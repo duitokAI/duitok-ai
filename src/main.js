@@ -3,7 +3,7 @@ import "./styles.css";
 const app = document.querySelector("#app");
 const toast = document.querySelector("#toast");
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
-const isStudioPath = () => window.location.pathname.startsWith("/studio");
+const isStudioPath = () => window.location.pathname.startsWith("/studio") || window.location.pathname.startsWith("/admin");
 const pathIs = (path) => window.location.pathname === path;
 
 const steps = [
@@ -29,6 +29,7 @@ const pages = [
 const state = {
   loading: true,
   user: JSON.parse(localStorage.getItem("duitok-user") || "null"),
+  token: localStorage.getItem("duitok-auth") || "",
   lang: localStorage.getItem("duitok-lang") || "ms",
   db: null,
   page: "dashboard",
@@ -491,8 +492,10 @@ function notify(message) {
 }
 
 async function api(path, options = {}) {
+  const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
+  if (state.token) headers.Authorization = `Bearer ${state.token}`;
   const res = await fetch(`${apiBaseUrl}/api${path}`, {
-    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+    headers,
     ...options
   });
   if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "Request failed");
@@ -500,6 +503,7 @@ async function api(path, options = {}) {
 }
 
 async function boot() {
+  if (window.location.pathname.startsWith("/admin")) state.page = "admin";
   if (isStudioPath()) await ensureStudioData();
   state.loading = false;
   render();
@@ -508,6 +512,10 @@ async function boot() {
 
 async function ensureStudioData() {
   if (state.db) return;
+  if (!state.user || !state.token) {
+    window.history.replaceState({}, "", "/login");
+    return;
+  }
   state.db = await api("/state");
   state.projectId = state.db.projects[0]?.id;
 }
@@ -858,6 +866,7 @@ function studio() {
         ${languageSwitch()}
         <div class="side-section">${icon("layout-dashboard", 18)} Workspace</div>
         <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard">${icon("sparkles")} ${t("dashboard")}</button>
+        ${state.user?.role === "admin" ? `<button class="side-link ${state.page === "admin" ? "active" : ""}" data-page="admin">${icon("shield-check")} Admin CRM</button>` : ""}
         <button class="side-link" data-action="chat">${icon("bot")} Duitok Agent</button>
         <button class="side-link ${state.page === "library" ? "active" : ""}" data-page="library">${icon("folder")} Content Library</button>
         <button class="side-link ${state.page === "autopost" ? "active" : ""}" data-page="autopost">${icon("calendar-days")} Scheduler</button>
@@ -903,6 +912,7 @@ function projectButtons() {
 }
 
 function page() {
+  if (state.page === "admin") return adminPage();
   if (state.page === "dashboard") return dashboardOverview();
   if (state.page === "project") return projectPage();
   if (state.page === "library") return contentLibraryPage();
@@ -1079,6 +1089,55 @@ function projectStatusBar(p) {
 function contentLibraryPage() {
   const results = allResults().slice().reverse();
   return `<header class="project-head"><div><p class="folder-label">${icon("folder", 18)} Content Library</p><h1>Generated Assets</h1><p class="subtitle">All project outputs in one place, ready for export or scheduling.</p></div><button class="sop-button" data-action="export-all">${icon("download")} Export Data</button></header><section class="canvas-card slim"><div class="library-grid">${results.map((item) => `<article><b>${item.title}</b><span>${item.projectName}</span>${resultPreview(item)}<button data-result="${item.id}">${icon("download")} ${t("export")}</button></article>`).join("") || `<p class="empty-text">No generated assets yet.</p>`}</div></section>`;
+}
+
+function adminPage() {
+  if (state.user?.role !== "admin") return `<section class="canvas-card slim"><h1>Admin access required</h1></section>`;
+  const admin = state.db.admin || {};
+  const totals = admin.totals || {};
+  const users = admin.users || [];
+  const jobs = admin.generationJobs || [];
+  const calls = admin.apiCalls || [];
+  const payments = admin.payments || [];
+  return `
+    <header class="project-head dashboard-head">
+      <div>
+        <p class="folder-label">${icon("shield-check", 18)} Admin CRM</p>
+        <h1>Duitok Multi-User CRM</h1>
+        <p class="subtitle">Users, generation jobs, API calls, costs, assets, payments, and publish records.</p>
+      </div>
+      <button class="sop-button" data-action="export-all">${icon("download")} Export CRM Data</button>
+    </header>
+    <section class="dashboard-stat-grid">
+      ${[
+        ["Users", totals.users || 0, "users", "All accounts", "CRM"],
+        ["Generations", totals.generations || 0, "sparkles", "All jobs", "AI"],
+        ["Revenue", `RM ${Number(totals.revenueRm || 0).toFixed(2)}`, "receipt-text", "Paid CHIP", "Sales"],
+        ["Cost", `RM ${Number(totals.costRm || 0).toFixed(2)}`, "wallet-cards", "Provider cost", "COGS"],
+        ["Profit", `RM ${Number((totals.revenueRm || 0) - (totals.costRm || 0)).toFixed(2)}`, "trending-up", "Revenue - cost", "Margin"],
+        ["Failed Calls", totals.failedCalls || 0, "triangle-alert", "API errors", "Ops"]
+      ].map(([label, value, ic, note, meta]) => `<article><div><span>${label}</span><b>${value}</b><small>${note}</small></div>${icon(ic, 24)}<em>${meta}</em></article>`).join("")}
+    </section>
+    <section class="dashboard-main-grid">
+      <article class="activity-card">
+        <div class="card-title"><h2>${icon("users", 22)} Users</h2><span>${users.length} accounts</span></div>
+        ${table(users.map((user) => [user.email, `${user.role} | ${user.projectCount} projects`, `Credits ${user.billing?.credits ?? 0} | Cost RM ${Number(user.totalCostRm || 0).toFixed(2)}`]))}
+      </article>
+      <article class="activity-card">
+        <div class="card-title"><h2>${icon("activity", 22)} API Calls</h2><span>${calls.length} records</span></div>
+        ${table(calls.slice(0, 12).map((call) => [call.model || call.provider, `${call.status} | RM ${Number(call.costRm || 0).toFixed(3)}`, call.endpoint || call.taskId || ""]))}
+      </article>
+    </section>
+    <section class="dashboard-main-grid">
+      <article class="activity-card">
+        <div class="card-title"><h2>${icon("image", 22)} Generated Assets</h2><span>${jobs.length} jobs</span></div>
+        ${table(jobs.slice(0, 12).map((job) => [job.model || job.type, `${job.provider} | ${job.status}`, `RM ${Number(job.costRm || 0).toFixed(3)} | ${job.taskId || ""}`]))}
+      </article>
+      <article class="activity-card">
+        <div class="card-title"><h2>${icon("credit-card", 22)} Payments</h2><span>${payments.length} payments</span></div>
+        ${table(payments.slice(0, 12).map((payment) => [payment.orderId, `${payment.status} | RM ${payment.amount}`, payment.createdAt ? new Date(payment.createdAt).toLocaleString() : ""]))}
+      </article>
+    </section>`;
 }
 
 function projectPage() {
@@ -1366,11 +1425,12 @@ async function action(event, name) {
   }
   if (name === "logout") {
     localStorage.removeItem("duitok-user");
-    return set({ user: null, modal: null });
+    localStorage.removeItem("duitok-auth");
+    return set({ user: null, token: "", db: null, modal: null });
   }
   if (name === "forgot") return window.open("https://wa.me/60123456789", "_blank");
   if (name === "open-whatsapp") return window.open("https://wa.me/60123456789", "_blank");
-  if (name === "connect-tiktok") return window.location.href = `${apiBaseUrl}/api/tiktok/connect`;
+  if (name === "connect-tiktok") return window.location.href = `${apiBaseUrl}/api/tiktok/connect?token=${encodeURIComponent(state.token)}`;
   if (name === "tiktok-creator-info") return tiktokCreatorInfo();
   if (name === "copy-affiliate") { await navigator.clipboard?.writeText("https://duitok.com/ref/DUIT2026"); return notify("Affiliate link copied."); }
   if (name === "support-ticket") return mutate("/support", { method: "POST", body: JSON.stringify({ message: "Support ticket from studio" }) }, "Support ticket saved.");
@@ -1386,11 +1446,13 @@ async function submit(event) {
   const data = Object.fromEntries(new FormData(event.currentTarget));
   if (event.currentTarget.dataset.form === "login") {
     const res = await api("/auth/login", { method: "POST", body: JSON.stringify(data) });
-    state.db ||= await api("/state");
-    state.projectId ||= state.db.projects[0]?.id;
     localStorage.setItem("duitok-user", JSON.stringify(res.user));
+    localStorage.setItem("duitok-auth", res.token);
+    state.token = res.token;
+    state.db = res.state;
+    state.projectId = state.db.projects[0]?.id;
     window.history.pushState({}, "", "/studio");
-    return set({ user: res.user, modal: null });
+    return set({ user: res.user, modal: null, page: "dashboard" });
   }
   if (event.currentTarget.dataset.form === "lead") {
     notify("Opening registration.");
@@ -1559,7 +1621,9 @@ async function mutate(path, options, message) {
 }
 
 async function download(url, filename) {
-  const res = await fetch(url.startsWith("/api") ? `${apiBaseUrl}${url}` : url);
+  const res = await fetch(url.startsWith("/api") ? `${apiBaseUrl}${url}` : url, {
+    headers: state.token ? { Authorization: `Bearer ${state.token}` } : {}
+  });
   const blob = await res.blob();
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);

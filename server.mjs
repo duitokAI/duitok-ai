@@ -44,6 +44,8 @@ const grsaiDrawPath = process.env.GRSAI_DRAW_PATH || "/v1/draw/nano-banana";
 const grsaiResultPath = process.env.GRSAI_RESULT_PATH || "/v1/draw/result";
 const grsaiNanoModel = process.env.GRSAI_NANO_MODEL || "nano-banana-pro";
 const allowedMediaModels = new Set(["GPT Image 2", "Nano Banana Pro", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"]);
+const adminUserId = "u_1";
+const authSecret = process.env.AUTH_SECRET || process.env.CHIP_API_TOKEN || "duitok-local-dev-secret";
 const postgresPool = databaseUrl
   ? new Pool({
       connectionString: databaseUrl,
@@ -90,9 +92,19 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
-function blankProject(id, name) {
+function defaultBilling() {
+  return {
+    plan: "Duitok AI Pro",
+    credits: 83,
+    nextBill: "2026-06-26",
+    invoices: []
+  };
+}
+
+function blankProject(id, name, userId = adminUserId) {
   return {
     id,
+    userId,
     name,
     createdAt: new Date().toISOString(),
     image: { model: "GPT Image 2", mode: "Create Image", prompt: "" },
@@ -106,8 +118,8 @@ function blankProject(id, name) {
   };
 }
 
-function usage(action, credits) {
-  return { id: crypto.randomUUID(), action, credits, createdAt: new Date().toISOString() };
+function usage(action, credits, userId = adminUserId) {
+  return { id: crypto.randomUUID(), userId, action, credits, createdAt: new Date().toISOString() };
 }
 
 function hashPassword(password) {
@@ -125,8 +137,52 @@ function verifyPassword(password, stored) {
   return expected.length === actual.length && crypto.timingSafeEqual(expected, actual);
 }
 
+function publicUser(user) {
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role || "user"
+  };
+}
+
+function signAuthToken(user) {
+  const payload = Buffer.from(JSON.stringify({ userId: user.id, role: user.role || "user" })).toString("base64url");
+  const signature = crypto.createHmac("sha256", authSecret).update(payload).digest("base64url");
+  return `${payload}.${signature}`;
+}
+
+function verifyAuthToken(token, db) {
+  if (!token || !token.includes(".")) return null;
+  const [payload, signature] = token.split(".");
+  const expected = crypto.createHmac("sha256", authSecret).update(payload).digest("base64url");
+  if (signature.length !== expected.length || !crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) return null;
+  const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+  return db.users.find((user) => user.id === data.userId) || null;
+}
+
+async function requireAuth(req) {
+  const db = await ensureDb();
+  const token = String(req.get("authorization") || req.query.token || "").replace(/^Bearer\s+/i, "");
+  const user = verifyAuthToken(token, db);
+  if (!user) {
+    const error = new Error("Login required.");
+    error.status = 401;
+    throw error;
+  }
+  return { db, user };
+}
+
+function requireAdminUser(user) {
+  if ((user.role || "user") !== "admin") {
+    const error = new Error("Admin access required.");
+    error.status = 403;
+    throw error;
+  }
+}
+
 const seed = {
-  users: [{ id: "u_1", email: "admin@duitok.com", passwordHash: hashPassword("duitok123"), name: "Duitok  AI Admin" }],
+  users: [{ id: adminUserId, email: "admin@duitok.com", passwordHash: hashPassword("duitok123"), name: "Duitok AI Admin", role: "admin", billing: defaultBilling() }],
   liveCount: 10,
   projects: [
     blankProject("p_1", "Project 1"),
@@ -195,15 +251,26 @@ const seed = {
 
 function normalizeDb(db) {
   db.users ||= structuredClone(seed.users);
+  db.users = db.users.map((user) => ({
+    ...user,
+    role: user.id === adminUserId || user.email === "admin@duitok.com" ? "admin" : user.role || "user",
+    billing: { ...defaultBilling(), ...(user.billing || {}) }
+  }));
+  if (!db.users.some((user) => user.email === "admin@duitok.com")) db.users.unshift(structuredClone(seed.users[0]));
   db.liveCount ||= seed.liveCount;
   db.projects ||= structuredClone(seed.projects);
+  db.projects = db.projects.map((project) => ({ userId: project.userId || adminUserId, ...project }));
   db.attachments ||= [];
+  db.attachments = db.attachments.map((item) => ({ userId: item.userId || adminUserId, ...item }));
   db.billing ||= structuredClone(seed.billing);
   db.payments ||= [];
+  db.payments = db.payments.map((item) => ({ userId: item.userId || adminUserId, ...item }));
   db.affiliate ||= structuredClone(seed.affiliate);
   db.usage ||= structuredClone(seed.usage);
+  db.usage = db.usage.map((item) => ({ userId: item.userId || adminUserId, ...item }));
   db.schedule ||= structuredClone(seed.schedule);
   db.schedule = db.schedule.map((item, index) => ({
+    userId: item.userId || adminUserId,
     caption: item.caption || `${item.title || `Post ${index + 1}`}\n\nGenerated with Duitok AI.`,
     hashtags: item.hashtags || "#duitok #tiktokshopmalaysia",
     mediaUrl: item.mediaUrl || "",
@@ -212,9 +279,14 @@ function normalizeDb(db) {
   }));
   db.tiktok ||= structuredClone(seed.tiktok);
   db.tiktok.connections ||= [];
+  db.tiktok.connections = db.tiktok.connections.map((item) => ({ userId: item.userId || adminUserId, ...item }));
   db.tiktok.oauthStates ||= [];
   db.tiktok.publishes ||= [];
+  db.tiktok.publishes = db.tiktok.publishes.map((item) => ({ userId: item.userId || adminUserId, ...item }));
   db.supportTickets ||= [];
+  db.supportTickets = db.supportTickets.map((item) => ({ userId: item.userId || adminUserId, ...item }));
+  db.generationJobs ||= [];
+  db.apiCalls ||= [];
   return db;
 }
 
@@ -285,12 +357,56 @@ function mutateDb(handler) {
   return run;
 }
 
-function publicState(db) {
-  const { users: _users, ...rest } = db;
+function publicState(db, user = db.users?.find((item) => item.id === adminUserId)) {
+  const isAdmin = (user?.role || "user") === "admin";
+  const owns = (item) => isAdmin || item.userId === user.id;
+  const userBilling = user?.billing || defaultBilling();
+  const projects = (db.projects || []).filter(owns);
+  const usageRows = (db.usage || []).filter(owns);
+  const scheduleRows = (db.schedule || []).filter(owns);
+  const generationJobs = (db.generationJobs || []).filter(owns);
+  const apiCalls = (db.apiCalls || []).filter(owns);
+  const payments = (db.payments || []).filter(owns);
+  const supportTickets = (db.supportTickets || []).filter(owns);
+  const attachments = (db.attachments || []).filter(owns);
+  const tiktokConnections = (db.tiktok?.connections || []).filter(owns);
+  const tiktokPublishes = (db.tiktok?.publishes || []).filter(owns);
+  const admin = isAdmin ? {
+    users: db.users.map((item) => ({
+      ...publicUser(item),
+      billing: item.billing || defaultBilling(),
+      projectCount: db.projects.filter((project) => project.userId === item.id).length,
+      generationCount: db.generationJobs.filter((job) => job.userId === item.id).length,
+      totalCostRm: db.generationJobs.filter((job) => job.userId === item.id).reduce((sum, job) => sum + Number(job.costRm || 0), 0)
+    })),
+    generationJobs: db.generationJobs || [],
+    apiCalls: db.apiCalls || [],
+    payments: db.payments || [],
+    supportTickets: db.supportTickets || [],
+    totals: {
+      users: db.users.length,
+      generations: db.generationJobs.length,
+      costRm: db.generationJobs.reduce((sum, job) => sum + Number(job.costRm || 0), 0),
+      revenueRm: db.payments.filter((payment) => payment.status === "paid").reduce((sum, payment) => sum + Number(payment.amount || 0), 0),
+      failedCalls: db.apiCalls.filter((call) => call.status === "failed").length
+    }
+  } : null;
   return {
-    ...rest,
+    liveCount: db.liveCount,
+    projects,
+    attachments,
+    billing: userBilling,
+    payments,
+    affiliate: db.affiliate,
+    usage: usageRows,
+    schedule: scheduleRows,
+    generationJobs,
+    apiCalls,
+    supportTickets,
+    currentUser: user ? publicUser(user) : null,
+    admin,
     tiktok: {
-      connections: (db.tiktok?.connections || []).map((item) => ({
+      connections: tiktokConnections.map((item) => ({
         id: item.id,
         openId: item.openId,
         unionId: item.unionId,
@@ -301,7 +417,7 @@ function publicState(db) {
         connectedAt: item.connectedAt,
         creatorInfo: item.creatorInfo || null
       })),
-      publishes: db.tiktok?.publishes || []
+      publishes: tiktokPublishes
     }
   };
 }
@@ -317,9 +433,14 @@ function setDeep(target, dotted, value) {
   cursor[parts[0]] = value;
 }
 
-function findProject(db, id) {
+function findProject(db, id, user) {
   const project = db.projects.find((item) => item.id === id);
   if (!project) {
+    const error = new Error("Project not found");
+    error.status = 404;
+    throw error;
+  }
+  if (user && (user.role || "user") !== "admin" && project.userId !== user.id) {
     const error = new Error("Project not found");
     error.status = 404;
     throw error;
@@ -355,6 +476,21 @@ function providerForMediaModel(model) {
   if (model === "Nano Banana Pro") return process.env.GRSAI_API_KEY ? "grsai" : "mock";
   if (model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni" || model === "Grok Imagine Video") return process.env.WUYIN_API_KEY ? "wuyin" : "mock";
   return "unsupported";
+}
+
+function generationCostFor(project, action, generated) {
+  const model = project.image?.model || "GPT Image 2";
+  const provider = generated.provider || providerForMediaModel(model);
+  if (action !== "generate-image") return { costRm: 0.01, costRmb: 0, costUsd: 0, model: "APIMart Text", provider: "apimart", unit: "text" };
+  const costMap = {
+    "GPT Image 2": { costRm: 0.024, costUsd: 0.006, unit: "image" },
+    "Nano Banana Pro": { costRm: 0.105, costRmb: 0.18, unit: "image" },
+    "Veo 3.1": { costRm: 0.234, costRmb: 0.4, unit: "8s video" },
+    "Sora 2": { costRm: 0.093, costRmb: 0.16, unit: "8s video" },
+    "Gemini Omni": { costRm: 0.584, costRmb: 1, unit: "10s video" },
+    "Grok Imagine Video": { costRm: 0.292, costRmb: 0.5, unit: "10s video" }
+  };
+  return { model, provider, ...(costMap[model] || { costRm: 0, costRmb: 0, unit: "unknown" }) };
 }
 
 function requireDeepSeekConfig() {
@@ -850,10 +986,11 @@ async function generateWithProvider(project, action, step) {
   return { title, body, provider: "mock" };
 }
 
-async function saveGeneratedResult(projectId, action, step, generated) {
+async function saveGeneratedResult(projectId, action, step, generated, user) {
   return mutateDb(async (currentDb) => {
-    const project = findProject(currentDb, projectId);
-    project.results.push({
+    const project = findProject(currentDb, projectId, user);
+    const cost = generationCostFor(project, action, generated);
+    const result = {
       id: crypto.randomUUID(),
       type: step,
       title: generated.title,
@@ -862,11 +999,50 @@ async function saveGeneratedResult(projectId, action, step, generated) {
       videoUrl: generated.videoUrl,
       taskId: generated.taskId,
       provider: generated.provider,
+      model: project.image?.model,
+      costRm: cost.costRm,
       createdAt: new Date().toISOString()
+    };
+    project.results.push(result);
+    const owner = currentDb.users.find((item) => item.id === project.userId) || user;
+    owner.billing ||= defaultBilling();
+    owner.billing.credits = Math.max(0, Number(owner.billing.credits || 0) - 4);
+    const job = {
+      id: crypto.randomUUID(),
+      userId: project.userId,
+      projectId,
+      resultId: result.id,
+      action,
+      step,
+      type: generated.videoUrl ? "video" : generated.imageUrl ? "image" : "text",
+      status: "succeeded",
+      taskId: generated.taskId,
+      prompt: project.image?.prompt || "",
+      imageUrl: generated.imageUrl,
+      videoUrl: generated.videoUrl,
+      textOutput: generated.body,
+      creditsCharged: 4,
+      createdAt: result.createdAt,
+      completedAt: result.createdAt,
+      ...cost
+    };
+    currentDb.generationJobs.unshift(job);
+    currentDb.apiCalls.unshift({
+      id: crypto.randomUUID(),
+      userId: project.userId,
+      projectId,
+      generationJobId: job.id,
+      provider: job.provider,
+      model: job.model,
+      endpoint: job.provider === "grsai" ? grsaiDrawPath : job.provider === "wuyin" ? wuyinPathFromProject(project) : apimartImagePath,
+      status: "succeeded",
+      taskId: generated.taskId,
+      costRm: job.costRm,
+      createdAt: result.createdAt
     });
-    currentDb.billing.credits = Math.max(0, currentDb.billing.credits - 4);
-    currentDb.usage.unshift(usage(generated.title, 4));
-    return saveDb(currentDb);
+    currentDb.usage.unshift(usage(generated.title, 4, project.userId));
+    await saveDb(currentDb);
+    return publicState(currentDb, user);
   });
 }
 
@@ -922,17 +1098,23 @@ function tiktokRedirectUri() {
   return publicAppUrl(tiktokRedirectPath);
 }
 
-function latestTikTokConnection(db) {
-  return db.tiktok?.connections?.[0] || null;
+function latestTikTokConnection(db, userId) {
+  const connections = db.tiktok?.connections || [];
+  return userId ? connections.find((item) => item.userId === userId) || null : connections[0] || null;
 }
 
-function findTikTokConnection(db, id) {
+function findTikTokConnection(db, id, user) {
   const connection = id
     ? db.tiktok.connections.find((item) => item.id === id)
-    : latestTikTokConnection(db);
+    : latestTikTokConnection(db, user && (user.role || "user") !== "admin" ? user.id : null);
   if (!connection) {
     const error = new Error("TikTok account not connected yet.");
     error.status = 400;
+    throw error;
+  }
+  if (user && (user.role || "user") !== "admin" && connection.userId !== user.id) {
+    const error = new Error("TikTok account not found.");
+    error.status = 404;
     throw error;
   }
   return connection;
@@ -1233,7 +1415,7 @@ const agentTools = [
   }
 ];
 
-async function executeAgentTool(name, args) {
+async function executeAgentTool(name, args, user) {
   if (name === "open_workspace") {
     return {
       ok: true,
@@ -1247,26 +1429,28 @@ async function executeAgentTool(name, args) {
 
   if (name === "create_project") {
     const db = await mutateDb(async (currentDb) => {
-      currentDb.projects.push(blankProject(crypto.randomUUID(), args.name || `Project ${currentDb.projects.length + 1}`));
-      return saveDb(currentDb);
+      currentDb.projects.push(blankProject(crypto.randomUUID(), args.name || `Project ${currentDb.projects.length + 1}`, user.id));
+      await saveDb(currentDb);
+      return publicState(currentDb, user);
     });
     return { ok: true, message: "Project created.", db };
   }
 
   if (name === "update_project_field") {
     const db = await mutateDb(async (currentDb) => {
-      setDeep(findProject(currentDb, args.projectId), args.field, args.value);
-      currentDb.usage.unshift(usage(`Agent updated ${args.field}`, 0));
-      return saveDb(currentDb);
+      setDeep(findProject(currentDb, args.projectId, user), args.field, args.value);
+      currentDb.usage.unshift(usage(`Agent updated ${args.field}`, 0, user.id));
+      await saveDb(currentDb);
+      return publicState(currentDb, user);
     });
     return { ok: true, message: `${args.field} updated.`, db };
   }
 
   if (name === "generate_project_output") {
     const db = await ensureDb();
-    const projectSnapshot = structuredClone(findProject(db, args.projectId));
+    const projectSnapshot = structuredClone(findProject(db, args.projectId, user));
     const generated = await generateWithProvider(projectSnapshot, args.action, args.step);
-    const nextDb = await saveGeneratedResult(args.projectId, args.action, args.step, generated);
+    const nextDb = await saveGeneratedResult(args.projectId, args.action, args.step, generated, user);
     return { ok: true, message: `${generated.title} saved.`, db: nextDb };
   }
 
@@ -1274,9 +1458,11 @@ async function executeAgentTool(name, args) {
     const db = await mutateDb(async (currentDb) => {
       const item = currentDb.schedule.find((entry) => entry.id === args.scheduleId);
       if (!item) throw Object.assign(new Error("Schedule item not found"), { status: 404 });
+      if ((user.role || "user") !== "admin" && item.userId !== user.id) throw Object.assign(new Error("Schedule item not found"), { status: 404 });
       item.status = item.status === "Ready" ? "Posted" : "Ready";
-      currentDb.usage.unshift(usage(`Agent updated schedule: ${item.title}`, 0));
-      return saveDb(currentDb);
+      currentDb.usage.unshift(usage(`Agent updated schedule: ${item.title}`, 0, item.userId));
+      await saveDb(currentDb);
+      return publicState(currentDb, user);
     });
     return { ok: true, message: "Schedule updated.", db };
   }
@@ -1285,6 +1471,7 @@ async function executeAgentTool(name, args) {
     const db = await mutateDb(async (currentDb) => {
       const item = currentDb.schedule.find((entry) => entry.id === args.scheduleId);
       if (!item) throw Object.assign(new Error("Auto post job not found"), { status: 404 });
+      if ((user.role || "user") !== "admin" && item.userId !== user.id) throw Object.assign(new Error("Auto post job not found"), { status: 404 });
       if (args.status) item.status = String(args.status);
       if (args.caption !== undefined) item.caption = String(args.caption);
       if (args.hashtags !== undefined) item.hashtags = String(args.hashtags);
@@ -1292,19 +1479,22 @@ async function executeAgentTool(name, args) {
       if (args.productUrl !== undefined) item.productUrl = String(args.productUrl);
       item.updatedAt = new Date().toISOString();
       if (item.status === "Posted") item.postedAt = item.updatedAt;
-      currentDb.usage.unshift(usage(`Agent Auto Post ${item.status}: ${item.title}`, 0));
-      return saveDb(currentDb);
+      currentDb.usage.unshift(usage(`Agent Auto Post ${item.status}: ${item.title}`, 0, item.userId));
+      await saveDb(currentDb);
+      return publicState(currentDb, user);
     });
     return { ok: true, message: "Auto post job updated.", db };
   }
 
   if (name === "query_tiktok_creator_info") {
     const db = await mutateDb(async (currentDb) => {
-      const connection = findTikTokConnection(currentDb, args.connectionId);
+      const connection = findTikTokConnection(currentDb, args.connectionId, user);
+      if ((user.role || "user") !== "admin" && connection.userId !== user.id) throw Object.assign(new Error("TikTok account not found"), { status: 404 });
       await refreshTikTokConnection(connection);
       await queryTikTokCreatorInfo(connection);
-      currentDb.usage.unshift(usage("Agent queried TikTok creator info", 0));
-      return saveDb(currentDb);
+      currentDb.usage.unshift(usage("Agent queried TikTok creator info", 0, connection.userId));
+      await saveDb(currentDb);
+      return publicState(currentDb, user);
     });
     return { ok: true, message: "TikTok creator info updated.", db };
   }
@@ -1313,10 +1503,12 @@ async function executeAgentTool(name, args) {
     const result = await mutateDb(async (currentDb) => {
       const currentJob = currentDb.schedule.find((entry) => entry.id === args.scheduleId);
       if (!currentJob) throw Object.assign(new Error("Auto post job not found"), { status: 404 });
+      if ((user.role || "user") !== "admin" && currentJob.userId !== user.id) throw Object.assign(new Error("Auto post job not found"), { status: 404 });
       const mediaUrl = args.mediaUrl || currentJob.mediaUrl;
       if (!mediaUrl) throw Object.assign(new Error("TikTok Direct Post needs a public mediaUrl."), { status: 400 });
 
-      const connection = findTikTokConnection(currentDb, args.connectionId);
+      const connection = findTikTokConnection(currentDb, args.connectionId, user);
+      if ((user.role || "user") !== "admin" && connection.userId !== currentJob.userId) throw Object.assign(new Error("TikTok account not found"), { status: 404 });
       await refreshTikTokConnection(connection);
       if (!connection.creatorInfo) await queryTikTokCreatorInfo(connection);
 
@@ -1344,6 +1536,7 @@ async function executeAgentTool(name, args) {
       });
       const publish = {
         id: crypto.randomUUID(),
+        userId: currentJob.userId,
         scheduleId: currentJob.id,
         connectionId: connection.id,
         publishId: payload.data?.publish_id,
@@ -1356,9 +1549,9 @@ async function executeAgentTool(name, args) {
       currentJob.status = "Processing";
       currentJob.mediaUrl = mediaUrl;
       currentJob.updatedAt = publish.createdAt;
-      currentDb.usage.unshift(usage(`Agent TikTok publish started: ${currentJob.title}`, 0));
+      currentDb.usage.unshift(usage(`Agent TikTok publish started: ${currentJob.title}`, 0, currentJob.userId));
       await saveDb(currentDb);
-      return { publish, db: publicState(currentDb) };
+      return { publish, db: publicState(currentDb, user) };
     });
     return { ok: true, message: `TikTok publish started: ${result.publish.publishId || result.publish.id}`, db: result.db };
   }
@@ -1367,7 +1560,8 @@ async function executeAgentTool(name, args) {
     const result = await mutateDb(async (currentDb) => {
       const publish = currentDb.tiktok.publishes.find((item) => item.publishId === args.publishId || item.id === args.publishId);
       if (!publish) throw Object.assign(new Error("TikTok publish record not found"), { status: 404 });
-      const connection = findTikTokConnection(currentDb, publish.connectionId);
+      if ((user.role || "user") !== "admin" && publish.userId !== user.id) throw Object.assign(new Error("TikTok publish record not found"), { status: 404 });
+      const connection = findTikTokConnection(currentDb, publish.connectionId, user);
       await refreshTikTokConnection(connection);
       const payload = await tiktokRequest("/v2/post/publish/status/fetch/", {
         method: "POST",
@@ -1382,17 +1576,18 @@ async function executeAgentTool(name, args) {
         job.status = "Posted";
         job.postedAt = publish.updatedAt;
       }
-      currentDb.usage.unshift(usage(`Agent checked TikTok publish: ${publish.status}`, 0));
+      currentDb.usage.unshift(usage(`Agent checked TikTok publish: ${publish.status}`, 0, publish.userId));
       await saveDb(currentDb);
-      return { publish, db: publicState(currentDb) };
+      return { publish, db: publicState(currentDb, user) };
     });
     return { ok: true, message: `TikTok publish status: ${result.publish.status}`, db: result.db };
   }
 
   if (name === "create_support_ticket") {
     const db = await mutateDb(async (currentDb) => {
-      currentDb.supportTickets.unshift({ id: crypto.randomUUID(), message: args.message, createdAt: new Date().toISOString() });
-      return saveDb(currentDb);
+      currentDb.supportTickets.unshift({ id: crypto.randomUUID(), userId: user.id, message: args.message, createdAt: new Date().toISOString() });
+      await saveDb(currentDb);
+      return publicState(currentDb, user);
     });
     return { ok: true, message: "Support ticket created.", db };
   }
@@ -1479,14 +1674,21 @@ async function markChipPurchasePaid(db, payload) {
   payment.status = "paid";
   payment.rawStatus = payload.status;
   payment.paidAt = new Date().toISOString();
-  db.billing.credits += payment.credits;
-  db.billing.invoices.unshift({ id: `INV-${Date.now()}`, amount: payment.amount, createdAt: new Date().toISOString() });
-  db.usage.unshift(usage(`Top up ${payment.credits} credits`, 0));
+  const user = db.users.find((item) => item.id === payment.userId) || db.users.find((item) => item.id === adminUserId);
+  user.billing ||= defaultBilling();
+  user.billing.credits += payment.credits;
+  user.billing.invoices.unshift({ id: `INV-${Date.now()}`, amount: payment.amount, createdAt: new Date().toISOString() });
+  db.usage.unshift(usage(`Top up ${payment.credits} credits`, 0, user.id));
   return payment;
 }
 
-app.get("/api/state", async (_req, res) => {
-  res.json(publicState(await ensureDb()));
+app.get("/api/state", async (req, res, next) => {
+  try {
+    const { db, user } = await requireAuth(req);
+    res.json(publicState(db, user));
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.post("/api/auth/login", async (req, res) => {
@@ -1502,9 +1704,12 @@ app.post("/api/auth/login", async (req, res) => {
         id: crypto.randomUUID(),
         email,
         passwordHash: hashPassword(password),
-        name: email.split("@")[0]
+        name: email.split("@")[0],
+        role: email === "admin@duitok.com" ? "admin" : "user",
+        billing: defaultBilling()
       };
       db.users.push(user);
+      db.projects.push(blankProject(crypto.randomUUID(), "Project 1", user.id));
       await saveDb(db);
     } else if (!verifyPassword(password, user.passwordHash || user.password)) {
       const error = new Error("Invalid email or password");
@@ -1515,17 +1720,18 @@ app.post("/api/auth/login", async (req, res) => {
       delete user.password;
       await saveDb(db);
     }
-    return { user: { id: user.id, email: user.email, name: user.name } };
+    return { user: publicUser(user), token: signAuthToken(user), state: publicState(db, user) };
   });
   res.json(payload);
 });
 
-app.get("/api/tiktok/connect", async (_req, res, next) => {
+app.get("/api/tiktok/connect", async (req, res, next) => {
   try {
+    const { user } = await requireAuth(req);
     const { clientKey } = requireTikTokConfig();
     const state = crypto.randomBytes(18).toString("hex");
     await mutateDb(async (db) => {
-      db.tiktok.oauthStates.unshift({ state, createdAt: new Date().toISOString() });
+      db.tiktok.oauthStates.unshift({ state, userId: user.id, createdAt: new Date().toISOString() });
       db.tiktok.oauthStates = db.tiktok.oauthStates.slice(0, 20);
       return saveDb(db);
     });
@@ -1568,9 +1774,10 @@ app.get("/api/tiktok/oauth/callback", async (req, res, next) => {
 
     await mutateDb(async (currentDb) => {
       currentDb.tiktok.oauthStates = currentDb.tiktok.oauthStates.filter((item) => item.state !== state);
-      const existing = currentDb.tiktok.connections.find((item) => item.openId === data.open_id);
+      const existing = currentDb.tiktok.connections.find((item) => item.openId === data.open_id && item.userId === knownState.userId);
       const connection = existing || { id: crypto.randomUUID(), connectedAt: new Date().toISOString() };
       Object.assign(connection, {
+        userId: knownState.userId,
         openId: data.open_id,
         unionId: data.union_id,
         accessToken: data.access_token,
@@ -1581,7 +1788,7 @@ app.get("/api/tiktok/oauth/callback", async (req, res, next) => {
         updatedAt: new Date().toISOString()
       });
       if (!existing) currentDb.tiktok.connections.unshift(connection);
-      currentDb.usage.unshift(usage("TikTok account connected", 0));
+      currentDb.usage.unshift(usage("TikTok account connected", 0, knownState.userId));
       return saveDb(currentDb);
     });
 
@@ -1591,19 +1798,25 @@ app.get("/api/tiktok/oauth/callback", async (req, res, next) => {
   }
 });
 
-app.get("/api/tiktok/status", async (_req, res) => {
-  const db = await ensureDb();
-  res.json(publicState(db).tiktok);
+app.get("/api/tiktok/status", async (req, res, next) => {
+  try {
+    const { db, user } = await requireAuth(req);
+    res.json(publicState(db, user).tiktok);
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.post("/api/tiktok/creator-info", async (req, res, next) => {
   try {
+    const { user } = await requireAuth(req);
     const result = await mutateDb(async (db) => {
-      const connection = findTikTokConnection(db, req.body.connectionId);
+      const connection = findTikTokConnection(db, req.body.connectionId, user);
+      if ((user.role || "user") !== "admin" && connection.userId !== user.id) throw Object.assign(new Error("TikTok account not found"), { status: 404 });
       await refreshTikTokConnection(connection);
       const creatorInfo = await queryTikTokCreatorInfo(connection);
       await saveDb(db);
-      return { creatorInfo, tiktok: publicState(db).tiktok };
+      return { creatorInfo, tiktok: publicState(db, user).tiktok };
     });
     res.json(result);
   } catch (error) {
@@ -1612,31 +1825,36 @@ app.post("/api/tiktok/creator-info", async (req, res, next) => {
 });
 
 app.post("/api/projects", async (req, res) => {
+  const { user } = await requireAuth(req);
   res.json(await mutateDb(async (db) => {
-    db.projects.push(blankProject(crypto.randomUUID(), req.body.name));
-    return saveDb(db);
+    db.projects.push(blankProject(crypto.randomUUID(), req.body.name, user.id));
+    await saveDb(db);
+    return publicState(db, user);
   }));
 });
 
 app.patch("/api/projects/:id/field", async (req, res) => {
+  const { user } = await requireAuth(req);
   res.json(await mutateDb(async (db) => {
-    setDeep(findProject(db, req.params.id), req.body.field, req.body.value);
-    return saveDb(db);
+    setDeep(findProject(db, req.params.id, user), req.body.field, req.body.value);
+    await saveDb(db);
+    return publicState(db, user);
   }));
 });
 
 app.post("/api/projects/:id/generate", async (req, res) => {
-  const db = await ensureDb();
-  const projectSnapshot = structuredClone(findProject(db, req.params.id));
+  const { db, user } = await requireAuth(req);
+  const projectSnapshot = structuredClone(findProject(db, req.params.id, user));
   const generated = await generateWithProvider(projectSnapshot, req.body.action, req.body.step);
-  res.json(await saveGeneratedResult(req.params.id, req.body.action, req.body.step, generated));
+  res.json(await saveGeneratedResult(req.params.id, req.body.action, req.body.step, generated, user));
 });
 
 app.post("/api/agent", async (req, res, next) => {
   try {
-    const db = await ensureDb();
+    const { db, user } = await requireAuth(req);
     const history = Array.isArray(req.body.messages) ? req.body.messages.slice(-10) : [];
-    const projectId = req.body.projectId || db.projects[0]?.id;
+    const stateForUser = publicState(db, user);
+    const projectId = req.body.projectId || stateForUser.projects[0]?.id;
     const messages = [
       {
         role: "system",
@@ -1650,7 +1868,7 @@ app.post("/api/agent", async (req, res, next) => {
       },
       {
         role: "system",
-        content: `Current workspace JSON:\n${JSON.stringify(compactWorkspaceState(db), null, 2)}\nCurrent project id: ${projectId || "none"}`
+        content: `Current workspace JSON:\n${JSON.stringify(compactWorkspaceState(stateForUser), null, 2)}\nCurrent project id: ${projectId || "none"}`
       },
       ...history
         .filter((item) => ["user", "assistant"].includes(item.role) && typeof item.content === "string")
@@ -1659,7 +1877,7 @@ app.post("/api/agent", async (req, res, next) => {
 
     const toolResults = [];
     const uiActions = [];
-    let latestDb = publicState(db);
+    let latestDb = stateForUser;
 
     for (let round = 0; round < 3; round += 1) {
       const completion = await deepseekRequest({
@@ -1691,7 +1909,7 @@ app.post("/api/agent", async (req, res, next) => {
         } catch {
           args = {};
         }
-        const result = await executeAgentTool(name, args);
+        const result = await executeAgentTool(name, args, user);
         if (result.db) latestDb = result.db;
         if (result.uiAction) uiActions.push(result.uiAction);
         toolResults.push({ name, args, result: { ok: result.ok, message: result.message, error: result.error } });
@@ -1715,15 +1933,18 @@ app.post("/api/agent", async (req, res, next) => {
 });
 
 app.post("/api/attachments", async (req, res) => {
+  const { user } = await requireAuth(req);
   res.json(await mutateDb(async (db) => {
-    db.attachments.unshift({ id: crypto.randomUUID(), ...req.body, createdAt: new Date().toISOString() });
-    db.usage.unshift(usage(`Uploaded ${req.body.kind}`, 0));
-    return saveDb(db);
+    db.attachments.unshift({ id: crypto.randomUUID(), userId: user.id, ...req.body, createdAt: new Date().toISOString() });
+    db.usage.unshift(usage(`Uploaded ${req.body.kind}`, 0, user.id));
+    await saveDb(db);
+    return publicState(db, user);
   }));
 });
 
 app.post("/api/billing/topup", async (req, res, next) => {
   try {
+    const { user } = await requireAuth(req);
     const amount = Number(req.body.amount || 0);
     if (![10, 30, 50, 100].includes(amount)) return res.status(400).json({ error: "Invalid top up amount" });
 
@@ -1738,6 +1959,7 @@ app.post("/api/billing/topup", async (req, res, next) => {
     await mutateDb(async (db) => {
       db.payments.unshift({
         id: crypto.randomUUID(),
+        userId: user.id,
         orderId,
         chipPurchaseId: chipPurchase.id,
         checkoutUrl: chipPurchase.checkout_url,
@@ -1747,7 +1969,8 @@ app.post("/api/billing/topup", async (req, res, next) => {
         status: "pending",
         createdAt: new Date().toISOString()
       });
-      return saveDb(db);
+      await saveDb(db);
+      return publicState(db, user);
     });
 
     res.json({
@@ -1777,18 +2000,28 @@ app.post("/api/payments/chip/callback", async (req, res, next) => {
 });
 
 app.patch("/api/schedule/:id", async (req, res) => {
+  const { user } = await requireAuth(req);
   res.json(await mutateDb(async (db) => {
     const item = db.schedule.find((entry) => entry.id === req.params.id);
+    if (item && (user.role || "user") !== "admin" && item.userId !== user.id) throw Object.assign(new Error("Schedule item not found"), { status: 404 });
     if (item) item.status = item.status === "Ready" ? "Posted" : "Ready";
-    return saveDb(db);
+    await saveDb(db);
+    return publicState(db, user);
   }));
 });
 
-app.get("/api/autopost/jobs", async (_req, res) => {
-  res.json({ jobs: autoPostJobs(await ensureDb()) });
+app.get("/api/autopost/jobs", async (req, res, next) => {
+  try {
+    const { db, user } = await requireAuth(req);
+    const state = publicState(db, user);
+    res.json({ jobs: autoPostJobs(state) });
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.patch("/api/autopost/jobs/:id", async (req, res) => {
+  const { user } = await requireAuth(req);
   res.json(await mutateDb(async (db) => {
     const item = db.schedule.find((entry) => entry.id === req.params.id);
     if (!item) {
@@ -1796,6 +2029,7 @@ app.patch("/api/autopost/jobs/:id", async (req, res) => {
       error.status = 404;
       throw error;
     }
+    if ((user.role || "user") !== "admin" && item.userId !== user.id) throw Object.assign(new Error("Auto post job not found"), { status: 404 });
     if (req.body.status) item.status = req.body.status;
     if (req.body.caption !== undefined) item.caption = String(req.body.caption);
     if (req.body.hashtags !== undefined) item.hashtags = String(req.body.hashtags);
@@ -1803,23 +2037,26 @@ app.patch("/api/autopost/jobs/:id", async (req, res) => {
     if (req.body.productUrl !== undefined) item.productUrl = String(req.body.productUrl);
     item.updatedAt = new Date().toISOString();
     if (item.status === "Posted") item.postedAt = item.updatedAt;
-    db.usage.unshift(usage(`Auto Post ${item.status}: ${item.title}`, 0));
-    return saveDb(db);
+    db.usage.unshift(usage(`Auto Post ${item.status}: ${item.title}`, 0, item.userId));
+    await saveDb(db);
+    return publicState(db, user);
   }));
 });
 
 app.post("/api/tiktok/publish/:id", async (req, res, next) => {
   try {
-    const db = await ensureDb();
+    const { db, user } = await requireAuth(req);
     const job = db.schedule.find((entry) => entry.id === req.params.id);
     if (!job) return res.status(404).json({ error: "Auto post job not found" });
+    if ((user.role || "user") !== "admin" && job.userId !== user.id) return res.status(404).json({ error: "Auto post job not found" });
     if (!job.mediaUrl && !req.body.mediaUrl) {
       return res.status(400).json({ error: "TikTok Direct Post needs a public mediaUrl for PULL_FROM_URL. Upload/select a video first." });
     }
 
     const result = await mutateDb(async (currentDb) => {
       const currentJob = currentDb.schedule.find((entry) => entry.id === req.params.id);
-      const connection = findTikTokConnection(currentDb, req.body.connectionId);
+      const connection = findTikTokConnection(currentDb, req.body.connectionId, user);
+      if ((user.role || "user") !== "admin" && connection.userId !== currentJob.userId) throw Object.assign(new Error("TikTok account not found"), { status: 404 });
       await refreshTikTokConnection(connection);
       if (!connection.creatorInfo) await queryTikTokCreatorInfo(connection);
 
@@ -1848,6 +2085,7 @@ app.post("/api/tiktok/publish/:id", async (req, res, next) => {
       });
       const publish = {
         id: crypto.randomUUID(),
+        userId: currentJob.userId,
         scheduleId: currentJob.id,
         connectionId: connection.id,
         publishId: payload.data?.publish_id,
@@ -1860,9 +2098,9 @@ app.post("/api/tiktok/publish/:id", async (req, res, next) => {
       currentJob.status = "Processing";
       currentJob.mediaUrl = mediaUrl;
       currentJob.updatedAt = publish.createdAt;
-      currentDb.usage.unshift(usage(`TikTok publish started: ${currentJob.title}`, 0));
+      currentDb.usage.unshift(usage(`TikTok publish started: ${currentJob.title}`, 0, currentJob.userId));
       await saveDb(currentDb);
-      return { publish, db: publicState(currentDb) };
+      return { publish, db: publicState(currentDb, user) };
     });
     res.json(result);
   } catch (error) {
@@ -1872,6 +2110,7 @@ app.post("/api/tiktok/publish/:id", async (req, res, next) => {
 
 app.get("/api/tiktok/publish/:publishId/status", async (req, res, next) => {
   try {
+    const { user } = await requireAuth(req);
     const result = await mutateDb(async (db) => {
       const publish = db.tiktok.publishes.find((item) => item.publishId === req.params.publishId || item.id === req.params.publishId);
       if (!publish) {
@@ -1879,7 +2118,8 @@ app.get("/api/tiktok/publish/:publishId/status", async (req, res, next) => {
         error.status = 404;
         throw error;
       }
-      const connection = findTikTokConnection(db, publish.connectionId);
+      if ((user.role || "user") !== "admin" && publish.userId !== user.id) throw Object.assign(new Error("TikTok publish record not found"), { status: 404 });
+      const connection = findTikTokConnection(db, publish.connectionId, user);
       await refreshTikTokConnection(connection);
       const payload = await tiktokRequest("/v2/post/publish/status/fetch/", {
         method: "POST",
@@ -1895,7 +2135,7 @@ app.get("/api/tiktok/publish/:publishId/status", async (req, res, next) => {
         job.postedAt = publish.updatedAt;
       }
       await saveDb(db);
-      return { publish, db: publicState(db) };
+      return { publish, db: publicState(db, user) };
     });
     res.json(result);
   } catch (error) {
@@ -1904,30 +2144,38 @@ app.get("/api/tiktok/publish/:publishId/status", async (req, res, next) => {
 });
 
 app.post("/api/support", async (req, res) => {
+  const { user } = await requireAuth(req);
   res.json(await mutateDb(async (db) => {
-    db.supportTickets.unshift({ id: crypto.randomUUID(), message: req.body.message, createdAt: new Date().toISOString() });
-    return saveDb(db);
+    db.supportTickets.unshift({ id: crypto.randomUUID(), userId: user.id, message: req.body.message, createdAt: new Date().toISOString() });
+    await saveDb(db);
+    return publicState(db, user);
   }));
 });
 
-app.get("/api/export/all", async (_req, res) => {
-  res.attachment("duitok-data.json").json(publicState(await ensureDb()));
+app.get("/api/export/all", async (req, res, next) => {
+  try {
+    const { db, user } = await requireAuth(req);
+    res.attachment("duitok-data.json").json(publicState(db, user));
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.get("/api/export/project/:id", async (req, res) => {
-  const db = await ensureDb();
-  res.attachment("project.json").json(findProject(db, req.params.id));
+  const { db, user } = await requireAuth(req);
+  res.attachment("project.json").json(findProject(db, req.params.id, user));
 });
 
 app.get("/api/export/result/:id", async (req, res) => {
-  const db = await ensureDb();
-  const result = db.projects.flatMap((project) => project.results).find((item) => item.id === req.params.id);
+  const { db, user } = await requireAuth(req);
+  const projects = (user.role || "user") === "admin" ? db.projects : db.projects.filter((project) => project.userId === user.id);
+  const result = projects.flatMap((project) => project.results).find((item) => item.id === req.params.id);
   res.attachment("result.txt").type("text/plain").send(`${result?.title || "Result"}\n\n${result?.body || ""}`);
 });
 
 app.get("/api/export/invoice/:id", async (req, res) => {
-  const db = await ensureDb();
-  const invoice = db.billing.invoices.find((item) => item.id === req.params.id);
+  const { user } = await requireAuth(req);
+  const invoice = (user.billing?.invoices || []).find((item) => item.id === req.params.id);
   res.attachment("invoice.txt").type("text/plain").send(`Duitok  AI Invoice\n${invoice?.id || req.params.id}\nAmount: RM${invoice?.amount || 0}`);
 });
 
