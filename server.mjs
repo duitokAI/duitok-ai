@@ -101,6 +101,17 @@ function defaultBilling() {
   };
 }
 
+function defaultModelCosts() {
+  return {
+    "GPT Image 2": { costRm: 0.024, costUsd: 0.006, unit: "image" },
+    "Nano Banana Pro": { costRm: 0.105, costRmb: 0.18, unit: "image" },
+    "Veo 3.1": { costRm: 0.234, costRmb: 0.4, unit: "8s video" },
+    "Sora 2": { costRm: 0.093, costRmb: 0.16, unit: "8s video" },
+    "Gemini Omni": { costRm: 0.584, costRmb: 1, unit: "10s video" },
+    "Grok Imagine Video": { costRm: 0.292, costRmb: 0.5, unit: "10s video" }
+  };
+}
+
 function blankProject(id, name, userId = adminUserId) {
   return {
     id,
@@ -306,6 +317,7 @@ function normalizeDb(db) {
   db.apiCalls ||= [];
   db.creditLedger ||= [];
   db.creditLedger = db.creditLedger.map((item) => ({ userId: item.userId || adminUserId, ...item }));
+  db.modelCosts = { ...defaultModelCosts(), ...(db.modelCosts || {}) };
   return db;
 }
 
@@ -418,6 +430,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
     payments: db.payments || [],
     supportTickets: db.supportTickets || [],
     creditLedger: db.creditLedger || [],
+    modelCosts: db.modelCosts || defaultModelCosts(),
     totals: {
       users: db.users.length,
       generations: db.generationJobs.length,
@@ -514,19 +527,36 @@ function providerForMediaModel(model) {
   return "unsupported";
 }
 
-function generationCostFor(project, action, generated) {
+function generationCostFor(db, project, action, generated) {
   const model = project.image?.model || "GPT Image 2";
   const provider = generated.provider || providerForMediaModel(model);
   if (action !== "generate-image") return { costRm: 0.01, costRmb: 0, costUsd: 0, model: "APIMart Text", provider: "apimart", unit: "text" };
-  const costMap = {
-    "GPT Image 2": { costRm: 0.024, costUsd: 0.006, unit: "image" },
-    "Nano Banana Pro": { costRm: 0.105, costRmb: 0.18, unit: "image" },
-    "Veo 3.1": { costRm: 0.234, costRmb: 0.4, unit: "8s video" },
-    "Sora 2": { costRm: 0.093, costRmb: 0.16, unit: "8s video" },
-    "Gemini Omni": { costRm: 0.584, costRmb: 1, unit: "10s video" },
-    "Grok Imagine Video": { costRm: 0.292, costRmb: 0.5, unit: "10s video" }
-  };
-  return { model, provider, ...(costMap[model] || { costRm: 0, costRmb: 0, unit: "unknown" }) };
+  const costs = { ...defaultModelCosts(), ...(db.modelCosts || {}) };
+  return { model, provider, ...(costs[model] || { costRm: 0, costRmb: 0, unit: "unknown" }) };
+}
+
+function assertGenerationAccess(db, user) {
+  if ((user.role || "user") === "admin") return;
+
+  user.billing ||= defaultBilling();
+  if (Number(user.billing.credits || 0) < 4) {
+    const error = new Error("Not enough credits. Please top up before generating.");
+    error.status = 402;
+    throw error;
+  }
+
+  const now = Date.now();
+  const perMinuteLimit = Number(process.env.USER_GENERATE_PER_MINUTE || 3);
+  const perDayLimit = Number(process.env.USER_GENERATE_PER_DAY || 50);
+  const userJobs = (db.generationJobs || []).filter((job) => job.userId === user.id);
+  const inLastMinute = userJobs.filter((job) => Date.parse(job.createdAt || 0) > now - 60 * 1000).length;
+  const inLastDay = userJobs.filter((job) => Date.parse(job.createdAt || 0) > now - 24 * 60 * 60 * 1000).length;
+
+  if (inLastMinute >= perMinuteLimit || inLastDay >= perDayLimit) {
+    const error = new Error("Too many generations. Please wait a moment and try again.");
+    error.status = 429;
+    throw error;
+  }
 }
 
 function requireDeepSeekConfig() {
@@ -1025,7 +1055,7 @@ async function generateWithProvider(project, action, step) {
 async function saveGeneratedResult(projectId, action, step, generated, user) {
   return mutateDb(async (currentDb) => {
     const project = findProject(currentDb, projectId, user);
-    const cost = generationCostFor(project, action, generated);
+    const cost = generationCostFor(currentDb, project, action, generated);
     const result = {
       id: crypto.randomUUID(),
       type: step,
@@ -1092,7 +1122,7 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
 async function saveFailedGeneration(projectId, action, step, error, user) {
   return mutateDb(async (currentDb) => {
     const project = findProject(currentDb, projectId, user);
-    const cost = generationCostFor(project, action, { provider: providerForMediaModel(project.image?.model) });
+    const cost = generationCostFor(currentDb, project, action, { provider: providerForMediaModel(project.image?.model) });
     const createdAt = new Date().toISOString();
     const job = {
       id: crypto.randomUUID(),
@@ -1534,8 +1564,15 @@ async function executeAgentTool(name, args, user) {
 
   if (name === "generate_project_output") {
     const db = await ensureDb();
+    assertGenerationAccess(db, user);
     const projectSnapshot = structuredClone(findProject(db, args.projectId, user));
-    const generated = await generateWithProvider(projectSnapshot, args.action, args.step);
+    let generated;
+    try {
+      generated = await generateWithProvider(projectSnapshot, args.action, args.step);
+    } catch (error) {
+      await saveFailedGeneration(args.projectId, args.action, args.step, error, user).catch(() => null);
+      throw error;
+    }
     const nextDb = await saveGeneratedResult(args.projectId, args.action, args.step, generated, user);
     return { ok: true, message: `${generated.title} saved.`, db: nextDb };
   }
@@ -1935,6 +1972,7 @@ app.patch("/api/projects/:id/field", async (req, res) => {
 
 app.post("/api/projects/:id/generate", async (req, res) => {
   const { db, user } = await requireAuth(req);
+  assertGenerationAccess(db, user);
   const projectSnapshot = structuredClone(findProject(db, req.params.id, user));
   try {
     const generated = await generateWithProvider(projectSnapshot, req.body.action, req.body.step);

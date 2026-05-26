@@ -37,6 +37,7 @@ const state = {
   projectId: null,
   modal: null,
   search: "",
+  adminUserId: null,
   dateFrom: "2026-05-01",
   dateTo: "2026-05-26",
   live: false,
@@ -1097,6 +1098,12 @@ function adminPage() {
   const jobs = admin.generationJobs || [];
   const calls = admin.apiCalls || [];
   const payments = admin.payments || [];
+  const selectedUser = users.find((user) => user.id === state.adminUserId) || users[0];
+  const selectedJobs = jobs.filter((job) => job.userId === selectedUser?.id);
+  const selectedPayments = payments.filter((payment) => payment.userId === selectedUser?.id);
+  const selectedLedger = (admin.creditLedger || []).filter((entry) => entry.userId === selectedUser?.id);
+  const selectedProjects = (state.db.projects || []).filter((project) => project.userId === selectedUser?.id);
+  const modelCosts = admin.modelCosts || {};
   return `
     <header class="project-head dashboard-head">
       <div>
@@ -1119,11 +1126,43 @@ function adminPage() {
     <section class="dashboard-main-grid">
       <article class="activity-card">
         <div class="card-title"><h2>${icon("users", 22)} Users</h2><span>${users.length} accounts</span></div>
-        ${table(users.map((user) => [user.email, `${user.role} | ${user.projectCount} projects`, `Credits ${user.billing?.credits ?? 0} | Cost RM ${Number(user.totalCostRm || 0).toFixed(2)}`]))}
+        ${table(users.map((user) => [user.email, `${user.role} | ${user.projectCount} projects`, `<button class="dark-button mini-button" data-admin-user="${user.id}">${icon("eye", 15)} View</button> Credits ${user.billing?.credits ?? 0} | Cost RM ${Number(user.totalCostRm || 0).toFixed(2)}`]))}
       </article>
       <article class="activity-card">
         <div class="card-title"><h2>${icon("activity", 22)} API Calls</h2><span>${calls.length} records</span></div>
         ${table(calls.slice(0, 12).map((call) => [call.model || call.provider, `${call.status} | RM ${Number(call.costRm || 0).toFixed(3)}`, call.endpoint || call.taskId || ""]))}
+      </article>
+    </section>
+    <section class="dashboard-main-grid">
+      <article class="activity-card">
+        <div class="card-title"><h2>${icon("id-card", 22)} User Detail</h2><span>${selectedUser?.email || "No user"}</span></div>
+        ${selectedUser ? `<div class="metric-row">
+          <article><span>Credits</span><strong>${selectedUser.billing?.credits ?? 0}</strong></article>
+          <article><span>Projects</span><strong>${selectedProjects.length}</strong></article>
+          <article><span>Jobs</span><strong>${selectedJobs.length}</strong></article>
+          <article><span>Cost</span><strong>RM ${Number(selectedUser.totalCostRm || 0).toFixed(2)}</strong></article>
+        </div>
+        ${table(selectedJobs.slice(0, 8).map((job) => [job.model || job.type, `${job.status} | ${job.provider || ""}`, job.imageUrl || job.videoUrl || job.errorMessage || job.taskId || ""]))}` : `<p class="empty-text">No user selected.</p>`}
+      </article>
+      <article class="activity-card">
+        <div class="card-title"><h2>${icon("wallet-cards", 22)} Ledger</h2><span>${selectedLedger.length} entries</span></div>
+        ${table(selectedLedger.slice(0, 8).map((entry) => [entry.note || entry.type, `${entry.credits > 0 ? "+" : ""}${entry.credits} credits`, entry.createdAt ? new Date(entry.createdAt).toLocaleString() : ""]))}
+        <div class="card-title compact-title"><h2>${icon("receipt-text", 20)} Payments</h2><span>${selectedPayments.length}</span></div>
+        ${table(selectedPayments.slice(0, 4).map((payment) => [payment.orderId, `${payment.status} | RM ${payment.amount}`, payment.createdAt ? new Date(payment.createdAt).toLocaleString() : ""]))}
+      </article>
+    </section>
+    <section class="dashboard-main-grid">
+      <article class="activity-card">
+        <div class="card-title"><h2>${icon("sliders-horizontal", 22)} Internal Model Costs</h2><span>Admin only</span></div>
+        ${table(Object.entries(modelCosts).map(([model, cost]) => [model, `RM ${Number(cost.costRm || 0).toFixed(3)}`, cost.unit || ""]))}
+      </article>
+      <article class="activity-card">
+        <div class="card-title"><h2>${icon("shield-check", 22)} Guardrails</h2><span>Active</span></div>
+        ${table([
+          ["Credit check", "4 credits per generation", "Blocks normal users when balance is below 4"],
+          ["Rate limit", "3/minute, 50/day", "Admin accounts are exempt for testing"],
+          ["Failure ledger", "No credit charge", "Failed API calls are recorded for admin review"]
+        ])}
       </article>
     </section>
     <section class="dashboard-main-grid">
@@ -1358,6 +1397,7 @@ function bind() {
   document.querySelectorAll("[data-step]").forEach((el) => el.addEventListener("click", () => set({ step: el.dataset.step })));
   document.querySelectorAll("[data-step-open]").forEach((el) => el.addEventListener("click", () => set({ page: "project", step: el.dataset.stepOpen })));
   document.querySelectorAll("[data-project]").forEach((el) => el.addEventListener("click", () => set({ projectId: el.dataset.project, page: "project" })));
+  document.querySelectorAll("[data-admin-user]").forEach((el) => el.addEventListener("click", () => set({ adminUserId: el.dataset.adminUser })));
   document.querySelectorAll("[data-date-field]").forEach((el) => el.addEventListener("change", () => set({ [el.dataset.dateField]: el.value })));
   document.querySelectorAll("[data-action]").forEach((el) => el.addEventListener("click", (e) => action(e, el.dataset.action)));
   document.querySelectorAll("[data-field]").forEach((el) => el.addEventListener("change", fieldChange));

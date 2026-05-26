@@ -13,6 +13,14 @@ services:
         value: "true"
       - key: DATA_DIR
         value: /var/data
+      - key: AUTH_SECRET
+        sync: false
+      - key: AUTH_TOKEN_TTL_MS
+        value: "604800000"
+      - key: USER_GENERATE_PER_MINUTE
+        value: "3"
+      - key: USER_GENERATE_PER_DAY
+        value: "50"
       - key: PUBLIC_APP_URL
         sync: false
       - key: CORS_ORIGINS
@@ -87,6 +95,18 @@ services:
         value: "10"
       - key: WUYIN_GROK_ASPECT_RATIO
         value: 9:16
+      - key: ASSET_STORAGE_PROVIDER
+        value: external
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_BUCKET
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_PUBLIC_BASE_URL
+        sync: false
     disk:
       name: duitok-data
       mountPath: /var/data
