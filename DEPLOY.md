@@ -60,7 +60,7 @@ After Render deploys, copy its HTTPS domain and paste it into `PUBLIC_APP_URL`.
 2. Go to Project Settings > Database > Connection string.
 3. Choose the pooled connection string if Supabase offers it.
 4. Copy the URI and replace `[YOUR-PASSWORD]` with the database password you created.
-5. Paste that value into Render as `DATABASE_URL`.
+5. Paste that value into Render as `DATABASE_URL`. Keep `POSTGRES_SSL=true` and do not add `sslmode=require` to the URL.
 6. Redeploy the Render service.
 
 The app will automatically create one table called `app_state` and store the current Duitok  AI app data there. If `DATABASE_URL` is empty, it falls back to local `data/db.json` for development.
