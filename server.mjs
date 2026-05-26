@@ -35,14 +35,15 @@ const wuyinBaseUrl = (process.env.WUYIN_BASE_URL || "https://api.wuyinkeji.com")
 const wuyinImagePaths = {
   "Veo 3.1": "/api/video/veo",
   "Sora 2": "/api/async/video_sora2",
-  "Gemini Omni": "/api/async/video_google_omni"
+  "Gemini Omni": "/api/async/video_google_omni",
+  "Grok Imagine Video": "/api/async/video_grok_imagine"
 };
 const wuyinVideoModel = process.env.WUYIN_VIDEO_MODEL || "veo3.1-fast";
 const grsaiBaseUrl = (process.env.GRSAI_BASE_URL || "https://grsaiapi.com").replace(/\/$/, "");
 const grsaiDrawPath = process.env.GRSAI_DRAW_PATH || "/v1/draw/nano-banana";
 const grsaiResultPath = process.env.GRSAI_RESULT_PATH || "/v1/draw/result";
 const grsaiNanoModel = process.env.GRSAI_NANO_MODEL || "nano-banana-pro";
-const allowedMediaModels = new Set(["GPT Image 2", "Nano Banana Pro", "Veo 3.1", "Sora 2", "Gemini Omni"]);
+const allowedMediaModels = new Set(["GPT Image 2", "Nano Banana Pro", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"]);
 const postgresPool = databaseUrl
   ? new Pool({
       connectionString: databaseUrl,
@@ -352,7 +353,7 @@ function requireApimartConfig() {
 function providerForMediaModel(model) {
   if (model === "GPT Image 2") return process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Nano Banana Pro") return process.env.GRSAI_API_KEY ? "grsai" : "mock";
-  if (model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni") return process.env.WUYIN_API_KEY ? "wuyin" : "mock";
+  if (model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni" || model === "Grok Imagine Video") return process.env.WUYIN_API_KEY ? "wuyin" : "mock";
   return "unsupported";
 }
 
@@ -692,6 +693,13 @@ function wuyinImageBody(project, prompt) {
       size: process.env.WUYIN_OMNI_SIZE || "720x1280"
     };
   }
+  if (model === "Grok Imagine Video") {
+    return {
+      prompt,
+      duration: process.env.WUYIN_GROK_DURATION || "10",
+      aspect_ratio: process.env.WUYIN_GROK_ASPECT_RATIO || process.env.WUYIN_VIDEO_RATIO || "9:16"
+    };
+  }
   return { prompt, size: imageSize, aspectRatio };
 }
 
@@ -818,12 +826,12 @@ async function generateWithProvider(project, action, step) {
   if (action === "generate-image") {
     const model = project.image?.model || "GPT Image 2";
     if (!allowedMediaModels.has(model)) {
-      const error = new Error("This Duitok plan only supports GPT Image 2, Nano Banana Pro, Veo 3.1, Sora 2, and Gemini Omni.");
+      const error = new Error("This Duitok plan only supports GPT Image 2, Nano Banana Pro, Veo 3.1, Sora 2, Gemini Omni, and Grok Imagine Video.");
       error.status = 400;
       throw error;
     }
     const provider = providerForMediaModel(model);
-    if (provider === "wuyin" && (model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni")) {
+    if (provider === "wuyin" && (model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni" || model === "Grok Imagine Video")) {
       const video = await generateVideoWithWuyin(project);
       return { title: `速创API ${model}`, body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "wuyin" };
     }

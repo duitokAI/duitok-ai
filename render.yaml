@@ -81,6 +81,10 @@ services:
         value: "10"
       - key: WUYIN_OMNI_SIZE
         value: 720x1280
+      - key: WUYIN_GROK_DURATION
+        value: "10"
+      - key: WUYIN_GROK_ASPECT_RATIO
+        value: 9:16
     disk:
       name: duitok-data
       mountPath: /var/data

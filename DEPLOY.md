@@ -79,6 +79,8 @@ WUYIN_SORA_DURATION=10
 WUYIN_SORA_SIZE=small
 WUYIN_OMNI_DURATION=10
 WUYIN_OMNI_SIZE=720x1280
+WUYIN_GROK_DURATION=10
+WUYIN_GROK_ASPECT_RATIO=9:16
 ```
 
 After Render deploys, copy its HTTPS domain and paste it into `PUBLIC_APP_URL`.
@@ -141,13 +143,14 @@ Results are polled through `/v1/draw/result`.
 
 ## Optional: Connect 速创API / 无垠科技
 
-速创API powers `Veo 3.1`, `Sora 2`, and `Gemini Omni` video generation.
+速创API powers `Veo 3.1`, `Sora 2`, `Gemini Omni`, and `Grok Imagine Video` video generation.
 
 The media endpoints used are:
 
 - `Veo 3.1` -> `/api/video/veo` with `model=veo3.1-fast`
 - `Sora 2` -> `/api/async/video_sora2`
 - `Gemini Omni` -> `/api/async/video_google_omni`
+- `Grok Imagine Video` -> `/api/async/video_grok_imagine`
 
 All tasks are polled through `/api/async/detail`.
 
