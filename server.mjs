@@ -1156,6 +1156,70 @@ const agentTools = [
   {
     type: "function",
     function: {
+      name: "update_autopost_job",
+      description: "Update an Auto Post job caption, hashtags, media URL, product URL, or status before publishing.",
+      parameters: {
+        type: "object",
+        properties: {
+          scheduleId: { type: "string" },
+          status: { type: "string", description: "Optional status such as Draft, Ready, Processing, Posted." },
+          caption: { type: "string" },
+          hashtags: { type: "string" },
+          mediaUrl: { type: "string", description: "Public video URL for TikTok PULL_FROM_URL publishing." },
+          productUrl: { type: "string" }
+        },
+        required: ["scheduleId"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "query_tiktok_creator_info",
+      description: "Query the connected TikTok account's creator info and posting options.",
+      parameters: {
+        type: "object",
+        properties: {
+          connectionId: { type: "string", description: "Optional TikTok connection id. Uses the latest connection if omitted." }
+        }
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "publish_tiktok_video",
+      description: "Start an official TikTok Direct Post for an Auto Post job. Requires a connected TikTok account and a public mediaUrl.",
+      parameters: {
+        type: "object",
+        properties: {
+          scheduleId: { type: "string" },
+          mediaUrl: { type: "string", description: "Optional public video URL. Uses the job mediaUrl if omitted." },
+          connectionId: { type: "string", description: "Optional TikTok connection id. Uses the latest connection if omitted." },
+          privacyLevel: { type: "string", description: "TikTok privacy level, defaults to SELF_ONLY." },
+          isAigc: { type: "boolean", description: "Whether to mark the video as AI-generated content. Defaults to true." }
+        },
+        required: ["scheduleId"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "check_tiktok_publish_status",
+      description: "Check the status of an official TikTok publish request.",
+      parameters: {
+        type: "object",
+        properties: {
+          publishId: { type: "string", description: "TikTok publish_id or Duitok publish record id." }
+        },
+        required: ["publishId"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
       name: "create_support_ticket",
       description: "Create a support ticket when the user asks for human help or reports a platform problem.",
       parameters: {
@@ -1215,6 +1279,114 @@ async function executeAgentTool(name, args) {
       return saveDb(currentDb);
     });
     return { ok: true, message: "Schedule updated.", db };
+  }
+
+  if (name === "update_autopost_job") {
+    const db = await mutateDb(async (currentDb) => {
+      const item = currentDb.schedule.find((entry) => entry.id === args.scheduleId);
+      if (!item) throw Object.assign(new Error("Auto post job not found"), { status: 404 });
+      if (args.status) item.status = String(args.status);
+      if (args.caption !== undefined) item.caption = String(args.caption);
+      if (args.hashtags !== undefined) item.hashtags = String(args.hashtags);
+      if (args.mediaUrl !== undefined) item.mediaUrl = String(args.mediaUrl);
+      if (args.productUrl !== undefined) item.productUrl = String(args.productUrl);
+      item.updatedAt = new Date().toISOString();
+      if (item.status === "Posted") item.postedAt = item.updatedAt;
+      currentDb.usage.unshift(usage(`Agent Auto Post ${item.status}: ${item.title}`, 0));
+      return saveDb(currentDb);
+    });
+    return { ok: true, message: "Auto post job updated.", db };
+  }
+
+  if (name === "query_tiktok_creator_info") {
+    const db = await mutateDb(async (currentDb) => {
+      const connection = findTikTokConnection(currentDb, args.connectionId);
+      await refreshTikTokConnection(connection);
+      await queryTikTokCreatorInfo(connection);
+      currentDb.usage.unshift(usage("Agent queried TikTok creator info", 0));
+      return saveDb(currentDb);
+    });
+    return { ok: true, message: "TikTok creator info updated.", db };
+  }
+
+  if (name === "publish_tiktok_video") {
+    const result = await mutateDb(async (currentDb) => {
+      const currentJob = currentDb.schedule.find((entry) => entry.id === args.scheduleId);
+      if (!currentJob) throw Object.assign(new Error("Auto post job not found"), { status: 404 });
+      const mediaUrl = args.mediaUrl || currentJob.mediaUrl;
+      if (!mediaUrl) throw Object.assign(new Error("TikTok Direct Post needs a public mediaUrl."), { status: 400 });
+
+      const connection = findTikTokConnection(currentDb, args.connectionId);
+      await refreshTikTokConnection(connection);
+      if (!connection.creatorInfo) await queryTikTokCreatorInfo(connection);
+
+      const publishBody = {
+        post_info: {
+          title: tiktokPostTitle(currentJob),
+          privacy_level: args.privacyLevel || "SELF_ONLY",
+          disable_duet: false,
+          disable_comment: false,
+          disable_stitch: false,
+          video_cover_timestamp_ms: 1000,
+          brand_content_toggle: false,
+          brand_organic_toggle: false,
+          is_aigc: args.isAigc !== undefined ? Boolean(args.isAigc) : true
+        },
+        source_info: {
+          source: "PULL_FROM_URL",
+          video_url: mediaUrl
+        }
+      };
+      const payload = await tiktokRequest("/v2/post/publish/video/init/", {
+        method: "POST",
+        accessToken: connection.accessToken,
+        body: publishBody
+      });
+      const publish = {
+        id: crypto.randomUUID(),
+        scheduleId: currentJob.id,
+        connectionId: connection.id,
+        publishId: payload.data?.publish_id,
+        status: "PROCESSING",
+        request: publishBody,
+        response: payload.data || payload,
+        createdAt: new Date().toISOString()
+      };
+      currentDb.tiktok.publishes.unshift(publish);
+      currentJob.status = "Processing";
+      currentJob.mediaUrl = mediaUrl;
+      currentJob.updatedAt = publish.createdAt;
+      currentDb.usage.unshift(usage(`Agent TikTok publish started: ${currentJob.title}`, 0));
+      await saveDb(currentDb);
+      return { publish, db: publicState(currentDb) };
+    });
+    return { ok: true, message: `TikTok publish started: ${result.publish.publishId || result.publish.id}`, db: result.db };
+  }
+
+  if (name === "check_tiktok_publish_status") {
+    const result = await mutateDb(async (currentDb) => {
+      const publish = currentDb.tiktok.publishes.find((item) => item.publishId === args.publishId || item.id === args.publishId);
+      if (!publish) throw Object.assign(new Error("TikTok publish record not found"), { status: 404 });
+      const connection = findTikTokConnection(currentDb, publish.connectionId);
+      await refreshTikTokConnection(connection);
+      const payload = await tiktokRequest("/v2/post/publish/status/fetch/", {
+        method: "POST",
+        accessToken: connection.accessToken,
+        body: { publish_id: publish.publishId }
+      });
+      publish.status = payload.data?.status || publish.status;
+      publish.statusResponse = payload.data || payload;
+      publish.updatedAt = new Date().toISOString();
+      const job = currentDb.schedule.find((item) => item.id === publish.scheduleId);
+      if (job && /PUBLISH_COMPLETE|SUCCESS|DONE|POSTED/i.test(String(publish.status))) {
+        job.status = "Posted";
+        job.postedAt = publish.updatedAt;
+      }
+      currentDb.usage.unshift(usage(`Agent checked TikTok publish: ${publish.status}`, 0));
+      await saveDb(currentDb);
+      return { publish, db: publicState(currentDb) };
+    });
+    return { ok: true, message: `TikTok publish status: ${result.publish.status}`, db: result.db };
   }
 
   if (name === "create_support_ticket") {
