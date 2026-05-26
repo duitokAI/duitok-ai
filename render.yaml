@@ -41,6 +41,24 @@ services:
         value: 1:1
       - key: APIMART_IMAGE_RESOLUTION
         value: 1K
+      - key: GRSAI_API_KEY
+        sync: false
+      - key: GRSAI_BASE_URL
+        value: https://grsaiapi.com
+      - key: GRSAI_DRAW_PATH
+        value: /v1/draw/nano-banana
+      - key: GRSAI_RESULT_PATH
+        value: /v1/draw/result
+      - key: GRSAI_NANO_MODEL
+        value: nano-banana-pro
+      - key: GRSAI_NANO_ASPECT_RATIO
+        value: 1:1
+      - key: GRSAI_NANO_IMAGE_SIZE
+        value: 1K
+      - key: GRSAI_IMAGE_POLL_ATTEMPTS
+        value: "36"
+      - key: GRSAI_IMAGE_POLL_MS
+        value: "3000"
       - key: WUYIN_API_KEY
         sync: false
       - key: WUYIN_BASE_URL

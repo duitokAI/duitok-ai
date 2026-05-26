@@ -33,12 +33,15 @@ const tiktokRedirectPath = process.env.TIKTOK_REDIRECT_PATH || "/api/tiktok/oaut
 const tiktokScopes = process.env.TIKTOK_SCOPES || "user.info.basic,video.publish";
 const wuyinBaseUrl = (process.env.WUYIN_BASE_URL || "https://api.wuyinkeji.com").replace(/\/$/, "");
 const wuyinImagePaths = {
-  "Nano Banana Pro": "/api/async/image_nanoBanana_pro",
   "Veo 3.1": "/api/video/veo",
   "Sora 2": "/api/async/video_sora2",
   "Gemini Omni": "/api/async/video_google_omni"
 };
 const wuyinVideoModel = process.env.WUYIN_VIDEO_MODEL || "veo3.1-fast";
+const grsaiBaseUrl = (process.env.GRSAI_BASE_URL || "https://grsaiapi.com").replace(/\/$/, "");
+const grsaiDrawPath = process.env.GRSAI_DRAW_PATH || "/v1/draw/nano-banana";
+const grsaiResultPath = process.env.GRSAI_RESULT_PATH || "/v1/draw/result";
+const grsaiNanoModel = process.env.GRSAI_NANO_MODEL || "nano-banana-pro";
 const allowedMediaModels = new Set(["GPT Image 2", "Nano Banana Pro", "Veo 3.1", "Sora 2", "Gemini Omni"]);
 const postgresPool = databaseUrl
   ? new Pool({
@@ -74,7 +77,8 @@ app.get("/api/health", (_req, res) => {
   const aiProviders = [
     hasConfiguredKey(process.env.APIMART_API_KEY) ? "apimart" : null,
     hasConfiguredKey(process.env.DEEPSEEK_API_KEY) ? "deepseek" : null,
-    hasConfiguredKey(process.env.WUYIN_API_KEY) ? "wuyin" : null
+    hasConfiguredKey(process.env.WUYIN_API_KEY) ? "wuyin" : null,
+    hasConfiguredKey(process.env.GRSAI_API_KEY) ? "grsai" : null
   ].filter(Boolean);
   res.json({
     ok: true,
@@ -347,7 +351,8 @@ function requireApimartConfig() {
 
 function providerForMediaModel(model) {
   if (model === "GPT Image 2") return process.env.APIMART_API_KEY ? "apimart" : "mock";
-  if (model === "Nano Banana Pro" || model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni") return process.env.WUYIN_API_KEY ? "wuyin" : "mock";
+  if (model === "Nano Banana Pro") return process.env.GRSAI_API_KEY ? "grsai" : "mock";
+  if (model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni") return process.env.WUYIN_API_KEY ? "wuyin" : "mock";
   return "unsupported";
 }
 
@@ -441,6 +446,57 @@ function requireWuyinConfig() {
     throw error;
   }
   return apiKey;
+}
+
+function requireGrsaiConfig() {
+  const apiKey = process.env.GRSAI_API_KEY;
+  if (!apiKey || apiKey.includes("replace_with")) {
+    const error = new Error("GRS AI belum configure. Isi GRSAI_API_KEY dalam Render Environment Variables dulu.");
+    error.status = 503;
+    throw error;
+  }
+  return apiKey;
+}
+
+function parseJsonishPayload(text) {
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    const parsedLines = text
+      .split(/\r?\n/)
+      .map((line) => line.trim().replace(/^data:\s*/, ""))
+      .filter((line) => line && line !== "[DONE]")
+      .map((line) => {
+        try {
+          return JSON.parse(line);
+        } catch {
+          return null;
+        }
+      })
+      .filter(Boolean);
+    return parsedLines.at(-1) || { raw: text };
+  }
+}
+
+async function grsaiRequest(pathname, { method = "POST", body } = {}) {
+  const apiKey = requireGrsaiConfig();
+  const response = await fetch(`${grsaiBaseUrl}${pathname}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: body ? JSON.stringify(body) : undefined,
+    signal: AbortSignal.timeout(Number(process.env.GRSAI_TIMEOUT_MS || 120000))
+  });
+  const payload = parseJsonishPayload(await response.text());
+  if (!response.ok || (payload.code && payload.code !== 0)) {
+    const error = new Error(payload.msg || payload.message || payload.error || `GRS AI request failed (${response.status})`);
+    error.status = response.status || 502;
+    throw error;
+  }
+  return payload;
 }
 
 async function wuyinRequest(pathname, { method = "GET", body, query = {} } = {}) {
@@ -599,6 +655,16 @@ function wuyinPathFromProject(project) {
   return wuyinImagePaths[project.image?.model] || process.env.WUYIN_IMAGE_PATH || "/api/async/image_nanoBanana_pro";
 }
 
+function grsaiImageBody(prompt) {
+  return {
+    model: grsaiNanoModel,
+    prompt,
+    aspectRatio: process.env.GRSAI_NANO_ASPECT_RATIO || process.env.WUYIN_IMAGE_ASPECT_RATIO || "1:1",
+    imageSize: process.env.GRSAI_NANO_IMAGE_SIZE || process.env.WUYIN_IMAGE_SIZE || "1K",
+    shutProgress: true
+  };
+}
+
 function wuyinImageBody(project, prompt) {
   const model = project.image?.model || "";
   const aspectRatio = process.env.WUYIN_IMAGE_ASPECT_RATIO || "1:1";
@@ -645,6 +711,55 @@ async function pollWuyinTask(taskId) {
   const error = new Error("速创API image task is still processing. Please try again later.");
   error.status = 202;
   throw error;
+}
+
+async function pollGrsaiTask(taskId) {
+  const maxAttempts = Number(process.env.GRSAI_IMAGE_POLL_ATTEMPTS || 36);
+  const delayMs = Number(process.env.GRSAI_IMAGE_POLL_MS || 3000);
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, delayMs));
+    const payload = await grsaiRequest(grsaiResultPath, { body: { id: taskId } });
+    const data = payload.data || payload;
+    const status = String(data.status || payload.status || "").toLowerCase();
+    if (data.progress >= 100 || ["succeeded", "success", "completed"].includes(status)) return payload;
+    if (["failed", "error", "cancelled"].includes(status) || data.failure_reason || data.error) {
+      const error = new Error(data.failure_reason || data.error || payload.msg || `GRS AI image task ${status || "failed"}`);
+      error.status = 502;
+      throw error;
+    }
+  }
+  const error = new Error("GRS AI image task is still processing. Please try again later.");
+  error.status = 202;
+  throw error;
+}
+
+function extractGrsaiUrls(taskData) {
+  const data = taskData.data || taskData;
+  const resultUrls = Array.isArray(data.results)
+    ? data.results.map((result) => result?.url).filter(Boolean)
+    : [];
+  return [...new Set([...resultUrls, ...extractUrlsDeep(taskData)])];
+}
+
+async function generateImageWithGrsai(project) {
+  const prompt = [
+    project.image?.prompt || "Create a high-converting TikTok Shop product image.",
+    `Mode: ${project.image?.mode || "Create Image"}.`,
+    "Style: realistic commercial product scene, clear product focus, vertical-social friendly, no fake brand claims."
+  ].join("\n");
+  const payload = await grsaiRequest(grsaiDrawPath, {
+    body: grsaiImageBody(prompt)
+  });
+  const data = payload.data || payload;
+  const taskId = data.id || data.task_id || payload.id || payload.task_id;
+  if (!taskId) return { text: JSON.stringify(payload, null, 2), urls: extractGrsaiUrls(payload) };
+  const taskData = await pollGrsaiTask(taskId);
+  const urls = extractGrsaiUrls(taskData);
+  return {
+    text: urls.length ? `Image generated with GRS AI.\n\nTask ID: ${taskId}` : `Image task completed with GRS AI.\n\nTask ID: ${taskId}`,
+    urls,
+    taskId
+  };
 }
 
 async function generateImageWithWuyin(project) {
@@ -712,9 +827,9 @@ async function generateWithProvider(project, action, step) {
       const video = await generateVideoWithWuyin(project);
       return { title: `速创API ${model}`, body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "wuyin" };
     }
-    if (provider === "wuyin") {
-      const image = await generateImageWithWuyin(project);
-      return { title: "速创API Nano Banana Pro", body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "wuyin" };
+    if (provider === "grsai") {
+      const image = await generateImageWithGrsai(project);
+      return { title: "GRS AI Nano Banana Pro", body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "grsai" };
     }
     if (provider === "apimart") {
       const image = await generateImageWithApimart(project);
