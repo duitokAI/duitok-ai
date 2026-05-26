@@ -850,7 +850,6 @@ function login() {
     <main class="login-shell">
       <section class="login-card">
         ${brand()}
-        <img class="login-brand-art" src="${brandAssets.stacked}" alt="Duitok AI mascot">
         ${languageSwitch()}
         <p class="eyebrow">${t("welcomeBack")}</p>
         <h1>${t("loginTitle")}</h1>

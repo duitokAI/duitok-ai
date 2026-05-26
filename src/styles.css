@@ -61,7 +61,9 @@ button {
 
 .login-shell {
   display: grid;
-  place-items: center;
+  align-items: start;
+  justify-items: center;
+  padding: clamp(28px, 7vh, 72px) 16px 40px;
 }
 
 .public-shell {
@@ -91,7 +93,7 @@ button {
 
 .login-card {
   width: min(460px, calc(100vw - 32px));
-  padding: 34px;
+  padding: 28px 34px 32px;
   border: 1px solid var(--line);
   border-radius: 18px;
   background: rgba(18, 18, 18, 0.94);
@@ -3639,18 +3641,6 @@ label {
   height: 64px;
 }
 
-.login-brand-art {
-  width: 100%;
-  max-height: 178px;
-  display: block;
-  margin: 4px 0 18px;
-  border: 1px solid rgba(93, 8, 108, 0.1);
-  border-radius: 14px;
-  object-fit: cover;
-  object-position: center 48%;
-  box-shadow: 0 18px 36px rgba(76, 0, 87, 0.1);
-}
-
 .price-brand-mark {
   width: 84px;
   height: 84px;
@@ -3709,10 +3699,6 @@ label {
     min-height: 24px;
     padding-left: 8px;
     font-size: 11px;
-  }
-
-  .login-brand-art {
-    max-height: 140px;
   }
 
   .signup-brand-banner {
