@@ -47,6 +47,7 @@ const allowedMediaModels = new Set(["GPT Image 2", "Nano Banana Pro", "Veo 3.1",
 const adminUserId = "u_1";
 const authSecret = process.env.AUTH_SECRET || process.env.CHIP_API_TOKEN || "duitok-local-dev-secret";
 const assetStorageProvider = process.env.ASSET_STORAGE_PROVIDER || "external";
+const r2Endpoint = process.env.R2_ENDPOINT || (process.env.R2_ACCOUNT_ID ? `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com` : "");
 const postgresPool = databaseUrl
   ? new Pool({
       connectionString: databaseUrl,
@@ -126,13 +127,114 @@ function defaultAgentPermissions() {
 }
 
 function storageStatus() {
-  const r2Ready = Boolean(process.env.R2_BUCKET && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_PUBLIC_BASE_URL);
+  const r2Ready = Boolean(process.env.R2_BUCKET && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_PUBLIC_BASE_URL && r2Endpoint);
   return {
     provider: r2Ready ? "cloudflare-r2" : assetStorageProvider,
     ready: assetStorageProvider === "external" || r2Ready,
     durableAssets: r2Ready,
     message: r2Ready ? "Generated assets can be mirrored to your own CDN." : "Using provider URLs until R2 credentials are configured."
   };
+}
+
+function hmac(key, value, encoding) {
+  return crypto.createHmac("sha256", key).update(value).digest(encoding);
+}
+
+function sha256(value, encoding = "hex") {
+  return crypto.createHash("sha256").update(value).digest(encoding);
+}
+
+function r2SigningKey(dateStamp) {
+  const dateKey = hmac(`AWS4${process.env.R2_SECRET_ACCESS_KEY}`, dateStamp);
+  const regionKey = hmac(dateKey, "auto");
+  const serviceKey = hmac(regionKey, "s3");
+  return hmac(serviceKey, "aws4_request");
+}
+
+function r2ObjectUrl(key) {
+  return `${String(process.env.R2_PUBLIC_BASE_URL || "").replace(/\/$/, "")}/${key.split("/").map(encodeURIComponent).join("/")}`;
+}
+
+function extensionFromContentType(contentType, fallbackUrl = "") {
+  const cleanType = String(contentType || "").split(";")[0].trim().toLowerCase();
+  if (cleanType === "image/jpeg") return "jpg";
+  if (cleanType === "image/png") return "png";
+  if (cleanType === "image/webp") return "webp";
+  if (cleanType === "image/gif") return "gif";
+  if (cleanType === "video/mp4") return "mp4";
+  if (cleanType === "video/webm") return "webm";
+  const match = String(fallbackUrl).split("?")[0].match(/\.([a-z0-9]{2,5})$/i);
+  return match?.[1]?.toLowerCase() || "bin";
+}
+
+async function putR2Object(key, bytes, contentType) {
+  const bucket = process.env.R2_BUCKET;
+  const accessKey = process.env.R2_ACCESS_KEY_ID;
+  const secretKey = process.env.R2_SECRET_ACCESS_KEY;
+  if (!bucket || !accessKey || !secretKey || !r2Endpoint) throw Object.assign(new Error("R2 storage is not configured."), { status: 503 });
+
+  const endpoint = new URL(r2Endpoint);
+  const objectPath = `/${bucket}/${key.split("/").map(encodeURIComponent).join("/")}`;
+  const now = new Date();
+  const amzDate = now.toISOString().replace(/[:-]|\.\d{3}/g, "");
+  const dateStamp = amzDate.slice(0, 8);
+  const payloadHash = sha256(bytes);
+  const canonicalHeaders = [
+    `content-type:${contentType}`,
+    `host:${endpoint.host}`,
+    `x-amz-content-sha256:${payloadHash}`,
+    `x-amz-date:${amzDate}`
+  ].join("\n") + "\n";
+  const signedHeaders = "content-type;host;x-amz-content-sha256;x-amz-date";
+  const canonicalRequest = ["PUT", objectPath, "", canonicalHeaders, signedHeaders, payloadHash].join("\n");
+  const credentialScope = `${dateStamp}/auto/s3/aws4_request`;
+  const stringToSign = ["AWS4-HMAC-SHA256", amzDate, credentialScope, sha256(canonicalRequest)].join("\n");
+  const signature = hmac(r2SigningKey(dateStamp), stringToSign, "hex");
+  const response = await fetch(`${endpoint.origin}${objectPath}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `AWS4-HMAC-SHA256 Credential=${accessKey}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`,
+      "Content-Type": contentType,
+      "X-Amz-Content-Sha256": payloadHash,
+      "X-Amz-Date": amzDate
+    },
+    body: bytes
+  });
+  if (!response.ok) {
+    const error = new Error(`R2 upload failed: ${response.status} ${await response.text().catch(() => "")}`.trim());
+    error.status = 502;
+    throw error;
+  }
+  return r2ObjectUrl(key);
+}
+
+async function mirrorAssetToStorage(sourceUrl, { userId, projectId, resultId, type }) {
+  const status = storageStatus();
+  if (!sourceUrl || !status.durableAssets) return { url: sourceUrl, originalUrl: sourceUrl, storage: "external" };
+  try {
+    const response = await fetch(sourceUrl);
+    if (!response.ok) throw new Error(`Asset download failed: ${response.status}`);
+    const contentType = response.headers.get("content-type") || (type === "video" ? "video/mp4" : "image/png");
+    const bytes = Buffer.from(await response.arrayBuffer());
+    const extension = extensionFromContentType(contentType, sourceUrl);
+    const key = [
+      "generated-assets",
+      userId,
+      projectId,
+      `${resultId}.${extension}`
+    ].map((part) => String(part).replace(/[^a-zA-Z0-9._-]/g, "-")).join("/");
+    return {
+      url: await putR2Object(key, bytes, contentType),
+      originalUrl: sourceUrl,
+      storage: "cloudflare-r2",
+      storageKey: key,
+      bytes: bytes.length,
+      contentType
+    };
+  } catch (error) {
+    console.error("R2 asset mirror failed", error);
+    return { url: sourceUrl, originalUrl: sourceUrl, storage: "external", storageError: error.message };
+  }
 }
 
 function blankProject(id, name, userId = adminUserId) {
@@ -427,7 +529,16 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
   const userBilling = user?.billing || defaultBilling();
   const sanitizeResult = (result) => {
     if (isAdmin) return result;
-    const { costRm: _costRm, costRmb: _costRmb, costUsd: _costUsd, ...safe } = result;
+    const {
+      costRm: _costRm,
+      costRmb: _costRmb,
+      costUsd: _costUsd,
+      originalImageUrl: _originalImageUrl,
+      originalVideoUrl: _originalVideoUrl,
+      assetStorageKey: _assetStorageKey,
+      assetStorageError: _assetStorageError,
+      ...safe
+    } = result;
     return safe;
   };
   const sanitizeProject = (project) => ({
@@ -436,7 +547,18 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
   });
   const sanitizeJob = (job) => {
     if (isAdmin) return job;
-    const { costRm: _costRm, costRmb: _costRmb, costUsd: _costUsd, provider: _provider, endpoint: _endpoint, ...safe } = job;
+    const {
+      costRm: _costRm,
+      costRmb: _costRmb,
+      costUsd: _costUsd,
+      provider: _provider,
+      endpoint: _endpoint,
+      originalImageUrl: _originalImageUrl,
+      originalVideoUrl: _originalVideoUrl,
+      assetStorageKey: _assetStorageKey,
+      assetStorageError: _assetStorageError,
+      ...safe
+    } = job;
     return safe;
   };
   const projects = (db.projects || []).filter(owns).map(sanitizeProject);
@@ -1138,13 +1260,27 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
     const project = findProject(currentDb, projectId, user);
     const cost = generationCostFor(currentDb, project, action, generated);
     const creditsToCharge = creditChargeFor(project, action);
+    const resultId = crypto.randomUUID();
+    const jobId = crypto.randomUUID();
+    const assetType = generated.videoUrl ? "video" : generated.imageUrl ? "image" : "text";
+    const mirrored = await mirrorAssetToStorage(generated.videoUrl || generated.imageUrl, {
+      userId: project.userId,
+      projectId,
+      resultId,
+      type: assetType
+    });
     const result = {
-      id: crypto.randomUUID(),
+      id: resultId,
       type: step,
       title: generated.title,
       body: generated.body,
-      imageUrl: generated.imageUrl,
-      videoUrl: generated.videoUrl,
+      imageUrl: generated.imageUrl ? mirrored.url : undefined,
+      videoUrl: generated.videoUrl ? mirrored.url : undefined,
+      originalImageUrl: generated.imageUrl && mirrored.originalUrl !== mirrored.url ? mirrored.originalUrl : undefined,
+      originalVideoUrl: generated.videoUrl && mirrored.originalUrl !== mirrored.url ? mirrored.originalUrl : undefined,
+      assetStorage: mirrored.storage,
+      assetStorageKey: mirrored.storageKey,
+      assetStorageError: mirrored.storageError,
       taskId: generated.taskId,
       provider: generated.provider,
       model: project.image?.model,
@@ -1156,18 +1292,23 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
     owner.billing ||= defaultBilling();
     owner.billing.credits = Math.max(0, roundCredits(Number(owner.billing.credits || 0) - creditsToCharge));
     const job = {
-      id: crypto.randomUUID(),
+      id: jobId,
       userId: project.userId,
       projectId,
       resultId: result.id,
       action,
       step,
-      type: generated.videoUrl ? "video" : generated.imageUrl ? "image" : "text",
+      type: assetType,
       status: "succeeded",
       taskId: generated.taskId,
       prompt: project.image?.prompt || "",
-      imageUrl: generated.imageUrl,
-      videoUrl: generated.videoUrl,
+      imageUrl: result.imageUrl,
+      videoUrl: result.videoUrl,
+      originalImageUrl: result.originalImageUrl,
+      originalVideoUrl: result.originalVideoUrl,
+      assetStorage: result.assetStorage,
+      assetStorageKey: result.assetStorageKey,
+      assetStorageError: result.assetStorageError,
       textOutput: generated.body,
       creditsCharged: creditsToCharge,
       createdAt: result.createdAt,
@@ -1308,13 +1449,26 @@ async function completeQueuedGeneration(jobId, generated) {
     const cost = generationCostFor(currentDb, project, job.action, generated);
     const creditsToCharge = creditChargeFor(project, job.action);
     const completedAt = new Date().toISOString();
+    const resultId = crypto.randomUUID();
+    const assetType = generated.videoUrl ? "video" : generated.imageUrl ? "image" : "text";
+    const mirrored = await mirrorAssetToStorage(generated.videoUrl || generated.imageUrl, {
+      userId: project.userId,
+      projectId: project.id,
+      resultId,
+      type: assetType
+    });
     const result = {
-      id: crypto.randomUUID(),
+      id: resultId,
       type: job.step,
       title: generated.title,
       body: generated.body,
-      imageUrl: generated.imageUrl,
-      videoUrl: generated.videoUrl,
+      imageUrl: generated.imageUrl ? mirrored.url : undefined,
+      videoUrl: generated.videoUrl ? mirrored.url : undefined,
+      originalImageUrl: generated.imageUrl && mirrored.originalUrl !== mirrored.url ? mirrored.originalUrl : undefined,
+      originalVideoUrl: generated.videoUrl && mirrored.originalUrl !== mirrored.url ? mirrored.originalUrl : undefined,
+      assetStorage: mirrored.storage,
+      assetStorageKey: mirrored.storageKey,
+      assetStorageError: mirrored.storageError,
       taskId: generated.taskId,
       provider: generated.provider,
       model: project.image?.model,
@@ -1330,8 +1484,13 @@ async function completeQueuedGeneration(jobId, generated) {
       resultId: result.id,
       status: "succeeded",
       taskId: generated.taskId,
-      imageUrl: generated.imageUrl,
-      videoUrl: generated.videoUrl,
+      imageUrl: result.imageUrl,
+      videoUrl: result.videoUrl,
+      originalImageUrl: result.originalImageUrl,
+      originalVideoUrl: result.originalVideoUrl,
+      assetStorage: result.assetStorage,
+      assetStorageKey: result.assetStorageKey,
+      assetStorageError: result.assetStorageError,
       textOutput: generated.body,
       creditsCharged: creditsToCharge,
       creditsRequired: creditsToCharge,
