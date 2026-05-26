@@ -501,7 +501,7 @@ function publicSite() {
           </div>
         </div>
         <section class="hero-board">
-          <img class="hero-logo" src="/duittok-logo-cropped.png" alt="Duitok AI">
+          <img class="hero-scene" src="/duitok-hero-seller-v2.jpg" alt="Duitok AI seller using AI content tools">
           <div class="product-link-card">
             <span>${icon("link", 16)} TikTok Shop URL</span>
             <b>duitok.my/product/ugc-kit</b>
@@ -806,6 +806,8 @@ function dashboardStats() {
   const results = allResults().filter(inDateRange);
   const usage = state.db.usage.filter(inDateRange);
   const typeCount = (type) => results.filter((item) => item.type === type).length;
+  const todayKey = localDateKey(new Date());
+  const todayCount = (type) => results.filter((item) => item.type === type && item.createdAt?.startsWith(todayKey)).length;
   const usedCredits = usage.reduce((sum, item) => sum + Number(item.credits || 0), 0);
   const readyPosts = state.db.schedule.filter((item) => item.status === "Ready").length;
   const totalCost = usedCredits * 0.28;
@@ -815,11 +817,11 @@ function dashboardStats() {
     usedCredits,
     totalCost,
     cards: [
-      ["Image", typeCount("image"), "image", "+5 today", "Visual assets"],
-      ["UGC", typeCount("ugc"), "video", "Scripts + scenes", "Video-ready"],
-      ["Auto Content", typeCount("auto"), "wand-sparkles", "7-day plans", "Batch plans"],
-      ["Original Video", typeCount("original"), "film", "Remakes", "Analyzed"],
-      ["Clone Prompt", typeCount("clone") + typeCount("viral"), "layers-3", "Research", "Patterns"],
+      ["Image", typeCount("image"), "image", `${todayCount("image")} today`, "Visual assets"],
+      ["UGC", typeCount("ugc"), "video", `${todayCount("ugc")} today`, "Video-ready"],
+      ["Auto Content", typeCount("auto"), "wand-sparkles", `${todayCount("auto")} today`, "Batch plans"],
+      ["Original Video", typeCount("original"), "film", `${todayCount("original")} today`, "Analyzed"],
+      ["Clone Prompt", typeCount("clone") + typeCount("viral"), "layers-3", `${todayCount("clone") + todayCount("viral")} today`, "Patterns"],
       ["Ready to Post", readyPosts, "send", "Scheduler", "Queued"],
       ["Total Cost", `RM ${totalCost.toFixed(2)}`, "wallet-cards", `${usedCredits} credits`, "AI spend"]
     ]
@@ -921,9 +923,9 @@ function nextActionTitle() {
 }
 
 function nextActionCopy(stats) {
-  if (stats.results.length === 0) return "No content has been generated in this date range. Start with UGC or Auto Content to build a publishing batch.";
   const ready = state.db.schedule.filter((item) => item.status === "Ready").length;
   if (ready > 0) return "You have content in the queue. Schedule the best pieces for tonight's TikTok peak hours before generating more.";
+  if (stats.results.length === 0) return "No content has been generated in this date range. Start with UGC or Auto Content to build a publishing batch.";
   return "Your content exists, but nothing is marked ready. Move generated outputs into the Scheduler so the workspace becomes operational.";
 }
 
