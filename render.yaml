@@ -41,6 +41,16 @@ services:
         value: 1:1
       - key: APIMART_IMAGE_RESOLUTION
         value: 1K
+      - key: AI_IMAGE_PROVIDER
+        value: auto
+      - key: WUYIN_API_KEY
+        sync: false
+      - key: WUYIN_BASE_URL
+        value: https://api.wuyinkeji.com
+      - key: WUYIN_IMAGE_SIZE
+        value: 1K
+      - key: WUYIN_IMAGE_ASPECT_RATIO
+        value: 1:1
     disk:
       name: duitok-data
       mountPath: /var/data

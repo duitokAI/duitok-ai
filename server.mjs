@@ -23,6 +23,15 @@ const apimartImagePath = process.env.APIMART_IMAGE_PATH || "/v1/images/generatio
 const apimartTaskPathPrefix = process.env.APIMART_TASK_PATH_PREFIX || "/v1/tasks";
 const apimartTextModel = process.env.APIMART_TEXT_MODEL || "gpt-5-mini";
 const apimartImageModel = process.env.APIMART_IMAGE_MODEL || "gpt-image-2";
+const wuyinBaseUrl = (process.env.WUYIN_BASE_URL || "https://api.wuyinkeji.com").replace(/\/$/, "");
+const wuyinImageProvider = (process.env.AI_IMAGE_PROVIDER || "auto").toLowerCase();
+const wuyinImagePaths = {
+  "GPT Image 2": "/api/async/image_gpt",
+  "Nano Banana 2": "/api/async/image_nanoBanana2",
+  "Nano Banana Pro": "/api/async/image_nanoBanana_pro",
+  "Banana Pro": "/api/async/image_nanoBanana_pro",
+  "Nano Banana": "/api/async/image_nanoBanana"
+};
 const postgresPool = databaseUrl
   ? new Pool({
       connectionString: databaseUrl,
@@ -53,11 +62,16 @@ app.use(express.json({
 }));
 
 app.get("/api/health", (_req, res) => {
+  const aiProviders = [
+    process.env.APIMART_API_KEY ? "apimart" : null,
+    process.env.WUYIN_API_KEY ? "wuyin" : null
+  ].filter(Boolean);
   res.json({
     ok: true,
     service: "duitok-ai",
     storage: postgresPool ? "postgres" : "json",
-    ai: process.env.APIMART_API_KEY ? "apimart" : "mock"
+    ai: aiProviders.join("+") || "mock",
+    imageProvider: selectImageProvider()
   });
 });
 
@@ -259,6 +273,14 @@ function requireApimartConfig() {
   return apiKey;
 }
 
+function selectImageProvider() {
+  if (wuyinImageProvider === "wuyin" && process.env.WUYIN_API_KEY) return "wuyin";
+  if (wuyinImageProvider === "apimart" && process.env.APIMART_API_KEY) return "apimart";
+  if (wuyinImageProvider === "auto" && process.env.WUYIN_API_KEY) return "wuyin";
+  if (process.env.APIMART_API_KEY) return "apimart";
+  return "mock";
+}
+
 async function apimartRequest(pathname, options = {}) {
   const apiKey = requireApimartConfig();
   const response = await fetch(`${apimartBaseUrl}${pathname}`, {
@@ -273,6 +295,41 @@ async function apimartRequest(pathname, options = {}) {
   const payload = await response.json().catch(() => ({}));
   if (!response.ok || (payload.code && payload.code >= 400)) {
     const error = new Error(payload.message || payload.detail || payload.error || `APIMart request failed (${response.status})`);
+    error.status = response.status || 502;
+    throw error;
+  }
+  return payload.data || payload;
+}
+
+function requireWuyinConfig() {
+  const apiKey = process.env.WUYIN_API_KEY;
+  if (!apiKey || apiKey.includes("replace_with")) {
+    const error = new Error("速创API belum configure. Isi WUYIN_API_KEY dalam Render Environment Variables dulu.");
+    error.status = 503;
+    throw error;
+  }
+  return apiKey;
+}
+
+async function wuyinRequest(pathname, { method = "GET", body, query = {} } = {}) {
+  const apiKey = requireWuyinConfig();
+  const url = new URL(`${wuyinBaseUrl}${pathname}`);
+  url.searchParams.set("key", apiKey);
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") url.searchParams.set(key, value);
+  });
+  const response = await fetch(url, {
+    method,
+    headers: {
+      Authorization: apiKey,
+      "Content-Type": "application/json"
+    },
+    body: body ? JSON.stringify(body) : undefined,
+    signal: AbortSignal.timeout(Number(process.env.WUYIN_TIMEOUT_MS || 120000))
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || (payload.code && payload.code !== 200)) {
+    const error = new Error(payload.msg || payload.message || `速创API request failed (${response.status})`);
     error.status = response.status || 502;
     throw error;
   }
@@ -366,6 +423,22 @@ function extractImageUrls(taskData) {
     .filter(Boolean);
 }
 
+function extractUrlsDeep(value) {
+  const urls = [];
+  const visit = (item) => {
+    if (!item) return;
+    if (typeof item === "string") {
+      const matches = item.match(/https?:\/\/[^\s"'<>\\]+/g) || [];
+      urls.push(...matches.filter((url) => /\.(png|jpe?g|webp|gif)(\?|$)/i.test(url)));
+      return;
+    }
+    if (Array.isArray(item)) return item.forEach(visit);
+    if (typeof item === "object") Object.values(item).forEach(visit);
+  };
+  visit(value);
+  return [...new Set(urls)];
+}
+
 async function generateImageWithApimart(project) {
   const prompt = [
     project.image?.prompt || "Create a high-converting TikTok Shop product image.",
@@ -394,6 +467,62 @@ async function generateImageWithApimart(project) {
   };
 }
 
+function wuyinPathFromProject(project) {
+  return wuyinImagePaths[project.image?.model] || process.env.WUYIN_IMAGE_PATH || "/api/async/image_gpt";
+}
+
+function wuyinImageBody(project, prompt) {
+  const model = project.image?.model || "";
+  const aspectRatio = process.env.WUYIN_IMAGE_ASPECT_RATIO || "1:1";
+  const imageSize = process.env.WUYIN_IMAGE_SIZE || "1K";
+  if (model === "GPT Image 2") {
+    return { prompt, size: aspectRatio };
+  }
+  if (model === "Nano Banana") {
+    return { prompt, imageSize, aspectRatio };
+  }
+  return { prompt, size: imageSize, aspectRatio };
+}
+
+async function pollWuyinTask(taskId) {
+  const maxAttempts = Number(process.env.WUYIN_IMAGE_POLL_ATTEMPTS || 36);
+  const delayMs = Number(process.env.WUYIN_IMAGE_POLL_MS || 3000);
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, delayMs));
+    const data = await wuyinRequest("/api/async/detail", { query: { id: taskId } });
+    if (data.status === 2 || data.status === "success" || data.status === "completed") return data;
+    if (data.status === 3 || data.status === "failed") {
+      const error = new Error(data.message || data.msg || `速创API image task ${data.status}`);
+      error.status = 502;
+      throw error;
+    }
+  }
+  const error = new Error("速创API image task is still processing. Please try again later.");
+  error.status = 202;
+  throw error;
+}
+
+async function generateImageWithWuyin(project) {
+  const prompt = [
+    project.image?.prompt || "Create a high-converting TikTok Shop product image.",
+    `Mode: ${project.image?.mode || "Create Image"}.`,
+    "Style: realistic commercial product scene, clear product focus, vertical-social friendly, no fake brand claims."
+  ].join("\n");
+  const data = await wuyinRequest(wuyinPathFromProject(project), {
+    method: "POST",
+    body: wuyinImageBody(project, prompt)
+  });
+  const taskId = data.id || data.task_id;
+  if (!taskId) return { text: JSON.stringify(data, null, 2), urls: [] };
+  const taskData = await pollWuyinTask(taskId);
+  const urls = extractUrlsDeep(taskData);
+  return {
+    text: urls.length ? `Image generated with 速创API.\n\nTask ID: ${taskId}` : `Image task completed with 速创API.\n\nTask ID: ${taskId}`,
+    urls,
+    taskId
+  };
+}
+
 async function generateWithApimart(project, action, step) {
   if (action === "generate-image") {
     const image = await generateImageWithApimart(project);
@@ -402,6 +531,25 @@ async function generateWithApimart(project, action, step) {
   const body = await generateTextWithApimart(project, action, step);
   const [fallbackTitle] = generatedCopy(action, step);
   return { title: fallbackTitle.replace(/^(Image|UGC|Auto|Original|Clone|Story|Viral)/, "APIMart $1"), body };
+}
+
+async function generateWithProvider(project, action, step) {
+  if (action === "generate-image") {
+    const provider = selectImageProvider();
+    if (provider === "wuyin") {
+      const image = await generateImageWithWuyin(project);
+      return { title: "速创API Image", body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "wuyin" };
+    }
+    if (provider === "apimart") {
+      const image = await generateImageWithApimart(project);
+      return { title: "APIMart Image", body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "apimart" };
+    }
+  }
+  if (process.env.APIMART_API_KEY) {
+    return { ...(await generateWithApimart(project, action, step)), provider: "apimart" };
+  }
+  const [title, body] = generatedCopy(action, step);
+  return { title, body, provider: "mock" };
 }
 
 function publicAppUrl(pathname) {
@@ -546,12 +694,7 @@ app.patch("/api/projects/:id/field", async (req, res) => {
 app.post("/api/projects/:id/generate", async (req, res) => {
   const db = await ensureDb();
   const projectSnapshot = structuredClone(findProject(db, req.params.id));
-  const generated = process.env.APIMART_API_KEY
-    ? await generateWithApimart(projectSnapshot, req.body.action, req.body.step)
-    : (() => {
-        const [title, body] = generatedCopy(req.body.action, req.body.step);
-        return { title, body };
-      })();
+  const generated = await generateWithProvider(projectSnapshot, req.body.action, req.body.step);
 
   res.json(await mutateDb(async (currentDb) => {
     const project = findProject(currentDb, req.params.id);
@@ -562,7 +705,7 @@ app.post("/api/projects/:id/generate", async (req, res) => {
       body: generated.body,
       imageUrl: generated.imageUrl,
       taskId: generated.taskId,
-      provider: process.env.APIMART_API_KEY ? "apimart" : "mock",
+      provider: generated.provider,
       createdAt: new Date().toISOString()
     });
     currentDb.billing.credits = Math.max(0, currentDb.billing.credits - 4);

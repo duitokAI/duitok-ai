@@ -59,6 +59,11 @@ APIMART_TEXT_MODEL=gpt-5-mini
 APIMART_IMAGE_MODEL=gpt-image-2
 APIMART_IMAGE_SIZE=1:1
 APIMART_IMAGE_RESOLUTION=1K
+AI_IMAGE_PROVIDER=auto
+WUYIN_API_KEY=your_wuyin_api_key
+WUYIN_BASE_URL=https://api.wuyinkeji.com
+WUYIN_IMAGE_SIZE=1K
+WUYIN_IMAGE_ASPECT_RATIO=1:1
 ```
 
 After Render deploys, copy its HTTPS domain and paste it into `PUBLIC_APP_URL`.
@@ -108,6 +113,19 @@ In APIMart:
 5. Open Studio > Image Generator, choose `GPT Image 2` or `Nano Banana Pro`, write a prompt, then click Generate Image.
 
 The app submits image tasks through `/v1/images/generations`, polls `/v1/tasks/{task_id}`, then saves the returned image URL into the project result.
+
+## Optional: Connect 速创API / 无垠科技
+
+速创API is used as a second image-generation backend when `WUYIN_API_KEY` is present. With `AI_IMAGE_PROVIDER=auto`, image generation prefers 速创API and falls back to APIMart only when 速创 is not configured. Text outputs still use APIMart.
+
+The image endpoints used are:
+
+- `GPT Image 2` -> `/api/async/image_gpt`
+- `Nano Banana Pro` -> `/api/async/image_nanoBanana_pro`
+- `Nano Banana 2` -> `/api/async/image_nanoBanana2`
+- `Nano Banana` -> `/api/async/image_nanoBanana`
+
+All tasks are polled through `/api/async/detail`.
 
 ## Later, Not Now
 
