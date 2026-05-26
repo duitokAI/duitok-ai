@@ -65,6 +65,9 @@ WUYIN_IMAGE_SIZE=1K
 WUYIN_IMAGE_ASPECT_RATIO=1:1
 WUYIN_VIDEO_MODEL=veo3.1-fast
 WUYIN_VIDEO_RATIO=9:16
+WUYIN_SORA_ASPECT_RATIO=9:16
+WUYIN_SORA_DURATION=10
+WUYIN_SORA_SIZE=small
 ```
 
 After Render deploys, copy its HTTPS domain and paste it into `PUBLIC_APP_URL`.
@@ -117,12 +120,13 @@ The app submits image tasks through `/v1/images/generations`, polls `/v1/tasks/{
 
 ## Optional: Connect 速创API / 无垠科技
 
-速创API powers `Nano Banana Pro` image generation and `Veo 3.1` video generation. `GPT Image 2` stays on APIMart. Text outputs also use APIMart.
+速创API powers `Nano Banana Pro` image generation plus `Veo 3.1` and `Sora 2` video generation. `GPT Image 2` stays on APIMart. Text outputs also use APIMart.
 
 The media endpoints used are:
 
 - `Nano Banana Pro` -> `/api/async/image_nanoBanana_pro`
 - `Veo 3.1` -> `/api/video/veo` with `model=veo3.1-fast`
+- `Sora 2` -> `/api/async/video_sora2`
 
 All tasks are polled through `/api/async/detail`.
 

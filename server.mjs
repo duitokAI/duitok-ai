@@ -29,10 +29,11 @@ const deepseekModel = process.env.DEEPSEEK_MODEL || "deepseek-v4-flash";
 const wuyinBaseUrl = (process.env.WUYIN_BASE_URL || "https://api.wuyinkeji.com").replace(/\/$/, "");
 const wuyinImagePaths = {
   "Nano Banana Pro": "/api/async/image_nanoBanana_pro",
-  "Veo 3.1": "/api/video/veo"
+  "Veo 3.1": "/api/video/veo",
+  "Sora 2": "/api/async/video_sora2"
 };
 const wuyinVideoModel = process.env.WUYIN_VIDEO_MODEL || "veo3.1-fast";
-const allowedMediaModels = new Set(["GPT Image 2", "Nano Banana Pro", "Veo 3.1"]);
+const allowedMediaModels = new Set(["GPT Image 2", "Nano Banana Pro", "Veo 3.1", "Sora 2"]);
 const postgresPool = databaseUrl
   ? new Pool({
       connectionString: databaseUrl,
@@ -277,7 +278,7 @@ function requireApimartConfig() {
 
 function providerForMediaModel(model) {
   if (model === "GPT Image 2") return process.env.APIMART_API_KEY ? "apimart" : "mock";
-  if (model === "Nano Banana Pro" || model === "Veo 3.1") return process.env.WUYIN_API_KEY ? "wuyin" : "mock";
+  if (model === "Nano Banana Pro" || model === "Veo 3.1" || model === "Sora 2") return process.env.WUYIN_API_KEY ? "wuyin" : "mock";
   return "unsupported";
 }
 
@@ -509,6 +510,14 @@ function wuyinImageBody(project, prompt) {
       ratio: process.env.WUYIN_VIDEO_RATIO || "9:16"
     };
   }
+  if (model === "Sora 2") {
+    return {
+      prompt,
+      aspectRatio: process.env.WUYIN_SORA_ASPECT_RATIO || process.env.WUYIN_VIDEO_RATIO || "9:16",
+      duration: process.env.WUYIN_SORA_DURATION || "10",
+      size: process.env.WUYIN_SORA_SIZE || "small"
+    };
+  }
   return { prompt, size: imageSize, aspectRatio };
 }
 
@@ -586,14 +595,14 @@ async function generateWithProvider(project, action, step) {
   if (action === "generate-image") {
     const model = project.image?.model || "GPT Image 2";
     if (!allowedMediaModels.has(model)) {
-      const error = new Error("This Duitok plan only supports GPT Image 2, Nano Banana Pro, and Veo 3.1.");
+      const error = new Error("This Duitok plan only supports GPT Image 2, Nano Banana Pro, Veo 3.1, and Sora 2.");
       error.status = 400;
       throw error;
     }
     const provider = providerForMediaModel(model);
-    if (provider === "wuyin" && model === "Veo 3.1") {
+    if (provider === "wuyin" && (model === "Veo 3.1" || model === "Sora 2")) {
       const video = await generateVideoWithWuyin(project);
-      return { title: "速创API Veo 3.1", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "wuyin" };
+      return { title: `速创API ${model}`, body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "wuyin" };
     }
     if (provider === "wuyin") {
       const image = await generateImageWithWuyin(project);
