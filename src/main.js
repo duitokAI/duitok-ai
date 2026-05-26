@@ -56,7 +56,7 @@ const copy = {
     navAffiliate: "Affiliate",
     navFaq: "FAQ",
     signIn: "Log masuk",
-    promo: "Promo RM75/bulan tamat malam ini · 13 slot pelancaran lagi",
+    promo: "Promo RM69/bulan tamat malam ini · 13 slot pelancaran lagi",
     heroEyebrow: "1,300+ seller Malaysia boleh hasilkan content lebih laju",
     heroTitle: "Competitor post 10 video. Anda mula hari ini.",
     heroCopy: "Paste link produk dan biar Duitok AI rancang image, skrip UGC, hook BM, caption, dan idea posting TikTok Shop tanpa team creator.",
@@ -75,7 +75,7 @@ const copy = {
     speedCopy: "Generate content sebulan sementara team anda urus order.",
     price: "Harga",
     priceTitle: "Ringan untuk seller kecil.",
-    priceCopy: "Mula RM75/bulan, tambah credit hanya bila generate.",
+    priceCopy: "Mula RM69/bulan, tambah credit hanya bila generate.",
     simple: "Mudah",
     simpleTitle: "Paste link. Pilih output. Export.",
     simpleCopy: "Tak perlu belajar prompt engineering. Tak perlu timeline editor.",
@@ -100,7 +100,7 @@ const copy = {
     pricingTitle: "Satu launch plan. Tambah credit bila perlu output lebih.",
     pricingCopy: "Subscription buka Studio. Credit digunakan untuk generate, export dan future AI worker.",
     launchOffer: "Launch offer",
-    claimPlan: "Claim plan RM75",
+    claimPlan: "Claim plan RM69",
     startNow: "Mula sekarang",
     registerTitle: "Register dan aktif dalam satu minit.",
     registerCopy: "Guna flow sign-in Studio sekarang. Payment dan automasi account akan connect ke CHIP bila merchant key siap.",
@@ -165,7 +165,7 @@ const copy = {
     navAffiliate: "联盟",
     navFaq: "FAQ",
     signIn: "登录",
-    promo: "RM75/月限时优惠今晚结束 · 还剩 13 个名额",
+    promo: "RM69/月限时优惠今晚结束 · 还剩 13 个名额",
     heroEyebrow: "1,300+ 马来西亚卖家正在加速内容生产",
     heroTitle: "竞争对手一天发 10 条，你今天就开始追上。",
     heroCopy: "粘贴产品链接，让 Duitok AI 规划图片、UGC 脚本、马来文 hook、caption 和 TikTok Shop 发布想法，不需要 creator 团队。",
@@ -184,7 +184,7 @@ const copy = {
     speedCopy: "团队处理订单时，你可以生成一个月内容。",
     price: "价格",
     priceTitle: "小卖家也负担得起。",
-    priceCopy: "RM75/月开始，需要生成时再加 credit。",
+    priceCopy: "RM69/月开始，需要生成时再加 credit。",
     simple: "简单",
     simpleTitle: "粘贴链接，选择输出，导出。",
     simpleCopy: "不用学 prompt，不用剪辑时间线。",
@@ -209,7 +209,7 @@ const copy = {
     pricingTitle: "一个启动计划，需要更多输出时再加 credit。",
     pricingCopy: "订阅解锁 Studio。Credit 用于生成、导出和未来 AI worker 动作。",
     launchOffer: "启动优惠",
-    claimPlan: "领取 RM75 计划",
+    claimPlan: "领取 RM69 计划",
     startNow: "现在开始",
     registerTitle: "一分钟注册并激活。",
     registerCopy: "现在先使用 Studio 登录流程。支付和账号自动化会在 CHIP merchant key 准备好后连接。",
@@ -274,7 +274,7 @@ const copy = {
     navAffiliate: "Affiliate",
     navFaq: "FAQ",
     signIn: "Sign in",
-    promo: "Promo RM75/month ends tonight · 13 launch slots left",
+    promo: "Promo RM69/month ends tonight · 13 launch slots left",
     heroEyebrow: "1,300+ Malaysia sellers can scale content faster",
     heroTitle: "Competitors post 10 videos. You start today.",
     heroCopy: "Paste a product link and let Duitok AI plan images, UGC scripts, Malay hooks, captions, and TikTok Shop posting ideas without a creator team.",
@@ -293,7 +293,7 @@ const copy = {
     speedCopy: "Generate a full content month while your team handles orders.",
     price: "Price",
     priceTitle: "Lean enough for small sellers.",
-    priceCopy: "Start from RM75/month, then top up credits only when you generate.",
+    priceCopy: "Start from RM69/month, then top up credits only when you generate.",
     simple: "Simple",
     simpleTitle: "Paste link. Choose output. Export.",
     simpleCopy: "No prompt engineering course. No editor timeline.",
@@ -318,7 +318,7 @@ const copy = {
     pricingTitle: "One launch plan. Add credits when you need more output.",
     pricingCopy: "Subscription unlocks the Studio. Credits are used for generation, exports, and future AI worker actions.",
     launchOffer: "Launch offer",
-    claimPlan: "Claim RM75 plan",
+    claimPlan: "Claim RM69 plan",
     startNow: "Start now",
     registerTitle: "Register and activate in one minute.",
     registerCopy: "Use the Studio sign-in flow now. Payment and account automation will connect to CHIP when your merchant keys are ready.",
@@ -531,7 +531,7 @@ function publicSite() {
         <article class="price-card">
           <span>${t("launchOffer")}</span>
           <h3>Duitok AI Pro</h3>
-          <div class="price"><s>RM300</s><b>RM75</b><small>/month</small></div>
+          <div class="price"><s>RM300</s><b>RM69</b><small>/month</small></div>
           <ul><li>Image Studio</li><li>UGC Script Studio</li><li>Auto Content Batch</li><li>Clone Prompt Mode</li><li>Storytelling Frameworks</li><li>VIP support channel</li></ul>
           <button class="gold-button" data-action="open-register">${icon("credit-card")} ${t("claimPlan")}</button>
         </article>
@@ -579,7 +579,7 @@ function registerPage() {
         <article class="price-card checkout-card">
           <span>Launch offer</span>
           <h3>Duitok AI Pro</h3>
-          <div class="price"><s>RM300</s><b>RM75</b><small>/month</small></div>
+          <div class="price"><s>RM300</s><b>RM69</b><small>/month</small></div>
           <ul><li>Full Studio access</li><li>Prompt library</li><li>Image and video workflows</li><li>Clone prompt mode</li><li>VIP WhatsApp support</li></ul>
         </article>
       </section>
@@ -594,7 +594,7 @@ function registerPage() {
           <label>WhatsApp<input name="phone" placeholder="+60" required></label>
           <label>Email<input name="email" type="email" placeholder="you@duitok.com" required></label>
           <label class="check-label"><input type="checkbox" required> <span>I agree to Terms and Privacy Policy.</span></label>
-          <button class="gold-button" type="submit">${icon("credit-card")} Pay RM75 - FPX / DuitNow QR</button>
+          <button class="gold-button" type="submit">${icon("credit-card")} Pay RM69 - FPX / DuitNow QR</button>
           <small>Secured via CHIP Payment once API keys are configured.</small>
         </form>
       </section>
