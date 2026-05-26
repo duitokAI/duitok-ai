@@ -379,7 +379,8 @@ const copy = {
 const t = (key) => copy[state.lang]?.[key] || copy.en[key] || key;
 
 function languageSwitch() {
-  return `<div class="lang-switch" role="group" aria-label="Language">${languages.map(([id, label]) => `<button class="${state.lang === id ? "active" : ""}" data-lang="${id}">${label}</button>`).join("")}</div>`;
+  const current = languages.find(([id]) => id === state.lang) || languages[0];
+  return `<button class="lang-switch" type="button" data-lang-cycle aria-label="Change language" title="Change language"><span>${current[1]}</span>${icon("chevron-down", 14)}</button>`;
 }
 
 const icon = (name, size = 20) => `<i data-lucide="${name}" style="width:${size}px;height:${size}px"></i>`;
@@ -858,9 +859,11 @@ function bind() {
   document.querySelectorAll("[data-result]").forEach((el) => el.addEventListener("click", () => download(`/api/export/result/${el.dataset.result}`, `duitok-result.txt`)));
   document.querySelectorAll("form").forEach((el) => el.addEventListener("submit", submit));
   document.querySelector("[data-search]")?.addEventListener("input", (e) => set({ search: e.target.value }));
-  document.querySelectorAll("[data-lang]").forEach((el) => el.addEventListener("click", () => {
-    localStorage.setItem("duitok-lang", el.dataset.lang);
-    set({ lang: el.dataset.lang });
+  document.querySelectorAll("[data-lang-cycle]").forEach((el) => el.addEventListener("click", () => {
+    const currentIndex = languages.findIndex(([id]) => id === state.lang);
+    const nextLang = languages[(currentIndex + 1) % languages.length][0];
+    localStorage.setItem("duitok-lang", nextLang);
+    set({ lang: nextLang });
   }));
 }
 
