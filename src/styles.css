@@ -136,6 +136,31 @@ button {
   margin-left: auto;
 }
 
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.lang-switch button {
+  min-height: 34px;
+  border: 0;
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 950;
+}
+
+.lang-switch button.active {
+  background: linear-gradient(135deg, var(--pink), var(--coral));
+  color: white;
+}
+
 .public-links a,
 .public-footer a {
   color: #c9c2b8;

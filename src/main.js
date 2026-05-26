@@ -7,28 +7,29 @@ const isStudioPath = () => window.location.pathname.startsWith("/studio");
 const pathIs = (path) => window.location.pathname === path;
 
 const steps = [
-  ["image", "image", "Image", "01"],
-  ["ugc", "video", "UGC", "02"],
-  ["auto", "wand-sparkles", "Auto Content", "03"],
-  ["original", "film", "Original Video", "04"],
-  ["clone", "layers-3", "Clone Prompt", "05"],
-  ["story", "book-open", "Storytelling", "06"],
-  ["viral", "film", "Viral", "07"]
+  ["image", "image", "stepImage", "01"],
+  ["ugc", "video", "stepUgc", "02"],
+  ["auto", "wand-sparkles", "stepAuto", "03"],
+  ["original", "film", "stepOriginal", "04"],
+  ["clone", "layers-3", "stepClone", "05"],
+  ["story", "book-open", "stepStory", "06"],
+  ["viral", "film", "stepViral", "07"]
 ];
 
 const pages = [
-  ["attachments", "image", "Attachments"],
-  ["billing", "credit-card", "Billing"],
-  ["topup", "wallet-cards", "Top Up Credit"],
-  ["affiliate", "users", "Affiliate"],
-  ["usage", "activity", "Usage"],
-  ["autopost", "send", "Auto Post TikTok"],
-  ["whatsapp", "message-circle", "Join Discussion WhatsApp"]
+  ["attachments", "image", "attachments"],
+  ["billing", "credit-card", "billing"],
+  ["topup", "wallet-cards", "topup"],
+  ["affiliate", "users", "affiliate"],
+  ["usage", "activity", "usage"],
+  ["autopost", "send", "autopost"],
+  ["whatsapp", "message-circle", "whatsapp"]
 ];
 
 const state = {
   loading: true,
   user: JSON.parse(localStorage.getItem("duitok-user") || "null"),
+  lang: localStorage.getItem("duitok-lang") || "ms",
   db: null,
   page: "dashboard",
   step: "image",
@@ -38,6 +39,348 @@ const state = {
   live: false,
   chat: false
 };
+
+const languages = [
+  ["ms", "BM"],
+  ["zh", "中文"],
+  ["en", "EN"]
+];
+
+const copy = {
+  ms: {
+    contentEngine: "Enjin Kandungan",
+    checkout: "Checkout",
+    studio: "Studio",
+    navFeatures: "Fungsi",
+    navPricing: "Harga",
+    navAffiliate: "Affiliate",
+    navFaq: "FAQ",
+    signIn: "Log masuk",
+    promo: "Promo RM75/bulan tamat malam ini · 13 slot pelancaran lagi",
+    heroEyebrow: "1,300+ seller Malaysia boleh hasilkan content lebih laju",
+    heroTitle: "Competitor post 10 video. Anda mula hari ini.",
+    heroCopy: "Paste link produk dan biar Duitok AI rancang image, skrip UGC, hook BM, caption, dan idea posting TikTok Shop tanpa team creator.",
+    startCreating: "Mula buat content",
+    whatsappCta: "WhatsApp",
+    rating: "Rating 4.9",
+    sellersNow: "7 seller sedang generate",
+    guarantee: "Jaminan 30 hari",
+    you: "Anda",
+    competitor: "Competitor",
+    oneVideo: "1 video / hari",
+    tenVideos: "10 video / hari",
+    catchUp: "Duitok AI kejar dalam beberapa minit",
+    speed: "Laju",
+    speedTitle: "100 idea dalam satu sesi.",
+    speedCopy: "Generate content sebulan sementara team anda urus order.",
+    price: "Harga",
+    priceTitle: "Ringan untuk seller kecil.",
+    priceCopy: "Mula RM75/bulan, tambah credit hanya bila generate.",
+    simple: "Mudah",
+    simpleTitle: "Paste link. Pilih output. Export.",
+    simpleCopy: "Tak perlu belajar prompt engineering. Tak perlu timeline editor.",
+    sellerReality: "Realiti seller",
+    painTitle: "Setiap hari tanpa content baru ialah reach yang hilang.",
+    painCopy: "Antara packing order, reply customer, check stok dan supplier, content selalu jadi benda yang tertangguh.",
+    notEnoughTime: "Masa tak cukup",
+    notEnoughTimeCopy: "Shoot manual jadikan satu produk simple kerja separuh hari.",
+    ideasDry: "Idea content cepat habis",
+    ideasDryCopy: "Angle sama berulang buat algoritma bosan sebelum buyer nampak anda.",
+    scatteredTools: "Tool AI bersepah",
+    scatteredToolsCopy: "Satu app untuk image, satu app untuk script, satu spreadsheet untuk caption.",
+    competitorsFaster: "Competitor bergerak lebih laju",
+    competitorsFasterCopy: "Volume dan konsisten menang attention.",
+    advantage: "Kelebihan anda",
+    weaponsTitle: "Lima senjata content untuk seller TikTok Shop.",
+    liveOutput: "Output preview",
+    outputTitle: "Preview output, bukan teori.",
+    outputCopy: "Layout ini sedia untuk kad MP4, caption, badge durasi dan kategori produk bila API media AI disambung.",
+    oldWay: "Cara lama",
+    newWay: "Cara Duitok AI",
+    pricingTitle: "Satu launch plan. Tambah credit bila perlu output lebih.",
+    pricingCopy: "Subscription buka Studio. Credit digunakan untuk generate, export dan future AI worker.",
+    launchOffer: "Launch offer",
+    claimPlan: "Claim plan RM75",
+    startNow: "Mula sekarang",
+    registerTitle: "Register dan aktif dalam satu minit.",
+    registerCopy: "Guna flow sign-in Studio sekarang. Payment dan automasi account akan connect ke CHIP bila merchant key siap.",
+    fullName: "Nama penuh",
+    email: "Email",
+    password: "Password",
+    continueRegistration: "Teruskan ke registration",
+    faqTitle: "Soalan seller sebelum mula.",
+    dashboard: "Dashboard",
+    newProject: "New project",
+    search: "Cari",
+    projects: "Projects",
+    publicTools: "Public Tools",
+    logout: "Sign out",
+    project: "Project",
+    sopImage: "SOP Image",
+    stepImage: "Image",
+    stepUgc: "UGC",
+    stepAuto: "Auto Content",
+    stepOriginal: "Original Video",
+    stepClone: "Clone Prompt",
+    stepStory: "Storytelling",
+    stepViral: "Viral",
+    attachments: "Attachments",
+    billing: "Billing",
+    topup: "Top Up Credit",
+    affiliate: "Affiliate",
+    usage: "Usage",
+    autopost: "Auto Post TikTok",
+    whatsapp: "Join Discussion WhatsApp",
+    imageGenerator: "Image Generator",
+    model: "Model",
+    mode: "Mode",
+    avatarRef: "Avatar Reference (Optional)",
+    productRef: "Product Reference (Optional)",
+    dropAvatar: "Click atau drop gambar muka character",
+    dropProduct: "Click atau drop gambar produk",
+    prompt: "Prompt",
+    generateImage: "Generate Image",
+    noResults: "Belum ada result",
+    export: "Export",
+    saveDone: "Saved.",
+    generatedSaved: "Generated result saved.",
+    loginTitle: "Log masuk untuk teruskan generate UGC viral.",
+    welcomeBack: "Welcome back",
+    forgot: "Lupa password? Hantar di WhatsApp ->",
+    noAccount: "Belum ada akaun? Pilih plan & daftar",
+    createProject: "Create New Project",
+    choosePlan: "Choose Plan & Register",
+    exportReady: "Export Ready",
+    supportTitle: "Duitok AI Support",
+    supportTicket: "Create Support Ticket",
+    liveActivity: "Live Activity",
+    support: "Support"
+  },
+  zh: {
+    contentEngine: "内容引擎",
+    checkout: "结账",
+    studio: "工作台",
+    navFeatures: "功能",
+    navPricing: "价格",
+    navAffiliate: "联盟",
+    navFaq: "FAQ",
+    signIn: "登录",
+    promo: "RM75/月限时优惠今晚结束 · 还剩 13 个名额",
+    heroEyebrow: "1,300+ 马来西亚卖家正在加速内容生产",
+    heroTitle: "竞争对手一天发 10 条，你今天就开始追上。",
+    heroCopy: "粘贴产品链接，让 Duitok AI 规划图片、UGC 脚本、马来文 hook、caption 和 TikTok Shop 发布想法，不需要 creator 团队。",
+    startCreating: "开始创作",
+    whatsappCta: "WhatsApp",
+    rating: "4.9 评分",
+    sellersNow: "7 个卖家正在生成",
+    guarantee: "30 天保障",
+    you: "你",
+    competitor: "竞争对手",
+    oneVideo: "1 条 / 天",
+    tenVideos: "10 条 / 天",
+    catchUp: "Duitok AI 几分钟内帮你追上",
+    speed: "速度",
+    speedTitle: "一次生成 100 个想法。",
+    speedCopy: "团队处理订单时，你可以生成一个月内容。",
+    price: "价格",
+    priceTitle: "小卖家也负担得起。",
+    priceCopy: "RM75/月开始，需要生成时再加 credit。",
+    simple: "简单",
+    simpleTitle: "粘贴链接，选择输出，导出。",
+    simpleCopy: "不用学 prompt，不用剪辑时间线。",
+    sellerReality: "卖家现实",
+    painTitle: "没有新内容的一天，就是少一次被看见。",
+    painCopy: "打包、回复客户、查库存、追供应商之后，内容永远被拖延。",
+    notEnoughTime: "时间不够",
+    notEnoughTimeCopy: "手动拍一个简单产品，也会变成半天工作。",
+    ideasDry: "内容想法枯竭",
+    ideasDryCopy: "同一个角度重复太多，算法比买家更早厌倦。",
+    scatteredTools: "AI 工具太分散",
+    scatteredToolsCopy: "图片一个 app，脚本一个 app，caption 又在表格里。",
+    competitorsFaster: "竞争对手更快",
+    competitorsFasterCopy: "数量和稳定更新会赢得注意力。",
+    advantage: "你的优势",
+    weaponsTitle: "TikTok Shop 卖家的五个内容武器。",
+    liveOutput: "输出预览",
+    outputTitle: "看输出，不讲理论。",
+    outputCopy: "这里已经准备好承载 MP4 卡片、caption、时长标签和产品分类，后续接 AI 媒体 API 即可。",
+    oldWay: "旧方法",
+    newWay: "Duitok AI 方法",
+    pricingTitle: "一个启动计划，需要更多输出时再加 credit。",
+    pricingCopy: "订阅解锁 Studio。Credit 用于生成、导出和未来 AI worker 动作。",
+    launchOffer: "启动优惠",
+    claimPlan: "领取 RM75 计划",
+    startNow: "现在开始",
+    registerTitle: "一分钟注册并激活。",
+    registerCopy: "现在先使用 Studio 登录流程。支付和账号自动化会在 CHIP merchant key 准备好后连接。",
+    fullName: "姓名",
+    email: "邮箱",
+    password: "密码",
+    continueRegistration: "继续注册",
+    faqTitle: "卖家开始前常问的问题。",
+    dashboard: "总控",
+    newProject: "新项目",
+    search: "搜索",
+    projects: "项目",
+    publicTools: "公开工具",
+    logout: "退出登录",
+    project: "项目",
+    sopImage: "图片 SOP",
+    stepImage: "图片",
+    stepUgc: "UGC",
+    stepAuto: "自动内容",
+    stepOriginal: "原视频",
+    stepClone: "复刻提示词",
+    stepStory: "故事脚本",
+    stepViral: "爆款",
+    attachments: "附件",
+    billing: "账单",
+    topup: "充值 Credit",
+    affiliate: "联盟",
+    usage: "用量",
+    autopost: "自动发布 TikTok",
+    whatsapp: "加入 WhatsApp 讨论群",
+    imageGenerator: "图片生成器",
+    model: "模型",
+    mode: "模式",
+    avatarRef: "人物参考（可选）",
+    productRef: "产品参考（可选）",
+    dropAvatar: "点击或拖入人物脸部图片",
+    dropProduct: "点击或拖入产品图片",
+    prompt: "提示词",
+    generateImage: "生成图片",
+    noResults: "还没有结果",
+    export: "导出",
+    saveDone: "已保存。",
+    generatedSaved: "生成结果已保存。",
+    loginTitle: "登录后继续生成爆款 UGC。",
+    welcomeBack: "欢迎回来",
+    forgot: "忘记密码？去 WhatsApp 联系 ->",
+    noAccount: "还没有账号？选择计划并注册",
+    createProject: "创建新项目",
+    choosePlan: "选择计划并注册",
+    exportReady: "导出已开始",
+    supportTitle: "Duitok AI 客服",
+    supportTicket: "创建客服工单",
+    liveActivity: "实时动态",
+    support: "客服"
+  },
+  en: {
+    contentEngine: "Content Engine",
+    checkout: "Checkout",
+    studio: "Studio",
+    navFeatures: "Features",
+    navPricing: "Pricing",
+    navAffiliate: "Affiliate",
+    navFaq: "FAQ",
+    signIn: "Sign in",
+    promo: "Promo RM75/month ends tonight · 13 launch slots left",
+    heroEyebrow: "1,300+ Malaysia sellers can scale content faster",
+    heroTitle: "Competitors post 10 videos. You start today.",
+    heroCopy: "Paste a product link and let Duitok AI plan images, UGC scripts, Malay hooks, captions, and TikTok Shop posting ideas without a creator team.",
+    startCreating: "Start creating",
+    whatsappCta: "WhatsApp",
+    rating: "4.9 rating",
+    sellersNow: "7 sellers generating now",
+    guarantee: "30-day guarantee",
+    you: "You",
+    competitor: "Competitor",
+    oneVideo: "1 video / day",
+    tenVideos: "10 videos / day",
+    catchUp: "Duitok AI catches up in minutes",
+    speed: "Speed",
+    speedTitle: "100 ideas in one sitting.",
+    speedCopy: "Generate a full content month while your team handles orders.",
+    price: "Price",
+    priceTitle: "Lean enough for small sellers.",
+    priceCopy: "Start from RM75/month, then top up credits only when you generate.",
+    simple: "Simple",
+    simpleTitle: "Paste link. Choose output. Export.",
+    simpleCopy: "No prompt engineering course. No editor timeline.",
+    sellerReality: "Seller reality",
+    painTitle: "Every day without fresh content is reach left on the table.",
+    painCopy: "Between packing orders, replying customers, checking stock, and chasing suppliers, content becomes the thing you delay.",
+    notEnoughTime: "Not enough time",
+    notEnoughTimeCopy: "Manual shooting turns one simple product into a half-day task.",
+    ideasDry: "Content ideas dry up",
+    ideasDryCopy: "Repeating the same angle makes the algorithm bored before buyers see you.",
+    scatteredTools: "AI tools feel scattered",
+    scatteredToolsCopy: "One app for image, one for script, one spreadsheet for captions.",
+    competitorsFaster: "Competitors move faster",
+    competitorsFasterCopy: "Volume plus consistency wins attention.",
+    advantage: "Your advantage",
+    weaponsTitle: "Five content weapons for TikTok Shop sellers.",
+    liveOutput: "Live output reel",
+    outputTitle: "Output previews, not theory.",
+    outputCopy: "The layout is ready for MP4 cards, captions, duration badges, and product categories once your AI media API is connected.",
+    oldWay: "Old way",
+    newWay: "Duitok AI way",
+    pricingTitle: "One launch plan. Add credits when you need more output.",
+    pricingCopy: "Subscription unlocks the Studio. Credits are used for generation, exports, and future AI worker actions.",
+    launchOffer: "Launch offer",
+    claimPlan: "Claim RM75 plan",
+    startNow: "Start now",
+    registerTitle: "Register and activate in one minute.",
+    registerCopy: "Use the Studio sign-in flow now. Payment and account automation will connect to CHIP when your merchant keys are ready.",
+    fullName: "Full name",
+    email: "Email",
+    password: "Password",
+    continueRegistration: "Continue to registration",
+    faqTitle: "Questions sellers ask before starting.",
+    dashboard: "Dashboard",
+    newProject: "New project",
+    search: "Search",
+    projects: "Projects",
+    publicTools: "Public Tools",
+    logout: "Sign out",
+    project: "Project",
+    sopImage: "SOP Image",
+    stepImage: "Image",
+    stepUgc: "UGC",
+    stepAuto: "Auto Content",
+    stepOriginal: "Original Video",
+    stepClone: "Clone Prompt",
+    stepStory: "Storytelling",
+    stepViral: "Viral",
+    attachments: "Attachments",
+    billing: "Billing",
+    topup: "Top Up Credit",
+    affiliate: "Affiliate",
+    usage: "Usage",
+    autopost: "Auto Post TikTok",
+    whatsapp: "Join Discussion WhatsApp",
+    imageGenerator: "Image Generator",
+    model: "Model",
+    mode: "Mode",
+    avatarRef: "Avatar Reference (Optional)",
+    productRef: "Product Reference (Optional)",
+    dropAvatar: "Click or drop character face image",
+    dropProduct: "Click or drop product image",
+    prompt: "Prompt",
+    generateImage: "Generate Image",
+    noResults: "No results yet",
+    export: "Export",
+    saveDone: "Saved.",
+    generatedSaved: "Generated result saved.",
+    loginTitle: "Sign in to keep generating viral UGC.",
+    welcomeBack: "Welcome back",
+    forgot: "Forgot password? Send WhatsApp ->",
+    noAccount: "No account yet? Choose a plan & register",
+    createProject: "Create New Project",
+    choosePlan: "Choose Plan & Register",
+    exportReady: "Export Ready",
+    supportTitle: "Duitok AI Support",
+    supportTicket: "Create Support Ticket",
+    liveActivity: "Live Activity",
+    support: "Support"
+  }
+};
+
+const t = (key) => copy[state.lang]?.[key] || copy.en[key] || key;
+
+function languageSwitch() {
+  return `<div class="lang-switch" role="group" aria-label="Language">${languages.map(([id, label]) => `<button class="${state.lang === id ? "active" : ""}" data-lang="${id}">${label}</button>`).join("")}</div>`;
+}
 
 const icon = (name, size = 20) => `<i data-lucide="${name}" style="width:${size}px;height:${size}px"></i>`;
 const esc = (value = "") => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
@@ -97,53 +440,54 @@ function route() {
 function publicSite() {
   return `
     <main class="public-shell">
-      <div class="promo-bar">${icon("timer", 18)} Promo RM75/bulan ends tonight · 13 launch slots left</div>
+      <div class="promo-bar">${icon("timer", 18)} ${t("promo")}</div>
       <nav class="public-nav">
-        ${brand("Content Engine")}
+        ${brand(t("contentEngine"))}
         <div class="public-links">
-          <a href="#features">Features</a>
-          <a href="#pricing">Pricing</a>
-          <a href="/affiliate">Affiliate</a>
-          <a href="#faq">FAQ</a>
+          <a href="#features">${t("navFeatures")}</a>
+          <a href="#pricing">${t("navPricing")}</a>
+          <a href="/affiliate">${t("navAffiliate")}</a>
+          <a href="#faq">${t("navFaq")}</a>
         </div>
-        <button class="dark-button" data-action="open-login">${icon("log-in")} Sign in</button>
+        ${languageSwitch()}
+        <button class="dark-button" data-action="open-login">${icon("log-in")} ${t("signIn")}</button>
       </nav>
       <section class="public-hero">
         <div>
-          <p class="eyebrow">1,300+ Malaysia sellers can scale content faster</p>
-          <h1>Competitors post 10 videos. You start today.</h1>
-          <p class="public-copy">Paste a product link and let Duitok AI plan images, UGC scripts, Malay hooks, captions, and TikTok Shop posting ideas without a creator team.</p>
+          <p class="eyebrow">${t("heroEyebrow")}</p>
+          <h1>${t("heroTitle")}</h1>
+          <p class="public-copy">${t("heroCopy")}</p>
           <div class="public-actions">
-            <button class="gold-button" data-action="open-register">${icon("sparkles")} Start creating</button>
-            <button class="dark-button" data-action="open-whatsapp">${icon("message-circle")} WhatsApp</button>
+            <button class="gold-button" data-action="open-register">${icon("sparkles")} ${t("startCreating")}</button>
+            <button class="dark-button" data-action="open-whatsapp">${icon("message-circle")} ${t("whatsappCta")}</button>
           </div>
-          <div class="trust-row"><span>4.9 rating</span><span>7 sellers generating now</span><span>30-day guarantee</span></div>
+          <div class="trust-row"><span>${t("rating")}</span><span>${t("sellersNow")}</span><span>${t("guarantee")}</span></div>
         </div>
         <section class="hero-board">
           <img class="hero-logo" src="/duittok-logo-cropped.png" alt="Duitok AI">
-          <div class="race-card"><span>You</span><b>1 video / day</b></div>
-          <div class="race-card hot"><span>Competitor</span><b>10 videos / day</b></div>
+          <div class="race-card"><span>${t("you")}</span><b>${t("oneVideo")}</b></div>
+          <div class="race-card hot"><span>${t("competitor")}</span><b>${t("tenVideos")}</b></div>
           <div class="race-meter"><i></i></div>
-          <strong>Duitok AI catches up in minutes</strong>
+          <strong>${t("catchUp")}</strong>
         </section>
       </section>
       <section class="public-grid three">
-        <article><span>Speed</span><h3>100 ideas in one sitting.</h3><p>Generate a full content month while your team handles orders.</p></article>
-        <article><span>Price</span><h3>Lean enough for small sellers.</h3><p>Start from RM75/month, then top up credits only when you generate.</p></article>
-        <article><span>Simple</span><h3>Paste link. Choose output. Export.</h3><p>No prompt engineering course. No editor timeline. No production calendar mess.</p></article>
+        <article><span>${t("speed")}</span><h3>${t("speedTitle")}</h3><p>${t("speedCopy")}</p></article>
+        <article><span>${t("price")}</span><h3>${t("priceTitle")}</h3><p>${t("priceCopy")}</p></article>
+        <article><span>${t("simple")}</span><h3>${t("simpleTitle")}</h3><p>${t("simpleCopy")}</p></article>
       </section>
       <section class="split-section">
-        <div><p class="eyebrow">Seller reality</p><h2>Every day without fresh content is reach left on the table.</h2><p>Between packing orders, replying customers, checking stock, and chasing suppliers, content becomes the thing you know you should do but keep delaying.</p></div>
+        <div><p class="eyebrow">${t("sellerReality")}</p><h2>${t("painTitle")}</h2><p>${t("painCopy")}</p></div>
         <div class="pain-list">
-          <article><h3>Not enough time</h3><p>Manual shooting turns one simple product into a half-day task.</p></article>
-          <article><h3>Content ideas dry up</h3><p>Repeating the same angle makes the algorithm bored before buyers even see you.</p></article>
-          <article><h3>AI tools feel scattered</h3><p>One app for image, one app for script, one spreadsheet for captions. Too much switching.</p></article>
-          <article><h3>Competitors move faster</h3><p>Volume plus consistency wins attention. Slow teams pay for it later.</p></article>
+          <article><h3>${t("notEnoughTime")}</h3><p>${t("notEnoughTimeCopy")}</p></article>
+          <article><h3>${t("ideasDry")}</h3><p>${t("ideasDryCopy")}</p></article>
+          <article><h3>${t("scatteredTools")}</h3><p>${t("scatteredToolsCopy")}</p></article>
+          <article><h3>${t("competitorsFaster")}</h3><p>${t("competitorsFasterCopy")}</p></article>
         </div>
       </section>
       <section id="features" class="feature-section">
-        <p class="eyebrow">Your advantage</p>
-        <h2>Five content weapons for TikTok Shop sellers.</h2>
+        <p class="eyebrow">${t("advantage")}</p>
+        <h2>${t("weaponsTitle")}</h2>
         <div class="feature-mosaic">
           ${featureCard("STOP THE PANIC", "10 days of content in one click.", "Let the AI plan hooks, scripts, captions, CTAs, and batch angles before your next campaign starts.", "calendar-check")}
           ${featureCard("PROTECT IDENTITY", "Use avatar-first UGC.", "Create creator-style scripts and assets without turning your own face into the brand.", "user-round")}
@@ -154,9 +498,9 @@ function publicSite() {
       </section>
       <section id="demo" class="demo-section">
         <div>
-          <p class="eyebrow">Live output reel</p>
-          <h2>Output previews, not theory.</h2>
-          <p>Use these as placeholders for real generated video once your AI media API is connected. The layout is ready for MP4 cards, captions, duration badges, and product categories.</p>
+          <p class="eyebrow">${t("liveOutput")}</p>
+          <h2>${t("outputTitle")}</h2>
+          <p>${t("outputCopy")}</p>
         </div>
         <div class="demo-reel">
           ${demoCard("8s", "Hijab skincare UGC", "Malay soft-sell hook")}
@@ -168,8 +512,8 @@ function publicSite() {
         <p class="eyebrow">Manual vs Duitok AI</p>
         <h2>The old workflow burns days. The new one compresses decisions.</h2>
         <div class="compare-grid">
-          <article><span>Old way</span><h3>Manual production</h3><ul><li>Find creator or shoot yourself</li><li>Write script and brief</li><li>Edit, revise, caption manually</li><li>Repeat again tomorrow</li></ul></article>
-          <article class="winner"><span>Duitok AI way</span><h3>AI-assisted content engine</h3><ul><li>Paste product link</li><li>Pick image, UGC, clone, or story mode</li><li>Generate batch-ready outputs</li><li>Export or continue inside Studio</li></ul></article>
+          <article><span>${t("oldWay")}</span><h3>Manual production</h3><ul><li>Find creator or shoot yourself</li><li>Write script and brief</li><li>Edit, revise, caption manually</li><li>Repeat again tomorrow</li></ul></article>
+          <article class="winner"><span>${t("newWay")}</span><h3>AI-assisted content engine</h3><ul><li>Paste product link</li><li>Pick image, UGC, clone, or story mode</li><li>Generate batch-ready outputs</li><li>Export or continue inside Studio</li></ul></article>
         </div>
       </section>
       <section class="testimonial-section">
@@ -183,27 +527,27 @@ function publicSite() {
         </div>
       </section>
       <section id="pricing" class="pricing-section">
-        <div><p class="eyebrow">Pricing</p><h2>One launch plan. Add credits when you need more output.</h2><p>Subscription unlocks the Studio. Credits are used for generation, exports, and future AI worker actions.</p></div>
+        <div><p class="eyebrow">${t("navPricing")}</p><h2>${t("pricingTitle")}</h2><p>${t("pricingCopy")}</p></div>
         <article class="price-card">
-          <span>Launch offer</span>
+          <span>${t("launchOffer")}</span>
           <h3>Duitok AI Pro</h3>
           <div class="price"><s>RM300</s><b>RM75</b><small>/month</small></div>
           <ul><li>Image Studio</li><li>UGC Script Studio</li><li>Auto Content Batch</li><li>Clone Prompt Mode</li><li>Storytelling Frameworks</li><li>VIP support channel</li></ul>
-          <button class="gold-button" data-action="open-register">${icon("credit-card")} Claim RM75 plan</button>
+          <button class="gold-button" data-action="open-register">${icon("credit-card")} ${t("claimPlan")}</button>
         </article>
       </section>
       <section class="signup-section">
-        <div><p class="eyebrow">Start now</p><h2>Register and activate in one minute.</h2><p>Use the Studio sign-in flow now. Payment and account automation will connect to CHIP when your merchant keys are ready.</p></div>
+        <div><p class="eyebrow">${t("startNow")}</p><h2>${t("registerTitle")}</h2><p>${t("registerCopy")}</p></div>
         <form class="lead-form" data-form="lead">
-          <label>Full name<input name="name" placeholder="Your name"></label>
+          <label>${t("fullName")}<input name="name" placeholder="Your name"></label>
           <label>WhatsApp<input name="phone" placeholder="+60"></label>
-          <label>Email<input name="email" placeholder="you@duitok.com"></label>
-          <button class="gold-button" type="submit">${icon("lock")} Continue to registration</button>
+          <label>${t("email")}<input name="email" placeholder="you@duitok.com"></label>
+          <button class="gold-button" type="submit">${icon("lock")} ${t("continueRegistration")}</button>
         </form>
       </section>
       <section id="faq" class="faq-section">
-        <p class="eyebrow">FAQ</p>
-        <h2>Questions sellers ask before starting.</h2>
+        <p class="eyebrow">${t("navFaq")}</p>
+        <h2>${t("faqTitle")}</h2>
         <details open><summary>Do I need to know how to shoot video?</summary><p>No. Duitok AI is designed around product links, prompts, scripts, and repeatable content structures.</p></details>
         <details><summary>Can this work for Malay content?</summary><p>Yes. The product is shaped for Malaysia seller workflows and informal Bahasa Melayu content direction.</p></details>
         <details><summary>Is auto-posting ready?</summary><p>The current build prepares scheduling states and exports. Full TikTok auto-posting should be connected after API approval.</p></details>
@@ -217,7 +561,8 @@ function registerPage() {
   return `
     <main class="public-shell">
       <nav class="public-nav">
-        ${brand("Checkout")}
+        ${brand(t("checkout"))}
+        ${languageSwitch()}
         <button class="dark-button" data-action="open-home">${icon("arrow-left")} Home</button>
       </nav>
       <section class="register-hero">
@@ -260,7 +605,8 @@ function affiliatePage() {
   return `
     <main class="public-shell affiliate-shell">
       <nav class="public-nav">
-        ${brand("Affiliate")}
+        ${brand(t("affiliate"))}
+        ${languageSwitch()}
         <button class="dark-button" data-action="open-home">${icon("arrow-left")} Main page</button>
       </nav>
       <section class="affiliate-hero">
@@ -324,15 +670,16 @@ function login() {
     <main class="login-shell">
       <section class="login-card">
         ${brand()}
-        <p class="eyebrow">Welcome back</p>
-        <h1>Sign in untuk teruskan generate UGC viral.</h1>
+        ${languageSwitch()}
+        <p class="eyebrow">${t("welcomeBack")}</p>
+        <h1>${t("loginTitle")}</h1>
         <form data-form="login" class="login-form">
-          <label>Email<input name="email" type="email" value="admin@duitok.com" required></label>
-          <label>Password<input name="password" type="password" value="duitok123" required></label>
-          <button class="gold-button" type="submit">${icon("log-in")} Sign in</button>
+          <label>${t("email")}<input name="email" type="email" value="admin@duitok.com" required></label>
+          <label>${t("password")}<input name="password" type="password" value="duitok123" required></label>
+          <button class="gold-button" type="submit">${icon("log-in")} ${t("signIn")}</button>
         </form>
-        <button class="text-button" data-action="forgot">Lupa password? Hantar di WhatsApp -></button>
-        <button class="text-button" data-action="register">Belum ada akaun? Pilih plan & daftar</button>
+        <button class="text-button" data-action="forgot">${t("forgot")}</button>
+        <button class="text-button" data-action="register">${t("noAccount")}</button>
       </section>
       ${modal()}
     </main>`;
@@ -343,14 +690,15 @@ function studio() {
     <div class="studio-shell">
       <aside class="sidebar">
         ${brand()}
-        <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard">${icon("sparkles")} Dashboard</button>
-        <button class="new-project" data-action="new-project">${icon("plus")} <span>New project</span><b>${state.db.projects.length}/5</b></button>
-        <label class="search-box">${icon("search", 18)}<input data-search value="${esc(state.search)}" placeholder="Search"></label>
-        <div class="side-section">${icon("folder", 18)} Projects</div>
+        ${languageSwitch()}
+        <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard">${icon("sparkles")} ${t("dashboard")}</button>
+        <button class="new-project" data-action="new-project">${icon("plus")} <span>${t("newProject")}</span><b>${state.db.projects.length}/5</b></button>
+        <label class="search-box">${icon("search", 18)}<input data-search value="${esc(state.search)}" placeholder="${t("search")}"></label>
+        <div class="side-section">${icon("folder", 18)} ${t("projects")}</div>
         <div class="project-list">${projectButtons()}</div>
-        <div class="side-section account">Public Tools</div>
-        ${pages.map(([id, ic, label]) => `<button class="side-link ${state.page === id ? "active" : ""}" data-page="${id}">${icon(ic)} ${label}${id === "whatsapp" ? icon("arrow-up-right", 14) : ""}</button>`).join("")}
-        <button class="side-link logout" data-action="logout">${icon("log-out")} Sign out</button>
+        <div class="side-section account">${t("publicTools")}</div>
+        ${pages.map(([id, ic, key]) => `<button class="side-link ${state.page === id ? "active" : ""}" data-page="${id}">${icon(ic)} ${t(key)}${id === "whatsapp" ? icon("arrow-up-right", 14) : ""}</button>`).join("")}
+        <button class="side-link logout" data-action="logout">${icon("log-out")} ${t("logout")}</button>
       </aside>
       <main class="workspace">${page()}</main>
       <button class="live-tab" data-action="live">${icon("activity", 18)} LIVE - ${state.db.liveCount}</button>
@@ -361,7 +709,7 @@ function studio() {
     </div>`;
 }
 
-function brand(label = "Studio") {
+function brand(label = t("studio")) {
   return `<div class="brand-lockup"><img class="brand-logo" src="/duittok-logo-cropped.png" alt="Duitok AI"><div><b>Duitok AI</b><strong>${label}</strong></div></div>`;
 }
 
@@ -377,11 +725,11 @@ function page() {
   const p = project();
   return `
     <header class="project-head">
-      <div><p class="folder-label">${icon("folder", 18)} Project</p><h1>${p.name}</h1></div>
-      <button class="sop-button" data-action="sop">${icon("book-open", 25)} SOP Image</button>
+      <div><p class="folder-label">${icon("folder", 18)} ${t("project")}</p><h1>${p.name}</h1></div>
+      <button class="sop-button" data-action="sop">${icon("book-open", 25)} ${t("sopImage")}</button>
     </header>
     <nav class="step-tabs">
-      ${steps.map(([id, ic, label, no]) => `<button class="${state.step === id ? "active" : ""}" data-step="${id}">${icon(ic)} <span>${label}</span><b>${no}</b></button>`).join("")}
+      ${steps.map(([id, ic, key, no]) => `<button class="${state.step === id ? "active" : ""}" data-step="${id}">${icon(ic)} <span>${t(key)}</span><b>${no}</b></button>`).join("")}
     </nav>
     <section class="canvas-card">${stepPanel(p)}</section>`;
 }
@@ -401,10 +749,10 @@ function stepPanel(p) {
 
 function imagePanel(p) {
   return `
-    <div class="generator-box"><h2>🖼️ Image Generator</h2><div class="form-grid two">${select("image.model", "Model", ["Banana Pro", "Seedream", "Nano Banana"], p.image.model)}${select("image.mode", "Mode", ["Create Image", "Edit Image", "Product Scene"], p.image.mode)}</div></div>
-    ${upload("Avatar Reference (Optional)", "Click or drop character face image", "Face / person - used for all variations", "camera", "avatar")}
-    ${upload("Product Reference (Optional)", "Click or drop product image", "Product - used for all images and videos", "package", "product")}
-    ${prompt("image.prompt", p.image.prompt, "Describe the product shot, background, pose, outfit, and mood.", "generate-image", "Generate Image")}
+    <div class="generator-box"><h2>🖼️ ${t("imageGenerator")}</h2><div class="form-grid two">${select("image.model", t("model"), ["Banana Pro", "Seedream", "Nano Banana"], p.image.model)}${select("image.mode", t("mode"), ["Create Image", "Edit Image", "Product Scene"], p.image.mode)}</div></div>
+    ${upload(t("avatarRef"), t("dropAvatar"), "Face / person - used for all variations", "camera", "avatar")}
+    ${upload(t("productRef"), t("dropProduct"), "Product - used for all images and videos", "package", "product")}
+    ${prompt("image.prompt", p.image.prompt, "Describe the product shot, background, pose, outfit, and mood.", "generate-image", t("generateImage"))}
     ${results(p, "image")}`;
 }
 
@@ -441,27 +789,27 @@ function upload(title, main, sub, ic, kind) {
 }
 
 function prompt(field, value, placeholder, action, button) {
-  return `<div class="prompt-block"><label>Prompt<textarea data-field="${field}" placeholder="${placeholder}">${esc(value)}</textarea></label><button class="gold-button" data-action="${action}">${icon("sparkles")} ${button}</button></div>`;
+  return `<div class="prompt-block"><label>${t("prompt")}<textarea data-field="${field}" placeholder="${placeholder}">${esc(value)}</textarea></label><button class="gold-button" data-action="${action}">${icon("sparkles")} ${button}</button></div>`;
 }
 
 function results(p, type) {
   const items = p.results.filter((item) => item.type === type).slice(-4).reverse();
-  if (!items.length) return `<section class="empty-result">${icon("sparkles")} No ${type} results yet.</section>`;
-  return `<section class="result-grid">${items.map((item) => `<article><b>${item.title}</b><p>${item.body}</p><button data-result="${item.id}">${icon("download")} Export</button></article>`).join("")}</section>`;
+  if (!items.length) return `<section class="empty-result">${icon("sparkles")} ${t("noResults")}</section>`;
+  return `<section class="result-grid">${items.map((item) => `<article><b>${item.title}</b><p>${item.body}</p><button data-result="${item.id}">${icon("download")} ${t("export")}</button></article>`).join("")}</section>`;
 }
 
 function accountPage() {
   const map = {
-    attachments: ["Attachments", "Upload records saved to backend.", table(state.db.attachments.map((x) => [x.name, x.kind, new Date(x.createdAt).toLocaleString()]))],
-    billing: ["Billing", "Invoices and plan state are persisted.", `<div class="metric-row"><article><span>Plan</span><strong>${state.db.billing.plan}</strong></article><article><span>Credits</span><strong>${state.db.billing.credits}</strong></article><article><span>Next bill</span><strong>${state.db.billing.nextBill}</strong></article></div>${invoiceTable()}`],
-    topup: ["Top Up Credit", "Credit purchases update the backend ledger.", `<div class="topup-grid">${[10, 30, 50, 100].map((x) => `<button data-topup="${x}"><strong>${x}</strong><span>credits</span><b>RM${x}</b></button>`).join("")}</div>`],
-    affiliate: ["Affiliate", "Referral links and payouts.", `<div class="metric-row"><article><span>Code</span><strong>${state.db.affiliate.code}</strong></article><article><span>Clicks</span><strong>${state.db.affiliate.clicks}</strong></article><article><span>Payout</span><strong>RM${state.db.affiliate.payout}</strong></article></div><button class="gold-button" data-action="copy-affiliate">${icon("copy")} Copy referral link</button>`],
-    usage: ["Usage", "Every generated action is written to history.", table(state.db.usage.map((x) => [x.action, `${x.credits} credits`, new Date(x.createdAt).toLocaleString()]))],
-    autopost: ["Auto Post TikTok", "Publishing queue with saved states.", schedule()],
-    whatsapp: ["Join Discussion WhatsApp", "Community handoff.", `<button class="gold-button" data-action="open-whatsapp">${icon("message-circle")} Open WhatsApp Group</button>`]
+    attachments: [t("attachments"), "Upload records saved to backend.", table(state.db.attachments.map((x) => [x.name, x.kind, new Date(x.createdAt).toLocaleString()]))],
+    billing: [t("billing"), "Invoices and plan state are persisted.", `<div class="metric-row"><article><span>Plan</span><strong>${state.db.billing.plan}</strong></article><article><span>Credits</span><strong>${state.db.billing.credits}</strong></article><article><span>Next bill</span><strong>${state.db.billing.nextBill}</strong></article></div>${invoiceTable()}`],
+    topup: [t("topup"), "Credit purchases update the backend ledger.", `<div class="topup-grid">${[10, 30, 50, 100].map((x) => `<button data-topup="${x}"><strong>${x}</strong><span>credits</span><b>RM${x}</b></button>`).join("")}</div>`],
+    affiliate: [t("affiliate"), "Referral links and payouts.", `<div class="metric-row"><article><span>Code</span><strong>${state.db.affiliate.code}</strong></article><article><span>Clicks</span><strong>${state.db.affiliate.clicks}</strong></article><article><span>Payout</span><strong>RM${state.db.affiliate.payout}</strong></article></div><button class="gold-button" data-action="copy-affiliate">${icon("copy")} Copy referral link</button>`],
+    usage: [t("usage"), "Every generated action is written to history.", table(state.db.usage.map((x) => [x.action, `${x.credits} credits`, new Date(x.createdAt).toLocaleString()]))],
+    autopost: [t("autopost"), "Publishing queue with saved states.", schedule()],
+    whatsapp: [t("whatsapp"), "Community handoff.", `<button class="gold-button" data-action="open-whatsapp">${icon("message-circle")} Open WhatsApp Group</button>`]
   };
   const [title, subtitle, body] = map[state.page];
-  return `<header class="project-head"><div><p class="folder-label">${icon("folder", 18)} Public Workspace</p><h1>${title}</h1><p class="subtitle">${subtitle}</p></div><button class="sop-button" data-action="export-all">${icon("download")} Export Data</button></header><section class="canvas-card slim">${body}</section>`;
+  return `<header class="project-head"><div><p class="folder-label">${icon("folder", 18)} ${t("publicTools")}</p><h1>${title}</h1><p class="subtitle">${subtitle}</p></div><button class="sop-button" data-action="export-all">${icon("download")} ${t("export")}</button></header><section class="canvas-card slim">${body}</section>`;
 }
 
 function table(rows) {
@@ -469,7 +817,7 @@ function table(rows) {
 }
 
 function invoiceTable() {
-  return `<div class="table">${state.db.billing.invoices.map((x) => `<div><span>${x.id}</span><b>RM${x.amount}</b><button data-invoice="${x.id}">${icon("download")} Download</button></div>`).join("")}</div>`;
+  return `<div class="table">${state.db.billing.invoices.map((x) => `<div><span>${x.id}</span><b>RM${x.amount}</b><button data-invoice="${x.id}">${icon("download")} ${t("export")}</button></div>`).join("")}</div>`;
 }
 
 function schedule() {
@@ -478,13 +826,13 @@ function schedule() {
 
 function modal() {
   if (!state.modal) return "";
-  const title = { newProject: "Create New Project", register: "Choose Plan & Register", sop: "SOP Image", export: "Export Ready", chat: "Duitok AI Support" }[state.modal];
+  const title = { newProject: t("createProject"), register: t("choosePlan"), sop: t("sopImage"), export: t("exportReady"), chat: t("supportTitle") }[state.modal];
   const body = {
-    newProject: `<form data-form="project"><label>Project name<input name="name" placeholder="Project ${(state.db?.projects.length || 0) + 1}" required></label><button class="gold-button" type="submit">${icon("plus")} Create</button></form>`,
-    register: `<form data-form="login"><label>Email<input name="email" type="email" placeholder="you@duitok.com" required></label><label>Password<input name="password" type="password" placeholder="Create password" required></label><button class="gold-button" type="submit">${icon("lock")} Register & Enter Studio</button></form>`,
+    newProject: `<form data-form="project"><label>${t("project")}<input name="name" placeholder="Project ${(state.db?.projects.length || 0) + 1}" required></label><button class="gold-button" type="submit">${icon("plus")} ${t("newProject")}</button></form>`,
+    register: `<form data-form="login"><label>${t("email")}<input name="email" type="email" placeholder="you@duitok.com" required></label><label>${t("password")}<input name="password" type="password" placeholder="Create password" required></label><button class="gold-button" type="submit">${icon("lock")} Register & Enter Studio</button></form>`,
     sop: `<div class="sop-sheet"><b>Image SOP</b><ol><li>Upload avatar face.</li><li>Upload product reference.</li><li>Select model and mode.</li><li>Write prompt.</li><li>Generate, save, export.</li></ol><button class="dark-button" data-action="download-sop">${icon("download")} Download SOP</button></div>`,
     export: `<p>Your export has started. Files are generated by the backend.</p><button class="gold-button" data-action="close-modal">${icon("check")} Done</button>`,
-    chat: `<p>How can Duitok AI help?</p><button class="gold-button" data-action="support-ticket">${icon("send")} Create Support Ticket</button>`
+    chat: `<p>How can Duitok AI help?</p><button class="gold-button" data-action="support-ticket">${icon("send")} ${t("supportTicket")}</button>`
   }[state.modal];
   return `<div class="modal-backdrop" data-action="close-modal"><section class="modal"><button class="icon-only close" data-action="close-modal">${icon("x")}</button><p class="folder-label">${icon("sparkles", 18)} Duitok AI</p><h2>${title}</h2>${body}</section></div>`;
 }
@@ -510,6 +858,10 @@ function bind() {
   document.querySelectorAll("[data-result]").forEach((el) => el.addEventListener("click", () => download(`/api/export/result/${el.dataset.result}`, `duitok-result.txt`)));
   document.querySelectorAll("form").forEach((el) => el.addEventListener("submit", submit));
   document.querySelector("[data-search]")?.addEventListener("input", (e) => set({ search: e.target.value }));
+  document.querySelectorAll("[data-lang]").forEach((el) => el.addEventListener("click", () => {
+    localStorage.setItem("duitok-lang", el.dataset.lang);
+    set({ lang: el.dataset.lang });
+  }));
 }
 
 async function action(event, name) {
@@ -584,7 +936,7 @@ async function submit(event) {
 async function fieldChange(event) {
   const db = await api(`/projects/${state.projectId}/field`, { method: "PATCH", body: JSON.stringify({ field: event.target.dataset.field, value: event.target.value }) });
   set({ db });
-  notify("Saved.");
+  notify(t("saveDone"));
 }
 
 async function uploadChange(event) {
@@ -598,7 +950,7 @@ async function uploadChange(event) {
 async function generate(name) {
   const db = await api(`/projects/${state.projectId}/generate`, { method: "POST", body: JSON.stringify({ action: name, step: state.step }) });
   set({ db });
-  notify("Generated result saved.");
+  notify(t("generatedSaved"));
 }
 
 async function topup(amount) {
