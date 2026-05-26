@@ -144,14 +144,14 @@ button {
 
 .lang-switch {
   display: inline-grid;
-  grid-template-columns: auto 14px;
+  grid-template-columns: 15px auto auto 14px;
   align-items: center;
-  gap: 5px;
-  min-width: 72px;
-  min-height: 34px;
+  gap: 7px;
+  min-width: 146px;
+  min-height: 38px;
   border: 1px solid rgba(95, 0, 103, 0.12);
-  border-radius: 999px;
-  padding: 7px 10px 7px 13px;
+  border-radius: 8px;
+  padding: 8px 10px;
   background: rgba(255, 255, 255, 0.86);
   color: var(--purple);
   font-size: 13px;
@@ -173,8 +173,16 @@ button {
 }
 
 .lang-switch span {
-  min-width: 24px;
-  text-align: center;
+  min-width: 28px;
+  text-align: right;
+}
+
+.lang-switch small {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .lang-switch i {
@@ -186,7 +194,7 @@ button {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  min-width: 118px;
+  min-width: 146px;
   display: grid;
   gap: 4px;
   padding: 8px;
@@ -2866,7 +2874,7 @@ label {
 
 /* Studio density pass: closer to Peninglab's production-console scale. */
 .studio-shell {
-  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-columns: 300px minmax(0, 1fr);
 }
 
 .sidebar {
@@ -2875,6 +2883,47 @@ label {
 
 .sidebar .brand-lockup {
   padding: 4px 8px 20px;
+}
+
+.sidebar .lang-menu {
+  display: grid;
+  width: 100%;
+  margin: 14px 0 12px;
+}
+
+.sidebar .lang-switch {
+  width: 100%;
+  justify-content: stretch;
+}
+
+.sidebar .lang-options {
+  position: static;
+  left: auto;
+  right: auto;
+  width: 100%;
+  min-width: 0;
+  max-height: 0;
+  margin-top: 0;
+  padding: 0 8px;
+  overflow: hidden;
+  opacity: 0;
+  transform: none;
+  pointer-events: none;
+  background: #fff;
+  box-shadow: 0 14px 34px rgba(96, 0, 103, 0.1);
+  transition: max-height 0.18s ease, margin 0.18s ease, padding 0.18s ease, opacity 0.18s ease;
+}
+
+.sidebar .lang-menu.open .lang-options {
+  max-height: 150px;
+  margin-top: 8px;
+  padding: 8px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sidebar .lang-options button {
+  min-height: 36px;
 }
 
 .sidebar .brand-logo {
@@ -2900,16 +2949,16 @@ label {
 .new-project,
 .side-link,
 .project-button {
-  min-height: 44px;
+  min-height: 40px;
   margin: 5px 0;
-  padding: 9px 12px;
-  font-size: 15px;
+  padding: 8px 11px;
+  font-size: 14px;
 }
 
 .side-primary,
 .new-project,
 .project-button {
-  min-height: 52px;
+  min-height: 48px;
 }
 
 .project-button svg {
@@ -2933,7 +2982,11 @@ label {
 }
 
 .workspace {
-  padding: 28px 36px 56px;
+  padding: 24px 30px 52px;
+}
+
+.workspace > * {
+  width: min(100%, 1440px);
 }
 
 .project-head {
@@ -2942,7 +2995,7 @@ label {
 
 .dashboard-head h1,
 .project-head h1 {
-  font-size: clamp(34px, 4vw, 50px);
+  font-size: clamp(32px, 3.2vw, 44px);
 }
 
 .subtitle {
@@ -2985,17 +3038,17 @@ label {
 }
 
 .dashboard-stat-grid article {
-  min-height: 118px;
+  min-height: 104px;
   gap: 8px;
-  padding: 16px;
+  padding: 14px;
 }
 
 .dashboard-stat-grid article svg {
-  right: 14px;
-  top: 14px;
-  width: 34px !important;
-  height: 34px !important;
-  padding: 7px;
+  right: 12px;
+  top: 12px;
+  width: 30px !important;
+  height: 30px !important;
+  padding: 6px;
 }
 
 .dashboard-stat-grid span,
@@ -3006,13 +3059,13 @@ label {
 }
 
 .dashboard-stat-grid b {
-  margin-top: 16px;
-  font-size: clamp(26px, 2.4vw, 34px);
+  margin-top: 12px;
+  font-size: clamp(24px, 2.1vw, 30px);
   white-space: nowrap;
 }
 
 .dashboard-stat-grid article:last-child b {
-  font-size: clamp(22px, 1.8vw, 30px);
+  font-size: clamp(20px, 1.6vw, 26px);
 }
 
 .dashboard-stat-grid small,
@@ -3024,7 +3077,7 @@ label {
   grid-template-columns: minmax(190px, 0.8fr) repeat(2, minmax(180px, 1fr)) minmax(140px, 0.55fr) auto;
   gap: 12px;
   margin-bottom: 18px;
-  padding: 18px;
+  padding: 16px;
 }
 
 .date-filter-card h2,

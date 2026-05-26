@@ -402,7 +402,7 @@ function languageSwitch() {
   return `
     <div class="lang-menu ${state.langOpen ? "open" : ""}">
       <button class="lang-switch" type="button" data-lang-toggle aria-label="Change language" title="Change language">
-        <span>${current[1]}</span>${icon(state.langOpen ? "chevron-up" : "chevron-down", 14)}
+        ${icon("globe-2", 15)}<small>Language</small><span>${current[1]}</span>${icon(state.langOpen ? "chevron-up" : "chevron-down", 14)}
       </button>
       <div class="lang-options" role="menu">
         ${languages.map(([id, label]) => `<button class="${state.lang === id ? "active" : ""}" type="button" data-lang="${id}" role="menuitem">${label}</button>`).join("")}
