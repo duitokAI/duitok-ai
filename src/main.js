@@ -58,7 +58,7 @@ const languages = [
 ];
 
 const brandAssets = {
-  horizontal: "/duitok-logo-horizontal.png",
+  horizontal: "/duitok-logo-transparent.png",
   mascot: "/duitok-brand-mascot.png",
   banner: "/duitok-brand-banner.png",
   stacked: "/duitok-logo-stacked.png"
