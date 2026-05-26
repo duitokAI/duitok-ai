@@ -122,6 +122,18 @@ function usage(action, credits, userId = adminUserId) {
   return { id: crypto.randomUUID(), userId, action, credits, createdAt: new Date().toISOString() };
 }
 
+function creditEntry(userId, type, credits, note, meta = {}) {
+  return {
+    id: crypto.randomUUID(),
+    userId,
+    type,
+    credits,
+    note,
+    meta,
+    createdAt: new Date().toISOString()
+  };
+}
+
 function hashPassword(password) {
   const salt = crypto.randomBytes(16).toString("hex");
   const hash = crypto.scryptSync(password, salt, 64).toString("hex");
@@ -147,7 +159,11 @@ function publicUser(user) {
 }
 
 function signAuthToken(user) {
-  const payload = Buffer.from(JSON.stringify({ userId: user.id, role: user.role || "user" })).toString("base64url");
+  const payload = Buffer.from(JSON.stringify({
+    userId: user.id,
+    role: user.role || "user",
+    exp: Date.now() + Number(process.env.AUTH_TOKEN_TTL_MS || 7 * 24 * 60 * 60 * 1000)
+  })).toString("base64url");
   const signature = crypto.createHmac("sha256", authSecret).update(payload).digest("base64url");
   return `${payload}.${signature}`;
 }
@@ -158,6 +174,7 @@ function verifyAuthToken(token, db) {
   const expected = crypto.createHmac("sha256", authSecret).update(payload).digest("base64url");
   if (signature.length !== expected.length || !crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) return null;
   const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+  if (data.exp && Date.now() > Number(data.exp)) return null;
   return db.users.find((user) => user.id === data.userId) || null;
 }
 
@@ -287,6 +304,8 @@ function normalizeDb(db) {
   db.supportTickets = db.supportTickets.map((item) => ({ userId: item.userId || adminUserId, ...item }));
   db.generationJobs ||= [];
   db.apiCalls ||= [];
+  db.creditLedger ||= [];
+  db.creditLedger = db.creditLedger.map((item) => ({ userId: item.userId || adminUserId, ...item }));
   return db;
 }
 
@@ -361,14 +380,29 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
   const isAdmin = (user?.role || "user") === "admin";
   const owns = (item) => isAdmin || item.userId === user.id;
   const userBilling = user?.billing || defaultBilling();
-  const projects = (db.projects || []).filter(owns);
+  const sanitizeResult = (result) => {
+    if (isAdmin) return result;
+    const { costRm: _costRm, costRmb: _costRmb, costUsd: _costUsd, ...safe } = result;
+    return safe;
+  };
+  const sanitizeProject = (project) => ({
+    ...project,
+    results: (project.results || []).map(sanitizeResult)
+  });
+  const sanitizeJob = (job) => {
+    if (isAdmin) return job;
+    const { costRm: _costRm, costRmb: _costRmb, costUsd: _costUsd, provider: _provider, endpoint: _endpoint, ...safe } = job;
+    return safe;
+  };
+  const projects = (db.projects || []).filter(owns).map(sanitizeProject);
   const usageRows = (db.usage || []).filter(owns);
   const scheduleRows = (db.schedule || []).filter(owns);
-  const generationJobs = (db.generationJobs || []).filter(owns);
-  const apiCalls = (db.apiCalls || []).filter(owns);
+  const generationJobs = (db.generationJobs || []).filter(owns).map(sanitizeJob);
+  const apiCalls = isAdmin ? (db.apiCalls || []).filter(owns) : [];
   const payments = (db.payments || []).filter(owns);
   const supportTickets = (db.supportTickets || []).filter(owns);
   const attachments = (db.attachments || []).filter(owns);
+  const creditLedger = (db.creditLedger || []).filter(owns);
   const tiktokConnections = (db.tiktok?.connections || []).filter(owns);
   const tiktokPublishes = (db.tiktok?.publishes || []).filter(owns);
   const admin = isAdmin ? {
@@ -383,6 +417,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
     apiCalls: db.apiCalls || [],
     payments: db.payments || [],
     supportTickets: db.supportTickets || [],
+    creditLedger: db.creditLedger || [],
     totals: {
       users: db.users.length,
       generations: db.generationJobs.length,
@@ -402,6 +437,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
     schedule: scheduleRows,
     generationJobs,
     apiCalls,
+    creditLedger,
     supportTickets,
     currentUser: user ? publicUser(user) : null,
     admin,
@@ -1041,6 +1077,56 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
       createdAt: result.createdAt
     });
     currentDb.usage.unshift(usage(generated.title, 4, project.userId));
+    currentDb.creditLedger.unshift(creditEntry(project.userId, "debit", -4, generated.title, {
+      projectId,
+      resultId: result.id,
+      generationJobId: job.id,
+      model: job.model,
+      provider: job.provider
+    }));
+    await saveDb(currentDb);
+    return publicState(currentDb, user);
+  });
+}
+
+async function saveFailedGeneration(projectId, action, step, error, user) {
+  return mutateDb(async (currentDb) => {
+    const project = findProject(currentDb, projectId, user);
+    const cost = generationCostFor(project, action, { provider: providerForMediaModel(project.image?.model) });
+    const createdAt = new Date().toISOString();
+    const job = {
+      id: crypto.randomUUID(),
+      userId: project.userId,
+      projectId,
+      action,
+      step,
+      type: action === "generate-image" && ["Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"].includes(project.image?.model) ? "video" : action === "generate-image" ? "image" : "text",
+      status: "failed",
+      taskId: null,
+      prompt: project.image?.prompt || "",
+      creditsCharged: 0,
+      errorMessage: error.message || "Generation failed",
+      createdAt,
+      completedAt: createdAt,
+      model: cost.model,
+      provider: cost.provider,
+      unit: cost.unit
+    };
+    currentDb.generationJobs.unshift(job);
+    currentDb.apiCalls.unshift({
+      id: crypto.randomUUID(),
+      userId: project.userId,
+      projectId,
+      generationJobId: job.id,
+      provider: job.provider,
+      model: job.model,
+      endpoint: job.provider === "grsai" ? grsaiDrawPath : job.provider === "wuyin" ? wuyinPathFromProject(project) : apimartImagePath,
+      status: "failed",
+      errorMessage: job.errorMessage,
+      costRm: 0,
+      createdAt
+    });
+    currentDb.usage.unshift(usage(`Failed: ${job.model || action}`, 0, project.userId));
     await saveDb(currentDb);
     return publicState(currentDb, user);
   });
@@ -1679,6 +1765,11 @@ async function markChipPurchasePaid(db, payload) {
   user.billing.credits += payment.credits;
   user.billing.invoices.unshift({ id: `INV-${Date.now()}`, amount: payment.amount, createdAt: new Date().toISOString() });
   db.usage.unshift(usage(`Top up ${payment.credits} credits`, 0, user.id));
+  db.creditLedger.unshift(creditEntry(user.id, "credit", payment.credits, `Top up RM${payment.amount}`, {
+    paymentId: payment.id,
+    orderId: payment.orderId,
+    chipPurchaseId: payment.chipPurchaseId
+  }));
   return payment;
 }
 
@@ -1845,8 +1936,13 @@ app.patch("/api/projects/:id/field", async (req, res) => {
 app.post("/api/projects/:id/generate", async (req, res) => {
   const { db, user } = await requireAuth(req);
   const projectSnapshot = structuredClone(findProject(db, req.params.id, user));
-  const generated = await generateWithProvider(projectSnapshot, req.body.action, req.body.step);
-  res.json(await saveGeneratedResult(req.params.id, req.body.action, req.body.step, generated, user));
+  try {
+    const generated = await generateWithProvider(projectSnapshot, req.body.action, req.body.step);
+    res.json(await saveGeneratedResult(req.params.id, req.body.action, req.body.step, generated, user));
+  } catch (error) {
+    await saveFailedGeneration(req.params.id, req.body.action, req.body.step, error, user).catch(() => null);
+    throw error;
+  }
 });
 
 app.post("/api/agent", async (req, res, next) => {

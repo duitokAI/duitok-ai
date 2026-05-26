@@ -944,12 +944,10 @@ function dashboardStats() {
   const todayCount = (type) => results.filter((item) => item.type === type && item.createdAt?.startsWith(todayKey)).length;
   const usedCredits = usage.reduce((sum, item) => sum + Number(item.credits || 0), 0);
   const readyPosts = state.db.schedule.filter((item) => item.status === "Ready").length;
-  const totalCost = usedCredits * 0.28;
   return {
     results,
     usage,
     usedCredits,
-    totalCost,
     cards: [
       ["Image", typeCount("image"), "image", `${todayCount("image")} today`, "Visual assets"],
       ["UGC", typeCount("ugc"), "video", `${todayCount("ugc")} today`, "Video-ready"],
@@ -957,7 +955,7 @@ function dashboardStats() {
       ["Original Video", typeCount("original"), "film", `${todayCount("original")} today`, "Analyzed"],
       ["Clone Prompt", typeCount("clone") + typeCount("viral"), "layers-3", `${todayCount("clone") + todayCount("viral")} today`, "Patterns"],
       ["Ready to Post", readyPosts, "send", "Scheduler", "Queued"],
-      ["Total Cost", `RM ${totalCost.toFixed(2)}`, "wallet-cards", `${usedCredits} credits`, "AI spend"]
+      ["Credits Used", usedCredits, "wallet-cards", `${usedCredits} credits`, "Usage"]
     ]
   };
 }
@@ -1003,7 +1001,7 @@ function dashboardOverview() {
     </section>
     <section class="dashboard-main-grid">
       <article class="cost-card">
-        <div class="card-title"><h2>${icon("receipt-text", 22)} Cost Breakdown</h2><span>Estimated from credits</span></div>
+        <div class="card-title"><h2>${icon("receipt-text", 22)} Credit Breakdown</h2><span>Usage ledger</span></div>
         ${costBreakdown(stats)}
       </article>
       <article class="activity-card">
@@ -1065,13 +1063,13 @@ function nextActionCopy(stats) {
 
 function costBreakdown(stats) {
   const rows = [
-    ["Image Cost", stats.usage.filter((item) => item.action.toLowerCase().includes("image")).reduce((sum, item) => sum + item.credits, 0)],
-    ["Video / UGC Cost", stats.usage.filter((item) => /ugc|video|original/i.test(item.action)).reduce((sum, item) => sum + item.credits, 0)],
-    ["Prompt / Research Cost", stats.usage.filter((item) => /viral|clone|story|auto/i.test(item.action)).reduce((sum, item) => sum + item.credits, 0)],
-    ["Storage / Export Cost", 0],
-    ["Total AI Cost", stats.usedCredits]
+    ["Image Credits", stats.usage.filter((item) => item.action.toLowerCase().includes("image")).reduce((sum, item) => sum + item.credits, 0)],
+    ["Video / UGC Credits", stats.usage.filter((item) => /ugc|video|original/i.test(item.action)).reduce((sum, item) => sum + item.credits, 0)],
+    ["Prompt / Research Credits", stats.usage.filter((item) => /viral|clone|story|auto/i.test(item.action)).reduce((sum, item) => sum + item.credits, 0)],
+    ["Storage / Export Credits", 0],
+    ["Total Credits", stats.usedCredits]
   ];
-  return `<div class="cost-list">${rows.map(([label, credits]) => `<div><span>${label}</span><b>RM ${(credits * 0.28).toFixed(2)}</b><small>${credits} credits</small></div>`).join("")}</div>`;
+  return `<div class="cost-list">${rows.map(([label, credits]) => `<div><span>${label}</span><b>${credits} credits</b><small>Internal provider prices are not shown to users.</small></div>`).join("")}</div>`;
 }
 
 function recentActivity(usage) {
@@ -1081,9 +1079,9 @@ function recentActivity(usage) {
 }
 
 function projectStatusBar(p) {
-  const spent = p.results.length * 4 * 0.28;
+  const spent = p.results.length * 4;
   const ready = state.db.schedule.filter((item) => item.status === "Ready").length;
-  return `<section class="project-status"><article><span>Assets generated</span><b>${p.results.length}</b></article><article><span>Ready to publish</span><b>${ready}</b></article><article><span>Project spend</span><b>RM ${spent.toFixed(2)}</b></article></section>`;
+  return `<section class="project-status"><article><span>Assets generated</span><b>${p.results.length}</b></article><article><span>Ready to publish</span><b>${ready}</b></article><article><span>Credits used</span><b>${spent}</b></article></section>`;
 }
 
 function contentLibraryPage() {
