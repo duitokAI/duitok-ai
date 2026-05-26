@@ -36,6 +36,8 @@ const state = {
   projectId: null,
   modal: null,
   search: "",
+  dateFrom: "2026-05-01",
+  dateTo: "2026-05-26",
   live: false,
   chat: false,
   langOpen: false,
@@ -61,8 +63,12 @@ const copy = {
     promo: "Promo RM69/bulan tamat malam ini · 13 slot pelancaran lagi",
     heroEyebrow: "1,300+ seller Malaysia boleh hasilkan content lebih laju",
     heroTitle: "Competitor post 10 video. Anda mula hari ini.",
-    heroCopy: "Paste link produk dan biar Duitok AI rancang image, skrip UGC, hook BM, caption, dan idea posting TikTok Shop tanpa team creator.",
-    startCreating: "Mula buat content",
+    heroTitleLead: "Kompetitor dah",
+    heroTitleHot: "post 10 video.",
+    heroTitleTail: "Anda baru fikir.",
+    demoCta: "Tengok 20 demo",
+    heroCopy: "Duitok AI catch up dalam 3 minit. Letak link produk TikTok Shop - AI hasilkan skrip UGC, avatar image, caption, dan idea posting. Tanpa shoot, tanpa hire creator.",
+    startCreating: "Mula Sekarang - 2 Video FREE",
     whatsappCta: "WhatsApp",
     rating: "Rating 4.9",
     sellersNow: "7 seller sedang generate",
@@ -171,8 +177,12 @@ const copy = {
     promo: "RM69/月限时优惠今晚结束 · 还剩 13 个名额",
     heroEyebrow: "1,300+ 马来西亚卖家正在加速内容生产",
     heroTitle: "竞争对手一天发 10 条，你今天就开始追上。",
-    heroCopy: "粘贴产品链接，让 Duitok AI 规划图片、UGC 脚本、马来文 hook、caption 和 TikTok Shop 发布想法，不需要 creator 团队。",
-    startCreating: "开始创作",
+    heroTitleLead: "竞争对手已经",
+    heroTitleHot: "发了 10 条视频。",
+    heroTitleTail: "你还在想。",
+    demoCta: "查看 20 个 demo",
+    heroCopy: "Duitok AI 让你 3 分钟追上内容节奏。放入 TikTok Shop 产品链接，AI 生成 UGC 脚本、头像素材、caption 和发布想法。不用拍摄，不用请 creator。",
+    startCreating: "现在开始 - 免费生成 2 条",
     whatsappCta: "WhatsApp",
     rating: "4.9 评分",
     sellersNow: "7 个卖家正在生成",
@@ -281,8 +291,12 @@ const copy = {
     promo: "Promo RM69/month ends tonight · 13 launch slots left",
     heroEyebrow: "1,300+ Malaysia sellers can scale content faster",
     heroTitle: "Competitors post 10 videos. You start today.",
-    heroCopy: "Paste a product link and let Duitok AI plan images, UGC scripts, Malay hooks, captions, and TikTok Shop posting ideas without a creator team.",
-    startCreating: "Start creating",
+    heroTitleLead: "Your competitor",
+    heroTitleHot: "posted 10 videos.",
+    heroTitleTail: "You are still thinking.",
+    demoCta: "View 20 demos",
+    heroCopy: "Duitok AI helps you catch up in 3 minutes. Paste a TikTok Shop product link and generate UGC scripts, avatar images, captions, and posting ideas. No shoot, no creator hiring.",
+    startCreating: "Start Now - 2 Videos FREE",
     whatsappCta: "WhatsApp",
     rating: "4.9 rating",
     sellersNow: "7 sellers generating now",
@@ -396,6 +410,10 @@ function languageSwitch() {
     </div>`;
 }
 
+function heroTitleMarkup() {
+  return `<span>${t("heroTitleLead")}</span><mark>${t("heroTitleHot")}</mark><span>${t("heroTitleTail")}</span>`;
+}
+
 const icon = (name, size = 20) => `<i data-lucide="${name}" style="width:${size}px;height:${size}px"></i>`;
 const esc = (value = "") => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
 
@@ -416,7 +434,7 @@ async function api(path, options = {}) {
 }
 
 async function boot() {
-  if (isStudioPath() && state.user) await ensureStudioData();
+  if (isStudioPath()) await ensureStudioData();
   state.loading = false;
   render();
   showPaymentReturnNotice();
@@ -444,7 +462,7 @@ function render() {
 }
 
 function route() {
-  if (isStudioPath()) return state.user ? studio() : login();
+  if (isStudioPath()) return studio();
   if (pathIs("/login")) return login();
   if (pathIs("/register")) return registerPage();
   if (pathIs("/affiliate")) return affiliatePage();
@@ -469,20 +487,34 @@ function publicSite() {
       <section class="public-hero">
         <div>
           <p class="eyebrow">${t("heroEyebrow")}</p>
-          <h1>${t("heroTitle")}</h1>
+          <h1 class="hero-headline">${heroTitleMarkup()}</h1>
           <p class="public-copy">${t("heroCopy")}</p>
           <div class="public-actions">
             <button class="gold-button" data-action="open-register">${icon("sparkles")} ${t("startCreating")}</button>
-            <button class="dark-button" data-action="open-whatsapp">${icon("message-circle")} ${t("whatsappCta")}</button>
+            <a class="dark-button demo-button" href="#demo">${icon("play-circle")} ${t("demoCta")}</a>
           </div>
-          <div class="trust-row"><span>${t("rating")}</span><span>${t("sellersNow")}</span><span>${t("guarantee")}</span></div>
+          <div class="trust-row">
+            <span class="avatar-stack"><i></i><i></i><i></i><i></i></span>
+            <span>${icon("star", 16)} ${t("rating")}</span>
+            <span>${icon("circle", 10)} ${t("sellersNow")}</span>
+            <span>${icon("shield-check", 16)} ${t("guarantee")}</span>
+          </div>
         </div>
         <section class="hero-board">
           <img class="hero-logo" src="/duittok-logo-cropped.png" alt="Duitok AI">
-          <div class="race-card"><span>${t("you")}</span><b>${t("oneVideo")}</b></div>
+          <div class="product-link-card">
+            <span>${icon("link", 16)} TikTok Shop URL</span>
+            <b>duitok.my/product/ugc-kit</b>
+          </div>
+          <div class="output-stack">
+            <article>${icon("image", 18)} <b>Avatar image</b><span>ready</span></article>
+            <article>${icon("file-text", 18)} <b>UGC script BM</b><span>12 hooks</span></article>
+            <article>${icon("captions", 18)} <b>Caption + CTA</b><span>auto</span></article>
+          </div>
+          <div class="race-card self"><span>${t("you")}</span><b>${t("oneVideo")}</b></div>
           <div class="race-card hot"><span>${t("competitor")}</span><b>${t("tenVideos")}</b></div>
           <div class="race-meter"><i></i></div>
-          <strong>${t("catchUp")}</strong>
+          <strong class="catch-badge">${icon("zap", 16)} ${t("catchUp")}</strong>
         </section>
       </section>
       <section class="public-grid three">
@@ -705,14 +737,26 @@ function studio() {
       <aside class="sidebar">
         ${brand()}
         ${languageSwitch()}
+        <div class="side-section">${icon("layout-dashboard", 18)} Workspace</div>
         <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard">${icon("sparkles")} ${t("dashboard")}</button>
+        <button class="side-link ${state.page === "library" ? "active" : ""}" data-page="library">${icon("folder")} Content Library</button>
+        <button class="side-link ${state.page === "autopost" ? "active" : ""}" data-page="autopost">${icon("calendar-days")} Scheduler</button>
         <button class="new-project" data-action="new-project">${icon("plus")} <span>${t("newProject")}</span><b>${state.db.projects.length}/5</b></button>
         <label class="search-box">${icon("search", 18)}<input data-search value="${esc(state.search)}" placeholder="${t("search")}"></label>
         <div class="side-section">${icon("folder", 18)} ${t("projects")}</div>
         <div class="project-list">${projectButtons()}</div>
-        <div class="side-section account">${t("publicTools")}</div>
-        ${pages.map(([id, ic, key]) => `<button class="side-link ${state.page === id ? "active" : ""}" data-page="${id}">${icon(ic)} ${t(key)}${id === "whatsapp" ? icon("arrow-up-right", 14) : ""}</button>`).join("")}
-        <button class="side-link logout" data-action="logout">${icon("log-out")} ${t("logout")}</button>
+        <div class="side-section account">${icon("wand-sparkles", 18)} Create</div>
+        ${steps.map(([id, ic, key]) => `<button class="side-link ${state.page === "project" && state.step === id ? "active" : ""}" data-step-open="${id}">${icon(ic)} ${t(key)}</button>`).join("")}
+        <div class="side-section account">${icon("wallet-cards", 18)} Business</div>
+        ${[
+          ["billing", "credit-card", "billing"],
+          ["topup", "wallet-cards", "topup"],
+          ["usage", "activity", "usage"],
+          ["affiliate", "users", "affiliate"]
+        ].map(([id, ic, key]) => `<button class="side-link ${state.page === id ? "active" : ""}" data-page="${id}">${icon(ic)} ${t(key)}</button>`).join("")}
+        <div class="side-section account">${icon("life-buoy", 18)} Support</div>
+        <button class="side-link" data-action="sop">${icon("book-open")} SOP</button>
+        <button class="side-link ${state.page === "whatsapp" ? "active" : ""}" data-page="whatsapp">${icon("message-circle")} ${t("whatsapp")}${icon("arrow-up-right", 14)}</button>
       </aside>
       <main class="workspace">${page()}</main>
       <button class="live-tab" data-action="live">${icon("activity", 18)} LIVE - ${state.db.liveCount}</button>
@@ -730,18 +774,195 @@ function brand(label = t("studio")) {
 function projectButtons() {
   return state.db.projects
     .filter((item) => item.name.toLowerCase().includes(state.search.toLowerCase()))
-    .map((item) => `<button class="project-button ${item.id === state.projectId ? "active" : ""}" data-project="${item.id}">${icon("folder")} <span>${item.name}</span></button>`)
+    .map((item) => `<button class="project-button ${item.id === state.projectId && state.page === "project" ? "active" : ""}" data-project="${item.id}">${icon("folder")} <span>${item.name}</span></button>`)
     .join("") || `<p class="empty-text">No projects found.</p>`;
 }
 
 function page() {
+  if (state.page === "dashboard") return dashboardOverview();
+  if (state.page === "project") return projectPage();
+  if (state.page === "library") return contentLibraryPage();
   if (state.page !== "dashboard") return accountPage();
+}
+
+function selectedDateRange() {
+  const from = new Date(`${state.dateFrom}T00:00:00`);
+  const to = new Date(`${state.dateTo}T23:59:59`);
+  return { from, to };
+}
+
+function allResults() {
+  return state.db.projects.flatMap((item) => item.results.map((result) => ({ ...result, projectName: item.name })));
+}
+
+function inDateRange(item) {
+  if (!item.createdAt) return true;
+  const { from, to } = selectedDateRange();
+  const date = new Date(item.createdAt);
+  return date >= from && date <= to;
+}
+
+function dashboardStats() {
+  const results = allResults().filter(inDateRange);
+  const usage = state.db.usage.filter(inDateRange);
+  const typeCount = (type) => results.filter((item) => item.type === type).length;
+  const usedCredits = usage.reduce((sum, item) => sum + Number(item.credits || 0), 0);
+  const readyPosts = state.db.schedule.filter((item) => item.status === "Ready").length;
+  const totalCost = usedCredits * 0.28;
+  return {
+    results,
+    usage,
+    usedCredits,
+    totalCost,
+    cards: [
+      ["Image", typeCount("image"), "image", "+5 today", "Visual assets"],
+      ["UGC", typeCount("ugc"), "video", "Scripts + scenes", "Video-ready"],
+      ["Auto Content", typeCount("auto"), "wand-sparkles", "7-day plans", "Batch plans"],
+      ["Original Video", typeCount("original"), "film", "Remakes", "Analyzed"],
+      ["Clone Prompt", typeCount("clone") + typeCount("viral"), "layers-3", "Research", "Patterns"],
+      ["Ready to Post", readyPosts, "send", "Scheduler", "Queued"],
+      ["Total Cost", `RM ${totalCost.toFixed(2)}`, "wallet-cards", `${usedCredits} credits`, "AI spend"]
+    ]
+  };
+}
+
+function dashboardOverview() {
+  const stats = dashboardStats();
+  return `
+    <header class="project-head dashboard-head">
+      <div>
+        <p class="folder-label">${icon("sparkles", 18)} Dashboard</p>
+        <h1>Duitok AI Studio</h1>
+        <p class="subtitle">Production summary for your TikTok affiliate workspace.</p>
+      </div>
+      <div class="head-actions">
+        <button class="dark-button" data-page="topup">${icon("plus")} Top Up Credit</button>
+        <button class="sop-button" data-action="sop">${icon("book-open", 24)} SOP Dashboard</button>
+      </div>
+    </header>
+    <section class="dashboard-stat-grid">
+      ${stats.cards.map(([label, value, ic, note, meta]) => `<article><div><span>${label}</span><b>${value}</b><small>${note}</small></div>${icon(ic, 24)}<em>${meta}</em></article>`).join("")}
+    </section>
+    <section class="date-filter-card">
+      <h2>${icon("calendar-days", 22)} Filter by date range</h2>
+      <label>From Date<input type="date" data-date-field="dateFrom" value="${state.dateFrom}"></label>
+      <label>To Date<input type="date" data-date-field="dateTo" value="${state.dateTo}"></label>
+      <button class="gold-button" data-action="apply-date">Apply</button>
+      <button class="dark-button" data-action="reset-date">Reset</button>
+    </section>
+    <section class="dashboard-main-grid">
+      <article class="chart-card">
+        <div class="card-title"><h2>${icon("trending-up", 22)} Daily Production</h2><span>${stats.results.length} total in range</span></div>
+        ${productionChart(stats.results)}
+      </article>
+      <article class="next-action-card">
+        <p class="eyebrow">Recommended next action</p>
+        <h2>${nextActionTitle()}</h2>
+        <p>${nextActionCopy(stats)}</p>
+        <div class="next-actions">
+          <button class="gold-button" data-page="autopost">${icon("calendar-plus")} Go to Scheduler</button>
+          <button class="dark-button" data-step-open="ugc">${icon("video")} Generate UGC</button>
+        </div>
+      </article>
+    </section>
+    <section class="dashboard-main-grid">
+      <article class="cost-card">
+        <div class="card-title"><h2>${icon("receipt-text", 22)} Cost Breakdown</h2><span>Estimated from credits</span></div>
+        ${costBreakdown(stats)}
+      </article>
+      <article class="activity-card">
+        <div class="card-title"><h2>${icon("activity", 22)} Recent Activity</h2><span>Backend ledger</span></div>
+        ${recentActivity(stats.usage)}
+      </article>
+    </section>`;
+}
+
+function productionChart(results) {
+  const days = [];
+  const { from, to } = selectedDateRange();
+  const cursor = new Date(from);
+  while (cursor <= to && days.length < 31) {
+    days.push(new Date(cursor));
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  const counts = days.map((day) => {
+    const key = localDateKey(day);
+    return {
+      key,
+      label: key.slice(5),
+      image: results.filter((item) => item.type === "image" && item.createdAt?.startsWith(key)).length,
+      ugc: results.filter((item) => item.type === "ugc" && item.createdAt?.startsWith(key)).length,
+      auto: results.filter((item) => item.type === "auto" && item.createdAt?.startsWith(key)).length,
+      video: results.filter((item) => ["original", "clone", "viral", "story"].includes(item.type) && item.createdAt?.startsWith(key)).length
+    };
+  });
+  const max = Math.max(1, ...counts.map((item) => item.image + item.ugc + item.auto + item.video));
+  return `
+    <div class="legend-row"><span><i></i> Image</span><span><i></i> UGC</span><span><i></i> Auto Content</span><span><i></i> Video/Research</span></div>
+    <div class="bar-chart">
+      ${counts.map((item) => {
+        const total = item.image + item.ugc + item.auto + item.video;
+        return `<div class="bar-day" title="${item.key}: ${total}"><div class="bar-stack" style="height:${Math.max(4, (total / max) * 100)}%"><i style="height:${(item.image / Math.max(1, total)) * 100}%"></i><i style="height:${(item.ugc / Math.max(1, total)) * 100}%"></i><i style="height:${(item.auto / Math.max(1, total)) * 100}%"></i><i style="height:${(item.video / Math.max(1, total)) * 100}%"></i></div><small>${item.label}</small></div>`;
+      }).join("")}
+    </div>`;
+}
+
+function localDateKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function nextActionTitle() {
+  const ready = state.db.schedule.filter((item) => item.status === "Ready").length;
+  if (ready > 0) return `${ready} posts are ready to publish.`;
+  return "Generate a batch before your next posting window.";
+}
+
+function nextActionCopy(stats) {
+  if (stats.results.length === 0) return "No content has been generated in this date range. Start with UGC or Auto Content to build a publishing batch.";
+  const ready = state.db.schedule.filter((item) => item.status === "Ready").length;
+  if (ready > 0) return "You have content in the queue. Schedule the best pieces for tonight's TikTok peak hours before generating more.";
+  return "Your content exists, but nothing is marked ready. Move generated outputs into the Scheduler so the workspace becomes operational.";
+}
+
+function costBreakdown(stats) {
+  const rows = [
+    ["Image Cost", stats.usage.filter((item) => item.action.toLowerCase().includes("image")).reduce((sum, item) => sum + item.credits, 0)],
+    ["Video / UGC Cost", stats.usage.filter((item) => /ugc|video|original/i.test(item.action)).reduce((sum, item) => sum + item.credits, 0)],
+    ["Prompt / Research Cost", stats.usage.filter((item) => /viral|clone|story|auto/i.test(item.action)).reduce((sum, item) => sum + item.credits, 0)],
+    ["Storage / Export Cost", 0],
+    ["Total AI Cost", stats.usedCredits]
+  ];
+  return `<div class="cost-list">${rows.map(([label, credits]) => `<div><span>${label}</span><b>RM ${(credits * 0.28).toFixed(2)}</b><small>${credits} credits</small></div>`).join("")}</div>`;
+}
+
+function recentActivity(usage) {
+  const rows = usage.slice(0, 6);
+  if (!rows.length) return `<p class="empty-text">No activity in this range.</p>`;
+  return `<div class="activity-list">${rows.map((item) => `<div><span>${item.action}</span><b>${item.credits} credits</b><small>${new Date(item.createdAt).toLocaleString()}</small></div>`).join("")}</div>`;
+}
+
+function projectStatusBar(p) {
+  const spent = p.results.length * 4 * 0.28;
+  const ready = state.db.schedule.filter((item) => item.status === "Ready").length;
+  return `<section class="project-status"><article><span>Assets generated</span><b>${p.results.length}</b></article><article><span>Ready to publish</span><b>${ready}</b></article><article><span>Project spend</span><b>RM ${spent.toFixed(2)}</b></article></section>`;
+}
+
+function contentLibraryPage() {
+  const results = allResults().slice().reverse();
+  return `<header class="project-head"><div><p class="folder-label">${icon("folder", 18)} Content Library</p><h1>Generated Assets</h1><p class="subtitle">All project outputs in one place, ready for export or scheduling.</p></div><button class="sop-button" data-action="export-all">${icon("download")} Export Data</button></header><section class="canvas-card slim"><div class="library-grid">${results.map((item) => `<article><b>${item.title}</b><span>${item.projectName}</span>${resultPreview(item)}<button data-result="${item.id}">${icon("download")} ${t("export")}</button></article>`).join("") || `<p class="empty-text">No generated assets yet.</p>`}</div></section>`;
+}
+
+function projectPage() {
   const p = project();
   return `
     <header class="project-head">
       <div><p class="folder-label">${icon("folder", 18)} ${t("project")}</p><h1>${p.name}</h1></div>
       <button class="sop-button" data-action="sop">${icon("book-open", 25)} ${t("sopImage")}</button>
     </header>
+    ${projectStatusBar(p)}
     <nav class="step-tabs">
       ${steps.map(([id, ic, key, no]) => `<button class="${state.step === id ? "active" : ""}" data-step="${id}">${icon(ic)} <span>${t(key)}</span><b>${no}</b></button>`).join("")}
     </nav>
@@ -868,7 +1089,9 @@ function chatPanel() {
 function bind() {
   document.querySelectorAll("[data-page]").forEach((el) => el.addEventListener("click", () => set({ page: el.dataset.page })));
   document.querySelectorAll("[data-step]").forEach((el) => el.addEventListener("click", () => set({ step: el.dataset.step })));
-  document.querySelectorAll("[data-project]").forEach((el) => el.addEventListener("click", () => set({ projectId: el.dataset.project, page: "dashboard" })));
+  document.querySelectorAll("[data-step-open]").forEach((el) => el.addEventListener("click", () => set({ page: "project", step: el.dataset.stepOpen })));
+  document.querySelectorAll("[data-project]").forEach((el) => el.addEventListener("click", () => set({ projectId: el.dataset.project, page: "project" })));
+  document.querySelectorAll("[data-date-field]").forEach((el) => el.addEventListener("change", () => set({ [el.dataset.dateField]: el.value })));
   document.querySelectorAll("[data-action]").forEach((el) => el.addEventListener("click", (e) => action(e, el.dataset.action)));
   document.querySelectorAll("[data-field]").forEach((el) => el.addEventListener("change", fieldChange));
   document.querySelectorAll("[data-upload]").forEach((el) => el.addEventListener("change", uploadChange));
@@ -914,10 +1137,12 @@ async function action(event, name) {
     return render();
   }
   if (name === "open-studio") {
-    if (state.user) await ensureStudioData();
+    await ensureStudioData();
     window.history.pushState({}, "", "/studio");
     return render();
   }
+  if (name === "apply-date") return notify("Dashboard date range applied.");
+  if (name === "reset-date") return set({ dateFrom: "2026-05-01", dateTo: "2026-05-26" });
   if (name === "live") return set({ live: !state.live });
   if (name === "chat") return set({ chat: !state.chat });
   if (name === "logout") {
