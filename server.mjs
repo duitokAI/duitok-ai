@@ -672,10 +672,9 @@ function wuyinImageBody(project, prompt) {
   const imageSize = process.env.WUYIN_IMAGE_SIZE || "1K";
   if (model === "Veo 3.1") {
     return {
-      model: wuyinVideoModel,
       prompt,
-      type: "text2video",
-      ratio: process.env.WUYIN_VIDEO_RATIO || "9:16"
+      aspectRatio: process.env.WUYIN_VIDEO_RATIO || "9:16",
+      size: process.env.WUYIN_VEO_SIZE || "720p"
     };
   }
   if (model === "Sora 2") {
