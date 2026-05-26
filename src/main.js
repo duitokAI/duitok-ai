@@ -570,19 +570,21 @@ function publicSite() {
         </div>
         <section class="hero-board">
           <img class="hero-scene" src="/duitok-hero-seller-v2.jpg" alt="Duitok AI seller using AI content tools">
-          <div class="product-link-card">
-            <span>${icon("link", 16)} TikTok Shop URL</span>
-            <b>duitok.my/product/ugc-kit</b>
+          <div class="hero-board-panel">
+            <div class="product-link-card">
+              <span>${icon("link", 16)} TikTok Shop URL</span>
+              <b>duitok.my/product/ugc-kit</b>
+            </div>
+            <div class="output-stack">
+              <article>${icon("image", 18)} <b>Avatar image</b><span>ready</span></article>
+              <article>${icon("file-text", 18)} <b>UGC script BM</b><span>12 hooks</span></article>
+              <article>${icon("captions", 18)} <b>Caption + CTA</b><span>auto</span></article>
+            </div>
+            <div class="race-card self"><span>${t("you")}</span><b>${t("oneVideo")}</b></div>
+            <div class="race-card hot"><span>${t("competitor")}</span><b>${t("tenVideos")}</b></div>
+            <div class="race-meter"><i></i></div>
+            <strong class="catch-badge">${icon("zap", 16)} ${t("catchUp")}</strong>
           </div>
-          <div class="output-stack">
-            <article>${icon("image", 18)} <b>Avatar image</b><span>ready</span></article>
-            <article>${icon("file-text", 18)} <b>UGC script BM</b><span>12 hooks</span></article>
-            <article>${icon("captions", 18)} <b>Caption + CTA</b><span>auto</span></article>
-          </div>
-          <div class="race-card self"><span>${t("you")}</span><b>${t("oneVideo")}</b></div>
-          <div class="race-card hot"><span>${t("competitor")}</span><b>${t("tenVideos")}</b></div>
-          <div class="race-meter"><i></i></div>
-          <strong class="catch-badge">${icon("zap", 16)} ${t("catchUp")}</strong>
         </section>
       </section>
       <section class="public-grid three">
