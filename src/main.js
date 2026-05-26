@@ -986,7 +986,7 @@ function stepPanel(p) {
 
 function imagePanel(p) {
   return `
-    <div class="generator-box"><h2>🖼️ ${t("imageGenerator")}</h2><div class="form-grid two">${select("image.model", t("model"), ["GPT Image 2", "Nano Banana Pro", "Veo 3.1", "Sora 2"], p.image.model)}${select("image.mode", t("mode"), ["Create Image", "Edit Image", "Product Scene"], p.image.mode)}</div></div>
+    <div class="generator-box"><h2>🖼️ ${t("imageGenerator")}</h2><div class="form-grid two">${select("image.model", t("model"), ["GPT Image 2", "Nano Banana Pro", "Veo 3.1", "Sora 2", "Gemini Omni"], p.image.model)}${select("image.mode", t("mode"), ["Create Image", "Edit Image", "Product Scene"], p.image.mode)}</div></div>
     ${upload(t("avatarRef"), t("dropAvatar"), "Face / person - used for all variations", "camera", "avatar")}
     ${upload(t("productRef"), t("dropProduct"), "Product - used for all images and videos", "package", "product")}
     ${prompt("image.prompt", p.image.prompt, "Describe the product shot, background, pose, outfit, and mood.", "generate-image", t("generateImage"))}
