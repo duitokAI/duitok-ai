@@ -68,9 +68,8 @@ WUYIN_VIDEO_RATIO=9:16
 WUYIN_SORA_ASPECT_RATIO=9:16
 WUYIN_SORA_DURATION=10
 WUYIN_SORA_SIZE=small
-WUYIN_OMNI_ASPECT_RATIO=9:16
 WUYIN_OMNI_DURATION=10
-WUYIN_OMNI_SIZE=small
+WUYIN_OMNI_SIZE=720x1280
 ```
 
 After Render deploys, copy its HTTPS domain and paste it into `PUBLIC_APP_URL`.
@@ -130,7 +129,7 @@ The media endpoints used are:
 - `Nano Banana Pro` -> `/api/async/image_nanoBanana_pro`
 - `Veo 3.1` -> `/api/video/veo` with `model=veo3.1-fast`
 - `Sora 2` -> `/api/async/video_sora2`
-- `Gemini Omni` -> `/api/async/video_omni`
+- `Gemini Omni` -> `/api/async/video_google_omni`
 
 All tasks are polled through `/api/async/detail`.
 

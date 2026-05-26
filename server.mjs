@@ -31,7 +31,7 @@ const wuyinImagePaths = {
   "Nano Banana Pro": "/api/async/image_nanoBanana_pro",
   "Veo 3.1": "/api/video/veo",
   "Sora 2": "/api/async/video_sora2",
-  "Gemini Omni": "/api/async/video_omni"
+  "Gemini Omni": "/api/async/video_google_omni"
 };
 const wuyinVideoModel = process.env.WUYIN_VIDEO_MODEL || "veo3.1-fast";
 const allowedMediaModels = new Set(["GPT Image 2", "Nano Banana Pro", "Veo 3.1", "Sora 2", "Gemini Omni"]);
@@ -522,9 +522,8 @@ function wuyinImageBody(project, prompt) {
   if (model === "Gemini Omni") {
     return {
       prompt,
-      aspectRatio: process.env.WUYIN_OMNI_ASPECT_RATIO || process.env.WUYIN_VIDEO_RATIO || "9:16",
       duration: process.env.WUYIN_OMNI_DURATION || "10",
-      size: process.env.WUYIN_OMNI_SIZE || "small"
+      size: process.env.WUYIN_OMNI_SIZE || "720x1280"
     };
   }
   return { prompt, size: imageSize, aspectRatio };
