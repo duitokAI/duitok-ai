@@ -3500,6 +3500,154 @@ label {
   font-size: 22px;
 }
 
+/* Duitok logo system refresh */
+.brand-lockup {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-logo {
+  width: clamp(168px, 13vw, 230px);
+  height: 62px;
+  object-fit: contain;
+  object-position: left center;
+  display: block;
+  filter: drop-shadow(0 12px 20px rgba(92, 0, 103, 0.12));
+}
+
+.brand-lockup strong {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  border-left: 1px solid rgba(93, 8, 108, 0.14);
+  padding-left: 12px;
+  color: var(--pink);
+  font-size: 13px;
+  font-weight: 950;
+  line-height: 1.05;
+  letter-spacing: 0.05em;
+}
+
+.public-nav .brand-lockup {
+  flex: 0 0 auto;
+}
+
+.sidebar .brand-logo {
+  width: 172px;
+  height: 54px;
+}
+
+.sidebar .brand-lockup {
+  display: grid;
+  gap: 8px;
+}
+
+.sidebar .brand-lockup strong {
+  min-height: 0;
+  border-left: 0;
+  padding-left: 0;
+  color: var(--pink);
+  font-size: 12px;
+}
+
+.login-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.login-card .brand-logo {
+  width: 210px;
+  height: 64px;
+}
+
+.login-brand-art {
+  width: 100%;
+  max-height: 178px;
+  display: block;
+  margin: 4px 0 18px;
+  border: 1px solid rgba(93, 8, 108, 0.1);
+  border-radius: 14px;
+  object-fit: cover;
+  object-position: center 48%;
+  box-shadow: 0 18px 36px rgba(76, 0, 87, 0.1);
+}
+
+.price-brand-mark {
+  width: 84px;
+  height: 84px;
+  display: block;
+  margin-bottom: 12px;
+  border: 1px solid rgba(93, 8, 108, 0.1);
+  border-radius: 24px;
+  object-fit: cover;
+  object-position: center;
+  box-shadow: 0 16px 32px rgba(76, 0, 87, 0.12);
+}
+
+.signup-brand-banner {
+  width: 100%;
+  max-height: 220px;
+  display: block;
+  margin-top: 22px;
+  border: 1px solid rgba(93, 8, 108, 0.1);
+  border-radius: 18px;
+  object-fit: cover;
+  object-position: center;
+  box-shadow: 0 18px 42px rgba(76, 0, 87, 0.1);
+}
+
+.footer-brand {
+  min-width: 220px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer-brand img {
+  width: 138px;
+  height: 42px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.footer-brand b {
+  color: var(--purple);
+  font-size: 13px;
+}
+
+@media (max-width: 700px) {
+  .brand-lockup {
+    gap: 8px;
+  }
+
+  .brand-logo,
+  .login-card .brand-logo {
+    width: 150px;
+    height: 46px;
+  }
+
+  .brand-lockup strong {
+    min-height: 24px;
+    padding-left: 8px;
+    font-size: 11px;
+  }
+
+  .login-brand-art {
+    max-height: 140px;
+  }
+
+  .signup-brand-banner {
+    max-height: 160px;
+  }
+
+  .footer-brand {
+    width: 100%;
+  }
+}
+
 @media (min-width: 1501px) {
   .dashboard-main-grid {
     grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);

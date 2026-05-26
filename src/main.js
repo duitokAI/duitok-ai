@@ -54,6 +54,13 @@ const languages = [
   ["en", "EN"]
 ];
 
+const brandAssets = {
+  horizontal: "/duitok-logo-horizontal.png",
+  mascot: "/duitok-brand-mascot.png",
+  banner: "/duitok-brand-banner.png",
+  stacked: "/duitok-logo-stacked.png"
+};
+
 const imagePromptPresets = {
   avatar: {
     label: "Avatar",
@@ -637,6 +644,7 @@ function publicSite() {
         <div><p class="eyebrow">${t("navPricing")}</p><h2>${t("pricingTitle")}</h2><p>${t("pricingCopy")}</p></div>
         <article class="price-card">
           <span>${t("launchOffer")}</span>
+          <img class="price-brand-mark" src="${brandAssets.mascot}" alt="" aria-hidden="true">
           <h3>Duitok AI Pro</h3>
           <div class="price"><s>RM300</s><b>RM69</b><small>/month</small></div>
           <ul><li>Image Studio</li><li>UGC Script Studio</li><li>Auto Content Batch</li><li>Clone Prompt Mode</li><li>Storytelling Frameworks</li><li>VIP support channel</li></ul>
@@ -644,7 +652,7 @@ function publicSite() {
         </article>
       </section>
       <section class="signup-section">
-        <div><p class="eyebrow">${t("startNow")}</p><h2>${t("registerTitle")}</h2><p>${t("registerCopy")}</p></div>
+        <div><p class="eyebrow">${t("startNow")}</p><h2>${t("registerTitle")}</h2><p>${t("registerCopy")}</p><img class="signup-brand-banner" src="${brandAssets.banner}" alt="Duitok AI"></div>
         <form class="lead-form" data-form="lead">
           <label>${t("fullName")}<input name="name" placeholder="Your name"></label>
           <label>WhatsApp<input name="phone" placeholder="+60"></label>
@@ -660,7 +668,7 @@ function publicSite() {
         <details><summary>Is auto-posting ready?</summary><p>The current build prepares scheduling states and exports. Full TikTok auto-posting should be connected after API approval.</p></details>
         <details><summary>Where do I manage projects?</summary><p>Go to /studio, sign in, and use the workspace for projects, billing, usage, affiliate, and support.</p></details>
       </section>
-      <footer class="public-footer"><b>Duitok AI</b><span>© 2026</span><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="mailto:hello@duitok.com">hello@duitok.com</a></footer>
+      ${footerBrand("Duitok AI")}
     </main>`;
 }
 
@@ -685,6 +693,7 @@ function registerPage() {
         </div>
         <article class="price-card checkout-card">
           <span>Launch offer</span>
+          <img class="price-brand-mark" src="${brandAssets.mascot}" alt="" aria-hidden="true">
           <h3>Duitok AI Pro</h3>
           <div class="price"><s>RM300</s><b>RM69</b><small>/month</small></div>
           <ul><li>Full Studio access</li><li>Prompt library</li><li>Image and video workflows</li><li>Clone prompt mode</li><li>VIP WhatsApp support</li></ul>
@@ -756,7 +765,7 @@ function affiliatePage() {
           <button class="gold-button" type="submit">${icon("send")} Submit application</button>
         </form>
       </section>
-      <footer class="public-footer"><b>Duitok AI Affiliate</b><span>© 2026</span><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="mailto:hello@duitok.com">hello@duitok.com</a></footer>
+      ${footerBrand("Duitok AI Affiliate")}
     </main>`;
 }
 
@@ -802,7 +811,7 @@ function legalPage(type) {
       <section class="legal-content">
         ${sections.map(([heading, body]) => `<article><h2>${heading}</h2><p>${body}</p></article>`).join("")}
       </section>
-      <footer class="public-footer"><b>Duitok AI</b><span>© 2026</span><a href="mailto:hello@duitok.com">hello@duitok.com</a></footer>
+      ${footerBrand("Duitok AI")}
     </main>`;
 }
 
@@ -823,6 +832,7 @@ function login() {
     <main class="login-shell">
       <section class="login-card">
         ${brand()}
+        <img class="login-brand-art" src="${brandAssets.stacked}" alt="Duitok AI mascot">
         ${languageSwitch()}
         <p class="eyebrow">${t("welcomeBack")}</p>
         <h1>${t("loginTitle")}</h1>
@@ -876,7 +886,11 @@ function studio() {
 }
 
 function brand(label = t("studio")) {
-  return `<div class="brand-lockup"><img class="brand-logo" src="/duittok-logo-cropped.png" alt="Duitok AI"><div><b>Duitok AI</b><strong>${label}</strong></div></div>`;
+  return `<div class="brand-lockup"><img class="brand-logo" src="${brandAssets.horizontal}" alt="Duitok AI"><strong>${label}</strong></div>`;
+}
+
+function footerBrand(label = "Duitok AI") {
+  return `<footer class="public-footer"><span class="footer-brand"><img src="${brandAssets.horizontal}" alt="Duitok AI"><b>${label}</b></span><span>© 2026</span><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="mailto:hello@duitok.com">hello@duitok.com</a></footer>`;
 }
 
 function projectButtons() {
