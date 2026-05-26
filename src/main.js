@@ -134,10 +134,14 @@ const copy = {
     heroTitle: "Competitor post 10 video. Anda mula hari ini.",
     heroTitleLead: "Kompetitor dah",
     heroTitleHot: "post 10 video.",
-    heroTitleTail: "Anda baru fikir.",
-    demoCta: "Tengok 20 demo",
-    heroCopy: "Duitok AI catch up dalam 3 minit. Letak link produk TikTok Shop - AI hasilkan skrip UGC, avatar image, caption, dan idea posting. Tanpa shoot, tanpa hire creator.",
+    heroTitleTail: "Anda masih fikir hook pertama.",
+    demoCta: "Tengok Demo",
+    heroCopy: "Paste link produk TikTok Shop. Duitok AI hasilkan hook, skrip UGC, caption, avatar idea dan posting plan dalam beberapa minit.",
     startCreating: "Mula Sekarang - 2 Video FREE",
+    heroTrust1: "Built for Malaysia sellers",
+    heroTrust2: "BM / 中文 / EN",
+    heroTrust3: "Tak perlu tunjuk muka",
+    heroTrust4: "Review dulu sebelum post",
     whatsappCta: "WhatsApp",
     rating: "Rating 4.9",
     sellersNow: "7 seller sedang generate",
@@ -157,27 +161,52 @@ const copy = {
     simpleTitle: "Paste link. Pilih output. Export.",
     simpleCopy: "Tak perlu belajar prompt engineering. Tak perlu timeline editor.",
     sellerReality: "Realiti seller",
-    painTitle: "Setiap hari tanpa content baru ialah reach yang hilang.",
-    painCopy: "Antara packing order, reply customer, check stok dan supplier, content selalu jadi benda yang tertangguh.",
-    notEnoughTime: "Masa tak cukup",
-    notEnoughTimeCopy: "Shoot manual jadikan satu produk simple kerja separuh hari.",
-    ideasDry: "Idea content cepat habis",
-    ideasDryCopy: "Angle sama berulang buat algoritma bosan sebelum buyer nampak anda.",
-    scatteredTools: "Tool AI bersepah",
-    scatteredToolsCopy: "Satu app untuk image, satu app untuk script, satu spreadsheet untuk caption.",
-    competitorsFaster: "Competitor bergerak lebih laju",
-    competitorsFasterCopy: "Volume dan konsisten menang attention.",
+    painTitle: "Content tertangguh bukan sebab malas. Sistem belum ada.",
+    painCopy: "Seller TikTok Shop perlu output harian, tapi kerja operasi selalu makan masa content.",
+    notEnoughTime: "Tak sempat shoot",
+    notEnoughTimeCopy: "Satu produk simple boleh makan separuh hari bila perlu setup, record dan ulang take.",
+    ideasDry: "Idea cepat habis",
+    ideasDryCopy: "Hook sama berulang buat video nampak penat sebelum buyer sempat percaya.",
+    scatteredTools: "Team content mahal",
+    scatteredToolsCopy: "Creator, editor dan copywriter cepat jadi kos tetap sebelum sales stabil.",
+    competitorsFaster: "Competitor lebih laju",
+    competitorsFasterCopy: "Mereka menang bukan sebab lebih kreatif sahaja, tapi sebab output lebih konsisten.",
     advantage: "Kelebihan anda",
     weaponsTitle: "Lima senjata content untuk seller TikTok Shop.",
-    liveOutput: "Output preview",
-    outputTitle: "Preview output, bukan teori.",
-    outputCopy: "Layout ini sedia untuk kad MP4, caption, badge durasi dan kategori produk bila API media AI disambung.",
+    liveOutput: "Output Duitok AI",
+    outputTitle: "Bukan dashboard kosong. Ini benda yang seller terus boleh guna.",
+    outputCopy: "Setiap generate simpan rekod, boleh diedit, diexport dan nanti disambung ke auto-post TikTok selepas approval.",
+    hookTitle: "Hook BM",
+    hookSample: "Competitor dah post 10 video. Produk anda masih tunggu caption?",
+    scriptTitle: "UGC Script",
+    scriptSample: "Scene 1: tunjuk masalah. Scene 2: close-up produk. Scene 3: bukti cepat. CTA: klik beg kuning.",
+    captionTitle: "Caption",
+    captionSample: "Seller busy, content tetap jalan. Simpan dulu, cuba untuk produk anda hari ini.",
+    planTitle: "Posting Plan",
+    planSample: "Day 1 proof video, Day 2 comparison, Day 3 objection, Day 4 promo soft-sell.",
+    howKicker: "Cara guna",
+    howTitle: "Dari product link ke content plan tanpa buka 5 tool.",
+    howCopy: "Flow dibuat supaya seller boleh repeat setiap hari, bukan hanya cantik untuk demo.",
+    how1Title: "Paste product link",
+    how1Copy: "Masukkan URL TikTok Shop atau detail produk.",
+    how2Title: "Choose content mode",
+    how2Copy: "Pilih UGC, image/avatar, clone prompt, storytelling atau viral angle.",
+    how3Title: "Generate output",
+    how3Copy: "Duitok AI hasilkan hook, skrip, caption, image state dan posting idea.",
+    how4Title: "Export atau schedule",
+    how4Copy: "Download file, simpan ke library, atau sedia untuk TikTok auto-post nanti.",
+    demoTitle: "Demo gaya TikTok Shop Malaysia.",
+    demoCopy: "Contoh dibuat untuk kategori seller sebenar: skincare, supplement, kitchenware, gadget, fashion dan home product.",
     oldWay: "Cara lama",
     newWay: "Cara Duitok AI",
-    pricingTitle: "Satu launch plan. Tambah credit bila perlu output lebih.",
-    pricingCopy: "Subscription buka Studio. Credit digunakan untuk generate, export dan future AI worker.",
+    pricingTitle: "RM69/month untuk content engine seller kecil.",
+    pricingCopy: "Launch plan jelas: mula murah, dapat 2 Video FREE, kemudian tambah credit bila volume naik.",
     launchOffer: "Launch offer",
     claimPlan: "Claim plan RM69",
+    riskReversal: "30-day money-back bila setup tak sesuai dengan workflow anda.",
+    controlKicker: "Trust & compliance",
+    controlTitle: "Auto-post boleh datang kemudian. Kawalan tetap di tangan anda.",
+    controlCopy: "Duitok AI bantu hasilkan output dan jadual. Final publish, claim produk dan compliance tetap perlu review manusia.",
     startNow: "Mula sekarang",
     registerTitle: "Register dan aktif dalam satu minit.",
     registerCopy: "Guna flow sign-in Studio sekarang. Payment dan automasi account akan connect ke CHIP bila merchant key siap.",
@@ -248,10 +277,14 @@ const copy = {
     heroTitle: "竞争对手一天发 10 条，你今天就开始追上。",
     heroTitleLead: "竞争对手已经",
     heroTitleHot: "发了 10 条视频。",
-    heroTitleTail: "你还在想。",
-    demoCta: "查看 20 个 demo",
-    heroCopy: "Duitok AI 让你 3 分钟追上内容节奏。放入 TikTok Shop 产品链接，AI 生成 UGC 脚本、头像素材、caption 和发布想法。不用拍摄，不用请 creator。",
+    heroTitleTail: "你还在想第一句 hook。",
+    demoCta: "查看 Demo",
+    heroCopy: "粘贴 TikTok Shop 产品链接。Duitok AI 在几分钟内生成 hook、UGC 脚本、caption、avatar 想法和发布计划。",
     startCreating: "现在开始 - 免费生成 2 条",
+    heroTrust1: "为马来西亚卖家设计",
+    heroTrust2: "BM / 中文 / EN",
+    heroTrust3: "无需露脸",
+    heroTrust4: "发布前人工确认",
     whatsappCta: "WhatsApp",
     rating: "4.9 评分",
     sellersNow: "7 个卖家正在生成",
@@ -271,27 +304,52 @@ const copy = {
     simpleTitle: "粘贴链接，选择输出，导出。",
     simpleCopy: "不用学 prompt，不用剪辑时间线。",
     sellerReality: "卖家现实",
-    painTitle: "没有新内容的一天，就是少一次被看见。",
-    painCopy: "打包、回复客户、查库存、追供应商之后，内容永远被拖延。",
-    notEnoughTime: "时间不够",
-    notEnoughTimeCopy: "手动拍一个简单产品，也会变成半天工作。",
-    ideasDry: "内容想法枯竭",
-    ideasDryCopy: "同一个角度重复太多，算法比买家更早厌倦。",
-    scatteredTools: "AI 工具太分散",
-    scatteredToolsCopy: "图片一个 app，脚本一个 app，caption 又在表格里。",
+    painTitle: "内容拖延不是你懒，是你还没有系统。",
+    painCopy: "TikTok Shop 卖家每天都需要内容，但打包、客服、库存和供应商已经吃掉大部分时间。",
+    notEnoughTime: "没时间拍",
+    notEnoughTimeCopy: "一个简单产品也要布景、拍摄、重拍，半天很快就没了。",
+    ideasDry: "想法很快枯竭",
+    ideasDryCopy: "重复同一个 hook，视频还没卖货就先显得疲惫。",
+    scatteredTools: "内容团队太贵",
+    scatteredToolsCopy: "creator、剪辑、文案都会变成固定成本，销量还没稳定前压力很大。",
     competitorsFaster: "竞争对手更快",
-    competitorsFasterCopy: "数量和稳定更新会赢得注意力。",
+    competitorsFasterCopy: "他们赢不只是因为更有创意，而是更新数量更稳定。",
     advantage: "你的优势",
     weaponsTitle: "TikTok Shop 卖家的五个内容武器。",
-    liveOutput: "输出预览",
-    outputTitle: "看输出，不讲理论。",
-    outputCopy: "这里已经准备好承载 MP4 卡片、caption、时长标签和产品分类，后续接 AI 媒体 API 即可。",
+    liveOutput: "Duitok AI 输出",
+    outputTitle: "不是空 dashboard，而是卖家马上能用的素材。",
+    outputCopy: "每次生成都会保存记录，可以编辑、导出，后续 TikTok auto-post 审批通过后继续接上。",
+    hookTitle: "中文 / BM Hook",
+    hookSample: "竞争对手已经发 10 条视频，你的产品还在等 caption？",
+    scriptTitle: "UGC 脚本",
+    scriptSample: "镜头 1：展示痛点。镜头 2：产品 close-up。镜头 3：快速证明。CTA：点击小黄车。",
+    captionTitle: "Caption",
+    captionSample: "卖家再忙，内容也可以继续跑。先收藏，今天试一个产品。",
+    planTitle: "发布计划",
+    planSample: "Day 1 证明视频，Day 2 对比，Day 3 处理疑虑，Day 4 soft-sell 促销。",
+    howKicker: "使用流程",
+    howTitle: "从产品链接到内容计划，不用打开 5 个工具。",
+    howCopy: "流程是为了卖家每天重复使用，不只是做一个好看的 demo。",
+    how1Title: "粘贴产品链接",
+    how1Copy: "输入 TikTok Shop URL 或产品信息。",
+    how2Title: "选择内容模式",
+    how2Copy: "选择 UGC、图片/avatar、复刻 prompt、故事脚本或爆款角度。",
+    how3Title: "生成输出",
+    how3Copy: "Duitok AI 生成 hook、脚本、caption、图片状态和发布想法。",
+    how4Title: "导出或排程",
+    how4Copy: "下载文件、保存到素材库，或为后续 TikTok auto-post 做准备。",
+    demoTitle: "马来西亚 TikTok Shop 风格 Demo。",
+    demoCopy: "示例覆盖真实卖家类目：skincare、supplement、kitchenware、gadget、fashion 和 home product。",
     oldWay: "旧方法",
     newWay: "Duitok AI 方法",
-    pricingTitle: "一个启动计划，需要更多输出时再加 credit。",
-    pricingCopy: "订阅解锁 Studio。Credit 用于生成、导出和未来 AI worker 动作。",
+    pricingTitle: "RM69/month，给小卖家的内容引擎。",
+    pricingCopy: "启动计划清楚：低成本开始，包含 2 Video FREE，后续内容量上来再加 credit。",
     launchOffer: "启动优惠",
     claimPlan: "领取 RM69 计划",
+    riskReversal: "如果不适合你的工作流，30 天内可申请退款。",
+    controlKicker: "信任与合规",
+    controlTitle: "Auto-post 可以后续接，但控制权必须在你手里。",
+    controlCopy: "Duitok AI 帮你生成内容和计划。最终发布、产品宣称和合规，仍然需要人工确认。",
     startNow: "现在开始",
     registerTitle: "一分钟注册并激活。",
     registerCopy: "现在先使用 Studio 登录流程。支付和账号自动化会在 CHIP merchant key 准备好后连接。",
@@ -362,10 +420,14 @@ const copy = {
     heroTitle: "Competitors post 10 videos. You start today.",
     heroTitleLead: "Your competitor",
     heroTitleHot: "posted 10 videos.",
-    heroTitleTail: "You are still thinking.",
-    demoCta: "View 20 demos",
-    heroCopy: "Duitok AI helps you catch up in 3 minutes. Paste a TikTok Shop product link and generate UGC scripts, avatar images, captions, and posting ideas. No shoot, no creator hiring.",
+    heroTitleTail: "You are still writing the first hook.",
+    demoCta: "View Demo",
+    heroCopy: "Paste a TikTok Shop product link. Duitok AI generates hooks, UGC scripts, captions, avatar ideas, and posting plans in minutes.",
     startCreating: "Start Now - 2 Videos FREE",
+    heroTrust1: "Built for Malaysia sellers",
+    heroTrust2: "BM / 中文 / EN",
+    heroTrust3: "No need to show face",
+    heroTrust4: "Review before posting",
     whatsappCta: "WhatsApp",
     rating: "4.9 rating",
     sellersNow: "7 sellers generating now",
@@ -385,27 +447,52 @@ const copy = {
     simpleTitle: "Paste link. Choose output. Export.",
     simpleCopy: "No prompt engineering course. No editor timeline.",
     sellerReality: "Seller reality",
-    painTitle: "Every day without fresh content is reach left on the table.",
-    painCopy: "Between packing orders, replying customers, checking stock, and chasing suppliers, content becomes the thing you delay.",
-    notEnoughTime: "Not enough time",
-    notEnoughTimeCopy: "Manual shooting turns one simple product into a half-day task.",
-    ideasDry: "Content ideas dry up",
-    ideasDryCopy: "Repeating the same angle makes the algorithm bored before buyers see you.",
-    scatteredTools: "AI tools feel scattered",
-    scatteredToolsCopy: "One app for image, one for script, one spreadsheet for captions.",
+    painTitle: "Content is delayed because the system is missing.",
+    painCopy: "TikTok Shop sellers need daily output, but operations keep swallowing the time meant for content.",
+    notEnoughTime: "No time to shoot",
+    notEnoughTimeCopy: "One simple product becomes a half-day task once you set up, record, and retake.",
+    ideasDry: "Ideas run out fast",
+    ideasDryCopy: "Repeating the same hook makes content feel tired before buyers trust you.",
+    scatteredTools: "Content teams cost too much",
+    scatteredToolsCopy: "Creators, editors, and copywriters become fixed costs before sales are stable.",
     competitorsFaster: "Competitors move faster",
-    competitorsFasterCopy: "Volume plus consistency wins attention.",
+    competitorsFasterCopy: "They win because their output is more consistent, not just more creative.",
     advantage: "Your advantage",
     weaponsTitle: "Five content weapons for TikTok Shop sellers.",
-    liveOutput: "Live output reel",
-    outputTitle: "Output previews, not theory.",
-    outputCopy: "The layout is ready for MP4 cards, captions, duration badges, and product categories once your AI media API is connected.",
+    liveOutput: "Duitok AI output",
+    outputTitle: "Not an empty dashboard. Output sellers can actually use.",
+    outputCopy: "Every generation is stored, editable, exportable, and ready for TikTok auto-post once approval is complete.",
+    hookTitle: "Hook",
+    hookSample: "Your competitor already posted 10 videos. Is your product still waiting for a caption?",
+    scriptTitle: "UGC Script",
+    scriptSample: "Scene 1: show the problem. Scene 2: product close-up. Scene 3: quick proof. CTA: tap the yellow bag.",
+    captionTitle: "Caption",
+    captionSample: "Busy seller, content still moving. Save this and test one product today.",
+    planTitle: "Posting Plan",
+    planSample: "Day 1 proof video, Day 2 comparison, Day 3 objection, Day 4 soft-sell promo.",
+    howKicker: "How it works",
+    howTitle: "From product link to content plan without opening five tools.",
+    howCopy: "The flow is designed for sellers to repeat daily, not just to look good in a demo.",
+    how1Title: "Paste product link",
+    how1Copy: "Add a TikTok Shop URL or product details.",
+    how2Title: "Choose content mode",
+    how2Copy: "Pick UGC, image/avatar, clone prompt, storytelling, or viral angle.",
+    how3Title: "Generate output",
+    how3Copy: "Duitok AI creates hooks, scripts, captions, image states, and posting ideas.",
+    how4Title: "Export or schedule",
+    how4Copy: "Download files, save to library, or prepare for TikTok auto-post later.",
+    demoTitle: "Malaysia TikTok Shop demo styles.",
+    demoCopy: "Examples are shaped around real seller categories: skincare, supplement, kitchenware, gadget, fashion, and home product.",
     oldWay: "Old way",
     newWay: "Duitok AI way",
-    pricingTitle: "One launch plan. Add credits when you need more output.",
-    pricingCopy: "Subscription unlocks the Studio. Credits are used for generation, exports, and future AI worker actions.",
+    pricingTitle: "RM69/month content engine for lean sellers.",
+    pricingCopy: "Clear launch plan: start low, get 2 Videos FREE, then add credits as volume grows.",
     launchOffer: "Launch offer",
     claimPlan: "Claim RM69 plan",
+    riskReversal: "30-day money-back if the setup does not fit your workflow.",
+    controlKicker: "Trust & compliance",
+    controlTitle: "Auto-post can come later. You stay in control.",
+    controlCopy: "Duitok AI helps create output and schedules. Final publishing, product claims, and compliance still need human review.",
     startNow: "Start now",
     registerTitle: "Register and activate in one minute.",
     registerCopy: "Use the Studio sign-in flow now. Payment and account automation will connect to CHIP when your merchant keys are ready.",
@@ -578,10 +665,10 @@ function publicSite() {
             <a class="dark-button demo-button" href="#demo">${icon("play-circle")} ${t("demoCta")}</a>
           </div>
           <div class="trust-row">
-            <span class="avatar-stack"><i></i><i></i><i></i><i></i></span>
-            <span>${icon("star", 16)} ${t("rating")}</span>
-            <span>${icon("circle", 10)} ${t("sellersNow")}</span>
-            <span>${icon("shield-check", 16)} ${t("guarantee")}</span>
+            <span>${icon("map-pin", 16)} ${t("heroTrust1")}</span>
+            <span>${icon("languages", 16)} ${t("heroTrust2")}</span>
+            <span>${icon("user-round-check", 16)} ${t("heroTrust3")}</span>
+            <span>${icon("shield-check", 16)} ${t("heroTrust4")}</span>
           </div>
         </div>
         <section class="hero-board">
@@ -603,21 +690,35 @@ function publicSite() {
           </div>
         </section>
       </section>
-      <section class="public-grid three">
-        <article><span>${t("speed")}</span><h3>${t("speedTitle")}</h3><p>${t("speedCopy")}</p></article>
-        <article><span>${t("price")}</span><h3>${t("priceTitle")}</h3><p>${t("priceCopy")}</p></article>
-        <article><span>${t("simple")}</span><h3>${t("simpleTitle")}</h3><p>${t("simpleCopy")}</p></article>
+      <section class="proof-strip">
+        <article>${icon("star", 18)} <b>${t("rating")}</b></article>
+        <article>${icon("radio", 18)} <b>${t("sellersNow")}</b></article>
+        <article>${icon("badge-check", 18)} <b>${t("guarantee")}</b></article>
+        <article>${icon("wallet-cards", 18)} <b>RM69/month</b></article>
       </section>
       <section class="split-section">
         <div><p class="eyebrow">${t("sellerReality")}</p><h2>${t("painTitle")}</h2><p>${t("painCopy")}</p></div>
         <div class="pain-list">
-          <article><h3>${t("notEnoughTime")}</h3><p>${t("notEnoughTimeCopy")}</p></article>
-          <article><h3>${t("ideasDry")}</h3><p>${t("ideasDryCopy")}</p></article>
-          <article><h3>${t("scatteredTools")}</h3><p>${t("scatteredToolsCopy")}</p></article>
-          <article><h3>${t("competitorsFaster")}</h3><p>${t("competitorsFasterCopy")}</p></article>
+          ${painCards()}
         </div>
       </section>
-      <section id="features" class="feature-section">
+      <section class="output-preview-section">
+        <div>
+          <p class="eyebrow">${t("liveOutput")}</p>
+          <h2>${t("outputTitle")}</h2>
+          <p>${t("outputCopy")}</p>
+        </div>
+        <div class="output-preview-grid">${outputPreviewCards()}</div>
+      </section>
+      <section id="features" class="workflow-section">
+        <div>
+          <p class="eyebrow">${t("howKicker")}</p>
+          <h2>${t("howTitle")}</h2>
+          <p>${t("howCopy")}</p>
+        </div>
+        <div class="workflow-steps">${workflowSteps()}</div>
+      </section>
+      <section class="feature-section">
         <p class="eyebrow">${t("advantage")}</p>
         <h2>${t("weaponsTitle")}</h2>
         <div class="feature-mosaic">
@@ -630,14 +731,12 @@ function publicSite() {
       </section>
       <section id="demo" class="demo-section">
         <div>
-          <p class="eyebrow">${t("liveOutput")}</p>
-          <h2>${t("outputTitle")}</h2>
-          <p>${t("outputCopy")}</p>
+          <p class="eyebrow">TikTok Shop Demo</p>
+          <h2>${t("demoTitle")}</h2>
+          <p>${t("demoCopy")}</p>
         </div>
         <div class="demo-reel">
-          ${demoCard("8s", "Hijab skincare UGC", "Malay soft-sell hook")}
-          ${demoCard("16s", "Kitchenware proof", "Before/after angle")}
-          ${demoCard("9:16", "Gadget review", "Objection handling")}
+          ${demoGalleryCards()}
         </div>
       </section>
       <section class="comparison-section">
@@ -665,9 +764,18 @@ function publicSite() {
           <img class="price-brand-mark" src="${brandAssets.mascot}" alt="" aria-hidden="true">
           <h3>Duitok AI Pro</h3>
           <div class="price"><s>RM300</s><b>RM69</b><small>/month</small></div>
-          <ul><li>Image Studio</li><li>UGC Script Studio</li><li>Auto Content Batch</li><li>Clone Prompt Mode</li><li>Storytelling Frameworks</li><li>VIP support channel</li></ul>
+          <ul>${pricingBullets().map((item) => `<li>${item}</li>`).join("")}</ul>
+          <p class="risk-note">${t("riskReversal")}</p>
           <button class="gold-button" data-action="open-register">${icon("credit-card")} ${t("claimPlan")}</button>
         </article>
+      </section>
+      <section class="control-section">
+        <div>
+          <p class="eyebrow">${t("controlKicker")}</p>
+          <h2>${t("controlTitle")}</h2>
+          <p>${t("controlCopy")}</p>
+        </div>
+        <div class="control-grid">${controlCards()}</div>
       </section>
       <section class="signup-section">
         <div><p class="eyebrow">${t("startNow")}</p><h2>${t("registerTitle")}</h2><p>${t("registerCopy")}</p><img class="signup-brand-banner" src="${brandAssets.banner}" alt="Duitok AI"></div>
@@ -837,6 +945,89 @@ function featureCard(kicker, title, text, ic) {
   return `<article>${icon(ic, 30)}<span>${kicker}</span><h3>${title}</h3><p>${text}</p></article>`;
 }
 
+function painCards() {
+  return [
+    ["video", t("notEnoughTime"), t("notEnoughTimeCopy")],
+    ["lightbulb", t("ideasDry"), t("ideasDryCopy")],
+    ["receipt", t("scatteredTools"), t("scatteredToolsCopy")],
+    ["activity", t("competitorsFaster"), t("competitorsFasterCopy")]
+  ]
+    .map(([ic, title, text]) => `<article>${icon(ic, 24)}<h3>${title}</h3><p>${text}</p></article>`)
+    .join("");
+}
+
+function outputPreviewCards() {
+  return [
+    ["01", t("hookTitle"), t("hookSample")],
+    ["02", t("scriptTitle"), t("scriptSample")],
+    ["03", t("captionTitle"), t("captionSample")],
+    ["04", t("planTitle"), t("planSample")]
+  ]
+    .map(([kicker, title, text]) => `<article><span>${kicker}</span><h3>${title}</h3><p>${text}</p></article>`)
+    .join("");
+}
+
+function workflowSteps() {
+  return [
+    ["link", t("how1Title"), t("how1Copy")],
+    ["sliders-horizontal", t("how2Title"), t("how2Copy")],
+    ["sparkles", t("how3Title"), t("how3Copy")],
+    ["download", t("how4Title"), t("how4Copy")]
+  ]
+    .map(([ic, title, text], index) => `<article><b>${String(index + 1).padStart(2, "0")}</b>${icon(ic, 24)}<h3>${title}</h3><p>${text}</p></article>`)
+    .join("");
+}
+
+function demoGalleryCards() {
+  const data = {
+    ms: [
+      ["8s", "Hijab skincare UGC", "Hook soft-sell BM"],
+      ["12s", "Supplement proof", "Angle before/after"],
+      ["16s", "Kitchenware demo", "Problem-solution flow"],
+      ["10s", "Gadget review", "Handle objection"],
+      ["14s", "Fashion try-on", "Style comparison"],
+      ["11s", "Home product", "Trust + CTA"]
+    ],
+    zh: [
+      ["8s", "头巾 skincare UGC", "BM soft-sell hook"],
+      ["12s", "保健品证明视频", "before/after 角度"],
+      ["16s", "厨具演示", "痛点到解决方案"],
+      ["10s", "Gadget 测评", "处理购买疑虑"],
+      ["14s", "Fashion try-on", "穿搭对比"],
+      ["11s", "Home product", "信任 + CTA"]
+    ],
+    en: [
+      ["8s", "Hijab skincare UGC", "BM soft-sell hook"],
+      ["12s", "Supplement proof", "Before/after angle"],
+      ["16s", "Kitchenware demo", "Problem-solution flow"],
+      ["10s", "Gadget review", "Objection handling"],
+      ["14s", "Fashion try-on", "Style comparison"],
+      ["11s", "Home product", "Trust + CTA"]
+    ]
+  };
+  return (data[state.lang] || data.ms).map(([duration, title, text]) => demoCard(duration, title, text)).join("");
+}
+
+function pricingBullets() {
+  const data = {
+    ms: ["2 Video FREE", "UGC Script Studio", "AI Image / Avatar workflow", "Caption generator", "Clone prompt mode", "TikTok posting planner", "WhatsApp support"],
+    zh: ["免费生成 2 条 Video", "UGC 脚本工作台", "AI Image / Avatar 流程", "Caption 生成器", "复刻 Prompt 模式", "TikTok 发布计划器", "WhatsApp 客服支持"],
+    en: ["2 Videos FREE", "UGC Script Studio", "AI Image / Avatar workflow", "Caption generator", "Clone prompt mode", "TikTok posting planner", "WhatsApp support"]
+  };
+  return data[state.lang] || data.ms;
+}
+
+function controlCards() {
+  const data = {
+    ms: ["Manual review sebelum posting", "Tiada final publish tanpa approval anda", "Avatar workflow untuk kurang bergantung pada muka sendiri", "Anda semak claim produk dan compliance", "TikTok API approval diperlukan untuk official auto-post"],
+    zh: ["发布前人工审核", "没有你的确认不会最终发布", "Avatar workflow 降低对真人露脸的依赖", "产品宣称和合规由你最终确认", "官方 auto-post 需要 TikTok API 审批"],
+    en: ["Manual review before posting", "No final publish without your approval", "Avatar workflow reduces dependence on your own face", "You review product claims and compliance", "TikTok API approval is required for official auto-post"]
+  };
+  return (data[state.lang] || data.ms)
+    .map((item) => `<article>${icon("check-circle-2", 20)}<p>${item}</p></article>`)
+    .join("");
+}
+
 function quote(text, name, role) {
   return `<article><p>"${text}"</p><b>${name}</b><span>${role}</span></article>`;
 }
@@ -904,11 +1095,11 @@ function studio() {
 }
 
 function brand(label = t("studio")) {
-  return `<div class="brand-lockup"><img class="brand-logo" src="${brandAssets.horizontal}" alt="Duitok AI"><strong>${label}</strong></div>`;
+  return `<div class="brand-lockup"><span class="brand-core" aria-label="Duitok AI"><img class="brand-logo-mascot" src="${brandAssets.mascot}" alt="" aria-hidden="true"><span class="brand-wordmark"><span>Duitok</span><span>AI</span></span></span><strong>${label}</strong></div>`;
 }
 
 function footerBrand(label = "Duitok AI") {
-  return `<footer class="public-footer"><span class="footer-brand"><img src="${brandAssets.horizontal}" alt="Duitok AI"><b>${label}</b></span><span>© 2026</span><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="mailto:hello@duitok.com">hello@duitok.com</a></footer>`;
+  return `<footer class="public-footer"><span class="footer-brand"><span class="brand-core footer-brand-core" aria-label="Duitok AI"><img class="brand-logo-mascot" src="${brandAssets.mascot}" alt="" aria-hidden="true"><span class="brand-wordmark"><span>Duitok</span><span>AI</span></span></span><b>${label}</b></span><span>© 2026</span><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="mailto:hello@duitok.com">hello@duitok.com</a></footer>`;
 }
 
 function projectButtons() {
