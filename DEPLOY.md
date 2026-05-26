@@ -15,7 +15,7 @@ Do not use all four. Use Render first.
 Render
   ├─ serves the Duitok  AI frontend
   ├─ runs the Node API
-  ├─ stores temporary JSON data on a Render disk
+  ├─ connects to Supabase Postgres for durable app data
   └─ receives CHIP payment callbacks
 ```
 
@@ -43,9 +43,10 @@ Set these in Render:
 ```env
 NODE_ENV=production
 SERVE_STATIC=true
-DATA_DIR=/var/data
-PUBLIC_APP_URL=https://your-render-or-custom-domain.com
+PUBLIC_APP_URL=https://duitok.com
 CORS_ORIGINS=
+DATABASE_URL=your_supabase_postgres_connection_string
+POSTGRES_SSL=true
 CHIP_API_TOKEN=your_chip_api_token
 CHIP_BRAND_ID=your_chip_brand_id
 CHIP_PUBLIC_KEY=your_chip_public_key
@@ -53,7 +54,18 @@ CHIP_PUBLIC_KEY=your_chip_public_key
 
 After Render deploys, copy its HTTPS domain and paste it into `PUBLIC_APP_URL`.
 
-## Step 4: Connect CHIP
+## Step 4: Create Supabase Database
+
+1. Open Supabase and create a new project.
+2. Go to Project Settings > Database > Connection string.
+3. Choose the pooled connection string if Supabase offers it.
+4. Copy the URI and replace `[YOUR-PASSWORD]` with the database password you created.
+5. Paste that value into Render as `DATABASE_URL`.
+6. Redeploy the Render service.
+
+The app will automatically create one table called `app_state` and store the current Duitok  AI app data there. If `DATABASE_URL` is empty, it falls back to local `data/db.json` for development.
+
+## Step 5: Connect CHIP
 
 In CHIP dashboard:
 
@@ -67,7 +79,7 @@ The app creates the callback URL automatically:
 https://your-domain.com/api/payments/chip/callback
 ```
 
-## Step 5: Test Payment
+## Step 6: Test Payment
 
 1. Open your deployed Duitok  AI site.
 2. Sign in.
@@ -78,10 +90,12 @@ https://your-domain.com/api/payments/chip/callback
 
 ## Later, Not Now
 
-Move JSON storage to Postgres before real customer volume:
+When traffic grows, split the single JSONB app state into normalized Postgres tables:
 
-```env
-DATABASE_URL=postgres://...
-```
+- `users`
+- `projects`
+- `payments`
+- `usage_events`
+- `support_tickets`
 
 Only split frontend to Vercel after the Render version is working.

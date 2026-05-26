@@ -5,14 +5,24 @@ import { createReadStream } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import express from "express";
+import pg from "pg";
 import { createServer as createViteServer } from "vite";
 
+const { Pool } = pg;
 const root = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = process.env.DATA_DIR || path.join(root, "data");
 const dbPath = path.join(dataDir, "db.json");
 const distDir = path.join(root, "dist");
 const port = Number(process.env.PORT || 4173);
 const serveStatic = process.env.SERVE_STATIC !== "false";
+const databaseUrl = process.env.DATABASE_URL || process.env.SUPABASE_DB_URL || "";
+const postgresStateId = process.env.POSTGRES_STATE_ID || "default";
+const postgresPool = databaseUrl
+  ? new Pool({
+      connectionString: databaseUrl,
+      ssl: process.env.POSTGRES_SSL === "false" ? false : { rejectUnauthorized: false }
+    })
+  : null;
 const allowedOrigins = (process.env.CORS_ORIGINS || process.env.PUBLIC_APP_URL || "")
   .split(",")
   .map((origin) => origin.trim().replace(/\/$/, ""))
@@ -108,14 +118,53 @@ const seed = {
   supportTickets: []
 };
 
+function normalizeDb(db) {
+  db.users ||= structuredClone(seed.users);
+  db.liveCount ||= seed.liveCount;
+  db.projects ||= structuredClone(seed.projects);
+  db.attachments ||= [];
+  db.billing ||= structuredClone(seed.billing);
+  db.payments ||= [];
+  db.affiliate ||= structuredClone(seed.affiliate);
+  db.usage ||= structuredClone(seed.usage);
+  db.schedule ||= structuredClone(seed.schedule);
+  db.supportTickets ||= [];
+  return db;
+}
+
+let postgresReady;
+
+async function ensurePostgresSchema() {
+  if (!postgresPool) return;
+  postgresReady ||= postgresPool.query(`
+    create table if not exists app_state (
+      id text primary key,
+      data jsonb not null,
+      updated_at timestamptz not null default now()
+    )
+  `);
+  await postgresReady;
+}
+
 async function ensureDb() {
+  if (postgresPool) {
+    await ensurePostgresSchema();
+    const result = await postgresPool.query("select data from app_state where id = $1", [postgresStateId]);
+    if (result.rows[0]?.data) {
+      const rawDb = result.rows[0].data;
+      const shouldBackfill = !rawDb.users || !rawDb.projects || !rawDb.billing || !rawDb.usage || !rawDb.schedule;
+      const db = normalizeDb(rawDb);
+      if (shouldBackfill) await saveDb(db);
+      return db;
+    }
+    const db = structuredClone(seed);
+    await saveDb(db);
+    return db;
+  }
+
   await mkdir(dataDir, { recursive: true });
   try {
-    const db = JSON.parse(await readFile(dbPath, "utf8"));
-    db.users ||= structuredClone(seed.users);
-    db.payments ||= [];
-    db.supportTickets ||= [];
-    return db;
+    return normalizeDb(JSON.parse(await readFile(dbPath, "utf8")));
   } catch {
     await writeFile(dbPath, JSON.stringify(seed, null, 2));
     return structuredClone(seed);
@@ -123,6 +172,18 @@ async function ensureDb() {
 }
 
 async function saveDb(db) {
+  normalizeDb(db);
+  if (postgresPool) {
+    await ensurePostgresSchema();
+    await postgresPool.query(
+      `insert into app_state (id, data, updated_at)
+       values ($1, $2::jsonb, now())
+       on conflict (id) do update set data = excluded.data, updated_at = now()`,
+      [postgresStateId, JSON.stringify(db)]
+    );
+    return publicState(db);
+  }
+
   await writeFile(dbPath, JSON.stringify(db, null, 2));
   return publicState(db);
 }
