@@ -2000,6 +2000,10 @@ button:disabled [data-lucide="loader-circle"] {
 }
 
 @media (max-width: 1500px) {
+  .dashboard-stat-grid {
+    grid-template-columns: repeat(auto-fit, minmax(136px, 1fr));
+  }
+
   .dashboard-main-grid,
   .date-filter-card {
     grid-template-columns: 1fr;
@@ -2857,5 +2861,258 @@ label {
 
   .hero-scene {
     height: 180px;
+  }
+}
+
+/* Studio density pass: closer to Peninglab's production-console scale. */
+.studio-shell {
+  grid-template-columns: 320px minmax(0, 1fr);
+}
+
+.sidebar {
+  padding: 20px 12px;
+}
+
+.sidebar .brand-lockup {
+  padding: 4px 8px 20px;
+}
+
+.sidebar .brand-logo {
+  width: 154px;
+  height: 48px;
+}
+
+.brand-lockup strong {
+  font-size: 13px;
+}
+
+.side-section {
+  padding: 8px 10px 10px;
+  font-size: 10px;
+}
+
+.side-section.account {
+  margin-top: 12px;
+  padding-top: 18px;
+}
+
+.side-primary,
+.new-project,
+.side-link,
+.project-button {
+  min-height: 44px;
+  margin: 5px 0;
+  padding: 9px 12px;
+  font-size: 15px;
+}
+
+.side-primary,
+.new-project,
+.project-button {
+  min-height: 52px;
+}
+
+.project-button svg {
+  width: 32px !important;
+  height: 32px !important;
+  padding: 5px;
+}
+
+.search-box {
+  margin: 12px 0 20px;
+}
+
+.search-box input {
+  min-height: 42px;
+  padding-left: 42px;
+}
+
+.search-box svg {
+  left: 15px;
+  bottom: 13px;
+}
+
+.workspace {
+  padding: 28px 36px 56px;
+}
+
+.project-head {
+  margin-bottom: 22px;
+}
+
+.dashboard-head h1,
+.project-head h1 {
+  font-size: clamp(34px, 4vw, 50px);
+}
+
+.subtitle {
+  font-size: 15px;
+}
+
+.head-actions {
+  gap: 10px;
+}
+
+.gold-button,
+.dark-button,
+.sop-button,
+.side-primary,
+.new-project,
+.side-link,
+.project-button,
+.step-tabs button,
+.icon-only,
+.text-button,
+.topup-grid button,
+.schedule-list button,
+.chat-panel button,
+.table button,
+.result-grid button {
+  min-height: 38px;
+  padding: 9px 12px;
+}
+
+.sop-button {
+  min-width: 150px;
+  min-height: 48px;
+  font-size: 15px;
+}
+
+.dashboard-stat-grid {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.dashboard-stat-grid article {
+  min-height: 118px;
+  gap: 8px;
+  padding: 16px;
+}
+
+.dashboard-stat-grid article svg {
+  right: 14px;
+  top: 14px;
+  width: 34px !important;
+  height: 34px !important;
+  padding: 7px;
+}
+
+.dashboard-stat-grid span,
+.project-status span,
+.cost-list span,
+.activity-list span {
+  font-size: 10px;
+}
+
+.dashboard-stat-grid b {
+  margin-top: 16px;
+  font-size: clamp(26px, 2.4vw, 34px);
+  white-space: nowrap;
+}
+
+.dashboard-stat-grid article:last-child b {
+  font-size: clamp(22px, 1.8vw, 30px);
+}
+
+.dashboard-stat-grid small,
+.dashboard-stat-grid em {
+  font-size: 12px;
+}
+
+.date-filter-card {
+  grid-template-columns: minmax(190px, 0.8fr) repeat(2, minmax(180px, 1fr)) minmax(140px, 0.55fr) auto;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 18px;
+}
+
+.date-filter-card h2,
+.card-title h2 {
+  font-size: 17px;
+}
+
+.dashboard-main-grid {
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.chart-card,
+.next-action-card,
+.cost-card,
+.activity-card {
+  padding: 20px;
+}
+
+.card-title {
+  margin-bottom: 14px;
+}
+
+.legend-row {
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.legend-row span {
+  padding: 6px 9px;
+  font-size: 10px;
+}
+
+.bar-chart {
+  height: 250px;
+  gap: 6px;
+  padding: 14px 10px 8px;
+}
+
+.bar-day small {
+  font-size: 10px;
+}
+
+.next-action-card h2 {
+  font-size: clamp(26px, 2.8vw, 36px);
+}
+
+.next-action-card p:not(.eyebrow) {
+  font-size: 15px;
+}
+
+.next-actions {
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.cost-list,
+.activity-list {
+  gap: 8px;
+}
+
+.cost-list div,
+.activity-list div {
+  padding: 11px 0;
+}
+
+.live-tab {
+  min-height: 118px;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.chat-bubble {
+  width: 48px;
+  height: 48px;
+  right: 22px;
+  bottom: 18px;
+  border-width: 4px;
+  opacity: 0.92;
+}
+
+.chat-bubble svg {
+  width: 22px !important;
+  height: 22px !important;
+}
+
+@media (min-width: 1501px) {
+  .dashboard-main-grid {
+    grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
   }
 }
