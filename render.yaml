@@ -23,6 +23,24 @@ services:
         sync: false
       - key: CHIP_PUBLIC_KEY
         sync: false
+      - key: APIMART_API_KEY
+        sync: false
+      - key: APIMART_BASE_URL
+        value: https://api.apimart.ai
+      - key: APIMART_CHAT_PATH
+        value: /v1/chat/completions
+      - key: APIMART_IMAGE_PATH
+        value: /v1/images/generations
+      - key: APIMART_TASK_PATH_PREFIX
+        value: /v1/tasks
+      - key: APIMART_TEXT_MODEL
+        value: gpt-5-mini
+      - key: APIMART_IMAGE_MODEL
+        value: gpt-image-2
+      - key: APIMART_IMAGE_SIZE
+        value: 1:1
+      - key: APIMART_IMAGE_RESOLUTION
+        value: 1K
     disk:
       name: duitok-data
       mountPath: /var/data

@@ -50,6 +50,15 @@ POSTGRES_SSL=true
 CHIP_API_TOKEN=your_chip_api_token
 CHIP_BRAND_ID=your_chip_brand_id
 CHIP_PUBLIC_KEY=your_chip_public_key
+APIMART_API_KEY=your_apimart_api_key
+APIMART_BASE_URL=https://api.apimart.ai
+APIMART_CHAT_PATH=/v1/chat/completions
+APIMART_IMAGE_PATH=/v1/images/generations
+APIMART_TASK_PATH_PREFIX=/v1/tasks
+APIMART_TEXT_MODEL=gpt-5-mini
+APIMART_IMAGE_MODEL=gpt-image-2
+APIMART_IMAGE_SIZE=1:1
+APIMART_IMAGE_RESOLUTION=1K
 ```
 
 After Render deploys, copy its HTTPS domain and paste it into `PUBLIC_APP_URL`.
@@ -87,6 +96,18 @@ https://your-domain.com/api/payments/chip/callback
 4. Click RM10 first.
 5. You should be redirected to CHIP.
 6. After successful payment, CHIP callback updates credits.
+
+## Step 7: Connect APIMart Image Generation
+
+In APIMart:
+
+1. Create an API key.
+2. Paste it into Render as `APIMART_API_KEY`.
+3. Keep the key only in Render/local `.env`; never expose it in frontend code.
+4. Redeploy the Render service.
+5. Open Studio > Image Generator, choose `GPT Image 2` or `Nano Banana Pro`, write a prompt, then click Generate Image.
+
+The app submits image tasks through `/v1/images/generations`, polls `/v1/tasks/{task_id}`, then saves the returned image URL into the project result.
 
 ## Later, Not Now
 

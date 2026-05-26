@@ -18,7 +18,7 @@ const serveStatic = process.env.SERVE_STATIC !== "false";
 const databaseUrl = process.env.DATABASE_URL || process.env.SUPABASE_DB_URL || "";
 const postgresStateId = process.env.POSTGRES_STATE_ID || "default";
 const apimartBaseUrl = (process.env.APIMART_BASE_URL || "https://api.apimart.ai").replace(/\/$/, "");
-const apimartChatPath = process.env.APIMART_CHAT_PATH || "/api/v1/chat/completions";
+const apimartChatPath = process.env.APIMART_CHAT_PATH || "/v1/chat/completions";
 const apimartImagePath = process.env.APIMART_IMAGE_PATH || "/v1/images/generations";
 const apimartTaskPathPrefix = process.env.APIMART_TASK_PATH_PREFIX || "/v1/tasks";
 const apimartTextModel = process.env.APIMART_TEXT_MODEL || "gpt-5-mini";
@@ -333,6 +333,8 @@ async function generateTextWithApimart(project, action, step) {
 
 function imageModelFromProject(project) {
   const modelMap = {
+    "GPT Image 2": "gpt-image-2",
+    "Nano Banana Pro": "gemini-3-pro-image-preview",
     "Banana Pro": "gemini-3-pro-image-preview",
     "Nano Banana": "gemini-2.5-flash-image-preview",
     Seedream: "seedream-4-0"
@@ -377,7 +379,7 @@ async function generateImageWithApimart(project) {
       prompt,
       n: 1,
       size: process.env.APIMART_IMAGE_SIZE || "1:1",
-      resolution: process.env.APIMART_IMAGE_RESOLUTION || "1k"
+      resolution: process.env.APIMART_IMAGE_RESOLUTION || "1K"
     })
   });
   const task = Array.isArray(data) ? data[0] : data;
