@@ -1,6 +1,6 @@
 import "dotenv/config";
 import crypto from "node:crypto";
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { readFile, writeFile, mkdir, readdir, stat } from "node:fs/promises";
 import { createReadStream } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -13,6 +13,7 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = process.env.DATA_DIR || path.join(root, "data");
 const dbPath = path.join(dataDir, "db.json");
 const distDir = path.join(root, "dist");
+const autoPostExtensionDir = path.join(root, "public", "duitok-autopost-extension");
 const port = Number(process.env.PORT || 4173);
 const serveStatic = process.env.SERVE_STATIC !== "false";
 const databaseUrl = process.env.DATABASE_URL || process.env.SUPABASE_DB_URL || "";
@@ -26,6 +27,10 @@ const apimartImageModel = process.env.APIMART_IMAGE_MODEL || "gpt-image-2";
 const deepseekBaseUrl = (process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com").replace(/\/$/, "");
 const deepseekChatPath = process.env.DEEPSEEK_CHAT_PATH || "/chat/completions";
 const deepseekModel = process.env.DEEPSEEK_MODEL || "deepseek-v4-flash";
+const tiktokAuthBaseUrl = (process.env.TIKTOK_AUTH_BASE_URL || "https://www.tiktok.com").replace(/\/$/, "");
+const tiktokOpenApiBaseUrl = (process.env.TIKTOK_OPEN_API_BASE_URL || "https://open.tiktokapis.com").replace(/\/$/, "");
+const tiktokRedirectPath = process.env.TIKTOK_REDIRECT_PATH || "/api/tiktok/oauth/callback";
+const tiktokScopes = process.env.TIKTOK_SCOPES || "user.info.basic,video.publish";
 const wuyinBaseUrl = (process.env.WUYIN_BASE_URL || "https://api.wuyinkeji.com").replace(/\/$/, "");
 const wuyinImagePaths = {
   "Nano Banana Pro": "/api/async/image_nanoBanana_pro",
@@ -49,7 +54,7 @@ const allowedOrigins = (process.env.CORS_ORIGINS || process.env.PUBLIC_APP_URL |
 const app = express();
 app.use((req, res, next) => {
   const origin = req.get("origin")?.replace(/\/$/, "");
-  if (origin && (allowedOrigins.length === 0 || allowedOrigins.includes(origin))) {
+  if (origin && (allowedOrigins.length === 0 || allowedOrigins.includes(origin) || origin.startsWith("chrome-extension://"))) {
     res.setHeader("Access-Control-Allow-Origin", origin);
     res.setHeader("Vary", "Origin");
   }
@@ -65,10 +70,11 @@ app.use(express.json({
 }));
 
 app.get("/api/health", (_req, res) => {
+  const hasConfiguredKey = (value) => Boolean(value && !value.includes("replace_with"));
   const aiProviders = [
-    process.env.APIMART_API_KEY ? "apimart" : null,
-    process.env.DEEPSEEK_API_KEY ? "deepseek" : null,
-    process.env.WUYIN_API_KEY ? "wuyin" : null
+    hasConfiguredKey(process.env.APIMART_API_KEY) ? "apimart" : null,
+    hasConfiguredKey(process.env.DEEPSEEK_API_KEY) ? "deepseek" : null,
+    hasConfiguredKey(process.env.WUYIN_API_KEY) ? "wuyin" : null
   ].filter(Boolean);
   res.json({
     ok: true,
@@ -140,10 +146,45 @@ const seed = {
     usage("Viral decode", 3)
   ],
   schedule: [
-    { id: "s_1", title: "Serum soft sell", platform: "TikTok", time: "Tue 20:30", status: "Ready" },
-    { id: "s_2", title: "Lunchbox proof video", platform: "TikTok", time: "Wed 12:15", status: "Draft" },
-    { id: "s_3", title: "Wireless mic review", platform: "TikTok", time: "Fri 21:00", status: "Ready" }
+    {
+      id: "s_1",
+      title: "Serum soft sell",
+      platform: "TikTok",
+      time: "Tue 20:30",
+      status: "Ready",
+      caption: "POV kulit nampak kusam walaupun dah pakai skincare. Ini cara soft sell serum tanpa overclaim.",
+      hashtags: "#tiktokshopmalaysia #skincaremalaysia #duitok",
+      mediaUrl: "",
+      productUrl: ""
+    },
+    {
+      id: "s_2",
+      title: "Lunchbox proof video",
+      platform: "TikTok",
+      time: "Wed 12:15",
+      status: "Draft",
+      caption: "Test lunchbox leakproof sebelum bawa pergi kerja. Simple proof, terus nampak value.",
+      hashtags: "#tiktokshop #malaysiaseller #lunchbox",
+      mediaUrl: "",
+      productUrl: ""
+    },
+    {
+      id: "s_3",
+      title: "Wireless mic review",
+      platform: "TikTok",
+      time: "Fri 21:00",
+      status: "Ready",
+      caption: "Before vs after audio test untuk seller yang selalu shoot content sendiri.",
+      hashtags: "#contentcreator #wirelessmic #duitok",
+      mediaUrl: "",
+      productUrl: ""
+    }
   ],
+  tiktok: {
+    connections: [],
+    oauthStates: [],
+    publishes: []
+  },
   supportTickets: []
 };
 
@@ -157,6 +198,17 @@ function normalizeDb(db) {
   db.affiliate ||= structuredClone(seed.affiliate);
   db.usage ||= structuredClone(seed.usage);
   db.schedule ||= structuredClone(seed.schedule);
+  db.schedule = db.schedule.map((item, index) => ({
+    caption: item.caption || `${item.title || `Post ${index + 1}`}\n\nGenerated with Duitok AI.`,
+    hashtags: item.hashtags || "#duitok #tiktokshopmalaysia",
+    mediaUrl: item.mediaUrl || "",
+    productUrl: item.productUrl || "",
+    ...item
+  }));
+  db.tiktok ||= structuredClone(seed.tiktok);
+  db.tiktok.connections ||= [];
+  db.tiktok.oauthStates ||= [];
+  db.tiktok.publishes ||= [];
   db.supportTickets ||= [];
   return db;
 }
@@ -230,7 +282,23 @@ function mutateDb(handler) {
 
 function publicState(db) {
   const { users: _users, ...rest } = db;
-  return rest;
+  return {
+    ...rest,
+    tiktok: {
+      connections: (db.tiktok?.connections || []).map((item) => ({
+        id: item.id,
+        openId: item.openId,
+        unionId: item.unionId,
+        displayName: item.displayName,
+        avatarUrl: item.avatarUrl,
+        scopes: item.scopes,
+        expiresAt: item.expiresAt,
+        connectedAt: item.connectedAt,
+        creatorInfo: item.creatorInfo || null
+      })),
+      publishes: db.tiktok?.publishes || []
+    }
+  };
 }
 
 function setDeep(target, dotted, value) {
@@ -293,6 +361,17 @@ function requireDeepSeekConfig() {
   return apiKey;
 }
 
+function requireTikTokConfig() {
+  const clientKey = process.env.TIKTOK_CLIENT_KEY;
+  const clientSecret = process.env.TIKTOK_CLIENT_SECRET;
+  if (!clientKey || !clientSecret || clientKey.includes("replace_with") || clientSecret.includes("replace_with")) {
+    const error = new Error("TikTok belum configure. Isi TIKTOK_CLIENT_KEY dan TIKTOK_CLIENT_SECRET dalam Environment Variables dulu.");
+    error.status = 503;
+    throw error;
+  }
+  return { clientKey, clientSecret };
+}
+
 async function apimartRequest(pathname, options = {}) {
   const apiKey = requireApimartConfig();
   const response = await fetch(`${apimartBaseUrl}${pathname}`, {
@@ -328,6 +407,27 @@ async function deepseekRequest(body) {
   if (!response.ok) {
     const error = new Error(payload.error?.message || payload.message || `DeepSeek request failed (${response.status})`);
     error.status = response.status || 502;
+    throw error;
+  }
+  return payload;
+}
+
+async function tiktokRequest(pathname, { method = "GET", body, accessToken, headers = {} } = {}) {
+  const response = await fetch(`${tiktokOpenApiBaseUrl}${pathname}`, {
+    method,
+    headers: {
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      ...(body instanceof URLSearchParams ? { "Content-Type": "application/x-www-form-urlencoded" } : { "Content-Type": "application/json; charset=UTF-8" }),
+      ...headers
+    },
+    body: body instanceof URLSearchParams ? body : body ? JSON.stringify(body) : undefined,
+    signal: AbortSignal.timeout(Number(process.env.TIKTOK_TIMEOUT_MS || 120000))
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || (payload.error && payload.error.code && payload.error.code !== "ok")) {
+    const error = new Error(payload.error?.message || payload.message || `TikTok request failed (${response.status})`);
+    error.status = response.status || 502;
+    error.payload = payload;
     throw error;
   }
   return payload;
@@ -680,6 +780,175 @@ function compactWorkspaceState(db) {
   };
 }
 
+function autoPostJobs(db) {
+  return db.schedule.map((item) => ({
+    id: item.id,
+    title: item.title,
+    platform: item.platform || "TikTok",
+    time: item.time,
+    status: item.status,
+    caption: item.caption || "",
+    hashtags: item.hashtags || "",
+    mediaUrl: item.mediaUrl || "",
+    productUrl: item.productUrl || "",
+    updatedAt: item.updatedAt || item.createdAt || null,
+    postedAt: item.postedAt || null
+  }));
+}
+
+function tiktokRedirectUri() {
+  return publicAppUrl(tiktokRedirectPath);
+}
+
+function latestTikTokConnection(db) {
+  return db.tiktok?.connections?.[0] || null;
+}
+
+function findTikTokConnection(db, id) {
+  const connection = id
+    ? db.tiktok.connections.find((item) => item.id === id)
+    : latestTikTokConnection(db);
+  if (!connection) {
+    const error = new Error("TikTok account not connected yet.");
+    error.status = 400;
+    throw error;
+  }
+  return connection;
+}
+
+function tiktokPostTitle(job) {
+  return [job.caption, job.hashtags].filter(Boolean).join("\n\n").trim().slice(0, 2200);
+}
+
+async function refreshTikTokConnection(connection) {
+  const { clientKey, clientSecret } = requireTikTokConfig();
+  if (!connection.refreshToken) return connection;
+  const expiresAt = connection.expiresAt ? new Date(connection.expiresAt).getTime() : 0;
+  if (expiresAt && expiresAt - Date.now() > 5 * 60 * 1000) return connection;
+
+  const body = new URLSearchParams({
+    client_key: clientKey,
+    client_secret: clientSecret,
+    grant_type: "refresh_token",
+    refresh_token: connection.refreshToken
+  });
+  const payload = await tiktokRequest("/v2/oauth/token/", { method: "POST", body });
+  const data = payload.data || payload;
+  connection.accessToken = data.access_token || connection.accessToken;
+  connection.refreshToken = data.refresh_token || connection.refreshToken;
+  connection.expiresAt = data.expires_in ? new Date(Date.now() + data.expires_in * 1000).toISOString() : connection.expiresAt;
+  connection.refreshExpiresAt = data.refresh_expires_in ? new Date(Date.now() + data.refresh_expires_in * 1000).toISOString() : connection.refreshExpiresAt;
+  connection.scopes = data.scope || connection.scopes;
+  connection.updatedAt = new Date().toISOString();
+  return connection;
+}
+
+async function queryTikTokCreatorInfo(connection) {
+  const payload = await tiktokRequest("/v2/post/publish/creator_info/query/", {
+    method: "POST",
+    accessToken: connection.accessToken,
+    body: {}
+  });
+  connection.creatorInfo = payload.data || null;
+  connection.creatorInfoFetchedAt = new Date().toISOString();
+  return connection.creatorInfo;
+}
+
+async function listFilesRecursive(dir, base = dir) {
+  const entries = await readdir(dir, { withFileTypes: true });
+  const files = [];
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...await listFilesRecursive(fullPath, base));
+    } else if (entry.isFile()) {
+      files.push({
+        path: fullPath,
+        name: path.relative(base, fullPath).replaceAll(path.sep, "/")
+      });
+    }
+  }
+  return files;
+}
+
+function crc32(buffer) {
+  let crc = -1;
+  for (const byte of buffer) {
+    crc ^= byte;
+    for (let bit = 0; bit < 8; bit += 1) {
+      crc = (crc >>> 1) ^ (0xedb88320 & -(crc & 1));
+    }
+  }
+  return (crc ^ -1) >>> 0;
+}
+
+function dosDateTime(date = new Date()) {
+  const dosTime = (date.getHours() << 11) | (date.getMinutes() << 5) | Math.floor(date.getSeconds() / 2);
+  const dosDate = ((date.getFullYear() - 1980) << 9) | ((date.getMonth() + 1) << 5) | date.getDate();
+  return { dosTime, dosDate };
+}
+
+async function zipDirectory(dir) {
+  await stat(dir);
+  const files = await listFilesRecursive(dir);
+  const localParts = [];
+  const centralParts = [];
+  let offset = 0;
+  const { dosTime, dosDate } = dosDateTime();
+
+  for (const file of files) {
+    const data = await readFile(file.path);
+    const name = Buffer.from(file.name);
+    const checksum = crc32(data);
+    const localHeader = Buffer.alloc(30);
+    localHeader.writeUInt32LE(0x04034b50, 0);
+    localHeader.writeUInt16LE(20, 4);
+    localHeader.writeUInt16LE(0, 6);
+    localHeader.writeUInt16LE(0, 8);
+    localHeader.writeUInt16LE(dosTime, 10);
+    localHeader.writeUInt16LE(dosDate, 12);
+    localHeader.writeUInt32LE(checksum, 14);
+    localHeader.writeUInt32LE(data.length, 18);
+    localHeader.writeUInt32LE(data.length, 22);
+    localHeader.writeUInt16LE(name.length, 26);
+    localHeader.writeUInt16LE(0, 28);
+    localParts.push(localHeader, name, data);
+
+    const centralHeader = Buffer.alloc(46);
+    centralHeader.writeUInt32LE(0x02014b50, 0);
+    centralHeader.writeUInt16LE(20, 4);
+    centralHeader.writeUInt16LE(20, 6);
+    centralHeader.writeUInt16LE(0, 8);
+    centralHeader.writeUInt16LE(0, 10);
+    centralHeader.writeUInt16LE(dosTime, 12);
+    centralHeader.writeUInt16LE(dosDate, 14);
+    centralHeader.writeUInt32LE(checksum, 16);
+    centralHeader.writeUInt32LE(data.length, 20);
+    centralHeader.writeUInt32LE(data.length, 24);
+    centralHeader.writeUInt16LE(name.length, 28);
+    centralHeader.writeUInt16LE(0, 30);
+    centralHeader.writeUInt16LE(0, 32);
+    centralHeader.writeUInt16LE(0, 34);
+    centralHeader.writeUInt16LE(0, 36);
+    centralHeader.writeUInt32LE(0, 38);
+    centralHeader.writeUInt32LE(offset, 42);
+    centralParts.push(centralHeader, name);
+    offset += localHeader.length + name.length + data.length;
+  }
+
+  const centralSize = centralParts.reduce((sum, part) => sum + part.length, 0);
+  const end = Buffer.alloc(22);
+  end.writeUInt32LE(0x06054b50, 0);
+  end.writeUInt16LE(0, 4);
+  end.writeUInt16LE(0, 6);
+  end.writeUInt16LE(files.length, 8);
+  end.writeUInt16LE(files.length, 10);
+  end.writeUInt32LE(centralSize, 12);
+  end.writeUInt32LE(offset, 16);
+  end.writeUInt16LE(0, 20);
+  return Buffer.concat([...localParts, ...centralParts, end]);
+}
+
 const agentTools = [
   {
     type: "function",
@@ -957,6 +1226,97 @@ app.post("/api/auth/login", async (req, res) => {
   res.json(payload);
 });
 
+app.get("/api/tiktok/connect", async (_req, res, next) => {
+  try {
+    const { clientKey } = requireTikTokConfig();
+    const state = crypto.randomBytes(18).toString("hex");
+    await mutateDb(async (db) => {
+      db.tiktok.oauthStates.unshift({ state, createdAt: new Date().toISOString() });
+      db.tiktok.oauthStates = db.tiktok.oauthStates.slice(0, 20);
+      return saveDb(db);
+    });
+    const url = new URL(`${tiktokAuthBaseUrl}/v2/auth/authorize/`);
+    url.searchParams.set("client_key", clientKey);
+    url.searchParams.set("scope", tiktokScopes);
+    url.searchParams.set("response_type", "code");
+    url.searchParams.set("redirect_uri", tiktokRedirectUri());
+    url.searchParams.set("state", state);
+    res.redirect(url.toString());
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/tiktok/oauth/callback", async (req, res, next) => {
+  try {
+    if (req.query.error) {
+      return res.redirect(publicAppUrl(`/studio?tiktok=failed&reason=${encodeURIComponent(req.query.error_description || req.query.error)}`));
+    }
+
+    const code = String(req.query.code || "");
+    const state = String(req.query.state || "");
+    if (!code || !state) return res.status(400).send("Missing TikTok OAuth code or state.");
+
+    const db = await ensureDb();
+    const knownState = db.tiktok.oauthStates.find((item) => item.state === state);
+    if (!knownState) return res.status(400).send("Invalid TikTok OAuth state.");
+
+    const { clientKey, clientSecret } = requireTikTokConfig();
+    const body = new URLSearchParams({
+      client_key: clientKey,
+      client_secret: clientSecret,
+      code,
+      grant_type: "authorization_code",
+      redirect_uri: tiktokRedirectUri()
+    });
+    const payload = await tiktokRequest("/v2/oauth/token/", { method: "POST", body });
+    const data = payload.data || payload;
+
+    await mutateDb(async (currentDb) => {
+      currentDb.tiktok.oauthStates = currentDb.tiktok.oauthStates.filter((item) => item.state !== state);
+      const existing = currentDb.tiktok.connections.find((item) => item.openId === data.open_id);
+      const connection = existing || { id: crypto.randomUUID(), connectedAt: new Date().toISOString() };
+      Object.assign(connection, {
+        openId: data.open_id,
+        unionId: data.union_id,
+        accessToken: data.access_token,
+        refreshToken: data.refresh_token,
+        scopes: data.scope,
+        expiresAt: data.expires_in ? new Date(Date.now() + data.expires_in * 1000).toISOString() : null,
+        refreshExpiresAt: data.refresh_expires_in ? new Date(Date.now() + data.refresh_expires_in * 1000).toISOString() : null,
+        updatedAt: new Date().toISOString()
+      });
+      if (!existing) currentDb.tiktok.connections.unshift(connection);
+      currentDb.usage.unshift(usage("TikTok account connected", 0));
+      return saveDb(currentDb);
+    });
+
+    res.redirect(publicAppUrl("/studio?tiktok=connected"));
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/tiktok/status", async (_req, res) => {
+  const db = await ensureDb();
+  res.json(publicState(db).tiktok);
+});
+
+app.post("/api/tiktok/creator-info", async (req, res, next) => {
+  try {
+    const result = await mutateDb(async (db) => {
+      const connection = findTikTokConnection(db, req.body.connectionId);
+      await refreshTikTokConnection(connection);
+      const creatorInfo = await queryTikTokCreatorInfo(connection);
+      await saveDb(db);
+      return { creatorInfo, tiktok: publicState(db).tiktok };
+    });
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.post("/api/projects", async (req, res) => {
   res.json(await mutateDb(async (db) => {
     db.projects.push(blankProject(crypto.randomUUID(), req.body.name));
@@ -1130,6 +1490,125 @@ app.patch("/api/schedule/:id", async (req, res) => {
   }));
 });
 
+app.get("/api/autopost/jobs", async (_req, res) => {
+  res.json({ jobs: autoPostJobs(await ensureDb()) });
+});
+
+app.patch("/api/autopost/jobs/:id", async (req, res) => {
+  res.json(await mutateDb(async (db) => {
+    const item = db.schedule.find((entry) => entry.id === req.params.id);
+    if (!item) {
+      const error = new Error("Auto post job not found");
+      error.status = 404;
+      throw error;
+    }
+    if (req.body.status) item.status = req.body.status;
+    if (req.body.caption !== undefined) item.caption = String(req.body.caption);
+    if (req.body.hashtags !== undefined) item.hashtags = String(req.body.hashtags);
+    if (req.body.mediaUrl !== undefined) item.mediaUrl = String(req.body.mediaUrl);
+    if (req.body.productUrl !== undefined) item.productUrl = String(req.body.productUrl);
+    item.updatedAt = new Date().toISOString();
+    if (item.status === "Posted") item.postedAt = item.updatedAt;
+    db.usage.unshift(usage(`Auto Post ${item.status}: ${item.title}`, 0));
+    return saveDb(db);
+  }));
+});
+
+app.post("/api/tiktok/publish/:id", async (req, res, next) => {
+  try {
+    const db = await ensureDb();
+    const job = db.schedule.find((entry) => entry.id === req.params.id);
+    if (!job) return res.status(404).json({ error: "Auto post job not found" });
+    if (!job.mediaUrl && !req.body.mediaUrl) {
+      return res.status(400).json({ error: "TikTok Direct Post needs a public mediaUrl for PULL_FROM_URL. Upload/select a video first." });
+    }
+
+    const result = await mutateDb(async (currentDb) => {
+      const currentJob = currentDb.schedule.find((entry) => entry.id === req.params.id);
+      const connection = findTikTokConnection(currentDb, req.body.connectionId);
+      await refreshTikTokConnection(connection);
+      if (!connection.creatorInfo) await queryTikTokCreatorInfo(connection);
+
+      const mediaUrl = req.body.mediaUrl || currentJob.mediaUrl;
+      const publishBody = {
+        post_info: {
+          title: tiktokPostTitle(currentJob),
+          privacy_level: req.body.privacyLevel || "SELF_ONLY",
+          disable_duet: Boolean(req.body.disableDuet),
+          disable_comment: Boolean(req.body.disableComment),
+          disable_stitch: Boolean(req.body.disableStitch),
+          video_cover_timestamp_ms: Number(req.body.videoCoverTimestampMs || 1000),
+          brand_content_toggle: Boolean(req.body.brandContent),
+          brand_organic_toggle: Boolean(req.body.brandOrganic),
+          is_aigc: req.body.isAigc !== undefined ? Boolean(req.body.isAigc) : true
+        },
+        source_info: {
+          source: "PULL_FROM_URL",
+          video_url: mediaUrl
+        }
+      };
+      const payload = await tiktokRequest("/v2/post/publish/video/init/", {
+        method: "POST",
+        accessToken: connection.accessToken,
+        body: publishBody
+      });
+      const publish = {
+        id: crypto.randomUUID(),
+        scheduleId: currentJob.id,
+        connectionId: connection.id,
+        publishId: payload.data?.publish_id,
+        status: "PROCESSING",
+        request: publishBody,
+        response: payload.data || payload,
+        createdAt: new Date().toISOString()
+      };
+      currentDb.tiktok.publishes.unshift(publish);
+      currentJob.status = "Processing";
+      currentJob.mediaUrl = mediaUrl;
+      currentJob.updatedAt = publish.createdAt;
+      currentDb.usage.unshift(usage(`TikTok publish started: ${currentJob.title}`, 0));
+      await saveDb(currentDb);
+      return { publish, db: publicState(currentDb) };
+    });
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/tiktok/publish/:publishId/status", async (req, res, next) => {
+  try {
+    const result = await mutateDb(async (db) => {
+      const publish = db.tiktok.publishes.find((item) => item.publishId === req.params.publishId || item.id === req.params.publishId);
+      if (!publish) {
+        const error = new Error("TikTok publish record not found");
+        error.status = 404;
+        throw error;
+      }
+      const connection = findTikTokConnection(db, publish.connectionId);
+      await refreshTikTokConnection(connection);
+      const payload = await tiktokRequest("/v2/post/publish/status/fetch/", {
+        method: "POST",
+        accessToken: connection.accessToken,
+        body: { publish_id: publish.publishId }
+      });
+      publish.status = payload.data?.status || publish.status;
+      publish.statusResponse = payload.data || payload;
+      publish.updatedAt = new Date().toISOString();
+      const job = db.schedule.find((item) => item.id === publish.scheduleId);
+      if (job && /PUBLISH_COMPLETE|SUCCESS|DONE|POSTED/i.test(String(publish.status))) {
+        job.status = "Posted";
+        job.postedAt = publish.updatedAt;
+      }
+      await saveDb(db);
+      return { publish, db: publicState(db) };
+    });
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.post("/api/support", async (req, res) => {
   res.json(await mutateDb(async (db) => {
     db.supportTickets.unshift({ id: crypto.randomUUID(), message: req.body.message, createdAt: new Date().toISOString() });
@@ -1160,6 +1639,18 @@ app.get("/api/export/invoice/:id", async (req, res) => {
 
 app.get("/api/export/sop", (_req, res) => {
   res.attachment("sop.txt").type("text/plain").send("Duitok  AI Image SOP\n1. Upload avatar.\n2. Upload product.\n3. Select model.\n4. Write prompt.\n5. Generate and export.");
+});
+
+app.get("/api/export/autopost-extension", async (_req, res, next) => {
+  try {
+    const zip = await zipDirectory(autoPostExtensionDir);
+    res
+      .attachment("duitok-autopost-extension.zip")
+      .type("application/zip")
+      .send(zip);
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.use((error, _req, res, _next) => {

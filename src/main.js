@@ -40,7 +40,11 @@ const state = {
   dateTo: "2026-05-26",
   live: false,
   chat: false,
+  agentInput: "",
+  agentBusy: false,
+  agentMessages: JSON.parse(localStorage.getItem("duitok-agent-messages") || "[]"),
   langOpen: false,
+  imagePromptGroup: "avatar",
   generating: false
 };
 
@@ -49,6 +53,61 @@ const languages = [
   ["zh", "中文"],
   ["en", "EN"]
 ];
+
+const imagePromptPresets = {
+  avatar: {
+    label: "Avatar",
+    icon: "user-round",
+    groups: [
+      ["Female", [
+        ["Kebaya 20s", "#ff2f6d", "A Malaysian woman in her 20s wearing a modern kebaya, friendly TikTok affiliate creator pose, holding the product naturally, clean home studio, soft daylight, realistic skin texture, vertical social commerce image."],
+        ["Casual 20s", "#ff2f6d", "A casual Malaysian female creator in her 20s, relaxed outfit, confident smile, unboxing the product on a desk, TikTok Shop affiliate vibe, bright clean background, realistic lifestyle product photography."],
+        ["Makcik", "#a12ab8", "A warm Malay makcik creator, trustworthy facial expression, demonstrating the product like a real recommendation to family, modest outfit, cozy Malaysian kitchen background, realistic UGC product image."],
+        ["Kitchen", "#a12ab8", "A female home creator in a Malaysian kitchen, using the product during a daily routine, natural hand pose, practical household UGC style, bright tiles, realistic lighting, product clearly visible."],
+        ["Nenek", "#f58b00", "A kind Malaysian grandmother creator, gentle smile, holding the product close to camera, warm home setting, trustworthy family recommendation mood, realistic TikTok affiliate product image."],
+        ["Nenek Garden", "#f58b00", "A Malaysian grandmother in a small home garden, peaceful morning light, presenting the product naturally, plants and outdoor tiles in the background, sincere TikTok Shop review style."]
+      ]],
+      ["Male", [
+        ["Baju Melayu 20s", "#1e90ff", "A young Malay male creator in baju melayu, clean and confident TikTok affiliate pose, holding the product at chest level, festive Malaysian home setting, realistic social commerce image."],
+        ["Casual 20s", "#1e90ff", "A casual Malaysian male creator in his 20s, simple streetwear, energetic expression, showing the product to camera, bedroom studio setup, modern TikTok review image."],
+        ["Abang Pro", "#009b8f", "A professional abang creator, neat casual shirt, confident product demonstration, clean office desk, credible Malaysian affiliate seller look, realistic lighting and sharp product focus."],
+        ["Pakcik", "#825846", "A friendly Malaysian pakcik creator, trustworthy smile, explaining the product with one hand gesture, simple home background, authentic local review style, realistic product photography."]
+      ]]
+    ]
+  },
+  product: {
+    label: "Product",
+    icon: "package",
+    groups: [
+      ["Scene", [
+        ["Clean Studio", "#ff2f6d", "A clean studio product hero image for TikTok Shop, product centered, soft shadow, pastel background, crisp packaging details, high conversion affiliate thumbnail style."],
+        ["Lifestyle Desk", "#a12ab8", "The product placed on a Malaysian creator desk with phone, notes, and packing boxes, realistic daily use context, bright natural light, TikTok affiliate lifestyle image."],
+        ["Before After", "#f58b00", "A split-scene product image showing before and after benefit, clear visual contrast, product in the center, clean labels, social commerce ad style, realistic and not over-edited."]
+      ]],
+      ["Commerce", [
+        ["TikTok Thumbnail", "#1e90ff", "A scroll-stopping TikTok Shop thumbnail, product large in foreground, creator hand pointing at the product, clean background, strong contrast, readable space for offer text."],
+        ["Bundle Shot", "#009b8f", "A product bundle arrangement with multiple units, clean ecommerce composition, soft gradient background, premium but affordable Malaysian TikTok Shop style."],
+        ["Unboxing", "#825846", "A realistic unboxing scene, open parcel box, product packaging visible, creator hands in frame, casual home table, authentic affiliate review mood."]
+      ]]
+    ]
+  },
+  sales: {
+    label: "Sales",
+    icon: "badge-dollar-sign",
+    groups: [
+      ["Hook", [
+        ["Problem Hook", "#ff2f6d", "A TikTok affiliate sales image showing the customer problem clearly, product as the practical solution, expressive creator reaction, Malaysian home context, high curiosity visual hook."],
+        ["Proof Shot", "#a12ab8", "A proof-focused product image with creator showing result or benefit, confident expression, product visible, clean space for testimonial text, realistic UGC sales style."],
+        ["Offer Push", "#f58b00", "A promotional TikTok Shop image with product, creator, and clear sale energy, bright background, room for price badge and voucher text, urgent but trustworthy affiliate style."]
+      ]],
+      ["Audience", [
+        ["For Moms", "#1e90ff", "A product image targeted to busy Malaysian moms, warm home setting, practical benefit shown through daily routine, gentle trustworthy tone, realistic TikTok Shop recommendation."],
+        ["For Students", "#009b8f", "A product image targeted to Malaysian students, compact desk or dorm setting, affordable and useful feeling, energetic creator pose, TikTok affiliate image style."],
+        ["For Office", "#825846", "A product image targeted to office workers, neat desk setup, professional creator using the product during workday, clean credible sales visual, realistic lighting."]
+      ]]
+    ]
+  }
+};
 
 const copy = {
   ms: {
@@ -466,6 +525,8 @@ function route() {
   if (pathIs("/login")) return login();
   if (pathIs("/register")) return registerPage();
   if (pathIs("/affiliate")) return affiliatePage();
+  if (pathIs("/terms")) return legalPage("terms");
+  if (pathIs("/privacy")) return legalPage("privacy");
   return publicSite();
 }
 
@@ -599,7 +660,7 @@ function publicSite() {
         <details><summary>Is auto-posting ready?</summary><p>The current build prepares scheduling states and exports. Full TikTok auto-posting should be connected after API approval.</p></details>
         <details><summary>Where do I manage projects?</summary><p>Go to /studio, sign in, and use the workspace for projects, billing, usage, affiliate, and support.</p></details>
       </section>
-      <footer class="public-footer"><b>Duitok AI</b><span>© 2026</span><a href="mailto:hello@duitok.com">hello@duitok.com</a></footer>
+      <footer class="public-footer"><b>Duitok AI</b><span>© 2026</span><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="mailto:hello@duitok.com">hello@duitok.com</a></footer>
     </main>`;
 }
 
@@ -639,7 +700,7 @@ function registerPage() {
           <label>Full name<input name="name" placeholder="Your full name" required></label>
           <label>WhatsApp<input name="phone" placeholder="+60" required></label>
           <label>Email<input name="email" type="email" placeholder="you@duitok.com" required></label>
-          <label class="check-label"><input type="checkbox" required> <span>I agree to Terms and Privacy Policy.</span></label>
+          <label class="check-label"><input type="checkbox" required> <span>I agree to <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</span></label>
           <button class="gold-button" type="submit">${icon("credit-card")} Pay RM69 - FPX / DuitNow QR</button>
           <small>Secured via CHIP Payment once API keys are configured.</small>
         </form>
@@ -695,7 +756,53 @@ function affiliatePage() {
           <button class="gold-button" type="submit">${icon("send")} Submit application</button>
         </form>
       </section>
-      <footer class="public-footer"><b>Duitok AI Affiliate</b><span>© 2026</span><a href="mailto:hello@duitok.com">hello@duitok.com</a></footer>
+      <footer class="public-footer"><b>Duitok AI Affiliate</b><span>© 2026</span><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="mailto:hello@duitok.com">hello@duitok.com</a></footer>
+    </main>`;
+}
+
+function legalPage(type) {
+  const isPrivacy = type === "privacy";
+  const title = isPrivacy ? "Privacy Policy" : "Terms of Service";
+  const updated = "Last updated: May 26, 2026";
+  const sections = isPrivacy
+    ? [
+        ["Information we collect", "Duitok AI collects account details, project content, uploaded product or creator references, generation prompts, billing records, usage logs, and TikTok connection data when you choose to connect a TikTok account."],
+        ["How we use information", "We use this information to provide the Studio, generate content, manage subscriptions and credits, support your account, improve reliability, and publish or prepare posts only when you request it."],
+        ["TikTok data", "If you connect TikTok, we use TikTok OAuth data only to identify the connected account, check creator or posting eligibility, and submit content through approved TikTok APIs. We do not sell TikTok account data."],
+        ["Sharing", "We share information with service providers that operate hosting, payments, AI generation, analytics, support, and official publishing integrations. We disclose information if required by law or to protect users and the service."],
+        ["Retention and deletion", "We keep account and project data while your account is active or as needed for legal, tax, security, and operational reasons. You may request deletion by contacting hello@duitok.com."],
+        ["Contact", "For privacy questions, account deletion, or data access requests, contact hello@duitok.com."]
+      ]
+    : [
+        ["Service", "Duitok AI is a web application for TikTok Shop sellers and content teams to create, organize, schedule, and publish or prepare product content."],
+        ["Accounts", "You are responsible for keeping your login secure, providing accurate information, and using the service only for content and products you are allowed to promote."],
+        ["Generated content", "AI output can contain mistakes. You are responsible for reviewing claims, captions, assets, disclosures, music, product details, and compliance before publishing."],
+        ["TikTok publishing", "When TikTok integrations are enabled, posts are created only from user-approved queue items. TikTok may review, limit, reject, or remove content according to its own rules and API policies."],
+        ["Payments and credits", "Subscription and generation credits unlock product features. Usage-based credits may be deducted when generation or publishing workflows are requested, subject to the plan terms shown at checkout."],
+        ["Acceptable use", "Do not use Duitok AI to infringe intellectual property, impersonate others, bypass platform rules, make unsafe product claims, spam, or publish illegal or harmful content."],
+        ["Contact", "For support or legal questions, contact hello@duitok.com."]
+      ];
+
+  return `
+    <main class="public-shell legal-shell">
+      <nav class="public-nav">
+        ${brand("Duitok AI")}
+        <div class="public-links">
+          <a href="/">Home</a>
+          <a href="/terms">Terms</a>
+          <a href="/privacy">Privacy</a>
+        </div>
+        <button class="dark-button" data-action="open-register">${icon("sparkles")} Start</button>
+      </nav>
+      <section class="legal-hero">
+        <p class="eyebrow">Legal</p>
+        <h1>${title}</h1>
+        <p>${updated}</p>
+      </section>
+      <section class="legal-content">
+        ${sections.map(([heading, body]) => `<article><h2>${heading}</h2><p>${body}</p></article>`).join("")}
+      </section>
+      <footer class="public-footer"><b>Duitok AI</b><span>© 2026</span><a href="mailto:hello@duitok.com">hello@duitok.com</a></footer>
     </main>`;
 }
 
@@ -739,6 +846,7 @@ function studio() {
         ${languageSwitch()}
         <div class="side-section">${icon("layout-dashboard", 18)} Workspace</div>
         <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard">${icon("sparkles")} ${t("dashboard")}</button>
+        <button class="side-link" data-action="chat">${icon("bot")} Duitok Agent</button>
         <button class="side-link ${state.page === "library" ? "active" : ""}" data-page="library">${icon("folder")} Content Library</button>
         <button class="side-link ${state.page === "autopost" ? "active" : ""}" data-page="autopost">${icon("calendar-days")} Scheduler</button>
         <button class="new-project" data-action="new-project">${icon("plus")} <span>${t("newProject")}</span><b>${state.db.projects.length}/5</b></button>
@@ -760,7 +868,7 @@ function studio() {
       </aside>
       <main class="workspace">${page()}</main>
       <button class="live-tab" data-action="live">${icon("activity", 18)} LIVE - ${state.db.liveCount}</button>
-      <button class="chat-bubble" data-action="chat">${icon("message-circle", 34)}</button>
+      <button class="chat-bubble" data-action="chat">${icon("bot", 34)}</button>
       ${state.live ? livePanel() : ""}
       ${state.chat ? chatPanel() : ""}
       ${modal()}
@@ -989,8 +1097,29 @@ function imagePanel(p) {
     <div class="generator-box"><h2>🖼️ ${t("imageGenerator")}</h2><div class="form-grid two">${select("image.model", t("model"), ["GPT Image 2", "Nano Banana Pro", "Veo 3.1", "Sora 2", "Gemini Omni"], p.image.model)}${select("image.mode", t("mode"), ["Create Image", "Edit Image", "Product Scene"], p.image.mode)}</div></div>
     ${upload(t("avatarRef"), t("dropAvatar"), "Face / person - used for all variations", "camera", "avatar")}
     ${upload(t("productRef"), t("dropProduct"), "Product - used for all images and videos", "package", "product")}
-    ${prompt("image.prompt", p.image.prompt, "Describe the product shot, background, pose, outfit, and mood.", "generate-image", t("generateImage"))}
+    ${imagePromptSettings(p)}
     ${results(p, "image")}`;
+}
+
+function imagePromptSettings(p) {
+  const active = imagePromptPresets[state.imagePromptGroup] || imagePromptPresets.avatar;
+  return `
+    <section class="prompt-settings">
+      <h2>✏️ Prompt & Settings</h2>
+      <div class="prompt-mode-tabs" aria-label="Image prompt modes">
+        ${Object.entries(imagePromptPresets).map(([id, item]) => `<button class="${state.imagePromptGroup === id ? "active" : ""}" type="button" data-prompt-group="${id}">${icon(item.icon, 19)} ${item.label}</button>`).join("")}
+      </div>
+      <div class="preset-groups">
+        ${active.groups.map(([title, presets]) => `
+          <div class="preset-row">
+            <p>${title}</p>
+            <div>
+              ${presets.map(([label, color, text]) => `<button class="${p.image.prompt === text ? "active" : ""}" style="--preset-color:${color}" type="button" data-image-preset="${esc(text)}">${label}</button>`).join("")}
+            </div>
+          </div>`).join("")}
+      </div>
+      ${prompt("image.prompt", p.image.prompt, "Describe your scene, or click a preset above for ready-made TikTok affiliate prompts.", "generate-image", t("generateImage"))}
+    </section>`;
 }
 
 function ugcPanel(p) {
@@ -1049,7 +1178,7 @@ function accountPage() {
     topup: [t("topup"), "Credit purchases update the backend ledger.", `<div class="topup-grid">${[10, 30, 50, 100].map((x) => `<button data-topup="${x}"><strong>${x}</strong><span>credits</span><b>RM${x}</b></button>`).join("")}</div>`],
     affiliate: [t("affiliate"), "Referral links and payouts.", `<div class="metric-row"><article><span>Code</span><strong>${state.db.affiliate.code}</strong></article><article><span>Clicks</span><strong>${state.db.affiliate.clicks}</strong></article><article><span>Payout</span><strong>RM${state.db.affiliate.payout}</strong></article></div><button class="gold-button" data-action="copy-affiliate">${icon("copy")} Copy referral link</button>`],
     usage: [t("usage"), "Every generated action is written to history.", table(state.db.usage.map((x) => [x.action, `${x.credits} credits`, new Date(x.createdAt).toLocaleString()]))],
-    autopost: [t("autopost"), "Publishing queue with saved states.", schedule()],
+    autopost: [t("autopost"), "Chrome extension assisted TikTok publishing queue.", autoPostPage()],
     whatsapp: [t("whatsapp"), "Community handoff.", `<button class="gold-button" data-action="open-whatsapp">${icon("message-circle")} Open WhatsApp Group</button>`]
   };
   const [title, subtitle, body] = map[state.page];
@@ -1064,8 +1193,52 @@ function invoiceTable() {
   return `<div class="table">${state.db.billing.invoices.map((x) => `<div><span>${x.id}</span><b>RM${x.amount}</b><button data-invoice="${x.id}">${icon("download")} ${t("export")}</button></div>`).join("")}</div>`;
 }
 
+function autoPostPage() {
+  const connection = state.db.tiktok?.connections?.[0];
+  const publishes = state.db.tiktok?.publishes || [];
+  return `
+    <div class="autopost-console">
+      <section class="autopost-sop">
+        <div>
+          <p class="folder-label">${icon("puzzle", 18)} Extension</p>
+          <h2>Duitok Auto Post - SOP</h2>
+          <p>Local Chrome helper for pulling Duitok scheduled TikTok posts into TikTok upload pages. It fills captions and hashtags; you still review and click final publish yourself.</p>
+        </div>
+        <button class="gold-button" data-action="download-autopost-extension">${icon("download")} Download Extension</button>
+        <ol>
+          <li><b>1</b><span>Download extension zip</span></li>
+          <li><b>2</b><span>Extract folder</span></li>
+          <li><b>3</b><span>Open <code>chrome://extensions/</code></span></li>
+          <li><b>4</b><span>Enable Developer Mode</span></li>
+          <li><b>5</b><span>Click Load unpacked and select the extracted folder</span></li>
+        </ol>
+      </section>
+      <section class="autopost-sop tiktok-official">
+        <div>
+          <p class="folder-label">${icon("badge-check", 18)} Official API</p>
+          <h2>TikTok Direct Post</h2>
+          <p>${connection ? `Connected: ${connection.displayName || connection.openId || "TikTok account"}` : "Connect a TikTok account after your TikTok Developer app has Content Posting API access."}</p>
+        </div>
+        <div class="official-actions">
+          <button class="gold-button" data-action="connect-tiktok">${icon("plug")} Connect TikTok</button>
+          <button class="dark-button" data-action="tiktok-creator-info">${icon("refresh-cw")} Creator Info</button>
+        </div>
+        <div class="tiktok-publishes">
+          ${publishes.slice(0, 4).map((item) => `<article><b>${item.status}</b><span>${item.publishId || item.id}</span><button data-tiktok-status="${item.publishId || item.id}">${icon("activity")} Check</button></article>`).join("") || `<p class="empty-text">No official API publishes yet.</p>`}
+        </div>
+      </section>
+      <section class="autopost-queue">
+        <div class="card-title">
+          <h2>${icon("calendar-days", 22)} TikTok Queue</h2>
+          <span>${state.db.schedule.length} scheduled items</span>
+        </div>
+        ${schedule()}
+      </section>
+    </div>`;
+}
+
 function schedule() {
-  return `<section class="schedule-list">${state.db.schedule.map((x) => `<article><b>${x.title}</b><span>${x.platform}</span><small>${x.time}</small><button data-schedule="${x.id}">${icon("settings")} ${x.status}</button></article>`).join("")}</section>`;
+  return `<section class="schedule-list">${state.db.schedule.map((x) => `<article><b>${x.title}</b><span>${x.platform}</span><small>${x.time}</small><p>${esc([x.caption, x.hashtags].filter(Boolean).join("\n")).replaceAll("\n", "<br>")}</p><button data-schedule="${x.id}">${icon("settings")} ${x.status}</button>${state.page === "autopost" ? `<button data-tiktok-publish="${x.id}">${icon("send")} Official Post</button>` : ""}</article>`).join("")}</section>`;
 }
 
 function modal() {
@@ -1086,7 +1259,25 @@ function livePanel() {
 }
 
 function chatPanel() {
-  return `<aside class="chat-panel"><h3>${icon("message-circle")} Support</h3><p>Backend ticket queue is ready.</p><button data-action="support-ticket">Create ticket</button></aside>`;
+  const intro = state.agentMessages.length
+    ? ""
+    : `<p class="agent-empty">Ask me to generate UGC, build a batch, decode a competitor, create a project, or decide what to do next.</p>`;
+  return `
+    <aside class="chat-panel agent-panel">
+      <header>
+        <h3>${icon("bot")} Duitok Agent</h3>
+        <button class="icon-only" data-action="clear-agent" title="Clear chat">${icon("trash-2", 18)}</button>
+      </header>
+      <div class="agent-thread">
+        ${intro}
+        ${state.agentMessages.map((item) => `<article class="${item.role}"><span>${item.role === "user" ? "You" : "Agent"}</span><p>${esc(item.content).replaceAll("\n", "<br>")}</p></article>`).join("")}
+        ${state.agentBusy ? `<article class="assistant"><span>Agent</span><p>${icon("loader-circle", 16)} Thinking and calling Duitok tools...</p></article>` : ""}
+      </div>
+      <form class="agent-form" data-form="agent">
+        <textarea name="message" data-agent-input placeholder="Tell Duitok Agent what you want..." ${state.agentBusy ? "disabled" : ""}>${esc(state.agentInput)}</textarea>
+        <button class="gold-button" type="submit" ${state.agentBusy ? "disabled" : ""}>${icon(state.agentBusy ? "loader-circle" : "send")} Send</button>
+      </form>
+    </aside>`;
 }
 
 function bind() {
@@ -1098,8 +1289,13 @@ function bind() {
   document.querySelectorAll("[data-action]").forEach((el) => el.addEventListener("click", (e) => action(e, el.dataset.action)));
   document.querySelectorAll("[data-field]").forEach((el) => el.addEventListener("change", fieldChange));
   document.querySelectorAll("[data-upload]").forEach((el) => el.addEventListener("change", uploadChange));
+  document.querySelector("[data-agent-input]")?.addEventListener("input", (e) => { state.agentInput = e.target.value; });
+  document.querySelectorAll("[data-prompt-group]").forEach((el) => el.addEventListener("click", () => set({ imagePromptGroup: el.dataset.promptGroup })));
+  document.querySelectorAll("[data-image-preset]").forEach((el) => el.addEventListener("click", () => applyImagePreset(el.dataset.imagePreset)));
   document.querySelectorAll("[data-topup]").forEach((el) => el.addEventListener("click", () => topup(Number(el.dataset.topup))));
   document.querySelectorAll("[data-schedule]").forEach((el) => el.addEventListener("click", () => scheduleUpdate(el.dataset.schedule)));
+  document.querySelectorAll("[data-tiktok-publish]").forEach((el) => el.addEventListener("click", () => tiktokPublish(el.dataset.tiktokPublish)));
+  document.querySelectorAll("[data-tiktok-status]").forEach((el) => el.addEventListener("click", () => tiktokStatus(el.dataset.tiktokStatus)));
   document.querySelectorAll("[data-invoice]").forEach((el) => el.addEventListener("click", () => download(`/api/export/invoice/${el.dataset.invoice}`, `${el.dataset.invoice}.txt`)));
   document.querySelectorAll("[data-result]").forEach((el) => el.addEventListener("click", () => download(`/api/export/result/${el.dataset.result}`, `duitok-result.txt`)));
   document.querySelectorAll("form").forEach((el) => el.addEventListener("submit", submit));
@@ -1148,15 +1344,22 @@ async function action(event, name) {
   if (name === "reset-date") return set({ dateFrom: "2026-05-01", dateTo: "2026-05-26" });
   if (name === "live") return set({ live: !state.live });
   if (name === "chat") return set({ chat: !state.chat });
+  if (name === "clear-agent") {
+    localStorage.removeItem("duitok-agent-messages");
+    return set({ agentMessages: [], agentInput: "" });
+  }
   if (name === "logout") {
     localStorage.removeItem("duitok-user");
     return set({ user: null, modal: null });
   }
   if (name === "forgot") return window.open("https://wa.me/60123456789", "_blank");
   if (name === "open-whatsapp") return window.open("https://wa.me/60123456789", "_blank");
+  if (name === "connect-tiktok") return window.location.href = `${apiBaseUrl}/api/tiktok/connect`;
+  if (name === "tiktok-creator-info") return tiktokCreatorInfo();
   if (name === "copy-affiliate") { await navigator.clipboard?.writeText("https://duitok.com/ref/DUIT2026"); return notify("Affiliate link copied."); }
   if (name === "support-ticket") return mutate("/support", { method: "POST", body: JSON.stringify({ message: "Support ticket from studio" }) }, "Support ticket saved.");
   if (name === "download-sop") return download("/api/export/sop", "duitok-image-sop.txt");
+  if (name === "download-autopost-extension") return download("/api/export/autopost-extension", "duitok-autopost-extension.zip");
   if (name === "export-all") return download("/api/export/all", "duitok-data.json");
   if (name === "export-project") return download(`/api/export/project/${state.projectId}`, `${project().name}.json`);
   if (name?.startsWith("generate") || ["analyze-original", "clone-prompt", "write-story", "decode-viral"].includes(name)) return generate(name);
@@ -1190,12 +1393,21 @@ async function submit(event) {
     const db = await api("/projects", { method: "POST", body: JSON.stringify(data) });
     return set({ db, projectId: db.projects.at(-1).id, modal: null, page: "dashboard" });
   }
+  if (event.currentTarget.dataset.form === "agent") {
+    return sendAgentMessage(data.message);
+  }
 }
 
 async function fieldChange(event) {
   const db = await api(`/projects/${state.projectId}/field`, { method: "PATCH", body: JSON.stringify({ field: event.target.dataset.field, value: event.target.value }) });
   set({ db });
   notify(t("saveDone"));
+}
+
+async function applyImagePreset(promptText) {
+  const db = await api(`/projects/${state.projectId}/field`, { method: "PATCH", body: JSON.stringify({ field: "image.prompt", value: promptText }) });
+  set({ db });
+  notify("Prompt preset applied.");
 }
 
 async function uploadChange(event) {
@@ -1220,6 +1432,54 @@ async function generate(name) {
   }
 }
 
+function rememberAgentMessages(messages) {
+  localStorage.setItem("duitok-agent-messages", JSON.stringify(messages.slice(-12)));
+}
+
+function applyAgentUiActions(uiActions = [], db) {
+  const patch = {};
+  for (const item of uiActions) {
+    if (item.page) patch.page = item.page;
+    if (item.step) patch.step = item.step;
+    if (item.projectId && db?.projects?.some((project) => project.id === item.projectId)) patch.projectId = item.projectId;
+  }
+  return patch;
+}
+
+async function sendAgentMessage(message) {
+  const content = String(message || state.agentInput || "").trim();
+  if (!content || state.agentBusy) return;
+  const nextMessages = [...state.agentMessages, { role: "user", content }];
+  rememberAgentMessages(nextMessages);
+  set({ agentMessages: nextMessages, agentInput: "", agentBusy: true });
+  try {
+    const res = await api("/agent", {
+      method: "POST",
+      body: JSON.stringify({
+        messages: nextMessages,
+        projectId: state.projectId,
+        page: state.page,
+        step: state.step
+      })
+    });
+    const messages = [...nextMessages, { role: "assistant", content: res.reply || "Done." }];
+    rememberAgentMessages(messages);
+    const db = res.db || state.db;
+    set({
+      db,
+      agentMessages: messages,
+      agentBusy: false,
+      ...applyAgentUiActions(res.uiActions, db)
+    });
+    if (res.toolResults?.length) notify("Duitok Agent updated the workspace.");
+  } catch (error) {
+    const messages = [...nextMessages, { role: "assistant", content: error.message }];
+    rememberAgentMessages(messages);
+    set({ agentMessages: messages, agentBusy: false });
+    notify(error.message);
+  }
+}
+
 async function topup(amount) {
   notify("Opening secure CHIP payment page...");
   const res = await api("/billing/topup", {
@@ -1237,6 +1497,43 @@ async function scheduleUpdate(id) {
   const db = await api(`/schedule/${id}`, { method: "PATCH" });
   set({ db });
   notify("Schedule status updated.");
+}
+
+async function tiktokCreatorInfo() {
+  try {
+    notify("Checking TikTok creator info...");
+    const res = await api("/tiktok/creator-info", { method: "POST", body: JSON.stringify({}) });
+    set({ db: { ...state.db, tiktok: res.tiktok } });
+    notify("TikTok creator info updated.");
+  } catch (error) {
+    notify(error.message);
+  }
+}
+
+async function tiktokPublish(id) {
+  const item = state.db.schedule.find((entry) => entry.id === id);
+  if (!item?.mediaUrl) {
+    notify("Official TikTok post needs a public video URL on this queue item first.");
+    return;
+  }
+  try {
+    notify("Starting TikTok official post...");
+    const res = await api(`/tiktok/publish/${id}`, { method: "POST", body: JSON.stringify({ mediaUrl: item.mediaUrl, privacyLevel: "SELF_ONLY", isAigc: true }) });
+    set({ db: res.db });
+    notify("TikTok publish started.");
+  } catch (error) {
+    notify(error.message);
+  }
+}
+
+async function tiktokStatus(id) {
+  try {
+    const res = await api(`/tiktok/publish/${id}/status`);
+    set({ db: res.db });
+    notify(`TikTok status: ${res.publish.status}`);
+  } catch (error) {
+    notify(error.message);
+  }
 }
 
 async function mutate(path, options, message) {
