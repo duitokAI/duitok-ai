@@ -563,7 +563,6 @@ app.post("/api/projects/:id/generate", async (req, res) => {
       provider: process.env.APIMART_API_KEY ? "apimart" : "mock",
       createdAt: new Date().toISOString()
     });
-    db.billing.credits = Math.max(0, db.billing.credits - 4);
     currentDb.billing.credits = Math.max(0, currentDb.billing.credits - 4);
     currentDb.usage.unshift(usage(generated.title, 4));
     return saveDb(currentDb);
