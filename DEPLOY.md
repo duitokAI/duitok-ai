@@ -147,7 +147,7 @@ Results are polled through `/v1/draw/result`.
 
 The media endpoints used are:
 
-- `Veo 3.1` -> `/api/video/veo` with `model=veo3.1-fast`
+- `Veo 3.1` -> `/api/async/video_veo3.1_fast` with `model=veo3.1-fast`
 - `Sora 2` -> `/api/async/video_sora2`
 - `Gemini Omni` -> `/api/async/video_google_omni`
 - `Grok Imagine Video` -> `/api/async/video_grok_imagine`

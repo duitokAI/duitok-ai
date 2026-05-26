@@ -33,7 +33,7 @@ const tiktokRedirectPath = process.env.TIKTOK_REDIRECT_PATH || "/api/tiktok/oaut
 const tiktokScopes = process.env.TIKTOK_SCOPES || "user.info.basic,video.publish";
 const wuyinBaseUrl = (process.env.WUYIN_BASE_URL || "https://api.wuyinkeji.com").replace(/\/$/, "");
 const wuyinImagePaths = {
-  "Veo 3.1": "/api/video/veo",
+  "Veo 3.1": "/api/async/video_veo3.1_fast",
   "Sora 2": "/api/async/video_sora2",
   "Gemini Omni": "/api/async/video_google_omni",
   "Grok Imagine Video": "/api/async/video_grok_imagine"
