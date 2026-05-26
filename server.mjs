@@ -141,7 +141,7 @@ function blankProject(id, name, userId = adminUserId) {
     userId,
     name,
     createdAt: new Date().toISOString(),
-    image: { model: "GPT Image 2", mode: "Create Image", prompt: "" },
+    image: { model: "GPT Image 2", mode: "Create Image", duration: "8", prompt: "" },
     ugc: { avatar: "Malay female", voice: "BM Casual", length: "30 seconds", script: "Hook, product proof, objection, offer, CTA." },
     auto: { platform: "TikTok", batch: "7 posts", tone: "Viral hook", productUrl: "" },
     original: { brief: "Rewrite this into Duitok  AI style while keeping the product claim safe." },
@@ -582,11 +582,35 @@ function generationCostFor(db, project, action, generated) {
   return { model, provider, ...(costs[model] || { costRm: 0, costRmb: 0, unit: "unknown" }) };
 }
 
-function assertGenerationAccess(db, user) {
+function videoDurationFor(project, model = project.image?.model) {
+  if (model === "Sora 2") return Number(project.image?.duration || process.env.WUYIN_SORA_DURATION || 8);
+  if (model === "Gemini Omni") return 10;
+  if (model === "Grok Imagine Video") return Number(project.image?.duration || process.env.WUYIN_GROK_DURATION || 8);
+  if (model === "Veo 3.1") return 8;
+  return 0;
+}
+
+function roundCredits(value) {
+  return Math.round(Number(value || 0) * 100) / 100;
+}
+
+function creditChargeFor(project, action) {
+  if (action !== "generate-image") return 0.1;
+  const model = project.image?.model || "GPT Image 2";
+  if (model === "GPT Image 2") return 0.1;
+  if (model === "Nano Banana Pro") return 0.2;
+  if (model === "Veo 3.1") return 0.4;
+  if (model === "Sora 2") return roundCredits(videoDurationFor(project, model) * 0.06);
+  if (model === "Gemini Omni") return 1.3;
+  if (model === "Grok Imagine Video") return roundCredits(videoDurationFor(project, model) * 0.06);
+  return 0.1;
+}
+
+function assertGenerationAccess(db, user, requiredCredits = 0.1) {
   if ((user.role || "user") === "admin") return;
 
   user.billing ||= defaultBilling();
-  if (Number(user.billing.credits || 0) < 4) {
+  if (Number(user.billing.credits || 0) < requiredCredits) {
     const error = new Error("Not enough credits. Please top up before generating.");
     error.status = 402;
     throw error;
@@ -940,7 +964,7 @@ function wuyinImageBody(project, prompt) {
     return {
       prompt,
       aspectRatio: process.env.WUYIN_SORA_ASPECT_RATIO || process.env.WUYIN_VIDEO_RATIO || "9:16",
-      duration: process.env.WUYIN_SORA_DURATION || "10",
+      duration: String(videoDurationFor(project, model)),
       size: process.env.WUYIN_SORA_SIZE || "small"
     };
   }
@@ -954,7 +978,7 @@ function wuyinImageBody(project, prompt) {
   if (model === "Grok Imagine Video") {
     return {
       prompt,
-      duration: process.env.WUYIN_GROK_DURATION || "10",
+      duration: String(videoDurationFor(project, model)),
       aspect_ratio: process.env.WUYIN_GROK_ASPECT_RATIO || process.env.WUYIN_VIDEO_RATIO || "9:16"
     };
   }
@@ -1113,6 +1137,7 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
   return mutateDb(async (currentDb) => {
     const project = findProject(currentDb, projectId, user);
     const cost = generationCostFor(currentDb, project, action, generated);
+    const creditsToCharge = creditChargeFor(project, action);
     const result = {
       id: crypto.randomUUID(),
       type: step,
@@ -1129,7 +1154,7 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
     project.results.push(result);
     const owner = currentDb.users.find((item) => item.id === project.userId) || user;
     owner.billing ||= defaultBilling();
-    owner.billing.credits = Math.max(0, Number(owner.billing.credits || 0) - 4);
+    owner.billing.credits = Math.max(0, roundCredits(Number(owner.billing.credits || 0) - creditsToCharge));
     const job = {
       id: crypto.randomUUID(),
       userId: project.userId,
@@ -1144,7 +1169,7 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
       imageUrl: generated.imageUrl,
       videoUrl: generated.videoUrl,
       textOutput: generated.body,
-      creditsCharged: 4,
+      creditsCharged: creditsToCharge,
       createdAt: result.createdAt,
       completedAt: result.createdAt,
       ...cost
@@ -1163,8 +1188,8 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
       costRm: job.costRm,
       createdAt: result.createdAt
     });
-    currentDb.usage.unshift(usage(generated.title, 4, project.userId));
-    currentDb.creditLedger.unshift(creditEntry(project.userId, "debit", -4, generated.title, {
+    currentDb.usage.unshift(usage(generated.title, creditsToCharge, project.userId));
+    currentDb.creditLedger.unshift(creditEntry(project.userId, "debit", -creditsToCharge, generated.title, {
       projectId,
       resultId: result.id,
       generationJobId: job.id,
@@ -1222,8 +1247,9 @@ async function saveFailedGeneration(projectId, action, step, error, user) {
 async function enqueueGeneration(projectId, action, step, user) {
   const jobId = crypto.randomUUID();
   const state = await mutateDb(async (currentDb) => {
-    assertGenerationAccess(currentDb, user);
     const project = findProject(currentDb, projectId, user);
+    const creditsToCharge = creditChargeFor(project, action);
+    assertGenerationAccess(currentDb, user, creditsToCharge);
     const cost = generationCostFor(currentDb, project, action, { provider: providerForMediaModel(project.image?.model) });
     const createdAt = new Date().toISOString();
     currentDb.generationJobs.unshift({
@@ -1236,6 +1262,8 @@ async function enqueueGeneration(projectId, action, step, user) {
       status: "queued",
       prompt: project.image?.prompt || "",
       creditsCharged: 0,
+      creditsRequired: creditsToCharge,
+      duration: videoDurationFor(project),
       createdAt,
       model: cost.model,
       provider: cost.provider,
@@ -1278,6 +1306,7 @@ async function completeQueuedGeneration(jobId, generated) {
     if (!project) throw Object.assign(new Error("Project not found"), { status: 404 });
     const owner = currentDb.users.find((item) => item.id === project.userId);
     const cost = generationCostFor(currentDb, project, job.action, generated);
+    const creditsToCharge = creditChargeFor(project, job.action);
     const completedAt = new Date().toISOString();
     const result = {
       id: crypto.randomUUID(),
@@ -1295,7 +1324,7 @@ async function completeQueuedGeneration(jobId, generated) {
     project.results.push(result);
     if (owner) {
       owner.billing ||= defaultBilling();
-      owner.billing.credits = Math.max(0, Number(owner.billing.credits || 0) - 4);
+      owner.billing.credits = Math.max(0, roundCredits(Number(owner.billing.credits || 0) - creditsToCharge));
     }
     Object.assign(job, {
       resultId: result.id,
@@ -1304,7 +1333,9 @@ async function completeQueuedGeneration(jobId, generated) {
       imageUrl: generated.imageUrl,
       videoUrl: generated.videoUrl,
       textOutput: generated.body,
-      creditsCharged: 4,
+      creditsCharged: creditsToCharge,
+      creditsRequired: creditsToCharge,
+      duration: videoDurationFor(project),
       completedAt,
       ...cost
     });
@@ -1321,8 +1352,8 @@ async function completeQueuedGeneration(jobId, generated) {
       costRm: job.costRm,
       createdAt: completedAt
     });
-    currentDb.usage.unshift(usage(generated.title, 4, project.userId));
-    currentDb.creditLedger.unshift(creditEntry(project.userId, "debit", -4, generated.title, {
+    currentDb.usage.unshift(usage(generated.title, creditsToCharge, project.userId));
+    currentDb.creditLedger.unshift(creditEntry(project.userId, "debit", -creditsToCharge, generated.title, {
       projectId: project.id,
       resultId: result.id,
       generationJobId: job.id,
@@ -1770,8 +1801,8 @@ async function executeAgentTool(name, args, user) {
   if (name === "generate_project_output") {
     requireAgentPermission(user, "generate");
     const db = await ensureDb();
-    assertGenerationAccess(db, user);
     const projectSnapshot = structuredClone(findProject(db, args.projectId, user));
+    assertGenerationAccess(db, user, creditChargeFor(projectSnapshot, args.action));
     let generated;
     try {
       generated = await generateWithProvider(projectSnapshot, args.action, args.step);
