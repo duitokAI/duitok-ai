@@ -37,7 +37,9 @@ const state = {
   modal: null,
   search: "",
   live: false,
-  chat: false
+  chat: false,
+  langOpen: false,
+  generating: false
 };
 
 const languages = [
@@ -140,6 +142,7 @@ const copy = {
     dropProduct: "Click atau drop gambar produk",
     prompt: "Prompt",
     generateImage: "Generate Image",
+    generating: "APIMart is generating...",
     noResults: "Belum ada result",
     export: "Export",
     saveDone: "Saved.",
@@ -249,6 +252,7 @@ const copy = {
     dropProduct: "点击或拖入产品图片",
     prompt: "提示词",
     generateImage: "生成图片",
+    generating: "APIMart 正在生成...",
     noResults: "还没有结果",
     export: "导出",
     saveDone: "已保存。",
@@ -358,6 +362,7 @@ const copy = {
     dropProduct: "Click or drop product image",
     prompt: "Prompt",
     generateImage: "Generate Image",
+    generating: "APIMart is generating...",
     noResults: "No results yet",
     export: "Export",
     saveDone: "Saved.",
@@ -380,7 +385,15 @@ const t = (key) => copy[state.lang]?.[key] || copy.en[key] || key;
 
 function languageSwitch() {
   const current = languages.find(([id]) => id === state.lang) || languages[0];
-  return `<button class="lang-switch" type="button" data-lang-cycle aria-label="Change language" title="Change language"><span>${current[1]}</span>${icon("chevron-down", 14)}</button>`;
+  return `
+    <div class="lang-menu ${state.langOpen ? "open" : ""}">
+      <button class="lang-switch" type="button" data-lang-toggle aria-label="Change language" title="Change language">
+        <span>${current[1]}</span>${icon(state.langOpen ? "chevron-up" : "chevron-down", 14)}
+      </button>
+      <div class="lang-options" role="menu">
+        ${languages.map(([id, label]) => `<button class="${state.lang === id ? "active" : ""}" type="button" data-lang="${id}" role="menuitem">${label}</button>`).join("")}
+      </div>
+    </div>`;
 }
 
 const icon = (name, size = 20) => `<i data-lucide="${name}" style="width:${size}px;height:${size}px"></i>`;
@@ -750,7 +763,7 @@ function stepPanel(p) {
 
 function imagePanel(p) {
   return `
-    <div class="generator-box"><h2>🖼️ ${t("imageGenerator")}</h2><div class="form-grid two">${select("image.model", t("model"), ["Banana Pro", "Seedream", "Nano Banana"], p.image.model)}${select("image.mode", t("mode"), ["Create Image", "Edit Image", "Product Scene"], p.image.mode)}</div></div>
+    <div class="generator-box"><h2>🖼️ ${t("imageGenerator")}</h2><div class="form-grid two">${select("image.model", t("model"), ["GPT Image 2", "Nano Banana Pro", "Nano Banana", "Seedream"], p.image.model)}${select("image.mode", t("mode"), ["Create Image", "Edit Image", "Product Scene"], p.image.mode)}</div></div>
     ${upload(t("avatarRef"), t("dropAvatar"), "Face / person - used for all variations", "camera", "avatar")}
     ${upload(t("productRef"), t("dropProduct"), "Product - used for all images and videos", "package", "product")}
     ${prompt("image.prompt", p.image.prompt, "Describe the product shot, background, pose, outfit, and mood.", "generate-image", t("generateImage"))}
@@ -782,7 +795,8 @@ function viralPanel(p) {
 }
 
 function select(field, label, options, value) {
-  return `<label>${label}<select data-field="${field}">${options.map((item) => `<option ${item === value ? "selected" : ""}>${item}</option>`).join("")}</select></label>`;
+  const list = value && !options.includes(value) ? [value, ...options] : options;
+  return `<label>${label}<select data-field="${field}">${list.map((item) => `<option ${item === value ? "selected" : ""}>${item}</option>`).join("")}</select></label>`;
 }
 
 function upload(title, main, sub, ic, kind) {
@@ -790,13 +804,18 @@ function upload(title, main, sub, ic, kind) {
 }
 
 function prompt(field, value, placeholder, action, button) {
-  return `<div class="prompt-block"><label>${t("prompt")}<textarea data-field="${field}" placeholder="${placeholder}">${esc(value)}</textarea></label><button class="gold-button" data-action="${action}">${icon("sparkles")} ${button}</button></div>`;
+  return `<div class="prompt-block"><label>${t("prompt")}<textarea data-field="${field}" placeholder="${placeholder}">${esc(value)}</textarea></label><button class="gold-button" data-action="${action}" ${state.generating ? "disabled" : ""}>${icon(state.generating ? "loader-circle" : "sparkles")} ${state.generating ? t("generating") : button}</button></div>`;
 }
 
 function results(p, type) {
   const items = p.results.filter((item) => item.type === type).slice(-4).reverse();
   if (!items.length) return `<section class="empty-result">${icon("sparkles")} ${t("noResults")}</section>`;
-  return `<section class="result-grid">${items.map((item) => `<article><b>${item.title}</b><p>${item.body}</p><button data-result="${item.id}">${icon("download")} ${t("export")}</button></article>`).join("")}</section>`;
+  return `<section class="result-grid">${items.map((item) => `<article><b>${item.title}</b>${resultPreview(item)}<button data-result="${item.id}">${icon("download")} ${t("export")}</button></article>`).join("")}</section>`;
+}
+
+function resultPreview(item) {
+  const image = item.imageUrl ? `<img class="result-image" src="${esc(item.imageUrl)}" alt="${esc(item.title)}">` : "";
+  return `${image}<p>${esc(item.body).replaceAll("\n", "<br>")}</p>`;
 }
 
 function accountPage() {
@@ -859,12 +878,21 @@ function bind() {
   document.querySelectorAll("[data-result]").forEach((el) => el.addEventListener("click", () => download(`/api/export/result/${el.dataset.result}`, `duitok-result.txt`)));
   document.querySelectorAll("form").forEach((el) => el.addEventListener("submit", submit));
   document.querySelector("[data-search]")?.addEventListener("input", (e) => set({ search: e.target.value }));
-  document.querySelectorAll("[data-lang-cycle]").forEach((el) => el.addEventListener("click", () => {
-    const currentIndex = languages.findIndex(([id]) => id === state.lang);
-    const nextLang = languages[(currentIndex + 1) % languages.length][0];
-    localStorage.setItem("duitok-lang", nextLang);
-    set({ lang: nextLang });
+  document.querySelectorAll("[data-lang-toggle]").forEach((el) => el.addEventListener("click", (event) => {
+    event.stopPropagation();
+    set({ langOpen: !state.langOpen });
   }));
+  document.querySelectorAll("[data-lang]").forEach((el) => el.addEventListener("click", (event) => {
+    event.stopPropagation();
+    localStorage.setItem("duitok-lang", el.dataset.lang);
+    set({ lang: el.dataset.lang, langOpen: false });
+  }));
+  document.addEventListener("click", closeLangMenu, { once: true });
+}
+
+function closeLangMenu(event) {
+  if (!state.langOpen || event.target.closest(".lang-menu")) return;
+  set({ langOpen: false });
 }
 
 async function action(event, name) {
@@ -951,9 +979,17 @@ async function uploadChange(event) {
 }
 
 async function generate(name) {
-  const db = await api(`/projects/${state.projectId}/generate`, { method: "POST", body: JSON.stringify({ action: name, step: state.step }) });
-  set({ db });
-  notify(t("generatedSaved"));
+  if (state.generating) return;
+  try {
+    set({ generating: true });
+    notify(t("generating"));
+    const db = await api(`/projects/${state.projectId}/generate`, { method: "POST", body: JSON.stringify({ action: name, step: state.step }) });
+    set({ db, generating: false });
+    notify(t("generatedSaved"));
+  } catch (error) {
+    set({ generating: false });
+    notify(error.message);
+  }
 }
 
 async function topup(amount) {

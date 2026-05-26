@@ -136,6 +136,12 @@ button {
   margin-left: auto;
 }
 
+.lang-menu {
+  position: relative;
+  display: inline-flex;
+  z-index: 35;
+}
+
 .lang-switch {
   display: inline-grid;
   grid-template-columns: auto 14px;
@@ -174,6 +180,49 @@ button {
 .lang-switch i {
   color: var(--muted);
   stroke-width: 3;
+}
+
+.lang-options {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 118px;
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid rgba(95, 0, 103, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 18px 42px rgba(76, 0, 87, 0.14);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition:
+    opacity 0.16s ease,
+    transform 0.16s ease;
+}
+
+.lang-menu.open .lang-options {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.lang-options button {
+  min-height: 36px;
+  border: 0;
+  border-radius: 10px;
+  padding: 8px 12px;
+  background: transparent;
+  color: var(--purple);
+  font-weight: 900;
+  text-align: left;
+}
+
+.lang-options button:hover,
+.lang-options button.active {
+  background: #fff1f7;
+  color: var(--pink);
 }
 
 .public-links a,
@@ -1185,6 +1234,16 @@ textarea {
   padding: 18px;
 }
 
+.result-image {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  margin: 14px 0 12px;
+  border: 1px solid rgba(95, 0, 103, 0.1);
+  border-radius: 14px;
+  object-fit: cover;
+  background: #fff4f1;
+}
+
 .result-grid p {
   color: #5d5b57;
   line-height: 1.5;
@@ -1197,6 +1256,21 @@ textarea {
   background: #161616;
   color: white;
   border-color: transparent;
+}
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+button:disabled [data-lucide="loader-circle"] {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .empty-result {
