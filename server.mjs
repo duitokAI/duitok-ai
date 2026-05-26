@@ -47,7 +47,7 @@ app.use(express.json({
 }));
 
 app.get("/api/health", (_req, res) => {
-  res.json({ ok: true });
+  res.json({ ok: true, service: "duitok-ai", storage: postgresPool ? "postgres" : "json" });
 });
 
 function blankProject(id, name) {
@@ -330,10 +330,6 @@ async function markChipPurchasePaid(db, payload) {
 
 app.get("/api/state", async (_req, res) => {
   res.json(publicState(await ensureDb()));
-});
-
-app.get("/api/health", (_req, res) => {
-  res.json({ ok: true, service: "duitok-ai" });
 });
 
 app.post("/api/auth/login", async (req, res) => {
