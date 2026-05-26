@@ -112,7 +112,7 @@ function publicSite() {
         <div>
           <p class="eyebrow">1,300+ Malaysia sellers can scale content faster</p>
           <h1>Competitors post 10 videos. You start today.</h1>
-          <p class="public-copy">Paste a product link and let Duitok  AI plan images, UGC scripts, Malay hooks, captions, and TikTok Shop posting ideas without a creator team.</p>
+          <p class="public-copy">Paste a product link and let Duitok AI plan images, UGC scripts, Malay hooks, captions, and TikTok Shop posting ideas without a creator team.</p>
           <div class="public-actions">
             <button class="gold-button" data-action="open-register">${icon("sparkles")} Start creating</button>
             <button class="dark-button" data-action="open-whatsapp">${icon("message-circle")} WhatsApp</button>
@@ -120,10 +120,11 @@ function publicSite() {
           <div class="trust-row"><span>4.9 rating</span><span>7 sellers generating now</span><span>30-day guarantee</span></div>
         </div>
         <section class="hero-board">
+          <img class="hero-logo" src="/duittok-logo-cropped.png" alt="Duitok AI">
           <div class="race-card"><span>You</span><b>1 video / day</b></div>
           <div class="race-card hot"><span>Competitor</span><b>10 videos / day</b></div>
           <div class="race-meter"><i></i></div>
-          <strong>Duitok  AI catches up in minutes</strong>
+          <strong>Duitok AI catches up in minutes</strong>
         </section>
       </section>
       <section class="public-grid three">
@@ -164,11 +165,11 @@ function publicSite() {
         </div>
       </section>
       <section class="comparison-section">
-        <p class="eyebrow">Manual vs Duitok  AI</p>
+        <p class="eyebrow">Manual vs Duitok AI</p>
         <h2>The old workflow burns days. The new one compresses decisions.</h2>
         <div class="compare-grid">
           <article><span>Old way</span><h3>Manual production</h3><ul><li>Find creator or shoot yourself</li><li>Write script and brief</li><li>Edit, revise, caption manually</li><li>Repeat again tomorrow</li></ul></article>
-          <article class="winner"><span>Duitok  AI way</span><h3>AI-assisted content engine</h3><ul><li>Paste product link</li><li>Pick image, UGC, clone, or story mode</li><li>Generate batch-ready outputs</li><li>Export or continue inside Studio</li></ul></article>
+          <article class="winner"><span>Duitok AI way</span><h3>AI-assisted content engine</h3><ul><li>Paste product link</li><li>Pick image, UGC, clone, or story mode</li><li>Generate batch-ready outputs</li><li>Export or continue inside Studio</li></ul></article>
         </div>
       </section>
       <section class="testimonial-section">
@@ -185,7 +186,7 @@ function publicSite() {
         <div><p class="eyebrow">Pricing</p><h2>One launch plan. Add credits when you need more output.</h2><p>Subscription unlocks the Studio. Credits are used for generation, exports, and future AI worker actions.</p></div>
         <article class="price-card">
           <span>Launch offer</span>
-          <h3>Duitok  AI Pro</h3>
+          <h3>Duitok AI Pro</h3>
           <div class="price"><s>RM300</s><b>RM75</b><small>/month</small></div>
           <ul><li>Image Studio</li><li>UGC Script Studio</li><li>Auto Content Batch</li><li>Clone Prompt Mode</li><li>Storytelling Frameworks</li><li>VIP support channel</li></ul>
           <button class="gold-button" data-action="open-register">${icon("credit-card")} Claim RM75 plan</button>
@@ -203,12 +204,12 @@ function publicSite() {
       <section id="faq" class="faq-section">
         <p class="eyebrow">FAQ</p>
         <h2>Questions sellers ask before starting.</h2>
-        <details open><summary>Do I need to know how to shoot video?</summary><p>No. Duitok  AI is designed around product links, prompts, scripts, and repeatable content structures.</p></details>
+        <details open><summary>Do I need to know how to shoot video?</summary><p>No. Duitok AI is designed around product links, prompts, scripts, and repeatable content structures.</p></details>
         <details><summary>Can this work for Malay content?</summary><p>Yes. The product is shaped for Malaysia seller workflows and informal Bahasa Melayu content direction.</p></details>
         <details><summary>Is auto-posting ready?</summary><p>The current build prepares scheduling states and exports. Full TikTok auto-posting should be connected after API approval.</p></details>
         <details><summary>Where do I manage projects?</summary><p>Go to /studio, sign in, and use the workspace for projects, billing, usage, affiliate, and support.</p></details>
       </section>
-      <footer class="public-footer"><b>Duitok  AI</b><span>© 2026</span><a href="mailto:hello@duitok.com">hello@duitok.com</a></footer>
+      <footer class="public-footer"><b>Duitok AI</b><span>© 2026</span><a href="mailto:hello@duitok.com">hello@duitok.com</a></footer>
     </main>`;
 }
 
@@ -223,7 +224,7 @@ function registerPage() {
         <div>
           <p class="eyebrow">Start now</p>
           <h1>Register, pay, and activate your Studio.</h1>
-          <p class="public-copy">This page mirrors the Duitok  AI checkout flow: plan confirmation on one side, buyer details on the other. CHIP payment will be connected after your merchant keys are ready.</p>
+          <p class="public-copy">This page mirrors the Duitok AI checkout flow: plan confirmation on one side, buyer details on the other. CHIP payment will be connected after your merchant keys are ready.</p>
           <div class="checkout-steps">
             <article><b>1</b><span>Subscribe plan</span><p>Unlock all content tools and low generation rates.</p></article>
             <article><b>2</b><span>Top up credits</span><p>RM1 = 1 credit. Credits are used when generating assets.</p></article>
@@ -232,7 +233,7 @@ function registerPage() {
         </div>
         <article class="price-card checkout-card">
           <span>Launch offer</span>
-          <h3>Duitok  AI Pro</h3>
+          <h3>Duitok AI Pro</h3>
           <div class="price"><s>RM300</s><b>RM75</b><small>/month</small></div>
           <ul><li>Full Studio access</li><li>Prompt library</li><li>Image and video workflows</li><li>Clone prompt mode</li><li>VIP WhatsApp support</li></ul>
         </article>
@@ -265,7 +266,7 @@ function affiliatePage() {
       <section class="affiliate-hero">
         <div>
           <p class="eyebrow">Affiliate program</p>
-          <h1>Earn monthly commission by sharing Duitok  AI.</h1>
+          <h1>Earn monthly commission by sharing Duitok AI.</h1>
           <p class="public-copy">For creators, agencies, coaches, and seller communities. Share one link, help sellers create faster, and earn on active subscriptions.</p>
           <div class="public-actions">
             <a class="gold-button" href="#affiliate-form">${icon("users")} Apply now</a>
@@ -302,7 +303,7 @@ function affiliatePage() {
           <button class="gold-button" type="submit">${icon("send")} Submit application</button>
         </form>
       </section>
-      <footer class="public-footer"><b>Duitok  AI Affiliate</b><span>© 2026</span><a href="mailto:hello@duitok.com">hello@duitok.com</a></footer>
+      <footer class="public-footer"><b>Duitok AI Affiliate</b><span>© 2026</span><a href="mailto:hello@duitok.com">hello@duitok.com</a></footer>
     </main>`;
 }
 
@@ -361,7 +362,7 @@ function studio() {
 }
 
 function brand(label = "Studio") {
-  return `<div class="brand-lockup"><span class="logo-mark">${icon("scissors", 28)}</span><div><b>Duitok  AI</b><strong>${label}</strong></div></div>`;
+  return `<div class="brand-lockup"><img class="brand-logo" src="/duittok-logo-cropped.png" alt="Duitok AI"><div><b>Duitok AI</b><strong>${label}</strong></div></div>`;
 }
 
 function projectButtons() {
@@ -477,15 +478,15 @@ function schedule() {
 
 function modal() {
   if (!state.modal) return "";
-  const title = { newProject: "Create New Project", register: "Choose Plan & Register", sop: "SOP Image", export: "Export Ready", chat: "Duitok  AI Support" }[state.modal];
+  const title = { newProject: "Create New Project", register: "Choose Plan & Register", sop: "SOP Image", export: "Export Ready", chat: "Duitok AI Support" }[state.modal];
   const body = {
     newProject: `<form data-form="project"><label>Project name<input name="name" placeholder="Project ${(state.db?.projects.length || 0) + 1}" required></label><button class="gold-button" type="submit">${icon("plus")} Create</button></form>`,
     register: `<form data-form="login"><label>Email<input name="email" type="email" placeholder="you@duitok.com" required></label><label>Password<input name="password" type="password" placeholder="Create password" required></label><button class="gold-button" type="submit">${icon("lock")} Register & Enter Studio</button></form>`,
     sop: `<div class="sop-sheet"><b>Image SOP</b><ol><li>Upload avatar face.</li><li>Upload product reference.</li><li>Select model and mode.</li><li>Write prompt.</li><li>Generate, save, export.</li></ol><button class="dark-button" data-action="download-sop">${icon("download")} Download SOP</button></div>`,
     export: `<p>Your export has started. Files are generated by the backend.</p><button class="gold-button" data-action="close-modal">${icon("check")} Done</button>`,
-    chat: `<p>How can Duitok  AI help?</p><button class="gold-button" data-action="support-ticket">${icon("send")} Create Support Ticket</button>`
+    chat: `<p>How can Duitok AI help?</p><button class="gold-button" data-action="support-ticket">${icon("send")} Create Support Ticket</button>`
   }[state.modal];
-  return `<div class="modal-backdrop" data-action="close-modal"><section class="modal"><button class="icon-only close" data-action="close-modal">${icon("x")}</button><p class="folder-label">${icon("sparkles", 18)} Duitok  AI</p><h2>${title}</h2>${body}</section></div>`;
+  return `<div class="modal-backdrop" data-action="close-modal"><section class="modal"><button class="icon-only close" data-action="close-modal">${icon("x")}</button><p class="folder-label">${icon("sparkles", 18)} Duitok AI</p><h2>${title}</h2>${body}</section></div>`;
 }
 
 function livePanel() {

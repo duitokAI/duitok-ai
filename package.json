@@ -7,6 +7,7 @@
     "dev": "node server.mjs",
     "api": "node server.mjs",
     "build": "vite build",
+    "check:chip": "node scripts/check-chip-config.mjs",
     "start": "node server.mjs",
     "preview": "NODE_ENV=production node server.mjs"
   },

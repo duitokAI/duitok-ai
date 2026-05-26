@@ -17,6 +17,12 @@ const port = Number(process.env.PORT || 4173);
 const serveStatic = process.env.SERVE_STATIC !== "false";
 const databaseUrl = process.env.DATABASE_URL || process.env.SUPABASE_DB_URL || "";
 const postgresStateId = process.env.POSTGRES_STATE_ID || "default";
+const apimartBaseUrl = (process.env.APIMART_BASE_URL || "https://api.apimart.ai").replace(/\/$/, "");
+const apimartChatPath = process.env.APIMART_CHAT_PATH || "/api/v1/chat/completions";
+const apimartImagePath = process.env.APIMART_IMAGE_PATH || "/v1/images/generations";
+const apimartTaskPathPrefix = process.env.APIMART_TASK_PATH_PREFIX || "/v1/tasks";
+const apimartTextModel = process.env.APIMART_TEXT_MODEL || "gpt-5-mini";
+const apimartImageModel = process.env.APIMART_IMAGE_MODEL || "gpt-image-2";
 const postgresPool = databaseUrl
   ? new Pool({
       connectionString: databaseUrl,
@@ -47,7 +53,12 @@ app.use(express.json({
 }));
 
 app.get("/api/health", (_req, res) => {
-  res.json({ ok: true, service: "duitok-ai", storage: postgresPool ? "postgres" : "json" });
+  res.json({
+    ok: true,
+    service: "duitok-ai",
+    storage: postgresPool ? "postgres" : "json",
+    ai: process.env.APIMART_API_KEY ? "apimart" : "mock"
+  });
 });
 
 function blankProject(id, name) {
@@ -238,6 +249,159 @@ function generatedCopy(action, step) {
   return map[action] || [`${step} result`, "Generated output saved."];
 }
 
+function requireApimartConfig() {
+  const apiKey = process.env.APIMART_API_KEY;
+  if (!apiKey || apiKey.includes("replace_with")) {
+    const error = new Error("APIMart belum configure. Isi APIMART_API_KEY dalam Render Environment Variables dulu.");
+    error.status = 503;
+    throw error;
+  }
+  return apiKey;
+}
+
+async function apimartRequest(pathname, options = {}) {
+  const apiKey = requireApimartConfig();
+  const response = await fetch(`${apimartBaseUrl}${pathname}`, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      ...(options.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
+      ...(options.headers || {})
+    },
+    signal: AbortSignal.timeout(Number(process.env.APIMART_TIMEOUT_MS || 120000))
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || (payload.code && payload.code >= 400)) {
+    const error = new Error(payload.message || payload.detail || payload.error || `APIMart request failed (${response.status})`);
+    error.status = response.status || 502;
+    throw error;
+  }
+  return payload.data || payload;
+}
+
+function formatProjectContext(project, action, step) {
+  return JSON.stringify({
+    action,
+    step,
+    projectName: project.name,
+    image: project.image,
+    ugc: project.ugc,
+    auto: project.auto,
+    original: project.original,
+    clone: project.clone,
+    story: project.story,
+    viral: project.viral
+  }, null, 2);
+}
+
+function buildTextPrompt(project, action, step) {
+  const taskMap = {
+    "generate-ugc": "Write a practical UGC video script with hook, scene notes, creator lines, objection handling, offer, and CTA.",
+    "generate-auto": "Create a batch content plan with post ideas, hooks, captions, visual directions, and CTA for each post.",
+    "analyze-original": "Analyze the original video brief and return hook, proof moment, content structure, remake notes, and safer rewrite.",
+    "clone-prompt": "Turn the reference into a reusable clone prompt. Keep the structure but do not copy exact words.",
+    "write-story": "Write a short-form storytelling script for TikTok Shop using the selected arc and market.",
+    "decode-viral": "Decode the competitor pattern into repeatable hooks, angles, pacing, proof, objections, and CTA checklist."
+  };
+  return [
+    taskMap[action] || "Generate the requested Duitok AI content output.",
+    "",
+    "Context:",
+    formatProjectContext(project, action, step),
+    "",
+    "Output in clean Markdown. Be specific, seller-friendly, and optimized for Malaysia TikTok Shop workflows."
+  ].join("\n");
+}
+
+async function generateTextWithApimart(project, action, step) {
+  const data = await apimartRequest(apimartChatPath, {
+    method: "POST",
+    body: JSON.stringify({
+      model: apimartTextModel,
+      stream: false,
+      messages: [
+        {
+          role: "system",
+          content: "You are Duitok AI, an AI content studio for Malaysia sellers. Produce usable marketing outputs, not generic advice."
+        },
+        { role: "user", content: buildTextPrompt(project, action, step) }
+      ]
+    })
+  });
+  return data.choices?.[0]?.message?.content?.trim() || data.output_text || data.text || JSON.stringify(data, null, 2);
+}
+
+function imageModelFromProject(project) {
+  const modelMap = {
+    "Banana Pro": "gemini-3-pro-image-preview",
+    "Nano Banana": "gemini-2.5-flash-image-preview",
+    Seedream: "seedream-4-0"
+  };
+  return process.env.APIMART_IMAGE_MODEL || modelMap[project.image?.model] || apimartImageModel;
+}
+
+async function pollApimartTask(taskId) {
+  const maxAttempts = Number(process.env.APIMART_IMAGE_POLL_ATTEMPTS || 24);
+  const delayMs = Number(process.env.APIMART_IMAGE_POLL_MS || 2500);
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, delayMs));
+    const data = await apimartRequest(`${apimartTaskPathPrefix}/${encodeURIComponent(taskId)}?language=en`);
+    if (data.status === "completed") return data;
+    if (["failed", "cancelled"].includes(data.status)) {
+      const error = new Error(data.fail_reason || data.error || `APIMart image task ${data.status}`);
+      error.status = 502;
+      throw error;
+    }
+  }
+  const error = new Error("APIMart image task is still processing. Please try again later.");
+  error.status = 202;
+  throw error;
+}
+
+function extractImageUrls(taskData) {
+  return (taskData.result?.images || [])
+    .flatMap((image) => Array.isArray(image.url) ? image.url : [image.url])
+    .filter(Boolean);
+}
+
+async function generateImageWithApimart(project) {
+  const prompt = [
+    project.image?.prompt || "Create a high-converting TikTok Shop product image.",
+    `Mode: ${project.image?.mode || "Create Image"}.`,
+    "Style: realistic commercial product scene, clear product focus, vertical-social friendly, no fake brand claims."
+  ].join("\n");
+  const data = await apimartRequest(apimartImagePath, {
+    method: "POST",
+    body: JSON.stringify({
+      model: imageModelFromProject(project),
+      prompt,
+      n: 1,
+      size: process.env.APIMART_IMAGE_SIZE || "1:1",
+      resolution: process.env.APIMART_IMAGE_RESOLUTION || "1k"
+    })
+  });
+  const task = Array.isArray(data) ? data[0] : data;
+  const taskId = task?.task_id || task?.id;
+  if (!taskId) return { text: JSON.stringify(data, null, 2), urls: [] };
+  const taskData = await pollApimartTask(taskId);
+  const urls = extractImageUrls(taskData);
+  return {
+    text: urls.length ? `Image generated with APIMart.\n\nTask ID: ${taskId}` : `Image task completed.\n\nTask ID: ${taskId}`,
+    urls,
+    taskId
+  };
+}
+
+async function generateWithApimart(project, action, step) {
+  if (action === "generate-image") {
+    const image = await generateImageWithApimart(project);
+    return { title: "APIMart Image", body: image.text, imageUrl: image.urls[0], taskId: image.taskId };
+  }
+  const body = await generateTextWithApimart(project, action, step);
+  const [fallbackTitle] = generatedCopy(action, step);
+  return { title: fallbackTitle.replace(/^(Image|UGC|Auto|Original|Clone|Story|Viral)/, "APIMart $1"), body };
+}
+
 function publicAppUrl(pathname) {
   const base = (process.env.PUBLIC_APP_URL || `http://localhost:${port}`).replace(/\/$/, "");
   return `${base}${pathname}`;
@@ -378,13 +542,31 @@ app.patch("/api/projects/:id/field", async (req, res) => {
 });
 
 app.post("/api/projects/:id/generate", async (req, res) => {
-  res.json(await mutateDb(async (db) => {
-    const project = findProject(db, req.params.id);
-    const [title, text] = generatedCopy(req.body.action, req.body.step);
-    project.results.push({ id: crypto.randomUUID(), type: req.body.step, title, body: text, createdAt: new Date().toISOString() });
+  const db = await ensureDb();
+  const projectSnapshot = structuredClone(findProject(db, req.params.id));
+  const generated = process.env.APIMART_API_KEY
+    ? await generateWithApimart(projectSnapshot, req.body.action, req.body.step)
+    : (() => {
+        const [title, body] = generatedCopy(req.body.action, req.body.step);
+        return { title, body };
+      })();
+
+  res.json(await mutateDb(async (currentDb) => {
+    const project = findProject(currentDb, req.params.id);
+    project.results.push({
+      id: crypto.randomUUID(),
+      type: req.body.step,
+      title: generated.title,
+      body: generated.body,
+      imageUrl: generated.imageUrl,
+      taskId: generated.taskId,
+      provider: process.env.APIMART_API_KEY ? "apimart" : "mock",
+      createdAt: new Date().toISOString()
+    });
     db.billing.credits = Math.max(0, db.billing.credits - 4);
-    db.usage.unshift(usage(title, 4));
-    return saveDb(db);
+    currentDb.billing.credits = Math.max(0, currentDb.billing.credits - 4);
+    currentDb.usage.unshift(usage(generated.title, 4));
+    return saveDb(currentDb);
   }));
 });
 

@@ -989,8 +989,7 @@ textarea {
 }
 
 .step-tabs {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(130px, 1fr));
+  display: flex;
   gap: 10px;
   padding-bottom: 12px;
   margin-bottom: 36px;
@@ -999,13 +998,31 @@ textarea {
 }
 
 .step-tabs button {
+  flex: 0 0 auto;
+  min-width: 142px;
   min-height: 62px;
+  gap: 6px;
+  padding-inline: 10px;
+  overflow: visible;
   background: #171717;
   color: #aaa;
   border-color: var(--line);
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 900;
   white-space: nowrap;
+}
+
+.step-tabs button span {
+  min-width: auto;
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+.step-tabs button svg,
+.step-tabs button b {
+  flex: 0 0 auto;
 }
 
 .step-tabs button.active {
@@ -1422,5 +1439,448 @@ textarea {
   .feature-mosaic article:nth-child(4),
   .feature-mosaic article:nth-child(5) {
     grid-column: auto;
+  }
+}
+
+/* Duitok AI brand refresh */
+:root {
+  color-scheme: light;
+  --bg: #fff8fb;
+  --panel: #ffffff;
+  --panel-2: #fff0f6;
+  --cream: #ffffff;
+  --ink: #2b0634;
+  --muted: #7a607f;
+  --line: rgba(95, 0, 103, 0.12);
+  --soft-line: #f0d8ed;
+  --gold: #ff5a6f;
+  --gold-2: #ff8b64;
+  --brown: #fff0f7;
+  --success: #23c980;
+  --danger: #ff4f65;
+  --purple: #5d086c;
+  --purple-2: #8f148c;
+  --pink: #ff4e78;
+  --coral: #ff835e;
+  --peach: #fff1e9;
+  --shadow: 0 22px 58px rgba(76, 0, 87, 0.13);
+}
+
+body {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 241, 247, 0.94)),
+    repeating-linear-gradient(45deg, rgba(96, 8, 116, 0.03) 0 1px, transparent 1px 18px);
+  color: var(--ink);
+}
+
+.loading,
+.login-shell,
+.public-shell,
+.studio-shell,
+.workspace,
+.affiliate-shell {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 241, 247, 0.96)),
+    repeating-linear-gradient(45deg, rgba(94, 8, 108, 0.035) 0 1px, transparent 1px 22px);
+  color: var(--ink);
+}
+
+.public-shell {
+  min-height: 100vh;
+}
+
+.promo-bar {
+  margin-bottom: 8px;
+  border-radius: 0 0 8px 8px;
+  background: linear-gradient(90deg, var(--pink), var(--coral));
+  color: white;
+  box-shadow: 0 14px 38px rgba(255, 79, 101, 0.22);
+}
+
+.public-nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  border-bottom: 1px solid rgba(93, 8, 108, 0.08);
+  background: rgba(255, 255, 255, 0.84);
+  backdrop-filter: blur(18px);
+}
+
+.brand-lockup {
+  gap: 12px;
+}
+
+.brand-logo {
+  width: 178px;
+  height: 54px;
+  object-fit: contain;
+  object-position: left center;
+  display: block;
+  filter: drop-shadow(0 10px 18px rgba(92, 0, 103, 0.13));
+}
+
+.sidebar .brand-logo,
+.login-card .brand-logo {
+  width: 196px;
+  height: 62px;
+}
+
+.brand-lockup b {
+  color: var(--purple);
+  letter-spacing: 0.08em;
+}
+
+.brand-lockup strong {
+  color: var(--pink);
+  font-size: 15px;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+}
+
+.logo-mark {
+  background: linear-gradient(135deg, var(--purple), var(--pink) 55%, var(--coral));
+  color: white;
+  box-shadow: 0 16px 34px rgba(255, 79, 101, 0.22);
+}
+
+.public-links a,
+.public-footer,
+.public-footer a,
+.public-copy,
+.public-grid p,
+.pain-list p,
+.feature-mosaic p,
+.comparison-section p,
+.testimonial-section p,
+.pricing-section p,
+.signup-section p,
+.faq-section p,
+.checkout-steps p,
+.demo-reel p {
+  color: var(--muted);
+}
+
+.public-links a:hover,
+.text-button,
+.eyebrow,
+.folder-label,
+.public-grid span,
+.feature-mosaic span,
+.compare-grid span,
+.price-card > span,
+.demo-reel span {
+  color: var(--pink);
+}
+
+.public-hero {
+  grid-template-columns: minmax(0, 1.08fr) minmax(340px, 0.92fr);
+}
+
+.public-hero h1,
+.split-section h2,
+.feature-section h2,
+.comparison-section h2,
+.testimonial-section h2,
+.pricing-section h2,
+.signup-section h2,
+.faq-section h2,
+.register-hero h1,
+.affiliate-hero h1,
+.project-head h1 {
+  color: var(--purple);
+  letter-spacing: 0;
+}
+
+.public-hero h1 {
+  max-width: 820px;
+}
+
+.hero-board,
+.public-grid article,
+.pain-list article,
+.feature-mosaic article,
+.compare-grid article,
+.quote-grid article,
+.price-card,
+.lead-form,
+.faq-section details,
+.checkout-steps article,
+.demo-reel article,
+.generator-box,
+.upload-card,
+.prompt-block,
+.result-grid article,
+.empty-result,
+.schedule-list article,
+.metric-row article,
+.table div,
+.topup-grid button,
+.sop-sheet,
+.login-card,
+.modal,
+.canvas-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--shadow);
+}
+
+.hero-board {
+  position: relative;
+  overflow: hidden;
+  padding: 28px;
+}
+
+.hero-logo {
+  width: min(100%, 440px);
+  margin: 4px auto 14px;
+  display: block;
+}
+
+.race-card {
+  border: 1px solid rgba(93, 8, 108, 0.1);
+  background: #fff7fb;
+  color: var(--purple);
+}
+
+.race-card.hot {
+  color: var(--pink);
+  background: linear-gradient(135deg, #fff3f0, #fff7fb);
+}
+
+.race-meter {
+  background: #f5e2f1;
+}
+
+.race-meter i {
+  background: linear-gradient(90deg, var(--purple), var(--pink), var(--coral));
+}
+
+.trust-row span,
+.commission-orbit i {
+  border-color: rgba(93, 8, 108, 0.12);
+  background: white;
+  color: var(--purple);
+}
+
+.gold-button,
+.sop-button,
+.checkout-steps b,
+.chat-panel button,
+.step-tabs button.active,
+.live-tab {
+  background: linear-gradient(135deg, var(--pink), var(--coral));
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 16px 34px rgba(255, 79, 101, 0.24);
+}
+
+.dark-button,
+.result-grid button,
+.table button,
+.schedule-list button,
+.icon-only.close {
+  background: var(--purple);
+  color: white;
+  border-color: transparent;
+}
+
+.dark-button:hover,
+.gold-button:hover,
+.side-link:hover,
+.project-button:hover,
+.topup-grid button:hover {
+  transform: translateY(-1px);
+}
+
+.compare-grid .winner {
+  border-color: rgba(255, 79, 101, 0.35);
+  background: linear-gradient(135deg, #fff5f2, #fff8fc);
+}
+
+.compare-grid ul,
+.price-card ul {
+  color: var(--ink);
+}
+
+.price b,
+.topup-grid b {
+  color: var(--pink);
+}
+
+.demo-screen {
+  background:
+    linear-gradient(135deg, rgba(93, 8, 108, 0.92), rgba(255, 78, 120, 0.88), rgba(255, 131, 94, 0.9));
+  color: white;
+}
+
+.commission-orbit {
+  border-color: rgba(255, 79, 101, 0.32);
+  background: linear-gradient(135deg, #fff, #fff1f7);
+  box-shadow: 0 24px 60px rgba(255, 79, 101, 0.18);
+}
+
+.commission-orbit b {
+  color: var(--pink);
+}
+
+.commission-orbit span {
+  color: var(--purple);
+}
+
+.sidebar {
+  border-right: 1px solid var(--line);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 241, 247, 0.96));
+}
+
+.sidebar .brand-lockup {
+  border-bottom: 1px solid var(--line);
+}
+
+.side-primary,
+.new-project,
+.side-link,
+.project-button,
+.step-tabs button {
+  color: var(--muted);
+  border-color: transparent;
+  background: transparent;
+}
+
+.side-primary {
+  border-color: rgba(93, 8, 108, 0.11);
+  background: white;
+  color: var(--purple);
+}
+
+.side-primary.active,
+.side-link.active,
+.project-button.active {
+  color: var(--purple);
+  background: #fff0f7;
+  border-color: rgba(255, 79, 101, 0.18);
+}
+
+.new-project {
+  color: white;
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--purple), var(--pink));
+  box-shadow: 0 16px 32px rgba(93, 8, 108, 0.16);
+}
+
+.new-project b {
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.search-box {
+  color: var(--muted);
+}
+
+.search-box input,
+input,
+select,
+textarea {
+  border-color: var(--soft-line);
+  background: #fff;
+  color: var(--ink);
+}
+
+.project-button svg {
+  border-color: rgba(93, 8, 108, 0.12);
+  background: white;
+}
+
+.project-button.active svg {
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--pink), var(--coral));
+  color: white;
+}
+
+.canvas-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 247, 252, 0.98));
+  color: var(--ink);
+}
+
+.generator-box {
+  border-color: rgba(255, 79, 101, 0.24);
+  background: linear-gradient(135deg, #fff, #fff4f8);
+}
+
+.generator-box h2,
+.upload-card h2,
+.modal h2 {
+  color: var(--purple);
+}
+
+label {
+  color: #8a628f;
+}
+
+.drop-zone {
+  border-color: rgba(255, 79, 101, 0.28);
+  background: linear-gradient(135deg, #fff8fb, #fff1ec);
+  color: var(--muted);
+}
+
+.drop-zone strong {
+  color: var(--purple);
+}
+
+.drop-zone small,
+.metric-row span,
+.table small,
+.schedule-list small,
+.subtitle,
+.empty-text {
+  color: var(--muted);
+}
+
+.topup-grid button {
+  background: linear-gradient(135deg, #fff, #fff5f9);
+  color: var(--purple);
+}
+
+.chat-bubble {
+  border-color: rgba(255, 255, 255, 0.8);
+  background: linear-gradient(135deg, var(--purple), var(--pink), var(--coral));
+  color: white;
+  box-shadow: 0 18px 46px rgba(255, 79, 101, 0.32);
+}
+
+.live-panel,
+.chat-panel,
+.toast {
+  border-color: var(--line);
+  background: white;
+  color: var(--ink);
+}
+
+.live-panel p {
+  color: var(--muted);
+}
+
+.modal-backdrop {
+  background: rgba(43, 6, 52, 0.38);
+  backdrop-filter: blur(8px);
+}
+
+.toast {
+  color: var(--purple);
+}
+
+@media (max-width: 1100px) {
+  .brand-logo {
+    width: 144px;
+    height: 50px;
+  }
+
+  .step-tabs button {
+    justify-content: flex-start;
+  }
+
+  .public-hero h1 {
+    font-size: clamp(40px, 11vw, 64px);
   }
 }
