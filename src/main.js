@@ -139,7 +139,7 @@ const copy = {
     usage: "Usage",
     autopost: "Auto Post TikTok",
     whatsapp: "Join Discussion WhatsApp",
-    imageGenerator: "Image Generator",
+    imageGenerator: "Media Generator",
     model: "Model",
     mode: "Mode",
     avatarRef: "Avatar Reference (Optional)",
@@ -147,7 +147,7 @@ const copy = {
     dropAvatar: "Click atau drop gambar muka character",
     dropProduct: "Click atau drop gambar produk",
     prompt: "Prompt",
-    generateImage: "Generate Image",
+    generateImage: "Generate Media",
     generating: "APIMart is generating...",
     noResults: "Belum ada result",
     export: "Export",
@@ -253,7 +253,7 @@ const copy = {
     usage: "用量",
     autopost: "自动发布 TikTok",
     whatsapp: "加入 WhatsApp 讨论群",
-    imageGenerator: "图片生成器",
+    imageGenerator: "图片 / 视频生成器",
     model: "模型",
     mode: "模式",
     avatarRef: "人物参考（可选）",
@@ -261,7 +261,7 @@ const copy = {
     dropAvatar: "点击或拖入人物脸部图片",
     dropProduct: "点击或拖入产品图片",
     prompt: "提示词",
-    generateImage: "生成图片",
+    generateImage: "生成作品",
     generating: "APIMart 正在生成...",
     noResults: "还没有结果",
     export: "导出",
@@ -367,7 +367,7 @@ const copy = {
     usage: "Usage",
     autopost: "Auto Post TikTok",
     whatsapp: "Join Discussion WhatsApp",
-    imageGenerator: "Image Generator",
+    imageGenerator: "Media Generator",
     model: "Model",
     mode: "Mode",
     avatarRef: "Avatar Reference (Optional)",
@@ -375,7 +375,7 @@ const copy = {
     dropAvatar: "Click or drop character face image",
     dropProduct: "Click or drop product image",
     prompt: "Prompt",
-    generateImage: "Generate Image",
+    generateImage: "Generate Media",
     generating: "APIMart is generating...",
     noResults: "No results yet",
     export: "Export",
@@ -986,7 +986,7 @@ function stepPanel(p) {
 
 function imagePanel(p) {
   return `
-    <div class="generator-box"><h2>🖼️ ${t("imageGenerator")}</h2><div class="form-grid two">${select("image.model", t("model"), ["GPT Image 2", "Nano Banana Pro", "Nano Banana 2", "Nano Banana", "Seedream"], p.image.model)}${select("image.mode", t("mode"), ["Create Image", "Edit Image", "Product Scene"], p.image.mode)}</div></div>
+    <div class="generator-box"><h2>🖼️ ${t("imageGenerator")}</h2><div class="form-grid two">${select("image.model", t("model"), ["GPT Image 2", "Nano Banana Pro", "Veo 3.1"], p.image.model)}${select("image.mode", t("mode"), ["Create Image", "Edit Image", "Product Scene"], p.image.mode)}</div></div>
     ${upload(t("avatarRef"), t("dropAvatar"), "Face / person - used for all variations", "camera", "avatar")}
     ${upload(t("productRef"), t("dropProduct"), "Product - used for all images and videos", "package", "product")}
     ${prompt("image.prompt", p.image.prompt, "Describe the product shot, background, pose, outfit, and mood.", "generate-image", t("generateImage"))}
@@ -1038,7 +1038,8 @@ function results(p, type) {
 
 function resultPreview(item) {
   const image = item.imageUrl ? `<img class="result-image" src="${esc(item.imageUrl)}" alt="${esc(item.title)}">` : "";
-  return `${image}<p>${esc(item.body).replaceAll("\n", "<br>")}</p>`;
+  const video = item.videoUrl ? `<video class="result-video" src="${esc(item.videoUrl)}" controls playsinline></video>` : "";
+  return `${image}${video}<p>${esc(item.body).replaceAll("\n", "<br>")}</p>`;
 }
 
 function accountPage() {

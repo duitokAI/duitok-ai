@@ -23,15 +23,16 @@ const apimartImagePath = process.env.APIMART_IMAGE_PATH || "/v1/images/generatio
 const apimartTaskPathPrefix = process.env.APIMART_TASK_PATH_PREFIX || "/v1/tasks";
 const apimartTextModel = process.env.APIMART_TEXT_MODEL || "gpt-5-mini";
 const apimartImageModel = process.env.APIMART_IMAGE_MODEL || "gpt-image-2";
+const deepseekBaseUrl = (process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com").replace(/\/$/, "");
+const deepseekChatPath = process.env.DEEPSEEK_CHAT_PATH || "/chat/completions";
+const deepseekModel = process.env.DEEPSEEK_MODEL || "deepseek-v4-flash";
 const wuyinBaseUrl = (process.env.WUYIN_BASE_URL || "https://api.wuyinkeji.com").replace(/\/$/, "");
-const wuyinImageProvider = (process.env.AI_IMAGE_PROVIDER || "auto").toLowerCase();
 const wuyinImagePaths = {
-  "GPT Image 2": "/api/async/image_gpt",
-  "Nano Banana 2": "/api/async/image_nanoBanana2",
   "Nano Banana Pro": "/api/async/image_nanoBanana_pro",
-  "Banana Pro": "/api/async/image_nanoBanana_pro",
-  "Nano Banana": "/api/async/image_nanoBanana"
+  "Veo 3.1": "/api/video/veo"
 };
+const wuyinVideoModel = process.env.WUYIN_VIDEO_MODEL || "veo3.1-fast";
+const allowedMediaModels = new Set(["GPT Image 2", "Nano Banana Pro", "Veo 3.1"]);
 const postgresPool = databaseUrl
   ? new Pool({
       connectionString: databaseUrl,
@@ -64,6 +65,7 @@ app.use(express.json({
 app.get("/api/health", (_req, res) => {
   const aiProviders = [
     process.env.APIMART_API_KEY ? "apimart" : null,
+    process.env.DEEPSEEK_API_KEY ? "deepseek" : null,
     process.env.WUYIN_API_KEY ? "wuyin" : null
   ].filter(Boolean);
   res.json({
@@ -71,7 +73,7 @@ app.get("/api/health", (_req, res) => {
     service: "duitok-ai",
     storage: postgresPool ? "postgres" : "json",
     ai: aiProviders.join("+") || "mock",
-    imageProvider: selectImageProvider()
+    imageProvider: "model-router"
   });
 });
 
@@ -80,7 +82,7 @@ function blankProject(id, name) {
     id,
     name,
     createdAt: new Date().toISOString(),
-    image: { model: "Banana Pro", mode: "Create Image", prompt: "" },
+    image: { model: "GPT Image 2", mode: "Create Image", prompt: "" },
     ugc: { avatar: "Malay female", voice: "BM Casual", length: "30 seconds", script: "Hook, product proof, objection, offer, CTA." },
     auto: { platform: "TikTok", batch: "7 posts", tone: "Viral hook", productUrl: "" },
     original: { brief: "Rewrite this into Duitok  AI style while keeping the product claim safe." },
@@ -273,12 +275,20 @@ function requireApimartConfig() {
   return apiKey;
 }
 
-function selectImageProvider() {
-  if (wuyinImageProvider === "wuyin" && process.env.WUYIN_API_KEY) return "wuyin";
-  if (wuyinImageProvider === "apimart" && process.env.APIMART_API_KEY) return "apimart";
-  if (wuyinImageProvider === "auto" && process.env.WUYIN_API_KEY) return "wuyin";
-  if (process.env.APIMART_API_KEY) return "apimart";
-  return "mock";
+function providerForMediaModel(model) {
+  if (model === "GPT Image 2") return process.env.APIMART_API_KEY ? "apimart" : "mock";
+  if (model === "Nano Banana Pro" || model === "Veo 3.1") return process.env.WUYIN_API_KEY ? "wuyin" : "mock";
+  return "unsupported";
+}
+
+function requireDeepSeekConfig() {
+  const apiKey = process.env.DEEPSEEK_API_KEY;
+  if (!apiKey || apiKey.includes("replace_with")) {
+    const error = new Error("DeepSeek belum configure. Isi DEEPSEEK_API_KEY dalam Environment Variables dulu.");
+    error.status = 503;
+    throw error;
+  }
+  return apiKey;
 }
 
 async function apimartRequest(pathname, options = {}) {
@@ -299,6 +309,26 @@ async function apimartRequest(pathname, options = {}) {
     throw error;
   }
   return payload.data || payload;
+}
+
+async function deepseekRequest(body) {
+  const apiKey = requireDeepSeekConfig();
+  const response = await fetch(`${deepseekBaseUrl}${deepseekChatPath}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(Number(process.env.DEEPSEEK_TIMEOUT_MS || 120000))
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(payload.error?.message || payload.message || `DeepSeek request failed (${response.status})`);
+    error.status = response.status || 502;
+    throw error;
+  }
+  return payload;
 }
 
 function requireWuyinConfig() {
@@ -390,11 +420,7 @@ async function generateTextWithApimart(project, action, step) {
 
 function imageModelFromProject(project) {
   const modelMap = {
-    "GPT Image 2": "gpt-image-2",
-    "Nano Banana Pro": "gemini-3-pro-image-preview",
-    "Banana Pro": "gemini-3-pro-image-preview",
-    "Nano Banana": "gemini-2.5-flash-image-preview",
-    Seedream: "seedream-4-0"
+    "GPT Image 2": "gpt-image-2"
   };
   return process.env.APIMART_IMAGE_MODEL || modelMap[project.image?.model] || apimartImageModel;
 }
@@ -425,15 +451,15 @@ function extractImageUrls(taskData) {
 
 function extractUrlsDeep(value) {
   const urls = [];
-  const visit = (item) => {
+  const visit = (item, keyName = "") => {
     if (!item) return;
     if (typeof item === "string") {
       const matches = item.match(/https?:\/\/[^\s"'<>\\]+/g) || [];
-      urls.push(...matches.filter((url) => /\.(png|jpe?g|webp|gif)(\?|$)/i.test(url)));
+      urls.push(...matches.filter((url) => /\.(png|jpe?g|webp|gif|mp4|mov|webm)(\?|$)/i.test(url) || /url/i.test(keyName)));
       return;
     }
-    if (Array.isArray(item)) return item.forEach(visit);
-    if (typeof item === "object") Object.values(item).forEach(visit);
+    if (Array.isArray(item)) return item.forEach((entry) => visit(entry, keyName));
+    if (typeof item === "object") Object.entries(item).forEach(([key, entry]) => visit(entry, key));
   };
   visit(value);
   return [...new Set(urls)];
@@ -468,18 +494,20 @@ async function generateImageWithApimart(project) {
 }
 
 function wuyinPathFromProject(project) {
-  return wuyinImagePaths[project.image?.model] || process.env.WUYIN_IMAGE_PATH || "/api/async/image_gpt";
+  return wuyinImagePaths[project.image?.model] || process.env.WUYIN_IMAGE_PATH || "/api/async/image_nanoBanana_pro";
 }
 
 function wuyinImageBody(project, prompt) {
   const model = project.image?.model || "";
   const aspectRatio = process.env.WUYIN_IMAGE_ASPECT_RATIO || "1:1";
   const imageSize = process.env.WUYIN_IMAGE_SIZE || "1K";
-  if (model === "GPT Image 2") {
-    return { prompt, size: aspectRatio };
-  }
-  if (model === "Nano Banana") {
-    return { prompt, imageSize, aspectRatio };
+  if (model === "Veo 3.1") {
+    return {
+      model: wuyinVideoModel,
+      prompt,
+      type: "text2video",
+      ratio: process.env.WUYIN_VIDEO_RATIO || "9:16"
+    };
   }
   return { prompt, size: imageSize, aspectRatio };
 }
@@ -523,6 +551,27 @@ async function generateImageWithWuyin(project) {
   };
 }
 
+async function generateVideoWithWuyin(project) {
+  const prompt = [
+    project.image?.prompt || "Create a high-converting TikTok Shop product video.",
+    `Mode: ${project.image?.mode || "Create Video"}.`,
+    "Style: realistic short-form ecommerce video, native-looking TikTok Shop pacing, clear product focus, no fake brand claims."
+  ].join("\n");
+  const data = await wuyinRequest(wuyinPathFromProject(project), {
+    method: "POST",
+    body: wuyinImageBody(project, prompt)
+  });
+  const taskId = data.id || data.task_id;
+  if (!taskId) return { text: JSON.stringify(data, null, 2), urls: [] };
+  const taskData = await pollWuyinTask(taskId);
+  const urls = extractUrlsDeep(taskData);
+  return {
+    text: urls.length ? `Video generated with 速创API.\n\nTask ID: ${taskId}` : `Video task completed with 速创API.\n\nTask ID: ${taskId}`,
+    urls,
+    taskId
+  };
+}
+
 async function generateWithApimart(project, action, step) {
   if (action === "generate-image") {
     const image = await generateImageWithApimart(project);
@@ -535,14 +584,24 @@ async function generateWithApimart(project, action, step) {
 
 async function generateWithProvider(project, action, step) {
   if (action === "generate-image") {
-    const provider = selectImageProvider();
+    const model = project.image?.model || "GPT Image 2";
+    if (!allowedMediaModels.has(model)) {
+      const error = new Error("This Duitok plan only supports GPT Image 2, Nano Banana Pro, and Veo 3.1.");
+      error.status = 400;
+      throw error;
+    }
+    const provider = providerForMediaModel(model);
+    if (provider === "wuyin" && model === "Veo 3.1") {
+      const video = await generateVideoWithWuyin(project);
+      return { title: "速创API Veo 3.1", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "wuyin" };
+    }
     if (provider === "wuyin") {
       const image = await generateImageWithWuyin(project);
-      return { title: "速创API Image", body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "wuyin" };
+      return { title: "速创API Nano Banana Pro", body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "wuyin" };
     }
     if (provider === "apimart") {
       const image = await generateImageWithApimart(project);
-      return { title: "APIMart Image", body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "apimart" };
+      return { title: "APIMart GPT Image 2", body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "apimart" };
     }
   }
   if (process.env.APIMART_API_KEY) {
@@ -552,9 +611,213 @@ async function generateWithProvider(project, action, step) {
   return { title, body, provider: "mock" };
 }
 
+async function saveGeneratedResult(projectId, action, step, generated) {
+  return mutateDb(async (currentDb) => {
+    const project = findProject(currentDb, projectId);
+    project.results.push({
+      id: crypto.randomUUID(),
+      type: step,
+      title: generated.title,
+      body: generated.body,
+      imageUrl: generated.imageUrl,
+      videoUrl: generated.videoUrl,
+      taskId: generated.taskId,
+      provider: generated.provider,
+      createdAt: new Date().toISOString()
+    });
+    currentDb.billing.credits = Math.max(0, currentDb.billing.credits - 4);
+    currentDb.usage.unshift(usage(generated.title, 4));
+    return saveDb(currentDb);
+  });
+}
+
 function publicAppUrl(pathname) {
   const base = (process.env.PUBLIC_APP_URL || `http://localhost:${port}`).replace(/\/$/, "");
   return `${base}${pathname}`;
+}
+
+function compactWorkspaceState(db) {
+  return {
+    credits: db.billing?.credits,
+    plan: db.billing?.plan,
+    projects: db.projects.map((project) => ({
+      id: project.id,
+      name: project.name,
+      image: project.image,
+      ugc: project.ugc,
+      auto: project.auto,
+      original: project.original,
+      clone: project.clone,
+      story: project.story,
+      viral: project.viral,
+      resultCount: project.results.length,
+      latestResults: project.results.slice(-3).map((item) => ({
+        id: item.id,
+        type: item.type,
+        title: item.title,
+        createdAt: item.createdAt
+      }))
+    })),
+    schedule: db.schedule,
+    recentUsage: db.usage.slice(0, 8)
+  };
+}
+
+const agentTools = [
+  {
+    type: "function",
+    function: {
+      name: "open_workspace",
+      description: "Move the user to a Duitok workspace page, step, or project. Use this when navigation helps.",
+      parameters: {
+        type: "object",
+        properties: {
+          page: { type: "string", description: "dashboard, project, library, autopost, billing, topup, usage, affiliate, whatsapp" },
+          step: { type: "string", description: "image, ugc, auto, original, clone, story, viral" },
+          projectId: { type: "string", description: "Existing project id, if relevant." }
+        }
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "create_project",
+      description: "Create a new Duitok project for the user.",
+      parameters: {
+        type: "object",
+        properties: {
+          name: { type: "string", description: "Project name." }
+        },
+        required: ["name"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "update_project_field",
+      description: "Update a project field before generating output.",
+      parameters: {
+        type: "object",
+        properties: {
+          projectId: { type: "string" },
+          field: { type: "string", description: "Dotted field path, for example image.prompt, ugc.script, auto.productUrl, clone.url, story.notes, viral.url." },
+          value: { type: "string" }
+        },
+        required: ["projectId", "field", "value"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "generate_project_output",
+      description: "Run one of Duitok's existing generation functions and save the result.",
+      parameters: {
+        type: "object",
+        properties: {
+          projectId: { type: "string" },
+          action: {
+            type: "string",
+            enum: ["generate-image", "generate-ugc", "generate-auto", "analyze-original", "clone-prompt", "write-story", "decode-viral"]
+          },
+          step: {
+            type: "string",
+            enum: ["image", "ugc", "auto", "original", "clone", "story", "viral"]
+          }
+        },
+        required: ["projectId", "action", "step"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "toggle_schedule_status",
+      description: "Toggle a scheduled post between Ready and Posted.",
+      parameters: {
+        type: "object",
+        properties: {
+          scheduleId: { type: "string" }
+        },
+        required: ["scheduleId"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "create_support_ticket",
+      description: "Create a support ticket when the user asks for human help or reports a platform problem.",
+      parameters: {
+        type: "object",
+        properties: {
+          message: { type: "string" }
+        },
+        required: ["message"]
+      }
+    }
+  }
+];
+
+async function executeAgentTool(name, args) {
+  if (name === "open_workspace") {
+    return {
+      ok: true,
+      uiAction: {
+        page: args.page || undefined,
+        step: args.step || undefined,
+        projectId: args.projectId || undefined
+      }
+    };
+  }
+
+  if (name === "create_project") {
+    const db = await mutateDb(async (currentDb) => {
+      currentDb.projects.push(blankProject(crypto.randomUUID(), args.name || `Project ${currentDb.projects.length + 1}`));
+      return saveDb(currentDb);
+    });
+    return { ok: true, message: "Project created.", db };
+  }
+
+  if (name === "update_project_field") {
+    const db = await mutateDb(async (currentDb) => {
+      setDeep(findProject(currentDb, args.projectId), args.field, args.value);
+      currentDb.usage.unshift(usage(`Agent updated ${args.field}`, 0));
+      return saveDb(currentDb);
+    });
+    return { ok: true, message: `${args.field} updated.`, db };
+  }
+
+  if (name === "generate_project_output") {
+    const db = await ensureDb();
+    const projectSnapshot = structuredClone(findProject(db, args.projectId));
+    const generated = await generateWithProvider(projectSnapshot, args.action, args.step);
+    const nextDb = await saveGeneratedResult(args.projectId, args.action, args.step, generated);
+    return { ok: true, message: `${generated.title} saved.`, db: nextDb };
+  }
+
+  if (name === "toggle_schedule_status") {
+    const db = await mutateDb(async (currentDb) => {
+      const item = currentDb.schedule.find((entry) => entry.id === args.scheduleId);
+      if (!item) throw Object.assign(new Error("Schedule item not found"), { status: 404 });
+      item.status = item.status === "Ready" ? "Posted" : "Ready";
+      currentDb.usage.unshift(usage(`Agent updated schedule: ${item.title}`, 0));
+      return saveDb(currentDb);
+    });
+    return { ok: true, message: "Schedule updated.", db };
+  }
+
+  if (name === "create_support_ticket") {
+    const db = await mutateDb(async (currentDb) => {
+      currentDb.supportTickets.unshift({ id: crypto.randomUUID(), message: args.message, createdAt: new Date().toISOString() });
+      return saveDb(currentDb);
+    });
+    return { ok: true, message: "Support ticket created.", db };
+  }
+
+  return { ok: false, error: `Unknown tool: ${name}` };
 }
 
 function requireChipConfig() {
@@ -695,23 +958,89 @@ app.post("/api/projects/:id/generate", async (req, res) => {
   const db = await ensureDb();
   const projectSnapshot = structuredClone(findProject(db, req.params.id));
   const generated = await generateWithProvider(projectSnapshot, req.body.action, req.body.step);
+  res.json(await saveGeneratedResult(req.params.id, req.body.action, req.body.step, generated));
+});
 
-  res.json(await mutateDb(async (currentDb) => {
-    const project = findProject(currentDb, req.params.id);
-    project.results.push({
-      id: crypto.randomUUID(),
-      type: req.body.step,
-      title: generated.title,
-      body: generated.body,
-      imageUrl: generated.imageUrl,
-      taskId: generated.taskId,
-      provider: generated.provider,
-      createdAt: new Date().toISOString()
+app.post("/api/agent", async (req, res, next) => {
+  try {
+    const db = await ensureDb();
+    const history = Array.isArray(req.body.messages) ? req.body.messages.slice(-10) : [];
+    const projectId = req.body.projectId || db.projects[0]?.id;
+    const messages = [
+      {
+        role: "system",
+        content: [
+          "You are Duitok Agent inside Duitok AI Studio for Malaysia TikTok Shop sellers.",
+          "Help the user decide what to do next, and call Duitok platform tools when useful.",
+          "You can navigate the UI, create projects, update project fields, generate outputs, update schedule status, and create support tickets.",
+          "Be concise, practical, and speak in the user's language. Ask only when required data is missing.",
+          "Do not claim a tool ran unless it was actually called and returned success."
+        ].join(" ")
+      },
+      {
+        role: "system",
+        content: `Current workspace JSON:\n${JSON.stringify(compactWorkspaceState(db), null, 2)}\nCurrent project id: ${projectId || "none"}`
+      },
+      ...history
+        .filter((item) => ["user", "assistant"].includes(item.role) && typeof item.content === "string")
+        .map((item) => ({ role: item.role, content: item.content.slice(0, 5000) }))
+    ];
+
+    const toolResults = [];
+    const uiActions = [];
+    let latestDb = publicState(db);
+
+    for (let round = 0; round < 3; round += 1) {
+      const completion = await deepseekRequest({
+        model: deepseekModel,
+        messages,
+        tools: agentTools,
+        tool_choice: "auto",
+        stream: false
+      });
+      const message = completion.choices?.[0]?.message;
+      if (!message) throw Object.assign(new Error("DeepSeek returned an empty response"), { status: 502 });
+
+      messages.push(message);
+      const calls = message.tool_calls || [];
+      if (!calls.length) {
+        return res.json({
+          reply: message.content || "Done.",
+          db: latestDb,
+          toolResults,
+          uiActions
+        });
+      }
+
+      for (const call of calls) {
+        const name = call.function?.name;
+        let args = {};
+        try {
+          args = JSON.parse(call.function?.arguments || "{}");
+        } catch {
+          args = {};
+        }
+        const result = await executeAgentTool(name, args);
+        if (result.db) latestDb = result.db;
+        if (result.uiAction) uiActions.push(result.uiAction);
+        toolResults.push({ name, args, result: { ok: result.ok, message: result.message, error: result.error } });
+        messages.push({
+          role: "tool",
+          tool_call_id: call.id,
+          content: JSON.stringify({ ok: result.ok, message: result.message, error: result.error })
+        });
+      }
+    }
+
+    res.json({
+      reply: "I completed the available Duitok actions. Check the updated workspace.",
+      db: latestDb,
+      toolResults,
+      uiActions
     });
-    currentDb.billing.credits = Math.max(0, currentDb.billing.credits - 4);
-    currentDb.usage.unshift(usage(generated.title, 4));
-    return saveDb(currentDb);
-  }));
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.post("/api/attachments", async (req, res) => {

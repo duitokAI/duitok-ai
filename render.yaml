@@ -41,8 +41,6 @@ services:
         value: 1:1
       - key: APIMART_IMAGE_RESOLUTION
         value: 1K
-      - key: AI_IMAGE_PROVIDER
-        value: auto
       - key: WUYIN_API_KEY
         sync: false
       - key: WUYIN_BASE_URL
@@ -51,6 +49,10 @@ services:
         value: 1K
       - key: WUYIN_IMAGE_ASPECT_RATIO
         value: 1:1
+      - key: WUYIN_VIDEO_MODEL
+        value: veo3.1-fast
+      - key: WUYIN_VIDEO_RATIO
+        value: 9:16
     disk:
       name: duitok-data
       mountPath: /var/data
