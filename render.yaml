@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: duitok-ai
+    runtime: node
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SERVE_STATIC
+        value: "true"
+      - key: DATA_DIR
+        value: /var/data
+      - key: PUBLIC_APP_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: ""
+      - key: CHIP_API_TOKEN
+        sync: false
+      - key: CHIP_BRAND_ID
+        sync: false
+      - key: CHIP_PUBLIC_KEY
+        sync: false
+    disk:
+      name: duitok-data
+      mountPath: /var/data
+      sizeGB: 1
