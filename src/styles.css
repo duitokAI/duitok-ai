@@ -1201,6 +1201,38 @@ textarea {
   margin-bottom: 12px;
 }
 
+.admin-actions,
+.permission-grid,
+.plan-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 14px 0 18px;
+}
+
+.plan-grid article {
+  flex: 1 1 180px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.plan-grid span,
+.plan-grid small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.plan-grid strong {
+  display: block;
+  margin: 7px 0;
+  color: var(--purple);
+  font-size: 28px;
+}
+
 .legend-row {
   display: flex;
   flex-wrap: wrap;

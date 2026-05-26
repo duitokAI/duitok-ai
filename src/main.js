@@ -45,6 +45,7 @@ const state = {
   agentInput: "",
   agentBusy: false,
   agentMessages: JSON.parse(localStorage.getItem("duitok-agent-messages") || "[]"),
+  queuePolling: false,
   langOpen: false,
   imagePromptGroup: "avatar",
   generating: false
@@ -519,6 +520,12 @@ async function ensureStudioData() {
   }
   state.db = await api("/state");
   state.projectId = state.db.projects[0]?.id;
+}
+
+async function refreshState() {
+  const db = await api("/state");
+  set({ db });
+  return db;
 }
 
 function set(patch) {
@@ -1009,6 +1016,20 @@ function dashboardOverview() {
         <div class="card-title"><h2>${icon("activity", 22)} Recent Activity</h2><span>Backend ledger</span></div>
         ${recentActivity(stats.usage)}
       </article>
+    </section>
+    <section class="dashboard-main-grid">
+      <article class="activity-card">
+        <div class="card-title"><h2>${icon("list-checks", 22)} Generation Queue</h2><span>${state.db.generationJobs.length} jobs</span></div>
+        ${generationQueueTable(state.db.generationJobs)}
+      </article>
+      <article class="activity-card">
+        <div class="card-title"><h2>${icon("database", 22)} Asset Storage</h2><span>${state.db.storage?.durableAssets ? "R2 ready" : "Provider URLs"}</span></div>
+        ${table([
+          ["Current mode", state.db.storage?.durableAssets ? "Cloudflare R2 mirror" : "External provider URLs", state.db.storage?.message || ""],
+          ["Content library", `${allResults().length} assets`, "Generated assets stay attached to your account"],
+          ["Publishing", `${state.db.schedule.filter((item) => item.mediaUrl).length} media URLs`, "Scheduler stores the final publish media URL"]
+        ])}
+      </article>
     </section>`;
 }
 
@@ -1079,6 +1100,15 @@ function recentActivity(usage) {
   return `<div class="activity-list">${rows.map((item) => `<div><span>${item.action}</span><b>${item.credits} credits</b><small>${new Date(item.createdAt).toLocaleString()}</small></div>`).join("")}</div>`;
 }
 
+function generationQueueTable(jobs) {
+  const rows = jobs.slice(0, 8);
+  return table(rows.map((job) => [
+    job.model || job.action,
+    `${job.status} | ${job.creditsCharged || 0} credits`,
+    job.errorMessage || job.completedAt || job.startedAt || job.createdAt || ""
+  ]));
+}
+
 function projectStatusBar(p) {
   const spent = p.results.length * 4;
   const ready = state.db.schedule.filter((item) => item.status === "Ready").length;
@@ -1104,6 +1134,7 @@ function adminPage() {
   const selectedLedger = (admin.creditLedger || []).filter((entry) => entry.userId === selectedUser?.id);
   const selectedProjects = (state.db.projects || []).filter((project) => project.userId === selectedUser?.id);
   const modelCosts = admin.modelCosts || {};
+  const permissions = selectedUser?.agentPermissions || {};
   return `
     <header class="project-head dashboard-head">
       <div>
@@ -1137,10 +1168,17 @@ function adminPage() {
       <article class="activity-card">
         <div class="card-title"><h2>${icon("id-card", 22)} User Detail</h2><span>${selectedUser?.email || "No user"}</span></div>
         ${selectedUser ? `<div class="metric-row">
-          <article><span>Credits</span><strong>${selectedUser.billing?.credits ?? 0}</strong></article>
+      <article><span>Credits</span><strong>${selectedUser.billing?.credits ?? 0}</strong></article>
+          <article><span>Revenue</span><strong>RM ${Number(selectedUser.totalRevenueRm || 0).toFixed(2)}</strong></article>
+          <article><span>Profit</span><strong>RM ${Number(selectedUser.totalProfitRm || 0).toFixed(2)}</strong></article>
           <article><span>Projects</span><strong>${selectedProjects.length}</strong></article>
           <article><span>Jobs</span><strong>${selectedJobs.length}</strong></article>
-          <article><span>Cost</span><strong>RM ${Number(selectedUser.totalCostRm || 0).toFixed(2)}</strong></article>
+          <article><span>Status</span><strong>${selectedUser.status || "active"}</strong></article>
+        </div>
+        <div class="admin-actions">
+          <button class="gold-button mini-button" data-admin-credit="${selectedUser.id}" data-delta="10">${icon("plus", 15)} +10 credits</button>
+          <button class="dark-button mini-button" data-admin-credit="${selectedUser.id}" data-delta="-10">${icon("minus", 15)} -10 credits</button>
+          <button class="dark-button mini-button" data-admin-status="${selectedUser.id}" data-status="${selectedUser.status === "suspended" ? "active" : "suspended"}">${icon(selectedUser.status === "suspended" ? "unlock" : "ban", 15)} ${selectedUser.status === "suspended" ? "Unsuspend" : "Suspend"}</button>
         </div>
         ${table(selectedJobs.slice(0, 8).map((job) => [job.model || job.type, `${job.status} | ${job.provider || ""}`, job.imageUrl || job.videoUrl || job.errorMessage || job.taskId || ""]))}` : `<p class="empty-text">No user selected.</p>`}
       </article>
@@ -1163,6 +1201,8 @@ function adminPage() {
           ["Rate limit", "3/minute, 50/day", "Admin accounts are exempt for testing"],
           ["Failure ledger", "No credit charge", "Failed API calls are recorded for admin review"]
         ])}
+        <div class="card-title compact-title"><h2>${icon("bot", 20)} Agent Permissions</h2><span>${selectedUser?.email || ""}</span></div>
+        ${selectedUser ? `<div class="permission-grid">${["generate", "updateProject", "schedule", "publish", "support"].map((key) => `<button class="${permissions[key] ? "gold-button" : "dark-button"} mini-button" data-agent-permission="${selectedUser.id}" data-permission="${key}" data-enabled="${permissions[key] ? "false" : "true"}">${permissions[key] ? icon("check", 15) : icon("x", 15)} ${key}</button>`).join("")}</div>` : ""}
       </article>
     </section>
     <section class="dashboard-main-grid">
@@ -1286,7 +1326,7 @@ function resultPreview(item) {
 function accountPage() {
   const map = {
     attachments: [t("attachments"), "Upload records saved to backend.", table(state.db.attachments.map((x) => [x.name, x.kind, new Date(x.createdAt).toLocaleString()]))],
-    billing: [t("billing"), "Invoices and plan state are persisted.", `<div class="metric-row"><article><span>Plan</span><strong>${state.db.billing.plan}</strong></article><article><span>Credits</span><strong>${state.db.billing.credits}</strong></article><article><span>Next bill</span><strong>${state.db.billing.nextBill}</strong></article></div>${invoiceTable()}`],
+    billing: [t("billing"), "Invoices and plan state are persisted.", `<div class="metric-row"><article><span>Plan</span><strong>${state.db.billing.plan}</strong></article><article><span>Credits</span><strong>${state.db.billing.credits}</strong></article><article><span>Next bill</span><strong>${state.db.billing.nextBill}</strong></article></div><div class="plan-grid">${[["Starter", "RM29", "For testing products"], ["Pro", "RM69", "Daily TikTok Shop creation"], ["Agency", "RM199", "Multiple brands and operators"]].map(([name, price, note]) => `<article><span>${name}</span><strong>${price}</strong><small>${note}</small></article>`).join("")}</div>${invoiceTable()}`],
     topup: [t("topup"), "Credit purchases update the backend ledger.", `<div class="topup-grid">${[10, 30, 50, 100].map((x) => `<button data-topup="${x}"><strong>${x}</strong><span>credits</span><b>RM${x}</b></button>`).join("")}</div>`],
     affiliate: [t("affiliate"), "Referral links and payouts.", `<div class="metric-row"><article><span>Code</span><strong>${state.db.affiliate.code}</strong></article><article><span>Clicks</span><strong>${state.db.affiliate.clicks}</strong></article><article><span>Payout</span><strong>RM${state.db.affiliate.payout}</strong></article></div><button class="gold-button" data-action="copy-affiliate">${icon("copy")} Copy referral link</button>`],
     usage: [t("usage"), "Every generated action is written to history.", table(state.db.usage.map((x) => [x.action, `${x.credits} credits`, new Date(x.createdAt).toLocaleString()]))],
@@ -1398,6 +1438,9 @@ function bind() {
   document.querySelectorAll("[data-step-open]").forEach((el) => el.addEventListener("click", () => set({ page: "project", step: el.dataset.stepOpen })));
   document.querySelectorAll("[data-project]").forEach((el) => el.addEventListener("click", () => set({ projectId: el.dataset.project, page: "project" })));
   document.querySelectorAll("[data-admin-user]").forEach((el) => el.addEventListener("click", () => set({ adminUserId: el.dataset.adminUser })));
+  document.querySelectorAll("[data-admin-credit]").forEach((el) => el.addEventListener("click", () => adminAdjustCredits(el.dataset.adminCredit, Number(el.dataset.delta))));
+  document.querySelectorAll("[data-admin-status]").forEach((el) => el.addEventListener("click", () => adminUpdateUser(el.dataset.adminStatus, { status: el.dataset.status })));
+  document.querySelectorAll("[data-agent-permission]").forEach((el) => el.addEventListener("click", () => adminUpdateUser(el.dataset.agentPermission, { agentPermissions: { [el.dataset.permission]: el.dataset.enabled === "true" } })));
   document.querySelectorAll("[data-date-field]").forEach((el) => el.addEventListener("change", () => set({ [el.dataset.dateField]: el.value })));
   document.querySelectorAll("[data-action]").forEach((el) => el.addEventListener("click", (e) => action(e, el.dataset.action)));
   document.querySelectorAll("[data-field]").forEach((el) => el.addEventListener("change", fieldChange));
@@ -1538,14 +1581,32 @@ async function generate(name) {
   if (state.generating) return;
   try {
     set({ generating: true });
-    notify(t("generating"));
+    notify("Generation queued. You can keep working while Duitok processes it.");
     const db = await api(`/projects/${state.projectId}/generate`, { method: "POST", body: JSON.stringify({ action: name, step: state.step }) });
     set({ db, generating: false });
-    notify(t("generatedSaved"));
+    notify("Generation job queued.");
+    pollGenerationQueue();
   } catch (error) {
     set({ generating: false });
     notify(error.message);
   }
+}
+
+async function pollGenerationQueue(attempt = 0) {
+  if (state.queuePolling && attempt === 0) return;
+  state.queuePolling = true;
+  try {
+    const db = await refreshState();
+    const hasRunning = db.generationJobs.some((job) => ["queued", "processing"].includes(job.status));
+    if (hasRunning && attempt < 30) {
+      setTimeout(() => pollGenerationQueue(attempt + 1), 3000);
+      return;
+    }
+    if (!hasRunning && attempt > 0) notify("Generation queue updated.");
+  } catch (error) {
+    notify(error.message);
+  }
+  state.queuePolling = false;
 }
 
 function rememberAgentMessages(messages) {
@@ -1613,6 +1674,18 @@ async function scheduleUpdate(id) {
   const db = await api(`/schedule/${id}`, { method: "PATCH" });
   set({ db });
   notify("Schedule status updated.");
+}
+
+async function adminUpdateUser(userId, patch) {
+  const db = await api(`/admin/users/${userId}`, { method: "PATCH", body: JSON.stringify(patch) });
+  set({ db, adminUserId: userId });
+  notify("Admin user updated.");
+}
+
+async function adminAdjustCredits(userId, delta) {
+  const db = await api(`/admin/users/${userId}/credits`, { method: "POST", body: JSON.stringify({ delta, note: `Admin adjusted ${delta} credits` }) });
+  set({ db, adminUserId: userId });
+  notify("Credits updated.");
 }
 
 async function tiktokCreatorInfo() {

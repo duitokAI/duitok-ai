@@ -46,6 +46,7 @@ const grsaiNanoModel = process.env.GRSAI_NANO_MODEL || "nano-banana-pro";
 const allowedMediaModels = new Set(["GPT Image 2", "Nano Banana Pro", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"]);
 const adminUserId = "u_1";
 const authSecret = process.env.AUTH_SECRET || process.env.CHIP_API_TOKEN || "duitok-local-dev-secret";
+const assetStorageProvider = process.env.ASSET_STORAGE_PROVIDER || "external";
 const postgresPool = databaseUrl
   ? new Pool({
       connectionString: databaseUrl,
@@ -112,6 +113,28 @@ function defaultModelCosts() {
   };
 }
 
+function defaultAgentPermissions() {
+  return {
+    generate: true,
+    updateProject: true,
+    schedule: true,
+    publish: true,
+    support: true,
+    billing: false,
+    admin: false
+  };
+}
+
+function storageStatus() {
+  const r2Ready = Boolean(process.env.R2_BUCKET && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_PUBLIC_BASE_URL);
+  return {
+    provider: r2Ready ? "cloudflare-r2" : assetStorageProvider,
+    ready: assetStorageProvider === "external" || r2Ready,
+    durableAssets: r2Ready,
+    message: r2Ready ? "Generated assets can be mirrored to your own CDN." : "Using provider URLs until R2 credentials are configured."
+  };
+}
+
 function blankProject(id, name, userId = adminUserId) {
   return {
     id,
@@ -165,7 +188,9 @@ function publicUser(user) {
     id: user.id,
     email: user.email,
     name: user.name,
-    role: user.role || "user"
+    role: user.role || "user",
+    status: user.status || "active",
+    agentPermissions: { ...defaultAgentPermissions(), ...(user.agentPermissions || {}) }
   };
 }
 
@@ -196,6 +221,11 @@ async function requireAuth(req) {
   if (!user) {
     const error = new Error("Login required.");
     error.status = 401;
+    throw error;
+  }
+  if ((user.status || "active") === "suspended" && (user.role || "user") !== "admin") {
+    const error = new Error("Account suspended. Please contact support.");
+    error.status = 403;
     throw error;
   }
   return { db, user };
@@ -282,7 +312,9 @@ function normalizeDb(db) {
   db.users = db.users.map((user) => ({
     ...user,
     role: user.id === adminUserId || user.email === "admin@duitok.com" ? "admin" : user.role || "user",
-    billing: { ...defaultBilling(), ...(user.billing || {}) }
+    status: user.status || "active",
+    billing: { ...defaultBilling(), ...(user.billing || {}) },
+    agentPermissions: { ...defaultAgentPermissions(), ...(user.agentPermissions || {}) }
   }));
   if (!db.users.some((user) => user.email === "admin@duitok.com")) db.users.unshift(structuredClone(seed.users[0]));
   db.liveCount ||= seed.liveCount;
@@ -318,6 +350,7 @@ function normalizeDb(db) {
   db.creditLedger ||= [];
   db.creditLedger = db.creditLedger.map((item) => ({ userId: item.userId || adminUserId, ...item }));
   db.modelCosts = { ...defaultModelCosts(), ...(db.modelCosts || {}) };
+  db.storage ||= storageStatus();
   return db;
 }
 
@@ -417,13 +450,25 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
   const creditLedger = (db.creditLedger || []).filter(owns);
   const tiktokConnections = (db.tiktok?.connections || []).filter(owns);
   const tiktokPublishes = (db.tiktok?.publishes || []).filter(owns);
+  const userRevenue = (userId) => db.payments.filter((payment) => payment.userId === userId && payment.status === "paid").reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
+  const userCost = (userId) => db.generationJobs.filter((job) => job.userId === userId).reduce((sum, job) => sum + Number(job.costRm || 0), 0);
+  const userLastUsed = (userId) => {
+    const timestamps = [
+      ...db.generationJobs.filter((job) => job.userId === userId).map((job) => job.completedAt || job.createdAt),
+      ...db.usage.filter((item) => item.userId === userId).map((item) => item.createdAt)
+    ].filter(Boolean).sort().reverse();
+    return timestamps[0] || null;
+  };
   const admin = isAdmin ? {
     users: db.users.map((item) => ({
       ...publicUser(item),
       billing: item.billing || defaultBilling(),
       projectCount: db.projects.filter((project) => project.userId === item.id).length,
       generationCount: db.generationJobs.filter((job) => job.userId === item.id).length,
-      totalCostRm: db.generationJobs.filter((job) => job.userId === item.id).reduce((sum, job) => sum + Number(job.costRm || 0), 0)
+      totalRevenueRm: userRevenue(item.id),
+      totalCostRm: userCost(item.id),
+      totalProfitRm: userRevenue(item.id) - userCost(item.id),
+      lastUsedAt: userLastUsed(item.id)
     })),
     generationJobs: db.generationJobs || [],
     apiCalls: db.apiCalls || [],
@@ -431,6 +476,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
     supportTickets: db.supportTickets || [],
     creditLedger: db.creditLedger || [],
     modelCosts: db.modelCosts || defaultModelCosts(),
+    storage: storageStatus(),
     totals: {
       users: db.users.length,
       generations: db.generationJobs.length,
@@ -454,6 +500,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
     supportTickets,
     currentUser: user ? publicUser(user) : null,
     admin,
+    storage: isAdmin ? storageStatus() : { durableAssets: storageStatus().durableAssets },
     tiktok: {
       connections: tiktokConnections.map((item) => ({
         id: item.id,
@@ -555,6 +602,16 @@ function assertGenerationAccess(db, user) {
   if (inLastMinute >= perMinuteLimit || inLastDay >= perDayLimit) {
     const error = new Error("Too many generations. Please wait a moment and try again.");
     error.status = 429;
+    throw error;
+  }
+}
+
+function requireAgentPermission(user, permission) {
+  if ((user.role || "user") === "admin") return;
+  const permissions = { ...defaultAgentPermissions(), ...(user.agentPermissions || {}) };
+  if (!permissions[permission]) {
+    const error = new Error(`Duitok Agent does not have ${permission} permission for this account.`);
+    error.status = 403;
     throw error;
   }
 }
@@ -1162,6 +1219,152 @@ async function saveFailedGeneration(projectId, action, step, error, user) {
   });
 }
 
+async function enqueueGeneration(projectId, action, step, user) {
+  const jobId = crypto.randomUUID();
+  const state = await mutateDb(async (currentDb) => {
+    assertGenerationAccess(currentDb, user);
+    const project = findProject(currentDb, projectId, user);
+    const cost = generationCostFor(currentDb, project, action, { provider: providerForMediaModel(project.image?.model) });
+    const createdAt = new Date().toISOString();
+    currentDb.generationJobs.unshift({
+      id: jobId,
+      userId: project.userId,
+      projectId,
+      action,
+      step,
+      type: action === "generate-image" && ["Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"].includes(project.image?.model) ? "video" : action === "generate-image" ? "image" : "text",
+      status: "queued",
+      prompt: project.image?.prompt || "",
+      creditsCharged: 0,
+      createdAt,
+      model: cost.model,
+      provider: cost.provider,
+      unit: cost.unit
+    });
+    currentDb.usage.unshift(usage(`Queued: ${cost.model || action}`, 0, project.userId));
+    await saveDb(currentDb);
+    return publicState(currentDb, user);
+  });
+  setTimeout(() => processGenerationJob(jobId).catch((error) => console.error("Generation job failed", error)), 0);
+  return { jobId, state };
+}
+
+async function processGenerationJob(jobId) {
+  const snapshot = await mutateDb(async (db) => {
+    const job = db.generationJobs.find((item) => item.id === jobId);
+    if (!job || job.status !== "queued") return null;
+    const project = db.projects.find((item) => item.id === job.projectId);
+    if (!project) throw Object.assign(new Error("Project not found"), { status: 404 });
+    job.status = "processing";
+    job.startedAt = new Date().toISOString();
+    await saveDb(db);
+    return { job: structuredClone(job), project: structuredClone(project) };
+  });
+  if (!snapshot) return;
+
+  try {
+    const generated = await generateWithProvider(snapshot.project, snapshot.job.action, snapshot.job.step);
+    await completeQueuedGeneration(jobId, generated);
+  } catch (error) {
+    await failQueuedGeneration(jobId, error);
+  }
+}
+
+async function completeQueuedGeneration(jobId, generated) {
+  await mutateDb(async (currentDb) => {
+    const job = currentDb.generationJobs.find((item) => item.id === jobId);
+    if (!job) return saveDb(currentDb);
+    const project = currentDb.projects.find((item) => item.id === job.projectId);
+    if (!project) throw Object.assign(new Error("Project not found"), { status: 404 });
+    const owner = currentDb.users.find((item) => item.id === project.userId);
+    const cost = generationCostFor(currentDb, project, job.action, generated);
+    const completedAt = new Date().toISOString();
+    const result = {
+      id: crypto.randomUUID(),
+      type: job.step,
+      title: generated.title,
+      body: generated.body,
+      imageUrl: generated.imageUrl,
+      videoUrl: generated.videoUrl,
+      taskId: generated.taskId,
+      provider: generated.provider,
+      model: project.image?.model,
+      costRm: cost.costRm,
+      createdAt: completedAt
+    };
+    project.results.push(result);
+    if (owner) {
+      owner.billing ||= defaultBilling();
+      owner.billing.credits = Math.max(0, Number(owner.billing.credits || 0) - 4);
+    }
+    Object.assign(job, {
+      resultId: result.id,
+      status: "succeeded",
+      taskId: generated.taskId,
+      imageUrl: generated.imageUrl,
+      videoUrl: generated.videoUrl,
+      textOutput: generated.body,
+      creditsCharged: 4,
+      completedAt,
+      ...cost
+    });
+    currentDb.apiCalls.unshift({
+      id: crypto.randomUUID(),
+      userId: project.userId,
+      projectId: project.id,
+      generationJobId: job.id,
+      provider: job.provider,
+      model: job.model,
+      endpoint: job.provider === "grsai" ? grsaiDrawPath : job.provider === "wuyin" ? wuyinPathFromProject(project) : apimartImagePath,
+      status: "succeeded",
+      taskId: generated.taskId,
+      costRm: job.costRm,
+      createdAt: completedAt
+    });
+    currentDb.usage.unshift(usage(generated.title, 4, project.userId));
+    currentDb.creditLedger.unshift(creditEntry(project.userId, "debit", -4, generated.title, {
+      projectId: project.id,
+      resultId: result.id,
+      generationJobId: job.id,
+      model: job.model,
+      provider: job.provider
+    }));
+    await saveDb(currentDb);
+    return publicState(currentDb);
+  });
+}
+
+async function failQueuedGeneration(jobId, error) {
+  await mutateDb(async (currentDb) => {
+    const job = currentDb.generationJobs.find((item) => item.id === jobId);
+    if (!job) return saveDb(currentDb);
+    const project = currentDb.projects.find((item) => item.id === job.projectId);
+    const completedAt = new Date().toISOString();
+    Object.assign(job, {
+      status: "failed",
+      errorMessage: error.message || "Generation failed",
+      creditsCharged: 0,
+      completedAt
+    });
+    currentDb.apiCalls.unshift({
+      id: crypto.randomUUID(),
+      userId: job.userId,
+      projectId: job.projectId,
+      generationJobId: job.id,
+      provider: job.provider,
+      model: job.model,
+      endpoint: project ? (job.provider === "grsai" ? grsaiDrawPath : job.provider === "wuyin" ? wuyinPathFromProject(project) : apimartImagePath) : "",
+      status: "failed",
+      errorMessage: job.errorMessage,
+      costRm: 0,
+      createdAt: completedAt
+    });
+    currentDb.usage.unshift(usage(`Failed: ${job.model || job.action}`, 0, job.userId));
+    await saveDb(currentDb);
+    return publicState(currentDb);
+  });
+}
+
 function publicAppUrl(pathname) {
   const base = (process.env.PUBLIC_APP_URL || `http://localhost:${port}`).replace(/\/$/, "");
   return `${base}${pathname}`;
@@ -1544,6 +1747,7 @@ async function executeAgentTool(name, args, user) {
   }
 
   if (name === "create_project") {
+    requireAgentPermission(user, "updateProject");
     const db = await mutateDb(async (currentDb) => {
       currentDb.projects.push(blankProject(crypto.randomUUID(), args.name || `Project ${currentDb.projects.length + 1}`, user.id));
       await saveDb(currentDb);
@@ -1553,6 +1757,7 @@ async function executeAgentTool(name, args, user) {
   }
 
   if (name === "update_project_field") {
+    requireAgentPermission(user, "updateProject");
     const db = await mutateDb(async (currentDb) => {
       setDeep(findProject(currentDb, args.projectId, user), args.field, args.value);
       currentDb.usage.unshift(usage(`Agent updated ${args.field}`, 0, user.id));
@@ -1563,6 +1768,7 @@ async function executeAgentTool(name, args, user) {
   }
 
   if (name === "generate_project_output") {
+    requireAgentPermission(user, "generate");
     const db = await ensureDb();
     assertGenerationAccess(db, user);
     const projectSnapshot = structuredClone(findProject(db, args.projectId, user));
@@ -1578,6 +1784,7 @@ async function executeAgentTool(name, args, user) {
   }
 
   if (name === "toggle_schedule_status") {
+    requireAgentPermission(user, "schedule");
     const db = await mutateDb(async (currentDb) => {
       const item = currentDb.schedule.find((entry) => entry.id === args.scheduleId);
       if (!item) throw Object.assign(new Error("Schedule item not found"), { status: 404 });
@@ -1591,6 +1798,7 @@ async function executeAgentTool(name, args, user) {
   }
 
   if (name === "update_autopost_job") {
+    requireAgentPermission(user, "schedule");
     const db = await mutateDb(async (currentDb) => {
       const item = currentDb.schedule.find((entry) => entry.id === args.scheduleId);
       if (!item) throw Object.assign(new Error("Auto post job not found"), { status: 404 });
@@ -1610,6 +1818,7 @@ async function executeAgentTool(name, args, user) {
   }
 
   if (name === "query_tiktok_creator_info") {
+    requireAgentPermission(user, "publish");
     const db = await mutateDb(async (currentDb) => {
       const connection = findTikTokConnection(currentDb, args.connectionId, user);
       if ((user.role || "user") !== "admin" && connection.userId !== user.id) throw Object.assign(new Error("TikTok account not found"), { status: 404 });
@@ -1623,6 +1832,7 @@ async function executeAgentTool(name, args, user) {
   }
 
   if (name === "publish_tiktok_video") {
+    requireAgentPermission(user, "publish");
     const result = await mutateDb(async (currentDb) => {
       const currentJob = currentDb.schedule.find((entry) => entry.id === args.scheduleId);
       if (!currentJob) throw Object.assign(new Error("Auto post job not found"), { status: 404 });
@@ -1680,6 +1890,7 @@ async function executeAgentTool(name, args, user) {
   }
 
   if (name === "check_tiktok_publish_status") {
+    requireAgentPermission(user, "publish");
     const result = await mutateDb(async (currentDb) => {
       const publish = currentDb.tiktok.publishes.find((item) => item.publishId === args.publishId || item.id === args.publishId);
       if (!publish) throw Object.assign(new Error("TikTok publish record not found"), { status: 404 });
@@ -1707,6 +1918,7 @@ async function executeAgentTool(name, args, user) {
   }
 
   if (name === "create_support_ticket") {
+    requireAgentPermission(user, "support");
     const db = await mutateDb(async (currentDb) => {
       currentDb.supportTickets.unshift({ id: crypto.randomUUID(), userId: user.id, message: args.message, createdAt: new Date().toISOString() });
       await saveDb(currentDb);
@@ -1819,6 +2031,57 @@ app.get("/api/state", async (req, res, next) => {
   }
 });
 
+app.patch("/api/admin/users/:id", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    requireAdminUser(user);
+    const state = await mutateDb(async (db) => {
+      const target = db.users.find((item) => item.id === req.params.id);
+      if (!target) throw Object.assign(new Error("User not found"), { status: 404 });
+      if (req.body.status) target.status = String(req.body.status);
+      if (req.body.plan) {
+        target.billing ||= defaultBilling();
+        target.billing.plan = String(req.body.plan);
+      }
+      if (req.body.agentPermissions && typeof req.body.agentPermissions === "object") {
+        target.agentPermissions = { ...defaultAgentPermissions(), ...(target.agentPermissions || {}), ...req.body.agentPermissions };
+      }
+      target.updatedAt = new Date().toISOString();
+      db.usage.unshift(usage(`Admin updated user: ${target.email}`, 0, user.id));
+      await saveDb(db);
+      return publicState(db, user);
+    });
+    res.json(state);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/admin/users/:id/credits", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    requireAdminUser(user);
+    const delta = Number(req.body.delta || 0);
+    if (!Number.isFinite(delta) || delta === 0) throw Object.assign(new Error("Credit delta required"), { status: 400 });
+    const state = await mutateDb(async (db) => {
+      const target = db.users.find((item) => item.id === req.params.id);
+      if (!target) throw Object.assign(new Error("User not found"), { status: 404 });
+      target.billing ||= defaultBilling();
+      target.billing.credits = Math.max(0, Number(target.billing.credits || 0) + delta);
+      const note = req.body.note || `Admin ${delta > 0 ? "added" : "removed"} credits`;
+      db.creditLedger.unshift(creditEntry(target.id, delta > 0 ? "admin_credit" : "admin_debit", delta, note, {
+        adminUserId: user.id
+      }));
+      db.usage.unshift(usage(`${note}: ${target.email}`, 0, user.id));
+      await saveDb(db);
+      return publicState(db, user);
+    });
+    res.json(state);
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.post("/api/auth/login", async (req, res) => {
   const email = String(req.body.email || "admin@duitok.com").trim().toLowerCase();
   const password = String(req.body.password || "");
@@ -1834,7 +2097,9 @@ app.post("/api/auth/login", async (req, res) => {
         passwordHash: hashPassword(password),
         name: email.split("@")[0],
         role: email === "admin@duitok.com" ? "admin" : "user",
-        billing: defaultBilling()
+        status: "active",
+        billing: defaultBilling(),
+        agentPermissions: defaultAgentPermissions()
       };
       db.users.push(user);
       db.projects.push(blankProject(crypto.randomUUID(), "Project 1", user.id));
@@ -1847,6 +2112,11 @@ app.post("/api/auth/login", async (req, res) => {
       user.passwordHash = hashPassword(password);
       delete user.password;
       await saveDb(db);
+    }
+    if ((user.status || "active") === "suspended" && (user.role || "user") !== "admin") {
+      const error = new Error("Account suspended. Please contact support.");
+      error.status = 403;
+      throw error;
     }
     return { user: publicUser(user), token: signAuthToken(user), state: publicState(db, user) };
   });
@@ -1971,14 +2241,15 @@ app.patch("/api/projects/:id/field", async (req, res) => {
 });
 
 app.post("/api/projects/:id/generate", async (req, res) => {
-  const { db, user } = await requireAuth(req);
-  assertGenerationAccess(db, user);
-  const projectSnapshot = structuredClone(findProject(db, req.params.id, user));
   try {
-    const generated = await generateWithProvider(projectSnapshot, req.body.action, req.body.step);
-    res.json(await saveGeneratedResult(req.params.id, req.body.action, req.body.step, generated, user));
+    const { user } = await requireAuth(req);
+    const result = await enqueueGeneration(req.params.id, req.body.action, req.body.step, user);
+    res.json(result.state);
   } catch (error) {
-    await saveFailedGeneration(req.params.id, req.body.action, req.body.step, error, user).catch(() => null);
+    const { user } = await requireAuth(req).catch(() => ({ user: null }));
+    if (user && ![402, 403, 404, 429].includes(error.status)) {
+      await saveFailedGeneration(req.params.id, req.body.action, req.body.step, error, user).catch(() => null);
+    }
     throw error;
   }
 });
