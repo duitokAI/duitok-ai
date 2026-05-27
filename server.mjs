@@ -60,6 +60,8 @@ const publicMediaModelMap = {
 const internalMediaModelMap = Object.fromEntries(Object.entries(publicMediaModelMap).map(([label, model]) => [model, label]));
 const adminUserId = "u_1";
 const authSecret = process.env.AUTH_SECRET || process.env.CHIP_API_TOKEN || "duitok-local-dev-secret";
+const allowPublicSignup = process.env.ALLOW_PUBLIC_SIGNUP === "true" || process.env.NODE_ENV !== "production";
+const defaultUserCredits = Number(process.env.DEFAULT_USER_CREDITS ?? (process.env.NODE_ENV === "production" ? 0 : 83));
 const assetStorageProvider = process.env.ASSET_STORAGE_PROVIDER || "external";
 const requireDurableAssets = process.env.REQUIRE_DURABLE_ASSETS === "true" || (process.env.NODE_ENV === "production" && process.env.REQUIRE_DURABLE_ASSETS !== "false");
 const r2Endpoint = process.env.R2_ENDPOINT || (process.env.R2_ACCOUNT_ID ? `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com` : "");
@@ -110,7 +112,7 @@ app.get("/api/health", (_req, res) => {
 function defaultBilling() {
   return {
     plan: "Duitok AI Pro",
-    credits: 83,
+    credits: Number.isFinite(defaultUserCredits) ? defaultUserCredits : 0,
     nextBill: "2026-06-26",
     invoices: []
   };
@@ -2855,6 +2857,11 @@ app.post("/api/auth/login", async (req, res) => {
     db.users ||= structuredClone(seed.users);
     let user = db.users.find((item) => item.email === email);
     if (!user) {
+      if (!allowPublicSignup) {
+        const error = new Error("Account not found. Please contact Duitok support to activate access.");
+        error.status = 401;
+        throw error;
+      }
       user = {
         id: crypto.randomUUID(),
         email,
