@@ -4810,7 +4810,6 @@ label {
   min-width: 168px;
 }
 
-.public-nav .lang-menu,
 .login-card > .lang-menu {
   display: none;
 }

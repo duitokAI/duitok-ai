@@ -636,7 +636,7 @@ function project() {
 }
 
 function routeShell(content) {
-  const dock = isStudioPath() ? "" : `<div class="global-lang-dock">${languageSwitch()}</div>`;
+  const dock = pathIs("/login") ? `<div class="global-lang-dock">${languageSwitch()}</div>` : "";
   return `${dock}${content}`;
 }
 
