@@ -496,8 +496,9 @@ async function ensureDb() {
   try {
     return normalizeDb(JSON.parse(await readFile(dbPath, "utf8")));
   } catch {
-    await writeFile(dbPath, JSON.stringify(seed, null, 2));
-    return structuredClone(seed);
+    const db = normalizeDb(structuredClone(seed));
+    await writeFile(dbPath, JSON.stringify(db, null, 2));
+    return db;
   }
 }
 
@@ -789,6 +790,10 @@ function requireDeepSeekConfig() {
     throw error;
   }
   return apiKey;
+}
+
+function hasDeepSeekConfig() {
+  return Boolean(process.env.DEEPSEEK_API_KEY && !process.env.DEEPSEEK_API_KEY.includes("replace_with"));
 }
 
 function requireTikTokConfig() {
@@ -1968,6 +1973,29 @@ const agentTools = [
   {
     type: "function",
     function: {
+      name: "create_schedule_draft",
+      description: "Create a TikTok scheduler draft from Agent-created content, generated results, or user-provided caption details.",
+      parameters: {
+        type: "object",
+        properties: {
+          projectId: { type: "string", description: "Project this draft belongs to, when available." },
+          resultId: { type: "string", description: "Generated result to attach, when available." },
+          title: { type: "string", description: "Short post title." },
+          platform: { type: "string", description: "Defaults to TikTok." },
+          time: { type: "string", description: "Human-readable scheduled time, for example Today 20:30 or Fri 21:00." },
+          status: { type: "string", description: "Draft or Ready. Defaults to Draft." },
+          caption: { type: "string" },
+          hashtags: { type: "string" },
+          mediaUrl: { type: "string", description: "Public image/video URL if already generated." },
+          productUrl: { type: "string" }
+        },
+        required: ["title", "caption"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
       name: "toggle_schedule_status",
       description: "Toggle a scheduled post between Ready and Posted.",
       parameters: {
@@ -2073,12 +2101,19 @@ async function executeAgentTool(name, args, user) {
 
   if (name === "create_project") {
     requireAgentPermission(user, "updateProject");
+    const projectId = crypto.randomUUID();
     const db = await mutateDb(async (currentDb) => {
-      currentDb.projects.push(blankProject(crypto.randomUUID(), args.name || `Project ${currentDb.projects.length + 1}`, user.id));
+      currentDb.projects.push(blankProject(projectId, args.name || `Project ${currentDb.projects.length + 1}`, user.id));
       await saveDb(currentDb);
       return publicState(currentDb, user);
     });
-    return { ok: true, message: "Project created.", db };
+    return {
+      ok: true,
+      message: "Project created.",
+      db,
+      data: { projectId },
+      uiAction: { page: "project", projectId }
+    };
   }
 
   if (name === "update_project_field") {
@@ -2089,7 +2124,7 @@ async function executeAgentTool(name, args, user) {
       await saveDb(currentDb);
       return publicState(currentDb, user);
     });
-    return { ok: true, message: `${args.field} updated.`, db };
+    return { ok: true, message: `${args.field} updated.`, db, data: { projectId: args.projectId, field: args.field } };
   }
 
   if (name === "generate_project_output") {
@@ -2105,7 +2140,69 @@ async function executeAgentTool(name, args, user) {
       throw error;
     }
     const nextDb = await saveGeneratedResult(args.projectId, args.action, args.step, generated, user);
-    return { ok: true, message: `${generated.title} saved.`, db: nextDb };
+    const project = nextDb.projects.find((item) => item.id === args.projectId);
+    const result = project?.results?.[project.results.length - 1];
+    return {
+      ok: true,
+      message: `${generated.title} saved.`,
+      db: nextDb,
+      data: {
+        projectId: args.projectId,
+        resultId: result?.id,
+        resultType: result?.type,
+        title: result?.title,
+        mediaUrl: result?.videoUrl || result?.imageUrl || ""
+      }
+    };
+  }
+
+  if (name === "create_schedule_draft") {
+    requireAgentPermission(user, "schedule");
+    const scheduleId = crypto.randomUUID();
+    const db = await mutateDb(async (currentDb) => {
+      let result = null;
+      let project = null;
+      if (args.projectId) project = findProject(currentDb, args.projectId, user);
+      if (args.resultId) {
+        const projects = (currentDb.projects || []).filter((item) => (user.role || "user") === "admin" || item.userId === user.id);
+        for (const item of projects) {
+          const found = (item.results || []).find((entry) => entry.id === args.resultId);
+          if (found) {
+            project = item;
+            result = found;
+            break;
+          }
+        }
+        if (!result) throw Object.assign(new Error("Generated result not found"), { status: 404 });
+      }
+      const item = {
+        id: scheduleId,
+        userId: project?.userId || user.id,
+        projectId: project?.id || args.projectId || "",
+        resultId: result?.id || args.resultId || "",
+        title: args.title || result?.title || project?.name || "Agent draft",
+        platform: args.platform || "TikTok",
+        time: args.time || "Today 20:30",
+        status: args.status || "Draft",
+        caption: args.caption || result?.body || "",
+        hashtags: args.hashtags || "#duitok #tiktokshop",
+        mediaUrl: args.mediaUrl || result?.videoUrl || result?.imageUrl || "",
+        productUrl: args.productUrl || project?.auto?.productUrl || "",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      currentDb.schedule.unshift(item);
+      currentDb.usage.unshift(usage(`Agent created schedule draft: ${item.title}`, 0, item.userId));
+      await saveDb(currentDb);
+      return publicState(currentDb, user);
+    });
+    return {
+      ok: true,
+      message: "Scheduler draft created.",
+      db,
+      data: { scheduleId },
+      uiAction: { page: "autopost" }
+    };
   }
 
   if (name === "toggle_schedule_status") {
@@ -2253,6 +2350,79 @@ async function executeAgentTool(name, args, user) {
   }
 
   return { ok: false, error: `Unknown tool: ${name}` };
+}
+
+function inferAgentAction(content) {
+  const text = String(content || "").toLowerCase();
+  return {
+    wantsProject: /create|project|项目|專案|新建|创建|建立|buat project|projek/.test(text),
+    wantsSeedance: /seedance|视频|影片|video|t2v|text.?to.?video/.test(text),
+    wantsGenerate: /generate|生成|hasilkan|buat|run|create|做|产出/.test(text),
+    wantsSchedule: /schedule|排期|发布|posting|post|draft|草稿|日历|calendar/.test(text),
+    wantsAutoBatch: /7\s*天|七天|week|weekly|batch|content plan|内容计划|內容計劃|auto content/.test(text)
+  };
+}
+
+function agentProjectName(content) {
+  const compact = String(content || "").replace(/\s+/g, " ").trim();
+  if (!compact) return `Agent Project ${new Date().toISOString().slice(0, 10)}`;
+  return compact.length > 42 ? `${compact.slice(0, 42)}...` : compact;
+}
+
+async function runDeterministicAgent(content, { projectId, user }) {
+  const intent = inferAgentAction(content);
+  const toolResults = [];
+  const uiActions = [];
+  let latestDb = null;
+  let activeProjectId = projectId;
+
+  async function run(name, args) {
+    const result = await executeAgentTool(name, args, user);
+    if (result.db) latestDb = result.db;
+    if (result.uiAction) uiActions.push(result.uiAction);
+    if (result.data?.projectId) activeProjectId = result.data.projectId;
+    toolResults.push({ name, args, result: { ok: result.ok, message: result.message, error: result.error, data: result.data } });
+    return result;
+  }
+
+  if (!activeProjectId || intent.wantsProject) {
+    await run("create_project", { name: agentProjectName(content) });
+  }
+
+  if (intent.wantsSeedance) {
+    await run("update_project_field", { projectId: activeProjectId, field: "image.model", value: "Seedance 2.0" });
+    await run("update_project_field", { projectId: activeProjectId, field: "image.prompt", value: content });
+    const duration = String(content).match(/\b(4|6|8|10|12|15)\s*s(?:ec|econd|秒)?/i)?.[1];
+    if (duration) await run("update_project_field", { projectId: activeProjectId, field: "image.duration", value: duration });
+    if (intent.wantsGenerate) await run("generate_project_output", { projectId: activeProjectId, action: "generate-image", step: "image" });
+  } else if (intent.wantsAutoBatch) {
+    await run("update_project_field", { projectId: activeProjectId, field: "auto.productUrl", value: content });
+    await run("update_project_field", { projectId: activeProjectId, field: "auto.batch", value: "7 posts" });
+    await run("update_project_field", { projectId: activeProjectId, field: "auto.tone", value: "Viral hook" });
+    if (intent.wantsGenerate) await run("generate_project_output", { projectId: activeProjectId, action: "generate-auto", step: "auto" });
+  }
+
+  if (intent.wantsSchedule) {
+    await run("create_schedule_draft", {
+      projectId: activeProjectId,
+      title: agentProjectName(content),
+      caption: content,
+      hashtags: "#duitok #tiktokshop",
+      status: "Draft"
+    });
+  } else if (activeProjectId) {
+    uiActions.push({ page: "project", projectId: activeProjectId });
+  }
+
+  const actionNames = toolResults.map((item) => item.name).join(", ");
+  return {
+    reply: toolResults.length
+      ? `Done. I ran: ${actionNames}. DeepSeek is not configured, so I used Duitok's built-in action runner for this request.`
+      : "DeepSeek is not configured yet. I can still create projects, fill Seedance prompts, generate supported outputs, and create scheduler drafts when your request includes those actions.",
+    db: latestDb,
+    toolResults,
+    uiActions
+  };
 }
 
 function requireChipConfig() {
@@ -2585,13 +2755,28 @@ app.post("/api/agent", async (req, res, next) => {
     const history = Array.isArray(req.body.messages) ? req.body.messages.slice(-10) : [];
     const stateForUser = publicState(db, user);
     const projectId = req.body.projectId || stateForUser.projects[0]?.id;
+    const latestUserMessage = [...history].reverse().find((item) => item.role === "user" && typeof item.content === "string")?.content || "";
+
+    if (!hasDeepSeekConfig()) {
+      const fallback = await runDeterministicAgent(latestUserMessage, { projectId, user });
+      return res.json({
+        reply: fallback.reply,
+        db: fallback.db || stateForUser,
+        toolResults: fallback.toolResults,
+        uiActions: fallback.uiActions
+      });
+    }
+
     const messages = [
       {
         role: "system",
         content: [
           "You are Duitok Agent inside Duitok AI Studio for Malaysia TikTok Shop sellers.",
           "Help the user decide what to do next, and call Duitok platform tools when useful.",
-          "You can navigate the UI, create projects, update project fields, generate outputs, update schedule status, and create support tickets.",
+          "You can navigate the UI, create projects, update project fields, generate outputs, create scheduler drafts, update schedule status, and create support tickets.",
+          "Act like an operator, not a passive chatbot: when the user asks for an output, fill the relevant project fields and run the matching tool if enough information is available.",
+          "Common workflows: product/content request = create_project -> update fields -> generate_project_output -> open_workspace. Weekly content plan = update auto.productUrl/auto fields -> generate-auto -> create_schedule_draft when captions are available. Seedance video = set image.model to Seedance 2.0, set image.prompt/duration, then generate-image.",
+          "When a tool creates a project, result, or schedule draft, use the returned ids for the next tool call.",
           "Be concise, practical, and speak in the user's language. Ask only when required data is missing.",
           "Do not claim a tool ran unless it was actually called and returned success."
         ].join(" ")
@@ -2642,11 +2827,12 @@ app.post("/api/agent", async (req, res, next) => {
         const result = await executeAgentTool(name, args, user);
         if (result.db) latestDb = result.db;
         if (result.uiAction) uiActions.push(result.uiAction);
-        toolResults.push({ name, args, result: { ok: result.ok, message: result.message, error: result.error } });
+        const publicResult = { ok: result.ok, message: result.message, error: result.error, data: result.data };
+        toolResults.push({ name, args, result: publicResult });
         messages.push({
           role: "tool",
           tool_call_id: call.id,
-          content: JSON.stringify({ ok: result.ok, message: result.message, error: result.error })
+          content: JSON.stringify(publicResult)
         });
       }
     }
