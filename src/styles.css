@@ -3658,18 +3658,43 @@ label {
   padding: 4px 8px 20px;
 }
 
-.sidebar .lang-menu {
-  display: grid;
-  width: 100%;
-  margin: 14px 0 12px;
+.sidebar-language {
+  margin: 0 8px 18px;
+  padding: 10px;
+  border: 1px solid rgba(95, 0, 103, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.72);
 }
 
-.sidebar .lang-switch {
+.sidebar-language .lang-menu {
+  display: grid;
   width: 100%;
+  margin: 0;
+}
+
+.sidebar-language .lang-switch {
+  grid-template-columns: 15px minmax(0, 1fr) auto 14px;
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  border-color: transparent;
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: transparent;
+  box-shadow: none;
   justify-content: stretch;
 }
 
-.sidebar .lang-options {
+.sidebar-language .lang-switch:hover {
+  background: #fff1f7;
+  transform: none;
+}
+
+.sidebar-language .lang-switch span {
+  text-align: left;
+}
+
+.sidebar-language .lang-options {
   position: static;
   left: auto;
   right: auto;
@@ -3687,7 +3712,7 @@ label {
   transition: max-height 0.18s ease, margin 0.18s ease, padding 0.18s ease, opacity 0.18s ease;
 }
 
-.sidebar .lang-menu.open .lang-options {
+.sidebar-language .lang-menu.open .lang-options {
   max-height: 150px;
   margin-top: 8px;
   padding: 8px;
@@ -3695,7 +3720,7 @@ label {
   pointer-events: auto;
 }
 
-.sidebar .lang-options button {
+.sidebar-language .lang-options button {
   min-height: 36px;
 }
 
@@ -4239,7 +4264,6 @@ label {
 }
 
 .public-nav .lang-menu,
-.sidebar > .lang-menu,
 .login-card > .lang-menu {
   display: none;
 }
@@ -4265,7 +4289,11 @@ label {
   flex: 0 0 24px;
 }
 
-.sidebar .side-link svg:last-child {
+.sidebar .side-link svg:first-child {
+  margin-left: 0;
+}
+
+.sidebar .side-link svg + svg:last-child {
   flex-basis: 14px;
   margin-left: auto;
 }

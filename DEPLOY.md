@@ -82,6 +82,18 @@ WUYIN_OMNI_DURATION=10
 WUYIN_OMNI_SIZE=720x1280
 WUYIN_GROK_DURATION=10
 WUYIN_GROK_ASPECT_RATIO=9:16
+ATLASCLOUD_API_KEY=your_atlascloud_api_key
+ATLASCLOUD_BASE_URL=https://api.atlascloud.ai
+ATLASCLOUD_GENERATE_VIDEO_PATH=/api/v1/model/generateVideo
+ATLASCLOUD_PREDICTION_PATH_PREFIX=/api/v1/model/prediction
+ATLASCLOUD_SEEDANCE_MODEL=bytedance/seedance-2.0/text-to-video
+ATLASCLOUD_SEEDANCE_DURATION=4
+ATLASCLOUD_SEEDANCE_ASPECT_RATIO=9:16
+ATLASCLOUD_SEEDANCE_FPS=24
+ATLASCLOUD_SEEDANCE_WATERMARK=false
+ATLASCLOUD_POLL_ATTEMPTS=60
+ATLASCLOUD_POLL_MS=5000
+ATLASCLOUD_TIMEOUT_MS=120000
 ```
 
 After Render deploys, copy its HTTPS domain and paste it into `PUBLIC_APP_URL`.
@@ -154,6 +166,16 @@ The media endpoints used are:
 - `Grok Imagine Video` -> `/api/async/video_grok_imagine`
 
 All tasks are polled through `/api/async/detail`.
+
+## Optional: Connect Atlas Cloud Seedance 2.0
+
+Atlas Cloud powers only `Seedance 2.0` video generation. The other media models stay on their existing providers.
+
+The media endpoints used are:
+
+- `Seedance 2.0` -> `/api/v1/model/generateVideo` with `model=bytedance/seedance-2.0/text-to-video`
+
+Results are polled through `/api/v1/model/prediction/{id}`.
 
 ## Later, Not Now
 

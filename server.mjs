@@ -43,7 +43,11 @@ const grsaiBaseUrl = (process.env.GRSAI_BASE_URL || "https://grsaiapi.com").repl
 const grsaiDrawPath = process.env.GRSAI_DRAW_PATH || "/v1/draw/nano-banana";
 const grsaiResultPath = process.env.GRSAI_RESULT_PATH || "/v1/draw/result";
 const grsaiNanoModel = process.env.GRSAI_NANO_MODEL || "nano-banana-pro";
-const allowedMediaModels = new Set(["GPT Image 2", "Nano Banana Pro", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"]);
+const atlasBaseUrl = (process.env.ATLASCLOUD_BASE_URL || "https://api.atlascloud.ai").replace(/\/$/, "");
+const atlasGenerateVideoPath = process.env.ATLASCLOUD_GENERATE_VIDEO_PATH || "/api/v1/model/generateVideo";
+const atlasPredictionPathPrefix = process.env.ATLASCLOUD_PREDICTION_PATH_PREFIX || "/api/v1/model/prediction";
+const atlasSeedanceModel = process.env.ATLASCLOUD_SEEDANCE_MODEL || "bytedance/seedance-2.0/text-to-video";
+const allowedMediaModels = new Set(["GPT Image 2", "Nano Banana Pro", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"]);
 const adminUserId = "u_1";
 const authSecret = process.env.AUTH_SECRET || process.env.CHIP_API_TOKEN || "duitok-local-dev-secret";
 const assetStorageProvider = process.env.ASSET_STORAGE_PROVIDER || "external";
@@ -83,7 +87,8 @@ app.get("/api/health", (_req, res) => {
     hasConfiguredKey(process.env.APIMART_API_KEY) ? "apimart" : null,
     hasConfiguredKey(process.env.DEEPSEEK_API_KEY) ? "deepseek" : null,
     hasConfiguredKey(process.env.WUYIN_API_KEY) ? "wuyin" : null,
-    hasConfiguredKey(process.env.GRSAI_API_KEY) ? "grsai" : null
+    hasConfiguredKey(process.env.GRSAI_API_KEY) ? "grsai" : null,
+    hasConfiguredKey(process.env.ATLASCLOUD_API_KEY) ? "atlascloud" : null
   ].filter(Boolean);
   res.json({
     ok: true,
@@ -107,6 +112,7 @@ function defaultModelCosts() {
   return {
     "GPT Image 2": { costRm: 0.024, costUsd: 0.006, unit: "image" },
     "Nano Banana Pro": { costRm: 0.105, costRmb: 0.18, unit: "image" },
+    "Seedance 2.0": { costRm: 0.48, costUsd: 0.4, unit: "4s video" },
     "Veo 3.1": { costRm: 0.234, costRmb: 0.4, unit: "8s video" },
     "Sora 2": { costRm: 0.093, costRmb: 0.16, unit: "8s video" },
     "Gemini Omni": { costRm: 0.584, costRmb: 1, unit: "10s video" },
@@ -679,6 +685,16 @@ function generatedCopy(action, step) {
   return map[action] || [`${step} result`, "Generated output saved."];
 }
 
+function resultTypeForGeneration(action, step, generated = {}) {
+  if (action === "generate-image") {
+    if (generated.videoUrl) return "video";
+    return "image";
+  }
+  const normalized = String(step || "").toLowerCase();
+  if (["image", "ugc", "auto", "original", "clone", "story", "viral"].includes(normalized)) return normalized;
+  return normalized || "text";
+}
+
 function requireApimartConfig() {
   const apiKey = process.env.APIMART_API_KEY;
   if (!apiKey || apiKey.includes("replace_with")) {
@@ -692,6 +708,7 @@ function requireApimartConfig() {
 function providerForMediaModel(model) {
   if (model === "GPT Image 2") return process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Nano Banana Pro") return process.env.GRSAI_API_KEY ? "grsai" : "mock";
+  if (model === "Seedance 2.0") return process.env.ATLASCLOUD_API_KEY ? "atlascloud" : "mock";
   if (model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni" || model === "Grok Imagine Video") return process.env.WUYIN_API_KEY ? "wuyin" : "mock";
   return "unsupported";
 }
@@ -705,6 +722,7 @@ function generationCostFor(db, project, action, generated) {
 }
 
 function videoDurationFor(project, model = project.image?.model) {
+  if (model === "Seedance 2.0") return Number(project.image?.duration || process.env.ATLASCLOUD_SEEDANCE_DURATION || 4);
   if (model === "Sora 2") return Number(project.image?.duration || process.env.WUYIN_SORA_DURATION || 8);
   if (model === "Gemini Omni") return 10;
   if (model === "Grok Imagine Video") return Number(project.image?.duration || process.env.WUYIN_GROK_DURATION || 8);
@@ -721,6 +739,7 @@ function creditChargeFor(project, action) {
   const model = project.image?.model || "GPT Image 2";
   if (model === "GPT Image 2") return 0.1;
   if (model === "Nano Banana Pro") return 0.2;
+  if (model === "Seedance 2.0") return roundCredits(videoDurationFor(project, model) * 0.1);
   if (model === "Veo 3.1") return 0.4;
   if (model === "Sora 2") return roundCredits(videoDurationFor(project, model) * 0.06);
   if (model === "Gemini Omni") return 1.3;
@@ -854,6 +873,16 @@ function requireWuyinConfig() {
   return apiKey;
 }
 
+function requireAtlasConfig() {
+  const apiKey = process.env.ATLASCLOUD_API_KEY;
+  if (!apiKey || apiKey.includes("replace_with")) {
+    const error = new Error("Atlas Cloud belum configure. Isi ATLASCLOUD_API_KEY dalam Render Environment Variables dulu.");
+    error.status = 503;
+    throw error;
+  }
+  return apiKey;
+}
+
 function requireGrsaiConfig() {
   const apiKey = process.env.GRSAI_API_KEY;
   if (!apiKey || apiKey.includes("replace_with")) {
@@ -899,6 +928,27 @@ async function grsaiRequest(pathname, { method = "POST", body } = {}) {
   const payload = parseJsonishPayload(await response.text());
   if (!response.ok || (payload.code && payload.code !== 0)) {
     const error = new Error(payload.msg || payload.message || payload.error || `GRS AI request failed (${response.status})`);
+    error.status = response.status || 502;
+    throw error;
+  }
+  return payload;
+}
+
+async function atlasRequest(pathname, { method = "POST", body } = {}) {
+  const apiKey = requireAtlasConfig();
+  const response = await fetch(`${atlasBaseUrl}${pathname}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: body ? JSON.stringify(body) : undefined,
+    signal: AbortSignal.timeout(Number(process.env.ATLASCLOUD_TIMEOUT_MS || 120000))
+  });
+  const text = await response.text();
+  const payload = parseJsonishPayload(text);
+  if (!response.ok || payload.error || payload.message?.toLowerCase?.().includes("error")) {
+    const error = new Error(payload.error || payload.message || payload.msg || `Atlas Cloud request failed (${response.status})`);
     error.status = response.status || 502;
     throw error;
   }
@@ -1029,6 +1079,21 @@ function extractUrlsDeep(value) {
   return [...new Set(urls)];
 }
 
+function flattenUrlValues(value) {
+  const urls = [];
+  const visit = (item) => {
+    if (!item) return;
+    if (typeof item === "string") {
+      if (/^https?:\/\//i.test(item)) urls.push(item);
+      return;
+    }
+    if (Array.isArray(item)) return item.forEach(visit);
+    if (typeof item === "object") Object.values(item).forEach(visit);
+  };
+  visit(value);
+  return urls;
+}
+
 async function generateImageWithApimart(project) {
   const prompt = [
     project.image?.prompt || "Create a high-converting TikTok Shop product image.",
@@ -1107,6 +1172,25 @@ function wuyinImageBody(project, prompt) {
   return { prompt, size: imageSize, aspectRatio };
 }
 
+function atlasSeedanceBody(project, prompt) {
+  const aspectRatio = process.env.ATLASCLOUD_SEEDANCE_ASPECT_RATIO || process.env.WUYIN_VIDEO_RATIO || "9:16";
+  const [width, height] = aspectRatio === "1:1"
+    ? [1024, 1024]
+    : aspectRatio === "16:9"
+      ? [1280, 720]
+      : [720, 1280];
+  return {
+    model: atlasSeedanceModel,
+    prompt,
+    width: Number(process.env.ATLASCLOUD_SEEDANCE_WIDTH || width),
+    height: Number(process.env.ATLASCLOUD_SEEDANCE_HEIGHT || height),
+    duration: videoDurationFor(project, "Seedance 2.0"),
+    fps: Number(process.env.ATLASCLOUD_SEEDANCE_FPS || 24),
+    watermark: process.env.ATLASCLOUD_SEEDANCE_WATERMARK === "true",
+    return_last_frame: false
+  };
+}
+
 async function pollWuyinTask(taskId) {
   const maxAttempts = Number(process.env.WUYIN_IMAGE_POLL_ATTEMPTS || 36);
   const delayMs = Number(process.env.WUYIN_IMAGE_POLL_MS || 3000);
@@ -1145,10 +1229,36 @@ async function pollGrsaiTask(taskId) {
   throw error;
 }
 
+async function pollAtlasPrediction(predictionId) {
+  const maxAttempts = Number(process.env.ATLASCLOUD_POLL_ATTEMPTS || 60);
+  const delayMs = Number(process.env.ATLASCLOUD_POLL_MS || 5000);
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, delayMs));
+    const payload = await atlasRequest(`${atlasPredictionPathPrefix}/${encodeURIComponent(predictionId)}`, { method: "GET" });
+    const data = payload.data || payload;
+    const status = String(data.status || payload.status || "").toLowerCase();
+    if (["completed", "succeeded", "success"].includes(status)) return payload;
+    if (["failed", "error", "cancelled", "canceled"].includes(status)) {
+      const error = new Error(data.error || data.message || payload.error || payload.message || `Atlas Cloud Seedance task ${status || "failed"}`);
+      error.status = 502;
+      throw error;
+    }
+  }
+  const error = new Error("Atlas Cloud Seedance task is still processing. Please try again later.");
+  error.status = 202;
+  throw error;
+}
+
+function extractAtlasOutputs(taskData) {
+  const data = taskData.data || taskData;
+  const outputs = Array.isArray(data.outputs) ? data.outputs : [];
+  return [...new Set([...flattenUrlValues(outputs), ...extractUrlsDeep(taskData)])];
+}
+
 function extractGrsaiUrls(taskData) {
   const data = taskData.data || taskData;
   const resultUrls = Array.isArray(data.results)
-    ? data.results.map((result) => result?.url).filter(Boolean)
+    ? data.results.flatMap((result) => flattenUrlValues(result?.url || result?.image_url || result?.imageUrl || result?.output)).filter(Boolean)
     : [];
   return [...new Set([...resultUrls, ...extractUrlsDeep(taskData)])];
 }
@@ -1216,6 +1326,27 @@ async function generateVideoWithWuyin(project) {
   };
 }
 
+async function generateVideoWithAtlasSeedance(project) {
+  const prompt = [
+    project.image?.prompt || "Create a high-converting TikTok Shop product video.",
+    `Mode: ${project.image?.mode || "Create Video"}.`,
+    "Style: realistic short-form ecommerce video, native-looking TikTok Shop pacing, clear product focus, no fake brand claims."
+  ].join("\n");
+  const payload = await atlasRequest(atlasGenerateVideoPath, {
+    body: atlasSeedanceBody(project, prompt)
+  });
+  const data = payload.data || payload;
+  const predictionId = data.id || data.prediction_id || payload.id || payload.prediction_id;
+  if (!predictionId) return { text: JSON.stringify(payload, null, 2), urls: extractAtlasOutputs(payload) };
+  const taskData = await pollAtlasPrediction(predictionId);
+  const urls = extractAtlasOutputs(taskData);
+  return {
+    text: urls.length ? `Video generated with Atlas Cloud Seedance 2.0.\n\nTask ID: ${predictionId}` : `Seedance 2.0 task completed with Atlas Cloud.\n\nTask ID: ${predictionId}`,
+    urls,
+    taskId: predictionId
+  };
+}
+
 async function generateWithApimart(project, action, step) {
   if (action === "generate-image") {
     const image = await generateImageWithApimart(project);
@@ -1230,11 +1361,15 @@ async function generateWithProvider(project, action, step) {
   if (action === "generate-image") {
     const model = project.image?.model || "GPT Image 2";
     if (!allowedMediaModels.has(model)) {
-      const error = new Error("This Duitok plan only supports GPT Image 2, Nano Banana Pro, Veo 3.1, Sora 2, Gemini Omni, and Grok Imagine Video.");
+      const error = new Error("This Duitok plan only supports GPT Image 2, Nano Banana Pro, Seedance 2.0, Veo 3.1, Sora 2, Gemini Omni, and Grok Imagine Video.");
       error.status = 400;
       throw error;
     }
     const provider = providerForMediaModel(model);
+    if (provider === "atlascloud" && model === "Seedance 2.0") {
+      const video = await generateVideoWithAtlasSeedance(project);
+      return { title: "Atlas Cloud Seedance 2.0", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "atlascloud" };
+    }
     if (provider === "wuyin" && (model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni" || model === "Grok Imagine Video")) {
       const video = await generateVideoWithWuyin(project);
       return { title: `速创API ${model}`, body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "wuyin" };
@@ -1271,7 +1406,7 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
     });
     const result = {
       id: resultId,
-      type: step,
+      type: resultTypeForGeneration(action, step, generated),
       title: generated.title,
       body: generated.body,
       imageUrl: generated.imageUrl ? mirrored.url : undefined,
@@ -1323,7 +1458,7 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
       generationJobId: job.id,
       provider: job.provider,
       model: job.model,
-      endpoint: job.provider === "grsai" ? grsaiDrawPath : job.provider === "wuyin" ? wuyinPathFromProject(project) : apimartImagePath,
+      endpoint: job.provider === "atlascloud" ? atlasGenerateVideoPath : job.provider === "grsai" ? grsaiDrawPath : job.provider === "wuyin" ? wuyinPathFromProject(project) : apimartImagePath,
       status: "succeeded",
       taskId: generated.taskId,
       costRm: job.costRm,
@@ -1353,7 +1488,7 @@ async function saveFailedGeneration(projectId, action, step, error, user) {
       projectId,
       action,
       step,
-      type: action === "generate-image" && ["Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"].includes(project.image?.model) ? "video" : action === "generate-image" ? "image" : "text",
+      type: action === "generate-image" && ["Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"].includes(project.image?.model) ? "video" : action === "generate-image" ? "image" : "text",
       status: "failed",
       taskId: null,
       prompt: project.image?.prompt || "",
@@ -1373,7 +1508,7 @@ async function saveFailedGeneration(projectId, action, step, error, user) {
       generationJobId: job.id,
       provider: job.provider,
       model: job.model,
-      endpoint: job.provider === "grsai" ? grsaiDrawPath : job.provider === "wuyin" ? wuyinPathFromProject(project) : apimartImagePath,
+      endpoint: job.provider === "atlascloud" ? atlasGenerateVideoPath : job.provider === "grsai" ? grsaiDrawPath : job.provider === "wuyin" ? wuyinPathFromProject(project) : apimartImagePath,
       status: "failed",
       errorMessage: job.errorMessage,
       costRm: 0,
@@ -1399,7 +1534,7 @@ async function enqueueGeneration(projectId, action, step, user) {
       projectId,
       action,
       step,
-      type: action === "generate-image" && ["Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"].includes(project.image?.model) ? "video" : action === "generate-image" ? "image" : "text",
+      type: action === "generate-image" && ["Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"].includes(project.image?.model) ? "video" : action === "generate-image" ? "image" : "text",
       status: "queued",
       prompt: project.image?.prompt || "",
       creditsCharged: 0,
@@ -1459,7 +1594,7 @@ async function completeQueuedGeneration(jobId, generated) {
     });
     const result = {
       id: resultId,
-      type: job.step,
+      type: resultTypeForGeneration(job.action, job.step, generated),
       title: generated.title,
       body: generated.body,
       imageUrl: generated.imageUrl ? mirrored.url : undefined,
@@ -1505,7 +1640,7 @@ async function completeQueuedGeneration(jobId, generated) {
       generationJobId: job.id,
       provider: job.provider,
       model: job.model,
-      endpoint: job.provider === "grsai" ? grsaiDrawPath : job.provider === "wuyin" ? wuyinPathFromProject(project) : apimartImagePath,
+      endpoint: job.provider === "atlascloud" ? atlasGenerateVideoPath : job.provider === "grsai" ? grsaiDrawPath : job.provider === "wuyin" ? wuyinPathFromProject(project) : apimartImagePath,
       status: "succeeded",
       taskId: generated.taskId,
       costRm: job.costRm,
@@ -1543,7 +1678,7 @@ async function failQueuedGeneration(jobId, error) {
       generationJobId: job.id,
       provider: job.provider,
       model: job.model,
-      endpoint: project ? (job.provider === "grsai" ? grsaiDrawPath : job.provider === "wuyin" ? wuyinPathFromProject(project) : apimartImagePath) : "",
+      endpoint: project ? (job.provider === "atlascloud" ? atlasGenerateVideoPath : job.provider === "grsai" ? grsaiDrawPath : job.provider === "wuyin" ? wuyinPathFromProject(project) : apimartImagePath) : "",
       status: "failed",
       errorMessage: job.errorMessage,
       costRm: 0,
@@ -2759,6 +2894,46 @@ app.get("/api/export/all", async (req, res, next) => {
 app.get("/api/export/project/:id", async (req, res) => {
   const { db, user } = await requireAuth(req);
   res.attachment("project.json").json(findProject(db, req.params.id, user));
+});
+
+app.get("/api/media/result/:id/:kind", async (req, res, next) => {
+  try {
+    const { db, user } = await requireAuth(req);
+    const projects = (user.role || "user") === "admin" ? db.projects : db.projects.filter((project) => project.userId === user.id);
+    const result = projects.flatMap((project) => project.results || []).find((item) => item.id === req.params.id);
+    if (!result) {
+      const error = new Error("Result not found");
+      error.status = 404;
+      throw error;
+    }
+    const isVideo = req.params.kind === "video";
+    const sourceUrl = isVideo
+      ? (result.videoUrl || result.originalVideoUrl)
+      : (result.imageUrl || result.originalImageUrl);
+    if (!sourceUrl) {
+      const error = new Error("Result media not found");
+      error.status = 404;
+      throw error;
+    }
+    const response = await fetch(sourceUrl, {
+      headers: {
+        Accept: isVideo ? "video/*,*/*;q=0.8" : "image/*,*/*;q=0.8"
+      },
+      signal: AbortSignal.timeout(Number(process.env.MEDIA_PROXY_TIMEOUT_MS || 60000))
+    });
+    if (!response.ok) {
+      const error = new Error(`Media fetch failed: ${response.status}`);
+      error.status = 502;
+      throw error;
+    }
+    const contentType = response.headers.get("content-type") || (isVideo ? "video/mp4" : "image/png");
+    res.setHeader("Content-Type", contentType);
+    res.setHeader("Cache-Control", "private, max-age=300");
+    const bytes = Buffer.from(await response.arrayBuffer());
+    res.send(bytes);
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.get("/api/export/result/:id", async (req, res) => {

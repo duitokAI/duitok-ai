@@ -1069,6 +1069,7 @@ function studio() {
     <div class="studio-shell">
       <aside class="sidebar">
         ${brand()}
+        <div class="sidebar-language">${languageSwitch()}</div>
         <div class="side-section">${icon("layout-dashboard", 18)} Workspace</div>
         <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard">${icon("sparkles")} ${t("dashboard")}</button>
         ${state.user?.role === "admin" ? `<button class="side-link ${state.page === "admin" ? "active" : ""}" data-page="admin">${icon("shield-check")} Admin CRM</button>` : ""}
@@ -1444,14 +1445,15 @@ function stepPanel(p) {
 
 function imagePanel(p) {
   return `
-    <div class="generator-box"><h2>🖼️ ${t("imageGenerator")}</h2><div class="form-grid three">${select("image.model", t("model"), ["GPT Image 2", "Nano Banana Pro", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"], p.image.model)}${select("image.mode", t("mode"), ["Create Image", "Edit Image", "Product Scene"], p.image.mode)}${mediaDurationSelect(p)}</div></div>
+    <div class="generator-box"><h2>🖼️ ${t("imageGenerator")}</h2><div class="form-grid three">${select("image.model", t("model"), ["GPT Image 2", "Nano Banana Pro", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"], p.image.model)}${select("image.mode", t("mode"), ["Create Image", "Edit Image", "Product Scene"], p.image.mode)}${mediaDurationSelect(p)}</div></div>
     ${upload(t("avatarRef"), t("dropAvatar"), "Face / person - used for all variations", "camera", "avatar")}
     ${upload(t("productRef"), t("dropProduct"), "Product - used for all images and videos", "package", "product")}
     ${imagePromptSettings(p)}
-    ${results(p, "image")}`;
+    ${results(p, ["image", "video"])}`;
 }
 
 function mediaDurationSelect(p) {
+  if (p.image.model === "Seedance 2.0") return select("image.duration", "Duration", ["4", "6", "8", "10", "12", "15"], String(p.image.duration || "4"));
   if (p.image.model === "Sora 2") return select("image.duration", "Duration", ["8", "12"], String(p.image.duration || "8"));
   if (p.image.model === "Grok Imagine Video") return select("image.duration", "Duration", Array.from({ length: 23 }, (_, index) => String(index + 8)), String(p.image.duration || "8"));
   if (p.image.model === "Gemini Omni") return `<label>Duration<input value="10 seconds" disabled></label>`;
@@ -1518,7 +1520,8 @@ function prompt(field, value, placeholder, action, button) {
 }
 
 function results(p, type) {
-  const items = p.results.filter((item) => item.type === type).slice(-4).reverse();
+  const types = Array.isArray(type) ? type : [type];
+  const items = p.results.filter((item) => types.includes(item.type)).slice(-4).reverse();
   if (!items.length) return `<section class="empty-result">${icon("sparkles")} ${t("noResults")}</section>`;
   return `<section class="result-grid">${items.map(resultCard).join("")}</section>`;
 }

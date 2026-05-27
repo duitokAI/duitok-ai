@@ -95,6 +95,30 @@ services:
         value: "8"
       - key: WUYIN_GROK_ASPECT_RATIO
         value: 9:16
+      - key: ATLASCLOUD_API_KEY
+        sync: false
+      - key: ATLASCLOUD_BASE_URL
+        value: https://api.atlascloud.ai
+      - key: ATLASCLOUD_GENERATE_VIDEO_PATH
+        value: /api/v1/model/generateVideo
+      - key: ATLASCLOUD_PREDICTION_PATH_PREFIX
+        value: /api/v1/model/prediction
+      - key: ATLASCLOUD_SEEDANCE_MODEL
+        value: bytedance/seedance-2.0/text-to-video
+      - key: ATLASCLOUD_SEEDANCE_DURATION
+        value: "4"
+      - key: ATLASCLOUD_SEEDANCE_ASPECT_RATIO
+        value: 9:16
+      - key: ATLASCLOUD_SEEDANCE_FPS
+        value: "24"
+      - key: ATLASCLOUD_SEEDANCE_WATERMARK
+        value: "false"
+      - key: ATLASCLOUD_POLL_ATTEMPTS
+        value: "60"
+      - key: ATLASCLOUD_POLL_MS
+        value: "5000"
+      - key: ATLASCLOUD_TIMEOUT_MS
+        value: "120000"
       - key: ASSET_STORAGE_PROVIDER
         value: external
       - key: R2_ACCOUNT_ID
