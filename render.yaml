@@ -120,7 +120,15 @@ services:
       - key: ATLASCLOUD_TIMEOUT_MS
         value: "120000"
       - key: ASSET_STORAGE_PROVIDER
-        value: external
+        value: r2
+      - key: REQUIRE_DURABLE_ASSETS
+        value: "true"
+      - key: ADMIN_USER_IDS
+        value: u_1
+      - key: ADMIN_EMAILS
+        value: admin@duitok.com
+      - key: ADMIN_API_KEY
+        sync: false
       - key: R2_ACCOUNT_ID
         sync: false
       - key: R2_ENDPOINT

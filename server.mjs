@@ -61,6 +61,7 @@ const internalMediaModelMap = Object.fromEntries(Object.entries(publicMediaModel
 const adminUserId = "u_1";
 const authSecret = process.env.AUTH_SECRET || process.env.CHIP_API_TOKEN || "duitok-local-dev-secret";
 const assetStorageProvider = process.env.ASSET_STORAGE_PROVIDER || "external";
+const requireDurableAssets = process.env.REQUIRE_DURABLE_ASSETS === "true" || (process.env.NODE_ENV === "production" && process.env.REQUIRE_DURABLE_ASSETS !== "false");
 const r2Endpoint = process.env.R2_ENDPOINT || (process.env.R2_ACCOUNT_ID ? `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com` : "");
 const postgresPool = databaseUrl
   ? new Pool({
@@ -141,9 +142,10 @@ function storageStatus() {
   const r2Ready = Boolean(process.env.R2_BUCKET && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_PUBLIC_BASE_URL && r2Endpoint);
   return {
     provider: r2Ready ? "cloudflare-r2" : assetStorageProvider,
-    ready: assetStorageProvider === "external" || r2Ready,
+    ready: r2Ready || (!requireDurableAssets && assetStorageProvider === "external"),
     durableAssets: r2Ready,
-    message: r2Ready ? "Generated assets can be mirrored to your own CDN." : "Using provider URLs until R2 credentials are configured."
+    required: requireDurableAssets,
+    message: r2Ready ? "Generated assets are mirrored to Duitok-controlled storage." : "Duitok media storage is not configured."
   };
 }
 
@@ -221,7 +223,15 @@ async function putR2Object(key, bytes, contentType) {
 
 async function mirrorAssetToStorage(sourceUrl, { userId, projectId, resultId, type }) {
   const status = storageStatus();
-  if (!sourceUrl || !status.durableAssets) return { url: sourceUrl, originalUrl: sourceUrl, storage: "external" };
+  if (!sourceUrl) return { url: sourceUrl, originalUrl: sourceUrl, storage: "none" };
+  if (!status.durableAssets) {
+    if (requireDurableAssets) {
+      const error = new Error("Duitok media storage is required before generated assets can be delivered.");
+      error.status = 503;
+      throw error;
+    }
+    return { url: sourceUrl, originalUrl: sourceUrl, storage: "external" };
+  }
   try {
     const response = await fetch(sourceUrl);
     if (!response.ok) throw new Error(`Asset download failed: ${response.status}`);
@@ -244,6 +254,10 @@ async function mirrorAssetToStorage(sourceUrl, { userId, projectId, resultId, ty
     };
   } catch (error) {
     console.error("R2 asset mirror failed", error);
+    if (requireDurableAssets) {
+      error.status ||= 502;
+      throw error;
+    }
     return { url: sourceUrl, originalUrl: sourceUrl, storage: "external", storageError: error.message };
   }
 }
@@ -281,6 +295,17 @@ function creditEntry(userId, type, credits, note, meta = {}) {
   };
 }
 
+function adminAuditEntry(user, action, details = {}) {
+  return {
+    id: crypto.randomUUID(),
+    userId: user?.id || "",
+    email: user?.email || "",
+    action,
+    details,
+    createdAt: new Date().toISOString()
+  };
+}
+
 function hashPassword(password) {
   const salt = crypto.randomBytes(16).toString("hex");
   const hash = crypto.scryptSync(password, salt, 64).toString("hex");
@@ -303,6 +328,8 @@ function publicUser(user) {
     name: user.name,
     role: user.role || "user",
     status: user.status || "active",
+    adminVerified: isAdminRole(user) ? Boolean(user.__adminVerified) : false,
+    adminLocked: isAdminRole(user) ? !user.__adminVerified : false,
     agentPermissions: { ...defaultAgentPermissions(), ...(user.agentPermissions || {}) }
   };
 }
@@ -327,16 +354,70 @@ function verifyAuthToken(token, db) {
   return db.users.find((user) => user.id === data.userId) || null;
 }
 
+function safeEqualString(a = "", b = "") {
+  const left = Buffer.from(String(a));
+  const right = Buffer.from(String(b));
+  return left.length === right.length && crypto.timingSafeEqual(left, right);
+}
+
+function adminAllowList() {
+  return (process.env.ADMIN_USER_IDS || adminUserId).split(",").map((item) => item.trim()).filter(Boolean);
+}
+
+function adminEmailAllowList() {
+  return (process.env.ADMIN_EMAILS || "admin@duitok.com").split(",").map((item) => item.trim().toLowerCase()).filter(Boolean);
+}
+
+function adminAccessKey() {
+  return process.env.ADMIN_API_KEY || process.env.ADMIN_SECURITY_CODE || "";
+}
+
+function isAdminRole(user) {
+  return (user?.role || "user") === "admin";
+}
+
+function verifyAdminAccess(req, user, providedKey = "") {
+  if (!isAdminRole(user)) return false;
+  if (!adminAllowList().includes(user.id) && !adminEmailAllowList().includes(String(user.email || "").toLowerCase())) return false;
+  const requiredKey = adminAccessKey();
+  if (!requiredKey) return true;
+  const candidate = providedKey || req?.get?.("x-admin-key") || "";
+  return safeEqualString(candidate, requiredKey);
+}
+
+function hasAdminPrivileges(user) {
+  return isAdminRole(user) && Boolean(user.__adminVerified);
+}
+
+function auditAdminAccess(req, user, decision, reason) {
+  const event = {
+    event: "admin_access",
+    decision,
+    reason,
+    userId: user?.id || "anonymous",
+    email: user?.email || "",
+    path: req?.originalUrl || req?.url || "",
+    ip: req?.ip || "",
+    at: new Date().toISOString()
+  };
+  console.warn(JSON.stringify(event));
+}
+
 async function requireAuth(req) {
   const db = await ensureDb();
   const token = String(req.get("authorization") || req.query.token || "").replace(/^Bearer\s+/i, "");
-  const user = verifyAuthToken(token, db);
+  const foundUser = verifyAuthToken(token, db);
+  const user = foundUser ? { ...foundUser } : null;
   if (!user) {
     const error = new Error("Login required.");
     error.status = 401;
     throw error;
   }
-  if ((user.status || "active") === "suspended" && (user.role || "user") !== "admin") {
+  user.__adminVerified = verifyAdminAccess(req, user);
+  if (isAdminRole(user) && /^\/api\/(?:state|admin|export)/.test(req.path) && !user.__adminVerified) {
+    auditAdminAccess(req, user, "denied", "missing_or_invalid_admin_key");
+  }
+  if ((user.status || "active") === "suspended" && !hasAdminPrivileges(user)) {
     const error = new Error("Account suspended. Please contact support.");
     error.status = 403;
     throw error;
@@ -345,8 +426,7 @@ async function requireAuth(req) {
 }
 
 function requireAdminUser(user) {
-  const allowedAdminIds = (process.env.ADMIN_USER_IDS || adminUserId).split(",").map((item) => item.trim()).filter(Boolean);
-  if ((user.role || "user") !== "admin" || !allowedAdminIds.includes(user.id)) {
+  if (!hasAdminPrivileges(user)) {
     const error = new Error("Admin access required.");
     error.status = 403;
     throw error;
@@ -461,6 +541,7 @@ function normalizeDb(db) {
   db.supportTickets = db.supportTickets.map((item) => ({ userId: item.userId || adminUserId, ...item }));
   db.generationJobs ||= [];
   db.apiCalls ||= [];
+  db.adminAuditLogs ||= [];
   db.creditLedger ||= [];
   db.creditLedger = db.creditLedger.map((item) => ({ userId: item.userId || adminUserId, ...item }));
   db.modelCosts = { ...defaultModelCosts(), ...(db.modelCosts || {}) };
@@ -608,7 +689,7 @@ function publicMediaMarker(value) {
 }
 
 function publicState(db, user = db.users?.find((item) => item.id === adminUserId)) {
-  const isAdmin = (user?.role || "user") === "admin";
+  const isAdmin = hasAdminPrivileges(user) && Boolean(user.__adminVerified);
   const owns = (item) => isAdmin || item.userId === user.id;
   const userBilling = user?.billing || defaultBilling();
   const sanitizeResult = (result) => {
@@ -730,6 +811,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
     payments: db.payments || [],
     supportTickets: db.supportTickets || [],
     creditLedger: db.creditLedger || [],
+    adminAuditLogs: db.adminAuditLogs || [],
     modelCosts: db.modelCosts || defaultModelCosts(),
     storage: storageStatus(),
     totals: {
@@ -791,7 +873,7 @@ function findProject(db, id, user) {
     error.status = 404;
     throw error;
   }
-  if (user && (user.role || "user") !== "admin" && project.userId !== user.id) {
+  if (user && !hasAdminPrivileges(user) && project.userId !== user.id) {
     const error = new Error("Project not found");
     error.status = 404;
     throw error;
@@ -877,7 +959,7 @@ function creditChargeFor(project, action) {
 }
 
 function assertGenerationAccess(db, user, requiredCredits = 0.1) {
-  if ((user.role || "user") === "admin") return;
+  if (hasAdminPrivileges(user)) return;
 
   user.billing ||= defaultBilling();
   if (Number(user.billing.credits || 0) < requiredCredits) {
@@ -901,7 +983,7 @@ function assertGenerationAccess(db, user, requiredCredits = 0.1) {
 }
 
 function requireAgentPermission(user, permission) {
-  if ((user.role || "user") === "admin") return;
+  if (hasAdminPrivileges(user)) return;
   const permissions = { ...defaultAgentPermissions(), ...(user.agentPermissions || {}) };
   if (!permissions[permission]) {
     const error = new Error(`Duitok Agent does not have ${permission} permission for this account.`);
@@ -1895,13 +1977,13 @@ function latestTikTokConnection(db, userId) {
 function findTikTokConnection(db, id, user) {
   const connection = id
     ? db.tiktok.connections.find((item) => item.id === id)
-    : latestTikTokConnection(db, user && (user.role || "user") !== "admin" ? user.id : null);
+    : latestTikTokConnection(db, user && !hasAdminPrivileges(user) ? user.id : null);
   if (!connection) {
     const error = new Error("TikTok account not connected yet.");
     error.status = 400;
     throw error;
   }
-  if (user && (user.role || "user") !== "admin" && connection.userId !== user.id) {
+  if (user && !hasAdminPrivileges(user) && connection.userId !== user.id) {
     const error = new Error("TikTok account not found.");
     error.status = 404;
     throw error;
@@ -2304,7 +2386,7 @@ async function executeAgentTool(name, args, user) {
       let project = null;
       if (args.projectId) project = findProject(currentDb, args.projectId, user);
       if (args.resultId) {
-        const projects = (currentDb.projects || []).filter((item) => (user.role || "user") === "admin" || item.userId === user.id);
+        const projects = (currentDb.projects || []).filter((item) => hasAdminPrivileges(user) || item.userId === user.id);
         for (const item of projects) {
           const found = (item.results || []).find((entry) => entry.id === args.resultId);
           if (found) {
@@ -2350,7 +2432,7 @@ async function executeAgentTool(name, args, user) {
     const db = await mutateDb(async (currentDb) => {
       const item = currentDb.schedule.find((entry) => entry.id === args.scheduleId);
       if (!item) throw Object.assign(new Error("Schedule item not found"), { status: 404 });
-      if ((user.role || "user") !== "admin" && item.userId !== user.id) throw Object.assign(new Error("Schedule item not found"), { status: 404 });
+      if (!hasAdminPrivileges(user) && item.userId !== user.id) throw Object.assign(new Error("Schedule item not found"), { status: 404 });
       item.status = item.status === "Ready" ? "Posted" : "Ready";
       currentDb.usage.unshift(usage(`Agent updated schedule: ${item.title}`, 0, item.userId));
       await saveDb(currentDb);
@@ -2364,7 +2446,7 @@ async function executeAgentTool(name, args, user) {
     const db = await mutateDb(async (currentDb) => {
       const item = currentDb.schedule.find((entry) => entry.id === args.scheduleId);
       if (!item) throw Object.assign(new Error("Auto post job not found"), { status: 404 });
-      if ((user.role || "user") !== "admin" && item.userId !== user.id) throw Object.assign(new Error("Auto post job not found"), { status: 404 });
+      if (!hasAdminPrivileges(user) && item.userId !== user.id) throw Object.assign(new Error("Auto post job not found"), { status: 404 });
       if (args.status) item.status = String(args.status);
       if (args.caption !== undefined) item.caption = String(args.caption);
       if (args.hashtags !== undefined) item.hashtags = String(args.hashtags);
@@ -2383,7 +2465,7 @@ async function executeAgentTool(name, args, user) {
     requireAgentPermission(user, "publish");
     const db = await mutateDb(async (currentDb) => {
       const connection = findTikTokConnection(currentDb, args.connectionId, user);
-      if ((user.role || "user") !== "admin" && connection.userId !== user.id) throw Object.assign(new Error("TikTok account not found"), { status: 404 });
+      if (!hasAdminPrivileges(user) && connection.userId !== user.id) throw Object.assign(new Error("TikTok account not found"), { status: 404 });
       await refreshTikTokConnection(connection);
       await queryTikTokCreatorInfo(connection);
       currentDb.usage.unshift(usage("Agent queried TikTok creator info", 0, connection.userId));
@@ -2398,13 +2480,13 @@ async function executeAgentTool(name, args, user) {
     const result = await mutateDb(async (currentDb) => {
       const currentJob = currentDb.schedule.find((entry) => entry.id === args.scheduleId);
       if (!currentJob) throw Object.assign(new Error("Auto post job not found"), { status: 404 });
-      if ((user.role || "user") !== "admin" && currentJob.userId !== user.id) throw Object.assign(new Error("Auto post job not found"), { status: 404 });
+      if (!hasAdminPrivileges(user) && currentJob.userId !== user.id) throw Object.assign(new Error("Auto post job not found"), { status: 404 });
       const requestedMediaUrl = args.mediaUrl === "duitok-media-ready" ? "" : args.mediaUrl;
       const mediaUrl = requestedMediaUrl || currentJob.mediaUrl;
       if (!mediaUrl) throw Object.assign(new Error("TikTok Direct Post needs a public mediaUrl."), { status: 400 });
 
       const connection = findTikTokConnection(currentDb, args.connectionId, user);
-      if ((user.role || "user") !== "admin" && connection.userId !== currentJob.userId) throw Object.assign(new Error("TikTok account not found"), { status: 404 });
+      if (!hasAdminPrivileges(user) && connection.userId !== currentJob.userId) throw Object.assign(new Error("TikTok account not found"), { status: 404 });
       await refreshTikTokConnection(connection);
       if (!connection.creatorInfo) await queryTikTokCreatorInfo(connection);
 
@@ -2458,7 +2540,7 @@ async function executeAgentTool(name, args, user) {
     const result = await mutateDb(async (currentDb) => {
       const publish = currentDb.tiktok.publishes.find((item) => item.publishId === args.publishId || item.id === args.publishId);
       if (!publish) throw Object.assign(new Error("TikTok publish record not found"), { status: 404 });
-      if ((user.role || "user") !== "admin" && publish.userId !== user.id) throw Object.assign(new Error("TikTok publish record not found"), { status: 404 });
+      if (!hasAdminPrivileges(user) && publish.userId !== user.id) throw Object.assign(new Error("TikTok publish record not found"), { status: 404 });
       const connection = findTikTokConnection(currentDb, publish.connectionId, user);
       await refreshTikTokConnection(connection);
       const payload = await tiktokRequest("/v2/post/publish/status/fetch/", {
@@ -2686,6 +2768,8 @@ app.patch("/api/admin/users/:id", async (req, res, next) => {
       }
       target.updatedAt = new Date().toISOString();
       db.usage.unshift(usage(`Admin updated user: ${target.email}`, 0, user.id));
+      db.adminAuditLogs.unshift(adminAuditEntry(user, "admin_user_update", { targetUserId: target.id, fields: Object.keys(req.body || {}) }));
+      db.adminAuditLogs = db.adminAuditLogs.slice(0, 500);
       await saveDb(db);
       return publicState(db, user);
     });
@@ -2711,6 +2795,8 @@ app.post("/api/admin/users/:id/credits", async (req, res, next) => {
         adminUserId: user.id
       }));
       db.usage.unshift(usage(`${note}: ${target.email}`, 0, user.id));
+      db.adminAuditLogs.unshift(adminAuditEntry(user, "admin_credit_adjust", { targetUserId: target.id, delta }));
+      db.adminAuditLogs = db.adminAuditLogs.slice(0, 500);
       await saveDb(db);
       return publicState(db, user);
     });
@@ -2723,6 +2809,7 @@ app.post("/api/admin/users/:id/credits", async (req, res, next) => {
 app.post("/api/auth/login", async (req, res) => {
   const email = String(req.body.email || "admin@duitok.com").trim().toLowerCase();
   const password = String(req.body.password || "");
+  const adminKey = String(req.body.adminKey || "");
   if (!email || !password) return res.status(400).json({ error: "Email and password are required" });
 
   const payload = await mutateDb(async (db) => {
@@ -2751,12 +2838,20 @@ app.post("/api/auth/login", async (req, res) => {
       delete user.password;
       await saveDb(db);
     }
-    if ((user.status || "active") === "suspended" && (user.role || "user") !== "admin") {
+    if ((user.status || "active") === "suspended" && !hasAdminPrivileges(user)) {
       const error = new Error("Account suspended. Please contact support.");
       error.status = 403;
       throw error;
     }
-    return { user: publicUser(user), token: signAuthToken(user), state: publicState(db, user) };
+    const sessionUser = { ...user, __adminVerified: verifyAdminAccess(null, user, adminKey) };
+    if (isAdminRole(user)) {
+      auditAdminAccess({ originalUrl: "/api/auth/login", ip: "" }, sessionUser, sessionUser.__adminVerified ? "granted" : "locked", sessionUser.__adminVerified ? "login_admin_key_ok" : "login_admin_key_missing_or_invalid");
+      db.adminAuditLogs ||= [];
+      db.adminAuditLogs.unshift(adminAuditEntry(sessionUser, sessionUser.__adminVerified ? "admin_login_unlocked" : "admin_login_locked"));
+      db.adminAuditLogs = db.adminAuditLogs.slice(0, 500);
+      await saveDb(db);
+    }
+    return { user: publicUser(sessionUser), token: signAuthToken(user), state: publicState(db, sessionUser) };
   });
   res.json(payload);
 });
@@ -2848,7 +2943,7 @@ app.post("/api/tiktok/creator-info", async (req, res, next) => {
     const { user } = await requireAuth(req);
     const result = await mutateDb(async (db) => {
       const connection = findTikTokConnection(db, req.body.connectionId, user);
-      if ((user.role || "user") !== "admin" && connection.userId !== user.id) throw Object.assign(new Error("TikTok account not found"), { status: 404 });
+      if (!hasAdminPrivileges(user) && connection.userId !== user.id) throw Object.assign(new Error("TikTok account not found"), { status: 404 });
       await refreshTikTokConnection(connection);
       const creatorInfo = await queryTikTokCreatorInfo(connection);
       await saveDb(db);
@@ -3062,7 +3157,7 @@ app.patch("/api/schedule/:id", async (req, res) => {
   const { user } = await requireAuth(req);
   res.json(await mutateDb(async (db) => {
     const item = db.schedule.find((entry) => entry.id === req.params.id);
-    if (item && (user.role || "user") !== "admin" && item.userId !== user.id) throw Object.assign(new Error("Schedule item not found"), { status: 404 });
+    if (item && !hasAdminPrivileges(user) && item.userId !== user.id) throw Object.assign(new Error("Schedule item not found"), { status: 404 });
     if (item) item.status = item.status === "Ready" ? "Posted" : "Ready";
     await saveDb(db);
     return publicState(db, user);
@@ -3088,7 +3183,7 @@ app.patch("/api/autopost/jobs/:id", async (req, res) => {
       error.status = 404;
       throw error;
     }
-    if ((user.role || "user") !== "admin" && item.userId !== user.id) throw Object.assign(new Error("Auto post job not found"), { status: 404 });
+    if (!hasAdminPrivileges(user) && item.userId !== user.id) throw Object.assign(new Error("Auto post job not found"), { status: 404 });
     if (req.body.status) item.status = req.body.status;
     if (req.body.caption !== undefined) item.caption = String(req.body.caption);
     if (req.body.hashtags !== undefined) item.hashtags = String(req.body.hashtags);
@@ -3107,7 +3202,7 @@ app.post("/api/tiktok/publish/:id", async (req, res, next) => {
     const { db, user } = await requireAuth(req);
     const job = db.schedule.find((entry) => entry.id === req.params.id);
     if (!job) return res.status(404).json({ error: "Auto post job not found" });
-    if ((user.role || "user") !== "admin" && job.userId !== user.id) return res.status(404).json({ error: "Auto post job not found" });
+    if (!hasAdminPrivileges(user) && job.userId !== user.id) return res.status(404).json({ error: "Auto post job not found" });
     if (!job.mediaUrl && !req.body.mediaUrl) {
       return res.status(400).json({ error: "TikTok Direct Post needs a public mediaUrl for PULL_FROM_URL. Upload/select a video first." });
     }
@@ -3115,7 +3210,7 @@ app.post("/api/tiktok/publish/:id", async (req, res, next) => {
     const result = await mutateDb(async (currentDb) => {
       const currentJob = currentDb.schedule.find((entry) => entry.id === req.params.id);
       const connection = findTikTokConnection(currentDb, req.body.connectionId, user);
-      if ((user.role || "user") !== "admin" && connection.userId !== currentJob.userId) throw Object.assign(new Error("TikTok account not found"), { status: 404 });
+      if (!hasAdminPrivileges(user) && connection.userId !== currentJob.userId) throw Object.assign(new Error("TikTok account not found"), { status: 404 });
       await refreshTikTokConnection(connection);
       if (!connection.creatorInfo) await queryTikTokCreatorInfo(connection);
 
@@ -3179,7 +3274,7 @@ app.get("/api/tiktok/publish/:publishId/status", async (req, res, next) => {
         error.status = 404;
         throw error;
       }
-      if ((user.role || "user") !== "admin" && publish.userId !== user.id) throw Object.assign(new Error("TikTok publish record not found"), { status: 404 });
+      if (!hasAdminPrivileges(user) && publish.userId !== user.id) throw Object.assign(new Error("TikTok publish record not found"), { status: 404 });
       const connection = findTikTokConnection(db, publish.connectionId, user);
       await refreshTikTokConnection(connection);
       const payload = await tiktokRequest("/v2/post/publish/status/fetch/", {
@@ -3233,7 +3328,7 @@ app.get("/api/export/project/:id", async (req, res) => {
 app.get("/api/media/result/:id/:kind", async (req, res, next) => {
   try {
     const { db, user } = await requireAuth(req);
-    const projects = (user.role || "user") === "admin" ? db.projects : db.projects.filter((project) => project.userId === user.id);
+    const projects = hasAdminPrivileges(user) ? db.projects : db.projects.filter((project) => project.userId === user.id);
     const result = projects.flatMap((project) => project.results || []).find((item) => item.id === req.params.id);
     if (!result) {
       const error = new Error("Result not found");

@@ -45,6 +45,10 @@ NODE_ENV=production
 SERVE_STATIC=true
 PUBLIC_APP_URL=https://duitok.com
 CORS_ORIGINS=
+AUTH_SECRET=your_long_random_auth_secret
+ADMIN_USER_IDS=u_1
+ADMIN_EMAILS=admin@duitok.com
+ADMIN_API_KEY=your_private_admin_unlock_key
 DATABASE_URL=your_supabase_postgres_connection_string
 POSTGRES_SSL=true
 CHIP_API_TOKEN=your_chip_api_token
@@ -94,9 +98,19 @@ ATLASCLOUD_SEEDANCE_WATERMARK=false
 ATLASCLOUD_POLL_ATTEMPTS=60
 ATLASCLOUD_POLL_MS=5000
 ATLASCLOUD_TIMEOUT_MS=120000
+ASSET_STORAGE_PROVIDER=r2
+REQUIRE_DURABLE_ASSETS=true
+R2_ACCOUNT_ID=your_cloudflare_account_id
+R2_ENDPOINT=https://your_cloudflare_account_id.r2.cloudflarestorage.com
+R2_BUCKET=your_r2_bucket
+R2_ACCESS_KEY_ID=your_r2_access_key_id
+R2_SECRET_ACCESS_KEY=your_r2_secret_access_key
+R2_PUBLIC_BASE_URL=https://media.your-duitok-domain.com
 ```
 
 After Render deploys, copy its HTTPS domain and paste it into `PUBLIC_APP_URL`.
+
+`REQUIRE_DURABLE_ASSETS=true` is intentional. In production, generation should fail closed if R2/CDN is not configured, instead of returning an upstream provider URL to the user.
 
 ## Step 4: Create Supabase Database
 

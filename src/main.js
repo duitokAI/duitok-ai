@@ -30,6 +30,7 @@ const state = {
   loading: true,
   user: JSON.parse(localStorage.getItem("duitok-user") || "null"),
   token: localStorage.getItem("duitok-auth") || "",
+  adminKey: localStorage.getItem("duitok-admin-key") || "",
   lang: localStorage.getItem("duitok-lang") || "ms",
   db: null,
   page: "dashboard",
@@ -592,6 +593,7 @@ function notify(message) {
 async function api(path, options = {}) {
   const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
   if (state.token) headers.Authorization = `Bearer ${state.token}`;
+  if (state.adminKey) headers["X-Admin-Key"] = state.adminKey;
   const res = await fetch(`${apiBaseUrl}/api${path}`, {
     headers,
     ...options
@@ -1336,11 +1338,15 @@ function contentLibraryPage() {
 
 function adminPage() {
   if (state.user?.role !== "admin") return `<section class="canvas-card slim"><h1>Admin access required</h1></section>`;
+  if (state.user?.adminLocked || !state.db?.admin) {
+    return `<section class="canvas-card slim"><h1>Admin verification</h1><p class="subtitle">Enter your private admin key to unlock provider operations, costs, endpoints, and user controls.</p><form data-form="admin-key" class="login-form"><label>Admin key<input name="adminKey" type="password" autocomplete="off" required></label><button class="gold-button" type="submit">${icon("shield-check")} Unlock Admin</button></form></section>`;
+  }
   const admin = state.db.admin || {};
   const totals = admin.totals || {};
   const users = admin.users || [];
   const jobs = admin.generationJobs || [];
   const calls = admin.apiCalls || [];
+  const adminAuditLogs = admin.adminAuditLogs || [];
   const payments = admin.payments || [];
   const selectedUser = users.find((user) => user.id === state.adminUserId) || users[0];
   const selectedJobs = jobs.filter((job) => job.userId === selectedUser?.id);
@@ -1413,7 +1419,8 @@ function adminPage() {
         ${table([
           ["Credit check", "4 credits per generation", "Blocks normal users when balance is below 4"],
           ["Rate limit", "3/minute, 50/day", "Admin accounts are exempt for testing"],
-          ["Failure ledger", "No credit charge", "Failed API calls are recorded for admin review"]
+          ["Failure ledger", "No credit charge", "Failed API calls are recorded for admin review"],
+          ["Admin audit", `${adminAuditLogs.length} events`, "Sensitive admin actions are logged"]
         ])}
         <div class="card-title compact-title"><h2>${icon("bot", 20)} Agent Permissions</h2><span>${selectedUser?.email || ""}</span></div>
         ${selectedUser ? `<div class="permission-grid">${["generate", "updateProject", "schedule", "publish", "support"].map((key) => `<button class="${permissions[key] ? "gold-button" : "dark-button"} mini-button" data-agent-permission="${selectedUser.id}" data-permission="${key}" data-enabled="${permissions[key] ? "false" : "true"}">${permissions[key] ? icon("check", 15) : icon("x", 15)} ${key}</button>`).join("")}</div>` : ""}
@@ -1427,6 +1434,10 @@ function adminPage() {
       <article class="activity-card">
         <div class="card-title"><h2>${icon("credit-card", 22)} Payments</h2><span>${payments.length} payments</span></div>
         ${table(payments.slice(0, 12).map((payment) => [payment.orderId, `${payment.status} | RM ${payment.amount}`, payment.createdAt ? new Date(payment.createdAt).toLocaleString() : ""]))}
+      </article>
+      <article class="activity-card">
+        <div class="card-title"><h2>${icon("shield-check", 22)} Admin Audit</h2><span>${adminAuditLogs.length} events</span></div>
+        ${table(adminAuditLogs.slice(0, 12).map((entry) => [entry.action, entry.email || entry.userId, entry.createdAt ? new Date(entry.createdAt).toLocaleString() : ""]))}
       </article>
     </section>`;
 }
@@ -1809,6 +1820,10 @@ async function submit(event) {
   event.preventDefault();
   const data = Object.fromEntries(new FormData(event.currentTarget));
   if (event.currentTarget.dataset.form === "login") {
+    if (data.adminKey) {
+      localStorage.setItem("duitok-admin-key", data.adminKey);
+      state.adminKey = data.adminKey;
+    }
     const res = await api("/auth/login", { method: "POST", body: JSON.stringify(data) });
     localStorage.setItem("duitok-user", JSON.stringify(res.user));
     localStorage.setItem("duitok-auth", res.token);
@@ -1817,6 +1832,14 @@ async function submit(event) {
     state.projectId = state.db.projects[0]?.id;
     window.history.pushState({}, "", "/studio");
     return set({ user: res.user, modal: null, page: "dashboard" });
+  }
+  if (event.currentTarget.dataset.form === "admin-key") {
+    localStorage.setItem("duitok-admin-key", data.adminKey);
+    state.adminKey = data.adminKey;
+    const db = await api("/state");
+    const user = { ...(state.user || {}), adminVerified: Boolean(db.admin), adminLocked: !db.admin };
+    localStorage.setItem("duitok-user", JSON.stringify(user));
+    return set({ db, user });
   }
   if (event.currentTarget.dataset.form === "lead") {
     notify("Opening registration.");
