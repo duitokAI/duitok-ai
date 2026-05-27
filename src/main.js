@@ -652,8 +652,10 @@ function publicSite() {
           <a href="/affiliate">${t("navAffiliate")}</a>
           <a href="#faq">${t("navFaq")}</a>
         </div>
-        ${languageSwitch()}
-        <button class="dark-button" data-action="open-login">${icon("log-in")} ${t("signIn")}</button>
+        <div class="nav-actions">
+          <button class="dark-button" data-action="open-login">${icon("log-in")} ${t("signIn")}</button>
+          ${languageSwitch()}
+        </div>
       </nav>
       <section class="public-hero">
         <div>
@@ -803,8 +805,10 @@ function registerPage() {
     <main class="public-shell">
       <nav class="public-nav">
         ${brand(t("checkout"))}
-        ${languageSwitch()}
-        <button class="dark-button" data-action="open-home">${icon("arrow-left")} Home</button>
+        <div class="nav-actions">
+          <button class="dark-button" data-action="open-home">${icon("arrow-left")} Home</button>
+          ${languageSwitch()}
+        </div>
       </nav>
       <section class="register-hero">
         <div>
@@ -848,8 +852,10 @@ function affiliatePage() {
     <main class="public-shell affiliate-shell">
       <nav class="public-nav">
         ${brand(t("affiliate"))}
-        ${languageSwitch()}
-        <button class="dark-button" data-action="open-home">${icon("arrow-left")} Main page</button>
+        <div class="nav-actions">
+          <button class="dark-button" data-action="open-home">${icon("arrow-left")} Main page</button>
+          ${languageSwitch()}
+        </div>
       </nav>
       <section class="affiliate-hero">
         <div>
@@ -927,7 +933,10 @@ function legalPage(type) {
           <a href="/terms">Terms</a>
           <a href="/privacy">Privacy</a>
         </div>
-        <button class="dark-button" data-action="open-register">${icon("sparkles")} Start</button>
+        <div class="nav-actions">
+          <button class="dark-button" data-action="open-register">${icon("sparkles")} Start</button>
+          ${languageSwitch()}
+        </div>
       </nav>
       <section class="legal-hero">
         <p class="eyebrow">Legal</p>
@@ -1041,7 +1050,6 @@ function login() {
     <main class="login-shell">
       <section class="login-card">
         ${brand()}
-        ${languageSwitch()}
         <p class="eyebrow">${t("welcomeBack")}</p>
         <h1>${t("loginTitle")}</h1>
         <form data-form="login" class="login-form">
@@ -1061,7 +1069,6 @@ function studio() {
     <div class="studio-shell">
       <aside class="sidebar">
         ${brand()}
-        ${languageSwitch()}
         <div class="side-section">${icon("layout-dashboard", 18)} Workspace</div>
         <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard">${icon("sparkles")} ${t("dashboard")}</button>
         ${state.user?.role === "admin" ? `<button class="side-link ${state.page === "admin" ? "active" : ""}" data-page="admin">${icon("shield-check")} Admin CRM</button>` : ""}
@@ -1094,8 +1101,9 @@ function studio() {
     </div>`;
 }
 
-function brand(label = t("studio")) {
-  return `<div class="brand-lockup"><span class="brand-core" aria-label="Duitok AI"><img class="brand-logo-mascot" src="${brandAssets.mascot}" alt="" aria-hidden="true"><span class="brand-wordmark"><span>Duitok</span><span>AI</span></span></span><strong>${label}</strong></div>`;
+function brand(label = "") {
+  const labelMarkup = label ? `<strong class="brand-context">${label}</strong>` : "";
+  return `<div class="brand-lockup"><span class="brand-core" aria-label="Duitok AI"><img class="brand-logo-mascot" src="${brandAssets.mascot}" alt="" aria-hidden="true"><span class="brand-wordmark"><span>Duitok</span><span>AI</span></span></span>${labelMarkup}</div>`;
 }
 
 function footerBrand(label = "Duitok AI") {
@@ -1164,7 +1172,7 @@ function dashboardOverview() {
     <header class="project-head dashboard-head">
       <div>
         <p class="folder-label">${icon("sparkles", 18)} Dashboard</p>
-        <h1>Duitok AI Studio</h1>
+        <h1>${t("dashboard")}</h1>
         <p class="subtitle">Production summary for your TikTok affiliate workspace.</p>
       </div>
       <div class="head-actions">
@@ -1512,13 +1520,47 @@ function prompt(field, value, placeholder, action, button) {
 function results(p, type) {
   const items = p.results.filter((item) => item.type === type).slice(-4).reverse();
   if (!items.length) return `<section class="empty-result">${icon("sparkles")} ${t("noResults")}</section>`;
-  return `<section class="result-grid">${items.map((item) => `<article><b>${item.title}</b>${resultPreview(item)}<button data-result="${item.id}">${icon("download")} ${t("export")}</button></article>`).join("")}</section>`;
+  return `<section class="result-grid">${items.map(resultCard).join("")}</section>`;
+}
+
+function resultCard(item) {
+  const provider = item.provider || (item.title || "").split(" ")[0] || "Duitok";
+  const model = item.model || item.title || "Generated";
+  const promptText = item.body || "";
+  const taskId = item.taskId || item.id;
+  return `
+    <article class="result-card">
+      <header class="result-card-head">
+        <span>${icon("circle-check", 18)}</span>
+        <b>${esc(model)}</b>
+      </header>
+      ${resultPreview(item)}
+      <div class="result-meta">
+        <span>${icon("hash", 16)} task id</span>
+        <code>${esc(taskId)}</code>
+      </div>
+      <div class="result-name">
+        ${icon("pencil", 18)}
+        <div><b>${esc(item.title)}</b><p>${esc(promptText).replaceAll("\n", " ").slice(0, 120)}${promptText.length > 120 ? "..." : ""}</p></div>
+      </div>
+      <div class="result-actions" aria-label="Result actions preview">
+        <button type="button" title="Copy prompt">${icon("cloud-upload", 20)}</button>
+        <button type="button" title="Full prompt">${icon("palette", 20)}</button>
+        <button type="button" title="Copy task ID">${icon("cloud", 20)}</button>
+        <button type="button" title="${t("export")}">${icon("download", 20)}</button>
+        <button type="button" title="Delete">${icon("trash-2", 20)}</button>
+      </div>
+    </article>`;
 }
 
 function resultPreview(item) {
-  const image = item.imageUrl ? `<img class="result-image" src="${esc(item.imageUrl)}" alt="${esc(item.title)}">` : "";
-  const video = item.videoUrl ? `<video class="result-video" src="${esc(item.videoUrl)}" controls playsinline></video>` : "";
-  return `${image}${video}<p>${esc(item.body).replaceAll("\n", "<br>")}</p>`;
+  const token = encodeURIComponent(state.token || "");
+  const imageSrc = item.imageUrl ? `/api/media/result/${encodeURIComponent(item.id)}/image?token=${token}` : "";
+  const videoSrc = item.videoUrl ? `/api/media/result/${encodeURIComponent(item.id)}/video?token=${token}` : "";
+  const imageError = "this.replaceWith(Object.assign(document.createElement('div'),{className:'result-media-error',textContent:'Image link expired or blocked. Try generating again or configure durable storage.'}))";
+  const image = imageSrc ? `<img class="result-image" src="${imageSrc}" alt="${esc(item.title)}" loading="lazy" onerror="${esc(imageError)}">` : "";
+  const video = videoSrc ? `<video class="result-video" src="${videoSrc}" controls playsinline></video>` : "";
+  return `${image}${video}`;
 }
 
 function accountPage() {
