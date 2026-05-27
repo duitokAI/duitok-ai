@@ -1,10 +1,12 @@
 import "./styles.css";
+import { disposeAgent3D, mountAgent3D } from "./agent3d.js";
 
 const app = document.querySelector("#app");
 const toast = document.querySelector("#toast");
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
 const isStudioPath = () => window.location.pathname.startsWith("/studio") || window.location.pathname.startsWith("/admin");
 const pathIs = (path) => window.location.pathname === path;
+let sidebarScrollTop = 0;
 
 const steps = [
   ["image", "image", "stepImage", "01"],
@@ -604,6 +606,7 @@ async function api(path, options = {}) {
 
 async function boot() {
   if (window.location.pathname.startsWith("/admin")) state.page = "admin";
+  if (window.location.pathname.startsWith("/studio/agent")) state.page = "agent";
   if (isStudioPath()) await ensureStudioData();
   state.loading = false;
   render();
@@ -627,8 +630,21 @@ async function refreshState() {
 }
 
 function set(patch) {
+  rememberSidebarScroll();
   Object.assign(state, patch);
   render();
+}
+
+function rememberSidebarScroll() {
+  const sidebar = document.querySelector(".sidebar");
+  if (sidebar) sidebarScrollTop = sidebar.scrollTop;
+}
+
+function restoreSidebarScroll() {
+  const sidebar = document.querySelector(".sidebar");
+  if (!sidebar) return;
+  const maxScroll = Math.max(0, sidebar.scrollHeight - sidebar.clientHeight);
+  sidebar.scrollTop = Math.min(sidebarScrollTop, maxScroll);
 }
 
 function project() {
@@ -644,6 +660,8 @@ function render() {
   app.innerHTML = state.loading ? `<main class="loading">${icon("loader-circle")} Loading...</main>` : routeShell(route());
   bind();
   window.lucide?.createIcons();
+  mountCurrentAgent3D();
+  restoreSidebarScroll();
 }
 
 function route() {
@@ -673,8 +691,13 @@ function publicSite() {
           ${languageSwitch()}
         </div>
       </nav>
-      <section class="public-hero">
-        <div>
+      <section class="public-hero video-scene-hero">
+        <img class="video-scene-bg" src="/duitok-hero-seller-v2.jpg" alt="Duitok AI seller surrounded by TikTok Shop content previews">
+        <div class="video-scene-vignette" aria-hidden="true"></div>
+        <div class="video-scene-grid" aria-hidden="true"></div>
+        <div class="video-scene-beam beam-one" aria-hidden="true"></div>
+        <div class="video-scene-beam beam-two" aria-hidden="true"></div>
+        <div class="hero-copy-layer">
           <p class="eyebrow">${t("heroEyebrow")}</p>
           <h1 class="hero-headline">${heroTitleMarkup()}</h1>
           <p class="public-copy">${t("heroCopy")}</p>
@@ -682,31 +705,19 @@ function publicSite() {
             <button class="gold-button" data-action="open-register">${icon("sparkles")} ${t("startCreating")}</button>
             <a class="dark-button demo-button" href="#demo">${icon("play-circle")} ${t("demoCta")}</a>
           </div>
-          <div class="trust-row">
-            <span>${icon("map-pin", 16)} ${t("heroTrust1")}</span>
-            <span>${icon("languages", 16)} ${t("heroTrust2")}</span>
-            <span>${icon("user-round-check", 16)} ${t("heroTrust3")}</span>
-            <span>${icon("shield-check", 16)} ${t("heroTrust4")}</span>
-          </div>
         </div>
-        <section class="hero-board">
-          <img class="hero-scene" src="/duitok-hero-seller-v2.jpg" alt="Duitok AI seller using AI content tools">
-          <div class="hero-board-panel">
-            <div class="product-link-card">
-              <span>${icon("link", 16)} TikTok Shop URL</span>
-              <b>duitok.my/product/ugc-kit</b>
-            </div>
-            <div class="output-stack">
-              <article>${icon("image", 18)} <b>Avatar image</b><span>ready</span></article>
-              <article>${icon("file-text", 18)} <b>UGC script BM</b><span>12 hooks</span></article>
-              <article>${icon("captions", 18)} <b>Caption + CTA</b><span>auto</span></article>
-            </div>
-            <div class="race-card self"><span>${t("you")}</span><b>${t("oneVideo")}</b></div>
-            <div class="race-card hot"><span>${t("competitor")}</span><b>${t("tenVideos")}</b></div>
-            <div class="race-meter"><i></i></div>
-            <strong class="catch-badge">${icon("zap", 16)} ${t("catchUp")}</strong>
-          </div>
-        </section>
+        <div class="generation-panel">
+          <span>${icon("link", 15)} TikTok Shop URL</span>
+          <b>duitok.my/product/ugc-kit</b>
+          <div class="generation-meter"><i></i></div>
+          <small>${icon("zap", 14)} ${t("catchUp")}</small>
+        </div>
+        <div class="hero-proof-layer trust-row">
+          <span>${icon("map-pin", 16)} ${t("heroTrust1")}</span>
+          <span>${icon("languages", 16)} ${t("heroTrust2")}</span>
+          <span>${icon("user-round-check", 16)} ${t("heroTrust3")}</span>
+          <span>${icon("shield-check", 16)} ${t("heroTrust4")}</span>
+        </div>
       </section>
       <section class="proof-strip">
         <article>${icon("star", 18)} <b>${t("rating")}</b></article>
@@ -1683,6 +1694,102 @@ function livePanel() {
   return `<aside class="live-panel"><h3>${icon("activity")} Live Activity</h3>${state.db.usage.slice(0, 6).map((x) => `<p>${x.action}<small>${x.credits} credits</small></p>`).join("")}</aside>`;
 }
 
+function latestAgentUserMessage() {
+  return [...state.agentMessages].reverse().find((item) => item.role === "user")?.content || state.agentInput || "";
+}
+
+function agentWorkMode(text = "") {
+  const value = String(text).toLowerCase();
+  if (/(video|ugc|reel|tiktok|clip|shoot|shooting|视频|短片|短视频|拍摄)/i.test(value)) return "video";
+  if (/(image|photo|picture|avatar|thumbnail|poster|图片|图|头像|海报|封面)/i.test(value)) return "image";
+  if (/(caption|hook|script|copy|story|文案|脚本|标题|开头|caption)/i.test(value)) return "copy";
+  if (/(schedule|calendar|post|autopost|publish|plan|排期|发布|计划|日历)/i.test(value)) return "schedule";
+  return "command";
+}
+
+function currentAgent3DMode() {
+  const preview = new URLSearchParams(window.location.search).get("agentPreview");
+  const canPreview = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+  if (canPreview && ["idle", "image", "video", "copy", "schedule", "command"].includes(preview)) return preview;
+  if (!state.agentBusy) return "idle";
+  return agentWorkMode(latestAgentUserMessage());
+}
+
+function agent3DCopy(mode = "idle") {
+  const copy = {
+    idle: {
+      label: "Idle mode",
+      title: "Mascot sedang rehat, menunggu arahan.",
+      subtitle: "没有任务时它会在生活区休息、跑步或待命。用户一发任务，它就走去对应工位开工。",
+      cards: ["Resting", "Training", "Ready"]
+    },
+    image: {
+      label: "Image station",
+      title: "Image station: generate product visuals.",
+      subtitle: "图片任务会切到视觉工位：头像、商品图、封面和广告素材都在这里处理。",
+      cards: ["Avatar", "Product shot", "Thumbnail"]
+    },
+    video: {
+      label: "Video station",
+      title: "Video station: build TikTok UGC.",
+      subtitle: "视频任务会切到剪辑工位：脚本、镜头、素材和发布节奏一起推进。",
+      cards: ["Hook", "Scene", "Export"]
+    },
+    copy: {
+      label: "Copy station",
+      title: "Copy station: write hooks and captions.",
+      subtitle: "文案任务会切到写作工位：hook、caption、脚本和卖点结构由 Agent 生成。",
+      cards: ["Hook", "Script", "Caption"]
+    },
+    schedule: {
+      label: "Schedule station",
+      title: "Schedule station: plan posting flow.",
+      subtitle: "排期任务会切到运营工位：日历、批量内容和下一步动作都由 Agent 梳理。",
+      cards: ["7 days", "Queue", "Review"]
+    },
+    command: {
+      label: "Command station",
+      title: "Command station: coordinate the workspace.",
+      subtitle: "复杂任务会进入指挥工位：它会拆任务、调用工具，然后把结果放回 Duitok Studio。",
+      cards: ["Decode", "Generate", "Update"]
+    }
+  };
+  return copy[mode] || copy.idle;
+}
+
+function agent3DScene() {
+  const mode = currentAgent3DMode();
+  const copy = agent3DCopy(mode);
+  return `
+    <div class="agent-3d-card" data-agent-mode="${mode}">
+      <div class="agent-3d-status">
+        <span>${icon(mode === "idle" ? "moon" : "activity", 17)} ${copy.label}</span>
+        <b>${mode === "idle" ? "Standby" : "Working"}</b>
+      </div>
+      <div class="agent-3d-stage" data-agent-3d-stage>
+        <div class="agent-3d-fallback"><img src="${brandAssets.mascot}" alt="Duitok mascot"></div>
+      </div>
+      <div class="agent-3d-copy">
+        <h2>${copy.title}</h2>
+        <p>${copy.subtitle}</p>
+        <div class="agent-3d-task-row">
+          ${copy.cards.map((item) => `<span>${esc(item)}</span>`).join("")}
+        </div>
+      </div>
+    </div>`;
+}
+
+function mountCurrentAgent3D() {
+  const stage = document.querySelector("[data-agent-3d-stage]");
+  if (!stage) {
+    disposeAgent3D();
+    return;
+  }
+  const mode = stage.closest("[data-agent-mode]")?.dataset.agentMode || "idle";
+  const copy = agent3DCopy(mode);
+  mountAgent3D(stage, { ...copy, mode, mascotUrl: brandAssets.mascot });
+}
+
 function agentPage() {
   const prompts = [
     "帮我为这个产品做 7 天 TikTok 内容",
@@ -1697,8 +1804,9 @@ function agentPage() {
           <p class="folder-label">${icon("bot", 18)} Duitok Agent</p>
           <h1>Your AI operator for TikTok Shop content.</h1>
           <p class="subtitle">Ask it to create projects, write prompts, generate assets, build batches, schedule posts, and decide the next best action.</p>
+          <button class="dark-button" data-action="support">${icon("ticket")} Contact human support</button>
         </div>
-        <button class="dark-button" data-action="support">${icon("ticket")} Contact human support</button>
+        ${agent3DScene()}
       </header>
       <div class="agent-quick-actions">
         ${prompts.map((prompt) => `<button type="button" data-agent-prompt="${esc(prompt)}">${icon("sparkles", 17)} ${prompt}</button>`).join("")}
