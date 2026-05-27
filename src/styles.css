@@ -4235,6 +4235,295 @@ label {
   }
 }
 
+/* Studio visual refresh: darker navigation, calmer production workspace. */
+.studio-shell {
+  background: #f7f5f8;
+}
+
+.studio-shell .sidebar {
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    radial-gradient(circle at 44% 0%, rgba(255, 78, 120, 0.18), transparent 28%),
+    linear-gradient(180deg, #17091b, #0d090f 62%, #09070a);
+  color: #f7f2f8;
+  box-shadow: 16px 0 48px rgba(28, 6, 33, 0.12);
+}
+
+.studio-shell .sidebar .brand-lockup {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.studio-shell .sidebar .brand-wordmark {
+  color: #fff;
+}
+
+.studio-shell .sidebar .brand-wordmark span:last-child {
+  color: var(--pink);
+}
+
+.studio-shell .sidebar .brand-lockup strong,
+.studio-shell .side-section {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.studio-shell .sidebar-language {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.studio-shell .sidebar-language .lang-switch {
+  color: #fff;
+}
+
+.studio-shell .sidebar-language .lang-switch small,
+.studio-shell .sidebar-language .lang-switch i {
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.studio-shell .sidebar-language .lang-switch:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.studio-shell .side-primary,
+.studio-shell .side-link,
+.studio-shell .project-button {
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.studio-shell .side-primary {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.studio-shell .side-primary.active,
+.studio-shell .side-link.active,
+.studio-shell .project-button.active {
+  border-color: rgba(255, 78, 120, 0.35);
+  background: rgba(255, 78, 120, 0.14);
+  color: #fff;
+  box-shadow: inset 3px 0 0 var(--pink);
+}
+
+.studio-shell .side-link:hover,
+.studio-shell .project-button:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+}
+
+.studio-shell .new-project {
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--pink), var(--coral));
+  color: #fff;
+  box-shadow: 0 16px 36px rgba(255, 78, 120, 0.22);
+}
+
+.studio-shell .new-project b {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.studio-shell .search-box {
+  color: rgba(255, 255, 255, 0.46);
+}
+
+.studio-shell .search-box input {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.studio-shell .search-box input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.studio-shell .project-button svg {
+  border-color: rgba(255, 255, 255, 0.11);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.studio-shell .project-button.active svg {
+  background: linear-gradient(135deg, var(--pink), var(--coral));
+  color: #fff;
+}
+
+.studio-shell .workspace {
+  background:
+    radial-gradient(circle at 92% 8%, rgba(255, 78, 120, 0.08), transparent 26%),
+    linear-gradient(180deg, #fbfafc, #f4f1f6);
+  color: var(--ink);
+}
+
+.studio-shell .dashboard-head,
+.studio-shell .project-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.studio-shell .dashboard-head h1,
+.studio-shell .project-head h1 {
+  color: #210724;
+}
+
+.studio-shell .subtitle {
+  color: #7a667f;
+}
+
+.studio-shell .dashboard-stat-grid article,
+.studio-shell .date-filter-card,
+.studio-shell .chart-card,
+.studio-shell .next-action-card,
+.studio-shell .cost-card,
+.studio-shell .activity-card,
+.studio-shell .canvas-card,
+.studio-shell .project-status article,
+.studio-shell .table div,
+.studio-shell .schedule-list article,
+.studio-shell .topup-grid button,
+.studio-shell .generator-box,
+.studio-shell .upload-card,
+.studio-shell .prompt-block,
+.studio-shell .result-grid article,
+.studio-shell .empty-result {
+  border: 1px solid rgba(39, 10, 44, 0.09);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 14px 36px rgba(35, 8, 42, 0.06);
+}
+
+.studio-shell .dashboard-stat-grid article {
+  border-radius: 14px;
+}
+
+.studio-shell .dashboard-stat-grid article svg {
+  background: rgba(255, 78, 120, 0.1);
+  color: var(--pink);
+}
+
+.studio-shell .dashboard-stat-grid b,
+.studio-shell .metric-row strong,
+.studio-shell .topup-grid strong,
+.studio-shell .card-title h2,
+.studio-shell .date-filter-card h2,
+.studio-shell .generator-box h2,
+.studio-shell .upload-card h2 {
+  color: #26072d;
+}
+
+.studio-shell .dashboard-stat-grid span,
+.studio-shell .project-status span,
+.studio-shell .cost-list span,
+.studio-shell .activity-list span,
+.studio-shell .metric-row span,
+.studio-shell .table small,
+.studio-shell .schedule-list small {
+  color: #8b758f;
+}
+
+.studio-shell .date-filter-card {
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.studio-shell input,
+.studio-shell select,
+.studio-shell textarea {
+  border-color: rgba(39, 10, 44, 0.12);
+  background: #fff;
+}
+
+.studio-shell .dark-button,
+.studio-shell .sop-button,
+.studio-shell .live-tab,
+.studio-shell .step-tabs button.active {
+  background: #26072d;
+  color: #fff;
+  box-shadow: 0 14px 30px rgba(38, 7, 45, 0.16);
+}
+
+.studio-shell .gold-button,
+.studio-shell .date-filter-card .gold-button,
+.studio-shell .chat-panel button {
+  background: linear-gradient(135deg, var(--pink), var(--coral));
+  color: #fff;
+  box-shadow: 0 14px 34px rgba(255, 78, 120, 0.22);
+}
+
+.studio-shell .chat-bubble,
+.studio-shell .support-bubble {
+  background: linear-gradient(135deg, var(--pink), var(--coral));
+  box-shadow: 0 18px 44px rgba(255, 78, 120, 0.28);
+}
+
+@media (max-width: 1000px) {
+  .studio-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .studio-shell .sidebar {
+    position: static;
+    height: auto;
+    max-height: none;
+  }
+
+  .studio-shell .workspace {
+    padding: 24px 18px 120px;
+  }
+
+  .studio-shell .workspace > * {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .studio-shell .dashboard-head,
+  .studio-shell .project-head {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .studio-shell .dashboard-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .studio-shell .date-filter-card,
+  .studio-shell .dashboard-main-grid {
+    grid-template-columns: 1fr;
+    min-width: 0;
+  }
+
+  .studio-shell .chart-card,
+  .studio-shell .next-action-card,
+  .studio-shell .cost-card,
+  .studio-shell .activity-card {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .studio-shell .sidebar {
+    padding: 16px 12px 18px;
+  }
+
+  .studio-shell .dashboard-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .studio-shell .head-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .studio-shell .head-actions > * {
+    width: 100%;
+  }
+
+  .studio-shell .live-tab {
+    display: none;
+  }
+}
+
 /* Global language control */
 .global-lang-dock {
   position: fixed;
