@@ -246,7 +246,7 @@ const copy = {
     dropProduct: "Click atau drop gambar produk",
     prompt: "Prompt",
     generateImage: "Generate Media",
-    generating: "APIMart is generating...",
+    generating: "Duitok AI is generating...",
     noResults: "Belum ada result",
     export: "Export",
     saveDone: "Saved.",
@@ -392,7 +392,7 @@ const copy = {
     dropProduct: "点击或拖入产品图片",
     prompt: "提示词",
     generateImage: "生成作品",
-    generating: "APIMart 正在生成...",
+    generating: "Duitok AI 正在生成...",
     noResults: "还没有结果",
     export: "导出",
     saveDone: "已保存。",
@@ -538,7 +538,7 @@ const copy = {
     dropProduct: "Click or drop product image",
     prompt: "Prompt",
     generateImage: "Generate Media",
-    generating: "APIMart is generating...",
+    generating: "Duitok AI is generating...",
     noResults: "No results yet",
     export: "Export",
     saveDone: "Saved.",
@@ -1459,8 +1459,9 @@ function stepPanel(p) {
 }
 
 function imagePanel(p) {
+  const mediaModels = ["Duitok Image", "Duitok Image Pro", "Duitok Video", "Duitok Video Plus", "Duitok Story Video", "Duitok Omni Video", "Duitok Motion Video"];
   return `
-    <div class="generator-box"><h2>🖼️ ${t("imageGenerator")}</h2><div class="form-grid three">${select("image.model", t("model"), ["GPT Image 2", "Nano Banana Pro", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"], p.image.model)}${select("image.mode", t("mode"), ["Create Image", "Edit Image", "Product Scene"], p.image.mode)}${mediaDurationSelect(p)}</div></div>
+    <div class="generator-box"><h2>🖼️ ${t("imageGenerator")}</h2><div class="form-grid three">${select("image.model", t("model"), mediaModels, p.image.model)}${select("image.mode", t("mode"), ["Create Image", "Edit Image", "Product Scene"], p.image.mode)}${mediaDurationSelect(p)}</div></div>
     ${upload(t("avatarRef"), t("dropAvatar"), "Face / person - used for all variations", "camera", "avatar")}
     ${upload(t("productRef"), t("dropProduct"), "Product - used for all images and videos", "package", "product")}
     ${imagePromptSettings(p)}
@@ -1468,12 +1469,12 @@ function imagePanel(p) {
 }
 
 function mediaDurationSelect(p) {
-  if (p.image.model === "Seedance 2.0") return select("image.duration", "Duration", ["4", "6", "8", "10", "12", "15"], String(p.image.duration || "4"));
-  if (p.image.model === "Sora 2") return select("image.duration", "Duration", ["8", "12"], String(p.image.duration || "8"));
-  if (p.image.model === "Grok Imagine Video") return select("image.duration", "Duration", Array.from({ length: 23 }, (_, index) => String(index + 8)), String(p.image.duration || "8"));
-  if (p.image.model === "Gemini Omni") return `<label>Duration<input value="10 seconds" disabled></label>`;
-  if (p.image.model === "Veo 3.1") return `<label>Duration<input value="8 seconds" disabled></label>`;
-  return `<label>Charge<input value="${p.image.model === "Nano Banana Pro" ? "0.2" : "0.1"} credit" disabled></label>`;
+  if (p.image.model === "Duitok Video") return select("image.duration", "Duration", ["4", "6", "8", "10", "12", "15"], String(p.image.duration || "4"));
+  if (p.image.model === "Duitok Story Video") return select("image.duration", "Duration", ["8", "12"], String(p.image.duration || "8"));
+  if (p.image.model === "Duitok Motion Video") return select("image.duration", "Duration", Array.from({ length: 23 }, (_, index) => String(index + 8)), String(p.image.duration || "8"));
+  if (p.image.model === "Duitok Omni Video") return `<label>Duration<input value="10 seconds" disabled></label>`;
+  if (p.image.model === "Duitok Video Plus") return `<label>Duration<input value="8 seconds" disabled></label>`;
+  return `<label>Charge<input value="${p.image.model === "Duitok Image Pro" ? "0.2" : "0.1"} credit" disabled></label>`;
 }
 
 function imagePromptSettings(p) {
@@ -1542,10 +1543,8 @@ function results(p, type) {
 }
 
 function resultCard(item) {
-  const provider = item.provider || (item.title || "").split(" ")[0] || "Duitok";
-  const model = item.model || item.title || "Generated";
+  const model = item.title || "Generated asset";
   const promptText = item.body || "";
-  const taskId = item.taskId || item.id;
   return `
     <article class="result-card">
       <header class="result-card-head">
@@ -1554,8 +1553,8 @@ function resultCard(item) {
       </header>
       ${resultPreview(item)}
       <div class="result-meta">
-        <span>${icon("hash", 16)} task id</span>
-        <code>${esc(taskId)}</code>
+        <span>${icon("cloud-check", 16)} Duitok asset</span>
+        <code>${esc(item.id)}</code>
       </div>
       <div class="result-name">
         ${icon("pencil", 18)}
@@ -1564,7 +1563,7 @@ function resultCard(item) {
       <div class="result-actions" aria-label="Result actions preview">
         <button type="button" title="Copy prompt">${icon("cloud-upload", 20)}</button>
         <button type="button" title="Full prompt">${icon("palette", 20)}</button>
-        <button type="button" title="Copy task ID">${icon("cloud", 20)}</button>
+        <button type="button" title="Cloud status">${icon("cloud", 20)}</button>
         <button type="button" title="${t("export")}">${icon("download", 20)}</button>
         <button type="button" title="Delete">${icon("trash-2", 20)}</button>
       </div>
@@ -1671,7 +1670,7 @@ function livePanel() {
 function agentPage() {
   const prompts = [
     "帮我为这个产品做 7 天 TikTok 内容",
-    "用 Seedance 2.0 生成一个产品视频版本",
+    "用 Duitok Video 生成一个产品视频版本",
     "分析这个 competitor URL，生成 5 个 hook",
     "看一下我今天还缺什么内容"
   ];

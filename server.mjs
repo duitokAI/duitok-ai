@@ -48,6 +48,16 @@ const atlasGenerateVideoPath = process.env.ATLASCLOUD_GENERATE_VIDEO_PATH || "/a
 const atlasPredictionPathPrefix = process.env.ATLASCLOUD_PREDICTION_PATH_PREFIX || "/api/v1/model/prediction";
 const atlasSeedanceModel = process.env.ATLASCLOUD_SEEDANCE_MODEL || "bytedance/seedance-2.0/text-to-video";
 const allowedMediaModels = new Set(["GPT Image 2", "Nano Banana Pro", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"]);
+const publicMediaModelMap = {
+  "Duitok Image": "GPT Image 2",
+  "Duitok Image Pro": "Nano Banana Pro",
+  "Duitok Video": "Seedance 2.0",
+  "Duitok Video Plus": "Veo 3.1",
+  "Duitok Story Video": "Sora 2",
+  "Duitok Omni Video": "Gemini Omni",
+  "Duitok Motion Video": "Grok Imagine Video"
+};
+const internalMediaModelMap = Object.fromEntries(Object.entries(publicMediaModelMap).map(([label, model]) => [model, label]));
 const adminUserId = "u_1";
 const authSecret = process.env.AUTH_SECRET || process.env.CHIP_API_TOKEN || "duitok-local-dev-secret";
 const assetStorageProvider = process.env.ASSET_STORAGE_PROVIDER || "external";
@@ -82,20 +92,11 @@ app.use(express.json({
 }));
 
 app.get("/api/health", (_req, res) => {
-  const hasConfiguredKey = (value) => Boolean(value && !value.includes("replace_with"));
-  const aiProviders = [
-    hasConfiguredKey(process.env.APIMART_API_KEY) ? "apimart" : null,
-    hasConfiguredKey(process.env.DEEPSEEK_API_KEY) ? "deepseek" : null,
-    hasConfiguredKey(process.env.WUYIN_API_KEY) ? "wuyin" : null,
-    hasConfiguredKey(process.env.GRSAI_API_KEY) ? "grsai" : null,
-    hasConfiguredKey(process.env.ATLASCLOUD_API_KEY) ? "atlascloud" : null
-  ].filter(Boolean);
   res.json({
     ok: true,
     service: "duitok-ai",
     storage: postgresPool ? "postgres" : "json",
-    ai: aiProviders.join("+") || "mock",
-    imageProvider: "model-router"
+    generation: "available"
   });
 });
 
@@ -530,6 +531,73 @@ function mutateDb(handler) {
   return run;
 }
 
+const providerLeakPatterns = [
+  /\bAPIMart\b/gi,
+  /\bGRS AI\b/gi,
+  /\bGRSAI\b/gi,
+  /\bAtlas Cloud\b/gi,
+  /速创API/gi,
+  /\bWuyin\b/gi,
+  /无垠科技/gi,
+  /\bGPT Image 2\b/gi,
+  /\bNano Banana Pro\b/gi,
+  /\bSeedance 2\.0\b/gi,
+  /\bVeo 3\.1\b/gi,
+  /\bSora 2\b/gi,
+  /\bGemini Omni\b/gi,
+  /\bGrok Imagine Video\b/gi
+];
+
+function publicGenerationTitle(type = "text") {
+  if (type === "video") return "Duitok AI Video";
+  if (type === "image") return "Duitok AI Image";
+  return "Duitok AI Result";
+}
+
+function publicGenerationBody(type = "text") {
+  if (type === "video") return "Video generated with Duitok AI.";
+  if (type === "image") return "Image generated with Duitok AI.";
+  return "Generated with Duitok AI.";
+}
+
+function publicGenerationError() {
+  return "Generation failed. Please try again or contact support if it keeps happening.";
+}
+
+function internalMediaModel(model) {
+  return publicMediaModelMap[model] || model || "GPT Image 2";
+}
+
+function publicMediaModel(model) {
+  return internalMediaModelMap[internalMediaModel(model)] || model || "Duitok Image";
+}
+
+function isVideoMediaModel(model) {
+  return ["Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"].includes(internalMediaModel(model));
+}
+
+function redactProviderText(value, fallback = "") {
+  let text = String(value || fallback || "");
+  if (!text) return text;
+  text = text.replace(/Task ID:\s*[^\n]+/gi, "Reference ID hidden");
+  for (const pattern of providerLeakPatterns) text = text.replace(pattern, "Duitok AI");
+  return text.replace(/Duitok AI\s+Duitok AI/gi, "Duitok AI").replace(/\n{3,}/g, "\n\n").trim();
+}
+
+function safeLedgerMetadata(metadata = {}) {
+  const {
+    model: _model,
+    provider: _provider,
+    providerTaskId: _providerTaskId,
+    taskId: _taskId,
+    endpoint: _endpoint,
+    originalImageUrl: _originalImageUrl,
+    originalVideoUrl: _originalVideoUrl,
+    ...safe
+  } = metadata || {};
+  return safe;
+}
+
 function publicState(db, user = db.users?.find((item) => item.id === adminUserId)) {
   const isAdmin = (user?.role || "user") === "admin";
   const owns = (item) => isAdmin || item.userId === user.id;
@@ -544,12 +612,27 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
       originalVideoUrl: _originalVideoUrl,
       assetStorageKey: _assetStorageKey,
       assetStorageError: _assetStorageError,
+      taskId: _taskId,
+      providerTaskId: _providerTaskId,
+      provider: _provider,
+      model: _model,
+      providerTitle: _providerTitle,
+      providerBody: _providerBody,
       ...safe
     } = result;
-    return safe;
+    const publicType = safe.videoUrl ? "video" : safe.imageUrl ? "image" : safe.type;
+    return {
+      ...safe,
+      title: redactProviderText(safe.title, publicGenerationTitle(publicType)),
+      body: redactProviderText(safe.body, publicGenerationBody(publicType))
+    };
   };
   const sanitizeProject = (project) => ({
     ...project,
+    image: {
+      ...(project.image || {}),
+      model: publicMediaModel(project.image?.model)
+    },
     results: (project.results || []).map(sanitizeResult)
   });
   const sanitizeJob = (job) => {
@@ -560,23 +643,38 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
       costUsd: _costUsd,
       provider: _provider,
       endpoint: _endpoint,
+      model: _model,
+      taskId: _taskId,
+      providerTaskId: _providerTaskId,
+      providerTextOutput: _providerTextOutput,
+      providerErrorMessage: _providerErrorMessage,
       originalImageUrl: _originalImageUrl,
       originalVideoUrl: _originalVideoUrl,
       assetStorageKey: _assetStorageKey,
       assetStorageError: _assetStorageError,
       ...safe
     } = job;
-    return safe;
+    return {
+      ...safe,
+      textOutput: redactProviderText(safe.textOutput, publicGenerationBody(safe.type)),
+      errorMessage: safe.status === "failed" ? publicGenerationError() : redactProviderText(safe.errorMessage || "")
+    };
   };
+  const sanitizeUsage = (item) => isAdmin ? item : ({ ...item, action: redactProviderText(item.action, "Duitok generation") });
+  const sanitizeCreditLedger = (item) => isAdmin ? item : ({
+    ...item,
+    note: redactProviderText(item.note, item.type),
+    metadata: safeLedgerMetadata(item.metadata)
+  });
   const projects = (db.projects || []).filter(owns).map(sanitizeProject);
-  const usageRows = (db.usage || []).filter(owns);
+  const usageRows = (db.usage || []).filter(owns).map(sanitizeUsage);
   const scheduleRows = (db.schedule || []).filter(owns);
   const generationJobs = (db.generationJobs || []).filter(owns).map(sanitizeJob);
   const apiCalls = isAdmin ? (db.apiCalls || []).filter(owns) : [];
   const payments = (db.payments || []).filter(owns);
   const supportTickets = (db.supportTickets || []).filter(owns);
   const attachments = (db.attachments || []).filter(owns);
-  const creditLedger = (db.creditLedger || []).filter(owns);
+  const creditLedger = (db.creditLedger || []).filter(owns).map(sanitizeCreditLedger);
   const tiktokConnections = (db.tiktok?.connections || []).filter(owns);
   const tiktokPublishes = (db.tiktok?.publishes || []).filter(owns);
   const userRevenue = (userId) => db.payments.filter((payment) => payment.userId === userId && payment.status === "paid").reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
@@ -707,6 +805,7 @@ function requireApimartConfig() {
 }
 
 function providerForMediaModel(model) {
+  model = internalMediaModel(model);
   if (model === "GPT Image 2") return process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Nano Banana Pro") return process.env.GRSAI_API_KEY ? "grsai" : "mock";
   if (model === "Seedance 2.0") return process.env.ATLASCLOUD_API_KEY ? "atlascloud" : "mock";
@@ -715,7 +814,7 @@ function providerForMediaModel(model) {
 }
 
 function generationCostFor(db, project, action, generated) {
-  const model = project.image?.model || "GPT Image 2";
+  const model = internalMediaModel(project.image?.model);
   const provider = generated.provider || providerForMediaModel(model);
   if (action !== "generate-image") return { costRm: 0.01, costRmb: 0, costUsd: 0, model: "APIMart Text", provider: "apimart", unit: "text" };
   const costs = { ...defaultModelCosts(), ...(db.modelCosts || {}) };
@@ -723,6 +822,7 @@ function generationCostFor(db, project, action, generated) {
 }
 
 function videoDurationFor(project, model = project.image?.model) {
+  model = internalMediaModel(model);
   if (model === "Seedance 2.0") return Number(project.image?.duration || process.env.ATLASCLOUD_SEEDANCE_DURATION || 4);
   if (model === "Sora 2") return Number(project.image?.duration || process.env.WUYIN_SORA_DURATION || 8);
   if (model === "Gemini Omni") return 10;
@@ -737,7 +837,7 @@ function roundCredits(value) {
 
 function creditChargeFor(project, action) {
   if (action !== "generate-image") return 0.1;
-  const model = project.image?.model || "GPT Image 2";
+  const model = internalMediaModel(project.image?.model);
   if (model === "GPT Image 2") return 0.1;
   if (model === "Nano Banana Pro") return 0.2;
   if (model === "Seedance 2.0") return roundCredits(videoDurationFor(project, model) * 0.1);
@@ -1041,7 +1141,7 @@ function imageModelFromProject(project) {
   const modelMap = {
     "GPT Image 2": "gpt-image-2"
   };
-  return process.env.APIMART_IMAGE_MODEL || modelMap[project.image?.model] || apimartImageModel;
+  return process.env.APIMART_IMAGE_MODEL || modelMap[internalMediaModel(project.image?.model)] || apimartImageModel;
 }
 
 async function pollApimartTask(taskId) {
@@ -1128,7 +1228,7 @@ async function generateImageWithApimart(project) {
 }
 
 function wuyinPathFromProject(project) {
-  return wuyinImagePaths[project.image?.model] || process.env.WUYIN_IMAGE_PATH || "/api/async/image_nanoBanana_pro";
+  return wuyinImagePaths[internalMediaModel(project.image?.model)] || process.env.WUYIN_IMAGE_PATH || "/api/async/image_nanoBanana_pro";
 }
 
 function grsaiImageBody(prompt) {
@@ -1142,7 +1242,7 @@ function grsaiImageBody(prompt) {
 }
 
 function wuyinImageBody(project, prompt) {
-  const model = project.image?.model || "";
+  const model = internalMediaModel(project.image?.model);
   const aspectRatio = process.env.WUYIN_IMAGE_ASPECT_RATIO || "1:1";
   const imageSize = process.env.WUYIN_IMAGE_SIZE || "1K";
   if (model === "Veo 3.1") {
@@ -1364,7 +1464,7 @@ async function generateWithApimart(project, action, step) {
 
 async function generateWithProvider(project, action, step) {
   if (action === "generate-image") {
-    const model = project.image?.model || "GPT Image 2";
+    const model = internalMediaModel(project.image?.model);
     if (!allowedMediaModels.has(model)) {
       const error = new Error("This Duitok plan only supports GPT Image 2, Nano Banana Pro, Seedance 2.0, Veo 3.1, Sora 2, Gemini Omni, and Grok Imagine Video.");
       error.status = 400;
@@ -1403,6 +1503,8 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
     const resultId = crypto.randomUUID();
     const jobId = crypto.randomUUID();
     const assetType = generated.videoUrl ? "video" : generated.imageUrl ? "image" : "text";
+    const publicTitle = publicGenerationTitle(assetType);
+    const publicBody = publicGenerationBody(assetType);
     const mirrored = await mirrorAssetToStorage(generated.videoUrl || generated.imageUrl, {
       userId: project.userId,
       projectId,
@@ -1412,8 +1514,10 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
     const result = {
       id: resultId,
       type: resultTypeForGeneration(action, step, generated),
-      title: generated.title,
-      body: generated.body,
+      title: publicTitle,
+      body: publicBody,
+      providerTitle: generated.title,
+      providerBody: generated.body,
       imageUrl: generated.imageUrl ? mirrored.url : undefined,
       videoUrl: generated.videoUrl ? mirrored.url : undefined,
       originalImageUrl: generated.imageUrl && mirrored.originalUrl !== mirrored.url ? mirrored.originalUrl : undefined,
@@ -1422,8 +1526,9 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
       assetStorageKey: mirrored.storageKey,
       assetStorageError: mirrored.storageError,
       taskId: generated.taskId,
+      providerTaskId: generated.taskId,
       provider: generated.provider,
-      model: project.image?.model,
+      model: internalMediaModel(project.image?.model),
       costRm: cost.costRm,
       createdAt: new Date().toISOString()
     };
@@ -1441,6 +1546,7 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
       type: assetType,
       status: "succeeded",
       taskId: generated.taskId,
+      providerTaskId: generated.taskId,
       prompt: project.image?.prompt || "",
       imageUrl: result.imageUrl,
       videoUrl: result.videoUrl,
@@ -1449,7 +1555,8 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
       assetStorage: result.assetStorage,
       assetStorageKey: result.assetStorageKey,
       assetStorageError: result.assetStorageError,
-      textOutput: generated.body,
+      textOutput: publicBody,
+      providerTextOutput: generated.body,
       creditsCharged: creditsToCharge,
       createdAt: result.createdAt,
       completedAt: result.createdAt,
@@ -1469,13 +1576,11 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
       costRm: job.costRm,
       createdAt: result.createdAt
     });
-    currentDb.usage.unshift(usage(generated.title, creditsToCharge, project.userId));
-    currentDb.creditLedger.unshift(creditEntry(project.userId, "debit", -creditsToCharge, generated.title, {
+    currentDb.usage.unshift(usage(publicTitle, creditsToCharge, project.userId));
+    currentDb.creditLedger.unshift(creditEntry(project.userId, "debit", -creditsToCharge, publicTitle, {
       projectId,
       resultId: result.id,
-      generationJobId: job.id,
-      model: job.model,
-      provider: job.provider
+      generationJobId: job.id
     }));
     await saveDb(currentDb);
     return publicState(currentDb, user);
@@ -1493,12 +1598,13 @@ async function saveFailedGeneration(projectId, action, step, error, user) {
       projectId,
       action,
       step,
-      type: action === "generate-image" && ["Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"].includes(project.image?.model) ? "video" : action === "generate-image" ? "image" : "text",
+      type: action === "generate-image" && isVideoMediaModel(project.image?.model) ? "video" : action === "generate-image" ? "image" : "text",
       status: "failed",
       taskId: null,
       prompt: project.image?.prompt || "",
       creditsCharged: 0,
-      errorMessage: error.message || "Generation failed",
+      errorMessage: publicGenerationError(),
+      providerErrorMessage: error.message || "Generation failed",
       createdAt,
       completedAt: createdAt,
       model: cost.model,
@@ -1515,11 +1621,11 @@ async function saveFailedGeneration(projectId, action, step, error, user) {
       model: job.model,
       endpoint: job.provider === "atlascloud" ? atlasGenerateVideoPath : job.provider === "grsai" ? grsaiDrawPath : job.provider === "wuyin" ? wuyinPathFromProject(project) : apimartImagePath,
       status: "failed",
-      errorMessage: job.errorMessage,
+      errorMessage: job.providerErrorMessage || job.errorMessage,
       costRm: 0,
       createdAt
     });
-    currentDb.usage.unshift(usage(`Failed: ${job.model || action}`, 0, project.userId));
+    currentDb.usage.unshift(usage("Generation failed", 0, project.userId));
     await saveDb(currentDb);
     return publicState(currentDb, user);
   });
@@ -1539,7 +1645,7 @@ async function enqueueGeneration(projectId, action, step, user) {
       projectId,
       action,
       step,
-      type: action === "generate-image" && ["Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"].includes(project.image?.model) ? "video" : action === "generate-image" ? "image" : "text",
+      type: action === "generate-image" && isVideoMediaModel(project.image?.model) ? "video" : action === "generate-image" ? "image" : "text",
       status: "queued",
       prompt: project.image?.prompt || "",
       creditsCharged: 0,
@@ -1550,7 +1656,7 @@ async function enqueueGeneration(projectId, action, step, user) {
       provider: cost.provider,
       unit: cost.unit
     });
-    currentDb.usage.unshift(usage(`Queued: ${cost.model || action}`, 0, project.userId));
+    currentDb.usage.unshift(usage("Queued generation", 0, project.userId));
     await saveDb(currentDb);
     return publicState(currentDb, user);
   });
@@ -1591,6 +1697,8 @@ async function completeQueuedGeneration(jobId, generated) {
     const completedAt = new Date().toISOString();
     const resultId = crypto.randomUUID();
     const assetType = generated.videoUrl ? "video" : generated.imageUrl ? "image" : "text";
+    const publicTitle = publicGenerationTitle(assetType);
+    const publicBody = publicGenerationBody(assetType);
     const mirrored = await mirrorAssetToStorage(generated.videoUrl || generated.imageUrl, {
       userId: project.userId,
       projectId: project.id,
@@ -1600,8 +1708,10 @@ async function completeQueuedGeneration(jobId, generated) {
     const result = {
       id: resultId,
       type: resultTypeForGeneration(job.action, job.step, generated),
-      title: generated.title,
-      body: generated.body,
+      title: publicTitle,
+      body: publicBody,
+      providerTitle: generated.title,
+      providerBody: generated.body,
       imageUrl: generated.imageUrl ? mirrored.url : undefined,
       videoUrl: generated.videoUrl ? mirrored.url : undefined,
       originalImageUrl: generated.imageUrl && mirrored.originalUrl !== mirrored.url ? mirrored.originalUrl : undefined,
@@ -1610,8 +1720,9 @@ async function completeQueuedGeneration(jobId, generated) {
       assetStorageKey: mirrored.storageKey,
       assetStorageError: mirrored.storageError,
       taskId: generated.taskId,
+      providerTaskId: generated.taskId,
       provider: generated.provider,
-      model: project.image?.model,
+      model: internalMediaModel(project.image?.model),
       costRm: cost.costRm,
       createdAt: completedAt
     };
@@ -1624,6 +1735,7 @@ async function completeQueuedGeneration(jobId, generated) {
       resultId: result.id,
       status: "succeeded",
       taskId: generated.taskId,
+      providerTaskId: generated.taskId,
       imageUrl: result.imageUrl,
       videoUrl: result.videoUrl,
       originalImageUrl: result.originalImageUrl,
@@ -1631,7 +1743,8 @@ async function completeQueuedGeneration(jobId, generated) {
       assetStorage: result.assetStorage,
       assetStorageKey: result.assetStorageKey,
       assetStorageError: result.assetStorageError,
-      textOutput: generated.body,
+      textOutput: publicBody,
+      providerTextOutput: generated.body,
       creditsCharged: creditsToCharge,
       creditsRequired: creditsToCharge,
       duration: videoDurationFor(project),
@@ -1651,13 +1764,11 @@ async function completeQueuedGeneration(jobId, generated) {
       costRm: job.costRm,
       createdAt: completedAt
     });
-    currentDb.usage.unshift(usage(generated.title, creditsToCharge, project.userId));
-    currentDb.creditLedger.unshift(creditEntry(project.userId, "debit", -creditsToCharge, generated.title, {
+    currentDb.usage.unshift(usage(publicTitle, creditsToCharge, project.userId));
+    currentDb.creditLedger.unshift(creditEntry(project.userId, "debit", -creditsToCharge, publicTitle, {
       projectId: project.id,
       resultId: result.id,
-      generationJobId: job.id,
-      model: job.model,
-      provider: job.provider
+      generationJobId: job.id
     }));
     await saveDb(currentDb);
     return publicState(currentDb);
@@ -1672,7 +1783,8 @@ async function failQueuedGeneration(jobId, error) {
     const completedAt = new Date().toISOString();
     Object.assign(job, {
       status: "failed",
-      errorMessage: error.message || "Generation failed",
+      errorMessage: publicGenerationError(),
+      providerErrorMessage: error.message || "Generation failed",
       creditsCharged: 0,
       completedAt
     });
@@ -1685,11 +1797,11 @@ async function failQueuedGeneration(jobId, error) {
       model: job.model,
       endpoint: project ? (job.provider === "atlascloud" ? atlasGenerateVideoPath : job.provider === "grsai" ? grsaiDrawPath : job.provider === "wuyin" ? wuyinPathFromProject(project) : apimartImagePath) : "",
       status: "failed",
-      errorMessage: job.errorMessage,
+      errorMessage: job.providerErrorMessage || job.errorMessage,
       costRm: 0,
       createdAt: completedAt
     });
-    currentDb.usage.unshift(usage(`Failed: ${job.model || job.action}`, 0, job.userId));
+    currentDb.usage.unshift(usage("Generation failed", 0, job.userId));
     await saveDb(currentDb);
     return publicState(currentDb);
   });
