@@ -635,8 +635,13 @@ function project() {
   return state.db.projects.find((item) => item.id === state.projectId) || state.db.projects[0];
 }
 
+function routeShell(content) {
+  const dock = isStudioPath() ? "" : `<div class="global-lang-dock">${languageSwitch()}</div>`;
+  return `${dock}${content}`;
+}
+
 function render() {
-  app.innerHTML = state.loading ? `<main class="loading">${icon("loader-circle")} Loading...</main>` : route();
+  app.innerHTML = state.loading ? `<main class="loading">${icon("loader-circle")} Loading...</main>` : routeShell(route());
   bind();
   window.lucide?.createIcons();
 }
