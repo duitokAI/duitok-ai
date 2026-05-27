@@ -97,11 +97,13 @@ app.use(express.json({
 }));
 
 app.get("/api/health", (_req, res) => {
+  const storage = storageStatus();
   res.json({
     ok: true,
     service: "duitok-ai",
-    storage: postgresPool ? "postgres" : "json",
-    generation: "available"
+    database: postgresPool ? "postgres" : "json",
+    storage,
+    generation: storage.ready ? "available" : "blocked"
   });
 });
 
@@ -219,6 +221,43 @@ async function putR2Object(key, bytes, contentType) {
     throw error;
   }
   return r2ObjectUrl(key);
+}
+
+async function getR2Object(key) {
+  const bucket = process.env.R2_BUCKET;
+  const accessKey = process.env.R2_ACCESS_KEY_ID;
+  const secretKey = process.env.R2_SECRET_ACCESS_KEY;
+  if (!bucket || !accessKey || !secretKey || !r2Endpoint) throw Object.assign(new Error("R2 storage is not configured."), { status: 503 });
+
+  const endpoint = new URL(r2Endpoint);
+  const objectPath = `/${bucket}/${key.split("/").map(encodeURIComponent).join("/")}`;
+  const now = new Date();
+  const amzDate = now.toISOString().replace(/[:-]|\.\d{3}/g, "");
+  const dateStamp = amzDate.slice(0, 8);
+  const payloadHash = sha256("");
+  const canonicalHeaders = [
+    `host:${endpoint.host}`,
+    `x-amz-content-sha256:${payloadHash}`,
+    `x-amz-date:${amzDate}`
+  ].join("\n") + "\n";
+  const signedHeaders = "host;x-amz-content-sha256;x-amz-date";
+  const canonicalRequest = ["GET", objectPath, "", canonicalHeaders, signedHeaders, payloadHash].join("\n");
+  const credentialScope = `${dateStamp}/auto/s3/aws4_request`;
+  const stringToSign = ["AWS4-HMAC-SHA256", amzDate, credentialScope, sha256(canonicalRequest)].join("\n");
+  const signature = hmac(r2SigningKey(dateStamp), stringToSign, "hex");
+  const response = await fetch(`${endpoint.origin}${objectPath}`, {
+    headers: {
+      Authorization: `AWS4-HMAC-SHA256 Credential=${accessKey}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`,
+      "X-Amz-Content-Sha256": payloadHash,
+      "X-Amz-Date": amzDate
+    }
+  });
+  if (!response.ok) {
+    const error = new Error(`R2 media fetch failed: ${response.status}`);
+    error.status = response.status === 404 ? 404 : 502;
+    throw error;
+  }
+  return response;
 }
 
 async function mirrorAssetToStorage(sourceUrl, { userId, projectId, resultId, type }) {
@@ -3360,6 +3399,35 @@ app.get("/api/media/result/:id/:kind", async (req, res, next) => {
     res.setHeader("Cache-Control", "private, max-age=300");
     const bytes = Buffer.from(await response.arrayBuffer());
     res.send(bytes);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get(/^\/api\/media\/(.+)/, async (req, res, next) => {
+  try {
+    const rawKey = String(req.params[0] || "");
+    const key = rawKey.split("/").map((part) => {
+      try {
+        return decodeURIComponent(part);
+      } catch {
+        return part;
+      }
+    }).join("/");
+    if (!key || key.includes("..")) {
+      const error = new Error("Invalid media key");
+      error.status = 400;
+      throw error;
+    }
+    const response = await getR2Object(key);
+    const contentType = response.headers.get("content-type") || "application/octet-stream";
+    const cacheControl = response.headers.get("cache-control") || "public, max-age=31536000, immutable";
+    res.setHeader("Content-Type", contentType);
+    res.setHeader("Cache-Control", cacheControl);
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    const contentLength = response.headers.get("content-length");
+    if (contentLength) res.setHeader("Content-Length", contentLength);
+    res.send(Buffer.from(await response.arrayBuffer()));
   } catch (error) {
     next(error);
   }
