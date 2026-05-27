@@ -5270,3 +5270,82 @@ label {
     min-width: 88px;
   }
 }
+
+/* Homepage: dark conversion hero with a clean light body below. */
+.home-shell {
+  background:
+    radial-gradient(circle at 78px 150px, rgba(255, 78, 120, 0.16), transparent 250px),
+    radial-gradient(circle at 86% 250px, rgba(143, 20, 140, 0.22), transparent 360px),
+    linear-gradient(180deg, #100712 0 560px, #25102b 650px, #f8f5fa 790px, #f8f5fa 100%);
+  color: var(--ink);
+}
+
+.home-shell .public-hero {
+  margin-bottom: 0;
+  border-color: rgba(255, 255, 255, 0.12);
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    radial-gradient(circle at 80% 12%, rgba(255, 78, 120, 0.2), transparent 28%),
+    radial-gradient(circle at 18% 86%, rgba(255, 131, 94, 0.15), transparent 28%),
+    linear-gradient(135deg, #1b0b20, #100712 58%, #210b19);
+  background-size:
+    42px 42px,
+    42px 42px,
+    auto,
+    auto,
+    auto;
+}
+
+.home-shell .proof-strip {
+  position: relative;
+  z-index: 2;
+  width: min(1360px, calc(100% - 48px));
+  margin-top: -28px;
+  padding: 0 0 76px;
+}
+
+.home-shell .proof-strip article {
+  min-height: 86px;
+  border-color: rgba(93, 8, 108, 0.1);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.9)),
+    radial-gradient(circle at 8% 0, rgba(255, 78, 120, 0.12), transparent 42%);
+  color: var(--purple);
+  box-shadow: 0 20px 54px rgba(76, 0, 87, 0.12);
+  backdrop-filter: blur(12px);
+}
+
+.home-shell .split-section,
+.home-shell .output-preview-section,
+.home-shell .workflow-section,
+.home-shell .feature-section,
+.home-shell .demo-section,
+.home-shell .comparison-section,
+.home-shell .testimonial-section,
+.home-shell .pricing-section,
+.home-shell .control-section,
+.home-shell .signup-section,
+.home-shell .faq-section {
+  color: var(--ink);
+}
+
+.home-shell .split-section,
+.home-shell .output-preview-section,
+.home-shell .workflow-section,
+.home-shell .control-section {
+  border-top-color: rgba(93, 8, 108, 0.1);
+}
+
+@media (max-width: 700px) {
+  .home-shell {
+    background:
+      radial-gradient(circle at 54px 130px, rgba(255, 78, 120, 0.15), transparent 220px),
+      linear-gradient(180deg, #100712 0 720px, #25102b 820px, #f8f5fa 980px, #f8f5fa 100%);
+  }
+
+  .home-shell .proof-strip {
+    width: min(100%, calc(100% - 28px));
+    margin-top: -18px;
+  }
+}

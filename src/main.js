@@ -631,14 +631,37 @@ function set(patch) {
   render();
 }
 
+function captureScrollState() {
+  const sidebar = document.querySelector(".sidebar");
+  const workspace = document.querySelector(".workspace");
+  if (!sidebar && !workspace) return null;
+  return {
+    sidebarTop: sidebar?.scrollTop || 0,
+    workspaceTop: workspace?.scrollTop || 0,
+    windowX: window.scrollX,
+    windowY: window.scrollY
+  };
+}
+
+function restoreScrollState(scrollState) {
+  if (!scrollState) return;
+  const sidebar = document.querySelector(".sidebar");
+  const workspace = document.querySelector(".workspace");
+  if (sidebar) sidebar.scrollTop = scrollState.sidebarTop;
+  if (workspace) workspace.scrollTop = scrollState.workspaceTop;
+  window.scrollTo(scrollState.windowX, scrollState.windowY);
+}
+
 function project() {
   return state.db.projects.find((item) => item.id === state.projectId) || state.db.projects[0];
 }
 
 function render() {
+  const scrollState = captureScrollState();
   app.innerHTML = state.loading ? `<main class="loading">${icon("loader-circle")} Loading...</main>` : route();
   bind();
   window.lucide?.createIcons();
+  restoreScrollState(scrollState);
 }
 
 function route() {
@@ -653,7 +676,7 @@ function route() {
 
 function publicSite() {
   return `
-    <main class="public-shell">
+    <main class="public-shell home-shell">
       <div class="promo-bar">${icon("timer", 18)} ${t("promo")}</div>
       <nav class="public-nav">
         ${brand(t("contentEngine"))}
