@@ -82,6 +82,10 @@ app.use((req, res, next) => {
   }
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Signature");
+  res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
+  if (/^\/api\/(?:state|export|admin|media|agent|projects)/.test(req.path)) {
+    res.setHeader("Cache-Control", "no-store");
+  }
   if (req.method === "OPTIONS") return res.sendStatus(204);
   next();
 });
@@ -341,7 +345,8 @@ async function requireAuth(req) {
 }
 
 function requireAdminUser(user) {
-  if ((user.role || "user") !== "admin") {
+  const allowedAdminIds = (process.env.ADMIN_USER_IDS || adminUserId).split(",").map((item) => item.trim()).filter(Boolean);
+  if ((user.role || "user") !== "admin" || !allowedAdminIds.includes(user.id)) {
     const error = new Error("Admin access required.");
     error.status = 403;
     throw error;
@@ -598,6 +603,10 @@ function safeLedgerMetadata(metadata = {}) {
   return safe;
 }
 
+function publicMediaMarker(value) {
+  return value ? "duitok-media-ready" : undefined;
+}
+
 function publicState(db, user = db.users?.find((item) => item.id === adminUserId)) {
   const isAdmin = (user?.role || "user") === "admin";
   const owns = (item) => isAdmin || item.userId === user.id;
@@ -623,6 +632,8 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
     const publicType = safe.videoUrl ? "video" : safe.imageUrl ? "image" : safe.type;
     return {
       ...safe,
+      imageUrl: publicMediaMarker(safe.imageUrl),
+      videoUrl: publicMediaMarker(safe.videoUrl),
       title: redactProviderText(safe.title, publicGenerationTitle(publicType)),
       body: redactProviderText(safe.body, publicGenerationBody(publicType))
     };
@@ -656,10 +667,27 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
     } = job;
     return {
       ...safe,
+      imageUrl: publicMediaMarker(safe.imageUrl),
+      videoUrl: publicMediaMarker(safe.videoUrl),
       textOutput: redactProviderText(safe.textOutput, publicGenerationBody(safe.type)),
       errorMessage: safe.status === "failed" ? publicGenerationError() : redactProviderText(safe.errorMessage || "")
     };
   };
+  const sanitizeSchedule = (item) => isAdmin ? item : ({
+    ...item,
+    mediaUrl: item.mediaUrl ? "duitok-media-ready" : "",
+    caption: redactProviderText(item.caption || ""),
+    title: redactProviderText(item.title || "")
+  });
+  const sanitizePublish = (item) => isAdmin ? item : ({
+    id: item.id,
+    userId: item.userId,
+    scheduleId: item.scheduleId,
+    connectionId: item.connectionId,
+    status: item.status,
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt
+  });
   const sanitizeUsage = (item) => isAdmin ? item : ({ ...item, action: redactProviderText(item.action, "Duitok generation") });
   const sanitizeCreditLedger = (item) => isAdmin ? item : ({
     ...item,
@@ -668,7 +696,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
   });
   const projects = (db.projects || []).filter(owns).map(sanitizeProject);
   const usageRows = (db.usage || []).filter(owns).map(sanitizeUsage);
-  const scheduleRows = (db.schedule || []).filter(owns);
+  const scheduleRows = (db.schedule || []).filter(owns).map(sanitizeSchedule);
   const generationJobs = (db.generationJobs || []).filter(owns).map(sanitizeJob);
   const apiCalls = isAdmin ? (db.apiCalls || []).filter(owns) : [];
   const payments = (db.payments || []).filter(owns);
@@ -676,7 +704,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
   const attachments = (db.attachments || []).filter(owns);
   const creditLedger = (db.creditLedger || []).filter(owns).map(sanitizeCreditLedger);
   const tiktokConnections = (db.tiktok?.connections || []).filter(owns);
-  const tiktokPublishes = (db.tiktok?.publishes || []).filter(owns);
+  const tiktokPublishes = (db.tiktok?.publishes || []).filter(owns).map(sanitizePublish);
   const userRevenue = (userId) => db.payments.filter((payment) => payment.userId === userId && payment.status === "paid").reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
   const userCost = (userId) => db.generationJobs.filter((job) => job.userId === userId).reduce((sum, job) => sum + Number(job.costRm || 0), 0);
   const userLastUsed = (userId) => {
@@ -2256,7 +2284,7 @@ async function executeAgentTool(name, args, user) {
     const result = project?.results?.[project.results.length - 1];
     return {
       ok: true,
-      message: `${generated.title} saved.`,
+      message: `${result?.title || "Duitok AI Result"} saved.`,
       db: nextDb,
       data: {
         projectId: args.projectId,
@@ -2371,7 +2399,8 @@ async function executeAgentTool(name, args, user) {
       const currentJob = currentDb.schedule.find((entry) => entry.id === args.scheduleId);
       if (!currentJob) throw Object.assign(new Error("Auto post job not found"), { status: 404 });
       if ((user.role || "user") !== "admin" && currentJob.userId !== user.id) throw Object.assign(new Error("Auto post job not found"), { status: 404 });
-      const mediaUrl = args.mediaUrl || currentJob.mediaUrl;
+      const requestedMediaUrl = args.mediaUrl === "duitok-media-ready" ? "" : args.mediaUrl;
+      const mediaUrl = requestedMediaUrl || currentJob.mediaUrl;
       if (!mediaUrl) throw Object.assign(new Error("TikTok Direct Post needs a public mediaUrl."), { status: 400 });
 
       const connection = findTikTokConnection(currentDb, args.connectionId, user);
@@ -2418,9 +2447,10 @@ async function executeAgentTool(name, args, user) {
       currentJob.updatedAt = publish.createdAt;
       currentDb.usage.unshift(usage(`Agent TikTok publish started: ${currentJob.title}`, 0, currentJob.userId));
       await saveDb(currentDb);
-      return { publish, db: publicState(currentDb, user) };
+      const safeState = publicState(currentDb, user);
+      return { publish: safeState.tiktok.publishes.find((item) => item.id === publish.id) || null, db: safeState };
     });
-    return { ok: true, message: `TikTok publish started: ${result.publish.publishId || result.publish.id}`, db: result.db };
+    return { ok: true, message: `TikTok publish started: ${result.publish?.id || "queued"}`, db: result.db };
   }
 
   if (name === "check_tiktok_publish_status") {
@@ -2446,7 +2476,8 @@ async function executeAgentTool(name, args, user) {
       }
       currentDb.usage.unshift(usage(`Agent checked TikTok publish: ${publish.status}`, 0, publish.userId));
       await saveDb(currentDb);
-      return { publish, db: publicState(currentDb, user) };
+      const safeState = publicState(currentDb, user);
+      return { publish: safeState.tiktok.publishes.find((item) => item.id === publish.id) || null, db: safeState };
     });
     return { ok: true, message: `TikTok publish status: ${result.publish.status}`, db: result.db };
   }
@@ -3061,7 +3092,7 @@ app.patch("/api/autopost/jobs/:id", async (req, res) => {
     if (req.body.status) item.status = req.body.status;
     if (req.body.caption !== undefined) item.caption = String(req.body.caption);
     if (req.body.hashtags !== undefined) item.hashtags = String(req.body.hashtags);
-    if (req.body.mediaUrl !== undefined) item.mediaUrl = String(req.body.mediaUrl);
+    if (req.body.mediaUrl !== undefined && req.body.mediaUrl !== "duitok-media-ready") item.mediaUrl = String(req.body.mediaUrl);
     if (req.body.productUrl !== undefined) item.productUrl = String(req.body.productUrl);
     item.updatedAt = new Date().toISOString();
     if (item.status === "Posted") item.postedAt = item.updatedAt;
@@ -3088,7 +3119,8 @@ app.post("/api/tiktok/publish/:id", async (req, res, next) => {
       await refreshTikTokConnection(connection);
       if (!connection.creatorInfo) await queryTikTokCreatorInfo(connection);
 
-      const mediaUrl = req.body.mediaUrl || currentJob.mediaUrl;
+      const requestedMediaUrl = req.body.mediaUrl === "duitok-media-ready" ? "" : req.body.mediaUrl;
+      const mediaUrl = requestedMediaUrl || currentJob.mediaUrl;
       const publishBody = {
         post_info: {
           title: tiktokPostTitle(currentJob),
@@ -3128,7 +3160,8 @@ app.post("/api/tiktok/publish/:id", async (req, res, next) => {
       currentJob.updatedAt = publish.createdAt;
       currentDb.usage.unshift(usage(`TikTok publish started: ${currentJob.title}`, 0, currentJob.userId));
       await saveDb(currentDb);
-      return { publish, db: publicState(currentDb, user) };
+      const safeState = publicState(currentDb, user);
+      return { publish: safeState.tiktok.publishes.find((item) => item.id === publish.id) || null, db: safeState };
     });
     res.json(result);
   } catch (error) {
@@ -3163,7 +3196,8 @@ app.get("/api/tiktok/publish/:publishId/status", async (req, res, next) => {
         job.postedAt = publish.updatedAt;
       }
       await saveDb(db);
-      return { publish, db: publicState(db, user) };
+      const safeState = publicState(db, user);
+      return { publish: safeState.tiktok.publishes.find((item) => item.id === publish.id) || null, db: safeState };
     });
     res.json(result);
   } catch (error) {
@@ -3191,7 +3225,9 @@ app.get("/api/export/all", async (req, res, next) => {
 
 app.get("/api/export/project/:id", async (req, res) => {
   const { db, user } = await requireAuth(req);
-  res.attachment("project.json").json(findProject(db, req.params.id, user));
+  findProject(db, req.params.id, user);
+  const project = publicState(db, user).projects.find((item) => item.id === req.params.id);
+  res.attachment("project.json").json(project);
 });
 
 app.get("/api/media/result/:id/:kind", async (req, res, next) => {
@@ -3236,8 +3272,7 @@ app.get("/api/media/result/:id/:kind", async (req, res, next) => {
 
 app.get("/api/export/result/:id", async (req, res) => {
   const { db, user } = await requireAuth(req);
-  const projects = (user.role || "user") === "admin" ? db.projects : db.projects.filter((project) => project.userId === user.id);
-  const result = projects.flatMap((project) => project.results).find((item) => item.id === req.params.id);
+  const result = publicState(db, user).projects.flatMap((project) => project.results || []).find((item) => item.id === req.params.id);
   res.attachment("result.txt").type("text/plain").send(`${result?.title || "Result"}\n\n${result?.body || ""}`);
 });
 

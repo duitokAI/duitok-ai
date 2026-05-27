@@ -10,8 +10,8 @@ const files = [
 const checks = [
   {
     file: "src/main.js",
-    pattern: /\bAPIMart\b|GRS AI|Atlas Cloud|速创API|\bWuyin\b|GPT Image 2|Nano Banana Pro|Seedance 2\.0|Veo 3\.1|Sora 2|Gemini Omni|Grok Imagine|Copy task ID|\btask id\b/i,
-    message: "Front-end user copy must not expose provider/model names or upstream task IDs."
+    pattern: /\bAPIMart\b|GRS AI|Atlas Cloud|速创API|\bWuyin\b|GPT Image 2|Nano Banana Pro|Seedance 2\.0|Veo 3\.1|Sora 2|Gemini Omni|Grok Imagine|External provider URLs|Provider URLs|Copy task ID|\btask id\b/i,
+    message: "Front-end user copy must not expose provider/model names, provider URL hints, or upstream task IDs."
   },
   {
     file: "server.mjs",
@@ -22,6 +22,16 @@ const checks = [
     file: "server.mjs",
     pattern: /app\.get\("\/api\/health"[\s\S]*?\b(?:ai|imageProvider)\s*:/,
     message: "Public health endpoint must not expose configured AI providers."
+  },
+  {
+    file: "server.mjs",
+    pattern: /res\.attachment\("project\.json"\)\.json\(findProject|res\.attachment\("result\.txt"\)[\s\S]{0,220}db\.projects/,
+    message: "Export endpoints must use publicState redaction, not raw database records."
+  },
+  {
+    file: "server.mjs",
+    pattern: /return \{ publish, db: publicState/,
+    message: "TikTok publish responses must not return raw request/response payloads to normal users."
   }
 ];
 

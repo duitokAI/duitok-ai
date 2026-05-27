@@ -1237,9 +1237,9 @@ function dashboardOverview() {
         ${generationQueueTable(state.db.generationJobs)}
       </article>
       <article class="activity-card">
-        <div class="card-title"><h2>${icon("database", 22)} Asset Storage</h2><span>${state.db.storage?.durableAssets ? "R2 ready" : "Provider URLs"}</span></div>
+        <div class="card-title"><h2>${icon("database", 22)} Asset Storage</h2><span>${state.db.storage?.durableAssets ? "CDN ready" : "Proxy ready"}</span></div>
         ${table([
-          ["Current mode", state.db.storage?.durableAssets ? "Cloudflare R2 mirror" : "External provider URLs", state.db.storage?.message || ""],
+          ["Current mode", state.db.storage?.durableAssets ? "Duitok media CDN" : "Duitok media proxy", state.db.storage?.message || ""],
           ["Content library", `${allResults().length} assets`, "Generated assets stay attached to your account"],
           ["Publishing", `${state.db.schedule.filter((item) => item.mediaUrl).length} media URLs`, "Scheduler stores the final publish media URL"]
         ])}
