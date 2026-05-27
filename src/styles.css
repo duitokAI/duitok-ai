@@ -92,8 +92,8 @@ button {
 }
 
 .login-card {
-  width: min(460px, calc(100vw - 32px));
-  padding: 28px 34px 32px;
+  width: min(520px, calc(100vw - 32px));
+  padding: 30px 34px 34px;
   border: 1px solid var(--line);
   border-radius: 18px;
   background: rgba(18, 18, 18, 0.94);
@@ -101,8 +101,8 @@ button {
 }
 
 .login-card h1 {
-  font-size: clamp(34px, 5vw, 48px);
-  line-height: 1;
+  font-size: clamp(34px, 4.8vw, 52px);
+  line-height: 0.98;
 }
 
 .login-form {
@@ -4266,6 +4266,400 @@ label {
 .public-nav .lang-menu,
 .login-card > .lang-menu {
   display: none;
+}
+
+/* Reference-style login page */
+.login-shell {
+  min-height: 100vh;
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: clamp(16px, 2.8vh, 28px);
+  padding: clamp(22px, 4vh, 34px) 16px 24px;
+  background:
+    radial-gradient(circle at 50% 12%, rgba(255, 78, 120, 0.22), transparent 24%),
+    radial-gradient(circle at 78% 42%, rgba(93, 8, 108, 0.24), transparent 30%),
+    linear-gradient(135deg, #130715, #080708 52%, #16090f);
+  color: #f7f7f3;
+}
+
+.login-brand .brand-lockup {
+  margin: 0;
+}
+
+.login-brand .brand-core {
+  gap: 12px;
+}
+
+.login-brand .brand-logo-mascot {
+  width: 60px;
+  height: 60px;
+  filter: drop-shadow(0 18px 34px rgba(255, 78, 120, 0.24));
+}
+
+.login-brand .brand-wordmark {
+  color: #f7f7f3;
+  font-size: clamp(32px, 4.8vw, 44px);
+  letter-spacing: 0;
+}
+
+.login-brand .brand-wordmark span:last-child {
+  color: var(--pink);
+}
+
+.login-card {
+  width: min(680px, calc(100vw - 32px));
+  display: grid;
+  gap: clamp(18px, 2.6vw, 26px);
+  padding: clamp(26px, 3.8vw, 38px);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 26px;
+  background: rgba(21, 18, 22, 0.94);
+  box-shadow:
+    0 34px 90px rgba(76, 0, 87, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.login-card .brand-lockup {
+  display: none;
+}
+
+.login-copy {
+  display: grid;
+  gap: 8px;
+  text-align: left;
+}
+
+.login-card h1 {
+  margin: 0;
+  color: #f7f7f3;
+  font-size: clamp(36px, 4.8vw, 48px);
+  line-height: 1.02;
+  letter-spacing: 0;
+}
+
+.login-copy > p {
+  margin: 0;
+  color: #b5b5b5;
+  font-size: clamp(17px, 2.2vw, 23px);
+  line-height: 1.35;
+}
+
+.login-form {
+  display: grid;
+  gap: 16px;
+}
+
+.login-form label {
+  gap: 8px;
+  color: #f2f2ee;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.login-form input {
+  min-height: 58px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 14px 22px;
+  background: #111012;
+  color: #f7f7f3;
+  font-size: 17px;
+  font-weight: 650;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.22);
+}
+
+.login-form input::placeholder {
+  color: #777;
+}
+
+.login-form input:focus {
+  border-color: rgba(255, 78, 120, 0.72);
+  box-shadow:
+    0 0 0 4px rgba(255, 78, 120, 0.13),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.22);
+}
+
+.login-form .gold-button {
+  width: 100%;
+  min-height: 64px;
+  margin-top: 4px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--pink), var(--coral));
+  color: white;
+  font-size: 19px;
+  font-weight: 950;
+  box-shadow: 0 18px 46px rgba(255, 78, 120, 0.24);
+}
+
+.login-form .gold-button svg {
+  order: 2;
+  width: 24px;
+  height: 24px;
+  margin-left: 8px;
+}
+
+.login-form .gold-button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.login-links {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  color: #a8a8a8;
+  font-size: 17px;
+}
+
+.login-links .text-button {
+  min-height: auto;
+  padding: 0;
+  color: #b7b7b7;
+  font-size: inherit;
+  font-weight: 760;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.login-links > span {
+  width: 100%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.login-register-link {
+  display: inline-flex;
+  gap: 7px;
+}
+
+.login-register-link small {
+  color: #b7b7b7;
+  font: inherit;
+}
+
+.login-register-link b {
+  color: var(--pink);
+  font-weight: 900;
+}
+
+@media (max-width: 520px) {
+  .login-shell {
+    gap: 22px;
+    padding-top: 28px;
+  }
+
+  .login-brand .brand-core {
+    gap: 12px;
+  }
+
+  .login-brand .brand-logo-mascot {
+    width: 56px;
+    height: 56px;
+  }
+
+  .login-brand .brand-wordmark {
+    font-size: 32px;
+  }
+
+  .login-card {
+    gap: 26px;
+    padding: 28px 22px 30px;
+    border-radius: 24px;
+  }
+
+  .login-card h1 {
+    font-size: 38px;
+  }
+
+  .login-copy > p {
+    font-size: 20px;
+  }
+
+  .login-form {
+    gap: 22px;
+  }
+
+  .login-form label {
+    gap: 11px;
+    font-size: 18px;
+  }
+
+  .login-form input {
+    min-height: 64px;
+    border-radius: 18px;
+    padding: 16px 20px;
+    font-size: 17px;
+  }
+
+  .login-form .gold-button {
+    min-height: 70px;
+    font-size: 19px;
+  }
+
+  .login-links {
+    gap: 22px;
+    font-size: 15px;
+  }
+}
+
+/* Duitok Agent dedicated workspace */
+.agent-page {
+  display: grid;
+  gap: 18px;
+}
+
+.agent-page-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 20px;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow);
+}
+
+.agent-page-hero h1 {
+  max-width: 760px;
+  margin: 8px 0 10px;
+  color: var(--purple);
+  font-size: clamp(34px, 4vw, 58px);
+  line-height: 0.96;
+  letter-spacing: 0;
+}
+
+.agent-page-hero .subtitle {
+  max-width: 720px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.agent-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.agent-quick-actions button {
+  min-height: 58px;
+  border: 1px solid rgba(93, 8, 108, 0.12);
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--purple);
+  font-weight: 850;
+  text-align: left;
+  line-height: 1.25;
+  box-shadow: 0 12px 28px rgba(76, 0, 87, 0.08);
+}
+
+.agent-quick-actions button:hover {
+  border-color: rgba(255, 79, 101, 0.26);
+  background: #fff4f8;
+}
+
+.agent-page-panel {
+  width: 100%;
+  max-height: none;
+  min-height: min(680px, calc(100vh - 260px));
+  grid-template-rows: auto minmax(300px, 1fr) auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: var(--shadow);
+}
+
+.agent-page-panel header {
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(93, 8, 108, 0.1);
+}
+
+.agent-page-panel h3 {
+  margin: 0;
+  color: var(--purple);
+  font-size: 24px;
+}
+
+.agent-page-panel .agent-thread {
+  min-height: 320px;
+  padding: 16px 4px 16px 0;
+}
+
+.agent-page-panel .agent-thread article {
+  max-width: min(720px, 92%);
+  border-color: rgba(93, 8, 108, 0.12);
+  background: #171717;
+}
+
+.agent-page-panel .agent-thread article.user {
+  background: #fff8ec;
+  border-color: rgba(244, 202, 50, 0.44);
+}
+
+.agent-page-panel .agent-thread article.user p {
+  color: var(--purple);
+}
+
+.agent-page-panel .agent-empty,
+.agent-page-panel .agent-thread span {
+  color: rgba(93, 8, 108, 0.62);
+}
+
+.agent-page-panel .agent-form {
+  grid-template-columns: minmax(0, 1fr) minmax(160px, 220px);
+  align-items: stretch;
+  padding-top: 14px;
+  border-top: 1px solid rgba(93, 8, 108, 0.1);
+}
+
+.agent-page-panel .agent-form textarea {
+  min-height: 92px;
+}
+
+.support-bubble {
+  background: linear-gradient(135deg, var(--pink), var(--coral));
+  border-color: rgba(255, 79, 101, 0.24);
+  box-shadow: 0 18px 42px rgba(255, 79, 101, 0.28);
+}
+
+.support-form {
+  display: grid;
+  gap: 14px;
+}
+
+.support-form textarea {
+  min-height: 150px;
+}
+
+@media (max-width: 1000px) {
+  .agent-page-hero,
+  .agent-page-panel .agent-form {
+    grid-template-columns: 1fr;
+  }
+
+  .agent-quick-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .agent-page-hero {
+    padding: 18px;
+  }
+
+  .agent-page-hero h1 {
+    font-size: clamp(30px, 10vw, 42px);
+  }
+
+  .agent-quick-actions {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Sidebar menu alignment */

@@ -251,10 +251,13 @@ const copy = {
     export: "Export",
     saveDone: "Saved.",
     generatedSaved: "Generated result saved.",
-    loginTitle: "Log masuk untuk teruskan generate UGC viral.",
+    loginTitle: "Welcome back",
+    loginCopy: "Sign in untuk teruskan generate UGC viral.",
     welcomeBack: "Welcome back",
     forgot: "Lupa password? Hantar di WhatsApp ->",
     noAccount: "Belum ada akaun? Pilih plan & daftar",
+    noAccountLead: "Belum ada akaun?",
+    noAccountAction: "Pilih plan & daftar",
     createProject: "Create New Project",
     choosePlan: "Choose Plan & Register",
     exportReady: "Export Ready",
@@ -394,10 +397,13 @@ const copy = {
     export: "导出",
     saveDone: "已保存。",
     generatedSaved: "生成结果已保存。",
-    loginTitle: "登录后继续生成爆款 UGC。",
+    loginTitle: "Welcome back",
+    loginCopy: "登录后继续生成爆款 UGC。",
     welcomeBack: "欢迎回来",
     forgot: "忘记密码？去 WhatsApp 联系 ->",
     noAccount: "还没有账号？选择计划并注册",
+    noAccountLead: "还没有账号？",
+    noAccountAction: "选择计划并注册",
     createProject: "创建新项目",
     choosePlan: "选择计划并注册",
     exportReady: "导出已开始",
@@ -537,10 +543,13 @@ const copy = {
     export: "Export",
     saveDone: "Saved.",
     generatedSaved: "Generated result saved.",
-    loginTitle: "Sign in to keep generating viral UGC.",
+    loginTitle: "Welcome back",
+    loginCopy: "Sign in to keep generating viral UGC.",
     welcomeBack: "Welcome back",
     forgot: "Forgot password? Send WhatsApp ->",
     noAccount: "No account yet? Choose a plan & register",
+    noAccountLead: "No account yet?",
+    noAccountAction: "Choose a plan & register",
     createProject: "Create New Project",
     choosePlan: "Choose Plan & Register",
     exportReady: "Export Ready",
@@ -1048,17 +1057,22 @@ function demoCard(duration, title, text) {
 function login() {
   return `
     <main class="login-shell">
+      <div class="login-brand">${brand()}</div>
       <section class="login-card">
-        ${brand()}
-        <p class="eyebrow">${t("welcomeBack")}</p>
-        <h1>${t("loginTitle")}</h1>
+        <div class="login-copy">
+          <h1>${t("loginTitle")}</h1>
+          <p>${t("loginCopy")}</p>
+        </div>
         <form data-form="login" class="login-form">
           <label>${t("email")}<input name="email" type="email" value="admin@duitok.com" required></label>
           <label>${t("password")}<input name="password" type="password" value="duitok123" required></label>
           <button class="gold-button" type="submit">${icon("log-in")} ${t("signIn")}</button>
         </form>
-        <button class="text-button" data-action="forgot">${t("forgot")}</button>
-        <button class="text-button" data-action="register">${t("noAccount")}</button>
+        <div class="login-links">
+          <button class="text-button" data-action="forgot">${t("forgot")}</button>
+          <span aria-hidden="true"></span>
+          <button class="text-button login-register-link" data-action="register"><small>${t("noAccountLead")}</small> <b>${t("noAccountAction")}</b></button>
+        </div>
       </section>
       ${modal()}
     </main>`;
@@ -1073,7 +1087,7 @@ function studio() {
         <div class="side-section">${icon("layout-dashboard", 18)} Workspace</div>
         <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard">${icon("sparkles")} ${t("dashboard")}</button>
         ${state.user?.role === "admin" ? `<button class="side-link ${state.page === "admin" ? "active" : ""}" data-page="admin">${icon("shield-check")} Admin CRM</button>` : ""}
-        <button class="side-link" data-action="chat">${icon("bot")} Duitok Agent</button>
+        <button class="side-link ${state.page === "agent" ? "active" : ""}" data-page="agent">${icon("bot")} Duitok Agent</button>
         <button class="side-link ${state.page === "library" ? "active" : ""}" data-page="library">${icon("folder")} Content Library</button>
         <button class="side-link ${state.page === "autopost" ? "active" : ""}" data-page="autopost">${icon("calendar-days")} Scheduler</button>
         <button class="new-project" data-action="new-project">${icon("plus")} <span>${t("newProject")}</span><b>${state.db.projects.length}/5</b></button>
@@ -1090,14 +1104,14 @@ function studio() {
           ["affiliate", "users", "affiliate"]
         ].map(([id, ic, key]) => `<button class="side-link ${state.page === id ? "active" : ""}" data-page="${id}">${icon(ic)} ${t(key)}</button>`).join("")}
         <div class="side-section account">${icon("life-buoy", 18)} Support</div>
+        <button class="side-link" data-action="support">${icon("ticket")} Contact Support</button>
         <button class="side-link" data-action="sop">${icon("book-open")} SOP</button>
         <button class="side-link ${state.page === "whatsapp" ? "active" : ""}" data-page="whatsapp">${icon("message-circle")} ${t("whatsapp")}${icon("arrow-up-right", 14)}</button>
       </aside>
       <main class="workspace">${page()}</main>
       <button class="live-tab" data-action="live">${icon("activity", 18)} LIVE - ${state.db.liveCount}</button>
-      <button class="chat-bubble" data-action="chat">${icon("bot", 34)}</button>
+      <button class="chat-bubble support-bubble" data-action="support" title="Contact support">${icon("message-circle", 32)}</button>
       ${state.live ? livePanel() : ""}
-      ${state.chat ? chatPanel() : ""}
       ${modal()}
     </div>`;
 }
@@ -1120,6 +1134,7 @@ function projectButtons() {
 
 function page() {
   if (state.page === "admin") return adminPage();
+  if (state.page === "agent") return agentPage();
   if (state.page === "dashboard") return dashboardOverview();
   if (state.page === "project") return projectPage();
   if (state.page === "library") return contentLibraryPage();
@@ -1638,13 +1653,13 @@ function schedule() {
 
 function modal() {
   if (!state.modal) return "";
-  const title = { newProject: t("createProject"), register: t("choosePlan"), sop: t("sopImage"), export: t("exportReady"), chat: t("supportTitle") }[state.modal];
+  const title = { newProject: t("createProject"), register: t("choosePlan"), sop: t("sopImage"), export: t("exportReady"), support: t("supportTitle") }[state.modal];
   const body = {
     newProject: `<form data-form="project"><label>${t("project")}<input name="name" placeholder="Project ${(state.db?.projects.length || 0) + 1}" required></label><button class="gold-button" type="submit">${icon("plus")} ${t("newProject")}</button></form>`,
     register: `<form data-form="login"><label>${t("email")}<input name="email" type="email" placeholder="you@duitok.com" required></label><label>${t("password")}<input name="password" type="password" placeholder="Create password" required></label><button class="gold-button" type="submit">${icon("lock")} Register & Enter Studio</button></form>`,
     sop: `<div class="sop-sheet"><b>Image SOP</b><ol><li>Upload avatar face.</li><li>Upload product reference.</li><li>Select model and mode.</li><li>Write prompt.</li><li>Generate, save, export.</li></ol><button class="dark-button" data-action="download-sop">${icon("download")} Download SOP</button></div>`,
     export: `<p>Your export has started. Files are generated by the backend.</p><button class="gold-button" data-action="close-modal">${icon("check")} Done</button>`,
-    chat: `<p>How can Duitok AI help?</p><button class="gold-button" data-action="support-ticket">${icon("send")} ${t("supportTicket")}</button>`
+    support: `<form data-form="support" class="support-form"><label>Message<textarea name="message" placeholder="Tell us what happened, what you tried, and your WhatsApp number if you want a reply." required></textarea></label><button class="gold-button" type="submit">${icon("send")} ${t("supportTicket")}</button></form>`
   }[state.modal];
   return `<div class="modal-backdrop" data-action="close-modal"><section class="modal"><button class="icon-only close" data-action="close-modal">${icon("x")}</button><p class="folder-label">${icon("sparkles", 18)} Duitok AI</p><h2>${title}</h2>${body}</section></div>`;
 }
@@ -1653,12 +1668,36 @@ function livePanel() {
   return `<aside class="live-panel"><h3>${icon("activity")} Live Activity</h3>${state.db.usage.slice(0, 6).map((x) => `<p>${x.action}<small>${x.credits} credits</small></p>`).join("")}</aside>`;
 }
 
+function agentPage() {
+  const prompts = [
+    "帮我为这个产品做 7 天 TikTok 内容",
+    "用 Seedance 2.0 生成一个产品视频版本",
+    "分析这个 competitor URL，生成 5 个 hook",
+    "看一下我今天还缺什么内容"
+  ];
+  return `
+    <section class="agent-page">
+      <header class="agent-page-hero">
+        <div>
+          <p class="folder-label">${icon("bot", 18)} Duitok Agent</p>
+          <h1>Your AI operator for TikTok Shop content.</h1>
+          <p class="subtitle">Ask it to create projects, write prompts, generate assets, build batches, schedule posts, and decide the next best action.</p>
+        </div>
+        <button class="dark-button" data-action="support">${icon("ticket")} Contact human support</button>
+      </header>
+      <div class="agent-quick-actions">
+        ${prompts.map((prompt) => `<button type="button" data-agent-prompt="${esc(prompt)}">${icon("sparkles", 17)} ${prompt}</button>`).join("")}
+      </div>
+      ${chatPanel()}
+    </section>`;
+}
+
 function chatPanel() {
   const intro = state.agentMessages.length
     ? ""
     : `<p class="agent-empty">Ask me to generate UGC, build a batch, decode a competitor, create a project, or decide what to do next.</p>`;
   return `
-    <aside class="chat-panel agent-panel">
+    <section class="agent-panel agent-page-panel">
       <header>
         <h3>${icon("bot")} Duitok Agent</h3>
         <button class="icon-only" data-action="clear-agent" title="Clear chat">${icon("trash-2", 18)}</button>
@@ -1672,7 +1711,7 @@ function chatPanel() {
         <textarea name="message" data-agent-input placeholder="Tell Duitok Agent what you want..." ${state.agentBusy ? "disabled" : ""}>${esc(state.agentInput)}</textarea>
         <button class="gold-button" type="submit" ${state.agentBusy ? "disabled" : ""}>${icon(state.agentBusy ? "loader-circle" : "send")} Send</button>
       </form>
-    </aside>`;
+    </section>`;
 }
 
 function bind() {
@@ -1684,6 +1723,7 @@ function bind() {
   document.querySelectorAll("[data-admin-credit]").forEach((el) => el.addEventListener("click", () => adminAdjustCredits(el.dataset.adminCredit, Number(el.dataset.delta))));
   document.querySelectorAll("[data-admin-status]").forEach((el) => el.addEventListener("click", () => adminUpdateUser(el.dataset.adminStatus, { status: el.dataset.status })));
   document.querySelectorAll("[data-agent-permission]").forEach((el) => el.addEventListener("click", () => adminUpdateUser(el.dataset.agentPermission, { agentPermissions: { [el.dataset.permission]: el.dataset.enabled === "true" } })));
+  document.querySelectorAll("[data-agent-prompt]").forEach((el) => el.addEventListener("click", () => sendAgentMessage(el.dataset.agentPrompt)));
   document.querySelectorAll("[data-date-field]").forEach((el) => el.addEventListener("change", () => set({ [el.dataset.dateField]: el.value })));
   document.querySelectorAll("[data-action]").forEach((el) => el.addEventListener("click", (e) => action(e, el.dataset.action)));
   document.querySelectorAll("[data-field]").forEach((el) => el.addEventListener("change", fieldChange));
@@ -1722,6 +1762,7 @@ async function action(event, name) {
   if (name === "new-project") return set({ modal: "newProject" });
   if (name === "sop") return set({ modal: "sop" });
   if (name === "register") return set({ modal: "register" });
+  if (name === "support") return set({ modal: "support" });
   if (name === "open-home") {
     window.history.pushState({}, "", "/");
     return render();
@@ -1742,7 +1783,7 @@ async function action(event, name) {
   if (name === "apply-date") return notify("Dashboard date range applied.");
   if (name === "reset-date") return set({ dateFrom: "2026-05-01", dateTo: "2026-05-26" });
   if (name === "live") return set({ live: !state.live });
-  if (name === "chat") return set({ chat: !state.chat });
+  if (name === "chat") return set({ page: "agent" });
   if (name === "clear-agent") {
     localStorage.removeItem("duitok-agent-messages");
     return set({ agentMessages: [], agentInput: "" });
@@ -1794,6 +1835,11 @@ async function submit(event) {
   if (event.currentTarget.dataset.form === "project") {
     const db = await api("/projects", { method: "POST", body: JSON.stringify(data) });
     return set({ db, projectId: db.projects.at(-1).id, modal: null, page: "dashboard" });
+  }
+  if (event.currentTarget.dataset.form === "support") {
+    const db = await api("/support", { method: "POST", body: JSON.stringify(data) });
+    notify("Support ticket saved.");
+    return set({ db, modal: null });
   }
   if (event.currentTarget.dataset.form === "agent") {
     return sendAgentMessage(data.message);
