@@ -145,7 +145,7 @@ function defaultAgentPermissions() {
 function storageStatus() {
   const r2Ready = Boolean(process.env.R2_BUCKET && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_PUBLIC_BASE_URL && r2Endpoint);
   return {
-    provider: r2Ready ? "cloudflare-r2" : assetStorageProvider,
+    provider: r2Ready ? "durable-media" : assetStorageProvider,
     ready: r2Ready || (!requireDurableAssets && assetStorageProvider === "external"),
     durableAssets: r2Ready,
     required: requireDurableAssets,
@@ -741,6 +741,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
       costUsd: _costUsd,
       originalImageUrl: _originalImageUrl,
       originalVideoUrl: _originalVideoUrl,
+      assetStorage: _assetStorage,
       assetStorageKey: _assetStorageKey,
       assetStorageError: _assetStorageError,
       taskId: _taskId,
@@ -754,6 +755,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
     const publicType = safe.videoUrl ? "video" : safe.imageUrl ? "image" : safe.type;
     return {
       ...safe,
+      assetStorage: safe.imageUrl || safe.videoUrl ? "duitok-media" : undefined,
       imageUrl: publicMediaMarker(safe.imageUrl),
       videoUrl: publicMediaMarker(safe.videoUrl),
       title: redactProviderText(safe.title, publicGenerationTitle(publicType)),
@@ -783,12 +785,14 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
       providerErrorMessage: _providerErrorMessage,
       originalImageUrl: _originalImageUrl,
       originalVideoUrl: _originalVideoUrl,
+      assetStorage: _assetStorage,
       assetStorageKey: _assetStorageKey,
       assetStorageError: _assetStorageError,
       ...safe
     } = job;
     return {
       ...safe,
+      assetStorage: safe.imageUrl || safe.videoUrl ? "duitok-media" : undefined,
       imageUrl: publicMediaMarker(safe.imageUrl),
       videoUrl: publicMediaMarker(safe.videoUrl),
       textOutput: redactProviderText(safe.textOutput, publicGenerationBody(safe.type)),

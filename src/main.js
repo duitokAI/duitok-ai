@@ -1089,8 +1089,8 @@ function login() {
           <p>${t("loginCopy")}</p>
         </div>
         <form data-form="login" class="login-form">
-          <label>${t("email")}<input name="email" type="email" value="admin@duitok.com" required></label>
-          <label>${t("password")}<input name="password" type="password" value="duitok123" required></label>
+          <label>${t("email")}<input name="email" type="email" autocomplete="email" required></label>
+          <label>${t("password")}<input name="password" type="password" autocomplete="current-password" required></label>
           <button class="gold-button" type="submit">${icon("log-in")} ${t("signIn")}</button>
         </form>
         <div class="login-links">
