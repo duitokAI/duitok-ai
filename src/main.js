@@ -6,6 +6,7 @@ const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
 const isStudioPath = () => window.location.pathname.startsWith("/studio") || window.location.pathname.startsWith("/admin");
 const pathIs = (path) => window.location.pathname === path;
 const ownerAdminEmail = "admin@duitok.com";
+const whatsappGroupUrl = "https://chat.whatsapp.com/ERz2477U1gJFJHFsXtiMJH?mode=gi_t";
 let sidebarScrollTop = 0;
 
 const steps = [
@@ -3204,7 +3205,7 @@ async function action(event, name) {
     return set({ user: null, token: "", db: null, modal: null });
   }
   if (name === "forgot") return window.open("https://wa.me/60123456789", "_blank");
-  if (name === "open-whatsapp") return window.open("https://wa.me/60123456789", "_blank");
+  if (name === "open-whatsapp") return window.open(whatsappGroupUrl, "_blank", "noopener,noreferrer");
   if (name === "connect-tiktok") return window.location.href = `${apiBaseUrl}/api/tiktok/connect?token=${encodeURIComponent(state.token)}`;
   if (name === "tiktok-creator-info") return tiktokCreatorInfo();
   if (name === "copy-affiliate") { await navigator.clipboard?.writeText("https://duitok.com/ref/DUIT2026"); return notify("Affiliate link copied."); }
