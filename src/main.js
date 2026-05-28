@@ -3013,6 +3013,7 @@ function schedule() {
 function modal() {
   if (!state.modal) return "";
   const editProject = state.db?.projects?.find((item) => item.id === state.editingProjectId);
+  if (state.modal === "sop") return sopDashboardModal();
   const title = { newProject: t("createProject"), renameProject: "Rename project", deleteProject: "Delete project", register: t("choosePlan"), sop: t("sopImage"), export: t("exportReady"), support: t("supportTitle") }[state.modal];
   const body = {
     newProject: `<form data-form="project"><label>${t("project")}<input name="name" placeholder="Project ${(state.db?.projects.length || 0) + 1}" required></label><button class="gold-button" type="submit">${icon("plus")} ${t("newProject")}</button></form>`,
@@ -3024,6 +3025,77 @@ function modal() {
     support: `<form data-form="support" class="support-form"><label>Message<textarea name="message" placeholder="Tell us what happened, what you tried, and your WhatsApp number if you want a reply." required></textarea></label><button class="gold-button" type="submit">${icon("send")} ${t("supportTicket")}</button></form>`
   }[state.modal];
   return `<div class="modal-backdrop" data-action="close-modal"><section class="modal"><button class="icon-only close" data-action="close-modal">${icon("x")}</button><p class="folder-label">${icon("sparkles", 18)} Duitok AI</p><h2>${title}</h2>${body}</section></div>`;
+}
+
+function sopDashboardModal() {
+  const stepCards = [
+    ["1", "Dashboard overview", "Tengok total production bulan ni: Image, UGC, Auto Content, Original Video, Clone Prompt, Ready to Post dan credit yang sudah guna.", "layout-dashboard"],
+    ["2", "Pilih atau create project", "Semua generation mesti duduk dalam satu project. Kalau campaign baru, create project dulu supaya asset, prompt dan schedule tidak bercampur.", "folder-plus"],
+    ["3", "Baca daily stats", "Guna date filter untuk check output harian, cost breakdown dan recent activity sebelum decide nak scale angle mana.", "bar-chart-3"],
+    ["4", "Masuk tab generation", "Lepas pilih project, teruskan ke Image / UGC / Auto Content / Story / Original Video / Clone Prompt ikut task yang nak dibuat.", "wand-sparkles"]
+  ];
+  return `
+    <div class="modal-backdrop sop-backdrop" data-action="close-modal">
+      <section class="sop-modal" role="dialog" aria-modal="true" aria-labelledby="sop-dashboard-title">
+        <header class="sop-modal-head">
+          <span class="sop-modal-icon">${icon("book-open", 36)}</span>
+          <div>
+            <p>Panduan</p>
+            <h2 id="sop-dashboard-title">Dashboard - Project & Production Summary</h2>
+          </div>
+          <button class="sop-close" data-action="close-modal" aria-label="Close SOP">${icon("x", 34)}</button>
+        </header>
+        <div class="sop-modal-scroll">
+          <p class="sop-path">Welcome screen · pick / create project · daily stats</p>
+          <section class="sop-copy-block">
+            <h3>Apa ini?</h3>
+            <p>Dashboard ialah landing page bila korang first kali login. Dia tunjuk ringkasan production keseluruhan (total Image / UGC / Cinema / Auto Content + Total Cost) dan jadi launchpad untuk pilih project mana yang nak kerja. Semua tab generation (Image / UGC / Auto Content / Story / Cinema / Clone) live DALAM satu project - korang mesti pilih atau buat project dulu sebelum generate apa-apa.</p>
+          </section>
+          <section class="sop-callout">
+            ${icon("lightbulb", 34)}
+            <div>
+              <h3>Bila guna tab ni?</h3>
+              <p>Setiap kali korang login. Atau bila nak switch antara client / campaign berbeza. Atau bila nak tengok overall production stats - berapa banyak generated bulan ni, total cost, daily breakdown.</p>
+            </div>
+          </section>
+          <section class="sop-guide">
+            <h3>${icon("chevron-right", 28)} Cara guna</h3>
+            <div class="sop-step-list">
+              ${stepCards.map(([no, title, copy, ic]) => `
+                <article class="sop-step-card">
+                  <div class="sop-step-title">
+                    <span>${no}</span>
+                    <h4>Step ${no} - ${title}</h4>
+                  </div>
+                  <div class="sop-step-preview">
+                    <div class="sop-mini-sidebar">
+                      <b>Duitok</b>
+                      <i></i><i></i><i></i>
+                    </div>
+                    <div class="sop-mini-screen">
+                      <strong>${icon(ic, 20)} ${title}</strong>
+                      <div class="sop-mini-grid"><i></i><i></i><i></i><i></i></div>
+                      <p>${copy}</p>
+                    </div>
+                  </div>
+                </article>`).join("")}
+            </div>
+          </section>
+          <section class="sop-checklist">
+            <h3>Checklist sebelum generate</h3>
+            <div>
+              <span>${icon("check", 18)} Project sudah dipilih</span>
+              <span>${icon("check", 18)} Credit cukup untuk batch</span>
+              <span>${icon("check", 18)} Date range betul</span>
+              <span>${icon("check", 18)} Next action jelas</span>
+            </div>
+          </section>
+        </div>
+        <footer class="sop-modal-foot">
+          <button class="sop-understood" data-action="close-modal">Faham - tutup</button>
+        </footer>
+      </section>
+    </div>`;
 }
 
 function livePanel() {
@@ -3136,6 +3208,7 @@ function agent3DScene() {
         <img class="agent-life-render-image agent-life-render-active" src="/duitok-agent-stage-chat-bg.png" alt="Duitok Agent workstation, chat station, and sleeping bed">
         <img class="agent-life-render-image agent-life-render-sleep" src="/duitok-agent-stage-chat-sleep-bg.png" alt="Duitok Agent sleeping in bed">
         <span class="agent-life-route" aria-hidden="true"></span>
+        <span class="agent-chair-mask" aria-hidden="true"></span>
         <img class="agent-sprite agent-sprite-work" src="/duitok-agent-sprite-work-chair.png" alt="">
         <img class="agent-sprite agent-sprite-chat" src="/duitok-agent-sprite-chat.png" alt="">
         <span class="agent-life-bubble">${agentVisualBubble(mode, phase)}</span>
