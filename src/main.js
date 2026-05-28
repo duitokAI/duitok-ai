@@ -9,6 +9,8 @@ const ownerAdminEmail = "admin@duitok.com";
 const whatsappGroupUrl = "https://chat.whatsapp.com/ERz2477U1gJFJHFsXtiMJH?mode=gi_t";
 const supportWhatsappUrl = "https://wa.me/60163100131";
 const promoCycleMs = 5 * 60 * 60 * 1000;
+const agentHistoryStorageKey = "duitok-agent-history";
+const agentHistoryLimit = 12;
 let sidebarScrollTop = 0;
 let promoCountdownTimer = null;
 
@@ -59,6 +61,9 @@ const state = {
   agentIdleActivity: "sleep",
   agentMessages: JSON.parse(localStorage.getItem("duitok-agent-messages") || "[]"),
   agentContextSummary: localStorage.getItem("duitok-agent-context-summary") || "",
+  agentExpandedMessages: {},
+  agentHistoryOpen: false,
+  agentHistorySessions: JSON.parse(localStorage.getItem(agentHistoryStorageKey) || "[]"),
   queuePolling: false,
   langOpen: false,
   imagePromptGroup: "avatar",
@@ -4541,7 +4546,6 @@ function agentPage() {
           <p class="folder-label">${icon("bot", 18)} Duitok Agent</p>
           <h1>Your AI operator for TikTok Shop content.</h1>
           <p class="subtitle">Ask it to create projects, write prompts, generate assets, build batches, schedule posts, and decide the next best action.</p>
-          <button class="dark-button" data-action="support">${icon("ticket")} Contact human support</button>
         </div>
         ${agent3DScene()}
       </header>
@@ -4553,6 +4557,7 @@ function agentPage() {
 }
 
 function chatPanel() {
+  const visibleMessages = visibleAgentMessages();
   const intro = state.agentMessages.length
     ? ""
     : `<p class="agent-empty">Ask me to generate UGC, build a batch, decode a competitor, create a project, or decide what to do next.</p>`;
@@ -4567,13 +4572,16 @@ function chatPanel() {
       <header>
         <h3>${icon("bot")} Duitok Agent</h3>
         <div class="agent-header-actions">
+          <button class="dark-button mini-button" data-action="toggle-agent-history" title="查看之前保存的 Agent 对话">${icon("history", 16)} 历史记录${state.agentHistorySessions.length ? ` <b>${state.agentHistorySessions.length}</b>` : ""}</button>
           <button class="dark-button mini-button" data-action="new-agent-chat" title="保留项目记忆，开始新对话">${icon("message-square-plus", 16)} 新对话</button>
           <button class="icon-only" data-action="clear-agent-context" title="清空本次上下文">${icon("trash-2", 18)}</button>
         </div>
       </header>
+      ${agentHistoryPanel()}
       <div class="agent-thread">
         ${intro}
-        ${state.agentMessages.map(agentMessageArticle).join("")}
+        ${agentCollapsedHistoryBar()}
+        ${visibleMessages.map(({ item, index }) => agentMessageArticle(item, index)).join("")}
         ${state.agentBusy ? agentThinkingCard() : ""}
       </div>
       <form class="agent-form" data-form="agent">
@@ -4583,10 +4591,58 @@ function chatPanel() {
     </section>`;
 }
 
-function agentMessageArticle(item) {
+function agentHistoryPanel() {
+  if (!state.agentHistoryOpen) return "";
+  const sessions = Array.isArray(state.agentHistorySessions) ? state.agentHistorySessions : [];
+  return `<section class="agent-history-panel">
+    <header><strong>${icon("history", 16)} Agent 历史记录</strong><button class="icon-only" data-action="toggle-agent-history" title="关闭">${icon("x", 16)}</button></header>
+    ${sessions.length
+      ? `<div class="agent-history-list">${sessions.map((item) => `<article>
+          <div><b>${esc(item.title || "未命名对话")}</b><small>${agentHistoryMeta(item)}</small></div>
+          <button class="dark-button mini-button" data-agent-history-restore="${esc(item.id)}">${icon("rotate-ccw", 14)} 恢复</button>
+          <button class="icon-only" data-agent-history-delete="${esc(item.id)}" title="删除这条历史">${icon("trash-2", 15)}</button>
+        </article>`).join("")}</div>`
+      : `<p class="agent-history-empty">还没有历史记录。点「新对话」时，当前对话会自动保存到这里。</p>`}
+  </section>`;
+}
+
+function agentHistoryMeta(item = {}) {
+  const date = item.updatedAt ? new Date(item.updatedAt).toLocaleString(state.lang === "zh" ? "zh-CN" : "en-GB", { month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit" }) : "";
+  const count = Array.isArray(item.messages) ? item.messages.length : 0;
+  return [date, `${count} 条消息`].filter(Boolean).join(" · ");
+}
+
+function visibleAgentMessages() {
+  const keep = 8;
+  const start = Math.max(0, state.agentMessages.length - keep);
+  return state.agentMessages.slice(start).map((item, offset) => ({ item, index: start + offset }));
+}
+
+function agentCollapsedHistoryBar() {
+  const hiddenCount = Math.max(0, state.agentMessages.length - 8);
+  if (!hiddenCount) return "";
+  const summary = state.agentContextSummary
+    ? state.agentContextSummary.split(/\r?\n/).filter(Boolean).slice(-1)[0]
+    : "较早对话已压缩成上下文摘要，Agent 会继续记住关键结论。";
+  return `<div class="agent-history-compact">${icon("archive", 16)} <span>已收起 ${hiddenCount} 条较早对话</span><small>${esc(summary.slice(0, 180))}</small><button type="button" data-action="new-agent-chat">${icon("message-square-plus", 14)} 新对话</button></div>`;
+}
+
+function agentMessageArticle(item, index = 0) {
+  const longMessage = item.role === "assistant" && isLongAgentMessage(item.content);
+  const expanded = Boolean(state.agentExpandedMessages[index]);
   const body = item.role === "assistant" ? agentMessageMarkdown(item.content) : `<p>${esc(item.content).replaceAll("\n", "<br>")}</p>`;
   const chips = item.role === "assistant" ? agentActionChips(item.content) : "";
-  return `<article class="${item.role}"><span>${item.role === "user" ? "You" : "Agent"}</span><div class="agent-message">${body}</div>${chips}${agentRunPanel(item.agentRun)}</article>`;
+  return `<article class="${item.role} ${longMessage && !expanded ? "is-collapsed" : ""}">
+    <span>${item.role === "user" ? "You" : "Agent"}</span>
+    <div class="agent-message">${body}</div>
+    ${longMessage ? `<button class="agent-expand-button" type="button" data-agent-expand="${index}">${expanded ? "收起回复" : "展开完整回复"} ${icon(expanded ? "chevron-up" : "chevron-down", 15)}</button>` : ""}
+    ${chips}${agentRunPanel(item.agentRun)}
+  </article>`;
+}
+
+function isLongAgentMessage(content = "") {
+  const text = String(content || "");
+  return text.length > 520 || text.split(/\r?\n/).filter((line) => line.trim()).length > 7;
 }
 
 function agentMessageMarkdown(content = "") {
@@ -4893,6 +4949,12 @@ function bind() {
     event.stopPropagation();
     set({ modal: "deleteProject", editingProjectId: el.dataset.projectDelete, projectMenuId: null });
   }));
+  document.querySelectorAll("[data-agent-expand]").forEach((el) => el.addEventListener("click", () => {
+    const index = el.dataset.agentExpand;
+    set({ agentExpandedMessages: { ...state.agentExpandedMessages, [index]: !state.agentExpandedMessages[index] } });
+  }));
+  document.querySelectorAll("[data-agent-history-restore]").forEach((el) => el.addEventListener("click", () => restoreAgentHistory(el.dataset.agentHistoryRestore)));
+  document.querySelectorAll("[data-agent-history-delete]").forEach((el) => el.addEventListener("click", () => deleteAgentHistory(el.dataset.agentHistoryDelete)));
   document.querySelectorAll("[data-admin-user]").forEach((el) => el.addEventListener("click", () => set({ adminUserId: el.dataset.adminUser })));
   document.querySelectorAll("[data-admin-credit]").forEach((el) => el.addEventListener("click", () => adminAdjustCredits(el.dataset.adminCredit, Number(el.dataset.delta))));
   document.querySelectorAll("[data-admin-clean-payment]").forEach((el) => el.addEventListener("click", () => adminCleanupPayment(el.dataset.adminCleanPayment)));
@@ -4980,14 +5042,16 @@ async function action(event, name) {
   if (name === "apply-date") return notify(t("toastDashboardDate"));
   if (name === "reset-date") return set({ dateFrom: "2026-05-01", dateTo: "2026-05-26" });
   if (name === "chat") return set({ page: "agent" });
+  if (name === "toggle-agent-history") return set({ agentHistoryOpen: !state.agentHistoryOpen });
   if (name === "new-agent-chat") {
+    saveCurrentAgentHistory();
     localStorage.removeItem("duitok-agent-messages");
-    return set({ agentMessages: [], agentInput: "" });
+    return set({ agentMessages: [], agentInput: "", agentExpandedMessages: {}, agentHistoryOpen: true });
   }
   if (name === "clear-agent-context" || name === "clear-agent") {
     localStorage.removeItem("duitok-agent-messages");
     localStorage.removeItem("duitok-agent-context-summary");
-    return set({ agentMessages: [], agentInput: "", agentContextSummary: "" });
+    return set({ agentMessages: [], agentInput: "", agentContextSummary: "", agentExpandedMessages: {} });
   }
   if (name === "clear-agent-confirm") {
     const messages = state.agentMessages.map((item) => item.agentRun?.status === "waiting_confirmation"
@@ -5238,6 +5302,46 @@ function rememberAgentMessages(messages) {
   if (overflow.length) rememberAgentContextSummary(overflow);
   localStorage.setItem("duitok-agent-messages", JSON.stringify(safeMessages.slice(-10)));
   state.agentContextSummary = localStorage.getItem("duitok-agent-context-summary") || "";
+}
+
+function rememberAgentHistorySessions(sessions = []) {
+  const safeSessions = (Array.isArray(sessions) ? sessions : [])
+    .filter((item) => item?.id && Array.isArray(item.messages) && item.messages.length)
+    .slice(0, agentHistoryLimit);
+  localStorage.setItem(agentHistoryStorageKey, JSON.stringify(safeSessions));
+  state.agentHistorySessions = safeSessions;
+  return safeSessions;
+}
+
+function saveCurrentAgentHistory() {
+  const messages = agentMessagesForStorage(state.agentMessages);
+  if (!messages.length) return state.agentHistorySessions;
+  const latestUser = [...messages].reverse().find((item) => item.role === "user" && item.content);
+  const latestAssistant = [...messages].reverse().find((item) => item.role === "assistant" && item.content);
+  const titleSource = latestUser?.content || latestAssistant?.content || "Agent 对话";
+  const session = {
+    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    title: titleSource.replace(/\s+/g, " ").slice(0, 42),
+    updatedAt: new Date().toISOString(),
+    messages
+  };
+  return rememberAgentHistorySessions([session, ...(state.agentHistorySessions || [])]);
+}
+
+function restoreAgentHistory(id) {
+  const session = (state.agentHistorySessions || []).find((item) => item.id === id);
+  if (!session) return notify("找不到这条历史记录。");
+  const messages = agentMessagesForStorage(session.messages);
+  localStorage.setItem("duitok-agent-messages", JSON.stringify(messages));
+  notify("已恢复历史对话。");
+  set({ agentMessages: messages, agentInput: "", agentExpandedMessages: {}, agentHistoryOpen: false });
+}
+
+function deleteAgentHistory(id) {
+  const sessions = (state.agentHistorySessions || []).filter((item) => item.id !== id);
+  rememberAgentHistorySessions(sessions);
+  notify("已删除这条历史记录。");
+  set({ agentHistorySessions: sessions });
 }
 
 function agentMessagesForStorage(messages = []) {
