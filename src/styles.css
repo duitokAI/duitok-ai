@@ -10881,6 +10881,11 @@ label {
   .public-shell .video-scene-hero h1.hero-headline {
     font-size: clamp(38px, 9.5vw, 50px);
   }
+
+  .public-shell .video-scene-hero h1.hero-headline-zh {
+    font-size: clamp(40px, 10vw, 52px);
+    line-height: 1.04;
+  }
 }
 
 /* Nav polish: remove the heavy rectangle behind the brand/header. */
@@ -11084,6 +11089,12 @@ label {
 .public-shell .video-scene-hero h1.hero-headline {
   color: var(--brand-purple) !important;
   text-shadow: none !important;
+}
+
+.public-shell .video-scene-hero h1.hero-headline-zh {
+  max-width: 680px;
+  font-size: clamp(44px, 4vw, 70px);
+  line-height: 1;
 }
 
 .public-shell .video-scene-hero .hero-headline mark {
@@ -11411,6 +11422,167 @@ label {
   color: var(--studio-ink) !important;
 }
 
+.public-shell .promo-bar {
+  width: calc(100% + clamp(36px, 8vw, 128px));
+  min-height: 54px;
+  margin: 0 calc(clamp(18px, 4vw, 64px) * -1);
+  padding: 11px clamp(18px, 4vw, 64px);
+  border-bottom: 0;
+  border-radius: 0;
+  color: #fff !important;
+  background:
+    linear-gradient(90deg, #ff3f6e 0%, #ff5d6f 48%, #ff7a5c 100%) !important;
+  box-shadow: 0 18px 38px rgba(255, 63, 110, 0.2) !important;
+  font-size: clamp(18px, 2vw, 30px);
+  font-weight: 950;
+  line-height: 1.15;
+}
+
+.public-shell .promo-bar svg {
+  flex: 0 0 auto;
+  color: rgba(255, 255, 255, 0.95);
+  stroke-width: 3;
+}
+
+.promo-copy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 5px;
+}
+
+.promo-copy strong {
+  color: #ffe562;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  text-shadow: 0 2px 12px rgba(75, 0, 94, 0.22);
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .public-shell .promo-bar {
+    min-height: 58px;
+    padding-block: 9px;
+    font-size: 15px;
+  }
+
+  .promo-copy {
+    gap: 3px;
+  }
+}
+
+.public-shell .public-footer {
+  min-height: 118px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  margin-top: 72px;
+  padding: 28px 0 34px;
+  border-top: 1px solid rgba(75, 0, 94, 0.08) !important;
+  color: rgba(75, 0, 94, 0.6) !important;
+}
+
+.footer-left,
+.footer-links {
+  display: inline-flex;
+  align-items: center;
+}
+
+.footer-left {
+  gap: 20px;
+  min-width: 0;
+}
+
+.public-shell .footer-brand {
+  min-width: 0;
+  gap: 10px;
+}
+
+.public-shell .footer-brand-core {
+  gap: 10px;
+}
+
+.public-shell .footer-brand-core .brand-logo-mascot {
+  width: 54px;
+  height: 54px;
+  filter: drop-shadow(0 14px 24px rgba(255, 63, 110, 0.14));
+}
+
+.public-shell .footer-brand-core .brand-wordmark {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.footer-year {
+  color: rgba(75, 0, 94, 0.54);
+  font-size: 18px;
+  font-weight: 820;
+  white-space: nowrap;
+}
+
+.footer-links {
+  justify-content: flex-end;
+  gap: clamp(28px, 5vw, 72px);
+  margin-left: auto;
+}
+
+.public-shell .footer-links a {
+  color: rgba(75, 0, 94, 0.68) !important;
+  font-size: 18px;
+  font-weight: 900;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.public-shell .footer-links a:hover {
+  color: var(--brand-pink) !important;
+}
+
+@media (max-width: 760px) {
+  .public-shell .public-footer {
+    min-height: 0;
+    align-items: flex-start;
+    margin-top: 48px;
+    padding: 24px 0 32px;
+  }
+
+  .footer-left,
+  .footer-links {
+    width: 100%;
+  }
+
+  .footer-left {
+    justify-content: space-between;
+  }
+
+  .footer-links {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 14px 22px;
+    margin-left: 0;
+  }
+
+  .public-shell .footer-brand {
+    width: auto;
+  }
+
+  .public-shell .footer-brand-core .brand-logo-mascot {
+    width: 46px;
+    height: 46px;
+  }
+
+  .public-shell .footer-brand-core .brand-wordmark {
+    font-size: 24px;
+  }
+
+  .footer-year,
+  .public-shell .footer-links a {
+    font-size: 15px;
+  }
+}
+
 .studio-shell .sidebar {
   border-right-color: rgba(255, 255, 255, 0.12) !important;
   background:
@@ -11645,4 +11817,58 @@ label {
   background: #6d4cff !important;
   color: #fff !important;
   box-shadow: 0 18px 44px rgba(109, 76, 255, 0.26) !important;
+}
+
+/* Studio sidebar refinement: active state should feel selected, not framed. */
+.studio-shell .side-primary,
+.studio-shell .side-link,
+.studio-shell .project-button {
+  border-color: transparent !important;
+  font-weight: 800 !important;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.studio-shell .side-link:hover,
+.studio-shell .project-button:hover,
+.studio-shell .side-primary:hover {
+  background: rgba(255, 255, 255, 0.095) !important;
+  color: #fff !important;
+  transform: translateX(1px);
+}
+
+.studio-shell .side-primary.active,
+.studio-shell .side-link.active,
+.studio-shell .project-button.active,
+.studio-shell .project-menu-item.active {
+  border-color: transparent !important;
+  background:
+    linear-gradient(90deg, rgba(255, 63, 110, 0.18), rgba(255, 255, 255, 0.075) 38%, rgba(255, 255, 255, 0.035)),
+    rgba(255, 255, 255, 0.045) !important;
+  color: #fff !important;
+  box-shadow: inset 2px 0 0 var(--studio-pink) !important;
+}
+
+.studio-shell .side-primary.active svg,
+.studio-shell .side-link.active svg,
+.studio-shell .project-button.active svg {
+  border-color: transparent !important;
+  background: transparent !important;
+  color: #fff !important;
+}
+
+.studio-shell .side-primary.active svg:first-child,
+.studio-shell .side-link.active svg:first-child {
+  opacity: 0.96;
+  filter: drop-shadow(0 0 10px rgba(255, 63, 110, 0.24));
+}
+
+.studio-shell .project-menu-item.active .project-icon {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+  box-shadow: none !important;
 }

@@ -7,7 +7,9 @@ const isStudioPath = () => window.location.pathname.startsWith("/studio") || win
 const pathIs = (path) => window.location.pathname === path;
 const ownerAdminEmail = "admin@duitok.com";
 const whatsappGroupUrl = "https://chat.whatsapp.com/ERz2477U1gJFJHFsXtiMJH?mode=gi_t";
+const promoCycleMs = 5 * 60 * 60 * 1000;
 let sidebarScrollTop = 0;
+let promoCountdownTimer = null;
 
 const steps = [
   ["image", "image", "stepImage", "01"],
@@ -285,9 +287,9 @@ const copy = {
     signIn: "登录",
     promo: "现在订阅 RM69/月，送 10 credits · 模板 + 教程 + 平台",
     heroEyebrow: "想用 AI 做副业？从短视频带货开始。",
-    heroTitle: "RM69/月，用 AI 开始短视频带货副业",
-    heroTitleLead: "RM69/月，用 AI 开始",
-    heroTitleHot: "短视频带货副业",
+    heroTitle: "RM69/月开启 AI带货副业",
+    heroTitleLead: "RM69/月开启",
+    heroTitleHot: "AI带货副业",
     heroTitleTail: "",
     demoCta: "看看如何运作",
     heroCopy: "Duitok AI 把选品 SOP、带货模板、教学和 AI 生成平台放在一起，让新手不用拿货、不用拍摄，也能用 AI 批量测试短视频带货内容。",
@@ -588,6 +590,58 @@ function heroTitleMarkup() {
 const icon = (name, size = 20) => `<i data-lucide="${name}" style="width:${size}px;height:${size}px"></i>`;
 const esc = (value = "") => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
 
+function promoContent() {
+  const content = {
+    ms: {
+      before: "Promo RM69/bulan ditutup dalam ",
+      after: "Tinggal 13 slot dari 80 - 67 seller dah claim hari ini."
+    },
+    zh: {
+      before: "RM69/月优惠倒计时 ",
+      after: "80 个名额只剩 13 个，今天已有 67 位 seller claim。"
+    },
+    en: {
+      before: "RM69/month promo closes in ",
+      after: "Only 13 of 80 slots left - 67 sellers claimed today."
+    }
+  };
+  return content[state.lang] || content.en;
+}
+
+function promoBar() {
+  const promo = promoContent();
+  return `
+    <div class="promo-bar" aria-live="polite">
+      ${icon("flame", 20)}
+      <span class="promo-copy">
+        <span>${promo.before}</span><strong data-promo-countdown>05:00:00</strong><span>${promo.after}</span>
+      </span>
+    </div>`;
+}
+
+function formatPromoTime(ms) {
+  const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return [hours, minutes, seconds].map((part) => String(part).padStart(2, "0")).join(":");
+}
+
+function updatePromoCountdown() {
+  const el = document.querySelector("[data-promo-countdown]");
+  clearInterval(promoCountdownTimer);
+  promoCountdownTimer = null;
+  if (!el) return;
+
+  const tick = () => {
+    const elapsed = Date.now() % promoCycleMs;
+    const remaining = elapsed === 0 ? promoCycleMs : promoCycleMs - elapsed;
+    el.textContent = formatPromoTime(remaining);
+  };
+  tick();
+  promoCountdownTimer = setInterval(tick, 1000);
+}
+
 function notify(message) {
   toast.textContent = message;
   toast.classList.add("show");
@@ -681,6 +735,7 @@ function render() {
   app.innerHTML = state.loading ? `<main class="loading">${icon("loader-circle")} Loading...</main>` : routeShell(route());
   bind();
   window.lucide?.createIcons();
+  updatePromoCountdown();
   restoreSidebarScroll();
 }
 
@@ -697,7 +752,7 @@ function route() {
 function publicSite() {
   return `
     <main class="public-shell">
-      <div class="promo-bar">${icon("timer", 18)} ${t("promo")}</div>
+      ${promoBar()}
       <nav class="public-nav">
         ${brand(t("contentEngine"))}
         <div class="public-links">
@@ -719,7 +774,7 @@ function publicSite() {
         <div class="video-scene-beam beam-two" aria-hidden="true"></div>
         <div class="hero-copy-layer">
           <p class="eyebrow">${t("heroEyebrow")}</p>
-          <h1 class="hero-headline">${heroTitleMarkup()}</h1>
+          <h1 class="hero-headline hero-headline-${state.lang}">${heroTitleMarkup()}</h1>
           <p class="public-copy">${t("heroCopy")}</p>
           <div class="public-actions">
             <button class="gold-button" data-action="open-register">${icon("sparkles")} ${t("startCreating")}</button>
@@ -1730,7 +1785,18 @@ function brand(label = "") {
 
 function footerBrand(label = "Duitok AI") {
   const labelMarkup = label && label !== "Duitok AI" ? `<b>${label}</b>` : "";
-  return `<footer class="public-footer"><span class="footer-brand"><span class="brand-core footer-brand-core" aria-label="Duitok AI"><img class="brand-logo-mascot" src="${brandAssets.mascot}" alt="" aria-hidden="true"><span class="brand-wordmark"><span>Duitok</span><span>AI</span></span></span>${labelMarkup}</span><span>© 2026</span><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="mailto:hello@duitok.com">hello@duitok.com</a></footer>`;
+  return `
+    <footer class="public-footer">
+      <div class="footer-left">
+        <span class="footer-brand"><span class="brand-core footer-brand-core" aria-label="Duitok AI"><img class="brand-logo-mascot" src="${brandAssets.mascot}" alt="" aria-hidden="true"><span class="brand-wordmark"><span>Duitok</span><span>AI</span></span></span>${labelMarkup}</span>
+        <span class="footer-year">© 2026</span>
+      </div>
+      <nav class="footer-links" aria-label="Footer">
+        <a href="/terms">Terms</a>
+        <a href="/privacy">Privacy</a>
+        <a href="mailto:hello@duitok.com">hello@duitok.com</a>
+      </nav>
+    </footer>`;
 }
 
 function currentAccountUser() {
