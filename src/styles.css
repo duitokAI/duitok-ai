@@ -2227,6 +2227,167 @@ textarea {
   margin-top: 28px;
 }
 
+.original-video-card {
+  padding: 34px 30px 28px;
+  border: 1px solid rgba(255, 213, 57, 0.28);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(255, 213, 57, 0.12), transparent 35%),
+    linear-gradient(135deg, #15140d, #0a0a09 58%, #050505);
+  color: #f6f1df;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 213, 57, 0.08),
+    0 22px 54px rgba(0, 0, 0, 0.22);
+}
+
+.original-video-head h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 14px;
+  color: #fffdf5;
+  font-size: 28px;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.original-video-head p {
+  margin: 0 0 28px;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 18px;
+  line-height: 1.45;
+}
+
+.original-field-label,
+.original-prompt-field span,
+.original-settings-grid span {
+  display: block;
+  margin: 0 0 14px;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 14px;
+  font-weight: 950;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.original-provider-grid,
+.original-mode-grid,
+.original-settings-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.original-provider-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 30px;
+}
+
+.original-mode-grid {
+  grid-template-columns: 1.05fr 1fr 1.05fr;
+  margin-bottom: 30px;
+}
+
+.original-provider-grid button,
+.original-mode-grid button {
+  min-height: 58px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.68);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 18px;
+  font-weight: 950;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    background 0.18s ease;
+}
+
+.original-provider-grid button:hover,
+.original-mode-grid button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 213, 57, 0.34);
+}
+
+.original-provider-grid button.active,
+.original-mode-grid button.active {
+  border-color: transparent;
+  background: linear-gradient(135deg, #ffdf46, #eda034);
+  color: #12110b;
+  box-shadow: 0 14px 30px rgba(255, 199, 45, 0.22);
+}
+
+.original-prompt-field {
+  display: block;
+  margin-bottom: 30px;
+}
+
+.original-prompt-field textarea {
+  width: 100%;
+  min-height: 180px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 12px;
+  background: #050505;
+  color: #fffdf5;
+  resize: vertical;
+}
+
+.original-prompt-field textarea::placeholder {
+  color: rgba(255, 255, 255, 0.43);
+}
+
+.original-settings-grid {
+  grid-template-columns: 1fr 1fr;
+  margin-bottom: 24px;
+}
+
+.original-settings-grid label,
+.original-settings-grid div {
+  display: grid;
+  gap: 10px;
+}
+
+.original-settings-grid select,
+.original-settings-grid b {
+  display: flex;
+  align-items: center;
+  min-height: 58px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.58);
+  color: #fffdf5;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.original-settings-grid select {
+  width: 100%;
+  padding: 0 18px;
+}
+
+.original-settings-grid b {
+  justify-content: center;
+  border-color: rgba(255, 213, 57, 0.24);
+  color: #ffd539;
+}
+
+.original-generate-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 66px;
+  border: 0;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #ffdf46, #eda034);
+  color: #12110b;
+  font-size: 22px;
+  font-weight: 950;
+  cursor: pointer;
+  box-shadow: 0 16px 34px rgba(255, 199, 45, 0.2);
+}
+
 @media (max-width: 760px) {
   .virtualize-card {
     padding: 24px 18px 28px;
@@ -2240,7 +2401,10 @@ textarea {
   .ugc-prompt-toolbar,
   .auto-source-tabs,
   .auto-provider-grid,
-  .auto-plan-grid {
+  .auto-plan-grid,
+  .original-provider-grid,
+  .original-mode-grid,
+  .original-settings-grid {
     grid-template-columns: 1fr;
   }
 

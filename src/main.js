@@ -2213,7 +2213,51 @@ function autoPlanButton(value, note, active, isNew = false) {
 }
 
 function originalPanel(p) {
-  return `${upload("Original Video", "Upload original video", "MP4 / MOV - used for caption and remake", "film", "original")}${prompt("original.brief", p.original.brief, "Rewrite brief.", "analyze-original", "Analyze Video")}${results(p, "original")}`;
+  const provider = p.original.provider || "Veo 3.1";
+  const imageMode = p.original.imageMode || "Text only";
+  const aspectRatio = p.original.aspectRatio || "9:16 (Vertical)";
+  return `
+    <section class="original-video-card">
+      <div class="original-video-head">
+        <h2>🎞️ Original Video</h2>
+        <p>Power-user raw video generator. Pick a provider — prompt sent 100% verbatim, no auto-locks or templates. Cascade fallback + history + deduct-on-success all work like other tabs.</p>
+      </div>
+      <p class="original-field-label">Provider</p>
+      <div class="original-provider-grid">
+        ${originalChoiceButton("original.provider", "Veo 3.1", "🎬 Veo 3.1", provider)}
+        ${originalChoiceButton("original.provider", "Grok", "⚡ Grok", provider)}
+        ${originalChoiceButton("original.provider", "Sora 2", "✨ Sora 2", provider)}
+        ${originalChoiceButton("original.provider", "GeminiOmni", "🔷 GeminiOmni", provider)}
+      </div>
+      <p class="original-field-label">Image Mode</p>
+      <div class="original-mode-grid">
+        ${originalChoiceButton("original.imageMode", "Text only", "📝 Text only", imageMode)}
+        ${originalChoiceButton("original.imageMode", "Start frame", "🖼️ Start frame", imageMode)}
+        ${originalChoiceButton("original.imageMode", "References", "🧩 References", imageMode)}
+      </div>
+      <label class="original-prompt-field">
+        <span>Prompt (sent verbatim — no auto-locks)</span>
+        <textarea data-field="original.brief" placeholder="Describe the video — characters, action, mood, camera style, dialogue if any...">${esc(p.original.brief || "")}</textarea>
+      </label>
+      <div class="original-settings-grid">
+        <label>
+          <span>Aspect Ratio</span>
+          <select data-field="original.aspectRatio">
+            ${["9:16 (Vertical)", "1:1 (Square)", "16:9 (Landscape)"].map((item) => `<option ${item === aspectRatio ? "selected" : ""}>${item}</option>`).join("")}
+          </select>
+        </label>
+        <div>
+          <span>Duration</span>
+          <b>Fixed 8s</b>
+        </div>
+      </div>
+      <button class="original-generate-button" data-action="analyze-original">🎬 Generate ${esc(provider.split(" ")[0])} Video · ~RM0.40</button>
+    </section>
+    ${results(p, "original")}`;
+}
+
+function originalChoiceButton(field, value, label, active) {
+  return `<button class="${active === value ? "active" : ""}" type="button" data-field-set="${field}" data-value="${esc(value)}">${label}</button>`;
 }
 
 function clonePanel(p) {
