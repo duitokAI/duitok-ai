@@ -4491,7 +4491,7 @@ label {
 }
 
 .sop-modal {
-  width: min(1760px, 86vw);
+  width: min(1540px, 75vw);
   height: min(90vh, 980px);
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
