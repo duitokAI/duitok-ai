@@ -640,6 +640,79 @@ button {
   margin-top: 24px;
 }
 
+.pricing-breakdown {
+  display: grid;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.pricing-breakdown article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 54px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 12px 15px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.pricing-breakdown span {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.pricing-breakdown b {
+  color: #fff;
+  font-size: 16px;
+  text-align: right;
+}
+
+.pricing-steps {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.pricing-steps article {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 6px 12px;
+  align-items: start;
+  border: 1px solid rgba(255, 78, 120, 0.16);
+  border-radius: 14px;
+  padding: 14px;
+  background:
+    linear-gradient(180deg, rgba(255, 78, 120, 0.07), rgba(255, 255, 255, 0.03)),
+    rgba(255, 255, 255, 0.03);
+}
+
+.pricing-steps article b {
+  grid-row: span 2;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--pink), var(--coral));
+  color: #fff;
+  font-size: 14px;
+}
+
+.pricing-steps span {
+  color: #fff;
+  font-weight: 950;
+}
+
+.pricing-steps p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.64) !important;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
 .lead-form {
   display: grid;
   gap: 16px;
@@ -4573,12 +4646,14 @@ label {
 
 /* Conversion PRD landing sections. */
 .proof-strip,
+.test-volume-section,
 .output-preview-section,
 .workflow-section,
 .control-section,
 .system-section,
 .case-section,
-.scenario-section {
+.scenario-section,
+.journey-section {
   width: min(1180px, 100%);
   margin: 0 auto;
 }
@@ -4643,7 +4718,9 @@ label {
 .control-section,
 .system-section,
 .case-section,
-.scenario-section {
+.scenario-section,
+.test-volume-section,
+.journey-section {
   display: grid;
   grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
   align-items: start;
@@ -4657,12 +4734,18 @@ label {
 .control-section h2,
 .system-section h2,
 .case-section h2,
-.scenario-section h2 {
+.scenario-section h2,
+.test-volume-section h2,
+.journey-section h2 {
   max-width: 780px;
   margin-bottom: 18px;
   color: var(--purple);
-  font-size: clamp(36px, 4vw, 60px);
-  line-height: 0.98;
+  font-size: clamp(34px, 3.55vw, 56px);
+  line-height: 1.04;
+  letter-spacing: 0;
+  overflow-wrap: normal;
+  word-break: keep-all;
+  text-wrap: balance;
 }
 
 .output-preview-section p,
@@ -4670,7 +4753,9 @@ label {
 .control-section p,
 .system-section p,
 .case-section p,
-.scenario-section p {
+.scenario-section p,
+.test-volume-section p,
+.journey-section p {
   color: #77657d;
   line-height: 1.55;
 }
@@ -4686,11 +4771,96 @@ label {
 .control-grid article,
 .system-grid article,
 .case-card,
-.scenario-grid article {
+.scenario-grid article,
+.volume-formula article,
+.journey-grid article {
   border: 1px solid rgba(93, 8, 108, 0.12);
   border-radius: 14px;
   background: white;
   box-shadow: 0 16px 42px rgba(76, 0, 87, 0.08);
+}
+
+.test-volume-section {
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  padding-top: 36px;
+}
+
+.volume-formula {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.volume-formula article {
+  min-height: 220px;
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: 20px;
+}
+
+.volume-formula b {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--pink), var(--coral));
+  color: #fff;
+  font-size: 15px;
+}
+
+.volume-formula span {
+  color: var(--purple);
+  font-size: 20px;
+  font-weight: 950;
+  line-height: 1.12;
+}
+
+.volume-formula p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.journey-section {
+  grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
+}
+
+.journey-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  gap: 12px;
+}
+
+.journey-grid article {
+  min-height: 184px;
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: 20px;
+}
+
+.journey-grid span {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: rgba(255, 78, 120, 0.12);
+  color: var(--pink);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.journey-grid h3 {
+  margin: 0;
+  color: var(--purple);
+  font-size: 20px;
+  line-height: 1.1;
+}
+
+.journey-grid p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
 }
 
 .system-grid {
@@ -6063,6 +6233,7 @@ label {
 
 .public-shell .proof-strip,
 .public-shell .split-section,
+.public-shell .test-volume-section,
 .public-shell .output-preview-section,
 .public-shell .workflow-section,
 .public-shell .system-section,
@@ -6071,6 +6242,7 @@ label {
 .public-shell .comparison-section,
 .public-shell .case-section,
 .public-shell .scenario-section,
+.public-shell .journey-section,
 .public-shell .pricing-section,
 .public-shell .signup-section,
 .public-shell .faq-section,
@@ -6509,6 +6681,22 @@ label {
   height: 100%;
   object-fit: contain;
   object-position: center;
+  opacity: 1;
+  transition: opacity 220ms ease;
+}
+
+.agent-life-render-sleep {
+  opacity: 0;
+}
+
+.agent-life-card[data-agent-phase="idle"] .agent-life-render-active,
+.agent-life-card[data-agent-phase="wake"] .agent-life-render-active {
+  opacity: 0;
+}
+
+.agent-life-card[data-agent-phase="idle"] .agent-life-render-sleep,
+.agent-life-card[data-agent-phase="wake"] .agent-life-render-sleep {
+  opacity: 1;
 }
 
 .agent-life-route {
@@ -6536,9 +6724,10 @@ label {
 }
 
 .agent-sprite-work {
-  width: 12.8%;
-  left: 24.2%;
-  bottom: 25.2%;
+  width: 17.2%;
+  left: 22.8%;
+  bottom: 20.1%;
+  transform-origin: 48% 78%;
 }
 
 .agent-sprite-chat {
@@ -6546,13 +6735,6 @@ label {
   left: 43.2%;
   bottom: 25.5%;
   transform-origin: 50% 78%;
-}
-
-.agent-sprite-sleep {
-  width: 16.8%;
-  left: 66.1%;
-  bottom: 26.4%;
-  transform-origin: 54% 68%;
 }
 
 .agent-life-bubble {
@@ -6586,18 +6768,11 @@ label {
   box-shadow: 0 0 0 5px rgba(255, 79, 120, 0.12);
 }
 
-.agent-life-card[data-agent-phase="idle"][data-idle-activity="sleep"] .agent-sprite-sleep,
-.agent-life-card[data-agent-phase="wake"] .agent-sprite-sleep,
 .agent-life-card[data-agent-phase="chatting"] .agent-sprite-chat,
 .agent-life-card[data-agent-phase="working"] .agent-sprite-work,
 .agent-life-card[data-agent-phase="done"][data-agent-mode="chat"] .agent-sprite-chat,
 .agent-life-card[data-agent-phase="done"]:not([data-agent-mode="chat"]) .agent-sprite-work {
   opacity: 1;
-}
-
-.agent-life-card[data-agent-phase="idle"][data-idle-activity="sleep"] .agent-sprite-sleep,
-.agent-life-card[data-agent-phase="wake"] .agent-sprite-sleep {
-  animation: agentSleepBreath 3.2s ease-in-out infinite;
 }
 
 .agent-life-card[data-agent-phase="walking"] .agent-sprite-chat {
@@ -8325,6 +8500,220 @@ label {
   box-shadow: none;
 }
 
+.canvas-card.slim:has(.usage-experience) {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.usage-experience {
+  display: grid;
+  gap: 26px;
+}
+
+.usage-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(220px, 1fr));
+  gap: 18px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.usage-summary-card {
+  min-height: 156px;
+  display: grid;
+  align-content: center;
+  gap: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 22px;
+  padding: 28px 30px;
+  background:
+    radial-gradient(circle at 88% 0, rgba(255, 78, 120, 0.1), transparent 38%),
+    #151515;
+  box-shadow: 0 20px 52px rgba(0, 0, 0, 0.18);
+}
+
+.usage-summary-card span,
+.usage-filter-row > span,
+.usage-ledger-head {
+  color: rgba(255, 255, 255, 0.48);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  font-weight: 950;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.usage-summary-card b {
+  color: #fff;
+  font-size: clamp(40px, 4vw, 58px);
+  line-height: 0.92;
+}
+
+.usage-summary-card small {
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 18px;
+}
+
+.usage-summary-card.spend b {
+  color: #8e3cff;
+}
+
+.usage-summary-card.image b {
+  color: #356dff;
+}
+
+.usage-summary-card.video b {
+  color: var(--pink);
+}
+
+.usage-summary-card.auto b {
+  color: #f39a15;
+}
+
+.usage-ledger-panel {
+  display: grid;
+  gap: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 24px;
+  padding: clamp(24px, 4vw, 42px);
+  background: #151515;
+  color: #fff;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
+}
+
+.usage-filter-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 18px;
+  align-items: center;
+}
+
+.usage-filter-row > span,
+.usage-filter-row small {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.usage-filter-row small {
+  color: rgba(255, 255, 255, 0.42);
+  font-weight: 800;
+}
+
+.usage-filter-row div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.usage-filter-row button {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 0 14px;
+  background: rgba(255, 255, 255, 0.025);
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 900;
+}
+
+.usage-filter-row button.active {
+  border-color: rgba(211, 255, 77, 0.7);
+  background: #d7ff4d;
+  color: #080808;
+  box-shadow: 0 14px 30px rgba(211, 255, 77, 0.24);
+}
+
+.usage-ledger-table {
+  overflow-x: auto;
+}
+
+.usage-ledger-head,
+.usage-ledger-table article {
+  min-width: 1020px;
+  display: grid;
+  grid-template-columns: minmax(180px, 0.95fr) minmax(360px, 1.8fr) 140px 190px 120px 120px;
+  gap: 18px;
+  align-items: center;
+}
+
+.usage-ledger-head {
+  min-height: 52px;
+  padding: 0 28px;
+  background: rgba(211, 255, 77, 0.05);
+}
+
+.usage-ledger-table article {
+  min-height: 84px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 18px 28px;
+}
+
+.usage-ledger-table strong,
+.usage-ledger-table span {
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 16px;
+  font-weight: 950;
+}
+
+.usage-ledger-table p {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.56);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.usage-ledger-table em {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid rgba(64, 211, 110, 0.35);
+  border-radius: 8px;
+  padding: 7px 10px;
+  color: #40d36e;
+  font-style: normal;
+  font-weight: 950;
+}
+
+.usage-ledger-table em.video,
+.usage-ledger-table em.auto,
+.usage-ledger-table em.clone,
+.usage-ledger-table em.post {
+  border-color: rgba(64, 211, 110, 0.35);
+  color: #40d36e;
+}
+
+.usage-ledger-table em.credit {
+  border-color: rgba(211, 255, 77, 0.45);
+  color: #d7ff4d;
+}
+
+.usage-ledger-table time {
+  color: rgba(255, 255, 255, 0.5);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 14px;
+}
+
+.usage-ledger-table b {
+  color: #fff;
+  font-size: 16px;
+}
+
+.usage-ledger-table b.debit {
+  color: #ff5f6f;
+}
+
+.usage-ledger-table b.credit {
+  color: #40d36e;
+}
+
 .topup-experience {
   display: grid;
   gap: 24px;
@@ -9402,14 +9791,24 @@ label {
 }
 
 .public-shell .video-scene-hero .eyebrow {
-  max-width: min(640px, 100%);
+  max-width: min(520px, 100%);
+  min-height: 42px;
+  padding: 11px 18px;
+  border-radius: 999px;
+  font-size: clamp(12px, 0.88vw, 14px);
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+  text-transform: none;
+  white-space: normal;
   animation: heroCopyIn 0.62s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 .public-shell .video-scene-hero h1.hero-headline {
-  max-width: 590px;
-  font-size: clamp(40px, 3.25vw, 58px);
-  line-height: 0.98;
+  max-width: 620px;
+  font-size: clamp(42px, 3.4vw, 60px);
+  line-height: 1.02;
+  word-break: keep-all;
+  text-wrap: balance;
   animation: heroCopyIn 0.72s cubic-bezier(0.2, 0.8, 0.2, 1) 0.08s both;
 }
 
@@ -9532,12 +9931,23 @@ label {
   .system-grid,
   .scenario-grid,
   .proof-strip,
-  .workflow-steps {
+  .workflow-steps,
+  .volume-formula,
+  .journey-grid {
     grid-template-columns: 1fr;
   }
 
   .section-cta {
     width: 100%;
+  }
+
+  .pricing-breakdown article {
+    display: grid;
+    gap: 6px;
+  }
+
+  .pricing-breakdown b {
+    text-align: left;
   }
 
   .case-card {
@@ -9563,10 +9973,12 @@ label {
 }
 
 .public-shell .video-scene-hero h1.hero-headline {
-  max-width: 680px;
-  font-size: clamp(44px, 3.7vw, 64px);
-  line-height: 1.03;
+  max-width: 620px;
+  font-size: clamp(42px, 3.4vw, 60px);
+  line-height: 1.02;
   letter-spacing: 0;
+  word-break: keep-all;
+  text-wrap: balance;
 }
 
 .public-shell .video-scene-hero .public-copy {
@@ -9594,6 +10006,7 @@ label {
 }
 
 .public-shell .split-section h2,
+.public-shell .test-volume-section h2,
 .public-shell .output-preview-section h2,
 .public-shell .workflow-section h2,
 .public-shell .system-section h2,
@@ -9602,6 +10015,7 @@ label {
 .public-shell .comparison-section h2,
 .public-shell .case-section h2,
 .public-shell .scenario-section h2,
+.public-shell .journey-section h2,
 .public-shell .pricing-section h2,
 .public-shell .control-section h2,
 .public-shell .signup-section h2,
@@ -9614,6 +10028,7 @@ label {
 .public-shell .output-preview-grid h3,
 .public-shell .workflow-steps h3,
 .public-shell .system-grid h3,
+.public-shell .journey-grid h3,
 .public-shell .price-card h3,
 .public-shell .case-card h3,
 .public-shell .faq-section summary {
@@ -9621,7 +10036,33 @@ label {
   text-transform: none;
 }
 
+.public-shell .split-section h2,
+.public-shell .test-volume-section h2,
+.public-shell .output-preview-section h2,
+.public-shell .workflow-section h2,
+.public-shell .system-section h2,
+.public-shell .feature-section h2,
+.public-shell .demo-section h2,
+.public-shell .comparison-section h2,
+.public-shell .case-section h2,
+.public-shell .scenario-section h2,
+.public-shell .journey-section h2,
+.public-shell .pricing-section h2,
+.public-shell .control-section h2,
+.public-shell .signup-section h2,
+.public-shell .faq-section h2,
+.public-shell .dream-section h2 {
+  max-width: 760px;
+  font-size: clamp(34px, 3.55vw, 56px) !important;
+  line-height: 1.05 !important;
+  letter-spacing: 0;
+  overflow-wrap: normal;
+  word-break: keep-all;
+  text-wrap: balance;
+}
+
 .public-shell .split-section p,
+.public-shell .test-volume-section p,
 .public-shell .output-preview-section p,
 .public-shell .workflow-section p,
 .public-shell .system-section p,
@@ -9630,6 +10071,7 @@ label {
 .public-shell .comparison-section p,
 .public-shell .case-section p,
 .public-shell .scenario-section p,
+.public-shell .journey-section p,
 .public-shell .pricing-section p,
 .public-shell .control-section p,
 .public-shell .signup-section p,
@@ -9642,6 +10084,7 @@ label {
 .public-shell .output-preview-grid p,
 .public-shell .workflow-steps p,
 .public-shell .system-grid p,
+.public-shell .journey-grid p,
 .public-shell .price-card p,
 .public-shell .case-card p {
   color: rgba(255, 255, 255, 0.7) !important;
@@ -9650,12 +10093,14 @@ label {
 .public-shell .pain-list article,
 .public-shell .output-preview-grid article,
 .public-shell .workflow-steps article,
+.public-shell .volume-formula article,
 .public-shell .system-grid article,
 .public-shell .feature-mosaic article,
 .public-shell .compare-grid article,
 .public-shell .quote-grid article,
 .public-shell .case-card,
 .public-shell .scenario-grid article,
+.public-shell .journey-grid article,
 .public-shell .price-card,
 .public-shell .lead-form,
 .public-shell .faq-section details,
@@ -9701,6 +10146,7 @@ label {
 
 .public-shell .feature-mosaic span,
 .public-shell .output-preview-grid span,
+.public-shell .journey-grid span,
 .public-shell .case-card > span,
 .public-shell .price-card > span {
   background: rgba(255, 78, 120, 0.14) !important;
@@ -9708,6 +10154,7 @@ label {
 }
 
 .public-shell .scenario-grid article span,
+.public-shell .volume-formula span,
 .public-shell .control-grid p,
 .public-shell .proof-strip article b {
   color: #fff !important;
@@ -9768,6 +10215,28 @@ label {
   text-transform: none;
 }
 
+@media (max-width: 680px) {
+  .public-shell .split-section h2,
+  .public-shell .test-volume-section h2,
+  .public-shell .output-preview-section h2,
+  .public-shell .workflow-section h2,
+  .public-shell .system-section h2,
+  .public-shell .feature-section h2,
+  .public-shell .demo-section h2,
+  .public-shell .comparison-section h2,
+  .public-shell .case-section h2,
+  .public-shell .scenario-section h2,
+  .public-shell .journey-section h2,
+  .public-shell .pricing-section h2,
+  .public-shell .control-section h2,
+  .public-shell .signup-section h2,
+  .public-shell .faq-section h2,
+  .public-shell .dream-section h2 {
+    font-size: clamp(34px, 10vw, 44px) !important;
+    line-height: 1.08 !important;
+  }
+}
+
 @media (max-width: 700px) {
   .public-shell .public-nav .brand-lockup {
     gap: 10px;
@@ -9777,5 +10246,442 @@ label {
     min-height: 24px;
     padding-left: 10px;
     font-size: 12px;
+  }
+}
+
+/* Duitok bright brand theme: aligned to mascot wordmark artwork. */
+:root {
+  --brand-white: #ffffff;
+  --brand-blush: #fff7fb;
+  --brand-lilac: #f6ecff;
+  --brand-peach: #fff0ea;
+  --brand-purple: #4b005e;
+  --brand-purple-2: #65007d;
+  --brand-purple-3: #7b1598;
+  --brand-pink: #ff3f6e;
+  --brand-coral: #ff7a5c;
+  --brand-yellow: #ffd21a;
+  --brand-text: #3b1943;
+  --brand-muted: #7b687f;
+  --brand-line: rgba(75, 0, 94, 0.11);
+  --brand-card-shadow: 0 20px 54px rgba(75, 0, 94, 0.09);
+}
+
+.public-shell {
+  background:
+    radial-gradient(circle at 92% 2%, rgba(255, 122, 92, 0.26), transparent 14%),
+    radial-gradient(circle at 5% 18%, rgba(178, 92, 255, 0.12), transparent 19%),
+    linear-gradient(180deg, #ffffff 0%, #fff7fb 34%, #f8f1ff 63%, #ffffff 100%) !important;
+  color: var(--brand-text) !important;
+}
+
+.public-shell::before {
+  content: "";
+  position: fixed;
+  inset: auto 0 0;
+  height: 170px;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 160% at 18% 100%, rgba(178, 92, 255, 0.28), transparent 62%),
+    radial-gradient(60% 180% at 86% 100%, rgba(255, 122, 92, 0.26), transparent 60%);
+  z-index: 0;
+}
+
+.public-shell > * {
+  position: relative;
+  z-index: 1;
+}
+
+.public-shell .promo-bar {
+  color: #fff !important;
+  background: linear-gradient(90deg, var(--brand-pink), var(--brand-coral)) !important;
+  box-shadow: 0 18px 38px rgba(255, 63, 110, 0.2);
+}
+
+.public-shell .public-nav {
+  border-bottom-color: rgba(75, 0, 94, 0.08) !important;
+  color: var(--brand-purple) !important;
+}
+
+.public-shell .public-nav .brand-lockup strong {
+  border-left-color: rgba(75, 0, 94, 0.12) !important;
+  color: rgba(75, 0, 94, 0.78) !important;
+}
+
+.public-shell .public-nav .brand-wordmark {
+  color: var(--brand-purple) !important;
+  text-shadow: none !important;
+}
+
+.public-shell .public-nav .brand-wordmark span:last-child {
+  color: var(--brand-pink) !important;
+}
+
+.public-shell .public-links a,
+.public-shell .lang-switch,
+.public-shell .public-nav .dark-button {
+  color: var(--brand-purple) !important;
+}
+
+.public-shell .public-nav .dark-button,
+.public-shell .lang-switch {
+  border-color: rgba(75, 0, 94, 0.14) !important;
+  background: rgba(255, 255, 255, 0.78) !important;
+  box-shadow: 0 12px 28px rgba(75, 0, 94, 0.07) !important;
+}
+
+.public-shell .video-scene-hero {
+  min-height: min(720px, calc(100vh - 132px));
+  border-color: rgba(75, 0, 94, 0.08) !important;
+  background:
+    radial-gradient(circle at 92% 3%, rgba(255, 122, 92, 0.16), transparent 18%),
+    radial-gradient(circle at 4% 100%, rgba(178, 92, 255, 0.22), transparent 24%),
+    linear-gradient(180deg, #ffffff 0%, #fff8fb 58%, #f8edff 100%) !important;
+  box-shadow: 0 26px 80px rgba(75, 0, 94, 0.12) !important;
+}
+
+.public-shell .video-scene-hero::after {
+  content: "";
+  position: absolute;
+  left: -4%;
+  right: -4%;
+  bottom: -1px;
+  height: 120px;
+  pointer-events: none;
+  background:
+    radial-gradient(70% 160% at 22% 100%, rgba(178, 92, 255, 0.24), transparent 58%),
+    radial-gradient(76% 180% at 88% 108%, rgba(255, 122, 92, 0.28), transparent 60%);
+  opacity: 0.9;
+  z-index: 1;
+}
+
+.public-shell .video-scene-bg {
+  opacity: 0.82;
+  filter: saturate(1.08) brightness(1.08);
+  mix-blend-mode: multiply;
+}
+
+.public-shell .video-scene-vignette {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 250, 253, 0.94) 36%, rgba(255, 250, 253, 0.62) 58%, rgba(255, 250, 253, 0.16) 100%),
+    linear-gradient(0deg, rgba(255, 247, 251, 0.92) 0%, rgba(255, 255, 255, 0.05) 44%, rgba(255, 255, 255, 0.5) 100%) !important;
+}
+
+.public-shell .video-scene-grid {
+  opacity: 0.34;
+  background-image:
+    linear-gradient(rgba(75, 0, 94, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(75, 0, 94, 0.08) 1px, transparent 1px) !important;
+}
+
+.public-shell .video-scene-hero .eyebrow {
+  border-color: rgba(255, 63, 110, 0.16) !important;
+  background: #fff0f5 !important;
+  color: var(--brand-pink) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.public-shell .video-scene-hero h1.hero-headline {
+  color: var(--brand-purple) !important;
+  text-shadow: none !important;
+}
+
+.public-shell .video-scene-hero .hero-headline mark {
+  color: var(--brand-pink) !important;
+  text-shadow: none !important;
+}
+
+.public-shell .video-scene-hero .public-copy {
+  color: #5f4467 !important;
+  font-weight: 780;
+  text-shadow: none !important;
+  opacity: 1 !important;
+  filter: none !important;
+  transform: none !important;
+  animation: none !important;
+}
+
+.public-shell .video-scene-hero .public-copy::first-line {
+  color: #5f4467 !important;
+}
+
+.public-shell .video-scene-hero .public-copy strong,
+.public-shell .video-scene-hero .public-copy b {
+  color: var(--brand-purple) !important;
+  text-shadow: none !important;
+}
+
+.public-shell .gold-button {
+  border-color: rgba(255, 210, 26, 0.72) !important;
+  background: linear-gradient(180deg, #ffe064, var(--brand-yellow)) !important;
+  color: #2a0034 !important;
+  box-shadow: 0 20px 42px rgba(255, 210, 26, 0.28) !important;
+}
+
+.public-shell .demo-button,
+.public-shell .dark-button {
+  border-color: rgba(75, 0, 94, 0.14) !important;
+  background: rgba(255, 255, 255, 0.82) !important;
+  color: var(--brand-purple) !important;
+  box-shadow: 0 18px 44px rgba(75, 0, 94, 0.08) !important;
+}
+
+.public-shell .split-section,
+.public-shell .test-volume-section,
+.public-shell .output-preview-section,
+.public-shell .workflow-section,
+.public-shell .system-section,
+.public-shell .feature-section,
+.public-shell .demo-section,
+.public-shell .comparison-section,
+.public-shell .case-section,
+.public-shell .scenario-section,
+.public-shell .journey-section,
+.public-shell .pricing-section,
+.public-shell .control-section,
+.public-shell .signup-section,
+.public-shell .faq-section,
+.public-shell .dream-section {
+  border-top-color: rgba(75, 0, 94, 0.08) !important;
+  color: var(--brand-text) !important;
+}
+
+.public-shell .test-volume-section,
+.public-shell .workflow-section,
+.public-shell .journey-section,
+.public-shell .faq-section {
+  background:
+    linear-gradient(135deg, rgba(255, 247, 251, 0.78), rgba(246, 236, 255, 0.68)) !important;
+  border-radius: 28px;
+  padding-inline: clamp(18px, 3vw, 36px);
+}
+
+.public-shell .system-section,
+.public-shell .demo-section,
+.public-shell .scenario-section {
+  background:
+    linear-gradient(135deg, rgba(246, 236, 255, 0.72), rgba(255, 255, 255, 0.8)) !important;
+  border-radius: 28px;
+  padding-inline: clamp(18px, 3vw, 36px);
+}
+
+.public-shell .split-section h2,
+.public-shell .test-volume-section h2,
+.public-shell .output-preview-section h2,
+.public-shell .workflow-section h2,
+.public-shell .system-section h2,
+.public-shell .feature-section h2,
+.public-shell .demo-section h2,
+.public-shell .comparison-section h2,
+.public-shell .case-section h2,
+.public-shell .scenario-section h2,
+.public-shell .journey-section h2,
+.public-shell .pricing-section h2,
+.public-shell .control-section h2,
+.public-shell .signup-section h2,
+.public-shell .faq-section h2,
+.public-shell .dream-section h2,
+.public-shell .public-grid h3,
+.public-shell .pain-list h3,
+.public-shell .feature-mosaic h3,
+.public-shell .compare-grid h3,
+.public-shell .output-preview-grid h3,
+.public-shell .workflow-steps h3,
+.public-shell .system-grid h3,
+.public-shell .journey-grid h3,
+.public-shell .case-card h3,
+.public-shell .faq-section summary {
+  color: var(--brand-purple) !important;
+}
+
+.public-shell .split-section p,
+.public-shell .test-volume-section p,
+.public-shell .output-preview-section p,
+.public-shell .workflow-section p,
+.public-shell .system-section p,
+.public-shell .feature-section p,
+.public-shell .demo-section p,
+.public-shell .comparison-section p,
+.public-shell .case-section p,
+.public-shell .scenario-section p,
+.public-shell .pricing-section p,
+.public-shell .control-section p,
+.public-shell .signup-section p,
+.public-shell .faq-section p,
+.public-shell .dream-section p,
+.public-shell .public-grid p,
+.public-shell .pain-list p,
+.public-shell .feature-mosaic p,
+.public-shell .compare-grid p,
+.public-shell .output-preview-grid p,
+.public-shell .workflow-steps p,
+.public-shell .system-grid p,
+.public-shell .journey-grid p,
+.public-shell .case-card p {
+  color: var(--brand-muted) !important;
+}
+
+.public-shell .pain-list article,
+.public-shell .output-preview-grid article,
+.public-shell .workflow-steps article,
+.public-shell .volume-formula article,
+.public-shell .system-grid article,
+.public-shell .feature-mosaic article,
+.public-shell .compare-grid article,
+.public-shell .quote-grid article,
+.public-shell .case-card,
+.public-shell .scenario-grid article,
+.public-shell .journey-grid article,
+.public-shell .lead-form,
+.public-shell .faq-section details,
+.public-shell .demo-reel article,
+.public-shell .control-grid article,
+.public-shell .proof-strip article {
+  border-color: var(--brand-line) !important;
+  background: rgba(255, 255, 255, 0.86) !important;
+  color: var(--brand-text) !important;
+  box-shadow: var(--brand-card-shadow) !important;
+}
+
+.public-shell .feature-mosaic article:nth-child(1),
+.public-shell .feature-mosaic article:nth-child(2),
+.public-shell .feature-mosaic article:nth-child(3),
+.public-shell .feature-mosaic article:nth-child(4),
+.public-shell .feature-mosaic article:nth-child(5) {
+  background: rgba(255, 255, 255, 0.88) !important;
+}
+
+.public-shell .eyebrow,
+.public-shell .feature-mosaic span,
+.public-shell .output-preview-grid span,
+.public-shell .journey-grid span,
+.public-shell .case-card > span {
+  border-color: rgba(255, 63, 110, 0.12) !important;
+  background: #fff0f5 !important;
+  color: var(--brand-pink) !important;
+}
+
+.public-shell .proof-strip svg,
+.public-shell .split-section .pain-list svg,
+.public-shell .workflow-steps svg,
+.public-shell .control-grid svg,
+.public-shell .system-grid svg,
+.public-shell .scenario-grid svg,
+.public-shell .volume-formula b {
+  color: var(--brand-pink) !important;
+}
+
+.public-shell .volume-formula b,
+.public-shell .pricing-steps article b {
+  background: linear-gradient(135deg, var(--brand-pink), var(--brand-coral)) !important;
+  color: #fff !important;
+}
+
+.public-shell .scenario-grid article span,
+.public-shell .volume-formula span,
+.public-shell .proof-strip article b,
+.public-shell .compare-grid ul,
+.public-shell .case-card ul {
+  color: var(--brand-purple) !important;
+}
+
+.public-shell .case-section {
+  border-radius: 30px;
+  padding-inline: clamp(18px, 3vw, 36px);
+  background: linear-gradient(135deg, #fff0f5, #ffe9df 58%, #f8edff) !important;
+}
+
+.public-shell .case-card b,
+.public-shell .quote-grid article p {
+  color: var(--brand-pink) !important;
+}
+
+.public-shell .case-section .risk-note {
+  border-color: rgba(75, 0, 94, 0.1) !important;
+  background: rgba(255, 255, 255, 0.66) !important;
+  color: var(--brand-muted) !important;
+}
+
+.public-shell .pricing-section {
+  border-radius: 30px;
+  padding-inline: clamp(18px, 3vw, 36px);
+  background: linear-gradient(135deg, #fff7fb, #f6ecff) !important;
+}
+
+.public-shell .price-card {
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  background:
+    radial-gradient(circle at 84% 0, rgba(255, 63, 110, 0.24), transparent 36%),
+    linear-gradient(145deg, #4b005e, #260032 72%) !important;
+  color: #fff !important;
+  box-shadow: 0 28px 80px rgba(75, 0, 94, 0.24) !important;
+}
+
+.public-shell .price-card h3,
+.public-shell .price-card p,
+.public-shell .price-card ul,
+.public-shell .price-card li,
+.public-shell .price-card small {
+  color: rgba(255, 255, 255, 0.84) !important;
+}
+
+.public-shell .price-card > span,
+.public-shell .included-credit-banner {
+  border-color: rgba(255, 210, 26, 0.3) !important;
+  background: rgba(255, 210, 26, 0.16) !important;
+  color: #ffe58b !important;
+}
+
+.public-shell .price b {
+  color: var(--brand-pink) !important;
+}
+
+.public-shell .usage-price-grid article {
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  background: rgba(255, 255, 255, 0.09) !important;
+}
+
+.public-shell .pricing-breakdown article,
+.public-shell .pricing-steps article {
+  border-color: rgba(75, 0, 94, 0.1) !important;
+  background: rgba(255, 255, 255, 0.66) !important;
+}
+
+.public-shell .pricing-breakdown span,
+.public-shell .pricing-steps p {
+  color: var(--brand-muted) !important;
+}
+
+.public-shell .pricing-breakdown b,
+.public-shell .pricing-steps span {
+  color: var(--brand-purple) !important;
+}
+
+.public-shell .lead-form input {
+  border-color: rgba(75, 0, 94, 0.12) !important;
+  background: #fff !important;
+  color: var(--brand-purple) !important;
+}
+
+.public-shell .lead-form label {
+  color: var(--brand-purple) !important;
+}
+
+.public-shell .public-footer,
+.public-shell .public-footer a {
+  color: rgba(75, 0, 94, 0.72) !important;
+}
+
+@media (max-width: 840px) {
+  .public-shell .video-scene-hero {
+    background:
+      radial-gradient(circle at 85% 35%, rgba(255, 122, 92, 0.14), transparent 28%),
+      linear-gradient(180deg, #ffffff 0%, #fff7fb 58%, #f8edff 100%) !important;
+  }
+
+  .public-shell .video-scene-vignette {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 250, 253, 0.78) 50%, rgba(255, 247, 251, 0.94) 100%) !important;
   }
 }
