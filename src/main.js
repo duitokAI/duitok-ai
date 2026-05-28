@@ -2668,7 +2668,96 @@ function storyChoiceButton(field, value, label, note, active) {
 }
 
 function viralPanel(p) {
-  return `<div class="generator-box"><h2>${icon("film")} Viral Research</h2><div class="form-grid two"><label>Competitor URL<input data-field="viral.url" value="${esc(p.viral.url)}" placeholder="Paste competitor video"></label>${select("viral.depth", "Depth", ["Quick decode", "Deep script map", "Hook library"], p.viral.depth)}</div></div><div class="prompt-block"><button class="gold-button" data-action="decode-viral">${icon("trending-up")} Decode Viral</button><button class="dark-button" data-action="export-project">${icon("download")} Export Project</button></div>${results(p, "viral")}`;
+  const feature = p.viral.feature || "Talking Object";
+  const objective = p.viral.objective || "Proud";
+  const language = p.viral.language || "Bahasa Melayu";
+  const target = p.viral.target || "Auto Target";
+  const mode = p.viral.mode || "Image -> Video";
+  const performance = p.viral.performance || "Action";
+  const dialog = p.viral.dialog || "Auto Dialog";
+  return `
+    <section class="viral-shell">
+      <div class="viral-feature-card">
+        <h2>🎬 Viral Feature</h2>
+        <div class="viral-feature-grid">
+          ${viralFeatureButton("Talking Object", "🗣️", feature)}
+          ${["Coming soon", "Coming soon", "Coming soon", "Coming soon"].map((item) => `<button type="button" disabled><b>✨</b><span>${item}</span></button>`).join("")}
+        </div>
+      </div>
+      <section class="viral-form-card">
+        <h3>🗣️ Talking Object</h3>
+        <label class="viral-field">
+          <span>1. Object / Ingredient</span>
+          <input data-field="viral.object" value="${esc(p.viral.object || "")}" placeholder="e.g. Banana, Biotin, Smartphone, L-Cystine">
+        </label>
+        <p class="viral-field-label">2. Objective</p>
+        <div class="viral-choice-grid three">
+          ${viralChoiceButton("viral.objective", "Proud", "💪", objective)}
+          ${viralChoiceButton("viral.objective", "Grumpy", "😤", objective)}
+          ${viralChoiceButton("viral.objective", "Villain", "😈", objective)}
+        </div>
+        <small>Confident mentor — drives saves (educational).</small>
+        <label class="viral-field">
+          <span>3. Purpose / Context (drives the scene)</span>
+          <input data-field="viral.purpose" value="${esc(p.viral.purpose || "")}" placeholder='e.g. "Hair growth (D-Bio Plus)", "Skin glow", "Energy boost"'>
+        </label>
+        <small>Tip: Same purpose across multiple objects in the same project = same scene = looks like a coherent series.</small>
+        <p class="viral-field-label">4. Language</p>
+        <div class="viral-choice-grid two">
+          ${viralChoiceButton("viral.language", "Bahasa Melayu", "🇲🇾", language)}
+          ${viralChoiceButton("viral.language", "English", "🇺🇸", language)}
+        </div>
+        <p class="viral-field-label">5. Target / Scene</p>
+        <div class="viral-choice-grid two">
+          ${viralChoiceButton("viral.target", "Auto Target", "🤖", target)}
+          ${viralChoiceButton("viral.target", "Custom Target", "📍", target)}
+        </div>
+        <small>AI picks the best background based on object + purpose.</small>
+        <p class="viral-field-label">6. Mode</p>
+        <div class="viral-choice-grid two">
+          ${viralChoiceButton("viral.mode", "Image -> Video", "🖼️", mode)}
+          ${viralChoiceButton("viral.mode", "Text -> Video", "📝", mode)}
+        </div>
+        <small>Generate banana-pro image first, then Veo uses it as start frame (pixel-identical character lock).</small>
+        <p class="viral-field-label">7. Performance</p>
+        <div class="viral-choice-grid two">
+          ${viralChoiceButton("viral.performance", "Action", "⚡", performance)}
+          ${viralChoiceButton("viral.performance", "Standing", "🎙️", performance)}
+        </div>
+        <small>Character actively performs its function (combat free radicals, strengthen hair roots, etc.) — drives engagement.</small>
+        <p class="viral-field-label">8. Dialog</p>
+        <div class="viral-choice-grid two">
+          ${viralChoiceButton("viral.dialog", "Auto Dialog", "🤖", dialog)}
+          ${viralChoiceButton("viral.dialog", "Custom Dialog", "✍️", dialog)}
+        </div>
+        <small>LLM auto-generates the dialog line from object + objective + language.</small>
+        <button class="viral-generate-button" data-action="decode-viral">🗣️ Generate Talking Object Video</button>
+      </section>
+    </section>
+    ${viralHistoryPanel(p)}`;
+}
+
+function viralFeatureButton(value, emoji, active) {
+  return `<button class="${active === value ? "active" : ""}" type="button" data-field-set="viral.feature" data-value="${esc(value)}"><b>${emoji}</b><span>${value}</span></button>`;
+}
+
+function viralChoiceButton(field, value, emoji, active) {
+  return `<button class="${active === value ? "active" : ""}" type="button" data-field-set="${field}" data-value="${esc(value)}"><b>${emoji}</b><span>${value}</span></button>`;
+}
+
+function viralHistoryPanel(p) {
+  const items = state.db.results.filter((item) => item.projectId === p.id && item.type === "viral");
+  return `
+    <section class="viral-history-card">
+      <header><h3>${icon("history", 18)} History — Viral — ${esc(p.name)}</h3><span>${items.length} items</span></header>
+      <div class="viral-history-filters">
+        <button class="active">🗣️ Talking Object</button>
+        <button>🎞️ Normal Video</button>
+        <button class="active">🎬 Videos</button>
+        <button>🖼️ Images</button>
+      </div>
+      ${items.length ? `<div class="result-grid">${items.map(resultCard).join("")}</div>` : `<div class="viral-empty"><b>${icon("history", 28)}</b><strong>Belum ada history.</strong><span>Generate satu, ia akan muncul di sini.</span></div>`}
+    </section>`;
 }
 
 function select(field, label, options, value) {

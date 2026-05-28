@@ -2853,6 +2853,226 @@ textarea {
   box-shadow: 0 14px 30px rgba(125, 76, 255, 0.18);
 }
 
+.viral-shell {
+  display: grid;
+  gap: 20px;
+  padding: clamp(26px, 4vw, 42px);
+  border-radius: 24px;
+  background: #fff;
+  color: #19161b;
+  box-shadow: 0 20px 46px rgba(31, 20, 8, 0.08);
+}
+
+.viral-feature-card,
+.viral-form-card {
+  border: 1px solid #ebe5de;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 14px 28px rgba(35, 24, 10, 0.05);
+}
+
+.viral-feature-card {
+  padding: 22px;
+}
+
+.viral-feature-card h2,
+.viral-form-card h3 {
+  margin: 0 0 18px;
+  color: #19161b;
+  font-size: 16px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.viral-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.viral-feature-grid button,
+.viral-choice-grid button {
+  display: grid;
+  place-items: center;
+  gap: 6px;
+  border: 1px solid #ebe5de;
+  border-radius: 8px;
+  background: #fffdf9;
+  color: #19161b;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.viral-feature-grid button {
+  min-height: 58px;
+  color: #8d8791;
+}
+
+.viral-feature-grid button.active,
+.viral-choice-grid button.active {
+  border: 2px solid #8b4dff;
+  background: #f7f2ff;
+  color: #7042d6;
+}
+
+.viral-feature-grid button:disabled {
+  opacity: 0.36;
+  cursor: not-allowed;
+}
+
+.viral-feature-grid b,
+.viral-choice-grid b {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.viral-feature-grid span,
+.viral-choice-grid span {
+  font-size: 13px;
+}
+
+.viral-form-card {
+  display: grid;
+  gap: 12px;
+  padding: 22px;
+}
+
+.viral-field {
+  display: grid;
+  gap: 10px;
+}
+
+.viral-field span,
+.viral-field-label {
+  margin: 0;
+  color: #8b858b;
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.viral-field input {
+  min-height: 46px;
+  border: 1px solid #ebe5de;
+  border-radius: 8px;
+  background: #fffefb;
+  color: #19161b;
+}
+
+.viral-choice-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.viral-choice-grid.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.viral-choice-grid.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.viral-choice-grid button {
+  min-height: 66px;
+}
+
+.viral-form-card small {
+  color: #7b7280;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.viral-generate-button {
+  min-height: 56px;
+  margin-top: 8px;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #b899ff, #d9bdff);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 950;
+  cursor: pointer;
+  box-shadow: 0 16px 34px rgba(139, 77, 255, 0.18);
+}
+
+.viral-history-card {
+  margin-top: 24px;
+  padding: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  background: #171717;
+  color: #fff;
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.24);
+}
+
+.viral-history-card header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.viral-history-card h3 {
+  margin: 0;
+  color: #fff;
+  font-size: 20px;
+}
+
+.viral-history-card header span {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 12px;
+}
+
+.viral-history-filters {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  max-width: 520px;
+  margin: 24px 0;
+}
+
+.viral-history-filters button {
+  min-height: 38px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.56);
+  font-weight: 900;
+}
+
+.viral-history-filters button.active {
+  background: #ffd31a;
+  color: #2a1800;
+}
+
+.viral-empty {
+  min-height: 260px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.48);
+  text-align: center;
+}
+
+.viral-empty b {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.viral-empty strong {
+  color: rgba(255, 255, 255, 0.68);
+}
+
 @media (max-width: 760px) {
   .virtualize-card {
     padding: 24px 18px 28px;
@@ -2873,7 +3093,11 @@ textarea {
   .story-select-row,
   .story-style-grid,
   .story-cta-grid,
-  .story-cost-grid {
+  .story-cost-grid,
+  .viral-feature-grid,
+  .viral-choice-grid.two,
+  .viral-choice-grid.three,
+  .viral-history-filters {
     grid-template-columns: 1fr;
   }
 
