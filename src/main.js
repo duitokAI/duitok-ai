@@ -2272,7 +2272,69 @@ function clonePanel(p) {
 }
 
 function storyPanel(p) {
-  return `<div class="generator-box"><h2>${icon("book-open")} Storytelling</h2><div class="form-grid two">${select("story.arc", "Story Arc", ["Problem -> proof -> offer", "Before / after", "Founder journey"], p.story.arc)}${select("story.market", "Market", ["Malaysia TikTok Shop", "Local service", "Info product"], p.story.market)}</div></div>${prompt("story.notes", p.story.notes, "Story notes.", "write-story", "Write Story")}${results(p, "story")}`;
+  const visualStyle = p.story.visualStyle || "Cinematic";
+  const voice = p.story.voice || "Jamal";
+  const cta = p.story.cta || "Engagement";
+  const styleCards = ["Cinematic", "3D Pixar", "Anime Ghibli", "Fantasy Epic", "Watercolor", "Cinematic Noir", "Vintage Film", "Editorial"];
+  return `
+    <section class="storytelling-card">
+      <header class="storytelling-head">
+        <h2>Storytelling</h2>
+        <p>AI-narrated storytelling videos in Bahasa Melayu</p>
+      </header>
+      <div class="story-steps">
+        <div class="active"><b>1</b><strong>Prompt & Settings</strong><span>Define your video</span></div>
+        <i></i>
+        <div><b>2</b><strong>Review & Generate</strong><span>Final confirmation</span></div>
+      </div>
+      <label class="story-main-prompt">
+        <span>Describe the video you want to make today <b>${wordCount(p.story.notes)}/1000</b></span>
+        <textarea data-field="story.notes" maxlength="1000" placeholder="Describe the video you want to make today">${esc(p.story.notes || "")}</textarea>
+      </label>
+      <div class="story-select-row">
+        ${select("story.language", "", ["MY Bahasa Melayu", "中文", "English"], p.story.language || "MY Bahasa Melayu")}
+        ${select("story.ratio", "", ["9:16 Portrait", "1:1 Square", "16:9 Landscape"], p.story.ratio || "9:16 Portrait")}
+      </div>
+      <p class="story-section-label">Visual Style</p>
+      <div class="story-style-grid">
+        ${styleCards.map((item, index) => storyStyleButton(item, visualStyle, index)).join("")}
+      </div>
+      <p class="story-section-label">Voice</p>
+      <div class="story-voice-grid">
+        ${storyVoiceButton("Jamal", "Custom-cloned Malay male voice — warm authoritative delivery with native phrasing.", "Malay Male · Cloned · Warm", voice)}
+        ${storyVoiceButton("Seasoned Man", "Deep, firm and resonant with steady articulation — authoritative like a news anchor.", "Malay Male · Deep · Polished", voice)}
+        ${storyVoiceButton("Passionate Lady", "Bright, rich and expressive with a natural laid-back delivery. Candid influencer vibe.", "Malay Female · Bright · Expressive", voice)}
+      </div>
+      <section class="story-cta-card">
+        <div><span>🎯</span><h3>Call-to-Action (final slide)</h3><p>How should the AI close the last slide?</p></div>
+        <div class="story-cta-grid">
+          ${storyChoiceButton("story.cta", "None", "🌊 None", "Natural close", cta)}
+          ${storyChoiceButton("story.cta", "Engagement", "💬 Engagement", "Bait comments", cta)}
+          ${storyChoiceButton("story.cta", "Follow", "👥 Follow", "Custom text", cta)}
+        </div>
+        <small>AI will end the last slide with a topic-relevant question that invites viewers to comment with their answer or experience.</small>
+      </section>
+      <div class="story-cost-grid">
+        <article>Slide duration is locked to 5s for TikTok pace <b>5s per slide LOCKED</b></article>
+        <article>Story length is locked to 10 slides for optimal viewer retention <b>12 slides LOCKED</b></article>
+        <article>Estimated video duration <b>5s × 12 = 1m 0s</b></article>
+        <article>Estimated cost (deducted on Generate) <b>RM 2.04</b><small>RM 0.07 × 12 images + RM 0.02 × 60 seconds audio</small></article>
+      </div>
+      <button class="story-preview-button" data-action="write-story">Preview & Continue</button>
+    </section>
+    ${results(p, "story")}`;
+}
+
+function storyStyleButton(value, active, index) {
+  return `<button class="${active === value ? "active" : ""}" style="--story-hue:${index * 37 + 12}deg" type="button" data-field-set="story.visualStyle" data-value="${esc(value)}"><span>${value}</span><b>${value}</b></button>`;
+}
+
+function storyVoiceButton(value, body, tags, active) {
+  return `<button class="${active === value ? "active" : ""}" type="button" data-field-set="story.voice" data-value="${esc(value)}"><b>${value[0]}</b><strong>${value}</strong><span>${body}</span><em>${tags}</em></button>`;
+}
+
+function storyChoiceButton(field, value, label, note, active) {
+  return `<button class="${active === value ? "active" : ""}" type="button" data-field-set="${field}" data-value="${esc(value)}"><b>${label}</b><span>${note}</span></button>`;
 }
 
 function viralPanel(p) {
