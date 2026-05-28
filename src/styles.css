@@ -11282,3 +11282,255 @@ label {
       linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 250, 253, 0.78) 50%, rgba(255, 247, 251, 0.94) 100%) !important;
   }
 }
+
+/* Studio PeningLab-inspired palette: black shell, white canvas, yellow actions. */
+:root {
+  --pl-black: #050505;
+  --pl-panel: #101010;
+  --pl-panel-2: #171717;
+  --pl-yellow: #ffdf3d;
+  --pl-yellow-2: #f1c62a;
+  --pl-white: #fffefa;
+  --pl-stroke: rgba(255, 255, 255, 0.1);
+  --pl-card-line: #e9e2dc;
+  --pl-ink: #211127;
+  --pl-muted: #8a808b;
+  --pl-purple: #260032;
+}
+
+.studio-shell {
+  background: var(--pl-black) !important;
+  color: var(--pl-white) !important;
+}
+
+.studio-shell .sidebar {
+  border-right-color: rgba(255, 255, 255, 0.12) !important;
+  background:
+    radial-gradient(circle at 18% 0, rgba(255, 223, 61, 0.08), transparent 30%),
+    linear-gradient(180deg, #080808 0%, #050505 100%) !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .sidebar .brand-lockup,
+.studio-shell .sidebar-account-panel {
+  border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+  border-top-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.studio-shell .sidebar .brand-wordmark {
+  color: #fff !important;
+}
+
+.studio-shell .sidebar .brand-wordmark span:last-child {
+  color: #ff5f7d !important;
+}
+
+.studio-shell .sidebar .brand-lockup strong,
+.studio-shell .side-section {
+  color: rgba(255, 255, 255, 0.48) !important;
+}
+
+.studio-shell .sidebar-language,
+.studio-shell .side-primary,
+.studio-shell .side-link,
+.studio-shell .project-button,
+.studio-shell .search-box input,
+.studio-shell .sidebar-subscription-card {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+  color: rgba(255, 255, 255, 0.72) !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .side-primary.active,
+.studio-shell .side-link.active,
+.studio-shell .project-button.active {
+  border-color: rgba(255, 223, 61, 0.42) !important;
+  background: rgba(255, 223, 61, 0.12) !important;
+  color: var(--pl-yellow) !important;
+  box-shadow: inset 3px 0 0 var(--pl-yellow) !important;
+}
+
+.studio-shell .side-link:hover,
+.studio-shell .project-button:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fff !important;
+}
+
+.studio-shell .new-project,
+.studio-shell .sidebar-credit-card button {
+  border-color: rgba(255, 223, 61, 0.58) !important;
+  background: var(--pl-yellow) !important;
+  color: #080808 !important;
+  box-shadow: 0 18px 34px rgba(255, 223, 61, 0.16) !important;
+}
+
+.studio-shell .new-project b {
+  color: rgba(0, 0, 0, 0.42) !important;
+}
+
+.studio-shell .project-button.active svg,
+.studio-shell .side-primary.active svg,
+.studio-shell .side-link.active svg {
+  border-color: var(--pl-yellow) !important;
+  background: var(--pl-yellow) !important;
+  color: #080808 !important;
+}
+
+.studio-shell .sidebar-credit-card {
+  border-color: rgba(255, 223, 61, 0.18) !important;
+  background:
+    radial-gradient(circle at 86% 0, rgba(255, 223, 61, 0.12), transparent 36%),
+    rgba(255, 223, 61, 0.055) !important;
+}
+
+.studio-shell .sidebar-credit-card > span,
+.studio-shell .sidebar-credit-card b {
+  color: var(--pl-yellow) !important;
+}
+
+.studio-shell .workspace {
+  background:
+    radial-gradient(circle at 96% 3%, rgba(255, 223, 61, 0.08), transparent 20%),
+    linear-gradient(180deg, #080808 0%, #050505 34%, #070707 100%) !important;
+  color: var(--pl-white) !important;
+}
+
+.studio-shell .dashboard-head,
+.studio-shell .project-head {
+  color: var(--pl-white) !important;
+}
+
+.studio-shell .dashboard-head h1,
+.studio-shell .project-head h1 {
+  color: #fff !important;
+  text-shadow: none !important;
+}
+
+.studio-shell .eyebrow,
+.studio-shell .folder-label {
+  color: var(--pl-yellow) !important;
+}
+
+.studio-shell .subtitle,
+.studio-shell .dashboard-stat-grid span,
+.studio-shell .project-status span,
+.studio-shell .cost-list span,
+.studio-shell .activity-list span,
+.studio-shell .metric-row span,
+.studio-shell .table small,
+.studio-shell .schedule-list small {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.studio-shell .step-tabs {
+  border-bottom-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.studio-shell .step-tabs button {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: rgba(255, 255, 255, 0.66) !important;
+}
+
+.studio-shell .step-tabs button.active {
+  border-color: rgba(255, 223, 61, 0.68) !important;
+  background: var(--pl-yellow) !important;
+  color: #090909 !important;
+  box-shadow: 0 16px 32px rgba(255, 223, 61, 0.16) !important;
+}
+
+.studio-shell .canvas-card,
+.studio-shell .generator-box,
+.studio-shell .upload-card,
+.studio-shell .prompt-block,
+.studio-shell .result-grid article,
+.studio-shell .empty-result,
+.studio-shell .date-filter-card,
+.studio-shell .chart-card,
+.studio-shell .next-action-card,
+.studio-shell .cost-card,
+.studio-shell .activity-card,
+.studio-shell .dashboard-stat-grid article,
+.studio-shell .project-status article,
+.studio-shell .table div,
+.studio-shell .schedule-list article,
+.studio-shell .topup-grid button {
+  border-color: var(--pl-card-line) !important;
+  background: var(--pl-white) !important;
+  color: var(--pl-ink) !important;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22) !important;
+}
+
+.studio-shell .canvas-card {
+  border-radius: 26px !important;
+}
+
+.studio-shell .generator-box,
+.studio-shell .prompt-block,
+.studio-shell .result-grid article,
+.studio-shell .empty-result {
+  border-radius: 16px !important;
+}
+
+.studio-shell .dashboard-stat-grid b,
+.studio-shell .metric-row strong,
+.studio-shell .topup-grid strong,
+.studio-shell .card-title h2,
+.studio-shell .date-filter-card h2,
+.studio-shell .generator-box h2,
+.studio-shell .upload-card h2,
+.studio-shell .result-grid h3 {
+  color: var(--pl-ink) !important;
+}
+
+.studio-shell .generator-box p,
+.studio-shell .prompt-block p,
+.studio-shell .result-grid p,
+.studio-shell .empty-result p,
+.studio-shell .canvas-card p {
+  color: var(--pl-muted) !important;
+}
+
+.studio-shell label {
+  color: #8d818e !important;
+}
+
+.studio-shell input,
+.studio-shell select,
+.studio-shell textarea {
+  border-color: #e5ddd8 !important;
+  background: #fffefa !important;
+  color: var(--pl-ink) !important;
+  box-shadow: none !important;
+}
+
+.studio-shell input::placeholder,
+.studio-shell textarea::placeholder {
+  color: #aaa2aa !important;
+}
+
+.studio-shell .gold-button,
+.studio-shell .date-filter-card .gold-button,
+.studio-shell .chat-panel button {
+  border-color: rgba(255, 223, 61, 0.68) !important;
+  background: var(--pl-yellow) !important;
+  color: #090909 !important;
+  box-shadow: 0 18px 34px rgba(255, 223, 61, 0.16) !important;
+}
+
+.studio-shell .dark-button,
+.studio-shell .sop-button,
+.studio-shell .result-grid button:not(.result-actions button) {
+  border-color: rgba(38, 0, 50, 0.94) !important;
+  background: var(--pl-purple) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .chat-bubble,
+.studio-shell .support-bubble {
+  background: #6d4cff !important;
+  color: #fff !important;
+  box-shadow: 0 18px 44px rgba(109, 76, 255, 0.26) !important;
+}
