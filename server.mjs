@@ -3924,26 +3924,6 @@ app.get("/api/state", async (req, res, next) => {
   }
 });
 
-app.post("/api/admin/unlock", async (req, res, next) => {
-  try {
-    const db = await ensureDb();
-    const token = String(req.get("authorization") || req.query.token || "").replace(/^Bearer\s+/i, "");
-    const foundUser = verifyAuthToken(token, db);
-    if (!foundUser) return res.status(401).json({ error: "Login required." });
-
-    const user = { ...foundUser };
-    const adminKey = String(req.body.adminKey || req.get("x-admin-key") || "");
-    const verified = verifyAdminAccess(null, user, adminKey);
-    auditAdminAccess({ originalUrl: "/api/admin/unlock", ip: req.ip || "" }, user, verified ? "granted" : "denied", verified ? "unlock_key_ok" : "unlock_key_invalid");
-    if (!verified) return res.status(403).json({ error: "Invalid admin key." });
-
-    const sessionUser = { ...user, __adminVerified: true };
-    res.json({ user: publicUser(sessionUser), state: publicState(db, sessionUser) });
-  } catch (error) {
-    next(error);
-  }
-});
-
 app.patch("/api/account/profile", async (req, res, next) => {
   try {
     const { user } = await requireAuth(req);
