@@ -1835,12 +1835,6 @@ function paymentRow(payment, adminActions = false) {
   return [payment.orderId, status, detail || (payment.createdAt ? new Date(payment.createdAt).toLocaleString() : "")];
 }
 
-function projectStatusBar(p) {
-  const spent = p.results.length * 4;
-  const ready = state.db.schedule.filter((item) => item.status === "Ready").length;
-  return `<section class="project-status"><article><span>Assets generated</span><b>${p.results.length}</b></article><article><span>Ready to publish</span><b>${ready}</b></article><article><span>Credits used</span><b>${spent}</b></article></section>`;
-}
-
 function contentLibraryPage() {
   const results = allResults().slice().reverse();
   return `<header class="project-head"><div><p class="folder-label">${icon("folder", 18)} Content Library</p><h1>Generated Assets</h1><p class="subtitle">All project outputs in one place, ready for export or scheduling.</p></div><button class="sop-button" data-action="export-all">${icon("download")} Export Data</button></header><section class="canvas-card slim"><div class="library-grid">${results.map((item) => `<article><b>${item.title}</b><span>${item.projectName}</span>${resultPreview(item)}<button data-result="${item.id}">${icon("download")} ${t("export")}</button></article>`).join("") || `<p class="empty-text">No generated assets yet.</p>`}</div></section>`;
@@ -1963,7 +1957,6 @@ function projectPage() {
       <div><p class="folder-label">${icon("folder", 18)} ${t("project")}</p><h1>${p.name}</h1></div>
       <button class="sop-button" data-action="sop">${icon("book-open", 25)} ${t("sopImage")}</button>
     </header>
-    ${projectStatusBar(p)}
     <nav class="step-tabs">
       ${steps.map(([id, ic, key, no]) => `<button class="${state.step === id ? "active" : ""}" data-step="${id}">${icon(ic)} <span>${t(key)}</span><b>${no}</b></button>`).join("")}
     </nav>
