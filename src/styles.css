@@ -11956,6 +11956,29 @@ label {
   color: var(--brand-pink) !important;
 }
 
+.public-shell .eyebrow {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  align-items: center;
+  border: 1px solid rgba(255, 63, 110, 0.12);
+  border-radius: 999px;
+  padding: 8px 13px;
+  line-height: 1;
+  box-decoration-break: clone;
+}
+
+.public-shell .feature-mosaic span,
+.public-shell .output-preview-grid span,
+.public-shell .journey-grid span,
+.public-shell .case-card > span {
+  justify-self: start;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 7px 10px;
+  line-height: 1;
+}
+
 .public-shell .proof-strip svg,
 .public-shell .split-section .pain-list svg,
 .public-shell .workflow-steps svg,
