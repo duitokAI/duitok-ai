@@ -285,15 +285,15 @@ const copy = {
     navAffiliate: "联盟",
     navFaq: "FAQ",
     signIn: "登录",
-    promo: "现在订阅 RM69/月，送 10 credits · 模板 + 教程 + 平台",
+    promo: "RM69 加入 AI 带货系统 · 送 10 credits · 模板 + SOP + 平台",
     heroEyebrow: "想用 AI 做副业？从短视频带货开始。",
-    heroTitle: "RM69/月开启 AI带货副业",
-    heroTitleLead: "RM69/月开启",
-    heroTitleHot: "AI带货副业",
+    heroTitle: "RM69/月，加入 AI 短视频带货系统",
+    heroTitleLead: "RM69/月，加入",
+    heroTitleHot: "AI 短视频带货系统",
     heroTitleTail: "",
     demoCta: "看看如何运作",
-    heroCopy: "Duitok AI 把选品 SOP、带货模板、教学和 AI 生成平台放在一起，让新手不用拿货、不用拍摄，也能用 AI 批量测试短视频带货内容。",
-    startCreating: "订阅 RM69，拿 10 credits",
+    heroCopy: "Duitok AI 把已经跑通的短视频带货打法做成系统，让你不用拿货、不用露脸，也能用 AI 批量测试产品、hook、脚本和内容角度。",
+    startCreating: "立即加入 RM69 计划",
     heroTrust1: "AI 短视频带货系统",
     heroTrust2: "BM / 中文 / EN",
     heroTrust3: "无需露脸",
@@ -307,32 +307,32 @@ const copy = {
     competitor: "竞争对手",
     oneVideo: "1 条 / 天",
     tenVideos: "10 条 / 天",
-    catchUp: "从手工 2-3 条，升级到 AI 100+ 条",
-    speed: "数量优势",
-    speedTitle: "短视频带货<br>靠的是测试量",
-    speedCopy: "一个产品不知道哪个角度会跑，一个 hook 不知道用户会不会停。手动一天 2-3 条太慢，AI 才能让你用更多内容换更多数据。",
+    catchUp: "普通卖家拼体力，AI 卖家拼产能",
+    speed: "产能优势",
+    speedTitle: "短视频带货<br>已经是产能战",
+    speedCopy: "普通卖家一天手工做 2-3 条视频，AI 卖家可以批量测试产品、hook、脚本和内容角度。谁更快拿到数据，谁更早找到能出单的方向。",
     price: "RM69",
-    priceTitle: "RM69 不是买软件按钮，是买一个开始副业的系统",
-    priceCopy: "你用小成本拿到平台、模板、教程、SOP 和第一批 10 credits，开始测试一个 AI 短视频带货机会。",
+    priceTitle: "RM69 买的不是工具，是一套已经跑通的 AI 带货打法",
+    priceCopy: "你拿到的不只是平台使用权，而是一套从选品、拆卖点、生成 hook/script/caption，到批量测试内容角度的执行系统。",
     simple: "不用拿货",
     simpleTitle: "不用再跟商家拿产品拍摄",
     simpleCopy: "减少拿货、布景、拍摄、剪辑这些最浪费时间的环节。",
-    sellerReality: "短视频带货的真实门槛",
-    painTitle: "不是你不努力<br>是测试量不够",
-    painCopy: "每天只发 2-3 条，很难测出哪个产品、hook、角度会跑。Duitok 要解决的是执行量和方法，不是再给你一个普通 AI 聊天工具。",
-    notEnoughTime: "不知道选什么产品",
-    notEnoughTimeCopy: "产品选错，视频再多也很难跑。新手需要选品 SOP，而不是自己乱猜。",
-    ideasDry: "不知道视频怎么开头",
-    ideasDryCopy: "Hook、脚本、CTA、caption 没有结构，视频看起来就像随机生成。",
-    scatteredTools: "自己用 AI 也不会做",
-    scatteredToolsCopy: "普通 AI 只会回答问题，不会告诉你短视频带货应该套什么模板、怎么发布、怎么复盘。",
-    competitorsFaster: "每天只做 2-3 条",
-    competitorsFasterCopy: "发得太少，测试不出爆款产品和爆款视频，也没有足够数据优化。",
+    sellerReality: "AI 卖家正在拉开差距",
+    painTitle: "还在手工做内容<br>速度已经不够了",
+    painCopy: "短视频带货不是只靠努力。你每天只做 2-3 条，根本测不出哪个产品、哪个 hook、哪个角度会跑。AI 卖家赢在产能，赢在测试速度，赢在更早拿到数据。",
+    notEnoughTime: "内容产能太低",
+    notEnoughTimeCopy: "一天 2-3 条，数据太少，判断只能靠感觉。",
+    ideasDry: "拍摄成本太高",
+    ideasDryCopy: "拿货、布景、拍摄、剪辑，把时间耗在体力活上。",
+    scatteredTools: "没有测试系统",
+    scatteredToolsCopy: "没有 SOP，只能刷同行、抄文案、碰运气。",
+    competitorsFaster: "AI 卖家已经提速",
+    competitorsFasterCopy: "同一个产品，可以同时测痛点、人群、hook、CTA 和视频角度。",
     advantage: "AI 带货武器",
-    weaponsTitle: "5 个 AI 带货武器<br>从选品到复盘",
+    weaponsTitle: "Duitok AI 放大的<br>不是灵感，是执行量",
     liveOutput: "Duitok AI 输出",
-    outputTitle: "一个产品<br>拆出 100+ 个带货角度",
-    outputCopy: "Duitok AI 把产品拆成 hook、脚本、caption、视觉方向和发布计划，让你按模板生成、发布、看数据、复制有效内容。",
+    outputTitle: "一个产品<br>批量拆出可测试内容角度",
+    outputCopy: "一个产品至少要测几十个内容角度。Duitok AI 把产品拆成 hook、脚本、caption、视觉方向和发布计划，让你更快跑内容、拿数据、复盘，再继续放大。",
     hookTitle: "100+ Hook",
     hookSample: "同一个产品，可以测试痛点角度、证明角度、对比角度、优惠角度。",
     scriptTitle: "UGC 脚本",
@@ -342,23 +342,23 @@ const copy = {
     planTitle: "发布计划",
     planSample: "适合 TikTok Affiliate、TikTok Shop、产品推广、Reels 和 Shorts 持续测试。",
     howKicker: "使用流程",
-    howTitle: "跟着 SOP<br>从选品做到复盘放大",
-    howCopy: "流程给新手设计：选产品、拆卖点、套模板、生成内容、发布测试、看数据后复制有效角度。",
-    demoTitle: "看得懂成本<br>才敢开始测试",
-    demoCopy: "每个样例都写清楚类目、hook、生成类型和预计成本，让你订阅前就理解平台怎么帮你做内容。",
+    howTitle: "跟着已跑通流程<br>从选品做到复盘放大",
+    howCopy: "流程给新手设计：选产品、拆卖点、套模板、生成内容、发布测试、看数据后复制有效角度。你不是随机使用 AI，而是按短视频带货系统执行。",
+    demoTitle: "看清楚 AI 带货内容<br>是怎么批量跑出来的",
+    demoCopy: "每个样例都写清楚类目、hook、生成类型和预计成本，让你订阅前就理解 Duitok 如何帮你提高内容产能。",
     oldWay: "旧方法",
     newWay: "Duitok AI 方法",
-    pricingTitle: "RM69/月<br>开始测试 AI 带货副业机会",
-    pricingCopy: "RM69 不是买软件按钮，而是开通一套 AI 短视频带货副业系统：平台、模板、教程和 SOP。现在 promotion：订阅就送 10 credits。之后生成按 credit 扣费：图片 RM0.10，视频 RM0.40。",
+    pricingTitle: "RM69 买的不是工具<br>是一套已经跑通的 AI 带货打法",
+    pricingCopy: "RM69 不是买一个生成按钮，而是进入一套 AI 短视频带货执行系统：选品 SOP、带货模板、教程、生成平台和第一批 10 credits。之后生成按 credit 扣费：图片 RM0.10，视频 RM0.40。",
     launchOffer: "订阅送 10 credits",
     claimPlan: "订阅 RM69 + 拿 10 credits",
-    riskReversal: "Duitok AI 不保证收益。结果取决于选品、账号、发布频率、内容质量和执行力。",
+    riskReversal: "Duitok AI 不承诺收入。我们提供的是已经跑通的 AI 带货系统，结果取决于选品、账号、发布量、复盘和执行。",
     controlKicker: "信任与合规",
-    controlTitle: "我们卖的是机会和系统<br>不是暴富承诺",
-    controlCopy: "已有学员根据我们的教程和平台执行，第一个星期赚到 RM1000+。这不是保证每个人都有同样结果，但证明模板、方法、平台和执行量结合起来，是有机会跑出结果的。",
+    controlTitle: "我们卖的是系统和打法<br>不是暴富承诺",
+    controlCopy: "已有学员根据我们的教程和平台执行，第一个星期赚到 RM1000+。这不是保证每个人都有同样结果，但证明模板、方法、平台和执行量结合起来，可以跑出结果。",
     startNow: "现在开始",
-    registerTitle: "用 RM69 开始<br>建立你的 AI 带货系统",
-    registerCopy: "注册后通过 CHIP 付款，付款成功后即可进入 Studio，跟着模板和教程生成第一批带货视频。",
+    registerTitle: "用 RM69 加入<br>AI 短视频带货系统",
+    registerCopy: "注册后通过 CHIP 付款，付款成功后即可进入 Studio，跟着模板、教程和 SOP 生成第一批带货内容。",
     fullName: "姓名",
     email: "邮箱",
     password: "密码",
@@ -597,8 +597,8 @@ function promoContent() {
       after: "Tinggal 13 slot dari 80 - 67 seller dah claim hari ini."
     },
     zh: {
-      before: "RM69/月优惠倒计时 ",
-      after: "80 个名额只剩 13 个，今天已有 67 位 seller claim。"
+      before: "RM69 AI带货系统名额倒计时 ",
+      after: "80 个名额只剩 13 个，今天已有 67 位 seller 加入。"
     },
     en: {
       before: "RM69/month promo closes in ",
@@ -1123,10 +1123,10 @@ function featureMosaicCards() {
       ["05", "Review method", "Ikut data, ulang angle yang jalan dan berhenti buang masa pada content yang tidak convert.", "chart-no-axes-combined"]
     ],
     zh: [
-      ["01", "选品 SOP", "帮你判断产品是否适合短视频测试，不是凭感觉乱选。", "search-check"],
-      ["02", "带货模板", "痛点型、证明型、测评型、对比型、优惠型、before-after 模板。", "layout-template"],
-      ["03", "Hook / Script / Caption", "不用从空白页开始想内容，直接按带货结构生成。", "message-square-text"],
-      ["04", "100+ 视频角度", "同一个产品拆出更多测试方向，用内容数量换数据。", "sparkles"],
+      ["01", "已跑通打法", "不是给你一个空工具，而是把 AI 短视频带货流程整理成可执行系统。", "search-check"],
+      ["02", "选品 SOP", "先判断产品是否适合短视频带货，不靠感觉乱选。", "layout-template"],
+      ["03", "Hook / Script / Caption", "批量生成带货结构，不再每天从空白页硬想内容。", "message-square-text"],
+      ["04", "内容产能放大", "同一个产品拆出更多痛点、人群、CTA 和视频角度。", "sparkles"],
       ["05", "发布复盘方法", "看数据，复制有效内容，停止浪费时间在没效果的角度。", "chart-no-axes-combined"]
     ],
     en: [
@@ -1151,12 +1151,12 @@ function painCards() {
       ["chart-no-axes-combined", "Tidak tahu review data", "Video sudah post, tapi tidak tahu hook, product atau format mana patut scale."]
     ],
     zh: [
-      ["package-search", "不知道选什么产品", "产品选错，视频再多也很难跑。新手需要选品 SOP，不是自己乱猜。"],
-      ["timer", "Hook 弱，用户直接滑走", "开头没有抓住注意力，用户还没理解产品就已经离开。"],
-      ["video", "没时间拍摄剪辑", "拿货、布景、拍摄、剪辑、写 caption，每一步都会拖慢产出。"],
-      ["activity", "每天只发 2-3 条", "测试量太少，很难看出哪个角度应该继续复制。"],
-      ["receipt", "自己用 AI 也很乱", "普通 AI 给答案，但不给短视频带货 SOP 和执行顺序。"],
-      ["chart-no-axes-combined", "不知道怎么复盘", "发了视频，但不知道该放大哪个 hook、产品或内容格式。"]
+      ["activity", "内容产能太低", "一天 2-3 条，数据太少，判断只能靠感觉。"],
+      ["video", "拍摄成本太高", "拿货、布景、拍摄、剪辑，把时间耗在体力活上。"],
+      ["receipt", "没有测试系统", "没有 SOP，只能刷同行、抄文案、碰运气。"],
+      ["sparkles", "AI 卖家已经提速", "同一个产品，可以同时测痛点、人群、hook、CTA 和视频角度。"],
+      ["package-search", "选品没有方法", "产品选错，内容产能再高也很难跑。先用 SOP 过滤产品。"],
+      ["chart-no-axes-combined", "复盘跟不上", "发了视频，但不知道该放大哪个 hook、产品或内容格式。"]
     ],
     en: [
       ["package-search", "No product-selection method", "The wrong product makes every video harder to sell. Beginners need SOP, not random guessing."],
@@ -1181,8 +1181,8 @@ function whyDuitokContent() {
     },
     zh: {
       kicker: "为什么不是自己用普通 AI",
-      title: "你拿到的<br>是一套带货系统",
-      copy: "普通 AI 只给你生成能力，但不告诉你怎么做短视频带货。Duitok 把模板、教程、SOP、选品方法和 AI 平台放在一起，让新手可以跟着方法执行。"
+      title: "Duitok AI 不是帮你写文案<br>是帮你放大带货执行量",
+      copy: "普通 AI 只给你生成能力，但不告诉你怎么做短视频带货。Duitok 把已跑通打法、模板、教程、SOP、选品方法和 AI 平台放在一起，让你按系统批量执行。"
     },
     en: {
       kicker: "Why not generic AI",
@@ -1202,10 +1202,10 @@ function whyDuitokCards() {
       ["badge-dollar-sign", "Ada pengalaman", "Student ikut tutorial dan platform kami, ada yang capai RM1000+ pada minggu pertama."]
     ],
     zh: [
-      ["layout-template", "有模板", "痛点型、对比型、证明型、测评型、优惠型、before-after 模板，不用从 0 想内容。"],
-      ["graduation-cap", "有教程", "跟着 SOP 做选品、生成视频、发布、看数据、复制有效内容。"],
-      ["wand-sparkles", "有平台", "Duitok AI 帮你把执行速度从每天 2-3 条手工视频，放大到 100+ 条视频角度。"],
-      ["badge-dollar-sign", "有经验", "已有学员根据我们的教程和平台执行，第一个星期赚到 RM1000+。"]
+      ["layout-template", "有打法", "我们把已经跑通的 AI 短视频带货方法做成新手能跟的流程。"],
+      ["graduation-cap", "有 SOP", "跟着步骤做选品、生成视频、发布、看数据、复制有效内容。"],
+      ["wand-sparkles", "有产能", "Duitok AI 帮你把执行速度从每天 2-3 条手工视频，放大到更多视频角度。"],
+      ["badge-dollar-sign", "有案例", "已有学员根据我们的教程和平台执行，第一个星期赚到 RM1000+。"]
     ],
     en: [
       ["layout-template", "Templates", "Pain, comparison, proof, review, offer, and before-after templates so you do not start from zero."],
@@ -1244,7 +1244,7 @@ function workflowSteps() {
       ["search-check", "选产品", "用 SOP 找适合短视频测试的产品，而不是随便乱选。"],
       ["list-tree", "拆卖点", "把产品拆成痛点、证明、对比、优惠和测评角度。"],
       ["layout-template", "选模板", "套用 pain、proof、review、comparison、offer 或 before-after 模板。"],
-      ["sparkles", "生成内容", "批量生成 hook、脚本、caption、画面方向和 100+ 视频角度。"],
+      ["sparkles", "批量生成", "批量生成 hook、脚本、caption、画面方向和更多视频角度。"],
       ["send", "发布测试", "发布到 TikTok、TikTok Shop、Reels、Shorts 或其它短视频渠道。"],
       ["chart-no-axes-combined", "复盘放大", "看数据，复制表现好的角度，停止浪费时间在没效果的内容。"]
     ],
@@ -1311,11 +1311,11 @@ function comparisonContent() {
       newBullets: ["Masukkan product info", "Pilih template selling", "Generate hook, script dan caption", "Pecahkan 100+ video angle", "Image RM0.10, video RM0.40", "Post, review data dan ulang angle yang jalan"]
     },
     zh: {
-      title: "手动做太慢<br>Duitok 帮你测试更多角度",
-      oldTitle: "旧方法：自己手动做",
-      oldBullets: ["跟商家拿货", "拍摄产品和重拍", "自己想 hook", "剪辑视频和写 caption", "一天只能做 2-3 条", "测试量太少，很难看出数据"],
-      newTitle: "Duitok 方法",
-      newBullets: ["输入产品信息", "套用带货模板", "生成 hook、脚本、caption", "拆出 100+ 视频角度", "图片 RM0.10，视频 RM0.40", "发布测试，复盘后复制有效角度"]
+      title: "普通卖家拼体力<br>AI 卖家拼产能",
+      oldTitle: "手工卖家",
+      oldBullets: ["跟商家拿货", "拍摄产品和重拍", "自己想 hook", "剪辑视频和写 caption", "一天只能做 2-3 条", "数据太少，判断靠感觉"],
+      newTitle: "AI 卖家",
+      newBullets: ["输入产品信息", "套用带货模板", "批量生成 hook、脚本、caption", "同时测试多个内容角度", "图片 RM0.10，视频 RM0.40", "发布测试，复盘后复制有效角度"]
     },
     en: {
       title: "Manual production is slow, Duitok helps you test more angles",
@@ -1337,8 +1337,8 @@ function testVolumeContent() {
     },
     zh: {
       kicker: "为什么一定要用 AI",
-      title: "短视频带货<br>靠的是测试量",
-      copy: "你无法提前知道哪个产品、hook 或角度会出单。更有效的方法，是快速做出更多内容、发布、看数据，再复制有效角度。"
+      title: "短视频带货<br>已经进入内容产能战",
+      copy: "你无法提前知道哪个产品、hook 或角度会出单。更有效的方法，是快速做出更多内容、发布、看数据，再复制有效角度。还在手工做内容，速度已经不够了。"
     },
     en: {
       kicker: "Why AI matters",
@@ -1358,8 +1358,8 @@ function testVolumeSteps() {
       ["4", "Scale yang jalan", "Ulang angle yang ada response, berhenti buang masa pada content lemah."]
     ],
     zh: [
-      ["1", "更多视频角度", "一个产品拆成痛点、证明、测评、对比和优惠角度。"],
-      ["2", "更多发布机会", "更多内容代表更多曝光机会，也代表更多数据反馈。"],
+      ["1", "放大内容产能", "一个产品拆成痛点、人群、证明、测评、对比和优惠角度。"],
+      ["2", "提高测试速度", "更多内容代表更多曝光机会，也代表更多数据反馈。"],
       ["3", "更快看到数据", "你能更快判断哪个产品、hook 和内容格式值得继续。"],
       ["4", "复制有效内容", "把有反应的角度继续放大，停止浪费时间在无效内容上。"]
     ],
@@ -1383,9 +1383,9 @@ function dreamContent() {
       copy: "Short video selling ialah testing game. Lebih banyak template video yang anda post, lebih banyak data anda kumpul, dan lebih cepat anda nampak angle yang patut diulang."
     },
     zh: {
-      kicker: "梦想感与执行方向",
-      title: "先跑出一个能出单的视频<br>再放大账号和渠道",
-      copy: "短视频带货的核心是测试。更多视频代表更多曝光机会，更多数据，也更有机会找到能出单的内容。"
+      kicker: "副业梦想与执行系统",
+      title: "你买的不是工具<br>是进入 AI 卖家阵营的机会",
+      copy: "很多人想做副业，但一直卡在选品、拍摄、脚本和执行量。Duitok AI 的价值，是让普通人用 RM69 进入一套已经跑通的 AI 短视频带货系统。"
     },
     en: {
       kicker: "Target imagination",
@@ -1405,8 +1405,8 @@ function dreamCards() {
       ["Multi", "Channel scale", "TikTok, Shop, Reels, Shorts dan produk lokal."]
     ],
     zh: [
-      ["RM69", "开始成本", "低成本进入 AI 短视频带货系统。"],
-      ["100+", "每日视频角度", "用更多内容换更多测试机会。"],
+      ["RM69", "系统门票", "低成本进入 AI 短视频带货系统。"],
+      ["产能", "核心优势", "普通卖家拼体力，AI 卖家拼产能。"],
       ["RM1000+", "学员首周案例", "真实案例，不代表人人保证。"],
       ["多渠道", "放大空间", "TikTok、Shop、Reels、Shorts 和本地产品。"]
     ],
@@ -1435,7 +1435,7 @@ function studentCaseContent() {
     },
     zh: {
       kicker: "学员出单案例",
-      title: "跟着方法做<br>有人首周做到 RM1000+",
+      title: "跟着已跑通打法执行<br>有人首周做到 RM1000+",
       copy: "已有学员根据 Duitok 教程和平台流程执行，用 AI 批量生成带货视频，并按照模板持续发布和测试，在第一周跑出 RM1000+ 案例。",
       note: "这个结果不代表每个人都会一样。实际收益取决于选品、账号状态、发布频率、内容质量、市场反馈和执行力。",
       badge: "Week 1 Case",
@@ -1464,8 +1464,8 @@ function sevenDayContent() {
     },
     zh: {
       kicker: "新手 7 天路径",
-      title: "订阅后第一周<br>这样开始",
-      copy: "Duitok 不是让你随机按按钮，而是给你一条新手执行路径：先学方法，再选品，再生成第一批内容，最后根据数据复盘。"
+      title: "订阅后第一周<br>按系统执行",
+      copy: "Duitok 不是让你随机按按钮，而是给你一条新手执行路径：先学已跑通打法，再选品，再生成第一批内容，最后根据数据复盘。"
     },
     en: {
       kicker: "Beginner path",
@@ -1488,13 +1488,13 @@ function sevenDaySteps() {
       ["Day 7", "Ulang angle yang jalan", "Scale hook dan produk yang ada signal."]
     ],
     zh: [
-      ["Day 1", "看教程，懂 SOP", "先理解短视频带货流程、credit 机制和模板用法。"],
+      ["Day 1", "看教程，懂打法", "先理解 AI 短视频带货流程、credit 机制和模板用法。"],
       ["Day 2", "选择 3-5 个产品", "用选品方法找适合短视频测试的产品方向。"],
       ["Day 3", "生成第一批 hook", "用模板生成 hook、脚本和 caption。"],
       ["Day 4", "生成图片或视频", "按 RM0.10 / RM0.40 的成本测试第一批内容。"],
       ["Day 5", "发布第一批内容", "把内容发布到 TikTok、Reels、Shorts 或其他渠道。"],
       ["Day 6", "看数据反馈", "观察浏览量、停留、点击和互动。"],
-      ["Day 7", "复制有效角度", "把有反应的 hook、产品和格式继续放大测试。"]
+      ["Day 7", "复制有效角度", "把有反应的 hook、产品和格式继续放大。"]
     ],
     en: [
       ["Day 1", "Learn the SOP", "Understand the selling workflow, credits, and templates."],
@@ -1521,7 +1521,7 @@ function scenarioContent() {
     zh: {
       kicker: "不只 TikTok Affiliate",
       title: "不只 TikTok Affiliate<br>任何短视频带货都能用",
-      copy: "TikTok Affiliate 是推荐入门场景，但 Duitok AI 的底层能力是短视频带货内容生产。只要你需要用短视频卖产品、测产品、做内容，Duitok 都可以帮你提高执行速度。"
+      copy: "TikTok Affiliate 是推荐入门场景，但 Duitok AI 的底层能力是短视频带货内容生产。只要你需要用短视频卖产品、测产品、做内容，Duitok 都可以帮你提高内容产能。"
     },
     en: {
       kicker: "Beyond TikTok Affiliate",
@@ -1546,7 +1546,7 @@ function scenarioCards() {
 function pricingBullets() {
   const data = {
     ms: ["AI short video selling platform", "Subscribe terus dapat 10 promo credits", "Template short video selling", "Tutorial SOP beginner", "Product selling point breakdown", "Batch hook, skrip dan caption", "Support 100+ video angle sehari", "Image generation RM0.10 setiap gambar", "Video generation RM0.40 setiap video", "Multi-channel content planning", "WhatsApp support"],
-    zh: ["AI 带货视频生成平台", "订阅立即送 10 credits", "短视频带货模板库", "新手教学 SOP", "产品卖点拆解", "批量 hook、脚本、caption", "支持一天 100+ 视频角度", "图片生成 RM0.10 / 张", "视频生成 RM0.40 / 条", "多渠道内容计划", "WhatsApp 客服支持"],
+    zh: ["已跑通的 AI 带货打法", "订阅立即送 10 credits", "新手选品 SOP", "短视频带货模板库", "产品卖点拆解", "批量 hook、脚本、caption", "放大内容产能和测试速度", "图片生成 RM0.10 / 张", "视频生成 RM0.40 / 条", "多渠道内容计划", "WhatsApp 客服支持"],
     en: ["AI short-video selling platform", "Subscribe and get 10 promo credits", "Short-video selling templates", "Beginner SOP tutorials", "Product selling-point breakdown", "Batch hooks, scripts, and captions", "Supports 100+ video angles a day", "Image generation at RM0.10 each", "Video generation at RM0.40 each", "Multi-channel content planning", "WhatsApp support"]
   };
   return data[state.lang] || data.ms;
@@ -1606,8 +1606,8 @@ function pricingSteps() {
       ["3", "Generate ikut credit", "Image RM0.10, video RM0.40. Guna berapa, tolak berapa."]
     ],
     zh: [
-      ["1", "订阅 RM69/月", "开通平台、模板、教程和 SOP。"],
-      ["2", "获得 10 credits", "先测试第一批内容，不用一开始大量充值。"],
+      ["1", "订阅 RM69/月", "加入 AI 短视频带货系统，开通平台、模板、教程和 SOP。"],
+      ["2", "获得 10 credits", "先生成第一批内容，不用一开始大量充值。"],
       ["3", "生成时扣 credits", "图片 RM0.10，视频 RM0.40。生成多少，用多少。"]
     ],
     en: [
@@ -1624,7 +1624,7 @@ function pricingSteps() {
 function includedCreditBanner() {
   const data = {
     ms: "Promotion sekarang: subscribe dan dapat 10 credits",
-    zh: "现在 promotion：订阅就送 10 credits",
+    zh: "RM69 加入 AI 带货系统，订阅送 10 credits",
     en: "Current promotion: subscribe and get 10 credits"
   };
   return data[state.lang] || data.ms;
@@ -1633,7 +1633,7 @@ function includedCreditBanner() {
 function controlCards() {
   const data = {
     ms: ["RM69/bulan untuk platform, template dan SOP", "Duitok AI bantu output, bukan guarantee income", "Lebih banyak video memberi lebih banyak peluang data", "Anda tetap perlu pilih produk, post dan review result", "RM1000+ student case ialah bukti kemungkinan, bukan janji fixed"],
-    zh: ["RM69/月包含平台、模板和 SOP", "Duitok AI 提高产出，不保证收益", "更多视频带来更多测试数据", "你仍然需要选品、发布和复盘结果", "RM1000+ 学员案例是可能性证明，不是固定承诺"],
+    zh: ["RM69/月进入 AI 短视频带货系统", "Duitok AI 放大执行量，不承诺收入", "更多内容带来更多测试数据", "你仍然需要选品、发布和复盘结果", "RM1000+ 学员案例是可能性证明，不是固定承诺"],
     en: ["RM69/month includes platform, templates, and SOP", "Duitok AI improves output; it does not guarantee income", "More videos create more testing data", "You still choose products, publish, and review results", "The RM1000+ student case shows possibility, not a fixed promise"]
   };
   return (data[state.lang] || data.ms)
@@ -1656,17 +1656,17 @@ function faqItems() {
       ["RM69 termasuk apa?", "RM69 ialah yuran membership bulanan untuk akses Duitok AI platform, template short video selling, tutorial SOP, hook/script/caption workflow dan basic support. Promotion sekarang: subscribe dan dapat 10 credits. Generation credit dikira jelas: image RM0.10 dan video RM0.40."]
     ],
     zh: [
-      ["Duitok AI 是保证赚钱吗？", "不保证。Duitok AI 提供平台、模板、教程和方法，帮助你更快开始短视频带货。实际收益取决于选品、账号、内容质量、市场反馈和执行力。"],
-      ["为什么不用普通 AI 工具？", "普通 AI 工具只给你生成能力，但不告诉你怎么做短视频带货。Duitok 提供模板、教程、SOP 和平台，让新手可以跟着方法执行。"],
-      ["RM69 是无限生成吗？", "不是。RM69 是每月会员费，用来开通平台、模板、教程和 SOP。生成内容会按 credits 扣费，这样成本更清楚。"],
-      ["10 credits 可以做什么？", "10 credits 可以先测试第一批内容。你可以混合生成一些 RM0.40 的视频和 RM0.10 的图片，看哪个产品和角度值得继续放大。"],
+      ["Duitok AI 是保证赚钱吗？", "不保证。Duitok AI 提供的是已经跑通的 AI 短视频带货系统，帮助你提高内容产能和执行速度。实际收益取决于选品、账号、发布量、内容质量、市场反馈和复盘能力。"],
+      ["为什么不用普通 AI 工具？", "普通 AI 工具只给你生成能力，但不告诉你怎么做短视频带货。Duitok 提供已跑通打法、模板、教程、SOP 和平台，让新手可以按系统执行。"],
+      ["RM69 是无限生成吗？", "不是。RM69 是每月会员费，用来加入 AI 短视频带货系统，开通平台、模板、教程和 SOP。生成内容会按 credits 扣费，这样成本更清楚。"],
+      ["10 credits 可以做什么？", "10 credits 可以先生成第一批内容。你可以混合生成一些 RM0.40 的视频和 RM0.10 的图片，看哪个产品和角度值得继续放大。"],
       ["Credits 用完怎么办？", "之后可以再 top up。Duitok 的逻辑是生成多少用多少，不需要一开始投入很大的内容成本。"],
-      ["我不会拍视频可以用吗？", "可以。Duitok AI 主打减少拍摄和剪辑压力，帮助你生成带货视频方向、脚本、caption 和不露脸内容。"],
+      ["我不会拍视频可以用吗？", "可以。Duitok AI 主打减少拿货、拍摄和剪辑压力，帮助你生成带货视频方向、脚本、caption 和不露脸内容。"],
       ["一定要做 TikTok Affiliate 吗？", "不一定。TikTok Affiliate 是推荐入门场景，但 Duitok AI 适合任何需要短视频带货的场景。"],
       ["没有 TikTok Affiliate 账号可以吗？", "可以。你也可以先用 Duitok 做 TikTok Shop、本地产品、Shopee / Lazada、Reels、Shorts 或品牌产品推广内容。"],
-      ["一天 100+ 视频是真的吗？", "平台流程是为了批量生成视频角度和内容而设计，具体数量取决于使用方式、credit 和产品素材。"],
+      ["一天能批量生成很多内容角度吗？", "平台流程是为了批量生成视频角度和内容而设计，具体数量取决于使用方式、credit、产品素材和你的执行节奏。"],
       ["学员第一个星期 RM1000+ 是保证吗？", "不是保证。这是已有学员根据教程和平台执行后的案例，结果因人而异。"],
-      ["RM69 包含什么？", "RM69 是每月会员费，包含 Duitok AI 平台使用、短视频带货模板、教学 SOP、hook/script/caption 生成流程和基础支持。现在 promotion：订阅送 10 credits。生成费用另外按 credit 计算：图片 RM0.10，视频 RM0.40。"]
+      ["RM69 包含什么？", "RM69 是每月会员费，包含 Duitok AI 平台使用、已跑通短视频带货打法、模板、教学 SOP、hook/script/caption 生成流程和基础支持。现在 promotion：订阅送 10 credits。生成费用另外按 credit 计算：图片 RM0.10，视频 RM0.40。"]
     ],
     en: [
       ["Does Duitok AI guarantee income?", "No. Duitok AI provides a platform, templates, tutorials, and method to help you start short-video selling. Results depend on products, accounts, content quality, market feedback, and execution."],
@@ -3426,7 +3426,7 @@ function chatPanel() {
       </header>
       <div class="agent-thread">
         ${intro}
-        ${state.agentMessages.map((item) => `<article class="${item.role}"><span>${item.role === "user" ? "You" : "Agent"}</span><p>${esc(item.content).replaceAll("\n", "<br>")}</p></article>`).join("")}
+        ${state.agentMessages.map((item) => `<article class="${item.role}"><span>${item.role === "user" ? "You" : "Agent"}</span><p>${esc(item.content).replaceAll("\n", "<br>")}</p>${agentRunPanel(item.agentRun)}</article>`).join("")}
         ${state.agentBusy ? `<article class="assistant"><span>Agent</span><p>${icon("loader-circle", 16)} Thinking and calling Duitok tools...</p></article>` : ""}
       </div>
       <form class="agent-form" data-form="agent">
@@ -3434,6 +3434,54 @@ function chatPanel() {
         <button class="gold-button" type="submit" ${state.agentBusy ? "disabled" : ""}>${icon(state.agentBusy ? "loader-circle" : "send")} Send</button>
       </form>
     </section>`;
+}
+
+function agentRunStatusLabel(status = "") {
+  return {
+    planning: "规划中",
+    running: "执行中",
+    waiting_confirmation: "等待确认",
+    completed: "已完成",
+    failed: "失败"
+  }[status] || status || "处理中";
+}
+
+function agentRunPanel(run) {
+  if (!run) return "";
+  const steps = Array.isArray(run.plan) ? run.plan : [];
+  const confidence = run.confidence || {};
+  return `
+    <div class="agent-run-card" data-agent-run-status="${esc(run.status || "")}">
+      <div class="agent-run-head">
+        <strong>${icon(run.status === "waiting_confirmation" ? "shield-alert" : "list-checks", 16)} ${agentRunStatusLabel(run.status)}</strong>
+        <span>${esc(run.intent || "agent")}</span>
+      </div>
+      ${steps.length ? `<ol class="agent-run-steps">${steps.map((step) => `
+        <li data-step-status="${esc(step.status || "pending")}">
+          <b></b>
+          <span>${esc(step.label || step.id || "Step")}</span>
+          ${step.detail ? `<small>${esc(step.detail)}</small>` : ""}
+        </li>`).join("")}</ol>` : ""}
+      ${Object.keys(confidence).length ? `<div class="agent-confidence">
+        ${["intent", "project", "tool", "execution"].map((key) => `<span>${key}<b>${Math.round(Number(confidence[key] || 0) * 100)}%</b></span>`).join("")}
+      </div>` : ""}
+      ${agentConfirmationCard(run)}
+    </div>`;
+}
+
+function agentConfirmationCard(run) {
+  const confirmation = run?.confirmation;
+  if (!confirmation || run.status !== "waiting_confirmation") return "";
+  return `
+    <div class="agent-confirm-card">
+      <strong>${icon("shield-check", 18)} ${esc(confirmation.title || "需要确认")}</strong>
+      <p>${esc(confirmation.message || "确认后才会执行。")}</p>
+      <small>${esc(confirmation.impact || "工作区动作")}</small>
+      <div>
+        <button class="gold-button" data-agent-confirm="${esc(run.id)}" data-agent-token="${esc(confirmation.token || "")}">${icon("check", 16)} Confirm</button>
+        <button class="dark-button" data-action="clear-agent-confirm">${icon("x", 16)} Cancel</button>
+      </div>
+    </div>`;
 }
 
 function bind() {
@@ -3459,6 +3507,7 @@ function bind() {
   document.querySelectorAll("[data-admin-status]").forEach((el) => el.addEventListener("click", () => adminUpdateUser(el.dataset.adminStatus, { status: el.dataset.status })));
   document.querySelectorAll("[data-agent-permission]").forEach((el) => el.addEventListener("click", () => adminUpdateUser(el.dataset.agentPermission, { agentPermissions: { [el.dataset.permission]: el.dataset.enabled === "true" } })));
   document.querySelectorAll("[data-agent-prompt]").forEach((el) => el.addEventListener("click", () => sendAgentMessage(el.dataset.agentPrompt)));
+  document.querySelectorAll("[data-agent-confirm]").forEach((el) => el.addEventListener("click", () => confirmAgentAction(el.dataset.agentConfirm, el.dataset.agentToken)));
   document.querySelectorAll("[data-date-field]").forEach((el) => el.addEventListener("change", () => set({ [el.dataset.dateField]: el.value })));
   document.querySelectorAll("[data-action]").forEach((el) => el.addEventListener("click", (e) => action(e, el.dataset.action)));
   document.querySelectorAll("[data-field-set]").forEach((el) => el.addEventListener("click", () => saveProjectField(el.dataset.fieldSet, el.dataset.value)));
@@ -3532,6 +3581,13 @@ async function action(event, name) {
   if (name === "clear-agent") {
     localStorage.removeItem("duitok-agent-messages");
     return set({ agentMessages: [], agentInput: "" });
+  }
+  if (name === "clear-agent-confirm") {
+    const messages = state.agentMessages.map((item) => item.agentRun?.status === "waiting_confirmation"
+      ? { ...item, agentRun: { ...item.agentRun, status: "failed", confirmation: null, plan: (item.agentRun.plan || []).map((step) => step.status === "waiting_confirmation" ? { ...step, status: "failed", detail: "用户已取消" } : step) } }
+      : item);
+    rememberAgentMessages(messages);
+    return set({ agentMessages: messages });
   }
   if (name === "logout") {
     localStorage.removeItem("duitok-user");
@@ -3802,7 +3858,7 @@ async function sendAgentMessage(message) {
         step: state.step
       })
     });
-    const messages = [...nextMessages, { role: "assistant", content: res.reply || "Done." }];
+    const messages = [...nextMessages, { role: "assistant", content: res.reply || "Done.", agentRun: res.agentRun || null }];
     rememberAgentMessages(messages);
     const db = res.db || state.db;
     set({
@@ -3818,6 +3874,37 @@ async function sendAgentMessage(message) {
     rememberAgentMessages(messages);
     set({ agentMessages: messages, agentBusy: false });
     completeAgentVisual();
+    notify(error.message);
+  }
+}
+
+async function confirmAgentAction(runId, token) {
+  if (!runId || !token || state.agentBusy) return;
+  set({ agentBusy: true });
+  try {
+    const res = await api("/agent/confirm", {
+      method: "POST",
+      body: JSON.stringify({ runId, token })
+    });
+    const db = res.db || state.db;
+    const messages = state.agentMessages.map((item) => item.agentRun?.id === runId
+      ? { ...item, content: res.reply || item.content, agentRun: res.agentRun || item.agentRun }
+      : item);
+    rememberAgentMessages(messages);
+    set({
+      db,
+      agentMessages: messages,
+      agentBusy: false,
+      ...applyAgentUiActions(res.uiActions, db)
+    });
+    completeAgentVisual();
+    notify("Confirmed Agent action completed.");
+  } catch (error) {
+    const messages = state.agentMessages.map((item) => item.agentRun?.id === runId
+      ? { ...item, agentRun: { ...item.agentRun, status: "failed", confirmation: null } }
+      : item);
+    rememberAgentMessages(messages);
+    set({ agentMessages: messages, agentBusy: false });
     notify(error.message);
   }
 }
