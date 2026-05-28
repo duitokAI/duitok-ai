@@ -3029,11 +3029,28 @@ function modal() {
 
 function sopDashboardModal() {
   const stepCards = [
-    ["1", "Dashboard overview", "Tengok total production bulan ni: Image, UGC, Auto Content, Original Video, Clone Prompt, Ready to Post dan credit yang sudah guna.", "layout-dashboard"],
-    ["2", "Pilih atau create project", "Semua generation mesti duduk dalam satu project. Kalau campaign baru, create project dulu supaya asset, prompt dan schedule tidak bercampur.", "folder-plus"],
-    ["3", "Baca daily stats", "Guna date filter untuk check output harian, cost breakdown dan recent activity sebelum decide nak scale angle mana.", "bar-chart-3"],
-    ["4", "Masuk tab generation", "Lepas pilih project, teruskan ke Image / UGC / Auto Content / Story / Original Video / Clone Prompt ikut task yang nak dibuat.", "wand-sparkles"]
+    ["1", "Dashboard overview", "Dashboard with stats cards + filter + daily production chart", "Atas: 5 stats cards (Image / UGC / Cinema / Auto Content / Total Cost) untuk date range yang dipilih. Tengah: Filter by Date Range - set From + To + Apply. Bawah: Daily Production line chart - tunjuk activity per day."],
+    ["2", "Apa itu PROJECT?", "", "Project = bekas (folder) untuk satu client / satu campaign / satu produk. SEMUA generation korang (image, video, auto content, dll) live dalam satu project specific. History grid kat setiap tab show data project tu sahaja. Contoh: Project 'meow' - untuk client A skincare brand. Project 'Project 1' - untuk client B yoga pants. Tukar project kat sidebar = tukar context. Stats + history beralih ikut project yang aktif."],
+    ["3", "Buat New Project", "", "Sidebar atas ada button '+ New project' (orange). Tekan -> modal popup. Masukkan project name (e.g. 'Brand X Campaign Q1') -> Create. Project baru muncul kat sidebar Projects list. Limit max 4 projects per akaun (badge '2/4' tunjuk current usage). Untuk lebih, perlu hubungi admin upgrade plan.", "Naming tip: pakai nama yang specific. 'Skincare-A-Aug-Campaign' lebih clear dari 'Project 5'."],
+    ["4", "Switch antara Projects", "", "Sidebar 'PROJECTS' section senaraikan semua project korang. Tekan project name -> semua tab generation switch ke project tu. URL update ke ?view=&lt;tab&gt; dan history grid reload. Kalau project tak ada (deleted), 'Project not found' message muncul - tekan project lain dari sidebar."],
+    ["5", "Search Projects (kalau dah banyak)", "", "Search bar kat atas sidebar - type nama project untuk filter. Useful bila dah ada 10+ projects (tapi limit 4 default, jadi rare)."],
+    ["6", "Project menu (3-dot)", "", "Hover atas project name -> 3-dot menu muncul -> boleh Rename atau Delete project. Delete project = WARNING. Semua history dalam tu hilang permanently. Confirm dialog akan tanya dulu. Tak ada undo.", "Rename anytime safe. Delete cuma kalau project memang dah expired / abandoned."],
+    ["7", "Card 'IMAGE / UGC / CINEMA / AUTO CONTENT'", "", "Total count generation per asset type dalam date range yang dipilih. IMAGE - gambar yang di-generate kat Image tab. UGC - video Veo 8s/16s dari UGC tab. CINEMA - video Seedance dari Cinema tab + video Grok dari Story tab combined. AUTO CONTENT - total videos dari Auto Content batches. Click stats card (kalau interactive) -> drill down ke specific tab history."],
+    ["8", "Card 'TOTAL COST'", "", "Sum credit deducted untuk semua generation dalam date range. Format RM. Useful untuk monthly accounting / billing client.", "Untuk monthly invoice: set From=01 + To=last day of month, Apply, screenshot Total Cost."],
+    ["9", "FILTER BY DATE RANGE", "", "FROM DATE - earliest date to include. TO DATE - latest date to include. APPLY button - refresh stats with new range. Reset button - back to default (current month). KL timezone (UTC+8) - tarikh local Malaysia."],
+    ["10", "DAILY PRODUCTION chart", "", "Line chart untuk visual trend. Setiap line satu asset type (color-coded). X-axis = dates. Y-axis = count generated. '42 total in range' = jumlah keseluruhan untuk filter aktif. Click legend (Image / UGC / Cinema / Auto Content) untuk toggle line on/off.", "Useful untuk identify spike days (campaign launches) atau gap (vacation / sakit)."],
+    ["11", "Top - Logo & Dashboard button", "", "Duitok AI logo (click -> balik ke dashboard view ini). Dashboard button (active highlighted bila kat dashboard)."],
+    ["12", "+ New project (orange button)", "", "Create project baru. Badge '2/4' = current count vs max limit."],
+    ["13", "Projects list (search + project rows)", "", "Senarai semua project dengan icon folder. Click row -> switch ke project tu. Hover -> 3-dot menu (Rename / Delete)."],
+    ["14", "ACCOUNT section", "", "Billing - manage Pro plan + payment history. Top Up Credit - beli credit packages. Usage - tracking spend & activity. Saved Prompts - library prompt history. Auto Post TikTok - install Chrome extension. SOP. Join Discussion WhatsApp - community group."],
+    ["15", "CREDIT BALANCE card", "", "Current credit balance + Top Up shortcut button. Auto-refresh setiap 30 saat."],
+    ["16", "PRO · 57 DAYS LEFT badge", "", "Plan status + days till renewal. Hover atau click -> Billing page untuk manage."],
+    ["17", "User card bawah sekali", "", "Display name + email. Settings + Sign out buttons."]
   ];
+  const sectionLabels = {
+    7: "Detail - Stats Cards & Filter",
+    11: "Sidebar Layout - Apa Setiap Section"
+  };
   return `
     <div class="modal-backdrop sop-backdrop" data-action="close-modal">
       <section class="sop-modal" role="dialog" aria-modal="true" aria-labelledby="sop-dashboard-title">
@@ -3049,46 +3066,36 @@ function sopDashboardModal() {
           <p class="sop-path">Welcome screen · pick / create project · daily stats</p>
           <section class="sop-copy-block">
             <h3>Apa ini?</h3>
-            <p>Dashboard ialah landing page bila korang first kali login. Dia tunjuk ringkasan production keseluruhan (total Image / UGC / Cinema / Auto Content + Total Cost) dan jadi launchpad untuk pilih project mana yang nak kerja. Semua tab generation (Image / UGC / Auto Content / Story / Cinema / Clone) live DALAM satu project - korang mesti pilih atau buat project dulu sebelum generate apa-apa.</p>
+            <p>Dashboard ialah landing page bila korang first kali login. Dia tunjuk ringkasan production keseluruhan (total Image / UGC / Cinema / Auto Content + Total Cost) dan jadi launchpad untuk pilih project mana yang nak kerja. Semua tab generation (Image / UGC / Auto Content / Story / Cinema / Clone) live DALAM satu project &mdash; korang mesti pilih atau buat project dulu sebelum generate apa-apa.</p>
           </section>
           <section class="sop-callout">
             ${icon("lightbulb", 34)}
             <div>
               <h3>Bila guna tab ni?</h3>
-              <p>Setiap kali korang login. Atau bila nak switch antara client / campaign berbeza. Atau bila nak tengok overall production stats - berapa banyak generated bulan ni, total cost, daily breakdown.</p>
+              <p>Setiap kali korang login. Atau bila nak switch antara client / campaign berbeza. Atau bila nak tengok overall production stats &mdash; berapa banyak generated bulan ni, total cost, daily breakdown.</p>
             </div>
           </section>
           <section class="sop-guide">
             <h3>${icon("chevron-right", 28)} Cara guna</h3>
             <div class="sop-step-list">
-              ${stepCards.map(([no, title, copy, ic]) => `
+              ${stepCards.map(([no, title, subtitle, copy, tip]) => `
+                ${sectionLabels[no] ? `<h3 class="sop-section-heading">${sectionLabels[no]}</h3>` : ""}
                 <article class="sop-step-card">
                   <div class="sop-step-title">
                     <span>${no}</span>
-                    <h4>Step ${no} - ${title}</h4>
+                    <h4>Step ${no} &mdash; ${title}</h4>
                   </div>
-                  <div class="sop-step-preview">
-                    <div class="sop-mini-sidebar">
-                      <b>Duitok</b>
-                      <i></i><i></i><i></i>
-                    </div>
-                    <div class="sop-mini-screen">
-                      <strong>${icon(ic, 20)} ${title}</strong>
-                      <div class="sop-mini-grid"><i></i><i></i><i></i><i></i></div>
-                      <p>${copy}</p>
-                    </div>
+                  <div class="sop-step-body">
+                    ${subtitle ? `<strong>${subtitle}</strong>` : ""}
+                    <p>${copy}</p>
+                    ${tip ? `<div class="sop-tip">${icon("lightbulb", 20)} <div><b>Tip:</b><p>${tip}</p></div></div>` : ""}
                   </div>
                 </article>`).join("")}
             </div>
           </section>
-          <section class="sop-checklist">
-            <h3>Checklist sebelum generate</h3>
-            <div>
-              <span>${icon("check", 18)} Project sudah dipilih</span>
-              <span>${icon("check", 18)} Credit cukup untuk batch</span>
-              <span>${icon("check", 18)} Date range betul</span>
-              <span>${icon("check", 18)} Next action jelas</span>
-            </div>
+          <section class="sop-workflow">
+            <h3>Workflow tip</h3>
+            <p>Buat 1 project per client. Generate 1 batch monthly content (5-10 videos via Auto Content). Review kat history grid -> mark posted via extension. Bulan baru -> reset counter + reuse project. Dashboard stats akan tunjuk progression korang merentasi bulan.</p>
           </section>
         </div>
         <footer class="sop-modal-foot">

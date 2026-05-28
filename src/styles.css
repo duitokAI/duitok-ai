@@ -4512,8 +4512,8 @@ label {
   padding: 24px 46px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   background:
-    radial-gradient(circle at 6% 18%, rgba(255, 223, 61, 0.16), transparent 24%),
-    linear-gradient(135deg, #1d1a0d, #100f09 58%, #171307);
+    radial-gradient(circle at 6% 18%, rgba(255, 78, 120, 0.2), transparent 24%),
+    linear-gradient(135deg, #19091e, #10080f 58%, #1c0a14);
 }
 
 .sop-modal-icon {
@@ -4522,9 +4522,9 @@ label {
   display: inline-grid;
   place-items: center;
   border-radius: 16px;
-  background: var(--pl-yellow, #ffdf3d);
-  color: #050505;
-  box-shadow: 0 18px 42px rgba(255, 223, 61, 0.22);
+  background: linear-gradient(135deg, var(--pink), var(--coral));
+  color: #fff;
+  box-shadow: 0 18px 42px rgba(255, 78, 120, 0.28);
 }
 
 .sop-modal-head p,
@@ -4532,7 +4532,7 @@ label {
 .sop-callout h3,
 .sop-checklist h3 {
   margin: 0;
-  color: var(--pl-yellow, #ffdf3d);
+  color: var(--pink);
   font-weight: 950;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -4589,16 +4589,16 @@ label {
   align-items: start;
   margin-bottom: 36px;
   padding: 24px 32px;
-  border: 1px solid rgba(255, 223, 61, 0.34);
+  border: 1px solid rgba(255, 78, 120, 0.36);
   border-radius: 22px;
   background:
-    linear-gradient(135deg, rgba(255, 223, 61, 0.08), rgba(255, 223, 61, 0.04)),
+    linear-gradient(135deg, rgba(255, 78, 120, 0.11), rgba(255, 131, 94, 0.07)),
     rgba(255, 255, 255, 0.03);
 }
 
 .sop-callout > svg,
 .sop-guide > h3 svg {
-  color: var(--pl-yellow, #ffdf3d);
+  color: var(--pink);
   stroke-width: 3;
 }
 
@@ -4616,6 +4616,15 @@ label {
   margin: 0 0 24px;
   color: #fff;
   font-size: clamp(20px, 1.45vw, 26px);
+}
+
+.sop-section-heading {
+  margin: 10px 0 2px;
+  color: var(--pink);
+  font-size: 17px;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .sop-step-list {
@@ -4645,8 +4654,8 @@ label {
   place-items: center;
   flex: 0 0 auto;
   border-radius: 14px;
-  background: var(--pl-yellow, #ffdf3d);
-  color: #050505;
+  background: linear-gradient(135deg, var(--pink), var(--coral));
+  color: #fff;
   font-size: 23px;
   font-weight: 950;
 }
@@ -4655,6 +4664,59 @@ label {
   margin: 0;
   color: #fff;
   font-size: clamp(18px, 1.25vw, 24px);
+}
+
+.sop-step-body {
+  display: grid;
+  gap: 12px;
+  padding: 24px 30px 28px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    linear-gradient(135deg, rgba(255, 78, 120, 0.05), rgba(255, 131, 94, 0.025)),
+    #0d0b0f;
+}
+
+.sop-step-body strong {
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 17px;
+  line-height: 1.45;
+}
+
+.sop-step-body p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 16px;
+  line-height: 1.62;
+}
+
+.sop-tip {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  margin-top: 4px;
+  padding: 16px 18px;
+  border: 1px solid rgba(255, 78, 120, 0.24);
+  border-radius: 16px;
+  background: rgba(255, 78, 120, 0.08);
+}
+
+.sop-tip svg {
+  color: var(--pink);
+  stroke-width: 3;
+}
+
+.sop-tip b {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--pink);
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sop-tip p {
+  color: rgba(255, 255, 255, 0.78);
 }
 
 .sop-step-preview {
@@ -4674,7 +4736,7 @@ label {
 }
 
 .sop-mini-sidebar b {
-  color: var(--pl-yellow, #ffdf3d);
+  color: var(--pink);
   font-size: 12px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -4702,7 +4764,7 @@ label {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: var(--pl-yellow, #ffdf3d);
+  color: var(--pink);
   font-size: 15px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -4718,7 +4780,7 @@ label {
   height: 58px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background:
-    linear-gradient(135deg, rgba(255, 223, 61, 0.13), rgba(255, 223, 61, 0.06)),
+    linear-gradient(135deg, rgba(255, 78, 120, 0.16), rgba(255, 131, 94, 0.08)),
     rgba(255, 255, 255, 0.06);
 }
 
@@ -4735,6 +4797,31 @@ label {
   padding: 24px;
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.05);
+}
+
+.sop-workflow {
+  margin-top: 28px;
+  padding: 24px 28px;
+  border: 1px solid rgba(255, 78, 120, 0.28);
+  border-radius: 20px;
+  background:
+    linear-gradient(135deg, rgba(255, 78, 120, 0.1), rgba(255, 131, 94, 0.06)),
+    rgba(255, 255, 255, 0.03);
+}
+
+.sop-workflow h3 {
+  margin: 0 0 10px;
+  color: var(--pink);
+  font-weight: 950;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.sop-workflow p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 16px;
+  line-height: 1.6;
 }
 
 .sop-checklist div {
@@ -4772,11 +4859,11 @@ label {
   min-height: 58px;
   border: 0;
   border-radius: 14px;
-  background: var(--pl-yellow, #ffdf3d);
-  color: #050505;
+  background: linear-gradient(135deg, var(--pink), var(--coral));
+  color: #fff;
   font-size: 20px;
   font-weight: 950;
-  box-shadow: 0 20px 54px rgba(255, 223, 61, 0.28);
+  box-shadow: 0 20px 54px rgba(255, 78, 120, 0.34);
 }
 
 @media (max-width: 760px) {
@@ -11284,38 +11371,45 @@ label {
   }
 }
 
-/* Studio PeningLab-inspired palette: black shell, white canvas, yellow actions. */
+/* Studio palette: extend Duitok purple brand while keeping a clean studio layout. */
 :root {
-  --pl-black: #050505;
-  --pl-panel: #101010;
-  --pl-panel-2: #171717;
-  --pl-yellow: #ffdf3d;
-  --pl-yellow-2: #f1c62a;
-  --pl-white: #fffefa;
-  --pl-stroke: rgba(255, 255, 255, 0.1);
-  --pl-card-line: #e9e2dc;
-  --pl-ink: #211127;
-  --pl-muted: #8a808b;
-  --pl-purple: #260032;
+  --studio-purple-950: #18001f;
+  --studio-purple-900: #260032;
+  --studio-purple-800: #3a004d;
+  --studio-purple-700: #4b005e;
+  --studio-purple-600: #65007d;
+  --studio-pink: #ff3f6e;
+  --studio-coral: #ff7a5c;
+  --studio-yellow: #ffd21a;
+  --studio-shell: #fff7fb;
+  --studio-lilac: #f6ecff;
+  --studio-card: #ffffff;
+  --studio-ink: #2d0d35;
+  --studio-muted: #7b687f;
+  --studio-line: rgba(75, 0, 94, 0.12);
+  --studio-shadow: 0 24px 70px rgba(75, 0, 94, 0.12);
 }
 
 .studio-shell {
-  background: var(--pl-black) !important;
-  color: var(--pl-white) !important;
+  background:
+    radial-gradient(circle at 86% 0, rgba(255, 63, 110, 0.14), transparent 30%),
+    linear-gradient(135deg, var(--studio-shell) 0%, var(--studio-lilac) 100%) !important;
+  color: var(--studio-ink) !important;
 }
 
 .studio-shell .sidebar {
   border-right-color: rgba(255, 255, 255, 0.12) !important;
   background:
-    radial-gradient(circle at 18% 0, rgba(255, 223, 61, 0.08), transparent 30%),
-    linear-gradient(180deg, #080808 0%, #050505 100%) !important;
-  box-shadow: none !important;
+    radial-gradient(circle at 20% 0, rgba(255, 63, 110, 0.22), transparent 34%),
+    radial-gradient(circle at 88% 24%, rgba(255, 122, 92, 0.12), transparent 30%),
+    linear-gradient(180deg, var(--studio-purple-900) 0%, var(--studio-purple-950) 100%) !important;
+  box-shadow: 18px 0 46px rgba(38, 0, 50, 0.2) !important;
 }
 
 .studio-shell .sidebar .brand-lockup,
 .studio-shell .sidebar-account-panel {
-  border-bottom-color: rgba(255, 255, 255, 0.1) !important;
-  border-top-color: rgba(255, 255, 255, 0.1) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.12) !important;
+  border-top-color: rgba(255, 255, 255, 0.12) !important;
 }
 
 .studio-shell .sidebar .brand-wordmark {
@@ -11323,12 +11417,12 @@ label {
 }
 
 .studio-shell .sidebar .brand-wordmark span:last-child {
-  color: #ff5f7d !important;
+  color: var(--studio-pink) !important;
 }
 
 .studio-shell .sidebar .brand-lockup strong,
 .studio-shell .side-section {
-  color: rgba(255, 255, 255, 0.48) !important;
+  color: rgba(255, 255, 255, 0.54) !important;
 }
 
 .studio-shell .sidebar-language,
@@ -11337,80 +11431,81 @@ label {
 .studio-shell .project-button,
 .studio-shell .search-box input,
 .studio-shell .sidebar-subscription-card {
-  border-color: rgba(255, 255, 255, 0.1) !important;
-  background: rgba(255, 255, 255, 0.055) !important;
-  color: rgba(255, 255, 255, 0.72) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  background: rgba(255, 255, 255, 0.075) !important;
+  color: rgba(255, 255, 255, 0.75) !important;
   box-shadow: none !important;
 }
 
 .studio-shell .side-primary.active,
 .studio-shell .side-link.active,
 .studio-shell .project-button.active {
-  border-color: rgba(255, 223, 61, 0.42) !important;
-  background: rgba(255, 223, 61, 0.12) !important;
-  color: var(--pl-yellow) !important;
-  box-shadow: inset 3px 0 0 var(--pl-yellow) !important;
+  border-color: rgba(255, 63, 110, 0.42) !important;
+  background: linear-gradient(135deg, rgba(255, 63, 110, 0.2), rgba(255, 122, 92, 0.12)) !important;
+  color: #fff !important;
+  box-shadow: inset 3px 0 0 var(--studio-pink), 0 14px 34px rgba(255, 63, 110, 0.12) !important;
 }
 
 .studio-shell .side-link:hover,
 .studio-shell .project-button:hover {
-  background: rgba(255, 255, 255, 0.08) !important;
+  background: rgba(255, 255, 255, 0.11) !important;
   color: #fff !important;
 }
 
 .studio-shell .new-project,
 .studio-shell .sidebar-credit-card button {
-  border-color: rgba(255, 223, 61, 0.58) !important;
-  background: var(--pl-yellow) !important;
-  color: #080808 !important;
-  box-shadow: 0 18px 34px rgba(255, 223, 61, 0.16) !important;
+  border-color: rgba(255, 63, 110, 0.36) !important;
+  background: linear-gradient(135deg, var(--studio-pink), var(--studio-coral)) !important;
+  color: #fff !important;
+  box-shadow: 0 18px 38px rgba(255, 63, 110, 0.24) !important;
 }
 
 .studio-shell .new-project b {
-  color: rgba(0, 0, 0, 0.42) !important;
+  color: rgba(255, 255, 255, 0.68) !important;
 }
 
 .studio-shell .project-button.active svg,
 .studio-shell .side-primary.active svg,
 .studio-shell .side-link.active svg {
-  border-color: var(--pl-yellow) !important;
-  background: var(--pl-yellow) !important;
-  color: #080808 !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  background: rgba(255, 255, 255, 0.18) !important;
+  color: #fff !important;
 }
 
 .studio-shell .sidebar-credit-card {
-  border-color: rgba(255, 223, 61, 0.18) !important;
+  border-color: rgba(255, 210, 26, 0.22) !important;
   background:
-    radial-gradient(circle at 86% 0, rgba(255, 223, 61, 0.12), transparent 36%),
-    rgba(255, 223, 61, 0.055) !important;
+    radial-gradient(circle at 86% 0, rgba(255, 210, 26, 0.18), transparent 36%),
+    rgba(255, 210, 26, 0.075) !important;
 }
 
 .studio-shell .sidebar-credit-card > span,
 .studio-shell .sidebar-credit-card b {
-  color: var(--pl-yellow) !important;
+  color: var(--studio-yellow) !important;
 }
 
 .studio-shell .workspace {
   background:
-    radial-gradient(circle at 96% 3%, rgba(255, 223, 61, 0.08), transparent 20%),
-    linear-gradient(180deg, #080808 0%, #050505 34%, #070707 100%) !important;
-  color: var(--pl-white) !important;
+    radial-gradient(circle at 94% 0, rgba(255, 63, 110, 0.14), transparent 28%),
+    radial-gradient(circle at 8% 18%, rgba(101, 0, 125, 0.1), transparent 30%),
+    linear-gradient(135deg, var(--studio-shell) 0%, var(--studio-lilac) 100%) !important;
+  color: var(--studio-ink) !important;
 }
 
 .studio-shell .dashboard-head,
 .studio-shell .project-head {
-  color: var(--pl-white) !important;
+  color: var(--studio-ink) !important;
 }
 
 .studio-shell .dashboard-head h1,
 .studio-shell .project-head h1 {
-  color: #fff !important;
+  color: var(--studio-purple-900) !important;
   text-shadow: none !important;
 }
 
 .studio-shell .eyebrow,
 .studio-shell .folder-label {
-  color: var(--pl-yellow) !important;
+  color: var(--studio-pink) !important;
 }
 
 .studio-shell .subtitle,
@@ -11421,24 +11516,24 @@ label {
 .studio-shell .metric-row span,
 .studio-shell .table small,
 .studio-shell .schedule-list small {
-  color: rgba(255, 255, 255, 0.5) !important;
+  color: var(--studio-muted) !important;
 }
 
 .studio-shell .step-tabs {
-  border-bottom-color: rgba(255, 255, 255, 0.12) !important;
+  border-bottom-color: var(--studio-line) !important;
 }
 
 .studio-shell .step-tabs button {
-  border-color: rgba(255, 255, 255, 0.12) !important;
-  background: rgba(255, 255, 255, 0.06) !important;
-  color: rgba(255, 255, 255, 0.66) !important;
+  border-color: var(--studio-line) !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  color: var(--studio-muted) !important;
 }
 
 .studio-shell .step-tabs button.active {
-  border-color: rgba(255, 223, 61, 0.68) !important;
-  background: var(--pl-yellow) !important;
-  color: #090909 !important;
-  box-shadow: 0 16px 32px rgba(255, 223, 61, 0.16) !important;
+  border-color: rgba(75, 0, 94, 0.24) !important;
+  background: linear-gradient(135deg, var(--studio-purple-700), var(--studio-purple-900)) !important;
+  color: #fff !important;
+  box-shadow: 0 16px 34px rgba(75, 0, 94, 0.2) !important;
 }
 
 .studio-shell .canvas-card,
@@ -11457,10 +11552,10 @@ label {
 .studio-shell .table div,
 .studio-shell .schedule-list article,
 .studio-shell .topup-grid button {
-  border-color: var(--pl-card-line) !important;
-  background: var(--pl-white) !important;
-  color: var(--pl-ink) !important;
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22) !important;
+  border-color: var(--studio-line) !important;
+  background: var(--studio-card) !important;
+  color: var(--studio-ink) !important;
+  box-shadow: var(--studio-shadow) !important;
 }
 
 .studio-shell .canvas-card {
@@ -11482,7 +11577,7 @@ label {
 .studio-shell .generator-box h2,
 .studio-shell .upload-card h2,
 .studio-shell .result-grid h3 {
-  color: var(--pl-ink) !important;
+  color: var(--studio-purple-900) !important;
 }
 
 .studio-shell .generator-box p,
@@ -11490,41 +11585,41 @@ label {
 .studio-shell .result-grid p,
 .studio-shell .empty-result p,
 .studio-shell .canvas-card p {
-  color: var(--pl-muted) !important;
+  color: var(--studio-muted) !important;
 }
 
 .studio-shell label {
-  color: #8d818e !important;
+  color: var(--studio-purple-700) !important;
 }
 
 .studio-shell input,
 .studio-shell select,
 .studio-shell textarea {
-  border-color: #e5ddd8 !important;
-  background: #fffefa !important;
-  color: var(--pl-ink) !important;
+  border-color: rgba(75, 0, 94, 0.14) !important;
+  background: #fff !important;
+  color: var(--studio-ink) !important;
   box-shadow: none !important;
 }
 
 .studio-shell input::placeholder,
 .studio-shell textarea::placeholder {
-  color: #aaa2aa !important;
+  color: #b29bb7 !important;
 }
 
 .studio-shell .gold-button,
 .studio-shell .date-filter-card .gold-button,
 .studio-shell .chat-panel button {
-  border-color: rgba(255, 223, 61, 0.68) !important;
-  background: var(--pl-yellow) !important;
-  color: #090909 !important;
-  box-shadow: 0 18px 34px rgba(255, 223, 61, 0.16) !important;
+  border-color: rgba(255, 63, 110, 0.36) !important;
+  background: linear-gradient(135deg, var(--studio-pink), var(--studio-coral)) !important;
+  color: #fff !important;
+  box-shadow: 0 18px 38px rgba(255, 63, 110, 0.22) !important;
 }
 
 .studio-shell .dark-button,
 .studio-shell .sop-button,
 .studio-shell .result-grid button:not(.result-actions button) {
-  border-color: rgba(38, 0, 50, 0.94) !important;
-  background: var(--pl-purple) !important;
+  border-color: rgba(38, 0, 50, 0.92) !important;
+  background: var(--studio-purple-900) !important;
   color: #fff !important;
   box-shadow: none !important;
 }
