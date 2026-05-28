@@ -1802,7 +1802,10 @@ function studio() {
         ${sidebarAccountPanel()}
       </aside>
       <main class="workspace">${page()}</main>
-      <button class="chat-bubble support-bubble" data-action="support" title="Contact support">${icon("message-circle", 32)}</button>
+      <button class="chat-bubble support-bubble" data-action="support" title="WhatsApp human support" aria-label="WhatsApp human support">
+        <span class="support-bubble-icon">${icon("message-circle", 26)}</span>
+        <span class="support-bubble-copy"><b>人工客服</b><small>WhatsApp</small></span>
+      </button>
       <div id="modal-root">${modal()}</div>
     </div>`;
 }
