@@ -3204,8 +3204,100 @@ function sopDashboardContent() {
   return content[state.lang] || content.ms;
 }
 
+function sopImageContent() {
+  const content = {
+    ms: {
+      eyebrow: "Panduan",
+      title: "Tab Image — Generate Image AI",
+      close: "Faham - tutup",
+      path: "Banana Pro · GPT Image 2 · Imagen 4",
+      whatTitle: "Apa ini?",
+      what: "Tab Image digunakan untuk generate gambar avatar, produk atau scene custom dengan AI. Korang boleh combine character reference, product reference dan prompt supaya AI hasilkan gambar baru yang konsisten. Output 9:16 paling sesuai untuk TikTok dan boleh dipakai semula dalam UGC workflow.",
+      whenTitle: "Bila guna tab ni?",
+      when: "Guna tab Image bila korang nak create avatar dahulu sebelum generate video, nak product placement tanpa photographer, atau nak banyak variasi muka avatar untuk digunakan semula dalam UGC tab.",
+      guideTitle: "Cara guna",
+      stepLabel: "Step",
+      tipLabel: "Tip",
+      workflowTitle: "Workflow tip",
+      workflow: "Generate 5-10 avatar atau product scene yang paling kuat dahulu. Simpan output terbaik, kemudian reuse sebagai reference di UGC tab supaya video batch selepas itu nampak konsisten.",
+      sections: { 5: "Dropdown & Pilihan — Apa Maksud Setiap Satu" },
+      steps: [
+        { no: "1", title: "Form overview", subtitle: "Image Generator, Character Reference, Product Reference", copy: "Tiga card utama ialah Image Generator untuk pilih Model dan Mode, Character Reference untuk drop muka avatar, dan Product Reference untuk drop gambar produk. Di bawah ada Prompt & Settings dengan preset Avatar, Product dan Sales." },
+        { no: "2", title: "Upload Character Reference", copy: "Drag muka avatar yang korang nak guna. Pilih selfie yang clear dan fokus pada satu muka. AI akan cuba kekalkan muka itu dalam semua variation yang korang generate. Boleh juga guna From History kalau avatar pernah generated sebelum ini.", tip: "Satu muka clear sudah cukup. Kalau reference ada ramai orang, AI mudah confused." },
+        { no: "3", title: "Upload Product Reference", copy: "Drag gambar produk kalau ada. Pastikan packaging, label dan bentuk produk jelas supaya AI boleh kekalkan produk dalam scene. Skip step ini kalau cuma nak buat avatar shot." },
+        { no: "4", title: "Tekan Generate Image", copy: "Tekan Generate Image untuk mula. Cost RM0.20 per gambar. Pending card akan muncul di history bawah. Biasanya tunggu 15-30 saat. Lepas siap, gambar boleh download atau dipakai dalam UGC tab sebagai reference." },
+        { no: "5", title: "Dropdown MODEL — pilih engine AI", copy: "Banana Pro ialah default dan paling stabil untuk muka Malaysia serta character consistency. GPT Image 2 lebih kreatif untuk aesthetic scene tetapi muka kadang kurang consistent. Imagen 4 paling realistic untuk product hero shot dan premium look.", tip: "Mula dengan Banana Pro untuk avatar. Switch ke GPT Image 2 untuk scene unik. Guna Imagen 4 untuk hero shot produk." },
+        { no: "6", title: "Dropdown MODE — type of operation", copy: "Create Image ialah default untuk generate dari prompt dan reference. Mode lain seperti edit atau inpaint lebih advanced dan biasanya tidak perlu untuk UGC workflow standard.", tip: "Stick dengan Create Image untuk 95% case." },
+        { no: "7", title: "Tab AVATAR / PRODUCT / SALES", copy: "Avatar berisi preset persona untuk muka creator. Product berisi preset untuk product shot seperti flat lay, pedestal atau splash. Sales berisi visual marketing-style untuk ads dan banners.", tip: "Tap preset untuk auto-fill prompt, kemudian edit ikut produk sendiri." },
+        { no: "8", title: "Female persona presets", copy: "Kebaya 20s untuk anak dara modern, Casual 20s untuk Gen Z daily casual, Makcik untuk warm motherly look, Kitchen untuk cooking context, Nenek untuk senior trust vibe, dan Nenek Garden untuk outdoor senior scene.", tip: "Women's product: Kebaya 20s atau Casual 20s. Family product: Makcik. Testimoni grandparent: Nenek." },
+        { no: "9", title: "Male persona presets", copy: "Baju Melayu 20s untuk young traditional look, Casual 20s untuk Gen Z daily casual, Abang Pro untuk professional 30s, dan Pakcik untuk warm paternal trust look.", tip: "Pakcik vibe sesuai untuk produk yang perlukan trust dan recommendation." }
+      ]
+    },
+    zh: {
+      eyebrow: "指南",
+      title: "Image 页面 — AI 图片生成",
+      close: "我明白了 - 关闭",
+      path: "Banana Pro · GPT Image 2 · Imagen 4",
+      whatTitle: "这是什么？",
+      what: "Image 页面用来生成 avatar、产品图或自定义场景。你可以上传人物参考、产品参考，再配合 prompt，让 AI 生成新的图片。9:16 输出最适合 TikTok，也可以继续作为 UGC 视频生成的参考图。",
+      whenTitle: "什么时候用？",
+      when: "当你要先做 avatar、没有摄影师但需要 product placement，或想批量生成多张 creator 形象再拿去 UGC tab 复用时，就先用 Image tab。",
+      guideTitle: "怎么用",
+      stepLabel: "步骤",
+      tipLabel: "提示",
+      workflowTitle: "工作流建议",
+      workflow: "先生成 5-10 张最稳定的 avatar 或产品场景图，挑出效果最好的保存下来，再在 UGC tab 里复用，这样后续视频会更统一。",
+      sections: { 5: "下拉选项 — 每个选项是什么意思" },
+      steps: [
+        { no: "1", title: "表单总览", subtitle: "Image Generator、Character Reference、Product Reference", copy: "主要有三张卡：Image Generator 用来选择 Model 和 Mode；Character Reference 用来上传 avatar 人脸；Product Reference 用来上传产品图。下方的 Prompt & Settings 里有 Avatar、Product、Sales 三类 preset。" },
+        { no: "2", title: "上传 Character Reference", copy: "上传你要保留的人物脸。最好用清晰自拍，并且画面里只有一个人。AI 会尽量在后续 variation 里保持这张脸的一致性。也可以用 From History 选择之前生成过的 avatar。", tip: "一张清楚的人脸就够了。参考图里如果有多人，AI 很容易混乱。" },
+        { no: "3", title: "上传 Product Reference", copy: "如果有产品图，就上传包装、label 和形状都清楚的图片。AI 会尽量把产品保留在新场景里。如果只是生成 avatar，可以跳过这一步。" },
+        { no: "4", title: "点击 Generate Image", copy: "点击 Generate Image 开始生成。每张图成本 RM0.20。下方 history 会出现 pending card，通常等待 15-30 秒。完成后可以下载，也可以拿到 UGC tab 作为 reference。" },
+        { no: "5", title: "MODEL 下拉 — 选择 AI 引擎", copy: "Banana Pro 是默认选项，适合马来西亚人脸和角色一致性。GPT Image 2 更适合创意场景和 aesthetic visual，但人脸可能没那么稳定。Imagen 4 更适合高真实感产品 hero shot。", tip: "Avatar 先用 Banana Pro。需要特别场景时用 GPT Image 2。产品高级图用 Imagen 4。" },
+        { no: "6", title: "MODE 下拉 — 操作类型", copy: "Create Image 是默认模式，用 prompt 和 reference 生成新图。其它 edit / inpaint 类模式更 advanced，标准 UGC workflow 通常不用。", tip: "95% 情况保持 Create Image 就好。" },
+        { no: "7", title: "AVATAR / PRODUCT / SALES tabs", copy: "Avatar 是人物 preset；Product 是产品图 preset，例如 flat lay、pedestal、splash；Sales 是广告和 banner 风格的营销视觉。", tip: "点击 preset 会自动填 prompt，你可以再按产品修改。" },
+        { no: "8", title: "女性 persona presets", copy: "Kebaya 20s 是现代 kebaya 年轻女性；Casual 20s 是 Gen Z 日常风；Makcik 是温暖妈妈感；Kitchen 是厨房场景；Nenek 是长辈信任感；Nenek Garden 是户外花园长辈场景。", tip: "女性产品用 Kebaya 20s 或 Casual 20s；家庭产品用 Makcik；长辈 testimonial 用 Nenek。" },
+        { no: "9", title: "男性 persona presets", copy: "Baju Melayu 20s 是年轻传统造型；Casual 20s 是 Gen Z 日常风；Abang Pro 是 30 岁左右专业形象；Pakcik 是温暖可信的叔叔感。", tip: "需要信任背书的产品，可以测试 Pakcik 风格。" }
+      ]
+    },
+    en: {
+      eyebrow: "Guide",
+      title: "Image Tab — AI Image Generation",
+      close: "Got it - close",
+      path: "Banana Pro · GPT Image 2 · Imagen 4",
+      whatTitle: "What is this?",
+      what: "The Image tab is for generating avatar, product, or custom scene images with AI. You can combine a character reference, product reference, and prompt to create a new visual. 9:16 output works best for TikTok and can be reused later as a UGC video reference.",
+      whenTitle: "When should I use it?",
+      when: "Use the Image tab when you need an avatar before video generation, product placement without a photographer, or multiple creator-face variations to reuse in the UGC tab.",
+      guideTitle: "How to use it",
+      stepLabel: "Step",
+      tipLabel: "Tip",
+      workflowTitle: "Workflow tip",
+      workflow: "Generate 5-10 strong avatar or product-scene images first. Save the best outputs, then reuse them in the UGC tab so later video batches stay visually consistent.",
+      sections: { 5: "Dropdowns & Options — What Each One Means" },
+      steps: [
+        { no: "1", title: "Form overview", subtitle: "Image Generator, Character Reference, Product Reference", copy: "The main cards are Image Generator for Model and Mode, Character Reference for an avatar face, and Product Reference for product images. Prompt & Settings includes Avatar, Product, and Sales presets." },
+        { no: "2", title: "Upload Character Reference", copy: "Upload the avatar face you want to keep. Use a clear selfie with one person in frame. The AI will try to keep that face consistent across variations. You can also choose an earlier avatar from History.", tip: "One clear face is enough. If the reference has multiple people, the AI may mix them up." },
+        { no: "3", title: "Upload Product Reference", copy: "Upload a product image if you have one. Make sure packaging, labels, and shape are clear so the AI can preserve the product in the scene. Skip this if you only need an avatar shot." },
+        { no: "4", title: "Click Generate Image", copy: "Click Generate Image to start. Cost is RM0.20 per image. A pending card appears in history. Most generations complete in 15-30 seconds. Once ready, download it or reuse it in the UGC tab as a reference." },
+        { no: "5", title: "MODEL dropdown — choose the AI engine", copy: "Banana Pro is the default and is strongest for Malaysian faces and character consistency. GPT Image 2 is more creative for aesthetic scenes, but faces may be less consistent. Imagen 4 is best for realistic premium product hero shots.", tip: "Start with Banana Pro for avatars. Use GPT Image 2 for unique scenes. Use Imagen 4 for premium product visuals." },
+        { no: "6", title: "MODE dropdown — operation type", copy: "Create Image is the default mode for generating from prompt and references. Other edit or inpaint modes are advanced and usually not needed for the standard UGC workflow.", tip: "Keep Create Image for most cases." },
+        { no: "7", title: "AVATAR / PRODUCT / SALES tabs", copy: "Avatar contains creator-persona presets. Product contains product-shot presets such as flat lay, pedestal, or splash. Sales contains marketing-style visuals for ads and banners.", tip: "Tap a preset to auto-fill the prompt, then edit it for your product." },
+        { no: "8", title: "Female persona presets", copy: "Kebaya 20s is a modern young kebaya look. Casual 20s is Gen Z daily casual. Makcik gives a warm motherly feel. Kitchen is for cooking context. Nenek gives senior trust. Nenek Garden creates an outdoor senior scene.", tip: "Women's products: Kebaya 20s or Casual 20s. Family products: Makcik. Grandparent testimonial: Nenek." },
+        { no: "9", title: "Male persona presets", copy: "Baju Melayu 20s is a young traditional look. Casual 20s is Gen Z daily casual. Abang Pro is a professional 30s look. Pakcik gives a warm, trusted uncle feel.", tip: "Use Pakcik when the product needs trust and recommendation energy." }
+      ]
+    }
+  };
+  return content[state.lang] || content.ms;
+}
+
+function sopGuideContent() {
+  if (state.page === "project" && state.step === "image") return sopImageContent();
+  return sopDashboardContent();
+}
+
 function sopDashboardModal() {
-  const guide = sopDashboardContent();
+  const guide = sopGuideContent();
   const stepCards = guide.steps;
   const sectionLabels = guide.sections || {};
   return `
