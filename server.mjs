@@ -47,8 +47,10 @@ const atlasBaseUrl = (process.env.ATLASCLOUD_BASE_URL || "https://api.atlascloud
 const atlasGenerateVideoPath = process.env.ATLASCLOUD_GENERATE_VIDEO_PATH || "/api/v1/model/generateVideo";
 const atlasPredictionPathPrefix = process.env.ATLASCLOUD_PREDICTION_PATH_PREFIX || "/api/v1/model/prediction";
 const atlasSeedanceModel = process.env.ATLASCLOUD_SEEDANCE_MODEL || "bytedance/seedance-2.0/text-to-video";
-const allowedMediaModels = new Set(["GPT Image 2", "Nano Banana Pro", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"]);
+const allowedMediaModels = new Set(["GPT Image 2", "Nano Banana Pro"]);
 const publicMediaModelMap = {
+  "GPT Image 2": "GPT Image 2",
+  "Nano Banana Pro": "Nano Banana Pro",
   "Duitok Image": "GPT Image 2",
   "Duitok Image Pro": "Nano Banana Pro",
   "Duitok Video": "Seedance 2.0",
@@ -744,7 +746,7 @@ function internalMediaModel(model) {
 }
 
 function publicMediaModel(model) {
-  return internalMediaModelMap[internalMediaModel(model)] || model || "Duitok Image";
+  return internalMediaModel(model) || "GPT Image 2";
 }
 
 function isVideoMediaModel(model) {
@@ -1669,7 +1671,7 @@ async function generateWithProvider(project, action, step) {
   if (action === "generate-image") {
     const model = internalMediaModel(project.image?.model);
     if (!allowedMediaModels.has(model)) {
-      const error = new Error("This Duitok plan only supports GPT Image 2, Nano Banana Pro, Seedance 2.0, Veo 3.1, Sora 2, Gemini Omni, and Grok Imagine Video.");
+      const error = new Error("This Duitok plan only supports GPT Image 2 and Nano Banana Pro.");
       error.status = 400;
       throw error;
     }
@@ -1684,11 +1686,11 @@ async function generateWithProvider(project, action, step) {
     }
     if (provider === "grsai") {
       const image = await generateImageWithGrsai(project);
-      return { title: "GRS AI Nano Banana Pro", body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "grsai" };
+      return { title: "Nano Banana Pro", body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "grsai" };
     }
     if (provider === "apimart") {
       const image = await generateImageWithApimart(project);
-      return { title: "APIMart GPT Image 2", body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "apimart" };
+      return { title: "GPT Image 2", body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "apimart" };
     }
   }
   if (process.env.APIMART_API_KEY) {

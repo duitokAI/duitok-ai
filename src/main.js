@@ -244,7 +244,7 @@ const copy = {
     usage: "Usage",
     autopost: "Auto Post TikTok",
     whatsapp: "Join Discussion WhatsApp",
-    imageGenerator: "Media Generator",
+    imageGenerator: "Image Generator",
     model: "Model",
     mode: "Mode",
     avatarRef: "Avatar Reference (Optional)",
@@ -390,7 +390,7 @@ const copy = {
     usage: "用量",
     autopost: "自动发布 TikTok",
     whatsapp: "加入 WhatsApp 讨论群",
-    imageGenerator: "图片 / 视频生成器",
+    imageGenerator: "Image Generator",
     model: "模型",
     mode: "模式",
     avatarRef: "人物参考（可选）",
@@ -536,7 +536,7 @@ const copy = {
     usage: "Usage",
     autopost: "Auto Post TikTok",
     whatsapp: "Join Discussion WhatsApp",
-    imageGenerator: "Media Generator",
+    imageGenerator: "Image Generator",
     model: "Model",
     mode: "Mode",
     avatarRef: "Avatar Reference (Optional)",
@@ -1550,22 +1550,18 @@ function stepPanel(p) {
 }
 
 function imagePanel(p) {
-  const mediaModels = ["Duitok Image", "Duitok Image Pro", "Duitok Video", "Duitok Video Plus", "Duitok Story Video", "Duitok Omni Video", "Duitok Motion Video"];
+  const imageModels = ["GPT Image 2", "Nano Banana Pro"];
+  const selectedModel = imageModels.includes(p.image.model) ? p.image.model : p.image.model === "Duitok Image Pro" ? "Nano Banana Pro" : "GPT Image 2";
   return `
-    <div class="generator-box"><h2>🖼️ ${t("imageGenerator")}</h2><div class="form-grid three">${select("image.model", t("model"), mediaModels, p.image.model)}${select("image.mode", t("mode"), ["Create Image", "Edit Image", "Product Scene"], p.image.mode)}${mediaDurationSelect(p)}</div></div>
+    <div class="generator-box"><h2>🖼️ ${t("imageGenerator")}</h2><div class="form-grid three">${select("image.model", t("model"), imageModels, selectedModel)}${select("image.mode", t("mode"), ["Create Image", "Edit Image", "Product Scene"], p.image.mode)}${mediaDurationSelect(selectedModel)}</div></div>
     ${upload(t("avatarRef"), t("dropAvatar"), "Face / person - used for all variations", "camera", "avatar")}
     ${upload(t("productRef"), t("dropProduct"), "Product - used for all images and videos", "package", "product")}
     ${imagePromptSettings(p)}
     ${results(p, ["image", "video"])}`;
 }
 
-function mediaDurationSelect(p) {
-  if (p.image.model === "Duitok Video") return select("image.duration", "Duration", ["4", "6", "8", "10", "12", "15"], String(p.image.duration || "4"));
-  if (p.image.model === "Duitok Story Video") return select("image.duration", "Duration", ["8", "12"], String(p.image.duration || "8"));
-  if (p.image.model === "Duitok Motion Video") return select("image.duration", "Duration", Array.from({ length: 23 }, (_, index) => String(index + 8)), String(p.image.duration || "8"));
-  if (p.image.model === "Duitok Omni Video") return `<label>Duration<input value="10 seconds" disabled></label>`;
-  if (p.image.model === "Duitok Video Plus") return `<label>Duration<input value="8 seconds" disabled></label>`;
-  return `<label>Charge<input value="${p.image.model === "Duitok Image Pro" ? "0.2" : "0.1"} credit" disabled></label>`;
+function mediaDurationSelect(model) {
+  return `<label>Charge<input value="${model === "Nano Banana Pro" ? "0.2" : "0.1"} credit" disabled></label>`;
 }
 
 function imagePromptSettings(p) {
@@ -1852,7 +1848,7 @@ function agent3DScene() {
 function agentPage() {
   const prompts = [
     "帮我为这个产品做 7 天 TikTok 内容",
-    "用 Duitok Video 生成一个产品视频版本",
+    "用 Nano Banana Pro 生成一个产品图版本",
     "分析这个 competitor URL，生成 5 个 hook",
     "看一下我今天还缺什么内容"
   ];
