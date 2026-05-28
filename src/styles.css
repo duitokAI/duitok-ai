@@ -8514,7 +8514,7 @@ label {
 
 .usage-summary-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(220px, 1fr));
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
   gap: 18px;
   overflow-x: auto;
   padding-bottom: 2px;
@@ -8634,23 +8634,23 @@ label {
 
 .usage-ledger-head,
 .usage-ledger-table article {
-  min-width: 1020px;
+  min-width: 760px;
   display: grid;
-  grid-template-columns: minmax(180px, 0.95fr) minmax(360px, 1.8fr) 140px 190px 120px 120px;
-  gap: 18px;
+  grid-template-columns: minmax(140px, 1fr) minmax(200px, 1.3fr) 100px 136px 72px 72px;
+  gap: 10px;
   align-items: center;
 }
 
 .usage-ledger-head {
   min-height: 52px;
-  padding: 0 28px;
+  padding: 0 18px;
   background: rgba(211, 255, 77, 0.05);
 }
 
 .usage-ledger-table article {
   min-height: 84px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 18px 28px;
+  padding: 18px;
 }
 
 .usage-ledger-table strong,
