@@ -4172,7 +4172,8 @@ function chatPanel() {
 
 function agentMessageArticle(item) {
   const body = item.role === "assistant" ? agentMessageMarkdown(item.content) : `<p>${esc(item.content).replaceAll("\n", "<br>")}</p>`;
-  return `<article class="${item.role}"><span>${item.role === "user" ? "You" : "Agent"}</span><div class="agent-message">${body}</div>${agentRunPanel(item.agentRun)}</article>`;
+  const chips = item.role === "assistant" ? agentActionChips(item.content) : "";
+  return `<article class="${item.role}"><span>${item.role === "user" ? "You" : "Agent"}</span><div class="agent-message">${body}</div>${chips}${agentRunPanel(item.agentRun)}</article>`;
 }
 
 function agentMessageMarkdown(content = "") {
@@ -4182,6 +4183,10 @@ function agentMessageMarkdown(content = "") {
   while (i < lines.length) {
     const line = lines[i].trim();
     if (!line) {
+      i += 1;
+      continue;
+    }
+    if (/^-{3,}$/.test(line)) {
       i += 1;
       continue;
     }
@@ -4213,6 +4218,18 @@ function agentMessageMarkdown(content = "") {
     i += 1;
   }
   return blocks.join("");
+}
+
+function agentActionChips(content = "") {
+  const actions = String(content || "")
+    .split(/\r?\n/)
+    .map((line) => line.trim().match(/^\d+\.\s+(.+?)(?:\s+[—-]\s+(.+))?$/)?.[1])
+    .filter(Boolean)
+    .map((item) => item.replace(/\*\*/g, "").trim())
+    .filter((item) => /补齐|生成|排期|安排|创建|检查|publish|schedule|generate|create|fix/i.test(item))
+    .slice(0, 3);
+  if (!actions.length) return "";
+  return `<div class="agent-action-chips">${actions.map((item) => `<button type="button" data-agent-prompt="${esc(item)}">${esc(item)}</button>`).join("")}</div>`;
 }
 
 function isMarkdownTable(lines, index) {
@@ -4322,9 +4339,18 @@ function agentToolCard(card = {}) {
     </section>`;
   }
   if (card.type === "workspace_inspect") {
+    const schedule = card.schedule || {};
+    const latest = Array.isArray(schedule.latest) ? schedule.latest.slice(0, 3) : [];
     return `<section class="agent-tool-card">
       <header><strong>${icon("clipboard-check", 16)} ${esc(card.title || "Workspace checklist")}</strong><span>${esc(card.summary || "")}</span></header>
+      <div class="agent-workspace-summary">
+        ${card.projectName ? `<p><span>当前项目</span><b>${esc(card.projectName)}</b></p>` : ""}
+        <p><span>剩余积分</span><b>${esc(card.credits ?? "-")}</b></p>
+        <p><span>生成结果</span><b>${esc(card.resultCount ?? 0)}</b></p>
+        <p><span>排期</span><b>${esc((schedule.currentProjectReady || 0) + (schedule.currentProjectDrafts || 0))}</b></p>
+      </div>
       ${card.missing?.length ? `<ul>${card.missing.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>` : `<p>Workspace looks ready for the next Agent task.</p>`}
+      ${latest.length ? `<div class="agent-mini-schedule">${latest.map((item) => `<p><b>${esc(item.title || "Untitled")}</b><span>${esc(item.time || "")}</span><em data-status="${esc(item.status || "")}">${esc(item.status || "")}</em></p>`).join("")}</div>` : ""}
       ${card.suggestions?.length ? `<div class="agent-suggestions">${card.suggestions.map((item) => `<button class="dark-button" data-agent-prompt="${esc(item)}">${esc(item)}</button>`).join("")}</div>` : ""}
     </section>`;
   }

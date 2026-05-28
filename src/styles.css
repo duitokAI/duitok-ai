@@ -8614,9 +8614,9 @@ label {
 .agent-page-panel .agent-message {
   display: grid;
   gap: 12px;
-  color: rgba(31, 6, 38, 0.94);
-  font-size: 15.5px;
-  font-weight: 720;
+  color: rgba(31, 6, 38, 0.95);
+  font-size: 16px;
+  font-weight: 760;
   line-height: 1.58;
 }
 
@@ -8661,9 +8661,11 @@ label {
 
 .agent-message-table th,
 .agent-message-table td {
+  color: rgba(31, 6, 38, 0.88);
   border-bottom: 1px solid rgba(93, 8, 108, 0.08);
   padding: 10px 12px;
   vertical-align: top;
+  font-weight: 820;
 }
 
 .agent-message-table th {
@@ -8786,15 +8788,25 @@ label {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: #fff;
-  font-size: 13px;
+  color: rgba(31, 6, 38, 0.9);
+  font-size: 13.5px;
+  font-weight: 950;
 }
 
 .agent-run-head span {
-  color: rgba(255, 255, 255, 0.58);
+  border-radius: 999px;
+  padding: 3px 8px;
+  background: rgba(255, 79, 101, 0.1);
+  color: rgba(93, 8, 108, 0.72);
   font-size: 12px;
+  font-weight: 900;
+}
+
+.agent-run-summary {
+  margin: 0;
+  color: rgba(31, 6, 38, 0.68);
+  font-size: 13px;
   font-weight: 850;
-  text-transform: uppercase;
 }
 
 .agent-run-steps {
@@ -9001,6 +9013,82 @@ label {
   gap: 8px !important;
 }
 
+.agent-action-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.agent-action-chips button {
+  min-height: 36px;
+  border: 1px solid rgba(93, 8, 108, 0.12);
+  border-radius: 999px;
+  padding: 0 14px;
+  background: #fff;
+  color: #4f055f;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  box-shadow: 0 8px 18px rgba(93, 8, 108, 0.06);
+}
+
+.agent-workspace-summary {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px !important;
+}
+
+.agent-workspace-summary p,
+.agent-mini-schedule p {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  border-radius: 9px;
+  padding: 10px;
+  background: rgba(93, 8, 108, 0.055);
+}
+
+.agent-workspace-summary span,
+.agent-mini-schedule span {
+  color: rgba(31, 6, 38, 0.58);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.agent-workspace-summary b,
+.agent-mini-schedule b {
+  color: #4f055f;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.agent-mini-schedule {
+  display: grid !important;
+  gap: 7px !important;
+}
+
+.agent-mini-schedule p {
+  grid-template-columns: minmax(0, 1.4fr) minmax(90px, 0.7fr) auto;
+  align-items: center;
+}
+
+.agent-mini-schedule em {
+  justify-self: end;
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: rgba(35, 197, 123, 0.12);
+  color: #117846;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 950;
+}
+
+.agent-mini-schedule em[data-status="Draft"] {
+  background: rgba(244, 202, 50, 0.18);
+  color: #6f5300;
+}
+
 .agent-recovery-card {
   border-color: rgba(255, 79, 101, 0.24);
   background: #fff7f8;
@@ -9021,7 +9109,7 @@ label {
 }
 
 .agent-page-panel .agent-thread .agent-run-head span {
-  color: rgba(255, 255, 255, 0.58);
+  color: rgba(93, 8, 108, 0.72);
 }
 
 .agent-page-panel .agent-thread .agent-confidence span {
