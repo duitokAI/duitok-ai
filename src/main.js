@@ -2272,7 +2272,7 @@ function isOwnerAdminAccount() {
 function adminPage() {
   if (!isOwnerAdminAccount()) return `<section class="canvas-card slim"><h1>Admin access required</h1></section>`;
   if (state.user?.adminLocked || !state.db?.admin) {
-    return `<section class="canvas-card slim"><h1>Admin verification</h1><p class="subtitle">Enter your private admin key to unlock provider operations, costs, endpoints, and user controls.</p><form data-form="admin-key" class="login-form"><label>Admin key<input name="adminKey" type="password" autocomplete="off" required></label><button class="gold-button" type="submit">${icon("shield-check")} Unlock Admin</button></form></section>`;
+    return `<section class="canvas-card slim"><h1>Admin verification</h1><p class="subtitle">Enter your private admin key to unlock provider operations, costs, endpoints, and user controls.</p><form data-form="admin-key" class="login-form"><label>Admin key<input name="adminKey" type="password" autocomplete="off" value="${esc(state.adminKey || "")}" required></label><button class="gold-button" type="submit">${icon("shield-check")} Unlock Admin</button></form></section>`;
   }
   const admin = state.db.admin || {};
   const totals = admin.totals || {};
@@ -4455,12 +4455,25 @@ async function submit(event) {
     return set({ user: res.user, modal: null, page: "dashboard" });
   }
   if (event.currentTarget.dataset.form === "admin-key") {
-    localStorage.setItem("duitok-admin-key", data.adminKey);
-    state.adminKey = data.adminKey;
-    const db = await api("/state");
-    const user = { ...(state.user || {}), adminVerified: Boolean(db.admin), adminLocked: !db.admin };
-    localStorage.setItem("duitok-user", JSON.stringify(user));
-    return set({ db, user });
+    const adminKey = String(data.adminKey || "").trim();
+    if (!adminKey) return notify("Enter admin key first.");
+    localStorage.setItem("duitok-admin-key", adminKey);
+    state.adminKey = adminKey;
+    try {
+      const db = await api("/state");
+      if (!db.admin) {
+        const user = { ...(state.user || {}), adminVerified: false, adminLocked: true };
+        localStorage.setItem("duitok-user", JSON.stringify(user));
+        set({ db, user });
+        return notify("Invalid admin key. Please check and try again.");
+      }
+      const user = { ...(state.user || {}), adminVerified: true, adminLocked: false };
+      localStorage.setItem("duitok-user", JSON.stringify(user));
+      notify("Admin unlocked.");
+      return set({ db, user, page: "admin" });
+    } catch (error) {
+      return notify(error.message || "Admin unlock failed.");
+    }
   }
   if (event.currentTarget.dataset.form === "lead") {
     notify("Opening registration.");
