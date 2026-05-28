@@ -13861,6 +13861,706 @@ label {
   }
 }
 
+/* Project generator density pass: compact all creation tabs without changing workflow. */
+.studio-shell .workspace:has(.step-tabs) .project-head {
+  margin-bottom: 20px !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .project-head h1 {
+  font-size: clamp(42px, 4.6vw, 68px) !important;
+  line-height: 0.96 !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .sop-button {
+  min-width: 154px !important;
+  min-height: 50px !important;
+  padding: 0 22px !important;
+  font-size: 16px !important;
+}
+
+.studio-shell .step-tabs {
+  gap: 8px !important;
+  margin-bottom: 22px !important;
+  padding-bottom: 10px !important;
+}
+
+.studio-shell .step-tabs button {
+  min-width: 126px !important;
+  min-height: 48px !important;
+  gap: 6px !important;
+  border-radius: 12px !important;
+  padding: 0 12px !important;
+  font-size: 13px !important;
+}
+
+.studio-shell .step-tabs button svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.studio-shell .step-tabs b {
+  font-size: 11px !important;
+}
+
+.studio-shell .canvas-card:has(.image-generator-box),
+.studio-shell .canvas-card:has(.video-generator-box),
+.studio-shell .canvas-card:has(.auto-content-card),
+.studio-shell .canvas-card:has(.original-video-card),
+.studio-shell .canvas-card:has(.clone-prompt-shell),
+.studio-shell .canvas-card:has(.storytelling-card),
+.studio-shell .canvas-card:has(.viral-shell) {
+  min-height: auto !important;
+  border-radius: 20px !important;
+  padding: clamp(18px, 2vw, 28px) !important;
+}
+
+.studio-shell .generator-box,
+.studio-shell .upload-card,
+.studio-shell .prompt-settings,
+.studio-shell .ugc-scene-card,
+.studio-shell .auto-content-card,
+.studio-shell .original-video-card,
+.studio-shell .clone-prompt-shell,
+.studio-shell .storytelling-card,
+.studio-shell .viral-shell,
+.studio-shell .viral-history-card {
+  border-radius: 16px !important;
+}
+
+.studio-shell .generator-box {
+  padding: 18px 20px !important;
+}
+
+.studio-shell .generator-box h2,
+.studio-shell .upload-card h2,
+.studio-shell .auto-content-head h2,
+.studio-shell .ugc-scene-head h2,
+.studio-shell .original-video-head h2,
+.studio-shell .storytelling-head h2 {
+  font-size: clamp(18px, 1.6vw, 24px) !important;
+}
+
+.studio-shell .form-grid,
+.studio-shell .form-grid.two,
+.studio-shell .form-grid.three {
+  gap: 12px !important;
+}
+
+.studio-shell .field-label {
+  margin: 18px 0 9px !important;
+  font-size: 11px !important;
+  letter-spacing: 0.12em !important;
+}
+
+.studio-shell label,
+.studio-shell select,
+.studio-shell input,
+.studio-shell textarea {
+  font-size: 14px !important;
+}
+
+.studio-shell select,
+.studio-shell input {
+  min-height: 42px !important;
+}
+
+.studio-shell .upload-card {
+  margin-top: 18px !important;
+  padding: 18px 20px !important;
+}
+
+.studio-shell .drop-zone {
+  min-height: 148px !important;
+  gap: 8px !important;
+  border-radius: 14px !important;
+}
+
+.studio-shell .drop-zone svg {
+  width: 34px !important;
+  height: 34px !important;
+}
+
+.studio-shell .drop-zone strong {
+  font-size: 17px !important;
+}
+
+.studio-shell .drop-zone small {
+  font-size: 13px !important;
+}
+
+.studio-shell .prompt-settings {
+  margin-top: 18px !important;
+  padding: 18px !important;
+}
+
+.studio-shell .prompt-settings h2 {
+  margin-bottom: 14px !important;
+  font-size: 18px !important;
+}
+
+.studio-shell .prompt-mode-tabs {
+  padding: 6px !important;
+}
+
+.studio-shell .prompt-mode-tabs button {
+  min-height: 42px !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+}
+
+.studio-shell .preset-groups {
+  gap: 12px !important;
+  margin-top: 16px !important;
+}
+
+.studio-shell .preset-row {
+  gap: 8px !important;
+}
+
+.studio-shell .preset-row p {
+  font-size: 11px !important;
+}
+
+.studio-shell .preset-row > div {
+  grid-template-columns: repeat(auto-fit, minmax(138px, 1fr)) !important;
+  gap: 8px !important;
+}
+
+.studio-shell .preset-row button {
+  min-height: 36px !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+}
+
+.studio-shell .prompt-settings textarea,
+.studio-shell .ugc-scene-textarea,
+.studio-shell .original-prompt-field textarea,
+.studio-shell .story-main-prompt textarea {
+  min-height: 132px !important;
+}
+
+.studio-shell .prompt-settings .gold-button,
+.studio-shell .auto-generate-button,
+.studio-shell .original-generate-button,
+.studio-shell .clone-generate-button,
+.studio-shell .story-preview-button,
+.studio-shell .viral-generate-button {
+  min-height: 48px !important;
+  border-radius: 12px !important;
+  font-size: 15px !important;
+}
+
+.studio-shell .result-grid {
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)) !important;
+  gap: 12px !important;
+  margin-top: 18px !important;
+}
+
+.studio-shell .result-image,
+.studio-shell .result-video,
+.studio-shell .result-media-error {
+  border-radius: 12px 12px 0 0 !important;
+  max-height: 380px !important;
+}
+
+.studio-shell .result-card-head,
+.studio-shell .result-meta,
+.studio-shell .result-name,
+.studio-shell .result-actions {
+  padding-inline: 12px !important;
+}
+
+.studio-shell .result-card-head {
+  min-height: 42px !important;
+  padding-top: 10px !important;
+  padding-bottom: 8px !important;
+  font-size: 11px !important;
+  letter-spacing: 0.1em !important;
+}
+
+.studio-shell .result-meta {
+  gap: 5px !important;
+  padding-top: 10px !important;
+}
+
+.studio-shell .result-meta span,
+.studio-shell .result-name p {
+  font-size: 12px !important;
+}
+
+.studio-shell .result-meta code {
+  padding: 5px 7px !important;
+  border-radius: 7px !important;
+  font-size: 11px !important;
+}
+
+.studio-shell .result-name {
+  grid-template-columns: 18px 1fr !important;
+  gap: 7px !important;
+  padding-top: 10px !important;
+}
+
+.studio-shell .result-name b {
+  margin-bottom: 4px !important;
+  font-size: 14px !important;
+}
+
+.studio-shell .result-actions {
+  gap: 7px !important;
+  padding-top: 14px !important;
+  padding-bottom: 12px !important;
+}
+
+.studio-shell .result-actions button {
+  min-height: 38px !important;
+  border-radius: 10px !important;
+}
+
+.studio-shell .empty-result {
+  min-height: 92px !important;
+  margin-top: 18px !important;
+  border-radius: 14px !important;
+}
+
+.studio-shell .video-provider-grid,
+.studio-shell .auto-provider-grid,
+.studio-shell .original-provider-grid,
+.studio-shell .original-mode-grid {
+  gap: 10px !important;
+  margin-bottom: 18px !important;
+}
+
+.studio-shell .video-provider-grid button,
+.studio-shell .auto-source-tabs button,
+.studio-shell .auto-provider-grid button,
+.studio-shell .auto-plan-grid button,
+.studio-shell .original-provider-grid button,
+.studio-shell .original-mode-grid button,
+.studio-shell .viral-feature-grid button,
+.studio-shell .viral-choice-grid button {
+  min-height: 44px !important;
+  border-radius: 10px !important;
+  font-size: 14px !important;
+}
+
+.studio-shell .ugc-scene-card {
+  margin-top: 18px !important;
+  padding: 20px !important;
+}
+
+.studio-shell .ugc-scene-head,
+.studio-shell .auto-content-head,
+.studio-shell .clone-prompt-head,
+.studio-shell .viral-history-card header {
+  gap: 12px !important;
+  margin-bottom: 16px !important;
+}
+
+.studio-shell .ugc-scene-head button {
+  min-height: 38px !important;
+  border-radius: 10px !important;
+  padding: 0 14px !important;
+  font-size: 12px !important;
+}
+
+.studio-shell .ugc-reference-grid,
+.studio-shell .ugc-frame-grid {
+  gap: 18px !important;
+}
+
+.studio-shell .ugc-reference-title {
+  margin-bottom: 9px !important;
+  font-size: 12px !important;
+}
+
+.studio-shell .ugc-avatar-drop,
+.studio-shell .ugc-product-slot,
+.studio-shell .ugc-frame-drop {
+  width: 86px !important;
+  height: 86px !important;
+  border-radius: 12px !important;
+}
+
+.studio-shell .ugc-avatar-drop span,
+.studio-shell .ugc-frame-drop span {
+  font-size: 24px !important;
+}
+
+.studio-shell .ugc-product-slot span {
+  font-size: 17px !important;
+}
+
+.studio-shell .ugc-reference-actions label,
+.studio-shell .ugc-reference-actions button {
+  min-width: 104px !important;
+  min-height: 32px !important;
+  font-size: 12px !important;
+}
+
+.studio-shell .ugc-scene-note {
+  margin: 14px 0 !important;
+  font-size: 13px !important;
+}
+
+.studio-shell .ugc-text-only {
+  min-height: 54px !important;
+  margin-bottom: 14px !important;
+  font-size: 15px !important;
+}
+
+.studio-shell .ugc-prompt-toolbar {
+  gap: 10px !important;
+  margin-bottom: 12px !important;
+}
+
+.studio-shell .ugc-prompt-toolbar button {
+  min-height: 40px !important;
+  border-radius: 10px !important;
+  font-size: 14px !important;
+}
+
+.studio-shell .ugc-scene-foot {
+  gap: 14px !important;
+  margin-top: 12px !important;
+  font-size: 12px !important;
+}
+
+.studio-shell .ugc-scene-foot .gold-button {
+  min-height: 44px !important;
+  padding: 0 16px !important;
+  white-space: nowrap;
+}
+
+.studio-shell .auto-content-card {
+  padding: 20px !important;
+}
+
+.studio-shell .auto-content-head span {
+  padding: 7px 12px !important;
+  border-radius: 8px !important;
+  font-size: 11px !important;
+}
+
+.studio-shell .auto-source-tabs,
+.studio-shell .auto-provider-grid,
+.studio-shell .auto-plan-grid {
+  margin-bottom: 14px !important;
+}
+
+.studio-shell .auto-product-picker {
+  margin-bottom: 10px !important;
+  border-radius: 12px !important;
+  padding: 7px 10px 7px 0 !important;
+}
+
+.studio-shell .auto-product-picker span {
+  padding: 6px 10px !important;
+  border-radius: 10px !important;
+  font-size: 12px !important;
+}
+
+.studio-shell .auto-product-picker b {
+  width: 24px !important;
+  height: 24px !important;
+}
+
+.studio-shell .auto-helper {
+  margin-bottom: 14px !important;
+  font-size: 13px !important;
+}
+
+.studio-shell .auto-persona-card {
+  padding: 14px !important;
+  border-radius: 13px !important;
+}
+
+.studio-shell .auto-duration-pill {
+  min-height: 42px !important;
+  margin: 12px 0 16px !important;
+  border-radius: 10px !important;
+  font-size: 15px !important;
+}
+
+.studio-shell .auto-plan-grid {
+  gap: 10px !important;
+}
+
+.studio-shell .auto-plan-grid button {
+  min-height: 62px !important;
+}
+
+.studio-shell .auto-plan-grid em {
+  top: 6px !important;
+  right: 6px !important;
+  padding: 3px 7px !important;
+  font-size: 10px !important;
+}
+
+.studio-shell .auto-framework-grid {
+  gap: 8px !important;
+}
+
+.studio-shell .auto-framework-grid label {
+  min-height: 32px !important;
+  border-radius: 8px !important;
+  padding: 0 10px !important;
+  font-size: 12px !important;
+}
+
+.studio-shell .auto-framework-grid input {
+  width: 15px !important;
+  height: 15px !important;
+}
+
+.studio-shell .auto-generate-button {
+  margin-top: 18px !important;
+}
+
+.studio-shell .original-video-card {
+  padding: 22px !important;
+}
+
+.studio-shell .original-video-head p {
+  margin-bottom: 18px !important;
+  font-size: 14px !important;
+  line-height: 1.38 !important;
+}
+
+.studio-shell .original-field-label,
+.studio-shell .original-prompt-field span,
+.studio-shell .original-settings-grid span {
+  margin-bottom: 9px !important;
+  font-size: 11px !important;
+}
+
+.studio-shell .original-prompt-field {
+  margin-bottom: 18px !important;
+}
+
+.studio-shell .original-settings-grid {
+  gap: 10px !important;
+  margin-bottom: 18px !important;
+}
+
+.studio-shell .original-settings-grid select,
+.studio-shell .original-settings-grid b {
+  min-height: 44px !important;
+  border-radius: 10px !important;
+  font-size: 15px !important;
+}
+
+.studio-shell .clone-prompt-shell {
+  padding: 18px !important;
+}
+
+.studio-shell .clone-prompt-card {
+  padding: 18px !important;
+  border-width: 1px !important;
+  border-radius: 14px !important;
+}
+
+.studio-shell .clone-prompt-head h2 {
+  font-size: 16px !important;
+}
+
+.studio-shell .clone-prompt-head span,
+.studio-shell .clone-prompt-card > p {
+  font-size: 11px !important;
+}
+
+.studio-shell .clone-video-drop {
+  min-height: 62px !important;
+  border-radius: 10px !important;
+  font-size: 14px !important;
+}
+
+.studio-shell .storytelling-card {
+  padding: clamp(20px, 2.6vw, 32px) !important;
+}
+
+.studio-shell .storytelling-head p {
+  font-size: 13px !important;
+}
+
+.studio-shell .story-steps {
+  max-width: 470px !important;
+  margin: 22px auto 20px !important;
+}
+
+.studio-shell .story-steps b {
+  width: 36px !important;
+  height: 36px !important;
+  font-size: 14px !important;
+}
+
+.studio-shell .story-steps strong,
+.studio-shell .story-steps span {
+  font-size: 11px !important;
+}
+
+.studio-shell .story-main-prompt,
+.studio-shell .story-select-row,
+.studio-shell .story-style-grid,
+.studio-shell .story-voice-grid,
+.studio-shell .story-cta-card,
+.studio-shell .story-cost-grid,
+.studio-shell .story-preview-button {
+  max-width: 720px !important;
+}
+
+.studio-shell .story-select-row,
+.studio-shell .story-style-grid,
+.studio-shell .story-voice-grid {
+  gap: 10px !important;
+  margin-bottom: 18px !important;
+}
+
+.studio-shell .story-section-label {
+  max-width: 720px !important;
+  margin: 16px auto 8px !important;
+  font-size: 13px !important;
+}
+
+.studio-shell .story-style-grid button {
+  min-height: 86px !important;
+  border-radius: 11px !important;
+  padding: 10px !important;
+}
+
+.studio-shell .story-style-grid b,
+.studio-shell .story-voice-grid strong,
+.studio-shell .story-cta-card h3 {
+  font-size: 14px !important;
+}
+
+.studio-shell .story-voice-grid button {
+  gap: 3px 10px !important;
+  border-radius: 12px !important;
+  padding: 12px !important;
+}
+
+.studio-shell .story-voice-grid b {
+  width: 34px !important;
+  height: 34px !important;
+}
+
+.studio-shell .story-voice-grid span,
+.studio-shell .story-voice-grid em,
+.studio-shell .story-cta-card p,
+.studio-shell .story-cta-card small,
+.studio-shell .story-cost-grid article {
+  font-size: 12px !important;
+}
+
+.studio-shell .story-cta-card {
+  gap: 12px !important;
+  padding: 14px !important;
+  border-radius: 13px !important;
+}
+
+.studio-shell .story-cta-grid {
+  gap: 9px !important;
+}
+
+.studio-shell .story-cta-grid button {
+  min-height: 52px !important;
+  border-radius: 10px !important;
+}
+
+.studio-shell .story-cost-grid {
+  gap: 9px !important;
+  margin-top: 14px !important;
+}
+
+.studio-shell .story-cost-grid article {
+  padding: 12px !important;
+  border-radius: 11px !important;
+}
+
+.studio-shell .story-cost-grid b {
+  margin-top: 6px !important;
+  font-size: 15px !important;
+}
+
+.studio-shell .viral-shell {
+  gap: 14px !important;
+  padding: clamp(18px, 2.4vw, 28px) !important;
+}
+
+.studio-shell .viral-feature-card,
+.studio-shell .viral-form-card {
+  border-radius: 13px !important;
+  padding: 16px !important;
+}
+
+.studio-shell .viral-feature-card h2,
+.studio-shell .viral-form-card h3 {
+  margin-bottom: 12px !important;
+  font-size: 14px !important;
+}
+
+.studio-shell .viral-feature-grid,
+.studio-shell .viral-choice-grid {
+  gap: 8px !important;
+}
+
+.studio-shell .viral-feature-grid button {
+  min-height: 46px !important;
+}
+
+.studio-shell .viral-choice-grid button {
+  min-height: 50px !important;
+}
+
+.studio-shell .viral-feature-grid b,
+.studio-shell .viral-choice-grid b {
+  font-size: 17px !important;
+}
+
+.studio-shell .viral-feature-grid span,
+.studio-shell .viral-choice-grid span,
+.studio-shell .viral-form-card small {
+  font-size: 12px !important;
+}
+
+.studio-shell .viral-field {
+  gap: 7px !important;
+}
+
+.studio-shell .viral-form-card {
+  gap: 10px !important;
+}
+
+.studio-shell .viral-history-card {
+  margin-top: 18px !important;
+  padding: 18px !important;
+}
+
+.studio-shell .viral-history-card h3 {
+  font-size: 16px !important;
+}
+
+.studio-shell .viral-history-filters {
+  gap: 8px !important;
+  margin: 16px 0 !important;
+}
+
+.studio-shell .viral-history-filters button {
+  min-height: 32px !important;
+  border-radius: 8px !important;
+  font-size: 12px !important;
+}
+
+.studio-shell .viral-empty {
+  min-height: 150px !important;
+}
+
+.studio-shell .viral-empty b {
+  width: 46px !important;
+  height: 46px !important;
+  border-radius: 12px !important;
+}
+
 /* Studio affiliate dashboard. */
 .studio-shell .canvas-card.slim:has(.affiliate-dashboard) {
   min-height: auto !important;
