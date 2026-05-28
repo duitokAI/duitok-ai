@@ -1,5 +1,4 @@
 import "./styles.css";
-import { disposeAgent3D, mountAgent3D } from "./agent3d.js";
 
 const app = document.querySelector("#app");
 const toast = document.querySelector("#toast");
@@ -51,7 +50,9 @@ const state = {
   queuePolling: false,
   langOpen: false,
   imagePromptGroup: "avatar",
-  generating: false
+  generating: false,
+  projectMenuId: null,
+  editingProjectId: null
 };
 
 const languages = [
@@ -64,7 +65,8 @@ const brandAssets = {
   horizontal: "/duitok-logo-transparent.png",
   mascot: "/duitok-mascot-transparent.png",
   banner: "/duitok-brand-banner-transparent.png",
-  stacked: "/duitok-logo-stacked.png"
+  stacked: "/duitok-logo-stacked.png",
+  agentModel: "/models/agent/duitok-agent.glb"
 };
 
 const imagePromptPresets = {
@@ -212,7 +214,7 @@ const copy = {
     controlCopy: "Duitok AI bantu hasilkan output dan jadual. Final publish, claim produk dan compliance tetap perlu review manusia.",
     startNow: "Mula sekarang",
     registerTitle: "Register dan aktif dalam satu minit.",
-    registerCopy: "Guna flow sign-in Studio sekarang. Payment dan automasi account akan connect ke CHIP bila merchant key siap.",
+    registerCopy: "Register, bayar melalui CHIP, kemudian login ke Studio selepas bayaran berjaya.",
     fullName: "Nama penuh",
     email: "Email",
     password: "Password",
@@ -358,7 +360,7 @@ const copy = {
     controlCopy: "Duitok AI 帮你生成内容和计划。最终发布、产品宣称和合规，仍然需要人工确认。",
     startNow: "现在开始",
     registerTitle: "一分钟注册并激活。",
-    registerCopy: "现在先使用 Studio 登录流程。支付和账号自动化会在 CHIP merchant key 准备好后连接。",
+    registerCopy: "注册后通过 CHIP 付款，付款成功后即可登录 Studio。",
     fullName: "姓名",
     email: "邮箱",
     password: "密码",
@@ -504,7 +506,7 @@ const copy = {
     controlCopy: "Duitok AI helps create output and schedules. Final publishing, product claims, and compliance still need human review.",
     startNow: "Start now",
     registerTitle: "Register and activate in one minute.",
-    registerCopy: "Use the Studio sign-in flow now. Payment and account automation will connect to CHIP when your merchant keys are ready.",
+    registerCopy: "Register, pay securely with CHIP, then sign in to Studio after payment succeeds.",
     fullName: "Full name",
     email: "Email",
     password: "Password",
@@ -660,7 +662,6 @@ function render() {
   app.innerHTML = state.loading ? `<main class="loading">${icon("loader-circle")} Loading...</main>` : routeShell(route());
   bind();
   window.lucide?.createIcons();
-  mountCurrentAgent3D();
   restoreSidebarScroll();
 }
 
@@ -841,7 +842,7 @@ function registerPage() {
         <div>
           <p class="eyebrow">Start now</p>
           <h1>Register, pay, and activate your Studio.</h1>
-          <p class="public-copy">This page mirrors the Duitok AI checkout flow: plan confirmation on one side, buyer details on the other. CHIP payment will be connected after your merchant keys are ready.</p>
+          <p class="public-copy">Create your account, pay securely through CHIP, and activate Duitok AI Pro after the payment callback confirms.</p>
           <div class="checkout-steps">
             <article><b>1</b><span>Subscribe plan</span><p>Unlock all content tools and low generation rates.</p></article>
             <article><b>2</b><span>Top up credits</span><p>RM1 = 1 credit. Credits are used when generating assets.</p></article>
@@ -860,15 +861,16 @@ function registerPage() {
         <div>
           <p class="eyebrow">Buyer details</p>
           <h2>Account info for login and support.</h2>
-          <p>After payment is connected, this form should create a pending purchase, redirect to CHIP, then activate the account after callback.</p>
+          <p>This creates a pending Duitok AI Pro order and redirects you to the secure CHIP payment page.</p>
         </div>
         <form class="lead-form" data-form="register">
           <label>Full name<input name="name" placeholder="Your full name" required></label>
           <label>WhatsApp<input name="phone" placeholder="+60" required></label>
           <label>Email<input name="email" type="email" placeholder="you@duitok.com" required></label>
+          <label>Password<input name="password" type="password" placeholder="Create password" minlength="6" required></label>
           <label class="check-label"><input type="checkbox" required> <span>I agree to <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</span></label>
           <button class="gold-button" type="submit">${icon("credit-card")} Pay RM69 - FPX / DuitNow QR</button>
-          <small>Secured via CHIP Payment once API keys are configured.</small>
+          <small>Secured via CHIP Payment.</small>
         </form>
       </section>
     </main>`;
@@ -1146,7 +1148,23 @@ function footerBrand(label = "Duitok AI") {
 function projectButtons() {
   return state.db.projects
     .filter((item) => item.name.toLowerCase().includes(state.search.toLowerCase()))
-    .map((item) => `<button class="project-button ${item.id === state.projectId && state.page === "project" ? "active" : ""}" data-project="${item.id}">${icon("folder")} <span>${item.name}</span></button>`)
+    .map((item) => {
+      const active = item.id === state.projectId && state.page === "project";
+      const menuOpen = state.projectMenuId === item.id;
+      return `
+        <div class="project-menu-item ${active ? "active" : ""} ${menuOpen ? "menu-open" : ""}">
+          <button class="project-button ${active ? "active" : ""}" data-project="${item.id}">
+            <span class="project-icon">${icon("folder", 22)}</span>
+            <span>${esc(item.name)}</span>
+          </button>
+          <button class="project-more" type="button" data-project-menu="${item.id}" aria-label="Project actions" title="Project actions">${icon("ellipsis", 18)}</button>
+          ${menuOpen ? `
+            <div class="project-action-menu">
+              <button type="button" data-project-rename="${item.id}">${icon("pencil", 19)} Rename</button>
+              <button type="button" class="danger" data-project-delete="${item.id}">${icon("trash-2", 19)} Delete</button>
+            </div>` : ""}
+        </div>`;
+    })
     .join("") || `<p class="empty-text">No projects found.</p>`;
 }
 
@@ -1679,9 +1697,12 @@ function schedule() {
 
 function modal() {
   if (!state.modal) return "";
-  const title = { newProject: t("createProject"), register: t("choosePlan"), sop: t("sopImage"), export: t("exportReady"), support: t("supportTitle") }[state.modal];
+  const editProject = state.db?.projects?.find((item) => item.id === state.editingProjectId);
+  const title = { newProject: t("createProject"), renameProject: "Rename project", deleteProject: "Delete project", register: t("choosePlan"), sop: t("sopImage"), export: t("exportReady"), support: t("supportTitle") }[state.modal];
   const body = {
     newProject: `<form data-form="project"><label>${t("project")}<input name="name" placeholder="Project ${(state.db?.projects.length || 0) + 1}" required></label><button class="gold-button" type="submit">${icon("plus")} ${t("newProject")}</button></form>`,
+    renameProject: `<form data-form="rename-project"><label>${t("project")}<input name="name" value="${esc(editProject?.name || "")}" required autofocus></label><button class="gold-button" type="submit">${icon("check")} Save name</button></form>`,
+    deleteProject: `<div class="delete-confirm"><p>Delete <b>${esc(editProject?.name || "this project")}</b>? This removes its generated assets, prompts, and schedules from this workspace.</p><div><button class="dark-button" data-action="close-modal">${icon("x")} Cancel</button><button class="gold-button danger-button" data-action="confirm-delete-project">${icon("trash-2")} Delete project</button></div></div>`,
     register: `<form data-form="login"><label>${t("email")}<input name="email" type="email" placeholder="you@duitok.com" required></label><label>${t("password")}<input name="password" type="password" placeholder="Create password" required></label><button class="gold-button" type="submit">${icon("lock")} Register & Enter Studio</button></form>`,
     sop: `<div class="sop-sheet"><b>Image SOP</b><ol><li>Upload avatar face.</li><li>Upload product reference.</li><li>Select model and mode.</li><li>Write prompt.</li><li>Generate, save, export.</li></ol><button class="dark-button" data-action="download-sop">${icon("download")} Download SOP</button></div>`,
     export: `<p>Your export has started. Files are generated by the backend.</p><button class="gold-button" data-action="close-modal">${icon("check")} Done</button>`,
@@ -1761,13 +1782,62 @@ function agent3DScene() {
   const mode = currentAgent3DMode();
   const copy = agent3DCopy(mode);
   return `
-    <div class="agent-3d-card" data-agent-mode="${mode}">
+    <div class="agent-3d-card agent-life-card" data-agent-mode="${mode}">
       <div class="agent-3d-status">
         <span>${icon(mode === "idle" ? "moon" : "activity", 17)} ${copy.label}</span>
         <b>${mode === "idle" ? "Standby" : "Working"}</b>
       </div>
-      <div class="agent-3d-stage" data-agent-3d-stage>
-        <div class="agent-3d-fallback"><img src="${brandAssets.mascot}" alt="Duitok mascot"></div>
+      <div class="agent-life-stage" aria-label="Duitok Agent work, rest, and training states">
+        <div class="agent-life-grid">
+          <div class="life-scene life-work">
+            <div class="life-monitor">
+              <span class="screen-window"></span>
+              <span class="screen-line one"></span>
+              <span class="screen-line two"></span>
+              <span class="screen-chart"></span>
+            </div>
+            <div class="life-desk"></div>
+            <div class="life-chair"></div>
+            <div class="life-robot robot-work">
+              <span class="robot-antenna"></span>
+              <span class="robot-ear left"></span>
+              <span class="robot-ear right"></span>
+              <span class="robot-head"></span>
+              <span class="robot-body"></span>
+              <span class="robot-arm left"></span>
+              <span class="robot-arm right"></span>
+              <span class="robot-accent"></span>
+            </div>
+          </div>
+          <div class="life-scene life-bed">
+            <div class="life-bed-frame"></div>
+            <div class="life-pillow"></div>
+            <div class="life-blanket"></div>
+            <div class="life-robot robot-sleep">
+              <span class="robot-antenna"></span>
+              <span class="robot-ear left"></span>
+              <span class="robot-ear right"></span>
+              <span class="robot-head"></span>
+              <span class="robot-body"></span>
+              <span class="robot-accent"></span>
+            </div>
+            <span class="sleep-z">z z Z</span>
+          </div>
+          <div class="life-scene life-run">
+            <div class="life-treadmill"></div>
+            <div class="life-treadmill-rail"></div>
+            <div class="life-robot robot-run">
+              <span class="robot-antenna"></span>
+              <span class="robot-ear left"></span>
+              <span class="robot-ear right"></span>
+              <span class="robot-head"></span>
+              <span class="robot-body"></span>
+              <span class="robot-arm left"></span>
+              <span class="robot-arm right"></span>
+              <span class="robot-accent"></span>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="agent-3d-copy">
         <h2>${copy.title}</h2>
@@ -1777,17 +1847,6 @@ function agent3DScene() {
         </div>
       </div>
     </div>`;
-}
-
-function mountCurrentAgent3D() {
-  const stage = document.querySelector("[data-agent-3d-stage]");
-  if (!stage) {
-    disposeAgent3D();
-    return;
-  }
-  const mode = stage.closest("[data-agent-mode]")?.dataset.agentMode || "idle";
-  const copy = agent3DCopy(mode);
-  mountAgent3D(stage, { ...copy, mode, mascotUrl: brandAssets.mascot });
 }
 
 function agentPage() {
@@ -1800,7 +1859,7 @@ function agentPage() {
   return `
     <section class="agent-page">
       <header class="agent-page-hero">
-        <div>
+        <div class="agent-hero-copy">
           <p class="folder-label">${icon("bot", 18)} Duitok Agent</p>
           <h1>Your AI operator for TikTok Shop content.</h1>
           <p class="subtitle">Ask it to create projects, write prompts, generate assets, build batches, schedule posts, and decide the next best action.</p>
@@ -1841,7 +1900,19 @@ function bind() {
   document.querySelectorAll("[data-page]").forEach((el) => el.addEventListener("click", () => set({ page: el.dataset.page })));
   document.querySelectorAll("[data-step]").forEach((el) => el.addEventListener("click", () => set({ step: el.dataset.step })));
   document.querySelectorAll("[data-step-open]").forEach((el) => el.addEventListener("click", () => set({ page: "project", step: el.dataset.stepOpen })));
-  document.querySelectorAll("[data-project]").forEach((el) => el.addEventListener("click", () => set({ projectId: el.dataset.project, page: "project" })));
+  document.querySelectorAll("[data-project]").forEach((el) => el.addEventListener("click", () => set({ projectId: el.dataset.project, page: "project", projectMenuId: null })));
+  document.querySelectorAll("[data-project-menu]").forEach((el) => el.addEventListener("click", (event) => {
+    event.stopPropagation();
+    set({ projectMenuId: state.projectMenuId === el.dataset.projectMenu ? null : el.dataset.projectMenu });
+  }));
+  document.querySelectorAll("[data-project-rename]").forEach((el) => el.addEventListener("click", (event) => {
+    event.stopPropagation();
+    set({ modal: "renameProject", editingProjectId: el.dataset.projectRename, projectMenuId: null });
+  }));
+  document.querySelectorAll("[data-project-delete]").forEach((el) => el.addEventListener("click", (event) => {
+    event.stopPropagation();
+    set({ modal: "deleteProject", editingProjectId: el.dataset.projectDelete, projectMenuId: null });
+  }));
   document.querySelectorAll("[data-admin-user]").forEach((el) => el.addEventListener("click", () => set({ adminUserId: el.dataset.adminUser })));
   document.querySelectorAll("[data-admin-credit]").forEach((el) => el.addEventListener("click", () => adminAdjustCredits(el.dataset.adminCredit, Number(el.dataset.delta))));
   document.querySelectorAll("[data-admin-status]").forEach((el) => el.addEventListener("click", () => adminUpdateUser(el.dataset.adminStatus, { status: el.dataset.status })));
@@ -1886,6 +1957,7 @@ async function action(event, name) {
   if (name === "sop") return set({ modal: "sop" });
   if (name === "register") return set({ modal: "register" });
   if (name === "support") return set({ modal: "support" });
+  if (name === "confirm-delete-project") return deleteProject();
   if (name === "open-home") {
     window.history.pushState({}, "", "/");
     return render();
@@ -1960,9 +2032,13 @@ async function submit(event) {
     return render();
   }
   if (event.currentTarget.dataset.form === "register") {
-    notify("Payment API not connected yet. Opening Studio login.");
-    window.history.pushState({}, "", "/studio");
-    return render();
+    notify("Opening secure CHIP payment page...");
+    const res = await api("/checkout/register", {
+      method: "POST",
+      body: JSON.stringify(data)
+    });
+    window.location.href = res.checkoutUrl;
+    return;
   }
   if (event.currentTarget.dataset.form === "affiliate") {
     return notify("Affiliate application saved for the next backend phase.");
@@ -1970,6 +2046,9 @@ async function submit(event) {
   if (event.currentTarget.dataset.form === "project") {
     const db = await api("/projects", { method: "POST", body: JSON.stringify(data) });
     return set({ db, projectId: db.projects.at(-1).id, modal: null, page: "dashboard" });
+  }
+  if (event.currentTarget.dataset.form === "rename-project") {
+    return renameProject(data.name);
   }
   if (event.currentTarget.dataset.form === "support") {
     const db = await api("/support", { method: "POST", body: JSON.stringify(data) });
@@ -1999,6 +2078,28 @@ async function uploadChange(event) {
   const db = await api("/attachments", { method: "POST", body: JSON.stringify({ projectId: state.projectId, kind: event.target.dataset.upload, name: file.name, size: file.size, type: file.type }) });
   set({ db });
   notify(`${file.name} saved to backend.`);
+}
+
+async function renameProject(name) {
+  if (!state.editingProjectId) return;
+  const db = await api(`/projects/${state.editingProjectId}`, { method: "PATCH", body: JSON.stringify({ name }) });
+  notify("Project renamed.");
+  set({ db, modal: null, editingProjectId: null });
+}
+
+async function deleteProject() {
+  if (!state.editingProjectId) return;
+  const deletedId = state.editingProjectId;
+  const db = await api(`/projects/${deletedId}`, { method: "DELETE" });
+  const nextProjectId = deletedId === state.projectId ? db.projects[0]?.id || null : state.projectId;
+  notify("Project deleted.");
+  set({
+    db,
+    modal: null,
+    editingProjectId: null,
+    projectId: nextProjectId,
+    page: nextProjectId ? state.page : "dashboard"
+  });
 }
 
 async function generate(name) {

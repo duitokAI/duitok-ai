@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 const modes = new Set(["idle", "image", "video", "copy", "schedule", "command"]);
 let currentScene = null;
@@ -13,6 +14,15 @@ const palette = {
   blue: 0x62a8ff,
   paper: 0xfffbf6,
   floor: 0xf3edf5
+};
+
+const productionAnimationMap = {
+  idle: ["idle_stand", "idle_sleep", "idle_run", "Idle", "idle"],
+  image: ["work_image", "walk", "work_typing", "Image", "image"],
+  video: ["work_video", "walk", "work_typing", "Video", "video"],
+  copy: ["work_typing", "thinking", "Copy", "copy"],
+  schedule: ["work_typing", "thinking", "Schedule", "schedule"],
+  command: ["thinking", "work_typing", "Command", "command"]
 };
 
 function box(w, h, d, color, options = {}) {
@@ -88,6 +98,81 @@ function labelPlane(text, bg, fg) {
   const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 0.66), material);
   mesh.userData.texture = texture;
   return mesh;
+}
+
+function setPrototypeVisible(data, visible) {
+  if (data.mascot) data.mascot.visible = visible;
+}
+
+function pickClip(clips, mode) {
+  const names = productionAnimationMap[mode] || productionAnimationMap.idle;
+  return names.map((name) => clips.find((clip) => clip.name === name || clip.name.toLowerCase() === name.toLowerCase())).find(Boolean);
+}
+
+function playProductionAnimation(data, mode) {
+  if (!data.modelMixer || !data.modelClips?.length) return;
+  const clip = pickClip(data.modelClips, mode);
+  if (!clip || data.activeClipName === clip.name) return;
+  const next = data.modelMixer.clipAction(clip);
+  next.enabled = true;
+  next.reset();
+  next.fadeIn(0.18);
+  next.play();
+  if (data.activeAction) data.activeAction.fadeOut(0.18);
+  data.activeAction = next;
+  data.activeClipName = clip.name;
+}
+
+function normalizeProductionModel(object) {
+  const box3 = new THREE.Box3().setFromObject(object);
+  const size = new THREE.Vector3();
+  const center = new THREE.Vector3();
+  box3.getSize(size);
+  box3.getCenter(center);
+  const maxAxis = Math.max(size.x, size.y, size.z) || 1;
+  object.scale.multiplyScalar(2.42 / maxAxis);
+  object.position.sub(center.multiplyScalar(object.scale.x));
+  object.position.y += 1.02;
+  object.traverse((child) => {
+    if (child.isMesh) {
+      child.castShadow = true;
+      child.receiveShadow = true;
+      if (child.material) child.material.needsUpdate = true;
+    }
+  });
+}
+
+function loadProductionModel(data, options) {
+  if (!options.modelUrl) return;
+  fetch(options.modelUrl, { method: "HEAD" })
+    .then((res) => {
+      if (!res.ok || currentScene !== data) throw new Error("Production model unavailable");
+      const loader = new GLTFLoader();
+      loader.load(
+        options.modelUrl,
+        (gltf) => {
+          if (currentScene !== data) return;
+      data.productionRoot = gltf.scene;
+          data.modelClips = gltf.animations || [];
+          data.modelMixer = data.modelClips.length ? new THREE.AnimationMixer(data.productionRoot) : null;
+      normalizeProductionModel(data.productionRoot);
+      data.productionRoot.position.x = data.mode === "idle" ? -1.85 : -0.72;
+      data.productionRoot.position.z = data.mode === "idle" ? 0.95 : -0.35;
+      data.productionRoot.rotation.y = data.mode === "idle" ? 0.16 : -0.22;
+      data.root.add(data.productionRoot);
+          setPrototypeVisible(data, false);
+          playProductionAnimation(data, data.mode);
+          data.el.closest(".agent-3d-card")?.classList.add("agent-3d-card--production");
+        },
+        undefined,
+        () => {
+          data.el.closest(".agent-3d-card")?.classList.add("agent-3d-card--prototype");
+        }
+      );
+    })
+    .catch(() => {
+      data.el.closest(".agent-3d-card")?.classList.add("agent-3d-card--prototype");
+    });
 }
 
 function disposeObject(object) {
@@ -326,6 +411,13 @@ function makeModeProps() {
 function setMode(scene, mode, copy = {}) {
   const nextMode = modes.has(mode) ? mode : "idle";
   scene.mode = nextMode;
+  if (scene.productionRoot) {
+    scene.productionRoot.position.x = nextMode === "idle" ? -1.85 : -0.72;
+    scene.productionRoot.position.z = nextMode === "idle" ? 0.95 : -0.35;
+    scene.productionRoot.rotation.y = nextMode === "idle" ? 0.16 : -0.22;
+    playProductionAnimation(scene, nextMode);
+    return;
+  }
   scene.idleGroup.visible = nextMode === "idle";
   scene.workGroup.visible = nextMode !== "idle";
   scene.cards.visible = nextMode !== "idle";
@@ -409,13 +501,19 @@ function createAgentScene(el, options) {
     frame: 0,
     reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
     resizeObserver: null,
-    mode: "idle"
+    mode: "idle",
+    productionRoot: null,
+    modelMixer: null,
+    modelClips: [],
+    activeAction: null,
+    activeClipName: ""
   };
 
   data.resizeObserver = new ResizeObserver(() => resize(data));
   data.resizeObserver.observe(el);
   resize(data);
   setMode(data, options.mode, options);
+  loadProductionModel(data, options);
   animate(data);
   return data;
 }
@@ -453,7 +551,11 @@ function animate(data) {
           item.scale.x = 1 + Math.abs(Math.sin(time * 2.4)) * 5.2;
         }
       });
+      if (data.productionRoot) {
+        data.productionRoot.rotation.y = (data.mode === "idle" ? 0.16 : -0.22) + Math.sin(time * 0.55) * 0.04;
+      }
     }
+    if (data.modelMixer) data.modelMixer.update(1 / 60);
     data.renderer.render(data.scene, data.camera);
     data.frame = requestAnimationFrame(tick);
   };

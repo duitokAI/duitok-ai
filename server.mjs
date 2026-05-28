@@ -463,6 +463,11 @@ async function requireAuth(req) {
     error.status = 403;
     throw error;
   }
+  if ((user.status || "active") === "pending_payment" && !hasAdminPrivileges(user)) {
+    const error = new Error("Payment is still pending. Please complete checkout to activate Studio access.");
+    error.status = 402;
+    throw error;
+  }
   return { db, user };
 }
 
@@ -2706,7 +2711,7 @@ function requireChipConfig() {
   return { token, brandId };
 }
 
-async function createChipPurchase({ orderId, amount, email, fullName }) {
+async function createChipPurchase({ orderId, amount, email, fullName, productName, credits = amount, metadata = {}, successPath = "/" }) {
   const { token, brandId } = requireChipConfig();
   const response = await fetch("https://gate.chip-in.asia/api/v1/purchases/", {
     method: "POST",
@@ -2721,21 +2726,22 @@ async function createChipPurchase({ orderId, amount, email, fullName }) {
       },
       purchase: {
         products: [{
-          name: `Duitok  AI ${amount} credits`,
+          name: productName || `Duitok  AI ${amount} credits`,
           price: amount * 100,
           quantity: 1
         }],
         currency: "MYR",
         metadata: {
           order_id: orderId,
-          credits: amount
+          credits,
+          ...metadata
         }
       },
       brand_id: brandId,
       reference: orderId,
-      success_redirect: publicAppUrl(`/?payment=success&order=${encodeURIComponent(orderId)}`),
-      failure_redirect: publicAppUrl(`/?payment=failed&order=${encodeURIComponent(orderId)}`),
-      cancel_redirect: publicAppUrl(`/?payment=cancelled&order=${encodeURIComponent(orderId)}`),
+      success_redirect: publicAppUrl(`${successPath}?payment=success&order=${encodeURIComponent(orderId)}`),
+      failure_redirect: publicAppUrl(`${successPath}?payment=failed&order=${encodeURIComponent(orderId)}`),
+      cancel_redirect: publicAppUrl(`${successPath}?payment=cancelled&order=${encodeURIComponent(orderId)}`),
       success_callback: publicAppUrl("/api/payments/chip/callback")
     })
   });
@@ -2776,14 +2782,22 @@ async function markChipPurchasePaid(db, payload) {
   payment.paidAt = new Date().toISOString();
   const user = db.users.find((item) => item.id === payment.userId) || db.users.find((item) => item.id === adminUserId);
   user.billing ||= defaultBilling();
-  user.billing.credits += payment.credits;
+  if (payment.kind === "subscription") {
+    user.status = "active";
+    user.billing.plan = payment.plan || "Duitok AI Pro";
+    user.billing.nextBill = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    db.usage.unshift(usage(`Activated ${user.billing.plan}`, 0, user.id));
+  }
+  if (payment.credits) user.billing.credits += payment.credits;
   user.billing.invoices.unshift({ id: `INV-${Date.now()}`, amount: payment.amount, createdAt: new Date().toISOString() });
-  db.usage.unshift(usage(`Top up ${payment.credits} credits`, 0, user.id));
-  db.creditLedger.unshift(creditEntry(user.id, "credit", payment.credits, `Top up RM${payment.amount}`, {
-    paymentId: payment.id,
-    orderId: payment.orderId,
-    chipPurchaseId: payment.chipPurchaseId
-  }));
+  if (payment.credits) {
+    db.usage.unshift(usage(`Top up ${payment.credits} credits`, 0, user.id));
+    db.creditLedger.unshift(creditEntry(user.id, "credit", payment.credits, `Top up RM${payment.amount}`, {
+      paymentId: payment.id,
+      orderId: payment.orderId,
+      chipPurchaseId: payment.chipPurchaseId
+    }));
+  }
   return payment;
 }
 
@@ -2891,6 +2905,11 @@ app.post("/api/auth/login", async (req, res) => {
     if ((user.status || "active") === "suspended" && !hasAdminPrivileges(user)) {
       const error = new Error("Account suspended. Please contact support.");
       error.status = 403;
+      throw error;
+    }
+    if ((user.status || "active") === "pending_payment" && !hasAdminPrivileges(user)) {
+      const error = new Error("Payment is still pending. Please complete checkout to activate Studio access.");
+      error.status = 402;
       throw error;
     }
     const sessionUser = { ...user, __adminVerified: verifyAdminAccess(null, user, adminKey) };
@@ -3009,6 +3028,41 @@ app.post("/api/projects", async (req, res) => {
   const { user } = await requireAuth(req);
   res.json(await mutateDb(async (db) => {
     db.projects.push(blankProject(crypto.randomUUID(), req.body.name, user.id));
+    await saveDb(db);
+    return publicState(db, user);
+  }));
+});
+
+app.patch("/api/projects/:id", async (req, res) => {
+  const { user } = await requireAuth(req);
+  res.json(await mutateDb(async (db) => {
+    const project = findProject(db, req.params.id, user);
+    const name = String(req.body.name || "").trim();
+    if (!name) {
+      const error = new Error("Project name is required");
+      error.status = 400;
+      throw error;
+    }
+    project.name = name.slice(0, 80);
+    await saveDb(db);
+    return publicState(db, user);
+  }));
+});
+
+app.delete("/api/projects/:id", async (req, res) => {
+  const { user } = await requireAuth(req);
+  res.json(await mutateDb(async (db) => {
+    findProject(db, req.params.id, user);
+    const ownedProjects = db.projects.filter((project) => hasAdminPrivileges(user) || project.userId === user.id);
+    if (ownedProjects.length <= 1) {
+      const error = new Error("Keep at least one project in the workspace.");
+      error.status = 400;
+      throw error;
+    }
+    db.projects = db.projects.filter((project) => project.id !== req.params.id);
+    db.attachments = (db.attachments || []).filter((item) => item.projectId !== req.params.id);
+    db.schedule = (db.schedule || []).filter((item) => item.projectId !== req.params.id);
+    db.generationJobs = (db.generationJobs || []).filter((item) => item.projectId !== req.params.id);
     await saveDb(db);
     return publicState(db, user);
   }));
@@ -3175,6 +3229,96 @@ app.post("/api/billing/topup", async (req, res, next) => {
       });
       await saveDb(db);
       return publicState(db, user);
+    });
+
+    res.json({
+      orderId,
+      checkoutUrl: chipPurchase.checkout_url,
+      directPostUrl: chipPurchase.direct_post_url
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/checkout/register", async (req, res, next) => {
+  try {
+    const email = String(req.body.email || "").trim().toLowerCase();
+    const fullName = String(req.body.name || "").trim();
+    const phone = String(req.body.phone || "").trim();
+    const password = String(req.body.password || "");
+
+    if (!email || !email.includes("@")) return res.status(400).json({ error: "Valid email is required" });
+    if (!fullName) return res.status(400).json({ error: "Full name is required" });
+    if (!phone) return res.status(400).json({ error: "WhatsApp number is required" });
+    if (password.length < 6) return res.status(400).json({ error: "Password must be at least 6 characters" });
+
+    const amount = 69;
+    const orderId = `DR-${Date.now()}`;
+    let checkoutUser;
+
+    await mutateDb(async (db) => {
+      db.users ||= structuredClone(seed.users);
+      let user = db.users.find((item) => item.email === email);
+      if (user) {
+        if (!verifyPassword(password, user.passwordHash || user.password)) {
+          const error = new Error("This email already exists. Use the same password or sign in to top up.");
+          error.status = 401;
+          throw error;
+        }
+      } else {
+        user = {
+          id: crypto.randomUUID(),
+          email,
+          passwordHash: hashPassword(password),
+          name: fullName,
+          phone,
+          role: "user",
+          status: "pending_payment",
+          billing: { ...defaultBilling(), credits: 0 },
+          agentPermissions: defaultAgentPermissions()
+        };
+        db.users.push(user);
+        db.projects.push(blankProject(crypto.randomUUID(), "Project 1", user.id));
+      }
+      user.name = fullName || user.name;
+      user.phone = phone || user.phone;
+      checkoutUser = user;
+      await saveDb(db);
+    });
+
+    const chipPurchase = await createChipPurchase({
+      orderId,
+      amount,
+      email,
+      fullName,
+      productName: "Duitok AI Pro monthly launch plan",
+      credits: 0,
+      metadata: {
+        kind: "subscription",
+        plan: "Duitok AI Pro",
+        phone
+      },
+      successPath: "/login"
+    });
+
+    await mutateDb(async (db) => {
+      db.payments.unshift({
+        id: crypto.randomUUID(),
+        userId: checkoutUser.id,
+        orderId,
+        chipPurchaseId: chipPurchase.id,
+        checkoutUrl: chipPurchase.checkout_url,
+        directPostUrl: chipPurchase.direct_post_url,
+        amount,
+        credits: 0,
+        kind: "subscription",
+        plan: "Duitok AI Pro",
+        status: "pending",
+        buyer: { email, fullName, phone },
+        createdAt: new Date().toISOString()
+      });
+      await saveDb(db);
     });
 
     res.json({
