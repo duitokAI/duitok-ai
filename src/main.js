@@ -405,7 +405,7 @@ const copy = {
     sellersNow: "订阅送 10 credits",
     guarantee: "图片 RM0.10",
     videoPrice: "视频 RM0.40",
-    you: "你",
+    you: "您",
     competitor: "竞争对手",
     oneVideo: "1 条 / 天",
     tenVideos: "10 条 / 天",
@@ -415,13 +415,13 @@ const copy = {
     speedCopy: "普通卖家一天手工做 2-3 条视频，AI 卖家可以批量测试产品、hook、脚本和内容角度。谁更快拿到数据，谁更早找到能出单的方向。",
     price: "RM69",
     priceTitle: "RM69 买的不是工具，是一套已经跑通的 AI 带货打法",
-    priceCopy: "你拿到的不只是平台使用权，而是一套从选品、拆卖点、生成 hook/script/caption，到批量测试内容角度的执行系统。",
+    priceCopy: "您拿到的不只是平台使用权，而是一套从选品、拆卖点、生成 hook/script/caption，到批量测试内容角度的执行系统。",
     simple: "不用拿货",
     simpleTitle: "不用再跟商家拿产品拍摄",
     simpleCopy: "减少拿货、布景、拍摄、剪辑这些最浪费时间的环节。",
     sellerReality: "AI 卖家正在拉开差距",
     painTitle: "还在手工做内容<br>速度已经不够了",
-    painCopy: "短视频带货不是只靠努力。你每天只做 2-3 条，根本测不出哪个产品、哪个 hook、哪个角度会跑。AI 卖家赢在产能，赢在测试速度，赢在更早拿到数据。",
+    painCopy: "短视频带货不是只靠努力。您每天只做 2-3 条，根本测不出哪个产品、哪个 hook、哪个角度会跑。AI 卖家赢在产能，赢在测试速度，赢在更早拿到数据。",
     notEnoughTime: "内容产能太低",
     notEnoughTimeCopy: "一天 2-3 条，数据太少，判断只能靠感觉。",
     ideasDry: "拍摄成本太高",
@@ -434,7 +434,7 @@ const copy = {
     weaponsTitle: "Duitok AI 放大的<br>不是灵感，是执行量",
     liveOutput: "Duitok AI 输出",
     outputTitle: "一个产品<br>批量拆出可测试内容角度",
-    outputCopy: "一个产品至少要测几十个内容角度。Duitok AI 把产品拆成 hook、脚本、caption、视觉方向和发布计划，让你更快跑内容、拿数据、复盘，再继续放大。",
+    outputCopy: "一个产品至少要测几十个内容角度。Duitok AI 把产品拆成 hook、脚本、caption、视觉方向和发布计划，让您更快跑内容、拿数据、复盘，再继续放大。",
     hookTitle: "100+ Hook",
     hookSample: "同一个产品，可以测试痛点角度、证明角度、对比角度、优惠角度。",
     scriptTitle: "UGC 脚本",
@@ -445,9 +445,9 @@ const copy = {
     planSample: "适合 TikTok Affiliate、TikTok Shop、产品推广、Reels 和 Shorts 持续测试。",
     howKicker: "使用流程",
     howTitle: "跟着已跑通流程<br>从选品做到复盘放大",
-    howCopy: "流程给新手设计：选产品、拆卖点、套模板、生成内容、发布测试、看数据后复制有效角度。你不是随机使用 AI，而是按短视频带货系统执行。",
+    howCopy: "流程给新手设计：选产品、拆卖点、套模板、生成内容、发布测试、看数据后复制有效角度。您不是随机使用 AI，而是按短视频带货系统执行。",
     demoTitle: "看清楚 AI 带货内容<br>是怎么批量跑出来的",
-    demoCopy: "每个样例都写清楚类目、hook、生成类型和预计成本，让你订阅前就理解 Duitok 如何帮你提高内容产能。",
+    demoCopy: "每个样例都写清楚类目、hook、生成类型和预计成本，让您订阅前就理解 Duitok 如何帮您提高内容产能。",
     oldWay: "旧方法",
     newWay: "Duitok AI 方法",
     pricingTitle: "RM69 买的不是工具<br>是一套已经跑通的 AI 带货打法",
@@ -465,7 +465,7 @@ const copy = {
     email: "邮箱",
     password: "密码",
     continueRegistration: "继续注册",
-    faqTitle: "开始前<br>你可能会问",
+    faqTitle: "开始前<br>您可能会问",
     dashboard: "总控",
     newProject: "新项目",
     search: "搜索",
@@ -524,11 +524,11 @@ const copy = {
     contactSupport: "联系客服",
     humanSupport: "人工客服",
     whatsappSupport: "WhatsApp",
-    dashboardSubtitle: "你的短视频带货工作台生产总览。",
+    dashboardSubtitle: "您的短视频带货工作台生产总览。",
     accountAttachmentsSubtitle: "已上传并保存到后台的记录。",
     accountBillingSubtitle: "计划、续费、费率和付款记录。",
     accountTopupSubtitle: "充值记录会同步到后台账本。",
-    accountAffiliateSubtitle: "管理你的推荐链接、收益和提现。",
+    accountAffiliateSubtitle: "管理您的推荐链接、收益和提现。",
     accountUsageSubtitle: "后台账本里的 Credit 使用记录。",
     accountAutopostSubtitle: "Chrome extension 辅助的 TikTok 发布队列。",
     accountWhatsappSubtitle: "进入 Duitok WhatsApp 社群。",
@@ -549,7 +549,7 @@ const copy = {
     referralTotalEarned: "累计收益",
     referralTotalCashedOut: "已提现",
     referralClicks: "点击数",
-    referralCode: "你的推荐码",
+    referralCode: "您的推荐码",
     copyCode: "复制码",
     shareReferralLink: "分享这个链接邀请卖家",
     referralLink: "推荐链接",
@@ -559,8 +559,8 @@ const copy = {
     affiliateReferrals: "推荐用户",
     affiliateCashOut: "提现",
     affiliateHowTitle: "Affiliate 如何运作",
-    affiliateHow1: "把你的 Duitok 链接或推荐码分享给卖家。",
-    affiliateHow2: "对方通过你的链接订阅后，系统会追踪你的佣金。",
+    affiliateHow1: "把您的 Duitok 链接或推荐码分享给卖家。",
+    affiliateHow2: "对方通过您的链接订阅后，系统会追踪您的佣金。",
     affiliateHow3: "付款确认后，钱包余额会更新。",
     affiliateHow4: "达到最低 RM50 后，可以提现到马来西亚银行账户。",
     totalReferrals: "总推荐数",
@@ -599,7 +599,7 @@ const copy = {
     whatsappNumber: "WhatsApp 号码",
     saveWhatsapp: "保存 WhatsApp",
     changePassword: "修改密码",
-    changePasswordSubtitle: "修改通过 WhatsApp 发给你的密码",
+    changePasswordSubtitle: "修改通过 WhatsApp 发给您的密码",
     oldPassword: "旧密码",
     newPassword: "新密码",
     confirmNewPassword: "确认新密码",
@@ -611,7 +611,7 @@ const copy = {
     done: "完成",
     exportStarted: "导出已开始，文件会由后台生成。",
     supportMessage: "问题描述",
-    supportPlaceholder: "告诉我们发生了什么、你试过什么，如果要回复请留下 WhatsApp。",
+    supportPlaceholder: "告诉我们发生了什么、您试过什么，如果要回复请留下 WhatsApp。",
     createPassword: "创建密码",
     registerEnterStudio: "注册并进入工作台",
     toastAffiliateCopied: "推荐链接已复制。",
@@ -1463,7 +1463,7 @@ function featureMosaicCards() {
       ["05", "Review method", "Ikut data, ulang angle yang jalan dan berhenti buang masa pada content yang tidak convert.", "chart-no-axes-combined"]
     ],
     zh: [
-      ["01", "已跑通打法", "不是给你一个空工具，而是把 AI 短视频带货流程整理成可执行系统。", "search-check"],
+      ["01", "已跑通打法", "不是给您一个空工具，而是把 AI 短视频带货流程整理成可执行系统。", "search-check"],
       ["02", "选品 SOP", "先判断产品是否适合短视频带货，不靠感觉乱选。", "layout-template"],
       ["03", "Hook / Script / Caption", "批量生成带货结构，不再每天从空白页硬想内容。", "message-square-text"],
       ["04", "内容产能放大", "同一个产品拆出更多痛点、人群、CTA 和视频角度。", "sparkles"],
@@ -1521,8 +1521,8 @@ function whyDuitokContent() {
     },
     zh: {
       kicker: "为什么不是自己用普通 AI",
-      title: "Duitok AI 不是帮你写文案<br>是帮你放大带货执行量",
-      copy: "普通 AI 只给你生成能力，但不告诉你怎么做短视频带货。Duitok 把已跑通打法、模板、教程、SOP、选品方法和 AI 平台放在一起，让你按系统批量执行。"
+      title: "Duitok AI 不是帮您写文案<br>是帮您放大带货执行量",
+      copy: "普通 AI 只给您生成能力，但不告诉您怎么做短视频带货。Duitok 把已跑通打法、模板、教程、SOP、选品方法和 AI 平台放在一起，让您按系统批量执行。"
     },
     en: {
       kicker: "Why not generic AI",
@@ -1544,7 +1544,7 @@ function whyDuitokCards() {
     zh: [
       ["layout-template", "有打法", "我们把已经跑通的 AI 短视频带货方法做成新手能跟的流程。"],
       ["graduation-cap", "有 SOP", "跟着步骤做选品、生成视频、发布、看数据、复制有效内容。"],
-      ["wand-sparkles", "有产能", "Duitok AI 帮你把执行速度从每天 2-3 条手工视频，放大到更多视频角度。"],
+      ["wand-sparkles", "有产能", "Duitok AI 帮您把执行速度从每天 2-3 条手工视频，放大到更多视频角度。"],
       ["badge-dollar-sign", "有案例", "已有学员根据我们的教程和平台执行，第一个星期赚到 RM1000+。"]
     ],
     en: [
@@ -1622,7 +1622,7 @@ function demoGalleryCards() {
       ["Bundle", "Tiga offer angle untuk set produk sama", "Offer script", "RM0.40", "video"]
     ],
     zh: [
-      ["Skincare", "为什么你的皮肤一到下午就暗沉？", "UGC 带货视频", "RM0.40", "video"],
+      ["Skincare", "为什么您的皮肤一到下午就暗沉？", "UGC 带货视频", "RM0.40", "video"],
       ["Kitchenware", "这个厨房小工具，真的省掉一半时间", "产品演示视频", "RM0.40", "video"],
       ["Supplement", "给还在犹豫的买家一个 before-after 证明", "证明型脚本", "RM0.40", "video"],
       ["Gadget", "买这个 model 前先看这 3 个点", "对比型视频", "RM0.40", "video"],
@@ -1705,7 +1705,7 @@ function testVolumeContent() {
     zh: {
       kicker: "为什么一定要用 AI",
       title: "短视频带货<br>已经进入内容产能战",
-      copy: "你无法提前知道哪个产品、hook 或角度会出单。更有效的方法，是快速做出更多内容、发布、看数据，再复制有效角度。还在手工做内容，速度已经不够了。"
+      copy: "您无法提前知道哪个产品、hook 或角度会出单。更有效的方法，是快速做出更多内容、发布、看数据，再复制有效角度。还在手工做内容，速度已经不够了。"
     },
     en: {
       kicker: "Why AI matters",
@@ -1727,7 +1727,7 @@ function testVolumeSteps() {
     zh: [
       ["1", "放大内容产能", "一个产品拆成痛点、人群、证明、测评、对比和优惠角度。"],
       ["2", "提高测试速度", "更多内容代表更多曝光机会，也代表更多数据反馈。"],
-      ["3", "更快看到数据", "你能更快判断哪个产品、hook 和内容格式值得继续。"],
+      ["3", "更快看到数据", "您能更快判断哪个产品、hook 和内容格式值得继续。"],
       ["4", "复制有效内容", "把有反应的角度继续放大，停止浪费时间在无效内容上。"]
     ],
     en: [
@@ -1751,7 +1751,7 @@ function dreamContent() {
     },
     zh: {
       kicker: "副业梦想与执行系统",
-      title: "你买的不是工具<br>是进入 AI 卖家阵营的机会",
+      title: "您买的不是工具<br>是进入 AI 卖家阵营的机会",
       copy: "很多人想做副业，但一直卡在选品、拍摄、脚本和执行量。Duitok AI 的价值，是让普通人用 RM69 进入一套已经跑通的 AI 短视频营销平台。"
     },
     en: {
@@ -1832,7 +1832,7 @@ function sevenDayContent() {
     zh: {
       kicker: "新手 7 天路径",
       title: "订阅后第一周<br>按系统执行",
-      copy: "Duitok 不是让你随机按按钮，而是给你一条新手执行路径：先学已跑通打法，再选品，再生成第一批内容，最后根据数据复盘。"
+      copy: "Duitok 不是让您随机按按钮，而是给您一条新手执行路径：先学已跑通打法，再选品，再生成第一批内容，最后根据数据复盘。"
     },
     en: {
       kicker: "Beginner path",
@@ -1888,7 +1888,7 @@ function scenarioContent() {
     zh: {
       kicker: "不只 TikTok Affiliate",
       title: "不只 TikTok Affiliate<br>任何短视频带货都能用",
-      copy: "TikTok Affiliate 是推荐入门场景，但 Duitok AI 的底层能力是短视频带货内容生产。只要你需要用短视频卖产品、测产品、做内容，Duitok 都可以帮你提高内容产能。"
+      copy: "TikTok Affiliate 是推荐入门场景，但 Duitok AI 的底层能力是短视频带货内容生产。只要您需要用短视频卖产品、测产品、做内容，Duitok 都可以帮您提高内容产能。"
     },
     en: {
       kicker: "Beyond TikTok Affiliate",
@@ -2000,7 +2000,7 @@ function includedCreditBanner() {
 function controlCards() {
   const data = {
     ms: ["RM69/bulan untuk platform, template dan SOP", "Duitok AI bantu output, bukan guarantee income", "Lebih banyak video memberi lebih banyak peluang data", "Anda tetap perlu pilih produk, post dan review result", "RM1000+ student case ialah bukti kemungkinan, bukan janji fixed"],
-    zh: ["RM69/月进入 AI 短视频营销平台", "Duitok AI 放大执行量，不承诺收入", "更多内容带来更多测试数据", "你仍然需要选品、发布和复盘结果", "RM1000+ 学员案例是可能性证明，不是固定承诺"],
+    zh: ["RM69/月进入 AI 短视频营销平台", "Duitok AI 放大执行量，不承诺收入", "更多内容带来更多测试数据", "您仍然需要选品、发布和复盘结果", "RM1000+ 学员案例是可能性证明，不是固定承诺"],
     en: ["RM69/month includes platform, templates, and SOP", "Duitok AI improves output; it does not guarantee income", "More videos create more testing data", "You still choose products, publish, and review results", "The RM1000+ student case shows possibility, not a fixed promise"]
   };
   return (data[state.lang] || data.ms)
@@ -2023,15 +2023,15 @@ function faqItems() {
       ["RM69 termasuk apa?", "RM69 ialah yuran membership bulanan untuk akses Duitok AI platform, template short video selling, tutorial SOP, hook/script/caption workflow dan basic support. Promotion sekarang: subscribe dan dapat 10 credits. Generation credit dikira jelas: image RM0.10 dan video RM0.40."]
     ],
     zh: [
-      ["Duitok AI 是保证赚钱吗？", "不保证。Duitok AI 提供的是已经跑通的 AI 短视频营销平台，帮助你提高内容产能和执行速度。实际收益取决于选品、账号、发布量、内容质量、市场反馈和复盘能力。"],
-      ["为什么不用普通 AI 工具？", "普通 AI 工具只给你生成能力，但不告诉你怎么做短视频带货。Duitok 提供已跑通打法、模板、教程、SOP 和平台，让新手可以按系统执行。"],
+      ["Duitok AI 是保证赚钱吗？", "不保证。Duitok AI 提供的是已经跑通的 AI 短视频营销平台，帮助您提高内容产能和执行速度。实际收益取决于选品、账号、发布量、内容质量、市场反馈和复盘能力。"],
+      ["为什么不用普通 AI 工具？", "普通 AI 工具只给您生成能力，但不告诉您怎么做短视频带货。Duitok 提供已跑通打法、模板、教程、SOP 和平台，让新手可以按系统执行。"],
       ["RM69 是无限生成吗？", "不是。RM69 是每月会员费，用来加入 AI 短视频营销平台，开通平台、模板、教程和 SOP。生成内容会按 credits 扣费，这样成本更清楚。"],
-      ["10 credits 可以做什么？", "10 credits 可以先生成第一批内容。你可以混合生成一些 RM0.40 的视频和 RM0.10 的图片，看哪个产品和角度值得继续放大。"],
+      ["10 credits 可以做什么？", "10 credits 可以先生成第一批内容。您可以混合生成一些 RM0.40 的视频和 RM0.10 的图片，看哪个产品和角度值得继续放大。"],
       ["Credits 用完怎么办？", "之后可以再 top up。Duitok 的逻辑是生成多少用多少，不需要一开始投入很大的内容成本。"],
-      ["我不会拍视频可以用吗？", "可以。Duitok AI 主打减少拿货、拍摄和剪辑压力，帮助你生成带货视频方向、脚本、caption 和不露脸内容。"],
+      ["我不会拍视频可以用吗？", "可以。Duitok AI 主打减少拿货、拍摄和剪辑压力，帮助您生成带货视频方向、脚本、caption 和不露脸内容。"],
       ["一定要做 TikTok Affiliate 吗？", "不一定。TikTok Affiliate 是推荐入门场景，但 Duitok AI 适合任何需要短视频带货的场景。"],
-      ["没有 TikTok Affiliate 账号可以吗？", "可以。你也可以先用 Duitok 做 TikTok Shop、本地产品、Shopee / Lazada、Reels、Shorts 或品牌产品推广内容。"],
-      ["一天能批量生成很多内容角度吗？", "平台流程是为了批量生成视频角度和内容而设计，具体数量取决于使用方式、credit、产品素材和你的执行节奏。"],
+      ["没有 TikTok Affiliate 账号可以吗？", "可以。您也可以先用 Duitok 做 TikTok Shop、本地产品、Shopee / Lazada、Reels、Shorts 或品牌产品推广内容。"],
+      ["一天能批量生成很多内容角度吗？", "平台流程是为了批量生成视频角度和内容而设计，具体数量取决于使用方式、credit、产品素材和您的执行节奏。"],
       ["学员第一个星期 RM1000+ 是保证吗？", "不是保证。这是已有学员根据教程和平台执行后的案例，结果因人而异。"],
       ["RM69 包含什么？", "RM69 是每月会员费，包含 Duitok AI 平台使用、已跑通短视频带货打法、模板、教学 SOP、hook/script/caption 生成流程和基础支持。现在 promotion：订阅送 10 credits。生成费用另外按 credit 计算：图片 RM0.10，视频 RM0.40。"]
     ],
@@ -3653,9 +3653,9 @@ function sopDashboardContent() {
       close: "我明白了 - 关闭",
       path: "登录首页 · 选择 / 创建项目 · 查看每日数据",
       whatTitle: "这是什么？",
-      what: "Dashboard 是你登录后的工作台首页。它会汇总当前账号的整体产出、生成成本、Credit 使用情况和正在操作的项目。Image、UGC、Auto Content、Story、Cinema、Clone 等所有生成动作，都应该先归入一个 Project，方便你后续查看历史、复盘成本和管理客户交付。",
+      what: "Dashboard 是您登录后的工作台首页。它会汇总当前账号的整体产出、生成成本、Credit 使用情况和正在操作的项目。Image、UGC、Auto Content、Story、Cinema、Clone 等所有生成动作，都应该先归入一个 Project，方便您后续查看历史、复盘成本和管理客户交付。",
       whenTitle: "什么时候用？",
-      when: "每次登录、切换客户 / Campaign、查看本月产出、核对成本或复盘每日生成节奏时，都先看 Dashboard。它不是一个装饰页，而是你判断下一步要继续生成、复盘还是发布的总控台。",
+      when: "每次登录、切换客户 / Campaign、查看本月产出、核对成本或复盘每日生成节奏时，都先看 Dashboard。它不是一个装饰页，而是您判断下一步要继续生成、复盘还是发布的总控台。",
       guideTitle: "怎么用",
       stepLabel: "步骤",
       tipLabel: "提示",
@@ -3668,18 +3668,18 @@ function sopDashboardContent() {
         { no: "3", title: "创建 New Project", copy: "点击 + New Project，输入清楚的项目名，例如 'Brand X Campaign Q1'，然后创建。新项目会出现在左侧 Projects 列表里。", tip: "命名尽量具体。'Skincare-A-Aug-Campaign' 比 'Project 5' 更容易管理。" },
         { no: "4", title: "切换 Project", copy: "点击 sidebar 里的项目名称，就会切换当前 workspace。所有生成 tab 和 history 都会跟着当前 Project 变化。" },
         { no: "5", title: "搜索 Project", copy: "项目变多后，用 sidebar 顶部的搜索框输入客户名、产品名或 Campaign 名，可以快速过滤项目。" },
-        { no: "6", title: "Project 三点菜单", copy: "鼠标移到项目上，会出现 3-dot 菜单。你可以 Rename 或 Delete 项目。", tip: "Rename 是安全操作。Delete 会删除该项目里的历史内容，只在项目确实废弃时使用。" },
+        { no: "6", title: "Project 三点菜单", copy: "鼠标移到项目上，会出现 3-dot 菜单。您可以 Rename 或 Delete 项目。", tip: "Rename 是安全操作。Delete 会删除该项目里的历史内容，只在项目确实废弃时使用。" },
         { no: "7", title: "数据卡片", copy: "这些卡片显示当前日期范围内，各类资产的生成总量。", bullets: ["Image — Image tab 生成的图片", "UGC — UGC tab 生成的视频", "Cinema — cinematic / story 视频输出", "Auto Content — 批量内容计划和视频"] },
         { no: "8", title: "Total Cost", copy: "Total Cost 显示当前日期范围内消耗的 Credit 或生成成本，适合用来做月度成本核算或客户报价。", tip: "做月度 invoice 时，把 From 设为月初，把 To 设为月底。" },
         { no: "9", title: "日期筛选", copy: "选择 From Date 和 To Date 后点击 Apply。Reset 会回到默认时间范围。日期按马来西亚时间计算。" },
-        { no: "10", title: "每日产出图表", copy: "这个图表用来观察每日生成趋势，帮助你发现爆发日、空档期或 Campaign 启动后的产出变化。" },
-        { no: "11", title: "Logo 与 Dashboard 按钮", copy: "Logo 用来回到主工作台。Dashboard 按钮高亮时，代表你正在查看这个总览页。" },
+        { no: "10", title: "每日产出图表", copy: "这个图表用来观察每日生成趋势，帮助您发现爆发日、空档期或 Campaign 启动后的产出变化。" },
+        { no: "11", title: "Logo 与 Dashboard 按钮", copy: "Logo 用来回到主工作台。Dashboard 按钮高亮时，代表您正在查看这个总览页。" },
         { no: "12", title: "+ New Project 按钮", copy: "这个按钮用来创建新项目。旁边的小数字显示当前项目数量和套餐上限。" },
         { no: "13", title: "Projects 列表", copy: "所有项目都在 sidebar 的 Projects 列表里。点击项目即可切换，三点菜单用于 rename 或 delete。" },
         { no: "14", title: "Account 区域", copy: "Account 区域包含 Billing、Top Up Credit、Usage、Auto Post TikTok、SOP 和 WhatsApp 社群入口。" },
         { no: "15", title: "Credit Balance 卡片", copy: "这里显示当前 Credit 余额，并提供快速充值入口。" },
         { no: "16", title: "Plan 状态", copy: "Pro 和 days left 会显示当前订阅状态，以及距离续费还有多少天。" },
-        { no: "17", title: "用户卡片", copy: "sidebar 底部显示你的名称、邮箱、Settings 和 Sign out。" }
+        { no: "17", title: "用户卡片", copy: "sidebar 底部显示您的名称、邮箱、Settings 和 Sign out。" }
       ]
     },
     en: {
@@ -3756,9 +3756,9 @@ function sopImageContent() {
       close: "我明白了 - 关闭",
       path: "Banana Pro · GPT Image 2 · Imagen 4",
       whatTitle: "这是什么？",
-      what: "Image 页面用来生成 avatar、产品图或自定义场景。你可以上传人物参考、产品参考，再配合 prompt，让 AI 生成新的图片。9:16 输出最适合 TikTok，也可以继续作为 UGC 视频生成的参考图。",
+      what: "Image 页面用来生成 avatar、产品图或自定义场景。您可以上传人物参考、产品参考，再配合 prompt，让 AI 生成新的图片。9:16 输出最适合 TikTok，也可以继续作为 UGC 视频生成的参考图。",
       whenTitle: "什么时候用？",
-      when: "当你要先做 avatar、没有摄影师但需要 product placement，或想批量生成多张 creator 形象再拿去 UGC tab 复用时，就先用 Image tab。",
+      when: "当您要先做 avatar、没有摄影师但需要 product placement，或想批量生成多张 creator 形象再拿去 UGC tab 复用时，就先用 Image tab。",
       guideTitle: "怎么用",
       stepLabel: "步骤",
       tipLabel: "提示",
@@ -3767,12 +3767,12 @@ function sopImageContent() {
       sections: { 5: "下拉选项 — 每个选项是什么意思" },
       steps: [
         { no: "1", title: "表单总览", subtitle: "Image Generator、Character Reference、Product Reference", copy: "主要有三张卡：Image Generator 用来选择 Model 和 Mode；Character Reference 用来上传 avatar 人脸；Product Reference 用来上传产品图。下方的 Prompt & Settings 里有 Avatar、Product、Sales 三类 preset。" },
-        { no: "2", title: "上传 Character Reference", copy: "上传你要保留的人物脸。最好用清晰自拍，并且画面里只有一个人。AI 会尽量在后续 variation 里保持这张脸的一致性。也可以用 From History 选择之前生成过的 avatar。", tip: "一张清楚的人脸就够了。参考图里如果有多人，AI 很容易混乱。" },
+        { no: "2", title: "上传 Character Reference", copy: "上传您要保留的人物脸。最好用清晰自拍，并且画面里只有一个人。AI 会尽量在后续 variation 里保持这张脸的一致性。也可以用 From History 选择之前生成过的 avatar。", tip: "一张清楚的人脸就够了。参考图里如果有多人，AI 很容易混乱。" },
         { no: "3", title: "上传 Product Reference", copy: "如果有产品图，就上传包装、label 和形状都清楚的图片。AI 会尽量把产品保留在新场景里。如果只是生成 avatar，可以跳过这一步。" },
         { no: "4", title: "点击 Generate Image", copy: "点击 Generate Image 开始生成。每张图成本 RM0.20。下方 history 会出现 pending card，通常等待 15-30 秒。完成后可以下载，也可以拿到 UGC tab 作为 reference。" },
         { no: "5", title: "MODEL 下拉 — 选择 AI 引擎", copy: "Banana Pro 是默认选项，适合马来西亚人脸和角色一致性。GPT Image 2 更适合创意场景和 aesthetic visual，但人脸可能没那么稳定。Imagen 4 更适合高真实感产品 hero shot。", tip: "Avatar 先用 Banana Pro。需要特别场景时用 GPT Image 2。产品高级图用 Imagen 4。" },
         { no: "6", title: "MODE 下拉 — 操作类型", copy: "Create Image 是默认模式，用 prompt 和 reference 生成新图。其它 edit / inpaint 类模式更 advanced，标准 UGC workflow 通常不用。", tip: "95% 情况保持 Create Image 就好。" },
-        { no: "7", title: "AVATAR / PRODUCT / SALES tabs", copy: "Avatar 是人物 preset；Product 是产品图 preset，例如 flat lay、pedestal、splash；Sales 是广告和 banner 风格的营销视觉。", tip: "点击 preset 会自动填 prompt，你可以再按产品修改。" },
+        { no: "7", title: "AVATAR / PRODUCT / SALES tabs", copy: "Avatar 是人物 preset；Product 是产品图 preset，例如 flat lay、pedestal、splash；Sales 是广告和 banner 风格的营销视觉。", tip: "点击 preset 会自动填 prompt，您可以再按产品修改。" },
         { no: "8", title: "女性 persona presets", copy: "Kebaya 20s 是现代 kebaya 年轻女性；Casual 20s 是 Gen Z 日常风；Makcik 是温暖妈妈感；Kitchen 是厨房场景；Nenek 是长辈信任感；Nenek Garden 是户外花园长辈场景。", tip: "女性产品用 Kebaya 20s 或 Casual 20s；家庭产品用 Makcik；长辈 testimonial 用 Nenek。" },
         { no: "9", title: "男性 persona presets", copy: "Baju Melayu 20s 是年轻传统造型；Casual 20s 是 Gen Z 日常风；Abang Pro 是 30 岁左右专业形象；Pakcik 是温暖可信的叔叔感。", tip: "需要信任背书的产品，可以测试 Pakcik 风格。" }
       ]
@@ -3850,9 +3850,9 @@ function sopUgcContent() {
       close: "我明白了 - 关闭",
       path: "Veo 3.1 Fast · 8 秒 · 竖屏 9:16",
       whatTitle: "这是什么？",
-      what: "UGC 页面用来生成自拍感、手持感的视频，就像真实 creator 用马来语对着镜头介绍产品。Avatar 可以拿着产品、看镜头说你写好的台词，适合 affiliate 和 TikTok Shop 内容。",
+      what: "UGC 页面用来生成自拍感、手持感的视频，就像真实 creator 用马来语对着镜头介绍产品。Avatar 可以拿着产品、看镜头说您写好的台词，适合 affiliate 和 TikTok Shop 内容。",
       whenTitle: "什么时候用？",
-      when: "当你已经有明确台词，只想生成一条 UGC review 视频时，用 UGC tab。如果要一次做很多条并让 AI 帮你规划，用 Auto Content。如果想边聊边让 AI 起草，用下方的 AI Agent UGC。",
+      when: "当您已经有明确台词，只想生成一条 UGC review 视频时，用 UGC tab。如果要一次做很多条并让 AI 帮您规划，用 Auto Content。如果想边聊边让 AI 起草，用下方的 AI Agent UGC。",
       guideTitle: "怎么用",
       stepLabel: "步骤",
       tipLabel: "提示",
@@ -3866,9 +3866,9 @@ function sopUgcContent() {
         { no: "4", title: "写 Scene Prompt + Dialog", copy: "描述场景、动作和 avatar 要说的话。Veo 8 秒最适合 18-22 个词左右的台词。用 2-3 句自然口语来写，像跟朋友讲话。", tip: "例子：Malay woman in kitchen, holding a jar of sambal, smiling at camera, says: \"Korang, sambal ni gila pedas! Aku makan setiap hari sekarang. Cuba la!\"" },
         { no: "5", title: "使用 Prompt Builder", copy: "Prompt Builder 会依次问 persona、scene、hook、framework、voice 和 dialog，然后自动生成一版可以编辑的 prompt。", tip: "第一次用建议一定走 Prompt Builder。熟悉后再直接手写。" },
         { no: "6", title: "设置 Size + Generate UGC", copy: "默认 9:16，适合 TikTok。点击 Generate UGC 后，history 里会出现 pending card。Veo 3.1 Fast 通常 60-90 秒完成。每条视频成本 RM0.40。", tip: "可以用略微不同的 prompt 连续生成多个版本。" },
-        { no: "7", title: "打开 AI Agent UGC", copy: "点击右下角 floating chat button 打开 AI Agent。它可以用 BM 和你聊天、提出 video variants，并直接提交生成。", tip: "Agent 有 persona、scene、hook、framework、voice 的 skill library，你只要说清楚想要什么。" },
-        { no: "8", title: "告诉 Agent 你要什么", copy: "像 WhatsApp 一样自然输入。例子：'Buat 3 video UGC untuk produk skincare aku, persona urban hijabi, hook pain confession'。也可以用 clip icon 附上产品图。", tip: "Agent 会在需要时追问 duration、voice、hijab/no hijab 或产品角度。" },
-        { no: "9", title: "输入 SUBMIT 开始生成", copy: "当 variants 准备好后，Agent 会给你 preview，并要求你输入 SUBMIT。之后会出现确认弹窗，让你最后 review、修改和 approve。", tip: "如果要无人物产品视频，说 'buat video type product, tanpa orang'，Agent 会切到 product mode。" },
+        { no: "7", title: "打开 AI Agent UGC", copy: "点击右下角 floating chat button 打开 AI Agent。它可以用 BM 和您聊天、提出 video variants，并直接提交生成。", tip: "Agent 有 persona、scene、hook、framework、voice 的 skill library，您只要说清楚想要什么。" },
+        { no: "8", title: "告诉 Agent 您要什么", copy: "像 WhatsApp 一样自然输入。例子：'Buat 3 video UGC untuk produk skincare aku, persona urban hijabi, hook pain confession'。也可以用 clip icon 附上产品图。", tip: "Agent 会在需要时追问 duration、voice、hijab/no hijab 或产品角度。" },
+        { no: "9", title: "输入 SUBMIT 开始生成", copy: "当 variants 准备好后，Agent 会给您 preview，并要求您输入 SUBMIT。之后会出现确认弹窗，让您最后 review、修改和 approve。", tip: "如果要无人物产品视频，说 'buat video type product, tanpa orang'，Agent 会切到 product mode。" },
         { no: "10", title: "History Grid", subtitle: "生成视频和操作按钮", copy: "表单下方是当前 project 的 UGC history。每张 card 有 thumbnail、model label、可编辑名称，以及 Extend、Combine、Improve、Download、Delete 等按钮。", tip: "点击 thumbnail 可以全屏播放。pending 太久时，点 card 上的 recheck status。" },
         { no: "11", title: "延长到 16 秒", copy: "done 状态的视频可以点击 Extend，再生成后续 8 秒。系统会把 segment 1 和 segment 2 自动 merge 成 16 秒视频。", tip: "用 Frame Anchor last，延续感会更自然。Voice 会沿用第一段，声音更统一。" },
         { no: "12", title: "Duration 8s", copy: "UGC 每次固定 8 秒，因为 Veo 3.1 Fast 的限制，也因为 18-22 个 BM 词最适合 8 秒口播。要 16 秒就先生成 8 秒，再 Extend。", tip: "8 秒成本 RM0.40。Extend 到 16 秒总成本 RM0.80。" },
@@ -3962,9 +3962,9 @@ function sopAutoContentContent() {
       close: "我明白了 - 关闭",
       path: "AI → 图片 → 视频 → 合并 · 每批 1-10 条视频",
       whatTitle: "这是什么？",
-      what: "Auto Content 用来围绕一个产品批量生成多条 UGC 视频。你可以贴 TikTok Shop / Shopee 链接，或手动上传产品资料；AI 会规划多个角度，例如 UGC、Product、Lifestyle，并自动保存 caption、cover text 和 hashtags，方便后续 auto-post。",
+      what: "Auto Content 用来围绕一个产品批量生成多条 UGC 视频。您可以贴 TikTok Shop / Shopee 链接，或手动上传产品资料；AI 会规划多个角度，例如 UGC、Product、Lifestyle，并自动保存 caption、cover text 和 hashtags，方便后续 auto-post。",
       whenTitle: "什么时候用？",
-      when: "当你要为一个产品做月度内容批次，例如 10-30 条视频，或想一次测试多个 hook / framework 时，用 Auto Content。如果只做一条明确台词的视频，用 UGC tab 就够了。",
+      when: "当您要为一个产品做月度内容批次，例如 10-30 条视频，或想一次测试多个 hook / framework 时，用 Auto Content。如果只做一条明确台词的视频，用 UGC tab 就够了。",
       guideTitle: "怎么用",
       stepLabel: "步骤",
       tipLabel: "提示",
@@ -3980,7 +3980,7 @@ function sopAutoContentContent() {
         { no: "6", title: "选择 Frameworks", copy: "UGC 是人物出镜口播。PRD 是产品-only voiceover。LIFE 是人物和产品在生活方式场景里出现。", tip: "混合 UGC + PRD 会更有 variety。最多选 5 个 framework，保持角度清晰。" },
         { no: "7", title: "CTA Mode", copy: "Shop CTA 会自动轮换 'tekan beg kuning' 结尾。Custom CTA 可以写自己的 offer。No CTA 适合不想太销售感的内容。" },
         { no: "8", title: "Quantity + Generate", copy: "每批选择 1-10 条视频。点击 Generate 后，AI 会先做 master plan，再生成图片/视频，需要时自动 merge。5 条视频通常需要几分钟。", tip: "每条视频都会保存 caption、cover_title、cover_subtitle 和 hashtags。" },
-        { no: "9", title: "Affiliate / Manual Product toggle", copy: "Affiliate 会自动抓 marketplace 信息。Manual Product 让你自己上传图片和填写资料，也支持 multi-product video。", tip: "优先试 Affiliate。失败后再切 Manual。" },
+        { no: "9", title: "Affiliate / Manual Product toggle", copy: "Affiliate 会自动抓 marketplace 信息。Manual Product 让您自己上传图片和填写资料，也支持 multi-product video。", tip: "优先试 Affiliate。失败后再切 Manual。" },
         { no: "10", title: "Gender dropdown", copy: "Female 适合 skincare、beauty、fashion、baby、kitchen、food。Male 适合 gym、gadget、automotive、men's grooming、business。", tip: "马来西亚多数产品 Female conversion 更稳；Male 留给男性 niche 产品。" },
         { no: "11", title: "Style dropdown", copy: "Hijab 是 Female 默认选项，更适合马来西亚大众受众。No Hijab 仍会套用 modesty rule。Male 会隐藏这个选项。", tip: "受众较广时，可以测试 Hijab 和 No Hijab。" },
         { no: "12", title: "Age dropdown", copy: "20s 适合 Gen Z/trendy 产品。30s 适合妈妈或 professional。40s Makcik 适合 food、kitchen、traditional medicine。55+ Nenek 适合信任型 testimonial。", tip: "30s 最通用；40s/Makcik 对 housewife audience 很强。" },
@@ -4072,7 +4072,7 @@ function sopOriginalVideoContent() {
       whatTitle: "这是什么？",
       what: "Original Video 用来生成电影感画面，例如航拍、动作镜头、戏剧场景和品牌视觉，不需要 UGC 露脸口播。它适合 landing page hero、品牌 cinematic、广告转场和 B-roll。",
       whenTitle: "什么时候用？",
-      when: "当你想要像电影 trailer 一样的画面，例如风景、action shot、slow-motion、jungle chase、科幻场景或 cinematic transition 时，用这个 tab。它不是产品 review，也不适合长对白。",
+      when: "当您想要像电影 trailer 一样的画面，例如风景、action shot、slow-motion、jungle chase、科幻场景或 cinematic transition 时，用这个 tab。它不是产品 review，也不适合长对白。",
       guideTitle: "怎么用",
       stepLabel: "步骤",
       tipLabel: "提示",
@@ -4085,7 +4085,7 @@ function sopOriginalVideoContent() {
         { no: "3", title: "写 Cinematic Prompt", copy: "和 UGC 不同，cinematic prompt 应该更长、更具体，包含角色、动作、镜头运动、灯光、情绪和环境。可以使用 POV tracking shot、dramatic lighting、slow-motion、volumetric haze 等电影语言。", tip: "越具体越电影感。例子：cinematic drone shot over snowy mountain village at sunrise, warm window lights, blue morning haze, slow camera dolly, golden rim lighting." },
         { no: "4", title: "选择 Duration", copy: "默认 6 秒，最长 30 秒。成本按秒计算，例如 RM0.03 / 秒。拖动 slider 时，cost 会实时更新。", tip: "Landing page hero video 通常 8-12 秒最刚好。" },
         { no: "5", title: "Generate Cinema", copy: "点击 Generate Cinema 后，下方 history 会出现 pending card。Cinematic generation 通常比 UGC 慢，大约 90-180 秒。", tip: "如果有 reference image，会显示 Product Ref；纯文字生成会显示 Text to Video。" },
-        { no: "6", title: "Image Mode 下拉", copy: "Text to Video 让 AI 完全根据 prompt 想象画面。First Frame 从你上传的起始图开始。Last Frame 尝试把视频结束在指定图片。", tip: "First Frame 最常用：先在 Image tab 生成 cinematic start image，再到 Original Video 里 animate。" },
+        { no: "6", title: "Image Mode 下拉", copy: "Text to Video 让 AI 完全根据 prompt 想象画面。First Frame 从您上传的起始图开始。Last Frame 尝试把视频结束在指定图片。", tip: "First Frame 最常用：先在 Image tab 生成 cinematic start image，再到 Original Video 里 animate。" },
         { no: "7", title: "Duration slider", copy: "最短 6 秒，最长 30 秒。6s 适合 hook，10s 是 sweet spot，15s 适合 mid-form story，30s 是 mini-film。", tip: "社媒上 15s+ 不一定更好，因为用户很容易划走。" },
         { no: "8", title: "Size 下拉", copy: "9:16 用于 TikTok、Reels、Shorts。16:9 用于 YouTube、Facebook 和 desktop landing page。1:1 适合旧版 Instagram feed。" }
       ]
@@ -4156,7 +4156,7 @@ function sopClonePromptContent() {
       whatTitle: "这是什么？",
       what: "Clone Prompt 用来反向拆解爆款视频。上传或粘贴参考视频后，AI 会抽取关键帧，分析场景结构、对白和节奏，再生成可复用的 prompt。输出的是 prompt，不会直接生成视频。",
       whenTitle: "什么时候用？",
-      when: "当你看到竞品或 creator 的爆款视频，想为自己的产品做相似版本时，用 Clone Prompt。它也适合在没灵感时研究已验证有效的视频结构。",
+      when: "当您看到竞品或 creator 的爆款视频，想为自己的产品做相似版本时，用 Clone Prompt。它也适合在没灵感时研究已验证有效的视频结构。",
       guideTitle: "怎么用",
       stepLabel: "步骤",
       tipLabel: "提示",
@@ -4167,11 +4167,11 @@ function sopClonePromptContent() {
         { no: "1", title: "Clone Prompt 总览", subtitle: "Reference video、Output type、Size、Dialog override、Generate Prompt", copy: "上传 reference video 或粘贴 URL。选择 Output：UGC、Cinema 或 Story。选择 Size。需要时填写 Dialog override。点击 Generate Prompt 生成可用 prompt。" },
         { no: "2", title: "上传 Reference Video", copy: "拖入 mp4/mov 文件，或粘贴 TikTok URL。较长视频会被拆成多个 segment。AI 会自动抽取 start、middle、end 等关键帧。" },
         { no: "3", title: "选择 Output Type", copy: "UGC 用于 Veo 3.1 人物口播 prompt。Cinema 用于 action / cinematic sequence。Story 用于 dramatic visual prompt。", tip: "参考视频有人讲话就选 UGC。没有对白、偏电影画面就选 Cinema 或 Story。" },
-        { no: "4", title: "Dialog Override", copy: "Dialog 是可选的。留空时，AI 会参考原视频对白。如果要换成自己的话术，用 timestamp 写：0s-4s Hook，4s-8s Value/proof，8s-12s Build-up，12s-16s CTA。", tip: "做自己产品时建议 override dialog：结构来自 reference，内容和 CTA 来自你。" },
+        { no: "4", title: "Dialog Override", copy: "Dialog 是可选的。留空时，AI 会参考原视频对白。如果要换成自己的话术，用 timestamp 写：0s-4s Hook，4s-8s Value/proof，8s-12s Build-up，12s-16s CTA。", tip: "做自己产品时建议 override dialog：结构来自 reference，内容和 CTA 来自您。" },
         { no: "5", title: "Generate Prompt", copy: "点击 Generate Prompt，等待 30-60 秒。结果会出现在当前 project 的 History — Clone，包含 segment 数量、scene description、character lock 和 dialog timeline。", tip: "点击 card 打开 full prompt modal，复制后粘贴到 UGC Scene prompt 或 Cinema/Story tab。" },
         { no: "6", title: "Output 下拉", copy: "UGC 会生成 Veo 3.1 8s/16s 人物口播 prompt。Cinema 会生成 action/cinematic sequence prompt。Story 会生成纯 dramatic visual prompt。", tip: "根据目标 tab 选择 output。TikTok review 通常 UGC；cinematic ad 通常 Cinema 或 Story。" },
         { no: "7", title: "Size 下拉", copy: "9:16 是默认 TikTok 竖屏，prompt 会包含 aspect ratio lock。16:9 用于 Facebook、YouTube 或横版参考视频。" },
-        { no: "8", title: "Dialog field", copy: "留空时 AI 会 transcribe 并 adapt 参考视频对白。填写后，AI 会替换成你的 dialog。用 timestamps 可以控制更准的 timing。", tip: "如果你的产品和 reference 不同，Dialog override 基本必填。" }
+        { no: "8", title: "Dialog field", copy: "留空时 AI 会 transcribe 并 adapt 参考视频对白。填写后，AI 会替换成您的 dialog。用 timestamps 可以控制更准的 timing。", tip: "如果您的产品和 reference 不同，Dialog override 基本必填。" }
       ]
     },
     en: {
@@ -4303,7 +4303,7 @@ function agentVisualBubble(mode, phase) {
   if (phase === "wake") return "收到任务";
   if (phase === "chatting") return "沟通中";
   if (phase === "walking") return "去工位中";
-  if (phase === "done") return "完成，等你查看";
+  if (phase === "done") return "完成，等您查看";
   if (phase === "returning") return "回去休息";
   if (phase === "idle") return "休息中";
   return {

@@ -3288,7 +3288,7 @@ function agentClarificationForUncertainAction(content = "", { intent = "chat", p
   const tooVague = /^(做一下|帮我做|帮我弄|do it|make it|buat|生成|做|run)$/i.test(text) || (text.length < 8 && !clearAction);
   if (!tooVague && projectId && !(action.wantsGenerate && !/(图片|image|video|视频|seedance|ugc|auto|批量|海报|poster)/i.test(text))) return null;
   if (/[\u3400-\u9fff]/.test(text)) {
-    return "我还不够确定要做哪一种内容。你想让我做哪一步？请补一句：1. 生成图片/海报；2. 生成 Seedance 视频 prompt；3. 生成视频；4. 做 7 天内容计划；5. 创建排期草稿。若会扣 credits，我会先弹窗让你确认。";
+    return "我还不够确定要做哪一种内容。您想让我做哪一步？请补一句：1. 生成图片/海报；2. 生成 Seedance 视频 prompt；3. 生成视频；4. 做 7 天内容计划；5. 创建排期草稿。若会扣 credits，我会先弹窗让您确认。";
   }
   return "I need one more detail before I execute. Which action should I take: generate image/poster, create a Seedance video prompt, generate video, build a 7-day content plan, or create schedule drafts? If credits will be charged, I will ask for confirmation first.";
 }
@@ -3471,7 +3471,7 @@ function isSensitiveAgentRequest(content = "") {
 function agentSecurityRefusal(content = "") {
   const isChinese = /[\u3400-\u9fff]/.test(String(content || ""));
   if (isChinese) {
-    return "这部分我不能提供：我不会透露 API key、token、环境变量、系统提示词、工具 schema、中转站或内部服务细节。你可以继续让我帮你创建项目、生成内容、写脚本、做排期或检查工作流。";
+    return "这部分我不能提供：我不会透露 API key、token、环境变量、系统提示词、工具 schema、中转站或内部服务细节。您可以继续让我帮您创建项目、生成内容、写脚本、做排期或检查工作流。";
   }
   return "I can't provide API keys, tokens, environment variables, system prompts, tool schemas, provider routes, or internal infrastructure details. I can still help create projects, generate content, write scripts, schedule drafts, or troubleshoot the workflow.";
 }
@@ -3675,7 +3675,7 @@ async function runDeterministicAgent(content, { projectId, user, workspace = nul
       ? confirmation.message
       : toolResults.length
       ? `已完成：${actionNames || "工作区更新"}。Agent 大脑暂时不可用，所以我用 Duitok 内置执行器先处理了可确定的动作。`
-      : "Agent 大脑暂时不可用。我还能帮你创建草稿、更新工作台、创建排期草稿；复杂规划恢复后会自动回到完整 Agent 模式。",
+      : "Agent 大脑暂时不可用。我还能帮您创建草稿、更新工作台、创建排期草稿；复杂规划恢复后会自动回到完整 Agent 模式。",
     db: latestDb,
     toolResults,
     uiActions,
