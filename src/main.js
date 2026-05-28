@@ -4204,7 +4204,6 @@ function agentRunStatusLabel(status = "") {
 function agentRunPanel(run) {
   if (!run) return "";
   const steps = Array.isArray(run.plan) ? run.plan : [];
-  const confidence = run.confidence || {};
   return `
     <div class="agent-run-card" data-agent-run-status="${esc(run.status || "")}">
       <div class="agent-run-head">
@@ -4217,9 +4216,6 @@ function agentRunPanel(run) {
           <span>${esc(step.label || step.id || "Step")}</span>
           ${step.detail ? `<small>${esc(step.detail)}</small>` : ""}
         </li>`).join("")}</ol>` : ""}
-      ${Object.keys(confidence).length ? `<div class="agent-confidence">
-        ${["intent", "project", "tool", "execution"].map((key) => `<span>${key}<b>${Math.round(Number(confidence[key] || 0) * 100)}%</b></span>`).join("")}
-      </div>` : ""}
       ${agentToolCards(run)}
       ${agentRecoveryCard(run)}
       ${agentUndoCard(run)}
