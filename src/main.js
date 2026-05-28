@@ -687,9 +687,40 @@ async function refreshState() {
 }
 
 function set(patch) {
+  const modalOnly = shouldPatchModalOnly(patch);
   rememberSidebarScroll();
   Object.assign(state, patch);
+  if (modalOnly) {
+    updateModalRoot();
+    if (Object.prototype.hasOwnProperty.call(patch, "projectMenuId") && !patch.projectMenuId) closeProjectMenusInDom();
+    return;
+  }
   render();
+}
+
+function shouldPatchModalOnly(patch) {
+  if (!isStudioPath() || state.loading || !document.getElementById("modal-root")) return false;
+  const keys = Object.keys(patch);
+  return keys.includes("modal") && keys.every((key) => ["modal", "editingProjectId", "projectMenuId"].includes(key));
+}
+
+function updateModalRoot() {
+  const root = document.getElementById("modal-root");
+  if (!root) return render();
+  root.innerHTML = modal();
+  bindModal(root);
+  window.lucide?.createIcons();
+}
+
+function bindModal(root) {
+  root.querySelectorAll("[data-action]").forEach((el) => el.addEventListener("click", (event) => action(event, el.dataset.action)));
+  root.querySelectorAll("form").forEach((el) => el.addEventListener("submit", submit));
+  root.querySelectorAll("[data-image-preset]").forEach((el) => el.addEventListener("click", () => applyImagePreset(el.dataset.imagePreset)));
+}
+
+function closeProjectMenusInDom() {
+  document.querySelectorAll(".project-menu-item.menu-open").forEach((item) => item.classList.remove("menu-open"));
+  document.querySelectorAll(".project-action-menu").forEach((menu) => menu.remove());
 }
 
 function rememberSidebarScroll() {
@@ -1774,7 +1805,7 @@ function studio() {
       </aside>
       <main class="workspace">${page()}</main>
       <button class="chat-bubble support-bubble" data-action="support" title="Contact support">${icon("message-circle", 32)}</button>
-      ${modal()}
+      <div id="modal-root">${modal()}</div>
     </div>`;
 }
 
