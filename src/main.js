@@ -287,9 +287,9 @@ const copy = {
     signIn: "登录",
     promo: "RM69 加入 AI 带货系统 · 送 10 credits · 模板 + SOP + 平台",
     heroEyebrow: "想用 AI 做副业？从短视频带货开始。",
-    heroTitle: "RM69/月，加入 AI 短视频带货系统",
-    heroTitleLead: "RM69/月，加入",
-    heroTitleHot: "AI 短视频带货系统",
+    heroTitle: "RM69/月加入 AI带货系统",
+    heroTitleLead: "RM69/月加入",
+    heroTitleHot: "AI带货系统",
     heroTitleTail: "",
     demoCta: "看看如何运作",
     heroCopy: "Duitok AI 把已经跑通的短视频带货打法做成系统，让你不用拿货、不用露脸，也能用 AI 批量测试产品、hook、脚本和内容角度。",
@@ -598,7 +598,7 @@ function promoContent() {
     },
     zh: {
       before: "RM69 AI带货系统名额倒计时 ",
-      after: "80 个名额只剩 13 个，今天已有 67 位 seller 加入。"
+      after: "80 个名额只剩 13 个，67 位 seller 已加入。"
     },
     en: {
       before: "RM69/month promo closes in ",
