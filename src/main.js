@@ -1785,7 +1785,6 @@ function studio() {
         <button class="side-link ${state.page === "library" ? "active" : ""}" data-page="library">${icon("folder")} Content Library</button>
         <button class="side-link ${state.page === "autopost" ? "active" : ""}" data-page="autopost">${icon("calendar-days")} Scheduler</button>
         <button class="new-project" data-action="new-project">${icon("plus")} <span>${t("newProject")}</span><b>${state.db.projects.length}/5</b></button>
-        <label class="search-box">${icon("search", 18)}<input data-search value="${esc(state.search)}" placeholder="${t("search")}"></label>
         <div class="side-section">${icon("folder", 18)} ${t("projects")}</div>
         <div class="project-list">${projectButtons()}</div>
         <div class="side-section account">${icon("wallet-cards", 18)} Business</div>
@@ -1889,7 +1888,6 @@ function sidebarAccountPanel() {
 
 function projectButtons() {
   return state.db.projects
-    .filter((item) => item.name.toLowerCase().includes(state.search.toLowerCase()))
     .map((item) => {
       const active = item.id === state.projectId && state.page === "project";
       const menuOpen = state.projectMenuId === item.id;
@@ -4238,13 +4236,17 @@ function agentRunStatusLabel(status = "") {
 function agentRunPanel(run) {
   if (!run) return "";
   const steps = Array.isArray(run.plan) ? run.plan : [];
+  const completed = run.status === "completed";
+  const summary = completed
+    ? agentRunSummary(steps)
+    : "";
   return `
     <div class="agent-run-card" data-agent-run-status="${esc(run.status || "")}">
       <div class="agent-run-head">
         <strong>${icon(run.status === "waiting_confirmation" ? "shield-alert" : "list-checks", 16)} ${agentRunStatusLabel(run.status)}</strong>
-        <span>${esc(run.intent || "agent")}</span>
+        ${run.status === "waiting_confirmation" ? `<span>需要确认</span>` : ""}
       </div>
-      ${steps.length ? `<ol class="agent-run-steps">${steps.map((step) => `
+      ${completed && summary ? `<p class="agent-run-summary">${esc(summary)}</p>` : steps.length ? `<ol class="agent-run-steps">${steps.map((step) => `
         <li data-step-status="${esc(step.status || "pending")}">
           <b></b>
           <span>${esc(step.label || step.id || "Step")}</span>
@@ -4255,6 +4257,15 @@ function agentRunPanel(run) {
       ${agentUndoCard(run)}
       ${agentConfirmationCard(run)}
     </div>`;
+}
+
+function agentRunSummary(steps = []) {
+  const done = steps
+    .filter((step) => ["completed", "waiting_confirmation"].includes(step.status))
+    .map((step) => step.label || step.id)
+    .filter(Boolean)
+    .slice(0, 3);
+  return done.length ? done.join(" · ") : "已回复";
 }
 
 function agentToolCards(run) {
@@ -4329,8 +4340,8 @@ function agentConfirmationCard(run) {
       <p>${esc(confirmation.message || "确认后才会执行。")}</p>
       <small>${esc(confirmation.impact || "工作区动作")}</small>
       <div>
-        <button class="gold-button" data-agent-confirm="${esc(run.id)}" data-agent-token="${esc(confirmation.token || "")}">${icon("check", 16)} Confirm</button>
-        <button class="dark-button" data-action="clear-agent-confirm">${icon("x", 16)} Cancel</button>
+        <button class="gold-button" data-agent-confirm="${esc(run.id)}" data-agent-token="${esc(confirmation.token || "")}">${icon("check", 16)} ${confirmation.creditsRequired ? "确认并扣 credits" : "确认执行"}</button>
+        <button class="dark-button" data-action="clear-agent-confirm">${icon("x", 16)} 取消</button>
       </div>
     </div>`;
 }
@@ -4383,7 +4394,6 @@ function bind() {
   document.querySelectorAll("[data-invoice]").forEach((el) => el.addEventListener("click", () => download(`/api/export/invoice/${el.dataset.invoice}`, `${el.dataset.invoice}.txt`)));
   document.querySelectorAll("[data-result]").forEach((el) => el.addEventListener("click", () => download(`/api/export/result/${el.dataset.result}`, `duitok-result.txt`)));
   document.querySelectorAll("form").forEach((el) => el.addEventListener("submit", submit));
-  document.querySelector("[data-search]")?.addEventListener("input", (e) => set({ search: e.target.value }));
   document.querySelectorAll("[data-lang-toggle]").forEach((el) => el.addEventListener("click", (event) => {
     event.stopPropagation();
     set({ langOpen: !state.langOpen });
