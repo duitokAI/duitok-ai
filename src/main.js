@@ -2053,7 +2053,7 @@ function ugcPanel(p) {
         ${videoProviderButton("Veo 3.1", "🎬 Veo 3.1 · 8s", provider)}
         ${videoProviderButton("Sora 2", "⚡ Sora 2 · 8 / 12s", provider)}
       </div>
-      ${select("ugc.imageMode", "Image Mode", ["Product Reference (AI creates scene)", "Avatar + Product References", "Text to Video"], imageMode)}
+      ${select("ugc.imageMode", "Image Mode", ["Product Reference (AI creates scene)", "First Frame (animate from image)", "Text to Video (no image needed)"], imageMode)}
     </div>
     <section class="ugc-scene-card">
       <div class="ugc-scene-head">
