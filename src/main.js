@@ -2602,7 +2602,7 @@ function adminPage() {
   const selectedJobs = jobs.filter((job) => job.userId === selectedUser?.id);
   const selectedPayments = payments.filter((payment) => payment.userId === selectedUser?.id);
   const selectedLedger = (admin.creditLedger || []).filter((entry) => entry.userId === selectedUser?.id);
-  const selectedProjects = (state.db.projects || []).filter((project) => project.userId === selectedUser?.id);
+  const selectedProjects = (admin.projects || state.db.projects || []).filter((project) => project.userId === selectedUser?.id);
   const modelCosts = admin.modelCosts || {};
   const permissions = selectedUser?.agentPermissions || {};
   return `

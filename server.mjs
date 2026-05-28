@@ -802,7 +802,8 @@ function publicMediaMarker(value) {
 
 function publicState(db, user = db.users?.find((item) => item.id === adminUserId)) {
   const isAdmin = hasAdminPrivileges(user) && Boolean(user.__adminVerified);
-  const owns = (item) => isAdmin || item.userId === user.id;
+  const owns = (item) => item.userId === user.id;
+  const canInspectAll = isAdmin;
   const userBilling = user?.billing || defaultBilling();
   const sanitizeResult = (result) => {
     if (isAdmin) return result;
@@ -912,7 +913,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
     ].filter(Boolean).sort().reverse();
     return timestamps[0] || null;
   };
-  const admin = isAdmin ? {
+  const admin = canInspectAll ? {
     users: db.users.map((item) => ({
       ...publicUser(item),
       billing: item.billing || defaultBilling(),
@@ -924,6 +925,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
       lastUsedAt: userLastUsed(item.id)
     })),
     generationJobs: db.generationJobs || [],
+    projects: (db.projects || []).map(sanitizeProject),
     apiCalls: db.apiCalls || [],
     payments: db.payments || [],
     supportTickets: db.supportTickets || [],
