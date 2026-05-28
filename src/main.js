@@ -1815,22 +1815,12 @@ function brand(label = "") {
 
 function footerBrand(label = "Duitok AI") {
   const labelMarkup = label && label !== "Duitok AI" ? `<b>${label}</b>` : "";
-  const geoLinks = [
-    ["/ai-short-video-marketing-platform", "AI short-form marketing"],
-    ["/tiktok-shop-ai-video-generator", "TikTok Shop AI video"],
-    ["/ai-tiktok-affiliate-video-generator", "TikTok Affiliate AI video"],
-    ["/no-face-ai-product-video-generator", "No-face product video"],
-    ["/ai-product-promo-video-generator", "AI product promo video"]
-  ];
   return `
     <footer class="public-footer">
       <div class="footer-left">
         <span class="footer-brand"><span class="brand-core footer-brand-core" aria-label="Duitok AI"><img class="brand-logo-mascot" src="${brandAssets.mascot}" alt="" aria-hidden="true"><span class="brand-wordmark"><span>Duitok</span><span>AI</span></span></span>${labelMarkup}</span>
         <span class="footer-year">© 2026</span>
       </div>
-      <nav class="footer-geo-links" aria-label="Duitok AI use cases">
-        ${geoLinks.map(([href, text]) => `<a href="${href}">${text}</a>`).join("")}
-      </nav>
       <nav class="footer-links" aria-label="Footer">
         <a href="/terms">Terms</a>
         <a href="/privacy">Privacy</a>

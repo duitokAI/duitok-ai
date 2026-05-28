@@ -12246,25 +12246,6 @@ label {
   margin-left: auto;
 }
 
-.footer-geo-links {
-  flex: 1 1 420px;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px 16px;
-}
-
-.public-shell .footer-geo-links a {
-  color: rgba(75, 0, 94, 0.58) !important;
-  font-size: 13px;
-  font-weight: 850;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.public-shell .footer-geo-links a:hover {
-  color: var(--brand-pink) !important;
-}
-
 .public-shell .footer-links a {
   color: rgba(75, 0, 94, 0.68) !important;
   font-size: 18px;
