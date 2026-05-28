@@ -3656,11 +3656,96 @@ function sopOriginalVideoContent() {
   return content[state.lang] || content.ms;
 }
 
+function sopClonePromptContent() {
+  const content = {
+    ms: {
+      eyebrow: "Panduan",
+      title: "Tab Clone Prompt — Curi Formula Video Viral",
+      close: "Faham - tutup",
+      path: "Frames → AI → Prompt(s) · reverse-engineer any video",
+      whatTitle: "Apa ini?",
+      what: "Clone Prompt digunakan untuk reverse-engineer video viral. Upload atau paste video reference, AI extract key frames, baca struktur scene, dialog dan timing, kemudian hasilkan prompt yang boleh korang pakai semula dalam UGC, Cinema atau Story. Output ialah prompt sahaja, bukan video terus.",
+      whenTitle: "Bila guna tab ni?",
+      when: "Guna Clone Prompt bila korang jumpa video kompetitor atau creator yang perform dan nak buat versi serupa untuk produk sendiri. Ia juga berguna bila stuck idea dan nak belajar formula video yang sudah terbukti jalan.",
+      guideTitle: "Cara guna",
+      stepLabel: "Step",
+      tipLabel: "Tip",
+      workflowTitle: "Workflow tip",
+      workflow: "Clone Prompt = curi struktur, bukan curi content. Ambil timing, camera logic, hook dan scene anchor, kemudian adapt dialog serta produk supaya jadi versi brand korang sendiri.",
+      sections: { 6: "Dropdown & Pilihan — Apa Maksud Setiap Satu" },
+      steps: [
+        { no: "1", title: "Clone Prompt overview", subtitle: "Reference video, Output type, Size, Dialog override dan Generate Prompt", copy: "Upload reference video atau paste URL. Pilih Output UGC, Cinema atau Story. Pilih Size. Isi Dialog jika mahu override. Tekan Generate Prompt untuk hasilkan prompt siap guna." },
+        { no: "2", title: "Upload Reference Video", copy: "Drag video file seperti mp4/mov atau paste TikTok URL. Video panjang akan dibaca sebagai beberapa segment. AI extract key frames seperti start, middle dan end secara automatik." },
+        { no: "3", title: "Pilih Output Type", copy: "UGC untuk prompt Veo 3.1 character speaking. Cinema untuk action atau cinematic sequence. Story untuk dramatic visual prompt.", tip: "Kalau reference ada orang bercakap, pilih UGC. Kalau visual cinematic tanpa dialog, pilih Cinema atau Story." },
+        { no: "4", title: "Dialog Override", copy: "Dialog optional. Kalau kosong, AI ikut dialog reference. Kalau mahu dialog sendiri, tulis dengan timestamp seperti 0s-4s Hook, 4s-8s Value/proof, 8s-12s Build-up, 12s-16s CTA.", tip: "Untuk produk sendiri, override dialog supaya skeleton ikut reference tetapi content dan CTA ikut brand korang." },
+        { no: "5", title: "Generate Prompt", copy: "Tekan Generate Prompt dan tunggu 30-60 saat. Output akan muncul di History — Clone — project semasa, lengkap dengan segment count, scene description, character lock dan dialog timeline.", tip: "Click card untuk full prompt modal, copy prompt, kemudian paste dalam UGC Scene prompt atau Cinema/Story tab." },
+        { no: "6", title: "Output dropdown", copy: "UGC generate prompt untuk Veo 3.1 8s/16s dengan character speaking dan dialog. Cinema generate prompt untuk action/cinematic sequence. Story generate prompt untuk pure dramatic visuals.", tip: "Pilih output ikut destination tab. TikTok review biasanya UGC. Cinematic ad biasanya Cinema atau Story." },
+        { no: "7", title: "Size dropdown", copy: "9:16 ialah default untuk TikTok vertical dan prompt akan include aspect ratio lock. 16:9 untuk Facebook, YouTube atau reference video horizontal." },
+        { no: "8", title: "Dialog field", copy: "Kalau kosong, AI transcribe dan adapt dialog reference. Kalau diisi, AI replace dengan dialog korang. Pakai timestamps untuk timing yang lebih tepat.", tip: "Dialog override wajib kalau produk korang berbeza daripada reference." }
+      ]
+    },
+    zh: {
+      eyebrow: "指南",
+      title: "Clone Prompt 页面 — 复刻爆款视频公式",
+      close: "我明白了 - 关闭",
+      path: "Frames → AI → Prompt(s) · reverse-engineer any video",
+      whatTitle: "这是什么？",
+      what: "Clone Prompt 用来反向拆解爆款视频。上传或粘贴参考视频后，AI 会抽取关键帧，分析场景结构、对白和节奏，再生成可复用的 prompt。输出的是 prompt，不会直接生成视频。",
+      whenTitle: "什么时候用？",
+      when: "当你看到竞品或 creator 的爆款视频，想为自己的产品做相似版本时，用 Clone Prompt。它也适合在没灵感时研究已验证有效的视频结构。",
+      guideTitle: "怎么用",
+      stepLabel: "步骤",
+      tipLabel: "提示",
+      workflowTitle: "工作流建议",
+      workflow: "Clone Prompt 是偷结构，不是偷内容。保留 timing、camera logic、hook 和 scene anchor，再换成自己的产品、dialog 和 CTA。",
+      sections: { 6: "下拉选项 — 每个选项是什么意思" },
+      steps: [
+        { no: "1", title: "Clone Prompt 总览", subtitle: "Reference video、Output type、Size、Dialog override、Generate Prompt", copy: "上传 reference video 或粘贴 URL。选择 Output：UGC、Cinema 或 Story。选择 Size。需要时填写 Dialog override。点击 Generate Prompt 生成可用 prompt。" },
+        { no: "2", title: "上传 Reference Video", copy: "拖入 mp4/mov 文件，或粘贴 TikTok URL。较长视频会被拆成多个 segment。AI 会自动抽取 start、middle、end 等关键帧。" },
+        { no: "3", title: "选择 Output Type", copy: "UGC 用于 Veo 3.1 人物口播 prompt。Cinema 用于 action / cinematic sequence。Story 用于 dramatic visual prompt。", tip: "参考视频有人讲话就选 UGC。没有对白、偏电影画面就选 Cinema 或 Story。" },
+        { no: "4", title: "Dialog Override", copy: "Dialog 是可选的。留空时，AI 会参考原视频对白。如果要换成自己的话术，用 timestamp 写：0s-4s Hook，4s-8s Value/proof，8s-12s Build-up，12s-16s CTA。", tip: "做自己产品时建议 override dialog：结构来自 reference，内容和 CTA 来自你。" },
+        { no: "5", title: "Generate Prompt", copy: "点击 Generate Prompt，等待 30-60 秒。结果会出现在当前 project 的 History — Clone，包含 segment 数量、scene description、character lock 和 dialog timeline。", tip: "点击 card 打开 full prompt modal，复制后粘贴到 UGC Scene prompt 或 Cinema/Story tab。" },
+        { no: "6", title: "Output 下拉", copy: "UGC 会生成 Veo 3.1 8s/16s 人物口播 prompt。Cinema 会生成 action/cinematic sequence prompt。Story 会生成纯 dramatic visual prompt。", tip: "根据目标 tab 选择 output。TikTok review 通常 UGC；cinematic ad 通常 Cinema 或 Story。" },
+        { no: "7", title: "Size 下拉", copy: "9:16 是默认 TikTok 竖屏，prompt 会包含 aspect ratio lock。16:9 用于 Facebook、YouTube 或横版参考视频。" },
+        { no: "8", title: "Dialog field", copy: "留空时 AI 会 transcribe 并 adapt 参考视频对白。填写后，AI 会替换成你的 dialog。用 timestamps 可以控制更准的 timing。", tip: "如果你的产品和 reference 不同，Dialog override 基本必填。" }
+      ]
+    },
+    en: {
+      eyebrow: "Guide",
+      title: "Clone Prompt Tab — Reverse-Engineer Viral Video Formula",
+      close: "Got it - close",
+      path: "Frames → AI → Prompt(s) · reverse-engineer any video",
+      whatTitle: "What is this?",
+      what: "Clone Prompt reverse-engineers viral videos. Upload or paste a reference video, and AI extracts key frames, analyzes scene structure, dialog, and timing, then outputs reusable prompts for UGC, Cinema, or Story. It outputs prompts only, not a generated video.",
+      whenTitle: "When should I use it?",
+      when: "Use Clone Prompt when you find a competitor or creator video that performs well and want to make a similar version for your own product. It is also useful for studying proven video structures when you are out of ideas.",
+      guideTitle: "How to use it",
+      stepLabel: "Step",
+      tipLabel: "Tip",
+      workflowTitle: "Workflow tip",
+      workflow: "Clone Prompt copies structure, not content. Keep the timing, camera logic, hook, and scene anchors, then adapt the product, dialog, and CTA to your own brand.",
+      sections: { 6: "Dropdowns & Options — What Each One Means" },
+      steps: [
+        { no: "1", title: "Clone Prompt overview", subtitle: "Reference video, Output type, Size, Dialog override, and Generate Prompt", copy: "Upload a reference video or paste a URL. Choose Output: UGC, Cinema, or Story. Choose Size. Add Dialog override if needed. Click Generate Prompt to create reusable prompts." },
+        { no: "2", title: "Upload Reference Video", copy: "Drag an mp4/mov file or paste a TikTok URL. Longer videos are read as multiple segments. AI automatically extracts key frames such as start, middle, and end." },
+        { no: "3", title: "Choose Output Type", copy: "UGC creates a Veo 3.1 character-speaking prompt. Cinema creates an action or cinematic sequence prompt. Story creates a dramatic visual prompt.", tip: "If the reference has a person speaking, choose UGC. If it is cinematic without dialog, choose Cinema or Story." },
+        { no: "4", title: "Dialog Override", copy: "Dialog is optional. Leave it empty to follow the reference dialog. To use your own dialog, write timestamps such as 0s-4s Hook, 4s-8s Value/proof, 8s-12s Build-up, 12s-16s CTA.", tip: "For your own product, override dialog so the skeleton comes from the reference while content and CTA come from you." },
+        { no: "5", title: "Generate Prompt", copy: "Click Generate Prompt and wait 30-60 seconds. Output appears in History — Clone for the current project, including segment count, scene description, character lock, and dialog timeline.", tip: "Click the card for the full prompt modal, copy it, then paste into UGC Scene prompt or the Cinema/Story tab." },
+        { no: "6", title: "Output dropdown", copy: "UGC generates Veo 3.1 8s/16s prompts with character speaking and dialog. Cinema generates action/cinematic sequence prompts. Story generates pure dramatic visual prompts.", tip: "Choose output based on the destination tab. TikTok reviews are usually UGC. Cinematic ads are usually Cinema or Story." },
+        { no: "7", title: "Size dropdown", copy: "9:16 is the default TikTok vertical format, and the prompt will include aspect ratio lock. Use 16:9 for Facebook, YouTube, or horizontal reference videos." },
+        { no: "8", title: "Dialog field", copy: "If empty, AI transcribes and adapts reference dialog. If filled, AI replaces the dialog with yours. Use timestamps for more precise timing.", tip: "Dialog override is essential when your product differs from the reference." }
+      ]
+    }
+  };
+  return content[state.lang] || content.ms;
+}
+
 function sopGuideContent() {
   if (state.page === "project" && state.step === "image") return sopImageContent();
   if (state.page === "project" && state.step === "ugc") return sopUgcContent();
   if (state.page === "project" && state.step === "auto") return sopAutoContentContent();
   if (state.page === "project" && state.step === "original") return sopOriginalVideoContent();
+  if (state.page === "project" && state.step === "clone") return sopClonePromptContent();
   return sopDashboardContent();
 }
 
