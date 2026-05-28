@@ -284,7 +284,7 @@ const copy = {
     navFaq: "FAQ",
     signIn: "登录",
     promo: "现在订阅 RM69/月，送 10 credits · 模板 + 教程 + 平台",
-    heroEyebrow: "别人已经用 AI 批量测试内容，你还在想第一条视频怎么拍？",
+    heroEyebrow: "想用 AI 做副业？从短视频带货开始。",
     heroTitle: "RM69/月，用 AI 开始短视频带货副业",
     heroTitleLead: "RM69/月，用 AI 开始",
     heroTitleHot: "短视频带货副业",
