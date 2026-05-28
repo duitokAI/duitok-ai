@@ -369,6 +369,7 @@ function publicUser(user) {
     id: user.id,
     email: user.email,
     name: user.name,
+    phone: user.phone || "",
     role: user.role || "user",
     status: user.status || "active",
     adminVerified: isAdminRole(user) ? Boolean(user.__adminVerified) : false,
@@ -2882,6 +2883,51 @@ app.get("/api/state", async (req, res, next) => {
   try {
     const { db, user } = await requireAuth(req);
     res.json(publicState(db, user));
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.patch("/api/account/profile", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    const name = String(req.body.name || "").trim();
+    const phone = String(req.body.phone || "").trim();
+    if (!name) return res.status(400).json({ error: "Display name is required" });
+    const state = await mutateDb(async (db) => {
+      const target = db.users.find((item) => item.id === user.id);
+      if (!target) throw Object.assign(new Error("User not found"), { status: 404 });
+      target.name = name;
+      target.phone = phone;
+      db.usage.unshift(usage("Updated account profile", 0, user.id));
+      return publicState(db, { ...target, __adminVerified: user.__adminVerified });
+    });
+    res.json({ user: state.currentUser, state });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.patch("/api/account/password", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    const oldPassword = String(req.body.oldPassword || "");
+    const newPassword = String(req.body.newPassword || "");
+    const confirmPassword = String(req.body.confirmPassword || "");
+    if (newPassword.length < 6) return res.status(400).json({ error: "New password must be at least 6 characters" });
+    if (newPassword !== confirmPassword) return res.status(400).json({ error: "New passwords do not match" });
+    await mutateDb(async (db) => {
+      const target = db.users.find((item) => item.id === user.id);
+      if (!target) throw Object.assign(new Error("User not found"), { status: 404 });
+      if (!verifyPassword(oldPassword, target.passwordHash || target.password)) {
+        throw Object.assign(new Error("Old password is incorrect"), { status: 401 });
+      }
+      target.passwordHash = hashPassword(newPassword);
+      delete target.password;
+      db.usage.unshift(usage("Changed account password", 0, user.id));
+      return publicState(db, { ...target, __adminVerified: user.__adminVerified });
+    });
+    res.json({ ok: true });
   } catch (error) {
     next(error);
   }
