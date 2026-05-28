@@ -3093,158 +3093,172 @@ function modal() {
   return `<div class="modal-backdrop" data-action="close-modal"><section class="modal"><button class="icon-only close" data-action="close-modal">${icon("x")}</button><p class="folder-label">${icon("sparkles", 18)} Duitok AI</p><h2>${title}</h2>${body}</section></div>`;
 }
 
-function sopDashboardModal() {
-  const stepCards = [
-    {
-      no: "1",
-      title: "Dashboard overview",
-      subtitle: "Dashboard with stats cards + filter + daily production chart",
-      copy: "Atas: 5 stats cards (Image / UGC / Cinema / Auto Content / Total Cost) untuk date range yang dipilih. Tengah: Filter by Date Range — set From + To + Apply. Bawah: Daily Production line chart — tunjuk activity per day."
+function sopDashboardContent() {
+  const content = {
+    ms: {
+      eyebrow: "Panduan",
+      title: "Dashboard — Project & Production Summary",
+      close: "Faham - tutup",
+      path: "Welcome screen · pick / create project · daily stats",
+      whatTitle: "Apa ini?",
+      what: "Dashboard ialah landing page selepas login. Ia tunjuk ringkasan production keseluruhan, credit yang digunakan dan project yang sedang aktif. Semua generation seperti Image, UGC, Auto Content, Story, Cinema dan Clone mesti dibuat dalam satu project supaya history, cost dan output tidak bercampur.",
+      whenTitle: "Bila guna tab ni?",
+      when: "Guna Dashboard setiap kali login, bila nak switch client atau campaign, dan bila nak semak output bulan ini: berapa banyak asset sudah generated, berapa credit/cost digunakan dan hari mana production paling aktif.",
+      guideTitle: "Cara guna",
+      stepLabel: "Step",
+      tipLabel: "Tip",
+      workflowTitle: "Workflow tip",
+      workflow: "Buat satu project untuk satu client, campaign atau produk. Generate batch content, review output dalam history grid, kemudian ulang semula pada bulan baru supaya Dashboard boleh tunjuk progression yang jelas.",
+      sections: { 7: "Detail — Stats Cards & Filter", 11: "Sidebar Layout — Apa Setiap Section" },
+      steps: [
+        { no: "1", title: "Dashboard overview", subtitle: "Stats cards, date filter dan daily production chart", copy: "Bahagian atas tunjuk total Image, UGC, Cinema, Auto Content dan Total Cost untuk date range yang dipilih. Bahagian tengah ialah filter tarikh. Chart bawah bantu korang nampak trend production setiap hari." },
+        { no: "2", title: "Apa itu Project?", copy: "Project ialah folder kerja untuk satu client, campaign atau produk. Semua generation, history dan cost akan disimpan ikut project yang aktif.", bullets: ["Project 'meow' — client A skincare brand", "Project 'Project 1' — client B yoga pants"], after: "Tukar project di sidebar bermaksud tukar context kerja." },
+        { no: "3", title: "Buat New Project", copy: "Tekan + New Project, masukkan nama yang jelas seperti 'Brand X Campaign Q1', kemudian create. Project baru akan muncul dalam sidebar.", tip: "Pakai nama specific. 'Skincare-A-Aug-Campaign' lebih mudah dibaca daripada 'Project 5'." },
+        { no: "4", title: "Switch antara Projects", copy: "Klik nama project di sidebar untuk tukar workspace. Semua tab generation dan history akan ikut project yang dipilih." },
+        { no: "5", title: "Search Projects", copy: "Gunakan search bar kalau project sudah banyak. Taip nama client, produk atau campaign untuk filter senarai project." },
+        { no: "6", title: "Project menu (3-dot)", copy: "Hover project untuk buka menu 3-dot. Dari sini boleh rename atau delete project.", tip: "Rename selamat. Delete hanya bila project memang sudah tamat kerana history dalam project itu akan hilang." },
+        { no: "7", title: "Stats cards", copy: "Cards menunjukkan total generation mengikut asset type dalam date range aktif.", bullets: ["Image — gambar dari Image tab", "UGC — video dari UGC tab", "Cinema — video cinematic / story output", "Auto Content — batch content plan dan video"] },
+        { no: "8", title: "Total Cost", copy: "Total Cost menunjukkan credit atau kos generation dalam date range tersebut. Ini berguna untuk kira monthly spend atau charge client.", tip: "Untuk invoice bulanan, set From ke hari pertama bulan dan To ke hari terakhir bulan." },
+        { no: "9", title: "Filter by Date Range", copy: "Pilih From Date dan To Date, kemudian tekan Apply. Reset akan kembali ke range default. Tarikh ikut timezone Malaysia." },
+        { no: "10", title: "Daily Production chart", copy: "Chart ini tunjuk trend harian. Gunakan untuk cari spike, gap production atau hari campaign berjalan kuat." },
+        { no: "11", title: "Logo & Dashboard button", copy: "Logo membawa korang balik ke workspace utama. Dashboard button akan aktif bila korang berada di overview ini." },
+        { no: "12", title: "+ New Project button", copy: "Button ini create project baru. Badge kecil menunjukkan jumlah project semasa berbanding limit plan." },
+        { no: "13", title: "Projects list", copy: "Senarai project berada di sidebar. Klik row untuk switch project. Menu 3-dot muncul untuk rename atau delete." },
+        { no: "14", title: "Account section", copy: "Bahagian account mengandungi Billing, Top Up Credit, Usage, Auto Post TikTok, SOP dan WhatsApp discussion." },
+        { no: "15", title: "Credit Balance card", copy: "Kad ini tunjuk baki credit semasa dan shortcut untuk top up." },
+        { no: "16", title: "Plan status badge", copy: "Badge Pro dan days left menunjukkan status subscription dan masa sebelum renewal." },
+        { no: "17", title: "User card", copy: "Bahagian bawah sidebar tunjuk nama, email, Settings dan Sign out." }
+      ]
     },
-    {
-      no: "2",
-      title: "Apa itu PROJECT?",
-      copy: "Project = bekas (folder) untuk satu client / satu campaign / satu produk. SEMUA generation korang (image, video, auto content, dll) live dalam satu project specific. History grid kat setiap tab show data project tu sahaja.",
-      bullets: ["Project 'meow' — untuk client A skincare brand", "Project 'Project 1' — untuk client B yoga pants"],
-      after: "Tukar project kat sidebar = tukar context. Stats + history beralih ikut project yang aktif."
+    zh: {
+      eyebrow: "指南",
+      title: "Dashboard — 项目与产出总览",
+      close: "我明白了 - 关闭",
+      path: "登录首页 · 选择 / 创建项目 · 查看每日数据",
+      whatTitle: "这是什么？",
+      what: "Dashboard 是你登录后的工作台首页。它会汇总当前账号的整体产出、生成成本、Credit 使用情况和正在操作的项目。Image、UGC、Auto Content、Story、Cinema、Clone 等所有生成动作，都应该先归入一个 Project，方便你后续查看历史、复盘成本和管理客户交付。",
+      whenTitle: "什么时候用？",
+      when: "每次登录、切换客户 / Campaign、查看本月产出、核对成本或复盘每日生成节奏时，都先看 Dashboard。它不是一个装饰页，而是你判断下一步要继续生成、复盘还是发布的总控台。",
+      guideTitle: "怎么用",
+      stepLabel: "步骤",
+      tipLabel: "提示",
+      workflowTitle: "工作流建议",
+      workflow: "一个客户、一个 Campaign 或一个产品，尽量对应一个 Project。先批量生成内容，再在 history grid 里复盘，月底用 Dashboard 看总量、成本和节奏，下个月继续沿用同一个 Project 追踪增长。",
+      sections: { 7: "细节 — 数据卡片与筛选", 11: "侧边栏 — 每个区域的作用" },
+      steps: [
+        { no: "1", title: "Dashboard 总览", subtitle: "数据卡片、日期筛选、每日产出图表", copy: "顶部是 Image、UGC、Cinema、Auto Content 和 Total Cost 的汇总。中间可以用日期筛选指定时间范围。下方图表用来查看每天的生成趋势。" },
+        { no: "2", title: "Project 是什么？", copy: "Project 可以理解成一个工作文件夹，用来承载一个客户、一个 Campaign 或一个产品。所有生成内容、历史记录和成本都会归入当前 Project。", bullets: ["Project 'meow' — 客户 A 的护肤品牌", "Project 'Project 1' — 客户 B 的瑜伽裤产品"], after: "切换 sidebar 里的 Project，就等于切换当前工作上下文。" },
+        { no: "3", title: "创建 New Project", copy: "点击 + New Project，输入清楚的项目名，例如 'Brand X Campaign Q1'，然后创建。新项目会出现在左侧 Projects 列表里。", tip: "命名尽量具体。'Skincare-A-Aug-Campaign' 比 'Project 5' 更容易管理。" },
+        { no: "4", title: "切换 Project", copy: "点击 sidebar 里的项目名称，就会切换当前 workspace。所有生成 tab 和 history 都会跟着当前 Project 变化。" },
+        { no: "5", title: "搜索 Project", copy: "项目变多后，用 sidebar 顶部的搜索框输入客户名、产品名或 Campaign 名，可以快速过滤项目。" },
+        { no: "6", title: "Project 三点菜单", copy: "鼠标移到项目上，会出现 3-dot 菜单。你可以 Rename 或 Delete 项目。", tip: "Rename 是安全操作。Delete 会删除该项目里的历史内容，只在项目确实废弃时使用。" },
+        { no: "7", title: "数据卡片", copy: "这些卡片显示当前日期范围内，各类资产的生成总量。", bullets: ["Image — Image tab 生成的图片", "UGC — UGC tab 生成的视频", "Cinema — cinematic / story 视频输出", "Auto Content — 批量内容计划和视频"] },
+        { no: "8", title: "Total Cost", copy: "Total Cost 显示当前日期范围内消耗的 Credit 或生成成本，适合用来做月度成本核算或客户报价。", tip: "做月度 invoice 时，把 From 设为月初，把 To 设为月底。" },
+        { no: "9", title: "日期筛选", copy: "选择 From Date 和 To Date 后点击 Apply。Reset 会回到默认时间范围。日期按马来西亚时间计算。" },
+        { no: "10", title: "每日产出图表", copy: "这个图表用来观察每日生成趋势，帮助你发现爆发日、空档期或 Campaign 启动后的产出变化。" },
+        { no: "11", title: "Logo 与 Dashboard 按钮", copy: "Logo 用来回到主工作台。Dashboard 按钮高亮时，代表你正在查看这个总览页。" },
+        { no: "12", title: "+ New Project 按钮", copy: "这个按钮用来创建新项目。旁边的小数字显示当前项目数量和套餐上限。" },
+        { no: "13", title: "Projects 列表", copy: "所有项目都在 sidebar 的 Projects 列表里。点击项目即可切换，三点菜单用于 rename 或 delete。" },
+        { no: "14", title: "Account 区域", copy: "Account 区域包含 Billing、Top Up Credit、Usage、Auto Post TikTok、SOP 和 WhatsApp 社群入口。" },
+        { no: "15", title: "Credit Balance 卡片", copy: "这里显示当前 Credit 余额，并提供快速充值入口。" },
+        { no: "16", title: "Plan 状态", copy: "Pro 和 days left 会显示当前订阅状态，以及距离续费还有多少天。" },
+        { no: "17", title: "用户卡片", copy: "sidebar 底部显示你的名称、邮箱、Settings 和 Sign out。" }
+      ]
     },
-    {
-      no: "3",
-      title: "Buat New Project",
-      copy: "Sidebar atas ada button '+ New project' (orange). Tekan → modal popup. Masukkan project name (e.g. 'Brand X Campaign Q1') → Create. Project baru muncul kat sidebar Projects list. Limit max 4 projects per akaun (badge '2/4' tunjuk current usage). Untuk lebih, perlu hubungi admin upgrade plan.",
-      tip: "Naming tip: pakai nama yang specific. 'Skincare-A-Aug-Campaign' lebih clear dari 'Project 5'."
-    },
-    {
-      no: "4",
-      title: "Switch antara Projects",
-      copy: "Sidebar 'PROJECTS' section senaraikan semua project korang. Tekan project name → semua tab generation switch ke project tu. URL update ke ?view=&lt;tab&gt; dan history grid reload. Kalau project tak ada (deleted), 'Project not found' message muncul — tekan project lain dari sidebar."
-    },
-    {
-      no: "5",
-      title: "Search Projects (kalau dah banyak)",
-      copy: "Search bar kat atas sidebar — type nama project untuk filter. Useful bila dah ada 10+ projects (tapi limit 4 default, jadi rare)."
-    },
-    {
-      no: "6",
-      title: "Project menu (3-dot)",
-      copy: "Hover atas project name → 3-dot menu muncul → boleh Rename atau Delete project. Delete project = WARNING. Semua history dalam tu hilang permanently. Confirm dialog akan tanya dulu. Tak ada undo.",
-      tip: "Rename anytime safe. Delete cuma kalau project memang dah expired / abandoned."
-    },
-    {
-      no: "7",
-      title: "Card 'IMAGE / UGC / CINEMA / AUTO CONTENT'",
-      copy: "Total count generation per asset type dalam date range yang dipilih.",
-      bullets: ["IMAGE — gambar yang di-generate kat Image tab", "UGC — video Veo 8s/16s dari UGC tab", "CINEMA — video Seedance dari Cinema tab + video Grok dari Story tab combined", "AUTO CONTENT — total videos dari Auto Content batches"],
-      after: "Click stats card (kalau interactive) → drill down ke specific tab history."
-    },
-    {
-      no: "8",
-      title: "Card 'TOTAL COST'",
-      copy: "Sum credit deducted untuk semua generation dalam date range. Format RM. Useful untuk monthly accounting / billing client.",
-      tip: "Untuk monthly invoice: set From=01 + To=last day of month, Apply, screenshot Total Cost."
-    },
-    {
-      no: "9",
-      title: "FILTER BY DATE RANGE",
-      copy: "FROM DATE — earliest date to include. TO DATE — latest date to include. APPLY button — refresh stats with new range. Reset button — back to default (current month). KL timezone (UTC+8) — tarikh local Malaysia."
-    },
-    {
-      no: "10",
-      title: "DAILY PRODUCTION chart",
-      copy: "Line chart untuk visual trend. Setiap line satu asset type (color-coded). X-axis = dates. Y-axis = count generated. '42 total in range' = jumlah keseluruhan untuk filter aktif. Click legend (Image / UGC / Cinema / Auto Content) untuk toggle line on/off.",
-      tip: "Useful untuk identify spike days (campaign launches) atau gap (vacation / sakit)."
-    },
-    {
-      no: "11",
-      title: "Top — Logo & Dashboard button",
-      copy: "PeningLab Studio logo (click → balik ke dashboard view ini). Dashboard button (active highlighted bila kat dashboard)."
-    },
-    {
-      no: "12",
-      title: "+ New project (orange button)",
-      copy: "Create project baru. Badge '2/4' = current count vs max limit."
-    },
-    {
-      no: "13",
-      title: "Projects list (search + project rows)",
-      copy: "Senarai semua project dengan icon folder. Click row → switch ke project tu. Hover → 3-dot menu (Rename / Delete)."
-    },
-    {
-      no: "14",
-      title: "ACCOUNT section",
-      copy: "Billing — manage Pro plan + payment history. Top Up Credit — beli credit packages. Usage — tracking spend & activity. Saved Prompts — library prompt history. Auto Post TikTok — install Chrome extension. SOP. Join Discussion WhatsApp — community group."
-    },
-    {
-      no: "15",
-      title: "CREDIT BALANCE card",
-      copy: "Current credit balance + Top Up shortcut button. Auto-refresh setiap 30 saat."
-    },
-    {
-      no: "16",
-      title: "PRO · 57 DAYS LEFT badge",
-      copy: "Plan status + days till renewal. Hover atau click → Billing page untuk manage."
-    },
-    {
-      no: "17",
-      title: "User card bawah sekali",
-      copy: "Display name + email. Settings + Sign out buttons."
+    en: {
+      eyebrow: "Guide",
+      title: "Dashboard — Project & Production Summary",
+      close: "Got it - close",
+      path: "Welcome screen · choose / create project · review daily stats",
+      whatTitle: "What is this?",
+      what: "The Dashboard is the first workspace screen after login. It summarizes total production, generation cost, credit usage, and the active project. Every generation flow — Image, UGC, Auto Content, Story, Cinema, and Clone — should live inside a project so history, cost, and deliverables stay organized.",
+      whenTitle: "When should I use it?",
+      when: "Use the Dashboard whenever you log in, switch between clients or campaigns, check monthly output, review spend, or decide what to generate next. Think of it as the control room for production, not a decorative landing page.",
+      guideTitle: "How to use it",
+      stepLabel: "Step",
+      tipLabel: "Tip",
+      workflowTitle: "Workflow tip",
+      workflow: "Create one project per client, campaign, or product. Generate a content batch, review the history grid, then use the Dashboard at month end to track output, cost, and production rhythm before continuing the next batch.",
+      sections: { 7: "Details — Stats Cards & Filter", 11: "Sidebar Layout — What Each Section Does" },
+      steps: [
+        { no: "1", title: "Dashboard overview", subtitle: "Stats cards, date filter, and daily production chart", copy: "The top cards summarize Image, UGC, Cinema, Auto Content, and Total Cost for the selected date range. The date filter controls the reporting window. The chart shows production activity by day." },
+        { no: "2", title: "What is a Project?", copy: "A project is a workspace folder for one client, campaign, or product. All generated assets, history, and cost data are stored under the active project.", bullets: ["Project 'meow' — Client A skincare brand", "Project 'Project 1' — Client B yoga pants"], after: "Switching projects in the sidebar changes the working context." },
+        { no: "3", title: "Create a New Project", copy: "Click + New Project, enter a clear name such as 'Brand X Campaign Q1', then create it. The new project appears in the Projects list.", tip: "Use specific names. 'Skincare-A-Aug-Campaign' is easier to manage than 'Project 5'." },
+        { no: "4", title: "Switch between Projects", copy: "Click a project name in the sidebar to switch workspaces. Generation tabs and history grids will follow the selected project." },
+        { no: "5", title: "Search Projects", copy: "When the list grows, use the sidebar search field to filter by client, product, or campaign name." },
+        { no: "6", title: "Project menu (3-dot)", copy: "Hover over a project to reveal the 3-dot menu. Use it to rename or delete a project.", tip: "Rename is safe. Delete removes that project's history, so use it only for abandoned projects." },
+        { no: "7", title: "Stats cards", copy: "Stats cards show generated asset totals for the active date range.", bullets: ["Image — images generated from the Image tab", "UGC — videos generated from the UGC tab", "Cinema — cinematic / story video output", "Auto Content — batch content plans and videos"] },
+        { no: "8", title: "Total Cost", copy: "Total Cost shows credit spend or generation cost for the selected range. Use it for monthly accounting or client billing.", tip: "For a monthly invoice, set From to the first day of the month and To to the last day." },
+        { no: "9", title: "Date Range Filter", copy: "Choose From Date and To Date, then click Apply. Reset returns to the default range. Dates follow Malaysia time." },
+        { no: "10", title: "Daily Production chart", copy: "The chart shows daily production trends so you can spot spikes, gaps, or campaign launch activity." },
+        { no: "11", title: "Logo & Dashboard button", copy: "The logo brings you back to the main workspace. The Dashboard button is highlighted when this overview is active." },
+        { no: "12", title: "+ New Project button", copy: "Use this button to create a new project. The small badge shows current project count versus your plan limit." },
+        { no: "13", title: "Projects list", copy: "All projects live in the sidebar list. Click a row to switch, or use the 3-dot menu to rename or delete." },
+        { no: "14", title: "Account section", copy: "The Account section includes Billing, Top Up Credit, Usage, Auto Post TikTok, SOP, and the WhatsApp discussion group." },
+        { no: "15", title: "Credit Balance card", copy: "This card shows your current credit balance and gives you a quick Top Up shortcut." },
+        { no: "16", title: "Plan status", copy: "The Pro and days-left badge shows subscription status and time before renewal." },
+        { no: "17", title: "User card", copy: "The bottom card shows your name, email, Settings, and Sign out." }
+      ]
     }
-  ];
-  const sectionLabels = {
-    7: "Detail - Stats Cards & Filter",
-    11: "Sidebar Layout - Apa Setiap Section"
   };
+  return content[state.lang] || content.ms;
+}
+
+function sopDashboardModal() {
+  const guide = sopDashboardContent();
+  const stepCards = guide.steps;
+  const sectionLabels = guide.sections || {};
   return `
     <div class="modal-backdrop sop-backdrop" data-action="close-modal">
       <section class="sop-modal" role="dialog" aria-modal="true" aria-labelledby="sop-dashboard-title">
         <header class="sop-modal-head">
           <span class="sop-modal-icon">${icon("book-open", 36)}</span>
           <div>
-            <p>Panduan</p>
-            <h2 id="sop-dashboard-title">Dashboard - Project & Production Summary</h2>
+            <p>${guide.eyebrow}</p>
+            <h2 id="sop-dashboard-title">${guide.title}</h2>
           </div>
           <button class="sop-close" data-action="close-modal" aria-label="Close SOP">${icon("x", 34)}</button>
         </header>
         <div class="sop-modal-scroll">
-          <p class="sop-path">Welcome screen · pick / create project · daily stats</p>
+          <p class="sop-path">${guide.path}</p>
           <section class="sop-copy-block">
-            <h3>Apa ini?</h3>
-            <p>Dashboard ialah landing page bila korang first kali login. Dia tunjuk ringkasan production keseluruhan (total Image / UGC / Cinema / Auto Content + Total Cost) dan jadi launchpad untuk pilih project mana yang nak kerja. Semua tab generation (Image / UGC / Auto Content / Story / Cinema / Clone) live DALAM satu project &mdash; korang mesti pilih atau buat project dulu sebelum generate apa-apa.</p>
+            <h3>${guide.whatTitle}</h3>
+            <p>${guide.what}</p>
           </section>
           <section class="sop-callout">
             ${icon("lightbulb", 34)}
             <div>
-              <h3>Bila guna tab ni?</h3>
-              <p>Setiap kali korang login. Atau bila nak switch antara client / campaign berbeza. Atau bila nak tengok overall production stats &mdash; berapa banyak generated bulan ni, total cost, daily breakdown.</p>
+              <h3>${guide.whenTitle}</h3>
+              <p>${guide.when}</p>
             </div>
           </section>
           <section class="sop-guide">
-            <h3>${icon("chevron-right", 28)} Cara guna</h3>
+            <h3>${icon("chevron-right", 28)} ${guide.guideTitle}</h3>
             <div class="sop-step-list">
               ${stepCards.map((item) => `
                 ${sectionLabels[item.no] ? `<h3 class="sop-section-heading">${sectionLabels[item.no]}</h3>` : ""}
                 <article class="sop-step-card">
                   <div class="sop-step-title">
                     <span>${item.no}</span>
-                    <h4>Step ${item.no} &mdash; ${item.title}</h4>
+                    <h4>${guide.stepLabel} ${item.no} &mdash; ${item.title}</h4>
                   </div>
                   <div class="sop-step-body">
                     ${item.subtitle ? `<strong>${item.subtitle}</strong>` : ""}
                     <p>${item.copy}</p>
                     ${item.bullets ? `<ul>${item.bullets.map((line) => `<li>${line}</li>`).join("")}</ul>` : ""}
                     ${item.after ? `<p>${item.after}</p>` : ""}
-                    ${item.tip ? `<div class="sop-tip">${icon("lightbulb", 20)} <div><b>Tip:</b><p>${item.tip}</p></div></div>` : ""}
+                    ${item.tip ? `<div class="sop-tip">${icon("lightbulb", 20)} <div><b>${guide.tipLabel}:</b><p>${item.tip}</p></div></div>` : ""}
                   </div>
                 </article>`).join("")}
             </div>
           </section>
           <section class="sop-workflow">
-            <h3>Workflow tip</h3>
-            <p>Buat 1 project per client. Generate 1 batch monthly content (5-10 videos via Auto Content). Review kat history grid -> mark posted via extension. Bulan baru -> reset counter + reuse project. Dashboard stats akan tunjuk progression korang merentasi bulan.</p>
+            <h3>${guide.workflowTitle}</h3>
+            <p>${guide.workflow}</p>
           </section>
         </div>
         <footer class="sop-modal-foot">
-          <button class="sop-understood" data-action="close-modal">Faham - tutup</button>
+          <button class="sop-understood" data-action="close-modal">${guide.close}</button>
         </footer>
       </section>
     </div>`;
