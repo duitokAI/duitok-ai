@@ -12589,6 +12589,69 @@ label {
   box-shadow: none !important;
 }
 
+/* Studio project list: compact, scan-friendly rows. */
+.studio-shell .project-list {
+  gap: 8px !important;
+}
+
+.studio-shell .project-menu-item {
+  grid-template-columns: minmax(0, 1fr) 32px !important;
+  min-height: 56px !important;
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, 0.035) !important;
+}
+
+.studio-shell .project-menu-item:hover {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.07) !important;
+}
+
+.studio-shell .project-menu-item.active {
+  background:
+    linear-gradient(90deg, rgba(255, 63, 110, 0.2), rgba(255, 255, 255, 0.06) 44%, rgba(255, 255, 255, 0.028)),
+    rgba(255, 255, 255, 0.055) !important;
+  box-shadow: inset 2px 0 0 var(--studio-pink), 0 12px 26px rgba(255, 63, 110, 0.1) !important;
+}
+
+.studio-shell .project-menu-item .project-button {
+  min-height: 54px !important;
+  gap: 12px !important;
+  padding: 8px 8px 8px 12px !important;
+  font-size: 15px !important;
+  font-weight: 850 !important;
+  letter-spacing: 0 !important;
+}
+
+.studio-shell .project-menu-item .project-button span:last-child {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 15px !important;
+  line-height: 1.18 !important;
+}
+
+.studio-shell .project-menu-item.active .project-button span:last-child {
+  color: #fff;
+}
+
+.studio-shell .project-menu-item .project-icon {
+  width: 34px !important;
+  height: 34px !important;
+  flex-basis: 34px !important;
+  border-radius: 11px !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+}
+
+.studio-shell .project-menu-item .project-icon svg {
+  width: 17px !important;
+  height: 17px !important;
+}
+
+.studio-shell .project-more {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 9px !important;
+}
+
 /* Studio modal performance: avoid expensive full-page blur on quick actions. */
 .studio-shell .modal-backdrop:not(.sop-backdrop) {
   background: rgba(31, 6, 38, 0.34) !important;
