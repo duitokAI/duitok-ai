@@ -11454,10 +11454,12 @@ label {
 .studio-shell .side-primary.active,
 .studio-shell .side-link.active,
 .studio-shell .project-button.active {
-  border-color: rgba(255, 63, 110, 0.42) !important;
-  background: linear-gradient(135deg, rgba(255, 63, 110, 0.2), rgba(255, 122, 92, 0.12)) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  background:
+    linear-gradient(90deg, rgba(255, 63, 110, 0.16), rgba(255, 255, 255, 0.07) 42%, rgba(255, 255, 255, 0.04)),
+    rgba(255, 255, 255, 0.06) !important;
   color: #fff !important;
-  box-shadow: inset 3px 0 0 var(--studio-pink), 0 14px 34px rgba(255, 63, 110, 0.12) !important;
+  box-shadow: inset 2px 0 0 var(--studio-pink), 0 12px 28px rgba(24, 0, 31, 0.18) !important;
 }
 
 .studio-shell .side-link:hover,
@@ -11481,8 +11483,8 @@ label {
 .studio-shell .project-button.active svg,
 .studio-shell .side-primary.active svg,
 .studio-shell .side-link.active svg {
-  border-color: rgba(255, 255, 255, 0.22) !important;
-  background: rgba(255, 255, 255, 0.18) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
   color: #fff !important;
 }
 
