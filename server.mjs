@@ -2298,7 +2298,7 @@ const agentTools = [
     type: "function",
     function: {
       name: "create_seedance_prompt",
-      description: "Create a structured Seedance video prompt for the current project and save it into image.prompt with model set to Seedance.",
+      description: "Create a structured video generation prompt for the current project and save it into image.prompt with the internal video model selected.",
       parameters: {
         type: "object",
         properties: {
@@ -2624,7 +2624,7 @@ function buildSeedancePrompt({ project, productName, scene, audience, language, 
   const message = keyMessage || memory.notes || `make ${product} feel useful, easy to understand, and worth trying`;
   const sceneText = scene || "a bright Malaysian home desk setup, natural daylight, clean product close-ups";
   return [
-    `Seedance prompt for ${product}:`,
+    `Video prompt for ${product}:`,
     `Duration: ${seconds}s. Format: vertical 9:16 TikTok Shop video.`,
     `Scene: ${sceneText}.`,
     `Style: ${visualStyle}; realistic UGC camera movement, smooth handheld push-in, product always clearly visible.`,
@@ -2650,7 +2650,7 @@ function agentToolCard(name, result = {}) {
   if (name === "create_seedance_prompt") {
     return {
       type: "seedance_prompt",
-      title: "Seedance prompt saved",
+      title: "视频 prompt 已保存",
       summary: String(data.prompt || "").split("\n").slice(0, 3).join(" "),
       projectId: data.projectId,
       resultId: data.resultId,
@@ -2904,7 +2904,7 @@ async function executeAgentTool(name, args, user) {
       project.results.push({
         id: promptId,
         type: "seedance_prompt",
-        title: "Seedance video prompt",
+        title: "视频 prompt",
         body: prompt,
         createdAt: new Date().toISOString()
       });
@@ -2914,7 +2914,7 @@ async function executeAgentTool(name, args, user) {
     });
     return {
       ok: true,
-      message: "Seedance prompt saved to the project.",
+      message: "视频 prompt 已保存到项目。",
       db: result.db,
       data: { projectId: args.projectId, resultId: promptId, prompt: result.prompt },
       diffs: [
@@ -3207,7 +3207,7 @@ function agentToolLabel(name = "") {
     update_project_field: "更新项目字段",
     generate_project_output: "生成内容",
     create_content_plan: "创建内容计划",
-    create_seedance_prompt: "生成 Seedance Prompt",
+    create_seedance_prompt: "生成视频 Prompt",
     remember_agent_context: "保存项目记忆",
     create_schedule_draft: "创建排期草稿",
     toggle_schedule_status: "更新排期状态",
@@ -3288,9 +3288,9 @@ function agentClarificationForUncertainAction(content = "", { intent = "chat", p
   const tooVague = /^(做一下|帮我做|帮我弄|do it|make it|buat|生成|做|run)$/i.test(text) || (text.length < 8 && !clearAction);
   if (!tooVague && projectId && !(action.wantsGenerate && !/(图片|image|video|视频|seedance|ugc|auto|批量|海报|poster)/i.test(text))) return null;
   if (/[\u3400-\u9fff]/.test(text)) {
-    return "我还不够确定要做哪一种内容。您想让我做哪一步？请补一句：1. 生成图片/海报；2. 生成 Seedance 视频 prompt；3. 生成视频；4. 做 7 天内容计划；5. 创建排期草稿。若会扣 credits，我会先弹窗让您确认。";
+    return "我还不够确定要做哪一种内容。您想让我做哪一步？请补一句：1. 生成图片/海报；2. 写视频 prompt；3. 生成视频；4. 做 7 天内容计划；5. 创建排期草稿。若会扣 credits，我会先弹窗让您确认。";
   }
-  return "I need one more detail before I execute. Which action should I take: generate image/poster, create a Seedance video prompt, generate video, build a 7-day content plan, or create schedule drafts? If credits will be charged, I will ask for confirmation first.";
+  return "I need one more detail before I execute. Which action should I take: generate image/poster, write a video prompt, generate video, build a 7-day content plan, or create schedule drafts? If credits will be charged, I will ask for confirmation first.";
 }
 
 function agentPublishArgsFromMessage(content = "") {
@@ -4344,9 +4344,9 @@ app.post("/api/agent", async (req, res, next) => {
         content: [
           "You are Duitok Agent inside Duitok AI Studio for Malaysia TikTok Shop sellers.",
           "Help the user decide what to do next, and call Duitok platform tools when useful.",
-          "You can inspect workspace state, remember project context, navigate the UI, create projects, create content plans, create Seedance prompts, update project fields, generate outputs, create scheduler drafts, update schedule status, and create support tickets.",
+          "You can inspect workspace state, remember project context, navigate the UI, create projects, create content plans, create video prompts, update project fields, generate outputs, create scheduler drafts, update schedule status, and create support tickets.",
           "Act like an operator, not a passive chatbot: when the user asks for an output, fill the relevant project fields and run the matching tool if enough information is available.",
-          "Common workflows: product/content request = inspect_workspace_state -> create_project or update fields -> generate_project_output -> open_workspace. Weekly content plan = inspect_workspace_state -> remember_agent_context when useful -> create_content_plan, and only create schedule drafts when the user asks for drafts. Seedance prompt request = create_seedance_prompt; Seedance generation request = create_seedance_prompt -> generate_project_output after confirmation if high cost.",
+          "Common workflows: product/content request = inspect_workspace_state -> create_project or update fields -> generate_project_output -> open_workspace. Weekly content plan = inspect_workspace_state -> remember_agent_context when useful -> create_content_plan, and only create schedule drafts when the user asks for drafts. Video prompt request = create_seedance_prompt; video generation request = create_seedance_prompt -> generate_project_output after confirmation if high cost. In user-facing replies and tool cards, say video prompt or generate video instead of naming the internal video model.",
           "For 'what is missing today' or workspace diagnosis, call inspect_workspace_state and answer from the returned summary.",
           "When a tool creates a project, result, or schedule draft, use the returned ids for the next tool call.",
           "Be concise, practical, and speak in the user's language. If the user's action request is ambiguous, ask one short clarification question before using tools.",

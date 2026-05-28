@@ -1694,74 +1694,6 @@ textarea {
   font-size: 13px;
 }
 
-.agent-memory-panel {
-  width: min(1480px, 100%);
-  margin: -16px auto 28px;
-  border: 1px solid rgba(93, 8, 108, 0.12);
-  border-radius: 8px;
-  padding: 18px;
-  background: #fffdf8;
-  box-shadow: 0 12px 36px rgba(31, 6, 38, 0.08);
-}
-
-.agent-memory-panel header {
-  display: flex;
-  align-items: start;
-  justify-content: space-between;
-  gap: 18px;
-  margin-bottom: 14px;
-}
-
-.agent-memory-panel h2,
-.agent-memory-panel p {
-  margin: 0;
-}
-
-.agent-memory-panel header span {
-  color: rgba(93, 8, 108, 0.52);
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.agent-memory-form {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.agent-memory-form label {
-  display: grid;
-  gap: 6px;
-  color: var(--purple);
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.agent-memory-form label:nth-of-type(n + 5) {
-  grid-column: span 2;
-}
-
-.agent-memory-form input,
-.agent-memory-form textarea {
-  width: 100%;
-  border: 1px solid rgba(93, 8, 108, 0.14);
-  border-radius: 8px;
-  padding: 10px 11px;
-  background: #fff;
-  color: var(--ink);
-  font: inherit;
-}
-
-.agent-memory-form textarea {
-  min-height: 82px;
-  resize: vertical;
-}
-
-.agent-memory-form button {
-  align-self: end;
-  min-height: 42px;
-}
-
 .canvas-card {
   width: min(1480px, 100%);
   min-height: 760px;
@@ -8721,31 +8653,37 @@ label {
 }
 
 .agent-page-panel .agent-thread article.agent-thinking {
-  max-width: min(760px, 96%);
-  border-color: rgba(244, 202, 50, 0.34);
+  max-width: min(560px, 94%);
+  gap: 10px;
+  padding: 14px 16px;
+  border-color: rgba(244, 202, 50, 0.3);
+  border-radius: 14px;
   background:
-    linear-gradient(90deg, rgba(244, 202, 50, 0.16), transparent 48%),
-    #fffdf6;
+    linear-gradient(135deg, rgba(244, 202, 50, 0.12), rgba(255, 255, 255, 0.72) 58%),
+    #fffaf2;
+  box-shadow: 0 12px 30px rgba(93, 8, 108, 0.07);
 }
 
 .agent-thinking > span {
-  color: rgba(93, 8, 108, 0.58) !important;
+  color: rgba(93, 8, 108, 0.7) !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
 }
 
 .agent-thinking-row {
   display: grid;
-  grid-template-columns: 36px minmax(0, 1fr);
-  gap: 11px;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 10px;
   align-items: center;
 }
 
 .agent-thinking-row b {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   border-radius: 999px;
-  background: rgba(244, 202, 50, 0.22);
+  background: rgba(244, 202, 50, 0.18);
   color: var(--purple);
 }
 
@@ -8757,17 +8695,55 @@ label {
   display: block;
   color: var(--purple);
   font-size: 16px;
+  font-weight: 950;
   line-height: 1.25;
 }
 
 .agent-thinking-row p {
-  margin-top: 3px !important;
-  color: rgba(93, 8, 108, 0.64) !important;
-  font-size: 13px !important;
+  margin-top: 4px !important;
+  color: rgba(93, 8, 108, 0.68) !important;
+  font-size: 14px !important;
+  font-weight: 720 !important;
+  line-height: 1.35 !important;
+}
+
+.agent-thinking-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 2px;
+}
+
+.agent-thinking-steps span {
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid rgba(93, 8, 108, 0.1);
+  border-radius: 999px;
+  padding: 5px 9px;
+  background: rgba(255, 255, 255, 0.7);
+  color: rgba(93, 8, 108, 0.36);
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.agent-thinking-steps span.done {
+  border-color: rgba(34, 199, 120, 0.22);
+  background: rgba(34, 199, 120, 0.09);
+  color: rgba(14, 120, 76, 0.9);
+}
+
+.agent-thinking-steps span.active {
+  border-color: rgba(93, 8, 108, 0.22);
+  background: rgba(93, 8, 108, 0.08);
+  color: var(--purple);
+  animation: agentStepPulse 1.4s ease-in-out infinite;
 }
 
 .agent-thinking-track {
-  height: 5px;
+  height: 3px;
   overflow: hidden;
   border-radius: 999px;
   background: rgba(93, 8, 108, 0.08);
@@ -8785,6 +8761,19 @@ label {
 @keyframes agentThinkingSlide {
   0% { transform: translateX(-110%); }
   100% { transform: translateX(250%); }
+}
+
+@keyframes agentStepPulse {
+  0%, 100% { box-shadow: 0 0 0 rgba(93, 8, 108, 0); }
+  50% { box-shadow: 0 0 0 4px rgba(93, 8, 108, 0.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .agent-thinking-row b svg,
+  .agent-thinking-track i,
+  .agent-thinking-steps span.active {
+    animation: none !important;
+  }
 }
 
 .agent-run-card {
@@ -9216,13 +9205,8 @@ label {
 }
 
 @media (max-width: 1000px) {
-  .agent-page-hero,
-  .agent-memory-form {
+  .agent-page-hero {
     grid-template-columns: 1fr;
-  }
-
-  .agent-memory-form label:nth-of-type(n + 5) {
-    grid-column: auto;
   }
 
   .agent-3d-card {
@@ -13871,4 +13855,393 @@ label {
 .studio-shell .support-bubble:hover {
   transform: translateY(-2px);
   box-shadow: 0 22px 52px rgba(18, 184, 106, 0.34), 0 0 0 8px rgba(36, 211, 102, 0.13) !important;
+}
+
+/* Homepage PRD execution: unified conversion page rhythm and reusable GEO-ready system. */
+.public-shell {
+  --home-purple: #4b005e;
+  --home-pink: #ff3f6e;
+  --home-coral: #ff7a5c;
+  --home-lime: #d8ff4a;
+  --home-ink: #32123b;
+  --home-muted: #6d5874;
+  --home-line: rgba(75, 0, 94, 0.12);
+  --home-card: rgba(255, 255, 255, 0.9);
+  --home-shadow: 0 22px 62px rgba(75, 0, 94, 0.1);
+  background:
+    radial-gradient(circle at 90% 2%, rgba(255, 122, 92, 0.22), transparent 15%),
+    radial-gradient(circle at 7% 20%, rgba(177, 89, 255, 0.14), transparent 18%),
+    linear-gradient(180deg, #fff 0%, #fff7fb 30%, #f7eeff 62%, #fff 100%) !important;
+  color: var(--home-ink) !important;
+}
+
+.public-shell .promo-bar {
+  min-height: 52px !important;
+  background: linear-gradient(90deg, #4b005e 0%, #ff3f6e 54%, #ff7a5c 100%) !important;
+}
+
+.public-shell .video-scene-hero {
+  min-height: min(760px, calc(100vh - 124px)) !important;
+  border-radius: 0 0 34px 34px !important;
+}
+
+.public-shell .video-scene-hero h1.hero-headline,
+.public-shell .video-scene-hero h1.hero-headline-zh {
+  max-width: 850px !important;
+  font-size: clamp(50px, 6.2vw, 104px) !important;
+  line-height: 0.94 !important;
+}
+
+.public-shell .video-scene-hero .public-copy {
+  max-width: 760px !important;
+  font-size: clamp(18px, 1.65vw, 27px) !important;
+  line-height: 1.45 !important;
+}
+
+.public-shell .proof-strip {
+  width: min(1180px, calc(100% - 32px)) !important;
+  margin-top: clamp(-42px, -3vw, -24px) !important;
+  border-radius: 22px !important;
+}
+
+.public-shell .proof-strip article {
+  min-height: 76px !important;
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+}
+
+.public-shell .opportunity-section,
+.public-shell .test-volume-section,
+.public-shell .system-section,
+.public-shell .demo-section,
+.public-shell .pricing-section,
+.public-shell .journey-section,
+.public-shell .faq-section,
+.public-shell .final-cta-section {
+  width: min(1480px, 100%) !important;
+  margin-inline: auto !important;
+  padding: clamp(62px, 7vw, 112px) clamp(22px, 4vw, 72px) !important;
+  border: 1px solid rgba(75, 0, 94, 0.08) !important;
+  border-radius: 30px !important;
+}
+
+.public-shell .opportunity-section,
+.public-shell .pricing-section,
+.public-shell .final-cta-section {
+  background:
+    radial-gradient(circle at 88% 8%, rgba(255, 122, 92, 0.16), transparent 26%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(255, 247, 251, 0.86)) !important;
+}
+
+.public-shell .test-volume-section,
+.public-shell .system-section,
+.public-shell .journey-section,
+.public-shell .faq-section {
+  background: linear-gradient(135deg, rgba(246, 236, 255, 0.82), rgba(255, 255, 255, 0.9)) !important;
+}
+
+.public-shell .opportunity-section,
+.public-shell .test-volume-section,
+.public-shell .pricing-section,
+.public-shell .journey-section,
+.public-shell .faq-section,
+.public-shell .final-cta-section {
+  display: grid !important;
+  grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1fr) !important;
+  align-items: center !important;
+  gap: clamp(28px, 5vw, 78px) !important;
+}
+
+.public-shell .opportunity-grid,
+.public-shell .system-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 16px !important;
+}
+
+.public-shell .opportunity-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.public-shell .opportunity-grid article,
+.public-shell .system-grid article,
+.public-shell .volume-formula article,
+.public-shell .journey-grid article,
+.public-shell .faq-section details,
+.public-shell .pricing-breakdown article,
+.public-shell .pricing-steps article {
+  border: 1px solid var(--home-line) !important;
+  border-radius: 20px !important;
+  background: var(--home-card) !important;
+  box-shadow: var(--home-shadow) !important;
+}
+
+.public-shell .opportunity-grid article,
+.public-shell .system-grid article {
+  min-height: 240px;
+  padding: clamp(22px, 2.2vw, 34px) !important;
+}
+
+.public-shell .opportunity-grid svg,
+.public-shell .system-grid svg {
+  width: 46px;
+  height: 46px;
+  padding: 10px;
+  border-radius: 16px;
+  background: #fff0f5;
+  color: var(--home-pink) !important;
+}
+
+.public-shell .opportunity-section h2,
+.public-shell .test-volume-section h2,
+.public-shell .system-section h2,
+.public-shell .demo-section h2,
+.public-shell .pricing-section h2,
+.public-shell .journey-section h2,
+.public-shell .faq-section h2,
+.public-shell .final-cta-section h2 {
+  max-width: 900px !important;
+  color: var(--home-purple) !important;
+  font-size: clamp(42px, 5.1vw, 82px) !important;
+  line-height: 0.98 !important;
+  letter-spacing: 0 !important;
+  word-break: normal !important;
+  overflow-wrap: anywhere !important;
+  text-wrap: balance;
+}
+
+.public-shell .opportunity-section p,
+.public-shell .test-volume-section p,
+.public-shell .system-section p,
+.public-shell .demo-section p,
+.public-shell .pricing-section p,
+.public-shell .journey-section p,
+.public-shell .faq-section p,
+.public-shell .final-cta-section p {
+  max-width: 760px;
+  color: var(--home-muted) !important;
+  font-size: clamp(17px, 1.45vw, 23px);
+  line-height: 1.52;
+}
+
+.public-shell .volume-formula {
+  gap: 12px !important;
+}
+
+.public-shell .volume-formula article {
+  min-height: 118px !important;
+  grid-template-columns: auto minmax(0, 1fr) !important;
+  align-items: start !important;
+}
+
+.public-shell .volume-formula article b,
+.public-shell .pricing-steps article b {
+  border-radius: 14px !important;
+  background: linear-gradient(135deg, var(--home-pink), var(--home-coral)) !important;
+  color: #fff !important;
+}
+
+.public-shell .demo-section {
+  grid-template-columns: 1fr !important;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(255, 63, 110, 0.1), transparent 28%),
+    linear-gradient(135deg, rgba(246, 236, 255, 0.72), rgba(255, 255, 255, 0.92)) !important;
+}
+
+.public-shell .demo-section .demo-reel {
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+}
+
+.public-shell .demo-section .demo-reel article {
+  border-radius: 16px !important;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.public-shell .demo-section .demo-reel article:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 28px 72px rgba(75, 0, 94, 0.14) !important;
+}
+
+.public-shell .demo-section .demo-screen {
+  aspect-ratio: 0.78 / 1 !important;
+  background:
+    radial-gradient(circle at 72% 18%, rgba(255, 255, 255, 0.28), transparent 24%),
+    linear-gradient(145deg, #6b137a 0%, #ff3f6e 55%, #ff7a5c 100%) !important;
+}
+
+.public-shell .pricing-section {
+  grid-template-columns: minmax(0, 0.9fr) minmax(360px, 0.68fr) !important;
+}
+
+.public-shell .pricing-breakdown {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+
+.public-shell .price-card {
+  border-radius: 28px !important;
+}
+
+.public-shell .price-card .gold-button {
+  width: 100%;
+  justify-content: center;
+}
+
+.public-shell .journey-section {
+  grid-template-columns: minmax(0, 0.82fr) minmax(460px, 1fr) !important;
+}
+
+.public-shell .journey-grid {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 12px !important;
+}
+
+.public-shell .journey-grid article {
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-columns: 88px minmax(0, 1fr) !important;
+  grid-template-areas:
+    "day title"
+    "day copy" !important;
+  align-items: center;
+  padding: 18px 20px !important;
+}
+
+.public-shell .journey-grid span {
+  grid-area: day;
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px !important;
+  background: #fff0f5 !important;
+  color: var(--home-pink) !important;
+  font-size: 13px;
+}
+
+.public-shell .journey-grid h3 {
+  grid-area: title;
+  margin: 0 !important;
+  color: var(--home-purple) !important;
+  font-size: clamp(20px, 1.7vw, 28px) !important;
+}
+
+.public-shell .journey-grid p {
+  grid-area: copy;
+  margin: 4px 0 0 !important;
+  font-size: 16px !important;
+}
+
+.public-shell .faq-section {
+  grid-template-columns: minmax(260px, 0.42fr) minmax(0, 1fr) !important;
+  align-items: start !important;
+}
+
+.public-shell .faq-section .eyebrow,
+.public-shell .faq-section h2 {
+  grid-column: 1;
+}
+
+.public-shell .faq-section details {
+  grid-column: 2;
+}
+
+.public-shell .final-cta-section .signup-brand-banner {
+  max-width: 430px;
+  opacity: 0.95;
+}
+
+@media (max-width: 1180px) {
+  .public-shell .system-grid,
+  .public-shell .pricing-breakdown {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .public-shell .demo-section .demo-reel {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .public-shell .opportunity-section,
+  .public-shell .test-volume-section,
+  .public-shell .pricing-section,
+  .public-shell .journey-section,
+  .public-shell .faq-section,
+  .public-shell .final-cta-section {
+    grid-template-columns: 1fr !important;
+  }
+
+  .public-shell .faq-section .eyebrow,
+  .public-shell .faq-section h2,
+  .public-shell .faq-section details {
+    grid-column: auto !important;
+  }
+}
+
+@media (max-width: 680px) {
+  .public-shell .promo-bar {
+    min-height: 48px !important;
+    font-size: 13px !important;
+  }
+
+  .public-shell .video-scene-hero {
+    min-height: 760px !important;
+    padding-inline: 18px !important;
+  }
+
+  .public-shell .video-scene-hero h1.hero-headline,
+  .public-shell .video-scene-hero h1.hero-headline-zh {
+    font-size: clamp(42px, 13vw, 62px) !important;
+    line-height: 0.98 !important;
+  }
+
+  .public-shell .opportunity-section,
+  .public-shell .test-volume-section,
+  .public-shell .system-section,
+  .public-shell .demo-section,
+  .public-shell .pricing-section,
+  .public-shell .journey-section,
+  .public-shell .faq-section,
+  .public-shell .final-cta-section {
+    width: calc(100% - 22px) !important;
+    padding: 42px 18px !important;
+    border-radius: 24px !important;
+  }
+
+  .public-shell .opportunity-grid,
+  .public-shell .system-grid,
+  .public-shell .pricing-breakdown,
+  .public-shell .demo-section .demo-reel {
+    grid-template-columns: 1fr !important;
+  }
+
+  .public-shell .opportunity-section h2,
+  .public-shell .test-volume-section h2,
+  .public-shell .system-section h2,
+  .public-shell .demo-section h2,
+  .public-shell .pricing-section h2,
+  .public-shell .journey-section h2,
+  .public-shell .faq-section h2,
+  .public-shell .final-cta-section h2 {
+    font-size: clamp(34px, 10.8vw, 48px) !important;
+    line-height: 1.05 !important;
+  }
+
+  .public-shell .journey-grid article {
+    grid-template-columns: 1fr !important;
+    grid-template-areas:
+      "day"
+      "title"
+      "copy" !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-shell *,
+  .public-shell *::before,
+  .public-shell *::after {
+    animation: none !important;
+    transition: none !important;
+  }
 }

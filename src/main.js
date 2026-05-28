@@ -49,8 +49,11 @@ const state = {
   dateTo: "2026-05-26",
   live: false,
   chat: false,
+  sopTopic: "dashboard",
   agentInput: "",
   agentBusy: false,
+  agentBusyStartedAt: 0,
+  agentWorkingTick: 0,
   agentVisualPhase: "idle",
   agentTaskMode: "idle",
   agentIdleActivity: "sleep",
@@ -67,6 +70,7 @@ const state = {
 };
 
 let agentVisualTimer = null;
+let agentWorkingTimer = null;
 
 const languages = [
   ["ms", "BM"],
@@ -1130,6 +1134,15 @@ function publicSite() {
         <article>${icon("badge-check", 18)} <b>${t("guarantee")}</b></article>
         <article>${icon("wallet-cards", 18)} <b>${t("videoPrice")}</b></article>
       </section>
+      <section class="opportunity-section">
+        <div>
+          <p class="eyebrow">${opportunityContent().kicker}</p>
+          <h2>${opportunityContent().title}</h2>
+          <p>${opportunityContent().copy}</p>
+          <button class="gold-button section-cta" data-action="open-register">${icon("sparkles")} ${t("startCreating")}</button>
+        </div>
+        <div class="opportunity-grid">${opportunityCards()}</div>
+      </section>
       <section class="test-volume-section">
         <div>
           <p class="eyebrow">${testVolumeContent().kicker}</p>
@@ -1138,43 +1151,13 @@ function publicSite() {
         </div>
         <div class="volume-formula">${testVolumeSteps()}</div>
       </section>
-      <section class="split-section">
-        <div><p class="eyebrow">${t("sellerReality")}</p><h2>${t("painTitle")}</h2><p>${t("painCopy")}</p></div>
-        <div class="pain-list">
-          ${painCards()}
-        </div>
-      </section>
-      <section class="system-section">
+      <section id="features" class="system-section">
         <div>
           <p class="eyebrow">${whyDuitokContent().kicker}</p>
           <h2>${whyDuitokContent().title}</h2>
           <p>${whyDuitokContent().copy}</p>
         </div>
         <div class="system-grid">${whyDuitokCards()}</div>
-      </section>
-      <section class="output-preview-section">
-        <div>
-          <p class="eyebrow">${t("liveOutput")}</p>
-          <h2>${t("outputTitle")}</h2>
-          <p>${t("outputCopy")}</p>
-        </div>
-        <div class="output-preview-grid">${outputPreviewCards()}</div>
-      </section>
-      <section id="features" class="workflow-section">
-        <div>
-          <p class="eyebrow">${t("howKicker")}</p>
-          <h2>${t("howTitle")}</h2>
-          <p>${t("howCopy")}</p>
-          <button class="gold-button section-cta" data-action="open-register">${icon("sparkles")} ${t("startCreating")}</button>
-        </div>
-        <div class="workflow-steps">${workflowSteps()}</div>
-      </section>
-      <section class="feature-section">
-        <p class="eyebrow">${t("advantage")}</p>
-        <h2>${t("weaponsTitle")}</h2>
-        <div class="feature-mosaic">
-          ${featureMosaicCards()}
-        </div>
       </section>
       <section id="demo" class="demo-section">
         <div>
@@ -1194,45 +1177,6 @@ function publicSite() {
           <article><span>${t("oldWay")}</span><h3>${comparisonContent().oldTitle}</h3><ul>${comparisonContent().oldBullets.map((item) => `<li>${item}</li>`).join("")}</ul></article>
           <article class="winner"><span>${t("newWay")}</span><h3>${comparisonContent().newTitle}</h3><ul>${comparisonContent().newBullets.map((item) => `<li>${item}</li>`).join("")}</ul></article>
         </div>
-      </section>
-      <section class="case-section">
-        <div>
-          <p class="eyebrow">${studentCaseContent().kicker}</p>
-          <h2>${studentCaseContent().title}</h2>
-          <p>${studentCaseContent().copy}</p>
-          <p class="risk-note">${studentCaseContent().note}</p>
-        </div>
-        <article class="case-card">
-          <span>${studentCaseContent().badge}</span>
-          <b>RM1000+</b>
-          <p>${studentCaseContent().cardCopy}</p>
-          <ul>${studentCaseContent().bullets.map((item) => `<li>${item}</li>`).join("")}</ul>
-        </article>
-      </section>
-      <section class="testimonial-section dream-section">
-        <p class="eyebrow">${dreamContent().kicker}</p>
-        <h2>${dreamContent().title}</h2>
-        <p>${dreamContent().copy}</p>
-        <div class="quote-grid">
-          ${dreamCards()}
-        </div>
-      </section>
-      <section class="scenario-section">
-        <div>
-          <p class="eyebrow">${scenarioContent().kicker}</p>
-          <h2>${scenarioContent().title}</h2>
-          <p>${scenarioContent().copy}</p>
-        </div>
-        <div class="scenario-grid">${scenarioCards()}</div>
-      </section>
-      <section class="journey-section">
-        <div>
-          <p class="eyebrow">${sevenDayContent().kicker}</p>
-          <h2>${sevenDayContent().title}</h2>
-          <p>${sevenDayContent().copy}</p>
-          <button class="gold-button section-cta" data-action="open-register">${icon("sparkles")} ${t("startCreating")}</button>
-        </div>
-        <div class="journey-grid">${sevenDaySteps()}</div>
       </section>
       <section id="pricing" class="pricing-section">
         <div>
@@ -1254,15 +1198,21 @@ function publicSite() {
           <button class="gold-button" data-action="open-register">${icon("credit-card")} ${t("claimPlan")}</button>
         </article>
       </section>
-      <section class="control-section">
+      <section class="journey-section">
         <div>
-          <p class="eyebrow">${t("controlKicker")}</p>
-          <h2>${t("controlTitle")}</h2>
-          <p>${t("controlCopy")}</p>
+          <p class="eyebrow">${sevenDayContent().kicker}</p>
+          <h2>${sevenDayContent().title}</h2>
+          <p>${sevenDayContent().copy}</p>
+          <button class="gold-button section-cta" data-action="open-register">${icon("sparkles")} ${t("startCreating")}</button>
         </div>
-        <div class="control-grid">${controlCards()}</div>
+        <div class="journey-grid">${sevenDaySteps()}</div>
       </section>
-      <section class="signup-section">
+      <section id="faq" class="faq-section">
+        <p class="eyebrow">${t("navFaq")}</p>
+        <h2>${t("faqTitle")}</h2>
+        ${faqItems().map((item, index) => `<details ${index === 0 ? "open" : ""}><summary>${item.q}</summary><p>${item.a}</p></details>`).join("")}
+      </section>
+      <section class="signup-section final-cta-section">
         <div><p class="eyebrow">${t("startNow")}</p><h2>${t("registerTitle")}</h2><p>${t("registerCopy")}</p><img class="signup-brand-banner" src="${brandAssets.banner}" alt="Duitok AI"></div>
         <form class="lead-form" data-form="lead">
           <label>${t("fullName")}<input name="name" placeholder="Your name"></label>
@@ -1270,11 +1220,6 @@ function publicSite() {
           <label>${t("email")}<input name="email" placeholder="you@duitok.com"></label>
           <button class="gold-button" type="submit">${icon("lock")} ${t("continueRegistration")}</button>
         </form>
-      </section>
-      <section id="faq" class="faq-section">
-        <p class="eyebrow">${t("navFaq")}</p>
-        <h2>${t("faqTitle")}</h2>
-        ${faqItems().map((item, index) => `<details ${index === 0 ? "open" : ""}><summary>${item.q}</summary><p>${item.a}</p></details>`).join("")}
       </section>
       ${footerBrand("Duitok AI")}
     </main>`;
@@ -1558,6 +1503,53 @@ function whyDuitokCards() {
   };
   return (data[state.lang] || data.ms)
     .map(([ic, title, text]) => `<article>${icon(ic, 26)}<h3>${title}</h3><p>${text}</p></article>`)
+    .join("");
+}
+
+function opportunityContent() {
+  const data = {
+    ms: {
+      kicker: "Side income entry",
+      title: "Bukan beli tool baru,<br>ini cara mula side income dengan AI",
+      copy: "Duitok bantu beginner mula short video selling tanpa perlu simpan stok, hantar parcel, buat customer service atau tunjuk muka. Fokus pertama ialah hasilkan content, post, baca data dan ulang angle yang ada signal."
+    },
+    zh: {
+      kicker: "副业机会",
+      title: "不是多买一个 AI 工具<br>是多一个可以开始的副业入口",
+      copy: "不用囤货、不用发货、不用做客服、不用露脸。Duitok AI 让你先用内容测试产品和角度，用更低成本开始 AI 短视频带货副业。"
+    },
+    en: {
+      kicker: "Side income entry",
+      title: "Not another AI tool,<br>but a side-income entry you can start",
+      copy: "Duitok helps beginners start short-video selling without inventory, fulfillment, customer service, or showing their face. The first job is to create content, publish, read data, and repeat angles that show signals."
+    }
+  };
+  return data[state.lang] || data.ms;
+}
+
+function opportunityCards() {
+  const data = {
+    ms: [
+      ["package-x", "Tak perlu simpan stok", "Mulakan dengan content dan product testing dahulu."],
+      ["truck", "Tak perlu fulfill parcel", "Fokus pada angle, hook dan content, bukan operasi backend."],
+      ["headphones", "Tak perlu buat customer service", "Gunakan short video untuk test demand sebelum komit besar."],
+      ["user-round-x", "Tak perlu tunjuk muka", "Generate no-face product video, script, caption dan visual direction."]
+    ],
+    zh: [
+      ["package-x", "不用囤货", "先用内容测试产品和方向，不用一开始压库存。"],
+      ["truck", "不用发货", "把精力放在选品、hook、脚本和内容角度。"],
+      ["headphones", "不用做客服", "先用短视频测试市场反馈，再决定怎么放大。"],
+      ["user-round-x", "不用露脸", "生成不露脸产品视频、脚本、caption 和画面方向。"]
+    ],
+    en: [
+      ["package-x", "No inventory first", "Start with content and product testing before holding stock."],
+      ["truck", "No fulfillment work", "Focus on angles, hooks, and content instead of backend operations."],
+      ["headphones", "No customer service first", "Use short videos to test demand before committing more."],
+      ["user-round-x", "No need to show face", "Generate no-face product videos, scripts, captions, and visual direction."]
+    ]
+  };
+  return (data[state.lang] || data.ms)
+    .map(([ic, title, text]) => `<article>${icon(ic, 24)}<h3>${title}</h3><p>${text}</p></article>`)
     .join("");
 }
 
@@ -2076,13 +2068,13 @@ function login() {
   const emailValue = payment?.buyer?.email || "";
   const paymentNotice = payment ? `
     <div class="payment-return ${payment.status === "paid" ? "paid" : "pending"}">
-      <b>${payment.status === "paid" ? "Payment confirmed" : "Payment status: " + esc(payment.status)}</b>
+      <b>${payment.status === "paid" ? t("paymentConfirmedShort") : tf("paymentStatusLabel", { status: esc(payment.status) })}</b>
       <p>${payment.status === "paid"
-        ? "Your Duitok AI Pro account is active. Sign in with the password you created during checkout."
-        : "If you have just paid, the CHIP callback may need a moment. Refresh the payment status before trying again."}</p>
+        ? t("paymentActiveCopy")
+        : t("paymentPendingCopy")}</p>
       <div>
-        <button class="dark-button mini-button" data-action="refresh-payment-status" data-order="${esc(payment.orderId)}">${icon("refresh-cw", 15)} Refresh status</button>
-        ${payment.checkoutUrl ? `<a class="gold-button mini-button" href="${esc(payment.checkoutUrl)}">${icon("credit-card", 15)} Continue checkout</a>` : ""}
+        <button class="dark-button mini-button" data-action="refresh-payment-status" data-order="${esc(payment.orderId)}">${icon("refresh-cw", 15)} ${t("refreshStatus")}</button>
+        ${payment.checkoutUrl ? `<a class="gold-button mini-button" href="${esc(payment.checkoutUrl)}">${icon("credit-card", 15)} ${t("continueCheckout")}</a>` : ""}
       </div>
     </div>` : "";
   return `
@@ -2115,24 +2107,24 @@ function studio() {
       <aside class="sidebar">
         ${brand()}
         <div class="sidebar-language">${languageSwitch()}</div>
-        <div class="side-section">${icon("layout-dashboard", 18)} Workspace</div>
+        <div class="side-section">${icon("layout-dashboard", 18)} ${t("workspace")}</div>
         <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard">${mascotIcon("nav-mascot-icon")} ${t("dashboard")}</button>
         ${isOwnerAdminAccount() ? `<button class="side-link ${state.page === "admin" ? "active" : ""}" data-page="admin">${icon("shield-check")} Admin CRM</button>` : ""}
         <button class="side-link ${state.page === "agent" ? "active" : ""}" data-page="agent">${icon("bot")} Duitok Agent</button>
-        <button class="side-link ${state.page === "library" ? "active" : ""}" data-page="library">${icon("folder")} Content Library</button>
+        <button class="side-link ${state.page === "library" ? "active" : ""}" data-page="library">${icon("folder")} ${t("contentLibrary")}</button>
         <button class="new-project" data-action="new-project">${icon("plus")} <span>${t("newProject")}</span><b>${state.db.projects.length}/5</b></button>
         <div class="side-section">${icon("folder", 18)} ${t("projects")}</div>
         <div class="project-list">${projectButtons()}</div>
-        <div class="side-section account">${icon("wallet-cards", 18)} Business</div>
+        <div class="side-section account">${icon("wallet-cards", 18)} ${t("business")}</div>
         ${[
           ["billing", "credit-card", "billing"],
           ["topup", "wallet-cards", "topup"],
           ["usage", "activity", "usage"],
           ["affiliate", "users", "affiliate"]
         ].map(([id, ic, key]) => `<button class="side-link ${state.page === id ? "active" : ""}" data-page="${id}">${icon(ic)} ${t(key)}</button>`).join("")}
-        <div class="side-section account">${icon("life-buoy", 18)} Support</div>
+        <div class="side-section account">${icon("life-buoy", 18)} ${t("support")}</div>
         <button class="side-link" data-action="support">${icon("ticket")} ${t("contactSupport")}</button>
-        <button class="side-link" data-action="sop">${icon("book-open")} SOP</button>
+        <button class="side-link ${state.page === "sop" ? "active" : ""}" data-sop-target="dashboard">${icon("book-open")} SOP</button>
         <button class="side-link ${state.page === "autopost" ? "active" : ""}" data-page="autopost">${icon("send")} ${t("autopost")}</button>
         <button class="side-link ${state.page === "whatsapp" ? "active" : ""}" data-page="whatsapp">${icon("message-circle")} ${t("whatsapp")}${icon("arrow-up-right", 14)}</button>
         ${sidebarAccountPanel()}
@@ -2236,15 +2228,15 @@ function projectButtons() {
             <span class="project-icon">${icon("folder", 22)}</span>
             <span>${esc(item.name)}</span>
           </button>
-          <button class="project-more" type="button" data-project-menu="${item.id}" aria-label="Project actions" title="Project actions">${icon("ellipsis", 18)}</button>
+          <button class="project-more" type="button" data-project-menu="${item.id}" aria-label="${t("projectActions")}" title="${t("projectActions")}">${icon("ellipsis", 18)}</button>
           ${menuOpen ? `
             <div class="project-action-menu">
-              <button type="button" data-project-rename="${item.id}">${icon("pencil", 19)} Rename</button>
-              <button type="button" class="danger" data-project-delete="${item.id}">${icon("trash-2", 19)} Delete</button>
+              <button type="button" data-project-rename="${item.id}">${icon("pencil", 19)} ${t("renameProject")}</button>
+              <button type="button" class="danger" data-project-delete="${item.id}">${icon("trash-2", 19)} ${t("deleteProject")}</button>
             </div>` : ""}
         </div>`;
     })
-    .join("") || `<p class="empty-text">No projects found.</p>`;
+    .join("") || `<p class="empty-text">${t("noProjectsFound")}</p>`;
 }
 
 function page() {
@@ -2253,6 +2245,7 @@ function page() {
   if (state.page === "dashboard") return dashboardOverview();
   if (state.page === "project") return projectPage();
   if (state.page === "library") return contentLibraryPage();
+  if (state.page === "sop") return sopPage();
   if (state.page !== "dashboard") return accountPage();
 }
 
@@ -2308,7 +2301,7 @@ function dashboardOverview() {
       </div>
       <div class="head-actions">
         <button class="dark-button" data-page="topup">${icon("plus")} ${t("topup")}</button>
-        <button class="sop-button" data-action="sop">${icon("book-open", 24)} SOP Dashboard</button>
+        <button class="sop-button" data-sop-target="dashboard">${icon("book-open", 24)} SOP Dashboard</button>
       </div>
     </header>
     <section class="dashboard-stat-grid">
@@ -2513,7 +2506,7 @@ function usagePage() {
           <small>${icon("calendar-days", 16)} All time</small>
         </div>
         <div class="usage-ledger-table">
-          <div class="usage-ledger-head"><span>Action</span><span>Prompt</span><span>Preview</span><span>Date</span><span>Credit</span><span>Balance</span></div>
+          <div class="usage-ledger-head"><span>${t("usageAction")}</span><span>${t("usagePrompt")}</span><span>${t("usagePreview")}</span><span>${t("date")}</span><span>${t("usageCredit")}</span><span>${t("usageBalance")}</span></div>
           ${visibleRows.map((row) => `
             <article>
               <strong>${esc(row.action)}</strong>
@@ -2522,7 +2515,7 @@ function usagePage() {
               <time>${row.createdAt ? new Date(row.createdAt).toLocaleString(state.lang === "zh" ? "zh-CN" : "en-GB", { day: "2-digit", month: "short", year: "2-digit", hour: "2-digit", minute: "2-digit" }) : ""}</time>
               <b class="${row.credits < 0 ? "debit" : "credit"}">${row.credits > 0 ? "+" : ""}${formatCreditNumber(row.credits)}</b>
               <span>${formatCreditNumber(row.balanceAfter)}</span>
-            </article>`).join("") || `<p class="empty-text">No usage records for this filter.</p>`}
+            </article>`).join("") || `<p class="empty-text">${t("noUsageRecords")}</p>`}
         </div>
       </section>
     </section>`;
@@ -2685,12 +2678,11 @@ function projectPage() {
   return `
     <header class="project-head">
       <div><p class="folder-label">${icon("folder", 18)} ${t("project")}</p><h1>${p.name}</h1></div>
-      <button class="sop-button" data-action="sop">${icon("book-open", 25)} ${sopButtonLabel()}</button>
+      <button class="sop-button" data-sop-target="${esc(state.step)}">${icon("book-open", 25)} ${sopButtonLabel()}</button>
     </header>
     <nav class="step-tabs">
       ${steps.map(([id, ic, key, no]) => `<button class="${state.step === id ? "active" : ""}" data-step="${id}">${icon(ic)} <span>${t(key)}</span><b>${no}</b></button>`).join("")}
     </nav>
-    ${agentMemoryPanel(p)}
     <section class="canvas-card">${stepPanel(p)}</section>`;
 }
 
@@ -2725,29 +2717,6 @@ function sopButtonLabel() {
     }
   };
   return labels[state.lang]?.[state.step] || labels.ms[state.step] || "SOP";
-}
-
-function agentMemoryPanel(p) {
-  const memory = p.agentMemory || {};
-  return `
-    <section class="agent-memory-panel">
-      <header>
-        <div>
-          <p class="folder-label">${icon("brain", 17)} Agent Memory</p>
-          <h2>Project context</h2>
-        </div>
-        <span>${esc(memory.updatedAt ? `Updated ${new Date(memory.updatedAt).toLocaleDateString()}` : "Editable")}</span>
-      </header>
-      <form class="agent-memory-form" data-form="agent-memory">
-        <label>Product name<input name="productName" value="${esc(memory.productName || "")}" placeholder="e.g. Hair growth serum"></label>
-        <label>Audience<input name="audience" value="${esc(memory.audience || "")}" placeholder="e.g. Malaysia women 25-40"></label>
-        <label>Language<input name="language" value="${esc(memory.language || "BM + English")}" placeholder="BM + English"></label>
-        <label>Brand tone<input name="brandTone" value="${esc(memory.brandTone || "")}" placeholder="Professional, friendly, local"></label>
-        <label>Claims to avoid<textarea name="claimsToAvoid" placeholder="Medical claims, guaranteed results...">${esc(memory.claimsToAvoid || "")}</textarea></label>
-        <label>Notes<textarea name="notes" placeholder="Anything Agent should remember for this project...">${esc(memory.notes || "")}</textarea></label>
-        <button class="dark-button" type="submit">${icon("save", 16)} Save memory</button>
-      </form>
-    </section>`;
 }
 
 function stepPanel(p) {
@@ -4310,7 +4279,7 @@ function agentVisualBubble(mode, phase) {
   if (phase === "walking") return "去工位中";
   if (phase === "done") return "完成，等您查看";
   if (phase === "returning") return "回去休息";
-  if (phase === "idle") return "休息中";
+  if (phase === "idle") return "待命中";
   return {
     image: "图片生成中",
     video: "影片生成中",
@@ -4434,9 +4403,9 @@ function chatPanel() {
     : `<p class="agent-empty">Ask me to generate UGC, build a batch, decode a competitor, create a project, or decide what to do next.</p>`;
   const pendingConfirmation = state.agentMessages.some((item) => item.agentRun?.status === "waiting_confirmation");
   const inputPlaceholder = state.agentBusy
-    ? "Agent is working..."
+    ? "Agent 正在处理，请稍等..."
     : pendingConfirmation
-      ? "Confirm or cancel the pending action first"
+      ? "请先确认或取消当前动作"
       : "Message Duitok Agent...";
   return `
     <section class="agent-panel agent-page-panel">
@@ -4534,26 +4503,86 @@ function agentInlineMarkdown(value = "") {
 
 function agentThinkingCard() {
   const mode = agentWorkMode(latestAgentUserMessage());
-  const label = {
-    image: "Preparing image workflow",
-    video: "Preparing video workflow",
-    copy: "Writing content structure",
-    schedule: "Checking schedule flow",
-    command: "Understanding your request",
-    chat: "Understanding your request"
-  }[mode] || "Understanding your request";
+  const elapsed = state.agentBusyStartedAt ? Date.now() - state.agentBusyStartedAt : 0;
+  const phase = agentWorkingPhase(elapsed, mode);
+  const steps = agentWorkingSteps(phase.key);
   return `
     <article class="assistant agent-thinking">
-      <span>Agent is working</span>
+      <span>Agent 正在处理</span>
       <div class="agent-thinking-row">
         <b>${icon("loader-circle", 18)}</b>
         <div>
-          <strong>${esc(label)}</strong>
-          <p>Reading workspace context, planning safe tool calls, and preparing the next update.</p>
+          <strong>${esc(phase.title)}</strong>
+          <p>${esc(phase.description)}</p>
         </div>
+      </div>
+      <div class="agent-thinking-steps" aria-label="Agent progress">
+        ${steps.map((step) => `<span class="${step.status}">${step.status === "done" ? icon("check", 13) : ""}${esc(step.label)}</span>`).join("")}
       </div>
       <div class="agent-thinking-track"><i></i></div>
     </article>`;
+}
+
+function agentWorkingPhase(elapsed = 0, mode = "command") {
+  if (elapsed >= 8000) {
+    return {
+      key: "slow",
+      title: "还在处理中",
+      description: "这一步比平时久一点，请不要重复提交。"
+    };
+  }
+  if (elapsed >= 4500) {
+    return {
+      key: "tool_calling",
+      title: agentWorkingExecutionTitle(mode),
+      description: "我正在处理任务；涉及扣积分或发布时会先让你确认。"
+    };
+  }
+  if (elapsed >= 2500) {
+    return {
+      key: "planning",
+      title: "正在规划下一步",
+      description: "如果信息不够，我会先问你；涉及扣积分会先确认。"
+    };
+  }
+  if (elapsed >= 1000) {
+    return {
+      key: "inspecting",
+      title: "正在检查 workspace",
+      description: "我在看项目资料、生成结果、排期和积分状态。"
+    };
+  }
+  return {
+    key: "understanding",
+    title: "正在理解你的需求",
+    description: "我会判断是直接回答、追问，还是调用工具。"
+  };
+}
+
+function agentWorkingExecutionTitle(mode = "command") {
+  return {
+    image: "正在准备生成内容",
+    video: "正在准备视频任务",
+    copy: "正在整理内容结构",
+    schedule: "正在检查排期动作",
+    chat: "正在整理回复",
+    command: "正在准备执行"
+  }[mode] || "正在准备执行";
+}
+
+function agentWorkingSteps(activeKey = "understanding") {
+  const order = ["understanding", "inspecting", "planning", "tool_calling"];
+  const labels = {
+    understanding: "理解需求",
+    inspecting: "检查资料",
+    planning: "准备执行",
+    tool_calling: "整理结果"
+  };
+  const activeIndex = activeKey === "slow" ? order.length - 1 : Math.max(order.indexOf(activeKey), 0);
+  return order.map((key, index) => ({
+    label: labels[key],
+    status: index < activeIndex ? "done" : index === activeIndex ? "active" : "pending"
+  }));
 }
 
 function agentRunStatusLabel(status = "") {
@@ -4619,9 +4648,9 @@ function agentToolCard(card = {}) {
   }
   if (card.type === "seedance_prompt") {
     return `<section class="agent-tool-card">
-      <header><strong>${icon("film", 16)} ${esc(card.title || "Seedance prompt")}</strong><span>${esc(card.summary || "")}</span></header>
+      <header><strong>${icon("film", 16)} ${esc(card.title || "视频 prompt 已保存")}</strong><span>${esc(card.summary || "")}</span></header>
       <pre>${esc(String(card.prompt || "").slice(0, 900))}</pre>
-      <div><button class="dark-button" data-page="project">${icon("edit-3", 15)} Edit prompt</button><button class="gold-button" data-agent-prompt="Generate video from the saved Seedance prompt">${icon("sparkles", 15)} Generate video</button></div>
+      <div><button class="dark-button" data-page="project">${icon("edit-3", 15)} 编辑 prompt</button><button class="gold-button" data-agent-prompt="Generate video from the saved video prompt">${icon("sparkles", 15)} 生成视频</button></div>
     </section>`;
   }
   if (card.type === "workspace_inspect") {
@@ -4649,7 +4678,7 @@ function agentToolCard(card = {}) {
   if (card.type === "schedule_drafts") {
     return `<section class="agent-tool-card">
       <header><strong>${icon("send", 16)} ${esc(card.title || "Drafts created")}</strong><span>${esc(card.summary || "")}</span></header>
-      <div><button class="dark-button" data-page="autopost">${icon("calendar", 15)} Open Scheduler</button></div>
+      <div><button class="dark-button" data-page="autopost">${icon("calendar", 15)} ${t("scheduler")}</button></div>
     </section>`;
   }
   return "";
@@ -4789,7 +4818,7 @@ async function action(event, name) {
     window.history.pushState({}, "", "/studio");
     return render();
   }
-  if (name === "apply-date") return notify("Dashboard date range applied.");
+  if (name === "apply-date") return notify(t("toastDashboardDate"));
   if (name === "reset-date") return set({ dateFrom: "2026-05-01", dateTo: "2026-05-26" });
   if (name === "chat") return set({ page: "agent" });
   if (name === "clear-agent") {
@@ -4868,13 +4897,13 @@ async function submit(event) {
     }
   }
   if (event.currentTarget.dataset.form === "lead") {
-    notify("Opening registration.");
+    notify(t("toastOpeningRegistration"));
     window.history.pushState({}, "", "/register");
     return render();
   }
   if (event.currentTarget.dataset.form === "register") {
     try {
-      notify("Opening secure CHIP payment page...");
+      notify(t("toastOpeningPayment"));
       const res = await api("/checkout/register", {
         method: "POST",
         body: JSON.stringify(data)
@@ -4927,9 +4956,6 @@ async function submit(event) {
   if (event.currentTarget.dataset.form === "agent") {
     return sendAgentMessage(data.message);
   }
-  if (event.currentTarget.dataset.form === "agent-memory") {
-    return saveAgentMemory(data);
-  }
 }
 
 async function fieldChange(event) {
@@ -4946,24 +4972,14 @@ async function saveProjectField(field, value) {
     notify(t("saveDone"));
   } catch (error) {
     set({ db: previousDb });
-    notify(error.message || "Save failed.");
-  }
-}
-
-async function saveAgentMemory(data) {
-  try {
-    const db = await api(`/projects/${state.projectId}/agent-memory`, { method: "PATCH", body: JSON.stringify(data) });
-    set({ db });
-    notify("Agent memory saved.");
-  } catch (error) {
-    notify(error.message || "Memory save failed.");
+    notify(error.message || t("toastSaveFailed"));
   }
 }
 
 async function applyImagePreset(promptText) {
   const db = await api(`/projects/${state.projectId}/field`, { method: "PATCH", body: JSON.stringify({ field: "image.prompt", value: promptText }) });
   set({ db });
-  notify("Prompt preset applied.");
+  notify(t("toastPromptPresetApplied"));
 }
 
 async function uploadChange(event) {
@@ -4971,13 +4987,13 @@ async function uploadChange(event) {
   if (!file) return;
   const db = await api("/attachments", { method: "POST", body: JSON.stringify({ projectId: state.projectId, kind: event.target.dataset.upload, name: file.name, size: file.size, type: file.type }) });
   set({ db });
-  notify(`${file.name} saved to backend.`);
+  notify(tf("toastFileSaved", { name: file.name }));
 }
 
 async function renameProject(name) {
   if (!state.editingProjectId) return;
   const db = await api(`/projects/${state.editingProjectId}`, { method: "PATCH", body: JSON.stringify({ name }) });
-  notify("Project renamed.");
+  notify(t("toastProjectRenamed"));
   set({ db, modal: null, editingProjectId: null });
 }
 
@@ -4985,7 +5001,7 @@ async function deleteProject() {
   if (!state.editingProjectId) return;
   const deletedId = state.editingProjectId;
   if ((state.db?.projects || []).length <= 1) {
-    notify("Keep at least one project in the workspace.");
+    notify(t("toastKeepOneProject"));
     return;
   }
 
@@ -5001,7 +5017,7 @@ async function deleteProject() {
   };
   const nextProjectId = deletedId === state.projectId ? optimisticDb.projects[0]?.id || null : state.projectId;
 
-  notify("Deleting project...");
+  notify(t("toastDeletingProject"));
   set({
     db: optimisticDb,
     modal: null,
@@ -5012,7 +5028,7 @@ async function deleteProject() {
 
   try {
     const db = await api(`/projects/${deletedId}`, { method: "DELETE" });
-    notify("Project deleted.");
+    notify(t("toastProjectDeleted"));
     set({ db });
   } catch (error) {
     notify(error.message);
@@ -5024,10 +5040,10 @@ async function generate(name) {
   if (state.generating) return;
   try {
     set({ generating: true });
-    notify("Generation queued. You can keep working while Duitok processes it.");
+    notify(t("toastGenerationQueued"));
     const db = await api(`/projects/${state.projectId}/generate`, { method: "POST", body: JSON.stringify({ action: name, step: state.step }) });
     set({ db, generating: false });
-    notify("Generation job queued.");
+    notify(t("toastGenerationJobQueued"));
     pollGenerationQueue();
   } catch (error) {
     set({ generating: false });
@@ -5045,7 +5061,7 @@ async function pollGenerationQueue(attempt = 0) {
       setTimeout(() => pollGenerationQueue(attempt + 1), 3000);
       return;
     }
-    if (!hasRunning && attempt > 0) notify("Generation queue updated.");
+    if (!hasRunning && attempt > 0) notify(t("toastGenerationQueueUpdated"));
   } catch (error) {
     notify(error.message);
   }
@@ -5071,6 +5087,25 @@ function scheduleAgentVisual(patch, delay) {
   agentVisualTimer = setTimeout(() => set(patch), delay);
 }
 
+function startAgentWorkingTimer() {
+  clearInterval(agentWorkingTimer);
+  set({ agentBusyStartedAt: Date.now(), agentWorkingTick: 0 });
+  agentWorkingTimer = setInterval(() => {
+    if (!state.agentBusy) {
+      clearInterval(agentWorkingTimer);
+      agentWorkingTimer = null;
+      return;
+    }
+    set({ agentWorkingTick: state.agentWorkingTick + 1 });
+  }, 1000);
+}
+
+function stopAgentWorkingTimer() {
+  clearInterval(agentWorkingTimer);
+  agentWorkingTimer = null;
+  set({ agentBusyStartedAt: 0, agentWorkingTick: 0 });
+}
+
 function startAgentVisual(content) {
   const taskMode = agentWorkMode(content);
   const isChatOnly = taskMode === "command";
@@ -5084,9 +5119,13 @@ function startAgentVisual(content) {
 
 function completeAgentVisual() {
   clearTimeout(agentVisualTimer);
+  clearInterval(agentWorkingTimer);
+  agentWorkingTimer = null;
   set({ agentVisualPhase: "done" });
   setTimeout(() => set({ agentVisualPhase: "returning" }), 1100);
-  setTimeout(() => set({ agentVisualPhase: "idle", agentTaskMode: "idle", agentIdleActivity: "sleep" }), 2400);
+  setTimeout(() => {
+    if (!state.agentBusy) set({ agentVisualPhase: "idle", agentTaskMode: "idle", agentIdleActivity: "sleep", agentBusyStartedAt: 0, agentWorkingTick: 0 });
+  }, 2400);
 }
 
 async function sendAgentMessage(message) {
@@ -5095,6 +5134,7 @@ async function sendAgentMessage(message) {
   const nextMessages = [...state.agentMessages, { role: "user", content }];
   rememberAgentMessages(nextMessages);
   set({ agentMessages: nextMessages, agentInput: "", agentBusy: true });
+  startAgentWorkingTimer();
   startAgentVisual(content);
   try {
     const res = await api("/agent", {
@@ -5116,7 +5156,7 @@ async function sendAgentMessage(message) {
       ...applyAgentUiActions(res.uiActions, db)
     });
     completeAgentVisual();
-    if (res.toolResults?.length) notify("Duitok Agent updated the workspace.");
+    if (res.toolResults?.length) notify(t("toastAgentWorkspaceUpdated"));
   } catch (error) {
     const messages = [...nextMessages, { role: "assistant", content: error.message }];
     rememberAgentMessages(messages);
@@ -5131,10 +5171,11 @@ async function confirmAgentAction(runId, token) {
   const run = state.agentMessages.find((item) => item.agentRun?.id === runId)?.agentRun;
   const confirmation = run?.confirmation || {};
   if (confirmation.creditsRequired) {
-    const approved = window.confirm(`这个 Agent 动作会扣 ${confirmation.creditsRequired} credits。\n当前余额：${confirmation.creditBalance ?? "未知"} credits。\n\n确认继续？`);
+    const approved = window.confirm(tf("confirmCreditDialog", { credits: confirmation.creditsRequired, balance: confirmation.creditBalance ?? "-" }));
     if (!approved) return;
   }
   set({ agentBusy: true });
+  startAgentWorkingTimer();
   try {
     const res = await api("/agent/confirm", {
       method: "POST",
@@ -5152,13 +5193,14 @@ async function confirmAgentAction(runId, token) {
       ...applyAgentUiActions(res.uiActions, db)
     });
     completeAgentVisual();
-    notify("Confirmed Agent action completed.");
+    notify(t("toastAgentConfirmCompleted"));
   } catch (error) {
     const messages = state.agentMessages.map((item) => item.agentRun?.id === runId
       ? { ...item, agentRun: { ...item.agentRun, status: "failed", confirmation: null } }
       : item);
     rememberAgentMessages(messages);
     set({ agentMessages: messages, agentBusy: false });
+    stopAgentWorkingTimer();
     notify(error.message);
   }
 }
@@ -5166,6 +5208,7 @@ async function confirmAgentAction(runId, token) {
 async function undoAgentRun(runId) {
   if (!runId || state.agentBusy) return;
   set({ agentBusy: true });
+  startAgentWorkingTimer();
   try {
     const res = await api(`/agent/runs/${runId}/undo`, { method: "POST", body: JSON.stringify({}) });
     const db = res.db || state.db;
@@ -5174,15 +5217,17 @@ async function undoAgentRun(runId) {
       : item);
     rememberAgentMessages(messages);
     set({ db, agentMessages: messages, agentBusy: false });
-    notify("Agent changes undone.");
+    stopAgentWorkingTimer();
+    notify(t("toastAgentChangesUndone"));
   } catch (error) {
     set({ agentBusy: false });
-    notify(error.message || "Undo failed.");
+    stopAgentWorkingTimer();
+    notify(error.message || t("toastUndoFailed"));
   }
 }
 
 async function topup(amount) {
-  notify("Opening secure CHIP payment page...");
+  notify(t("toastOpeningPayment"));
   const res = await api("/billing/topup", {
     method: "POST",
     body: JSON.stringify({
@@ -5197,7 +5242,7 @@ async function topup(amount) {
 async function scheduleUpdate(id) {
   const db = await api(`/schedule/${id}`, { method: "PATCH" });
   set({ db });
-  notify("Schedule status updated.");
+  notify(t("toastScheduleUpdated"));
 }
 
 async function adminUpdateUser(userId, patch) {
@@ -5223,7 +5268,7 @@ async function updateAccountProfile(patch) {
     const res = await api("/account/profile", { method: "PATCH", body: JSON.stringify(patch) });
     localStorage.setItem("duitok-user", JSON.stringify(res.user));
     set({ user: res.user, db: res.state });
-    notify("Account settings saved.");
+    notify(t("toastAccountSaved"));
   } catch (error) {
     notify(error.message);
   }
@@ -5232,7 +5277,7 @@ async function updateAccountProfile(patch) {
 async function changeAccountPassword(data) {
   try {
     await api("/account/password", { method: "PATCH", body: JSON.stringify(data) });
-    notify("Password changed.");
+    notify(t("toastPasswordChanged"));
   } catch (error) {
     notify(error.message);
   }
@@ -5243,7 +5288,7 @@ async function refreshPaymentStatus(orderId) {
   try {
     const payment = await api(`/payments/status/${encodeURIComponent(orderId)}`);
     set({ paymentReturn: payment });
-    notify(payment.status === "paid" ? "Payment confirmed. You can sign in now." : `Payment is ${payment.status}.`);
+    notify(payment.status === "paid" ? t("toastPaymentConfirmed") : tf("toastPaymentStatus", { status: payment.status }));
   } catch (error) {
     notify(error.message);
   }
@@ -5251,10 +5296,10 @@ async function refreshPaymentStatus(orderId) {
 
 async function tiktokCreatorInfo() {
   try {
-    notify("Checking TikTok creator info...");
+    notify(t("toastCheckingTiktok"));
     const res = await api("/tiktok/creator-info", { method: "POST", body: JSON.stringify({}) });
     set({ db: { ...state.db, tiktok: res.tiktok } });
-    notify("TikTok creator info updated.");
+    notify(t("toastTiktokUpdated"));
   } catch (error) {
     notify(error.message);
   }
@@ -5263,14 +5308,14 @@ async function tiktokCreatorInfo() {
 async function tiktokPublish(id) {
   const item = state.db.schedule.find((entry) => entry.id === id);
   if (!item?.mediaUrl) {
-    notify("Official TikTok post needs a public video URL on this queue item first.");
+    notify(t("toastTiktokNeedsUrl"));
     return;
   }
   try {
-    notify("Starting TikTok official post...");
+    notify(t("toastTiktokStarting"));
     const res = await api(`/tiktok/publish/${id}`, { method: "POST", body: JSON.stringify({ mediaUrl: item.mediaUrl, privacyLevel: "SELF_ONLY", isAigc: true }) });
     set({ db: res.db });
-    notify("TikTok publish started.");
+    notify(t("toastTiktokStarted"));
   } catch (error) {
     notify(error.message);
   }
@@ -5280,7 +5325,7 @@ async function tiktokStatus(id) {
   try {
     const res = await api(`/tiktok/publish/${id}/status`);
     set({ db: res.db });
-    notify(`TikTok status: ${res.publish.status}`);
+    notify(tf("toastTiktokStatus", { status: res.publish.status }));
   } catch (error) {
     notify(error.message);
   }
@@ -5322,9 +5367,9 @@ async function showPaymentReturnNotice() {
     try {
       const status = await api(`/payments/status/${encodeURIComponent(orderId)}`);
       set({ paymentReturn: status });
-      setTimeout(() => notify(status.status === "paid" ? "Payment confirmed. Sign in to Studio." : `Payment is ${status.status}. Refresh in a moment if you just paid.`), 750);
+      setTimeout(() => notify(status.status === "paid" ? t("toastPaymentConfirmed") : tf("toastPaymentStatus", { status: status.status })), 750);
     } catch {
-      setTimeout(() => notify("Payment received. Sign in after activation completes."), 750);
+      setTimeout(() => notify(t("toastPaymentConfirmed")), 750);
     }
   }
 }
