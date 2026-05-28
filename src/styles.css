@@ -15496,3 +15496,486 @@ label {
 .studio-shell .agent-page-panel .agent-run-head strong {
   color: rgba(31, 6, 38, 0.96) !important;
 }
+/* Studio Density System execution: compact operator-scale workspace. */
+.studio-shell {
+  --studio-sidebar-width: 304px;
+  --studio-page-pad-x: clamp(24px, 2.6vw, 42px);
+  --studio-page-pad-y: clamp(22px, 2.4vw, 34px);
+  --studio-section-gap: 20px;
+  --studio-card-pad: clamp(20px, 2vw, 30px);
+  --studio-card-radius: 18px;
+  --studio-inner-radius: 14px;
+  --studio-control-height: 50px;
+  --studio-button-height: 46px;
+  --studio-h1: clamp(34px, 3vw, 48px);
+  --studio-h2: clamp(22px, 2vw, 30px);
+  --studio-card-title: clamp(18px, 1.55vw, 23px);
+  --studio-body: 15px;
+  grid-template-columns: var(--studio-sidebar-width) minmax(0, 1fr) !important;
+}
+
+.studio-shell .sidebar {
+  width: var(--studio-sidebar-width) !important;
+  padding: 18px 12px !important;
+}
+
+.studio-shell .sidebar .brand-lockup {
+  min-height: 0 !important;
+  padding: 6px 8px 18px !important;
+}
+
+.studio-shell .sidebar .brand-logo-mascot {
+  width: 52px !important;
+  height: 52px !important;
+}
+
+.studio-shell .sidebar .brand-wordmark {
+  font-size: 28px !important;
+  line-height: 1 !important;
+}
+
+.studio-shell .sidebar .brand-lockup strong {
+  font-size: 11px !important;
+}
+
+.studio-shell .sidebar-language {
+  margin: 14px 0 20px !important;
+  border-radius: 15px !important;
+}
+
+.studio-shell .sidebar-language .lang-switch {
+  min-height: 50px !important;
+  padding: 0 14px !important;
+}
+
+.studio-shell .side-section {
+  gap: 8px !important;
+  padding: 6px 10px 10px !important;
+  font-size: 11px !important;
+  letter-spacing: 0.16em !important;
+}
+
+.studio-shell .side-section.account {
+  margin-top: 12px !important;
+  padding-top: 18px !important;
+}
+
+.studio-shell .side-primary,
+.studio-shell .side-link,
+.studio-shell .project-button,
+.studio-shell .new-project {
+  min-height: 48px !important;
+  margin: 5px 0 !important;
+  border-radius: 13px !important;
+  padding: 0 14px !important;
+  font-size: 15px !important;
+  line-height: 1.1 !important;
+}
+
+.studio-shell .side-primary svg,
+.studio-shell .side-link svg,
+.studio-shell .new-project svg {
+  width: 19px !important;
+  height: 19px !important;
+}
+
+.studio-shell .project-button {
+  display: grid !important;
+  grid-template-columns: 34px minmax(0, 1fr) auto !important;
+  gap: 10px !important;
+}
+
+.studio-shell .project-button svg {
+  width: 34px !important;
+  height: 34px !important;
+  padding: 6px !important;
+  border-radius: 10px !important;
+}
+
+.studio-shell .new-project {
+  min-height: 52px !important;
+  font-size: 15px !important;
+}
+
+.studio-shell .new-project b {
+  font-size: 14px !important;
+}
+
+.studio-shell .sidebar-account-panel,
+.studio-shell .sidebar-subscription-card {
+  border-radius: 16px !important;
+  padding: 12px !important;
+}
+
+.studio-shell .sidebar-account-panel {
+  gap: 12px !important;
+}
+
+.studio-shell .workspace {
+  padding: var(--studio-page-pad-y) var(--studio-page-pad-x) 64px !important;
+}
+
+.studio-shell .workspace > * {
+  max-width: min(1520px, 100%) !important;
+}
+
+.studio-shell .dashboard-head,
+.studio-shell .project-head {
+  gap: 14px !important;
+  margin-bottom: 16px !important;
+}
+
+.studio-shell .dashboard-head h1,
+.studio-shell .project-head h1,
+.studio-shell .agent-hero-copy h1 {
+  font-size: var(--studio-h1) !important;
+  line-height: 0.98 !important;
+}
+
+.studio-shell .folder-label {
+  gap: 8px !important;
+  margin-bottom: 8px !important;
+  font-size: 12px !important;
+  letter-spacing: 0.14em !important;
+}
+
+.studio-shell .subtitle {
+  max-width: 580px !important;
+  font-size: 15px !important;
+  line-height: 1.45 !important;
+}
+
+.studio-shell .sop-button {
+  min-width: 150px !important;
+  min-height: 48px !important;
+  border-radius: 16px !important;
+  padding: 0 18px !important;
+  font-size: 15px !important;
+}
+
+.studio-shell .step-tabs {
+  gap: 8px !important;
+  margin-bottom: 22px !important;
+  padding-bottom: 10px !important;
+}
+
+.studio-shell .step-tabs button {
+  min-width: 118px !important;
+  min-height: 50px !important;
+  max-width: 180px !important;
+  border-radius: 13px !important;
+  padding: 0 12px !important;
+  font-size: 14px !important;
+}
+
+.studio-shell .step-tabs button span {
+  max-width: 120px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.studio-shell .step-tabs b {
+  font-size: 11px !important;
+}
+
+.studio-shell .canvas-card {
+  min-height: 0 !important;
+  border-radius: 24px !important;
+  padding: clamp(24px, 3vw, 38px) !important;
+}
+
+.studio-shell .generator-box,
+.studio-shell .upload-card,
+.studio-shell .prompt-block,
+.studio-shell .chart-card,
+.studio-shell .next-action-card,
+.studio-shell .cost-card,
+.studio-shell .activity-card,
+.studio-shell .date-filter-card,
+.studio-shell .billing-overview-card,
+.studio-shell .billing-history-card,
+.studio-shell .credit-balance-panel,
+.studio-shell .topup-purchase-panel,
+.studio-shell .topup-history-panel,
+.studio-shell .agent-page-panel,
+.studio-shell .library-grid article,
+.studio-shell .schedule-list article,
+.studio-shell .result-grid article,
+.studio-shell .empty-result,
+.studio-shell .table div {
+  border-radius: var(--studio-card-radius) !important;
+  padding: var(--studio-card-pad) !important;
+  box-shadow: 0 12px 34px rgba(35, 8, 42, 0.055) !important;
+}
+
+.studio-shell .generator-box {
+  padding: clamp(20px, 2vw, 28px) !important;
+}
+
+.studio-shell .upload-card {
+  margin-top: 20px !important;
+  padding: clamp(20px, 2.1vw, 30px) !important;
+}
+
+.studio-shell .generator-box h2,
+.studio-shell .upload-card h2,
+.studio-shell .card-title h2,
+.studio-shell .date-filter-card h2,
+.studio-shell .topup-panel-head h2,
+.studio-shell .topup-history-panel h2,
+.studio-shell .billing-overview-card h2,
+.studio-shell .billing-history-card h2,
+.studio-shell .agent-page-panel h3 {
+  font-size: var(--studio-h2) !important;
+  line-height: 1.12 !important;
+}
+
+.studio-shell .form-grid {
+  gap: 14px !important;
+}
+
+.studio-shell label {
+  gap: 8px !important;
+  font-size: 12px !important;
+}
+
+.studio-shell input,
+.studio-shell select,
+.studio-shell textarea {
+  min-height: var(--studio-control-height) !important;
+  border-radius: 12px !important;
+  padding: 0 16px !important;
+  font-size: 15px !important;
+}
+
+.studio-shell textarea {
+  padding-top: 13px !important;
+  padding-bottom: 13px !important;
+}
+
+.studio-shell button,
+.studio-shell .dark-button,
+.studio-shell .gold-button,
+.studio-shell .mini-button {
+  min-height: var(--studio-button-height) !important;
+  border-radius: 12px !important;
+  font-size: 14px !important;
+}
+
+.studio-shell .icon-only {
+  width: 42px !important;
+  min-width: 42px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 !important;
+}
+
+.studio-shell .upload-zone,
+.studio-shell .virtualize-upload {
+  min-height: 180px !important;
+  border-radius: 16px !important;
+  padding: 22px !important;
+}
+
+.studio-shell .virtualize-upload svg,
+.studio-shell .upload-zone svg {
+  width: 38px !important;
+  height: 38px !important;
+}
+
+.studio-shell .virtualize-upload p,
+.studio-shell .upload-zone p {
+  font-size: 18px !important;
+  line-height: 1.22 !important;
+}
+
+.studio-shell .virtualize-upload small,
+.studio-shell .upload-zone small,
+.studio-shell .upload-card > p,
+.studio-shell .prompt-block p {
+  font-size: 14px !important;
+  line-height: 1.45 !important;
+}
+
+.studio-shell .dashboard-stat-grid {
+  gap: 12px !important;
+  margin-bottom: 18px !important;
+}
+
+.studio-shell .dashboard-stat-grid article,
+.studio-shell .project-status article,
+.studio-shell .metric-row article {
+  min-height: 104px !important;
+  padding: 16px !important;
+  border-radius: 14px !important;
+}
+
+.studio-shell .dashboard-stat-grid article svg {
+  width: 34px !important;
+  height: 34px !important;
+  padding: 7px !important;
+}
+
+.studio-shell .dashboard-stat-grid b,
+.studio-shell .project-status b,
+.studio-shell .metric-row strong,
+.studio-shell .topup-grid strong {
+  font-size: clamp(24px, 2.2vw, 34px) !important;
+}
+
+.studio-shell .dashboard-main-grid,
+.studio-shell .library-grid,
+.studio-shell .result-grid,
+.studio-shell .schedule-list,
+.studio-shell .cost-list,
+.studio-shell .activity-list {
+  gap: var(--studio-section-gap) !important;
+}
+
+.studio-shell .date-filter-card {
+  gap: 12px !important;
+  margin-bottom: 18px !important;
+  grid-template-columns: minmax(138px, 0.54fr) repeat(2, minmax(150px, 1fr)) minmax(102px, 0.38fr) minmax(90px, 0.34fr) !important;
+  padding: 18px 20px !important;
+}
+
+.studio-shell .date-filter-card h2 {
+  max-width: 140px !important;
+  font-size: 16px !important;
+  line-height: 1.12 !important;
+  letter-spacing: 0.12em !important;
+}
+
+.studio-shell .date-filter-card input[type="date"],
+.studio-shell .date-filter-card button {
+  min-height: 46px !important;
+  padding: 0 14px !important;
+  font-size: 14px !important;
+}
+
+.studio-shell .date-filter-card .dark-button {
+  min-width: 90px !important;
+}
+
+.studio-shell .topup-grid,
+.studio-shell .topup-package-grid,
+.studio-shell .pricing-breakdown,
+.studio-shell .credit-usage-grid {
+  gap: 12px !important;
+}
+
+.studio-shell .topup-grid button,
+.studio-shell .topup-package {
+  min-height: 96px !important;
+  padding: 16px !important;
+  border-radius: 14px !important;
+}
+
+.studio-shell .credit-balance-panel {
+  min-height: 150px !important;
+}
+
+.studio-shell .table div,
+.studio-shell .schedule-list article,
+.studio-shell .topup-history-list > div,
+.studio-shell .cost-list div,
+.studio-shell .activity-list div {
+  min-height: 54px !important;
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+}
+
+.studio-shell .library-grid {
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)) !important;
+}
+
+.studio-shell .agent-page-panel {
+  min-height: 0 !important;
+}
+
+.studio-shell .agent-page-panel header {
+  padding-bottom: 14px !important;
+}
+
+.studio-shell .agent-page-panel .agent-thread {
+  min-height: 260px !important;
+  padding: 12px 4px !important;
+}
+
+.studio-shell .agent-page-panel .agent-thread article {
+  max-width: min(760px, 92%) !important;
+  padding: 16px !important;
+  border-radius: 16px !important;
+}
+
+.studio-shell .agent-run-card,
+.studio-shell .agent-history-panel {
+  border-radius: 14px !important;
+  padding: 12px !important;
+}
+
+.studio-shell .agent-form {
+  padding: 12px !important;
+  border-radius: 18px !important;
+}
+
+.studio-shell .agent-form textarea {
+  min-height: 48px !important;
+}
+
+.studio-shell .support-bubble {
+  right: 18px !important;
+  bottom: 18px !important;
+  min-width: 150px !important;
+  height: 52px !important;
+  grid-template-columns: 34px minmax(0, 1fr) !important;
+}
+
+.studio-shell .support-bubble-icon {
+  width: 34px !important;
+  height: 34px !important;
+}
+
+.studio-shell .support-bubble-copy b {
+  font-size: 14px !important;
+}
+
+@media (max-width: 1180px) {
+  .studio-shell {
+    --studio-sidebar-width: 288px;
+  }
+}
+
+@media (max-width: 1000px) {
+  .studio-shell {
+    grid-template-columns: 1fr !important;
+  }
+
+  .studio-shell .sidebar {
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 680px) {
+  .studio-shell {
+    --studio-page-pad-x: 16px;
+    --studio-page-pad-y: 18px;
+    --studio-h1: clamp(28px, 8vw, 34px);
+  }
+
+  .studio-shell .project-head,
+  .studio-shell .dashboard-head {
+    grid-template-columns: 1fr !important;
+  }
+
+  .studio-shell .step-tabs button {
+    min-width: 112px !important;
+  }
+
+  .studio-shell .form-grid.two,
+  .studio-shell .form-grid.three,
+  .studio-shell .dashboard-main-grid,
+  .studio-shell .date-filter-card {
+    grid-template-columns: 1fr !important;
+  }
+}
