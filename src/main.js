@@ -4549,7 +4549,7 @@ function agent3DScene() {
         <img class="agent-life-render-image agent-life-render-sleep" src="/duitok-agent-stage-chat-sleep-bg.png" alt="Duitok Agent sleeping in bed">
         <span class="agent-life-route" aria-hidden="true"></span>
         <span class="agent-chair-mask" aria-hidden="true"></span>
-        <img class="agent-sprite agent-sprite-work" src="/duitok-agent-sprite-work-chair.png" alt="">
+        <img class="agent-sprite agent-sprite-work" src="/duitok-agent-sprite-work.png" alt="">
         <img class="agent-sprite agent-sprite-chat" src="/duitok-agent-sprite-chat.png" alt="">
         <span class="agent-life-bubble">${agentVisualBubble(mode, phase)}</span>
       </div>

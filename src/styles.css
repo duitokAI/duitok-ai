@@ -7729,9 +7729,9 @@ label {
 }
 
 .agent-sprite-work {
-  width: 17.2%;
-  left: 22.8%;
-  bottom: 20.1%;
+  width: 34%;
+  left: 8%;
+  bottom: 14%;
   transform-origin: 48% 78%;
 }
 
@@ -7774,6 +7774,11 @@ label {
 }
 
 .agent-life-card[data-agent-phase="chatting"] .agent-sprite-chat,
+.agent-life-card[data-agent-mode="image"][data-agent-phase="idle"] .agent-sprite-work,
+.agent-life-card[data-agent-mode="video"][data-agent-phase="idle"] .agent-sprite-work,
+.agent-life-card[data-agent-mode="copy"][data-agent-phase="idle"] .agent-sprite-work,
+.agent-life-card[data-agent-mode="schedule"][data-agent-phase="idle"] .agent-sprite-work,
+.agent-life-card[data-agent-mode="command"][data-agent-phase="idle"] .agent-sprite-work,
 .agent-life-card[data-agent-phase="working"] .agent-sprite-work,
 .agent-life-card[data-agent-phase="done"][data-agent-mode="chat"] .agent-sprite-chat,
 .agent-life-card[data-agent-phase="done"]:not([data-agent-mode="chat"]) .agent-sprite-work {
