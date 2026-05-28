@@ -11956,6 +11956,78 @@ label {
   color: var(--brand-pink) !important;
 }
 
+.public-shell .feature-mosaic {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: clamp(16px, 1.8vw, 24px);
+}
+
+.public-shell .feature-mosaic article {
+  min-height: clamp(220px, 22vw, 286px);
+  grid-template-columns: auto auto minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-areas:
+    "icon badge ."
+    "title title title"
+    "copy copy copy";
+  align-content: start;
+  align-items: start;
+  gap: 16px 12px;
+  padding: clamp(22px, 2.4vw, 34px) !important;
+}
+
+.public-shell .feature-mosaic article:nth-child(1),
+.public-shell .feature-mosaic article:nth-child(2) {
+  grid-column: span 6;
+}
+
+.public-shell .feature-mosaic article:nth-child(3),
+.public-shell .feature-mosaic article:nth-child(4),
+.public-shell .feature-mosaic article:nth-child(5) {
+  grid-column: span 4;
+}
+
+.public-shell .feature-mosaic article > svg {
+  grid-area: icon;
+  width: 42px;
+  height: 42px;
+  padding: 9px;
+  border-radius: 16px;
+  background: #fff0f5;
+  color: var(--brand-purple);
+}
+
+.public-shell .feature-mosaic span {
+  grid-area: badge;
+  justify-self: start;
+  align-self: center;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 7px 11px;
+  line-height: 1;
+  letter-spacing: 0.16em;
+}
+
+.public-shell .feature-mosaic h3 {
+  grid-area: title;
+  margin-bottom: 0;
+}
+
+.public-shell .feature-mosaic p {
+  grid-area: copy;
+  max-width: 92%;
+  margin-top: 10px;
+}
+
+@media (max-width: 920px) {
+  .public-shell .feature-mosaic {
+    grid-template-columns: 1fr;
+  }
+
+  .public-shell .feature-mosaic article:nth-child(n) {
+    grid-column: auto;
+  }
+}
+
 .public-shell .proof-strip svg,
 .public-shell .split-section .pain-list svg,
 .public-shell .workflow-steps svg,
