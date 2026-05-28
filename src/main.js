@@ -7,6 +7,7 @@ const isStudioPath = () => window.location.pathname.startsWith("/studio") || win
 const pathIs = (path) => window.location.pathname === path;
 const ownerAdminEmail = "admin@duitok.com";
 const whatsappGroupUrl = "https://chat.whatsapp.com/ERz2477U1gJFJHFsXtiMJH?mode=gi_t";
+const supportWhatsappUrl = "https://wa.me/60163100131";
 const promoCycleMs = 5 * 60 * 60 * 1000;
 let sidebarScrollTop = 0;
 let promoCountdownTimer = null;
@@ -4373,7 +4374,7 @@ async function action(event, name) {
   if (name === "new-project") return set({ modal: "newProject" });
   if (name === "sop") return set({ modal: "sop" });
   if (name === "register") return set({ modal: "register" });
-  if (name === "support") return set({ modal: "support" });
+  if (name === "support") return window.open(supportWhatsappUrl, "_blank", "noopener,noreferrer");
   if (name === "confirm-delete-project") return deleteProject();
   if (name === "refresh-payment-status") return refreshPaymentStatus(event.currentTarget.dataset.order);
   if (name === "open-home") {
