@@ -3029,23 +3029,100 @@ function modal() {
 
 function sopDashboardModal() {
   const stepCards = [
-    ["1", "Dashboard overview", "Dashboard with stats cards + filter + daily production chart", "Atas: 5 stats cards (Image / UGC / Cinema / Auto Content / Total Cost) untuk date range yang dipilih. Tengah: Filter by Date Range - set From + To + Apply. Bawah: Daily Production line chart - tunjuk activity per day."],
-    ["2", "Apa itu PROJECT?", "", "Project = bekas (folder) untuk satu client / satu campaign / satu produk. SEMUA generation korang (image, video, auto content, dll) live dalam satu project specific. History grid kat setiap tab show data project tu sahaja. Contoh: Project 'meow' - untuk client A skincare brand. Project 'Project 1' - untuk client B yoga pants. Tukar project kat sidebar = tukar context. Stats + history beralih ikut project yang aktif."],
-    ["3", "Buat New Project", "", "Sidebar atas ada button '+ New project' (orange). Tekan -> modal popup. Masukkan project name (e.g. 'Brand X Campaign Q1') -> Create. Project baru muncul kat sidebar Projects list. Limit max 4 projects per akaun (badge '2/4' tunjuk current usage). Untuk lebih, perlu hubungi admin upgrade plan.", "Naming tip: pakai nama yang specific. 'Skincare-A-Aug-Campaign' lebih clear dari 'Project 5'."],
-    ["4", "Switch antara Projects", "", "Sidebar 'PROJECTS' section senaraikan semua project korang. Tekan project name -> semua tab generation switch ke project tu. URL update ke ?view=&lt;tab&gt; dan history grid reload. Kalau project tak ada (deleted), 'Project not found' message muncul - tekan project lain dari sidebar."],
-    ["5", "Search Projects (kalau dah banyak)", "", "Search bar kat atas sidebar - type nama project untuk filter. Useful bila dah ada 10+ projects (tapi limit 4 default, jadi rare)."],
-    ["6", "Project menu (3-dot)", "", "Hover atas project name -> 3-dot menu muncul -> boleh Rename atau Delete project. Delete project = WARNING. Semua history dalam tu hilang permanently. Confirm dialog akan tanya dulu. Tak ada undo.", "Rename anytime safe. Delete cuma kalau project memang dah expired / abandoned."],
-    ["7", "Card 'IMAGE / UGC / CINEMA / AUTO CONTENT'", "", "Total count generation per asset type dalam date range yang dipilih. IMAGE - gambar yang di-generate kat Image tab. UGC - video Veo 8s/16s dari UGC tab. CINEMA - video Seedance dari Cinema tab + video Grok dari Story tab combined. AUTO CONTENT - total videos dari Auto Content batches. Click stats card (kalau interactive) -> drill down ke specific tab history."],
-    ["8", "Card 'TOTAL COST'", "", "Sum credit deducted untuk semua generation dalam date range. Format RM. Useful untuk monthly accounting / billing client.", "Untuk monthly invoice: set From=01 + To=last day of month, Apply, screenshot Total Cost."],
-    ["9", "FILTER BY DATE RANGE", "", "FROM DATE - earliest date to include. TO DATE - latest date to include. APPLY button - refresh stats with new range. Reset button - back to default (current month). KL timezone (UTC+8) - tarikh local Malaysia."],
-    ["10", "DAILY PRODUCTION chart", "", "Line chart untuk visual trend. Setiap line satu asset type (color-coded). X-axis = dates. Y-axis = count generated. '42 total in range' = jumlah keseluruhan untuk filter aktif. Click legend (Image / UGC / Cinema / Auto Content) untuk toggle line on/off.", "Useful untuk identify spike days (campaign launches) atau gap (vacation / sakit)."],
-    ["11", "Top - Logo & Dashboard button", "", "Duitok AI logo (click -> balik ke dashboard view ini). Dashboard button (active highlighted bila kat dashboard)."],
-    ["12", "+ New project (orange button)", "", "Create project baru. Badge '2/4' = current count vs max limit."],
-    ["13", "Projects list (search + project rows)", "", "Senarai semua project dengan icon folder. Click row -> switch ke project tu. Hover -> 3-dot menu (Rename / Delete)."],
-    ["14", "ACCOUNT section", "", "Billing - manage Pro plan + payment history. Top Up Credit - beli credit packages. Usage - tracking spend & activity. Saved Prompts - library prompt history. Auto Post TikTok - install Chrome extension. SOP. Join Discussion WhatsApp - community group."],
-    ["15", "CREDIT BALANCE card", "", "Current credit balance + Top Up shortcut button. Auto-refresh setiap 30 saat."],
-    ["16", "PRO · 57 DAYS LEFT badge", "", "Plan status + days till renewal. Hover atau click -> Billing page untuk manage."],
-    ["17", "User card bawah sekali", "", "Display name + email. Settings + Sign out buttons."]
+    {
+      no: "1",
+      title: "Dashboard overview",
+      subtitle: "Dashboard with stats cards + filter + daily production chart",
+      copy: "Atas: 5 stats cards (Image / UGC / Cinema / Auto Content / Total Cost) untuk date range yang dipilih. Tengah: Filter by Date Range — set From + To + Apply. Bawah: Daily Production line chart — tunjuk activity per day."
+    },
+    {
+      no: "2",
+      title: "Apa itu PROJECT?",
+      copy: "Project = bekas (folder) untuk satu client / satu campaign / satu produk. SEMUA generation korang (image, video, auto content, dll) live dalam satu project specific. History grid kat setiap tab show data project tu sahaja.",
+      bullets: ["Project 'meow' — untuk client A skincare brand", "Project 'Project 1' — untuk client B yoga pants"],
+      after: "Tukar project kat sidebar = tukar context. Stats + history beralih ikut project yang aktif."
+    },
+    {
+      no: "3",
+      title: "Buat New Project",
+      copy: "Sidebar atas ada button '+ New project' (orange). Tekan → modal popup. Masukkan project name (e.g. 'Brand X Campaign Q1') → Create. Project baru muncul kat sidebar Projects list. Limit max 4 projects per akaun (badge '2/4' tunjuk current usage). Untuk lebih, perlu hubungi admin upgrade plan.",
+      tip: "Naming tip: pakai nama yang specific. 'Skincare-A-Aug-Campaign' lebih clear dari 'Project 5'."
+    },
+    {
+      no: "4",
+      title: "Switch antara Projects",
+      copy: "Sidebar 'PROJECTS' section senaraikan semua project korang. Tekan project name → semua tab generation switch ke project tu. URL update ke ?view=&lt;tab&gt; dan history grid reload. Kalau project tak ada (deleted), 'Project not found' message muncul — tekan project lain dari sidebar."
+    },
+    {
+      no: "5",
+      title: "Search Projects (kalau dah banyak)",
+      copy: "Search bar kat atas sidebar — type nama project untuk filter. Useful bila dah ada 10+ projects (tapi limit 4 default, jadi rare)."
+    },
+    {
+      no: "6",
+      title: "Project menu (3-dot)",
+      copy: "Hover atas project name → 3-dot menu muncul → boleh Rename atau Delete project. Delete project = WARNING. Semua history dalam tu hilang permanently. Confirm dialog akan tanya dulu. Tak ada undo.",
+      tip: "Rename anytime safe. Delete cuma kalau project memang dah expired / abandoned."
+    },
+    {
+      no: "7",
+      title: "Card 'IMAGE / UGC / CINEMA / AUTO CONTENT'",
+      copy: "Total count generation per asset type dalam date range yang dipilih.",
+      bullets: ["IMAGE — gambar yang di-generate kat Image tab", "UGC — video Veo 8s/16s dari UGC tab", "CINEMA — video Seedance dari Cinema tab + video Grok dari Story tab combined", "AUTO CONTENT — total videos dari Auto Content batches"],
+      after: "Click stats card (kalau interactive) → drill down ke specific tab history."
+    },
+    {
+      no: "8",
+      title: "Card 'TOTAL COST'",
+      copy: "Sum credit deducted untuk semua generation dalam date range. Format RM. Useful untuk monthly accounting / billing client.",
+      tip: "Untuk monthly invoice: set From=01 + To=last day of month, Apply, screenshot Total Cost."
+    },
+    {
+      no: "9",
+      title: "FILTER BY DATE RANGE",
+      copy: "FROM DATE — earliest date to include. TO DATE — latest date to include. APPLY button — refresh stats with new range. Reset button — back to default (current month). KL timezone (UTC+8) — tarikh local Malaysia."
+    },
+    {
+      no: "10",
+      title: "DAILY PRODUCTION chart",
+      copy: "Line chart untuk visual trend. Setiap line satu asset type (color-coded). X-axis = dates. Y-axis = count generated. '42 total in range' = jumlah keseluruhan untuk filter aktif. Click legend (Image / UGC / Cinema / Auto Content) untuk toggle line on/off.",
+      tip: "Useful untuk identify spike days (campaign launches) atau gap (vacation / sakit)."
+    },
+    {
+      no: "11",
+      title: "Top — Logo & Dashboard button",
+      copy: "PeningLab Studio logo (click → balik ke dashboard view ini). Dashboard button (active highlighted bila kat dashboard)."
+    },
+    {
+      no: "12",
+      title: "+ New project (orange button)",
+      copy: "Create project baru. Badge '2/4' = current count vs max limit."
+    },
+    {
+      no: "13",
+      title: "Projects list (search + project rows)",
+      copy: "Senarai semua project dengan icon folder. Click row → switch ke project tu. Hover → 3-dot menu (Rename / Delete)."
+    },
+    {
+      no: "14",
+      title: "ACCOUNT section",
+      copy: "Billing — manage Pro plan + payment history. Top Up Credit — beli credit packages. Usage — tracking spend & activity. Saved Prompts — library prompt history. Auto Post TikTok — install Chrome extension. SOP. Join Discussion WhatsApp — community group."
+    },
+    {
+      no: "15",
+      title: "CREDIT BALANCE card",
+      copy: "Current credit balance + Top Up shortcut button. Auto-refresh setiap 30 saat."
+    },
+    {
+      no: "16",
+      title: "PRO · 57 DAYS LEFT badge",
+      copy: "Plan status + days till renewal. Hover atau click → Billing page untuk manage."
+    },
+    {
+      no: "17",
+      title: "User card bawah sekali",
+      copy: "Display name + email. Settings + Sign out buttons."
+    }
   ];
   const sectionLabels = {
     7: "Detail - Stats Cards & Filter",
@@ -3078,17 +3155,19 @@ function sopDashboardModal() {
           <section class="sop-guide">
             <h3>${icon("chevron-right", 28)} Cara guna</h3>
             <div class="sop-step-list">
-              ${stepCards.map(([no, title, subtitle, copy, tip]) => `
-                ${sectionLabels[no] ? `<h3 class="sop-section-heading">${sectionLabels[no]}</h3>` : ""}
+              ${stepCards.map((item) => `
+                ${sectionLabels[item.no] ? `<h3 class="sop-section-heading">${sectionLabels[item.no]}</h3>` : ""}
                 <article class="sop-step-card">
                   <div class="sop-step-title">
-                    <span>${no}</span>
-                    <h4>Step ${no} &mdash; ${title}</h4>
+                    <span>${item.no}</span>
+                    <h4>Step ${item.no} &mdash; ${item.title}</h4>
                   </div>
                   <div class="sop-step-body">
-                    ${subtitle ? `<strong>${subtitle}</strong>` : ""}
-                    <p>${copy}</p>
-                    ${tip ? `<div class="sop-tip">${icon("lightbulb", 20)} <div><b>Tip:</b><p>${tip}</p></div></div>` : ""}
+                    ${item.subtitle ? `<strong>${item.subtitle}</strong>` : ""}
+                    <p>${item.copy}</p>
+                    ${item.bullets ? `<ul>${item.bullets.map((line) => `<li>${line}</li>`).join("")}</ul>` : ""}
+                    ${item.after ? `<p>${item.after}</p>` : ""}
+                    ${item.tip ? `<div class="sop-tip">${icon("lightbulb", 20)} <div><b>Tip:</b><p>${item.tip}</p></div></div>` : ""}
                   </div>
                 </article>`).join("")}
             </div>
