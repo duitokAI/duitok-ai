@@ -82,6 +82,8 @@ const brandAssets = {
   agentModel: "/models/agent/duitok-agent.glb"
 };
 
+const mascotIcon = (className = "mascot-icon") => `<img class="${className}" src="${brandAssets.mascot}" alt="" aria-hidden="true">`;
+
 const imagePromptPresets = {
   avatar: {
     label: "Avatar",
@@ -2114,7 +2116,7 @@ function studio() {
         ${brand()}
         <div class="sidebar-language">${languageSwitch()}</div>
         <div class="side-section">${icon("layout-dashboard", 18)} Workspace</div>
-        <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard">${icon("sparkles")} ${t("dashboard")}</button>
+        <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard">${mascotIcon("nav-mascot-icon")} ${t("dashboard")}</button>
         ${isOwnerAdminAccount() ? `<button class="side-link ${state.page === "admin" ? "active" : ""}" data-page="admin">${icon("shield-check")} Admin CRM</button>` : ""}
         <button class="side-link ${state.page === "agent" ? "active" : ""}" data-page="agent">${icon("bot")} Duitok Agent</button>
         <button class="side-link ${state.page === "library" ? "active" : ""}" data-page="library">${icon("folder")} Content Library</button>
@@ -2301,7 +2303,7 @@ function dashboardOverview() {
   return `
     <header class="project-head dashboard-head">
       <div>
-        <p class="folder-label">${icon("sparkles", 18)} Dashboard</p>
+        <p class="folder-label">${mascotIcon("label-mascot-icon")} Dashboard</p>
         <h1>${t("dashboard")}</h1>
         <p class="subtitle">${t("dashboardSubtitle")}</p>
       </div>
@@ -3299,7 +3301,7 @@ function billingPage() {
     <section class="billing-experience">
       <div class="billing-plan-hero">
         <div class="billing-plan-copy">
-          <span class="billing-pill">${icon("sparkles", 20)} ${t("currentPlan")}</span>
+          <span class="billing-pill">${mascotIcon("pill-mascot-icon")} ${t("currentPlan")}</span>
           <h2>${esc(plan.replace("Duitok AI ", ""))}</h2>
           <p>${esc(status)} subscription · Renews ${esc(nextBill)}</p>
           <button class="billing-cancel-button" type="button">${t("cancelSubscription")}</button>
@@ -3607,7 +3609,7 @@ function modal() {
     export: `<p>${t("exportStarted")}</p><button class="gold-button" data-action="close-modal">${icon("check")} ${t("done")}</button>`,
     support: `<form data-form="support" class="support-form"><label>${t("supportMessage")}<textarea name="message" placeholder="${esc(t("supportPlaceholder"))}" required></textarea></label><button class="gold-button" type="submit">${icon("send")} ${t("supportTicket")}</button></form>`
   }[state.modal];
-  return `<div class="modal-backdrop" data-action="close-modal"><section class="modal"><button class="icon-only close" data-action="close-modal">${icon("x")}</button><p class="folder-label">${icon("sparkles", 18)} Duitok AI</p><h2>${title}</h2>${body}</section></div>`;
+  return `<div class="modal-backdrop" data-action="close-modal"><section class="modal"><button class="icon-only close" data-action="close-modal">${icon("x")}</button><p class="folder-label">${mascotIcon("label-mascot-icon")} Duitok AI</p><h2>${title}</h2>${body}</section></div>`;
 }
 
 function sopDashboardContent() {

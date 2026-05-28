@@ -6285,6 +6285,36 @@ label {
   filter: drop-shadow(0 12px 20px rgba(92, 0, 103, 0.14));
 }
 
+.nav-mascot-icon,
+.label-mascot-icon,
+.pill-mascot-icon {
+  flex: 0 0 auto;
+  display: inline-block;
+  object-fit: contain;
+  object-position: center;
+  pointer-events: none;
+}
+
+.nav-mascot-icon {
+  width: 30px;
+  height: 30px;
+  filter: drop-shadow(0 8px 14px rgba(255, 63, 110, 0.22));
+}
+
+.label-mascot-icon {
+  width: 22px;
+  height: 22px;
+  margin-right: 1px;
+  vertical-align: -5px;
+  filter: drop-shadow(0 6px 10px rgba(255, 63, 110, 0.18));
+}
+
+.pill-mascot-icon {
+  width: 24px;
+  height: 24px;
+  filter: drop-shadow(0 7px 12px rgba(255, 255, 255, 0.12));
+}
+
 .brand-wordmark {
   display: inline-flex;
   align-items: baseline;
