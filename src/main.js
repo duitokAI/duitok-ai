@@ -1815,22 +1815,12 @@ function brand(label = "") {
 
 function footerBrand(label = "Duitok AI") {
   const labelMarkup = label && label !== "Duitok AI" ? `<b>${label}</b>` : "";
-  const geoLinks = [
-    ["/ai-short-video-marketing-platform", "AI short-form marketing"],
-    ["/tiktok-shop-ai-video-generator", "TikTok Shop AI video"],
-    ["/ai-tiktok-affiliate-video-generator", "TikTok Affiliate AI video"],
-    ["/no-face-ai-product-video-generator", "No-face product video"],
-    ["/ai-product-promo-video-generator", "AI product promo video"]
-  ];
   return `
     <footer class="public-footer">
       <div class="footer-left">
         <span class="footer-brand"><span class="brand-core footer-brand-core" aria-label="Duitok AI"><img class="brand-logo-mascot" src="${brandAssets.mascot}" alt="" aria-hidden="true"><span class="brand-wordmark"><span>Duitok</span><span>AI</span></span></span>${labelMarkup}</span>
         <span class="footer-year">© 2026</span>
       </div>
-      <nav class="footer-geo-links" aria-label="Duitok AI use cases">
-        ${geoLinks.map(([href, text]) => `<a href="${href}">${text}</a>`).join("")}
-      </nav>
       <nav class="footer-links" aria-label="Footer">
         <a href="/terms">Terms</a>
         <a href="/privacy">Privacy</a>
@@ -2391,13 +2381,46 @@ function projectPage() {
   return `
     <header class="project-head">
       <div><p class="folder-label">${icon("folder", 18)} ${t("project")}</p><h1>${p.name}</h1></div>
-      <button class="sop-button" data-action="sop">${icon("book-open", 25)} ${t("sopImage")}</button>
+      <button class="sop-button" data-action="sop">${icon("book-open", 25)} ${sopButtonLabel()}</button>
     </header>
     <nav class="step-tabs">
       ${steps.map(([id, ic, key, no]) => `<button class="${state.step === id ? "active" : ""}" data-step="${id}">${icon(ic)} <span>${t(key)}</span><b>${no}</b></button>`).join("")}
     </nav>
     ${agentMemoryPanel(p)}
     <section class="canvas-card">${stepPanel(p)}</section>`;
+}
+
+function sopButtonLabel() {
+  const labels = {
+    ms: {
+      image: "SOP Image",
+      ugc: "SOP UGC",
+      auto: "SOP Auto Content",
+      original: "SOP Original Video",
+      clone: "SOP Clone Prompt",
+      story: "SOP Story",
+      viral: "SOP Viral"
+    },
+    zh: {
+      image: "图片 SOP",
+      ugc: "UGC SOP",
+      auto: "自动内容 SOP",
+      original: "原创视频 SOP",
+      clone: "复刻提示词 SOP",
+      story: "故事脚本 SOP",
+      viral: "爆款 SOP"
+    },
+    en: {
+      image: "Image SOP",
+      ugc: "UGC SOP",
+      auto: "Auto Content SOP",
+      original: "Original Video SOP",
+      clone: "Clone Prompt SOP",
+      story: "Story SOP",
+      viral: "Viral SOP"
+    }
+  };
+  return labels[state.lang]?.[state.step] || labels.ms[state.step] || "SOP";
 }
 
 function agentMemoryPanel(p) {
