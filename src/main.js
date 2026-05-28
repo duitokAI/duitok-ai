@@ -4743,6 +4743,12 @@ async function sendAgentMessage(message) {
 
 async function confirmAgentAction(runId, token) {
   if (!runId || !token || state.agentBusy) return;
+  const run = state.agentMessages.find((item) => item.agentRun?.id === runId)?.agentRun;
+  const confirmation = run?.confirmation || {};
+  if (confirmation.creditsRequired) {
+    const approved = window.confirm(`这个 Agent 动作会扣 ${confirmation.creditsRequired} credits。\n当前余额：${confirmation.creditBalance ?? "未知"} credits。\n\n确认继续？`);
+    if (!approved) return;
+  }
   set({ agentBusy: true });
   try {
     const res = await api("/agent/confirm", {
