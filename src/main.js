@@ -4098,7 +4098,7 @@ function chatPanel() {
       </header>
       <div class="agent-thread">
         ${intro}
-        ${state.agentMessages.map((item) => `<article class="${item.role}"><span>${item.role === "user" ? "You" : "Agent"}</span><p>${esc(item.content).replaceAll("\n", "<br>")}</p>${agentRunPanel(item.agentRun)}</article>`).join("")}
+        ${state.agentMessages.map(agentMessageArticle).join("")}
         ${state.agentBusy ? agentThinkingCard() : ""}
       </div>
       <form class="agent-form" data-form="agent">
@@ -4106,6 +4106,65 @@ function chatPanel() {
         <button class="gold-button" type="submit" ${state.agentBusy ? "disabled" : ""}>${icon(state.agentBusy ? "loader-circle" : "send")} Send</button>
       </form>
     </section>`;
+}
+
+function agentMessageArticle(item) {
+  const body = item.role === "assistant" ? agentMessageMarkdown(item.content) : `<p>${esc(item.content).replaceAll("\n", "<br>")}</p>`;
+  return `<article class="${item.role}"><span>${item.role === "user" ? "You" : "Agent"}</span><div class="agent-message">${body}</div>${agentRunPanel(item.agentRun)}</article>`;
+}
+
+function agentMessageMarkdown(content = "") {
+  const lines = esc(content).split(/\r?\n/);
+  const blocks = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i].trim();
+    if (!line) {
+      i += 1;
+      continue;
+    }
+    if (isMarkdownTable(lines, i)) {
+      const head = markdownTableCells(lines[i]);
+      const rows = [];
+      i += 2;
+      while (i < lines.length && /^\s*\|.*\|\s*$/.test(lines[i])) {
+        rows.push(markdownTableCells(lines[i]));
+        i += 1;
+      }
+      blocks.push(`<div class="agent-message-table"><table><thead><tr>${head.map((cell) => `<th>${agentInlineMarkdown(cell)}</th>`).join("")}</tr></thead><tbody>${rows.map((row) => `<tr>${row.map((cell) => `<td>${agentInlineMarkdown(cell)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`);
+      continue;
+    }
+    const listMatch = line.match(/^([-*]|\d+\.)\s+(.+)$/);
+    if (listMatch) {
+      const ordered = /^\d+\./.test(listMatch[1]);
+      const items = [];
+      while (i < lines.length) {
+        const match = lines[i].trim().match(/^([-*]|\d+\.)\s+(.+)$/);
+        if (!match || (/^\d+\./.test(match[1]) !== ordered)) break;
+        items.push(`<li>${agentInlineMarkdown(match[2])}</li>`);
+        i += 1;
+      }
+      blocks.push(`<${ordered ? "ol" : "ul"}>${items.join("")}</${ordered ? "ol" : "ul"}>`);
+      continue;
+    }
+    blocks.push(`<p>${agentInlineMarkdown(line.replace(/^#{1,4}\s+/, ""))}</p>`);
+    i += 1;
+  }
+  return blocks.join("");
+}
+
+function isMarkdownTable(lines, index) {
+  return /^\s*\|.*\|\s*$/.test(lines[index] || "") && /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(lines[index + 1] || "");
+}
+
+function markdownTableCells(line = "") {
+  return line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cell.trim());
+}
+
+function agentInlineMarkdown(value = "") {
+  return value
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
 }
 
 function agentThinkingCard() {

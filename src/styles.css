@@ -8610,6 +8610,72 @@ label {
   color: rgba(31, 6, 38, 0.82);
 }
 
+.agent-page-panel .agent-message {
+  display: grid;
+  gap: 12px;
+  color: rgba(31, 6, 38, 0.82);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.agent-page-panel .agent-message p,
+.agent-page-panel .agent-message ul,
+.agent-page-panel .agent-message ol {
+  margin: 0;
+}
+
+.agent-page-panel .agent-message ul,
+.agent-page-panel .agent-message ol {
+  display: grid;
+  gap: 6px;
+  padding-left: 22px;
+}
+
+.agent-page-panel .agent-message strong {
+  color: var(--purple);
+  font-weight: 950;
+}
+
+.agent-page-panel .agent-message code {
+  border-radius: 6px;
+  padding: 1px 6px;
+  background: rgba(93, 8, 108, 0.08);
+  color: var(--purple);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.92em;
+}
+
+.agent-message-table {
+  overflow-x: auto;
+  border: 1px solid rgba(93, 8, 108, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.agent-message-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.agent-message-table th,
+.agent-message-table td {
+  border-bottom: 1px solid rgba(93, 8, 108, 0.08);
+  padding: 10px 12px;
+  vertical-align: top;
+}
+
+.agent-message-table th {
+  background: rgba(93, 8, 108, 0.06);
+  color: rgba(31, 6, 38, 0.72);
+  font-size: 13px;
+  font-weight: 950;
+  text-align: left;
+}
+
+.agent-message-table tr:last-child td {
+  border-bottom: 0;
+}
+
 .agent-page-panel .agent-thread article.user {
   background: #fff8ec;
   border-color: rgba(244, 202, 50, 0.44);
