@@ -10603,6 +10603,185 @@ label {
   color: var(--purple);
 }
 
+/* Top up page density pass: same compact scale as Billing. */
+.studio-shell .workspace:has(.topup-experience) .project-head {
+  margin-bottom: 22px;
+}
+
+.studio-shell .workspace:has(.topup-experience) .project-head h1 {
+  font-size: clamp(46px, 5vw, 72px);
+  line-height: 0.95;
+}
+
+.studio-shell .workspace:has(.topup-experience) .project-head .subtitle {
+  font-size: clamp(16px, 1.35vw, 21px);
+}
+
+.studio-shell .workspace:has(.topup-experience) .project-head .sop-button {
+  min-height: 52px;
+  border-radius: 999px;
+  padding: 0 24px;
+  font-size: 16px;
+}
+
+.studio-shell .topup-experience {
+  gap: 22px;
+}
+
+.studio-shell .credit-balance-panel,
+.studio-shell .topup-purchase-panel,
+.studio-shell .topup-history-panel {
+  border-radius: 18px;
+  box-shadow: 0 16px 44px rgba(76, 0, 87, 0.07);
+}
+
+.studio-shell .credit-balance-panel {
+  gap: clamp(18px, 3vw, 32px);
+  min-height: 190px;
+  padding: clamp(22px, 3.2vw, 34px);
+}
+
+.studio-shell .credit-balance-panel::before {
+  width: 112px;
+  height: 112px;
+  border-radius: 28px;
+}
+
+.studio-shell .credit-balance-main {
+  gap: 14px;
+}
+
+.studio-shell .credit-balance-main > span,
+.studio-shell .topup-panel-head > span {
+  gap: 9px;
+  padding: 8px 13px;
+  font-size: 11px;
+}
+
+.studio-shell .credit-balance-main p {
+  gap: 12px;
+}
+
+.studio-shell .credit-balance-main b {
+  font-size: clamp(48px, 6vw, 76px);
+}
+
+.studio-shell .credit-balance-main em {
+  padding-bottom: 8px;
+  font-size: clamp(17px, 1.8vw, 24px);
+}
+
+.studio-shell .credit-balance-main small,
+.studio-shell .credit-usage-grid small,
+.studio-shell .topup-secure-note {
+  font-size: 13px;
+}
+
+.studio-shell .credit-usage-grid {
+  gap: 12px;
+}
+
+.studio-shell .credit-usage-grid article {
+  gap: 8px;
+  min-height: 88px;
+  border-radius: 14px;
+  padding: 18px 20px;
+}
+
+.studio-shell .credit-usage-grid span,
+.studio-shell .topup-panel-head span {
+  font-size: 11px;
+}
+
+.studio-shell .credit-usage-grid b {
+  font-size: clamp(24px, 2.7vw, 34px);
+}
+
+.studio-shell .topup-purchase-panel,
+.studio-shell .topup-history-panel {
+  padding: clamp(22px, 3vw, 34px);
+}
+
+.studio-shell .topup-panel-head {
+  gap: 18px;
+  margin-bottom: 22px;
+}
+
+.studio-shell .topup-panel-head h2,
+.studio-shell .topup-history-panel h2 {
+  font-size: clamp(25px, 2.8vw, 34px);
+}
+
+.studio-shell .topup-panel-head p {
+  margin-top: 8px;
+  font-size: 15px;
+}
+
+.studio-shell .topup-package-grid {
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.studio-shell .topup-package {
+  min-height: 108px;
+  gap: 6px;
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.studio-shell .topup-package i {
+  top: -11px;
+  right: 14px;
+  padding: 5px 11px;
+  font-size: 10px;
+}
+
+.studio-shell .topup-package strong {
+  font-size: 32px;
+}
+
+.studio-shell .topup-package span {
+  font-size: 11px;
+}
+
+.studio-shell .topup-package b {
+  font-size: 18px;
+}
+
+.studio-shell .topup-package small {
+  font-size: 12px;
+}
+
+.studio-shell .topup-pay-button {
+  min-height: 58px;
+  border-radius: 15px;
+  font-size: 18px;
+}
+
+.studio-shell .topup-secure-note {
+  margin-top: 14px;
+}
+
+.studio-shell .topup-history-panel h2 {
+  margin-bottom: 18px;
+}
+
+.studio-shell .topup-history-list > div {
+  gap: 16px;
+  min-height: 62px;
+}
+
+.studio-shell .topup-history-list time,
+.studio-shell .topup-history-list b,
+.studio-shell .topup-history-list strong {
+  font-size: 15px;
+}
+
+.studio-shell .topup-history-list .mini-button {
+  min-width: 78px;
+  min-height: 34px;
+}
+
 .payment-status {
   display: inline-flex;
   align-items: center;
