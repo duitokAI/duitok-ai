@@ -2940,7 +2940,7 @@ function resultPreview(item) {
 function accountPage() {
   const map = {
     attachments: [t("attachments"), "Upload records saved to backend.", table(state.db.attachments.map((x) => [x.name, x.kind, new Date(x.createdAt).toLocaleString()]))],
-    billing: [t("billing"), "Invoices and plan state are persisted.", `<div class="metric-row"><article><span>Plan</span><strong>${state.db.billing.plan}</strong></article><article><span>Credits</span><strong>${state.db.billing.credits}</strong></article><article><span>Next bill</span><strong>${state.db.billing.nextBill}</strong></article></div><div class="plan-grid">${[["Starter", "RM29", "For testing products"], ["Pro", "RM69", "Daily TikTok Shop creation"], ["Agency", "RM199", "Multiple brands and operators"]].map(([name, price, note]) => `<article><span>${name}</span><strong>${price}</strong><small>${note}</small></article>`).join("")}</div>${invoiceTable()}`],
+    billing: [t("billing"), "Plan, renewal, rates, and payment history.", billingPage()],
     topup: [t("topup"), "Credit purchases update the backend ledger.", topupPage()],
     affiliate: [t("affiliate"), "Manage your referral earnings and cashout.", affiliateDashboard()],
     usage: [t("usage"), "Credit usage from the backend ledger.", usagePage()],
@@ -2950,6 +2950,65 @@ function accountPage() {
   };
   const [title, subtitle, body] = map[state.page];
   return `<header class="project-head"><div><p class="folder-label">${icon("folder", 18)} ${t("publicTools")}</p><h1>${title}</h1><p class="subtitle">${subtitle}</p></div><button class="sop-button" data-action="export-all">${icon("download")} ${t("export")}</button></header><section class="canvas-card slim">${body}</section>`;
+}
+
+function billingPage() {
+  const billing = state.db.billing || {};
+  const payments = state.db.payments || [];
+  const plan = billing.plan || "Duitok AI Pro";
+  const nextBill = billing.nextBill || "22 Jun 2026";
+  const status = billing.status || "Active";
+  return `
+    <section class="billing-experience">
+      <div class="billing-plan-hero">
+        <div class="billing-plan-copy">
+          <span class="billing-pill">${icon("sparkles", 20)} Current Plan</span>
+          <h2>${esc(plan.replace("Duitok AI ", ""))}</h2>
+          <p>${esc(status)} subscription · Renews ${esc(nextBill)}</p>
+          <button class="billing-cancel-button" type="button">Cancel subscription</button>
+        </div>
+        <div class="billing-plan-metrics">
+          <article>
+            <span>Renewal</span>
+            <strong>${icon("calendar-days", 22)} ${esc(nextBill)}</strong>
+          </article>
+          <article>
+            <span>Status</span>
+            <strong><i></i>${esc(status)}</strong>
+          </article>
+          <article class="wide">
+            <span>Rates</span>
+            <strong>RM 0.20 <em>image</em><b>·</b> RM 0.40 <em>video 8s</em></strong>
+          </article>
+        </div>
+      </div>
+      <section class="billing-history-section">
+        <h2>${icon("badge-dollar-sign", 30)} Payment history</h2>
+        <div class="billing-history-table">
+          <div class="billing-history-head">
+            <span>Date</span><span>Description</span><span>Amount</span><span>Status</span>
+          </div>
+          ${payments.slice(0, 10).map(billingPaymentRow).join("") || `<p class="empty-text">No payment records yet.</p>`}
+        </div>
+      </section>
+    </section>`;
+}
+
+function billingPaymentRow(payment) {
+  const status = payment.status || "pending";
+  const credits = Number(payment.credits ?? payment.amount ?? 0);
+  const description = (payment.kind || "topup") === "subscription"
+    ? "Duitok AI Pro subscription"
+    : `Top up ${formatCreditNumber(credits)} credits`;
+  return `<div class="billing-history-row">
+    <time>${formatTopupDate(payment.createdAt)}</time>
+    <b>${esc(description)}</b>
+    <strong>RM${Number(payment.amount || 0).toFixed(2)}</strong>
+    <div class="billing-status-wrap">
+      <span class="payment-status ${esc(status)}">${icon(status === "paid" ? "check-circle-2" : "clock", 16)} ${esc(status)}</span>
+      ${status === "pending" ? `<button class="mini-button" data-action="refresh-payment-status" data-order="${esc(payment.orderId)}">${icon("refresh-cw", 15)} Check</button>` : ""}
+    </div>
+  </div>`;
 }
 
 function affiliateDashboard() {
