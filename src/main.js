@@ -2138,8 +2138,6 @@ function studio() {
           ["usage", "activity", "usage"],
           ["affiliate", "users", "affiliate"]
         ].map(([id, ic, key]) => `<button class="side-link ${state.page === id ? "active" : ""}" data-page="${id}">${icon(ic)} ${t(key)}</button>`).join("")}
-        <div class="side-section account">${icon("life-buoy", 18)} ${t("support")}</div>
-        <button class="side-link" data-action="support">${icon("ticket")} ${t("contactSupport")}</button>
         <button class="side-link ${state.page === "sop" ? "active" : ""}" data-sop-target="dashboard">${icon("book-open")} SOP</button>
         <button class="side-link ${state.page === "autopost" ? "active" : ""}" data-page="autopost">${icon("send")} ${t("autopost")}</button>
         <button class="side-link ${state.page === "whatsapp" ? "active" : ""}" data-page="whatsapp">${icon("message-circle")} ${t("whatsapp")}${icon("arrow-up-right", 14)}</button>
