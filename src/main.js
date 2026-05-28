@@ -33,7 +33,7 @@ const state = {
   user: JSON.parse(localStorage.getItem("duitok-user") || "null"),
   token: localStorage.getItem("duitok-auth") || "",
   adminKey: localStorage.getItem("duitok-admin-key") || "",
-  lang: localStorage.getItem("duitok-lang") || "ms",
+  lang: localStorage.getItem("duitok-lang") || "zh",
   db: null,
   page: "dashboard",
   step: "image",
@@ -47,6 +47,9 @@ const state = {
   chat: false,
   agentInput: "",
   agentBusy: false,
+  agentVisualPhase: "idle",
+  agentTaskMode: "idle",
+  agentIdleActivity: "sleep",
   agentMessages: JSON.parse(localStorage.getItem("duitok-agent-messages") || "[]"),
   queuePolling: false,
   langOpen: false,
@@ -57,6 +60,8 @@ const state = {
   paymentReturn: null,
   topupAmount: 50
 };
+
+let agentVisualTimer = null;
 
 const languages = [
   ["ms", "BM"],
@@ -129,7 +134,7 @@ const imagePromptPresets = {
 
 const copy = {
   ms: {
-    contentEngine: "Enjin Kandungan",
+    contentEngine: "AI Selling System",
     checkout: "Checkout",
     studio: "Studio",
     navFeatures: "Fungsi",
@@ -137,92 +142,85 @@ const copy = {
     navAffiliate: "Affiliate",
     navFaq: "FAQ",
     signIn: "Log masuk",
-    promo: "Promo RM69/bulan tamat malam ini · 13 slot pelancaran lagi",
-    heroEyebrow: "1,300+ seller Malaysia boleh hasilkan content lebih laju",
-    heroTitle: "Competitor post 10 video. Anda mula hari ini.",
-    heroTitleLead: "Kompetitor dah",
-    heroTitleHot: "post 10 video.",
-    heroTitleTail: "Anda masih fikir hook pertama.",
-    demoCta: "Tengok Demo",
-    heroCopy: "Paste link produk TikTok Shop. Duitok AI hasilkan hook, skrip UGC, caption, avatar idea dan posting plan dalam beberapa minit.",
-    startCreating: "Mula Sekarang - 2 Video FREE",
-    heroTrust1: "Built for Malaysia sellers",
+    promo: "Subscribe RM69/bulan, dapat 10 credits · Template + tutorial + platform",
+    heroEyebrow: "Sistem AI short video selling untuk mula side income",
+    heroTitle: "RM69/bulan, mula side income short video selling dengan AI",
+    heroTitleLead: "RM69/bulan, mula",
+    heroTitleHot: "side income short video selling",
+    heroTitleTail: "dengan AI",
+    demoCta: "Lihat cara kerja",
+    heroCopy: "Duitok AI beri template, tutorial SOP, product method dan pengalaman order sebenar. Ikut sistem, generate 100+ video sehari, post dan test produk dengan lebih laju.",
+    startCreating: "Subscribe RM69, dapat 10 credits",
+    heroTrust1: "AI short video selling",
     heroTrust2: "BM / 中文 / EN",
     heroTrust3: "Tak perlu tunjuk muka",
     heroTrust4: "Review dulu sebelum post",
     whatsappCta: "WhatsApp",
-    rating: "Rating 4.9",
-    sellersNow: "7 seller sedang generate",
-    guarantee: "Jaminan 30 hari",
+    rating: "RM69/bulan membership",
+    sellersNow: "Dapat 10 credits",
+    guarantee: "Image RM0.10",
+    videoPrice: "Video RM0.40",
     you: "Anda",
     competitor: "Competitor",
     oneVideo: "1 video / hari",
     tenVideos: "10 video / hari",
-    catchUp: "Duitok AI kejar dalam beberapa minit",
-    speed: "Laju",
-    speedTitle: "100 idea dalam satu sesi.",
-    speedCopy: "Generate content sebulan sementara team anda urus order.",
-    price: "Harga",
-    priceTitle: "Ringan untuk seller kecil.",
-    priceCopy: "Mula RM69/bulan, tambah credit hanya bila generate.",
-    simple: "Mudah",
-    simpleTitle: "Paste link. Pilih output. Export.",
-    simpleCopy: "Tak perlu belajar prompt engineering. Tak perlu timeline editor.",
-    sellerReality: "Realiti seller",
-    painTitle: "Content tertangguh bukan sebab malas. Sistem belum ada.",
-    painCopy: "Seller TikTok Shop perlu output harian, tapi kerja operasi selalu makan masa content.",
-    notEnoughTime: "Tak sempat shoot",
-    notEnoughTimeCopy: "Satu produk simple boleh makan separuh hari bila perlu setup, record dan ulang take.",
-    ideasDry: "Idea cepat habis",
-    ideasDryCopy: "Hook sama berulang buat video nampak penat sebelum buyer sempat percaya.",
-    scatteredTools: "Team content mahal",
-    scatteredToolsCopy: "Creator, editor dan copywriter cepat jadi kos tetap sebelum sales stabil.",
-    competitorsFaster: "Competitor lebih laju",
-    competitorsFasterCopy: "Mereka menang bukan sebab lebih kreatif sahaja, tapi sebab output lebih konsisten.",
-    advantage: "Kelebihan anda",
-    weaponsTitle: "Lima senjata content untuk seller TikTok Shop.",
+    catchUp: "Dari 2-3 video manual ke 100+ video AI",
+    speed: "Volume",
+    speedTitle: "Lebih banyak video, lebih banyak peluang view",
+    speedCopy: "Short video selling ialah game testing. Duitok bantu anda test lebih banyak produk, hook dan angle dengan cepat.",
+    price: "RM69",
+    priceTitle: "Kos kecil untuk mula mimpi side income",
+    priceCopy: "Bukan beli software sahaja. Anda beli sistem template, tutorial dan AI platform untuk mula buat short video selling.",
+    simple: "No stock",
+    simpleTitle: "Tak perlu ambil barang dari merchant",
+    simpleCopy: "Kurangkan masa shoot, pegang stok dan ulang setup produk.",
+    sellerReality: "Masalah seller biasa",
+    painTitle: "Ramai orang mahu guna AI buat duit, tapi tersangkut sebab tiada kaedah",
+    painCopy: "Masalah sebenar bukan tiada AI. Masalahnya tidak tahu pilih produk, tulis hook, susun video, prompt AI, post konsisten dan baca data.",
+    notEnoughTime: "Tak tahu pilih produk",
+    notEnoughTimeCopy: "Produk salah buat semua video susah jalan. Beginner perlukan SOP untuk pilih dan test produk, bukan sekadar idea rawak.",
+    ideasDry: "Tak tahu struktur video",
+    ideasDryCopy: "Hook, skrip, CTA dan caption tidak stabil bila semuanya dibuat ikut rasa sendiri.",
+    scatteredTools: "Guna AI pun masih blur",
+    scatteredToolsCopy: "AI umum boleh generate text, tapi tidak ajar template short video selling yang boleh diulang.",
+    competitorsFaster: "Output terlalu kecil",
+    competitorsFasterCopy: "2-3 video sehari terlalu perlahan untuk test produk, angle dan akaun. Kurang test bermaksud kurang data.",
+    advantage: "Duitok AI advantage",
+    weaponsTitle: "Anda dapat platform, template, tutorial dan pengalaman yang boleh diikuti",
     liveOutput: "Output Duitok AI",
-    outputTitle: "Bukan dashboard kosong. Ini benda yang seller terus boleh guna.",
-    outputCopy: "Setiap generate simpan rekod, boleh diedit, diexport dan nanti disambung ke auto-post TikTok selepas approval.",
-    hookTitle: "Hook BM",
-    hookSample: "Competitor dah post 10 video. Produk anda masih tunggu caption?",
+    outputTitle: "Dari product info ke 100+ video selling angle yang boleh diuji",
+    outputCopy: "Duitok AI bantu pecahkan produk kepada hook, skrip, caption, visual direction dan posting plan. Anda ikut template, generate batch, post, baca data dan ulang.",
+    hookTitle: "100+ Hook",
+    hookSample: "Satu produk boleh diuji dengan pain angle, proof angle, comparison angle dan offer angle.",
     scriptTitle: "UGC Script",
     scriptSample: "Scene 1: tunjuk masalah. Scene 2: close-up produk. Scene 3: bukti cepat. CTA: klik beg kuning.",
     captionTitle: "Caption",
-    captionSample: "Seller busy, content tetap jalan. Simpan dulu, cuba untuk produk anda hari ini.",
+    captionSample: "Caption selling yang jelas, soft-sell dan sesuai untuk audience Malaysia.",
     planTitle: "Posting Plan",
-    planSample: "Day 1 proof video, Day 2 comparison, Day 3 objection, Day 4 promo soft-sell.",
+    planSample: "Test harian untuk TikTok Affiliate, TikTok Shop, produk lokal, Reels atau Shorts.",
     howKicker: "Cara guna",
-    howTitle: "Dari product link ke content plan tanpa buka 5 tool.",
-    howCopy: "Flow dibuat supaya seller boleh repeat setiap hari, bukan hanya cantik untuk demo.",
-    how1Title: "Paste product link",
-    how1Copy: "Masukkan URL TikTok Shop atau detail produk.",
-    how2Title: "Choose content mode",
-    how2Copy: "Pilih UGC, image/avatar, clone prompt, storytelling atau viral angle.",
-    how3Title: "Generate output",
-    how3Copy: "Duitok AI hasilkan hook, skrip, caption, image state dan posting idea.",
-    how4Title: "Export atau schedule",
-    how4Copy: "Download file, simpan ke library, atau sedia untuk TikTok auto-post nanti.",
-    demoTitle: "Demo gaya TikTok Shop Malaysia.",
-    demoCopy: "Contoh dibuat untuk kategori seller sebenar: skincare, supplement, kitchenware, gadget, fashion dan home product.",
+    howTitle: "Ikut SOP dari pilih produk sampai scale angle yang jalan",
+    howCopy: "Flow dibuat untuk beginner: pilih produk, pecahkan selling point, pilih template, generate content, publish, review data dan ulang angle yang convert.",
+    demoTitle: "Contoh output yang boleh terus diuji",
+    demoCopy: "Setiap contoh menunjukkan kategori, hook, jenis output dan anggaran credit supaya pricing terasa jelas sebelum anda subscribe.",
     oldWay: "Cara lama",
     newWay: "Cara Duitok AI",
-    pricingTitle: "RM69/month untuk content engine seller kecil.",
-    pricingCopy: "Launch plan jelas: mula murah, dapat 2 Video FREE, kemudian tambah credit bila volume naik.",
-    launchOffer: "Launch offer",
-    claimPlan: "Claim plan RM69",
-    riskReversal: "30-day money-back bila setup tak sesuai dengan workflow anda.",
+    pricingTitle: "RM69/bulan ialah membership, generation guna credit",
+    pricingCopy: "RM69 ialah yuran membership bulanan untuk akses platform, template, tutorial dan SOP. Promotion sekarang: subscribe terus dapat 10 credits. Selepas itu generation guna credit: image RM0.10, video RM0.40.",
+    launchOffer: "Subscribe dapat 10 credits",
+    claimPlan: "Subscribe RM69 + 10 credits",
+    riskReversal: "Duitok AI tidak menjamin income. Result bergantung pada product, akaun, posting consistency dan execution anda.",
     controlKicker: "Trust & compliance",
-    controlTitle: "Auto-post boleh datang kemudian. Kawalan tetap di tangan anda.",
-    controlCopy: "Duitok AI bantu hasilkan output dan jadual. Final publish, claim produk dan compliance tetap perlu review manusia.",
+    controlTitle: "Kami jual peluang dan sistem, bukan janji kaya cepat",
+    controlCopy: "Ada pelajar ikut tutorial dan guna platform kami lalu capai RM1000+ pada minggu pertama. Ini case sebenar, bukan jaminan untuk semua orang. Result bergantung pada produk, akaun, content, data dan execution.",
     startNow: "Mula sekarang",
-    registerTitle: "Register dan aktif dalam satu minit.",
-    registerCopy: "Register, bayar melalui CHIP, kemudian login ke Studio selepas bayaran berjaya.",
+    registerTitle: "Mula dengan RM69, bina mesin short video selling anda",
+    registerCopy: "Register, bayar melalui CHIP, kemudian masuk Studio untuk ikut template dan generate video batch pertama.",
     fullName: "Nama penuh",
     email: "Email",
     password: "Password",
     continueRegistration: "Teruskan ke registration",
-    faqTitle: "Soalan seller sebelum mula.",
+    faqTitle: "Soalan seller sebelum mula",
     dashboard: "Dashboard",
     newProject: "New project",
     search: "Cari",
@@ -275,7 +273,7 @@ const copy = {
     support: "Support"
   },
   zh: {
-    contentEngine: "内容引擎",
+    contentEngine: "AI 带货系统",
     checkout: "结账",
     studio: "工作台",
     navFeatures: "功能",
@@ -283,92 +281,85 @@ const copy = {
     navAffiliate: "联盟",
     navFaq: "FAQ",
     signIn: "登录",
-    promo: "RM69/月限时优惠今晚结束 · 还剩 13 个名额",
-    heroEyebrow: "1,300+ 马来西亚卖家正在加速内容生产",
-    heroTitle: "竞争对手一天发 10 条，你今天就开始追上。",
-    heroTitleLead: "竞争对手已经",
-    heroTitleHot: "发了 10 条视频。",
-    heroTitleTail: "你还在想第一句 hook。",
-    demoCta: "查看 Demo",
-    heroCopy: "粘贴 TikTok Shop 产品链接。Duitok AI 在几分钟内生成 hook、UGC 脚本、caption、avatar 想法和发布计划。",
-    startCreating: "现在开始 - 免费生成 2 条",
-    heroTrust1: "为马来西亚卖家设计",
+    promo: "现在订阅 RM69/月，送 10 credits · 模板 + 教程 + 平台",
+    heroEyebrow: "想用 AI 做副业？从短视频带货开始。",
+    heroTitle: "RM69/月，用 AI 开始短视频带货副业",
+    heroTitleLead: "RM69/月，用 AI 开始",
+    heroTitleHot: "短视频带货副业",
+    heroTitleTail: "",
+    demoCta: "看看如何运作",
+    heroCopy: "不懂选品、不懂拍摄、不懂剪辑，也可以跟着 Duitok 的模板和教程，用 AI 一天生成 100+ 条带货视频，快速测试产品和内容。",
+    startCreating: "订阅 RM69，拿 10 credits",
+    heroTrust1: "AI 短视频带货系统",
     heroTrust2: "BM / 中文 / EN",
     heroTrust3: "无需露脸",
     heroTrust4: "发布前人工确认",
     whatsappCta: "WhatsApp",
-    rating: "4.9 评分",
-    sellersNow: "7 个卖家正在生成",
-    guarantee: "30 天保障",
+    rating: "RM69/月会员费",
+    sellersNow: "订阅送 10 credits",
+    guarantee: "图片 RM0.10",
+    videoPrice: "视频 RM0.40",
     you: "你",
     competitor: "竞争对手",
     oneVideo: "1 条 / 天",
     tenVideos: "10 条 / 天",
-    catchUp: "Duitok AI 几分钟内帮你追上",
-    speed: "速度",
-    speedTitle: "一次生成 100 个想法。",
-    speedCopy: "团队处理订单时，你可以生成一个月内容。",
-    price: "价格",
-    priceTitle: "小卖家也负担得起。",
-    priceCopy: "RM69/月开始，需要生成时再加 credit。",
-    simple: "简单",
-    simpleTitle: "粘贴链接，选择输出，导出。",
-    simpleCopy: "不用学 prompt，不用剪辑时间线。",
-    sellerReality: "卖家现实",
-    painTitle: "内容拖延不是你懒，是你还没有系统。",
-    painCopy: "TikTok Shop 卖家每天都需要内容，但打包、客服、库存和供应商已经吃掉大部分时间。",
-    notEnoughTime: "没时间拍",
-    notEnoughTimeCopy: "一个简单产品也要布景、拍摄、重拍，半天很快就没了。",
-    ideasDry: "想法很快枯竭",
-    ideasDryCopy: "重复同一个 hook，视频还没卖货就先显得疲惫。",
-    scatteredTools: "内容团队太贵",
-    scatteredToolsCopy: "creator、剪辑、文案都会变成固定成本，销量还没稳定前压力很大。",
-    competitorsFaster: "竞争对手更快",
-    competitorsFasterCopy: "他们赢不只是因为更有创意，而是更新数量更稳定。",
-    advantage: "你的优势",
-    weaponsTitle: "TikTok Shop 卖家的五个内容武器。",
+    catchUp: "从手工 2-3 条，升级到 AI 100+ 条",
+    speed: "数量优势",
+    speedTitle: "更多影片发布，代表更多浏览量机会",
+    speedCopy: "短视频带货是测试游戏。Duitok AI 帮你快速测试更多产品、hook 和角度。",
+    price: "RM69",
+    priceTitle: "用小成本开始一个副业梦想",
+    priceCopy: "你买的不是一个按钮，而是一套模板、教程和 AI 平台组成的短视频带货系统。",
+    simple: "不用拿货",
+    simpleTitle: "不用再跟商家拿产品拍摄",
+    simpleCopy: "减少拿货、布景、拍摄、剪辑这些最浪费时间的环节。",
+    sellerReality: "新手真正卡住的地方",
+    painTitle: "很多人想用 AI 赚钱，却不知道怎么开始",
+    painCopy: "因为他们缺的不是 AI，而是一套可以跟着执行的带货方法：选品、hook、视频结构、发布频率和复盘逻辑。",
+    notEnoughTime: "不知道选什么产品",
+    notEnoughTimeCopy: "产品选错，视频再多也很难跑。新手需要选品 SOP，而不是自己乱猜。",
+    ideasDry: "不知道视频怎么开头",
+    ideasDryCopy: "Hook、脚本、CTA、caption 没有结构，视频看起来就像随机生成。",
+    scatteredTools: "自己用 AI 也不会做",
+    scatteredToolsCopy: "普通 AI 只会回答问题，不会告诉你短视频带货应该套什么模板、怎么发布、怎么复盘。",
+    competitorsFaster: "每天只做 2-3 条",
+    competitorsFasterCopy: "发得太少，测试不出爆款产品和爆款视频，也没有足够数据优化。",
+    advantage: "为什么用 Duitok",
+    weaponsTitle: "你拿到的不是一个工具，而是一整套 AI 带货执行包",
     liveOutput: "Duitok AI 输出",
-    outputTitle: "不是空 dashboard，而是卖家马上能用的素材。",
-    outputCopy: "每次生成都会保存记录，可以编辑、导出，后续 TikTok auto-post 审批通过后继续接上。",
-    hookTitle: "中文 / BM Hook",
-    hookSample: "竞争对手已经发 10 条视频，你的产品还在等 caption？",
+    outputTitle: "一个产品，也能拆出 100+ 个带货角度",
+    outputCopy: "Duitok AI 把产品拆成 hook、脚本、caption、视觉方向和发布计划，让你按模板生成、发布、看数据、复制有效内容。",
+    hookTitle: "100+ Hook",
+    hookSample: "同一个产品，可以测试痛点角度、证明角度、对比角度、优惠角度。",
     scriptTitle: "UGC 脚本",
     scriptSample: "镜头 1：展示痛点。镜头 2：产品 close-up。镜头 3：快速证明。CTA：点击小黄车。",
     captionTitle: "Caption",
-    captionSample: "卖家再忙，内容也可以继续跑。先收藏，今天试一个产品。",
+    captionSample: "适合短视频带货的 soft-sell caption，让内容更像真实推荐。",
     planTitle: "发布计划",
-    planSample: "Day 1 证明视频，Day 2 对比，Day 3 处理疑虑，Day 4 soft-sell 促销。",
+    planSample: "适合 TikTok Affiliate、TikTok Shop、产品推广、Reels 和 Shorts 持续测试。",
     howKicker: "使用流程",
-    howTitle: "从产品链接到内容计划，不用打开 5 个工具。",
-    howCopy: "流程是为了卖家每天重复使用，不只是做一个好看的 demo。",
-    how1Title: "粘贴产品链接",
-    how1Copy: "输入 TikTok Shop URL 或产品信息。",
-    how2Title: "选择内容模式",
-    how2Copy: "选择 UGC、图片/avatar、复刻 prompt、故事脚本或爆款角度。",
-    how3Title: "生成输出",
-    how3Copy: "Duitok AI 生成 hook、脚本、caption、图片状态和发布想法。",
-    how4Title: "导出或排程",
-    how4Copy: "下载文件、保存到素材库，或为后续 TikTok auto-post 做准备。",
-    demoTitle: "马来西亚 TikTok Shop 风格 Demo。",
-    demoCopy: "示例覆盖真实卖家类目：skincare、supplement、kitchenware、gadget、fashion 和 home product。",
+    howTitle: "跟着 SOP，从选品做到复盘放大",
+    howCopy: "流程是给新手设计的：选产品、拆卖点、套模板、生成内容、发布测试、看数据后复制有效角度。",
+    demoTitle: "可以直接测试的输出样例",
+    demoCopy: "每个样例都写清楚类目、hook、生成类型和预计成本，让你订阅前就理解平台怎么帮你做内容。",
     oldWay: "旧方法",
     newWay: "Duitok AI 方法",
-    pricingTitle: "RM69/month，给小卖家的内容引擎。",
-    pricingCopy: "启动计划清楚：低成本开始，包含 2 Video FREE，后续内容量上来再加 credit。",
-    launchOffer: "启动优惠",
-    claimPlan: "领取 RM69 计划",
-    riskReversal: "如果不适合你的工作流，30 天内可申请退款。",
+    pricingTitle: "RM69/月是会员费，不是无限生成包",
+    pricingCopy: "RM69 是每月会员费，用来开通平台、模板、教程和 SOP。现在 promotion：订阅就送 10 credits。之后生成按 credit 扣费：图片 RM0.10，视频 RM0.40。",
+    launchOffer: "订阅送 10 credits",
+    claimPlan: "订阅 RM69 + 拿 10 credits",
+    riskReversal: "Duitok AI 不保证收益。结果取决于选品、账号、发布频率、内容质量和执行力。",
     controlKicker: "信任与合规",
-    controlTitle: "Auto-post 可以后续接，但控制权必须在你手里。",
-    controlCopy: "Duitok AI 帮你生成内容和计划。最终发布、产品宣称和合规，仍然需要人工确认。",
+    controlTitle: "我们卖的是机会和系统，不是暴富承诺",
+    controlCopy: "已有学员根据我们的教程和平台执行，第一个星期赚到 RM1000+。这不是保证每个人都有同样结果，但证明模板、方法、平台和执行量结合起来，是有机会跑出结果的。",
     startNow: "现在开始",
-    registerTitle: "一分钟注册并激活。",
-    registerCopy: "注册后通过 CHIP 付款，付款成功后即可登录 Studio。",
+    registerTitle: "用 RM69 开始，建立你的 AI 短视频带货机器",
+    registerCopy: "注册后通过 CHIP 付款，付款成功后即可进入 Studio，跟着模板和教程生成第一批带货视频。",
     fullName: "姓名",
     email: "邮箱",
     password: "密码",
     continueRegistration: "继续注册",
-    faqTitle: "卖家开始前常问的问题。",
+    faqTitle: "卖家开始前常问的问题",
     dashboard: "总控",
     newProject: "新项目",
     search: "搜索",
@@ -421,7 +412,7 @@ const copy = {
     support: "客服"
   },
   en: {
-    contentEngine: "Content Engine",
+    contentEngine: "AI Selling System",
     checkout: "Checkout",
     studio: "Studio",
     navFeatures: "Features",
@@ -429,92 +420,85 @@ const copy = {
     navAffiliate: "Affiliate",
     navFaq: "FAQ",
     signIn: "Sign in",
-    promo: "Promo RM69/month ends tonight · 13 launch slots left",
-    heroEyebrow: "1,300+ Malaysia sellers can scale content faster",
-    heroTitle: "Competitors post 10 videos. You start today.",
-    heroTitleLead: "Your competitor",
-    heroTitleHot: "posted 10 videos.",
-    heroTitleTail: "You are still writing the first hook.",
-    demoCta: "View Demo",
-    heroCopy: "Paste a TikTok Shop product link. Duitok AI generates hooks, UGC scripts, captions, avatar ideas, and posting plans in minutes.",
-    startCreating: "Start Now - 2 Videos FREE",
-    heroTrust1: "Built for Malaysia sellers",
+    promo: "Subscribe at RM69/month, get 10 credits · Templates + tutorials + platform",
+    heroEyebrow: "An AI short-video selling system for side-income beginners",
+    heroTitle: "RM69/month to start short-video selling with AI",
+    heroTitleLead: "RM69/month to start",
+    heroTitleHot: "short-video selling",
+    heroTitleTail: "with AI",
+    demoCta: "See how it works",
+    heroCopy: "Duitok AI gives you templates, SOP tutorials, product methods, and real order experience. Follow the system, generate 100+ videos a day, publish, and test faster.",
+    startCreating: "Subscribe RM69, get 10 credits",
+    heroTrust1: "AI short-video selling",
     heroTrust2: "BM / 中文 / EN",
     heroTrust3: "No need to show face",
     heroTrust4: "Review before posting",
     whatsappCta: "WhatsApp",
-    rating: "4.9 rating",
-    sellersNow: "7 sellers generating now",
-    guarantee: "30-day guarantee",
+    rating: "RM69/month membership",
+    sellersNow: "Get 10 credits",
+    guarantee: "Image RM0.10",
+    videoPrice: "Video RM0.40",
     you: "You",
     competitor: "Competitor",
     oneVideo: "1 video / day",
     tenVideos: "10 videos / day",
-    catchUp: "Duitok AI catches up in minutes",
-    speed: "Speed",
-    speedTitle: "100 ideas in one sitting.",
-    speedCopy: "Generate a full content month while your team handles orders.",
-    price: "Price",
-    priceTitle: "Lean enough for small sellers.",
-    priceCopy: "Start from RM69/month, then top up credits only when you generate.",
-    simple: "Simple",
-    simpleTitle: "Paste link. Choose output. Export.",
-    simpleCopy: "No prompt engineering course. No editor timeline.",
-    sellerReality: "Seller reality",
-    painTitle: "Content is delayed because the system is missing.",
-    painCopy: "TikTok Shop sellers need daily output, but operations keep swallowing the time meant for content.",
-    notEnoughTime: "No time to shoot",
-    notEnoughTimeCopy: "One simple product becomes a half-day task once you set up, record, and retake.",
-    ideasDry: "Ideas run out fast",
-    ideasDryCopy: "Repeating the same hook makes content feel tired before buyers trust you.",
-    scatteredTools: "Content teams cost too much",
-    scatteredToolsCopy: "Creators, editors, and copywriters become fixed costs before sales are stable.",
-    competitorsFaster: "Competitors move faster",
-    competitorsFasterCopy: "They win because their output is more consistent, not just more creative.",
-    advantage: "Your advantage",
-    weaponsTitle: "Five content weapons for TikTok Shop sellers.",
+    catchUp: "From 2-3 manual videos to 100+ AI videos",
+    speed: "Volume",
+    speedTitle: "More videos means more chances to earn views",
+    speedCopy: "Short-video selling is a testing game. Duitok helps you test more products, hooks, and angles faster.",
+    price: "RM69",
+    priceTitle: "A small cost to start a side-income dream",
+    priceCopy: "You are not buying just a software button. You are buying templates, tutorials, and an AI platform for short-video selling.",
+    simple: "No stock",
+    simpleTitle: "No need to request products from merchants",
+    simpleCopy: "Reduce the time lost to stock handling, setup, filming, and editing.",
+    sellerReality: "Where beginners get stuck",
+    painTitle: "Many people want to earn with AI, but do not know where to start",
+    painCopy: "The real problem is not lack of AI. It is lack of a repeatable selling method: products, hooks, video structure, posting rhythm, and review.",
+    notEnoughTime: "No product-selection method",
+    notEnoughTimeCopy: "The wrong product makes every video harder to sell. Beginners need a product SOP, not random guessing.",
+    ideasDry: "No video structure",
+    ideasDryCopy: "Hooks, scripts, CTAs, and captions feel random when there is no proven template.",
+    scatteredTools: "Generic AI is still confusing",
+    scatteredToolsCopy: "Normal AI can generate text, but it does not teach what selling template to use, how to post, or how to review data.",
+    competitorsFaster: "Only 2-3 videos/day",
+    competitorsFasterCopy: "Too little output means too little testing data to find winning products and videos.",
+    advantage: "Why Duitok",
+    weaponsTitle: "You get more than a tool: a complete AI selling execution pack",
     liveOutput: "Duitok AI output",
-    outputTitle: "Not an empty dashboard. Output sellers can actually use.",
-    outputCopy: "Every generation is stored, editable, exportable, and ready for TikTok auto-post once approval is complete.",
-    hookTitle: "Hook",
-    hookSample: "Your competitor already posted 10 videos. Is your product still waiting for a caption?",
+    outputTitle: "Turn one product into 100+ testable selling angles",
+    outputCopy: "Duitok AI breaks products into hooks, scripts, captions, visual directions, and posting plans so you can follow templates, publish, read data, and repeat what works.",
+    hookTitle: "100+ Hooks",
+    hookSample: "Test pain angles, proof angles, comparison angles, and offer angles from the same product.",
     scriptTitle: "UGC Script",
     scriptSample: "Scene 1: show the problem. Scene 2: product close-up. Scene 3: quick proof. CTA: tap the yellow bag.",
     captionTitle: "Caption",
-    captionSample: "Busy seller, content still moving. Save this and test one product today.",
+    captionSample: "Soft-sell captions for short-video commerce that feel like real recommendations.",
     planTitle: "Posting Plan",
-    planSample: "Day 1 proof video, Day 2 comparison, Day 3 objection, Day 4 soft-sell promo.",
+    planSample: "Use it for TikTok Affiliate, TikTok Shop, product promos, Reels, Shorts, and other selling channels.",
     howKicker: "How it works",
-    howTitle: "From product link to content plan without opening five tools.",
-    howCopy: "The flow is designed for sellers to repeat daily, not just to look good in a demo.",
-    how1Title: "Paste product link",
-    how1Copy: "Add a TikTok Shop URL or product details.",
-    how2Title: "Choose content mode",
-    how2Copy: "Pick UGC, image/avatar, clone prompt, storytelling, or viral angle.",
-    how3Title: "Generate output",
-    how3Copy: "Duitok AI creates hooks, scripts, captions, image states, and posting ideas.",
-    how4Title: "Export or schedule",
-    how4Copy: "Download files, save to library, or prepare for TikTok auto-post later.",
-    demoTitle: "Malaysia TikTok Shop demo styles.",
-    demoCopy: "Examples are shaped around real seller categories: skincare, supplement, kitchenware, gadget, fashion, and home product.",
+    howTitle: "Follow the SOP from product choice to scaling winning angles",
+    howCopy: "The flow is built for beginners: choose a product, break down selling points, pick templates, generate content, publish, review data, and repeat what works.",
+    demoTitle: "Output examples you can test directly",
+    demoCopy: "Each sample shows the category, hook, output type, and estimated cost so the credit model is clear before you subscribe.",
     oldWay: "Old way",
     newWay: "Duitok AI way",
-    pricingTitle: "RM69/month content engine for lean sellers.",
-    pricingCopy: "Clear launch plan: start low, get 2 Videos FREE, then add credits as volume grows.",
-    launchOffer: "Launch offer",
-    claimPlan: "Claim RM69 plan",
-    riskReversal: "30-day money-back if the setup does not fit your workflow.",
+    pricingTitle: "RM69/month is membership, generation uses credits",
+    pricingCopy: "RM69 is the monthly membership fee for platform access, templates, tutorials, and SOP. Current promotion: subscribe and get 10 credits. After that, generation uses credits: RM0.10 per image and RM0.40 per video.",
+    launchOffer: "Subscribe and get 10 credits",
+    claimPlan: "Subscribe RM69 + get 10 credits",
+    riskReversal: "Duitok AI does not guarantee income. Results depend on product choice, account quality, posting frequency, content quality, and execution.",
     controlKicker: "Trust & compliance",
-    controlTitle: "Auto-post can come later. You stay in control.",
-    controlCopy: "Duitok AI helps create output and schedules. Final publishing, product claims, and compliance still need human review.",
+    controlTitle: "We sell the opportunity and system, not a get-rich promise",
+    controlCopy: "Some students followed our tutorials and used our platform to earn RM1000+ in their first week. This is not a guarantee for everyone, but it proves that templates, methods, platform, and execution volume matter.",
     startNow: "Start now",
-    registerTitle: "Register and activate in one minute.",
-    registerCopy: "Register, pay securely with CHIP, then sign in to Studio after payment succeeds.",
+    registerTitle: "Start with RM69 and build your AI short-video selling machine",
+    registerCopy: "Register, pay securely with CHIP, then enter Studio to follow templates and generate your first batch of selling videos.",
     fullName: "Full name",
     email: "Email",
     password: "Password",
     continueRegistration: "Continue to registration",
-    faqTitle: "Questions sellers ask before starting.",
+    faqTitle: "Questions sellers ask before starting",
     dashboard: "Dashboard",
     newProject: "New project",
     search: "Search",
@@ -568,7 +552,12 @@ const copy = {
   }
 };
 
-const t = (key) => copy[state.lang]?.[key] || copy.en[key] || key;
+const t = (key) => {
+  const current = copy[state.lang] || copy.en;
+  if (Object.prototype.hasOwnProperty.call(current, key)) return current[key];
+  if (Object.prototype.hasOwnProperty.call(copy.en, key)) return copy.en[key];
+  return key;
+};
 
 function languageSwitch() {
   const current = languages.find(([id]) => id === state.lang) || languages[0];
@@ -584,7 +573,14 @@ function languageSwitch() {
 }
 
 function heroTitleMarkup() {
-  return `<span>${t("heroTitleLead")}</span><mark>${t("heroTitleHot")}</mark><span>${t("heroTitleTail")}</span>`;
+  return [
+    ["span", t("heroTitleLead")],
+    ["mark", t("heroTitleHot")],
+    ["span", t("heroTitleTail")]
+  ]
+    .filter(([, text]) => String(text || "").trim())
+    .map(([tag, text]) => `<${tag}>${text}</${tag}>`)
+    .join("");
 }
 
 const icon = (name, size = 20) => `<i data-lucide="${name}" style="width:${size}px;height:${size}px"></i>`;
@@ -729,8 +725,8 @@ function publicSite() {
           </div>
         </div>
         <div class="generation-panel">
-          <span>${icon("link", 15)} TikTok Shop URL</span>
-          <b>duitok.my/product/ugc-kit</b>
+          <span>${icon("link", 15)} ${heroPanelContent().label}</span>
+          <b>${heroPanelContent().title}</b>
           <div class="generation-meter"><i></i></div>
           <small>${icon("zap", 14)} ${t("catchUp")}</small>
         </div>
@@ -745,13 +741,21 @@ function publicSite() {
         <article>${icon("star", 18)} <b>${t("rating")}</b></article>
         <article>${icon("radio", 18)} <b>${t("sellersNow")}</b></article>
         <article>${icon("badge-check", 18)} <b>${t("guarantee")}</b></article>
-        <article>${icon("wallet-cards", 18)} <b>RM69/month</b></article>
+        <article>${icon("wallet-cards", 18)} <b>${t("videoPrice")}</b></article>
       </section>
       <section class="split-section">
         <div><p class="eyebrow">${t("sellerReality")}</p><h2>${t("painTitle")}</h2><p>${t("painCopy")}</p></div>
         <div class="pain-list">
           ${painCards()}
         </div>
+      </section>
+      <section class="system-section">
+        <div>
+          <p class="eyebrow">${whyDuitokContent().kicker}</p>
+          <h2>${whyDuitokContent().title}</h2>
+          <p>${whyDuitokContent().copy}</p>
+        </div>
+        <div class="system-grid">${whyDuitokCards()}</div>
       </section>
       <section class="output-preview-section">
         <div>
@@ -766,6 +770,7 @@ function publicSite() {
           <p class="eyebrow">${t("howKicker")}</p>
           <h2>${t("howTitle")}</h2>
           <p>${t("howCopy")}</p>
+          <button class="gold-button section-cta" data-action="open-register">${icon("sparkles")} ${t("startCreating")}</button>
         </div>
         <div class="workflow-steps">${workflowSteps()}</div>
       </section>
@@ -773,18 +778,15 @@ function publicSite() {
         <p class="eyebrow">${t("advantage")}</p>
         <h2>${t("weaponsTitle")}</h2>
         <div class="feature-mosaic">
-          ${featureCard("STOP THE PANIC", "10 days of content in one click.", "Let the AI plan hooks, scripts, captions, CTAs, and batch angles before your next campaign starts.", "calendar-check")}
-          ${featureCard("PROTECT IDENTITY", "Use avatar-first UGC.", "Create creator-style scripts and assets without turning your own face into the brand.", "user-round")}
-          ${featureCard("FAST OUTPUT", "From product link to post idea.", "Move from product URL to ready content angles in minutes, not meetings.", "zap")}
-          ${featureCard("REVERSE ENGINEER", "Decode viral references.", "Turn competitor patterns into your own product-safe hook structure.", "scan-search")}
-          ${featureCard("SLEEP MODE", "Plan while the shop runs.", "Prepare posting schedules and exportable content batches for the week ahead.", "moon")}
+          ${featureMosaicCards()}
         </div>
       </section>
       <section id="demo" class="demo-section">
         <div>
-          <p class="eyebrow">TikTok Shop Demo</p>
+          <p class="eyebrow">${demoKickerContent()}</p>
           <h2>${t("demoTitle")}</h2>
           <p>${t("demoCopy")}</p>
+          <button class="gold-button section-cta" data-action="open-register">${icon("credit-card")} ${t("claimPlan")}</button>
         </div>
         <div class="demo-reel">
           ${demoGalleryCards()}
@@ -792,21 +794,41 @@ function publicSite() {
       </section>
       <section class="comparison-section">
         <p class="eyebrow">Manual vs Duitok AI</p>
-        <h2>The old workflow burns days. The new one compresses decisions.</h2>
+        <h2>${comparisonContent().title}</h2>
         <div class="compare-grid">
-          <article><span>${t("oldWay")}</span><h3>Manual production</h3><ul><li>Find creator or shoot yourself</li><li>Write script and brief</li><li>Edit, revise, caption manually</li><li>Repeat again tomorrow</li></ul></article>
-          <article class="winner"><span>${t("newWay")}</span><h3>AI-assisted content engine</h3><ul><li>Paste product link</li><li>Pick image, UGC, clone, or story mode</li><li>Generate batch-ready outputs</li><li>Export or continue inside Studio</li></ul></article>
+          <article><span>${t("oldWay")}</span><h3>${comparisonContent().oldTitle}</h3><ul>${comparisonContent().oldBullets.map((item) => `<li>${item}</li>`).join("")}</ul></article>
+          <article class="winner"><span>${t("newWay")}</span><h3>${comparisonContent().newTitle}</h3><ul>${comparisonContent().newBullets.map((item) => `<li>${item}</li>`).join("")}</ul></article>
         </div>
       </section>
-      <section class="testimonial-section">
-        <p class="eyebrow">Real seller style feedback</p>
-        <h2>Built for sellers who need output, not another complicated dashboard.</h2>
-        <div class="quote-grid">
-          ${quote("Feels like a small content team inside one tab.", "Aina R.", "Skincare seller")}
-          ${quote("The Malay hooks are the part I needed most. Faster than briefing a freelancer.", "Faizul A.", "Supplement brand")}
-          ${quote("Clone mode makes competitor research useful instead of stressful.", "Nadia M.", "Fashion seller")}
-          ${quote("I can plan a week of content before lunch.", "Hafiz Z.", "Gadget seller")}
+      <section class="case-section">
+        <div>
+          <p class="eyebrow">${studentCaseContent().kicker}</p>
+          <h2>${studentCaseContent().title}</h2>
+          <p>${studentCaseContent().copy}</p>
+          <p class="risk-note">${studentCaseContent().note}</p>
         </div>
+        <article class="case-card">
+          <span>${studentCaseContent().badge}</span>
+          <b>RM1000+</b>
+          <p>${studentCaseContent().cardCopy}</p>
+          <ul>${studentCaseContent().bullets.map((item) => `<li>${item}</li>`).join("")}</ul>
+        </article>
+      </section>
+      <section class="testimonial-section dream-section">
+        <p class="eyebrow">${dreamContent().kicker}</p>
+        <h2>${dreamContent().title}</h2>
+        <p>${dreamContent().copy}</p>
+        <div class="quote-grid">
+          ${dreamCards()}
+        </div>
+      </section>
+      <section class="scenario-section">
+        <div>
+          <p class="eyebrow">${scenarioContent().kicker}</p>
+          <h2>${scenarioContent().title}</h2>
+          <p>${scenarioContent().copy}</p>
+        </div>
+        <div class="scenario-grid">${scenarioCards()}</div>
       </section>
       <section id="pricing" class="pricing-section">
         <div><p class="eyebrow">${t("navPricing")}</p><h2>${t("pricingTitle")}</h2><p>${t("pricingCopy")}</p></div>
@@ -814,7 +836,9 @@ function publicSite() {
           <span>${t("launchOffer")}</span>
           <img class="price-brand-mark" src="${brandAssets.mascot}" alt="" aria-hidden="true">
           <h3>Duitok AI Pro</h3>
-          <div class="price"><s>RM300</s><b>RM69</b><small>/month</small></div>
+          <div class="price"><s>RM300</s><b>RM69</b><small>${pricePeriodContent().period}</small></div>
+          <div class="included-credit-banner">${includedCreditBanner()}</div>
+          <div class="usage-price-grid">${usagePriceCards()}</div>
           <ul>${pricingBullets().map((item) => `<li>${item}</li>`).join("")}</ul>
           <p class="risk-note">${t("riskReversal")}</p>
           <button class="gold-button" data-action="open-register">${icon("credit-card")} ${t("claimPlan")}</button>
@@ -840,10 +864,7 @@ function publicSite() {
       <section id="faq" class="faq-section">
         <p class="eyebrow">${t("navFaq")}</p>
         <h2>${t("faqTitle")}</h2>
-        <details open><summary>Do I need to know how to shoot video?</summary><p>No. Duitok AI is designed around product links, prompts, scripts, and repeatable content structures.</p></details>
-        <details><summary>Can this work for Malay content?</summary><p>Yes. The product is shaped for Malaysia seller workflows and informal Bahasa Melayu content direction.</p></details>
-        <details><summary>Is auto-posting ready?</summary><p>The current build prepares scheduling states and exports. Full TikTok auto-posting should be connected after API approval.</p></details>
-        <details><summary>Where do I manage projects?</summary><p>Go to /studio, sign in, and use the workspace for projects, billing, usage, affiliate, and support.</p></details>
+        ${faqItems().map((item, index) => `<details ${index === 0 ? "open" : ""}><summary>${item.q}</summary><p>${item.a}</p></details>`).join("")}
       </section>
       ${footerBrand("Duitok AI")}
     </main>`;
@@ -865,8 +886,8 @@ function registerPage() {
           <h1>Register, pay, and activate your Studio.</h1>
           <p class="public-copy">Create your account, pay securely through CHIP, and activate Duitok AI Pro after the payment callback confirms.</p>
           <div class="checkout-steps">
-            <article><b>1</b><span>Subscribe plan</span><p>Unlock all content tools and low generation rates.</p></article>
-            <article><b>2</b><span>Top up credits</span><p>RM1 = 1 credit. Credits are used when generating assets.</p></article>
+            <article><b>1</b><span>Subscribe plan</span><p>RM69/month unlocks the membership and gives 10 promo credits.</p></article>
+            <article><b>2</b><span>Use credits</span><p>Images use RM0.10 each. Videos use RM0.40 each.</p></article>
             <article><b>3</b><span>Generate outputs</span><p>Image, UGC, clone, story, and batch tools deduct automatically.</p></article>
           </div>
         </div>
@@ -874,8 +895,10 @@ function registerPage() {
           <span>Launch offer</span>
           <img class="price-brand-mark" src="${brandAssets.mascot}" alt="" aria-hidden="true">
           <h3>Duitok AI Pro</h3>
-          <div class="price"><s>RM300</s><b>RM69</b><small>/month</small></div>
-          <ul><li>Full Studio access</li><li>Prompt library</li><li>Image and video workflows</li><li>Clone prompt mode</li><li>VIP WhatsApp support</li></ul>
+          <div class="price"><s>RM300</s><b>RM69</b><small>${pricePeriodContent().period}</small></div>
+          <div class="included-credit-banner">${includedCreditBanner()}</div>
+          <div class="usage-price-grid">${usagePriceCards()}</div>
+          <ul><li>Full Studio access</li><li>10 promo credits after subscription</li><li>Prompt library</li><li>Image and video workflows</li><li>Image generation RM0.10 each</li><li>Video generation RM0.40 each</li><li>Clone prompt mode</li><li>VIP WhatsApp support</li></ul>
         </article>
       </section>
       <section id="checkout" class="signup-section checkout-section">
@@ -1004,6 +1027,51 @@ function featureCard(kicker, title, text, ic) {
   return `<article>${icon(ic, 30)}<span>${kicker}</span><h3>${title}</h3><p>${text}</p></article>`;
 }
 
+function heroPanelContent() {
+  const data = {
+    ms: { label: "AI Selling Generator", title: "1 produk<br>jadi 100+ angle video selling" },
+    zh: { label: "AI 带货生成", title: "输入 1 个产品<br>生成 100+ 条带货视频角度" },
+    en: { label: "AI Selling Generator", title: "1 product<br>into 100+ selling-video angles" }
+  };
+  return data[state.lang] || data.ms;
+}
+
+function pricePeriodContent() {
+  const data = {
+    ms: { proof: "RM69/bulan", period: "/bulan" },
+    zh: { proof: "RM69/月", period: "/月" },
+    en: { proof: "RM69/month", period: "/month" }
+  };
+  return data[state.lang] || data.ms;
+}
+
+function featureMosaicCards() {
+  const data = {
+    ms: [
+      ["PLATFORM", "AI video selling generator.", "Generate hook, script, caption, visual direction dan batch video angle dalam satu workflow.", "badge-plus"],
+      ["TEMPLATE", "Template video yang boleh terus guna.", "Pain, comparison, proof, review, offer, before-after dan reply-comment format.", "layout-template"],
+      ["TUTORIAL", "SOP beginner step-by-step.", "Belajar pilih produk, generate video, post, baca data dan ulang content yang jalan.", "graduation-cap"],
+      ["EXPERIENCE", "Belajar dari order experience.", "Kami masukkan pengalaman campaign dan student case supaya anda tidak mula dari kosong.", "receipt"],
+      ["MATRIX", "Sedia untuk multi-channel.", "Guna untuk TikTok Affiliate, TikTok Shop, Reels, Shorts dan produk lokal.", "network"]
+    ],
+    zh: [
+      ["平台", "AI 带货视频生成平台", "在一个流程里生成 hook、脚本、caption、画面方向和批量视频角度。", "badge-plus"],
+      ["模板", "可以直接套用的带货模板", "痛点型、对比型、证明型、测评型、优惠型、before-after 和评论回复视频。", "layout-template"],
+      ["教程", "新手一步一步跟着做", "学习怎么选品、生成视频、发布、看数据、复制表现好的内容。", "graduation-cap"],
+      ["经验", "不是凭空教你", "我们把实战出单经验和学员案例放进方法里，让你不用从 0 乱试。", "receipt"],
+      ["矩阵", "适合多平台短视频带货", "可用于 TikTok Affiliate、TikTok Shop、Reels、Shorts 和本地产品推广。", "network"]
+    ],
+    en: [
+      ["PLATFORM", "AI selling video generator.", "Generate hooks, scripts, captions, visual directions, and batch video angles in one workflow.", "badge-plus"],
+      ["TEMPLATE", "Ready-to-use selling templates.", "Pain, comparison, proof, review, offer, before-after, and comment-reply formats.", "layout-template"],
+      ["TUTORIAL", "Beginner SOP step by step.", "Learn product selection, video generation, posting, data review, and content replication.", "graduation-cap"],
+      ["EXPERIENCE", "Learn from real order experience.", "We bring campaign experience and student cases into the method so you do not start from zero.", "receipt"],
+      ["MATRIX", "Built for multi-channel selling.", "Use it for TikTok Affiliate, TikTok Shop, Reels, Shorts, and local product promotions.", "network"]
+    ]
+  };
+  return (data[state.lang] || data.ms).map(([kicker, title, text, ic]) => featureCard(kicker, title, text, ic)).join("");
+}
+
 function painCards() {
   return [
     ["video", t("notEnoughTime"), t("notEnoughTimeCopy")],
@@ -1012,6 +1080,53 @@ function painCards() {
     ["activity", t("competitorsFaster"), t("competitorsFasterCopy")]
   ]
     .map(([ic, title, text]) => `<article>${icon(ic, 24)}<h3>${title}</h3><p>${text}</p></article>`)
+    .join("");
+}
+
+function whyDuitokContent() {
+  const data = {
+    ms: {
+      kicker: "Kenapa bukan AI biasa",
+      title: "Guna AI sendiri mudah jadi random, Duitok beri sistem yang boleh diikuti",
+      copy: "AI umum hanya beri output. Duitok gabungkan template short video selling, tutorial SOP, product method dan platform supaya beginner tahu apa perlu dibuat selepas tekan generate."
+    },
+    zh: {
+      kicker: "为什么不是自己用普通 AI",
+      title: "自己用 AI 容易乱做，Duitok 给你一套带货系统",
+      copy: "普通 AI 只给你生成能力，但不告诉你怎么做短视频带货。Duitok 把模板、教程、SOP、选品方法和 AI 平台放在一起，让新手可以跟着方法执行。"
+    },
+    en: {
+      kicker: "Why not generic AI",
+      title: "Generic AI makes random output, Duitok gives you a system to follow",
+      copy: "Generic AI gives generation ability, but not a selling method. Duitok combines short-video templates, SOP tutorials, product methods, and platform execution so beginners know what to do next."
+    }
+  };
+  return data[state.lang] || data.ms;
+}
+
+function whyDuitokCards() {
+  const data = {
+    ms: [
+      ["layout-template", "Ada template", "Pain, comparison, proof, review, offer dan before-after template supaya tidak mula dari kosong."],
+      ["graduation-cap", "Ada tutorial", "Ikut SOP untuk pilih produk, generate video, post, baca data dan scale angle yang jalan."],
+      ["wand-sparkles", "Ada platform", "Duitok AI bantu gandakan execution dari 2-3 video manual ke 100+ video angle sehari."],
+      ["badge-dollar-sign", "Ada pengalaman", "Student ikut tutorial dan platform kami, ada yang capai RM1000+ pada minggu pertama."]
+    ],
+    zh: [
+      ["layout-template", "有模板", "痛点型、对比型、证明型、测评型、优惠型、before-after 模板，不用从 0 想内容。"],
+      ["graduation-cap", "有教程", "跟着 SOP 做选品、生成视频、发布、看数据、复制有效内容。"],
+      ["wand-sparkles", "有平台", "Duitok AI 帮你把执行速度从每天 2-3 条手工视频，放大到 100+ 条视频角度。"],
+      ["badge-dollar-sign", "有经验", "已有学员根据我们的教程和平台执行，第一个星期赚到 RM1000+。"]
+    ],
+    en: [
+      ["layout-template", "Templates", "Pain, comparison, proof, review, offer, and before-after templates so you do not start from zero."],
+      ["graduation-cap", "Tutorials", "Follow SOPs for product selection, video generation, posting, data review, and scaling what works."],
+      ["wand-sparkles", "Platform", "Duitok AI expands execution from 2-3 manual videos to 100+ video angles a day."],
+      ["badge-dollar-sign", "Experience", "Some students followed our tutorials and platform to earn RM1000+ in their first week."]
+    ]
+  };
+  return (data[state.lang] || data.ms)
+    .map(([ic, title, text]) => `<article>${icon(ic, 26)}<h3>${title}</h3><p>${text}</p></article>`)
     .join("");
 }
 
@@ -1027,12 +1142,33 @@ function outputPreviewCards() {
 }
 
 function workflowSteps() {
-  return [
-    ["link", t("how1Title"), t("how1Copy")],
-    ["sliders-horizontal", t("how2Title"), t("how2Copy")],
-    ["sparkles", t("how3Title"), t("how3Copy")],
-    ["download", t("how4Title"), t("how4Copy")]
-  ]
+  const data = {
+    ms: [
+      ["search-check", "Pilih produk", "Guna SOP untuk cari produk yang sesuai diuji dengan short video."],
+      ["list-tree", "Pecahkan selling point", "Tukar produk kepada pain, proof, comparison, offer dan review angle."],
+      ["layout-template", "Pilih template", "Gunakan template pain, proof, review, comparison, offer atau before-after."],
+      ["sparkles", "Generate content", "Bina hook, skrip, caption, visual direction dan 100+ video angle."],
+      ["send", "Publish dan test", "Post ke TikTok, Shop, Reels, Shorts atau channel short video lain."],
+      ["chart-no-axes-combined", "Review dan scale", "Lihat data, ulang angle yang jalan dan buang yang tidak convert."]
+    ],
+    zh: [
+      ["search-check", "选产品", "用 SOP 找适合短视频测试的产品，而不是随便乱选。"],
+      ["list-tree", "拆卖点", "把产品拆成痛点、证明、对比、优惠和测评角度。"],
+      ["layout-template", "选模板", "套用 pain、proof、review、comparison、offer 或 before-after 模板。"],
+      ["sparkles", "生成内容", "批量生成 hook、脚本、caption、画面方向和 100+ 视频角度。"],
+      ["send", "发布测试", "发布到 TikTok、TikTok Shop、Reels、Shorts 或其它短视频渠道。"],
+      ["chart-no-axes-combined", "复盘放大", "看数据，复制表现好的角度，停止浪费时间在没效果的内容。"]
+    ],
+    en: [
+      ["search-check", "Choose products", "Use the SOP to find products that are suitable for short-video testing."],
+      ["list-tree", "Break down angles", "Turn each product into pain, proof, comparison, offer, and review angles."],
+      ["layout-template", "Pick templates", "Use pain, proof, review, comparison, offer, or before-after templates."],
+      ["sparkles", "Generate content", "Create hooks, scripts, captions, visual direction, and 100+ video angles."],
+      ["send", "Publish and test", "Post to TikTok, Shop, Reels, Shorts, or other short-video channels."],
+      ["chart-no-axes-combined", "Review and scale", "Read the data, repeat winning angles, and cut what does not convert."]
+    ]
+  };
+  return (data[state.lang] || data.ms)
     .map(([ic, title, text], index) => `<article><b>${String(index + 1).padStart(2, "0")}</b>${icon(ic, 24)}<h3>${title}</h3><p>${text}</p></article>`)
     .join("");
 }
@@ -1040,59 +1176,278 @@ function workflowSteps() {
 function demoGalleryCards() {
   const data = {
     ms: [
-      ["8s", "Hijab skincare UGC", "Hook soft-sell BM"],
-      ["12s", "Supplement proof", "Angle before/after"],
-      ["16s", "Kitchenware demo", "Problem-solution flow"],
-      ["10s", "Gadget review", "Handle objection"],
-      ["14s", "Fashion try-on", "Style comparison"],
-      ["11s", "Home product", "Trust + CTA"]
+      ["Skincare", "Kenapa kulit nampak kusam selepas tengah hari?", "UGC selling video", "RM0.40", "video"],
+      ["Kitchenware", "Tool kecil ini boleh jimat separuh masa dapur", "Product demo video", "RM0.40", "video"],
+      ["Supplement", "Before-after angle untuk buyer yang ragu-ragu", "Proof script", "RM0.40", "video"],
+      ["Gadget", "3 sebab buyer selalu pilih model ini", "Comparison video", "RM0.40", "video"],
+      ["Fashion", "Try-on angle untuk satu produk, banyak gaya", "Style video", "RM0.40", "video"],
+      ["Product cover", "Cover visual untuk hook pertama", "AI product image", "RM0.10", "image"]
     ],
     zh: [
-      ["8s", "头巾 skincare UGC", "BM soft-sell hook"],
-      ["12s", "保健品证明视频", "before/after 角度"],
-      ["16s", "厨具演示", "痛点到解决方案"],
-      ["10s", "Gadget 测评", "处理购买疑虑"],
-      ["14s", "Fashion try-on", "穿搭对比"],
-      ["11s", "Home product", "信任 + CTA"]
+      ["Skincare", "为什么你的皮肤一到下午就暗沉？", "UGC 带货视频", "RM0.40", "video"],
+      ["Kitchenware", "这个厨房小工具，真的省掉一半时间", "产品演示视频", "RM0.40", "video"],
+      ["Supplement", "给还在犹豫的买家一个 before-after 证明", "证明型脚本", "RM0.40", "video"],
+      ["Gadget", "买这个 model 前先看这 3 个点", "对比型视频", "RM0.40", "video"],
+      ["Fashion", "一件单品，拆出多个 try-on 角度", "穿搭展示视频", "RM0.40", "video"],
+      ["Product cover", "让用户停下来的第一张封面图", "AI 产品图", "RM0.10", "image"]
     ],
     en: [
-      ["8s", "Hijab skincare UGC", "BM soft-sell hook"],
-      ["12s", "Supplement proof", "Before/after angle"],
-      ["16s", "Kitchenware demo", "Problem-solution flow"],
-      ["10s", "Gadget review", "Objection handling"],
-      ["14s", "Fashion try-on", "Style comparison"],
-      ["11s", "Home product", "Trust + CTA"]
+      ["Skincare", "Why does your skin look dull by afternoon?", "UGC selling video", "RM0.40", "video"],
+      ["Kitchenware", "This small kitchen tool saves half the prep time", "Product demo video", "RM0.40", "video"],
+      ["Supplement", "A before-after proof angle for hesitant buyers", "Proof script", "RM0.40", "video"],
+      ["Gadget", "3 reasons buyers choose this model", "Comparison video", "RM0.40", "video"],
+      ["Fashion", "One product, multiple try-on angles", "Style video", "RM0.40", "video"],
+      ["Product cover", "A cover image that stops the scroll", "AI product image", "RM0.10", "image"]
     ]
   };
-  return (data[state.lang] || data.ms).map(([duration, title, text]) => demoCard(duration, title, text)).join("");
+  return (data[state.lang] || data.ms).map(([category, hook, type, cost, kind]) => demoCard(category, hook, type, cost, kind)).join("");
+}
+
+function demoKickerContent() {
+  const data = {
+    ms: "Short Video Selling Demo",
+    zh: "短视频带货 Demo",
+    en: "Short Video Selling Demo"
+  };
+  return data[state.lang] || data.ms;
+}
+
+function comparisonContent() {
+  const data = {
+    ms: {
+      title: "Buat AI sendiri dan ikut sistem Duitok, beza dia besar",
+      oldTitle: "Guna AI sendiri",
+      oldBullets: ["Tidak tahu produk mana mahu test", "Prompt dan content structure tidak stabil", "Generate beberapa idea tetapi tidak tahu publish macam mana", "Post sedikit, tiada data, susah improve"],
+      newTitle: "Ikut sistem Duitok",
+      newBullets: ["Ada product method dan template video", "Hook, skrip, caption dan angle dijana ikut format selling", "Generate 100+ video angle untuk test", "Ikut tutorial untuk post, review dan ulang content yang jalan"]
+    },
+    zh: {
+      title: "自己乱做 AI，和跟着 Duitok 方法做，差别很大",
+      oldTitle: "自己乱做 AI",
+      oldBullets: ["不知道选什么产品", "不知道 prompt 怎么写", "内容结构不稳定", "发了没数据也不知道怎么调整"],
+      newTitle: "Duitok 方法",
+      newBullets: ["有选品思路和视频模板", "AI 按带货结构生成 hook、脚本、caption", "批量生成 100+ 条视频角度", "跟着教程发布、测试、复盘、复制有效内容"]
+    },
+    en: {
+      title: "Doing AI randomly and following Duitok's method are very different",
+      oldTitle: "Random AI workflow",
+      oldBullets: ["No product-selection method", "Unstable prompts and content structure", "Generate ideas but do not know how to publish", "Too little data to improve"],
+      newTitle: "Duitok method",
+      newBullets: ["Product method and video templates", "AI generates hooks, scripts, and captions in selling structures", "Batch-generate 100+ video angles", "Follow tutorials to publish, review, and repeat what works"]
+    }
+  };
+  return data[state.lang] || data.ms;
+}
+
+function dreamContent() {
+  const data = {
+    ms: {
+      kicker: "Target imagination",
+      title: "Cari satu video yang boleh jual dahulu, lepas itu baru scale akaun dan channel",
+      copy: "Short video selling ialah testing game. Lebih banyak template video yang anda post, lebih banyak data anda kumpul, dan lebih cepat anda nampak angle yang patut diulang."
+    },
+    zh: {
+      kicker: "梦想感与执行方向",
+      title: "先跑出一个能出单的视频，再谈账号和渠道放大",
+      copy: "短视频带货的核心是测试。更多视频代表更多曝光机会，更多数据，也更有机会找到能出单的内容。"
+    },
+    en: {
+      kicker: "Target imagination",
+      title: "Find one selling video first, then scale accounts and channels",
+      copy: "Short-video selling is a testing game. More template-based videos mean more exposure, more data, and more chances to find content that converts."
+    }
+  };
+  return data[state.lang] || data.ms;
+}
+
+function dreamCards() {
+  const data = {
+    ms: [
+      ["RM69", "Kos mula", "Masuk sistem AI short video selling."],
+      ["100+", "Video sehari", "Lebih banyak content untuk diuji."],
+      ["RM1000+", "Student week 1 case", "Case sebenar, bukan guarantee semua orang."],
+      ["Multi", "Channel scale", "TikTok, Shop, Reels, Shorts dan produk lokal."]
+    ],
+    zh: [
+      ["RM69", "开始成本", "低成本进入 AI 短视频带货系统。"],
+      ["100+", "每日视频角度", "用更多内容换更多测试机会。"],
+      ["RM1000+", "学员首周案例", "真实案例，不代表人人保证。"],
+      ["多渠道", "放大空间", "TikTok、Shop、Reels、Shorts 和本地产品。"]
+    ],
+    en: [
+      ["RM69", "Entry cost", "Enter the AI short-video selling system."],
+      ["100+", "Daily video angles", "Create more content to run more tests."],
+      ["RM1000+", "Student week-one case", "A real case, not a guarantee for everyone."],
+      ["Multi", "Channel scale", "TikTok, Shop, Reels, Shorts, and local products."]
+    ]
+  };
+  return (data[state.lang] || data.ms)
+    .map(([value, name, role]) => `<article><p>${value}</p><b>${name}</b><span>${role}</span></article>`)
+    .join("");
+}
+
+function studentCaseContent() {
+  const data = {
+    ms: {
+      kicker: "Student case",
+      title: "Ikut kaedah, ada student minggu pertama capai RM1000+",
+      copy: "Student kami ikut tutorial Duitok, guna platform untuk generate video selling secara batch, kemudian post dan test ikut template. Ada yang capai RM1000+ pada minggu pertama.",
+      note: "Ini bukan jaminan setiap orang akan dapat result sama. Income bergantung pada produk, akaun, posting frequency, content quality, market feedback dan execution.",
+      badge: "Week 1 case",
+      cardCopy: "Template + tutorial + platform + execution volume.",
+      bullets: ["Ikut tutorial Duitok", "Generate video dengan platform", "Post dan test ikut template", "RM1000+ case pada minggu pertama"]
+    },
+    zh: {
+      kicker: "学员出单案例",
+      title: "跟着方法做，有学员首周做到 RM1000+",
+      copy: "我们的学员根据 Duitok 教程和平台执行，用 AI 批量生成带货视频，并按照模板持续发布和测试，第一个星期就做到 RM1000+ 收益。",
+      note: "这个结果不代表每个人都会一样。实际收益取决于选品、账号状态、发布频率、内容质量、市场反馈和执行力。",
+      badge: "Week 1 Case",
+      cardCopy: "模板 + 教程 + 平台 + 执行量。",
+      bullets: ["跟着 Duitok 教程执行", "使用 AI 批量生成带货视频", "按模板发布和测试内容", "第一个星期 RM1000+ 案例"]
+    },
+    en: {
+      kicker: "Student case",
+      title: "Some students followed the method and earned RM1000+ in week one",
+      copy: "Students followed Duitok tutorials, used the platform to batch-generate selling videos, then posted and tested content using the templates. Some reached RM1000+ in their first week.",
+      note: "This does not mean everyone will get the same result. Income depends on products, account condition, posting frequency, content quality, market feedback, and execution.",
+      badge: "Week 1 case",
+      cardCopy: "Templates + tutorials + platform + execution volume.",
+      bullets: ["Followed Duitok tutorials", "Generated videos with the platform", "Posted and tested with templates", "RM1000+ first-week case"]
+    }
+  };
+  return data[state.lang] || data.ms;
+}
+
+function scenarioContent() {
+  const data = {
+    ms: {
+      kicker: "Bukan TikTok sahaja",
+      title: "Duitok AI boleh digunakan untuk mana-mana short video selling",
+      copy: "TikTok Affiliate ialah entry scene yang kuat, tetapi kemampuan Duitok ialah generate content selling untuk produk. Selagi anda mahu jual, test atau promote produk melalui short video, sistem ini boleh bantu."
+    },
+    zh: {
+      kicker: "不只 TikTok Affiliate",
+      title: "任何 AI 短视频带货场景，都可以用 Duitok",
+      copy: "TikTok Affiliate 是推荐入门场景，但 Duitok AI 的底层能力是短视频带货内容生产。只要你需要用短视频卖产品、测产品、做内容，Duitok 都可以帮你提高执行速度。"
+    },
+    en: {
+      kicker: "Beyond TikTok Affiliate",
+      title: "Use Duitok for any AI short-video selling scenario",
+      copy: "TikTok Affiliate is a strong entry scene, but Duitok's core ability is producing short-video selling content. If you need to sell, test, or promote products through short videos, the system can help."
+    }
+  };
+  return data[state.lang] || data.ms;
+}
+
+function scenarioCards() {
+  const data = {
+    ms: ["TikTok Affiliate", "TikTok Shop", "Produk lokal", "Shopee / Lazada", "Facebook / Instagram Reels", "YouTube Shorts", "Brand product promo", "Multi-account matrix"],
+    zh: ["TikTok Affiliate", "TikTok Shop", "本地商家产品", "Shopee / Lazada 商品短视频", "Facebook / Instagram Reels", "YouTube Shorts", "品牌产品推广", "多账号内容矩阵"],
+    en: ["TikTok Affiliate", "TikTok Shop", "Local products", "Shopee / Lazada product videos", "Facebook / Instagram Reels", "YouTube Shorts", "Brand product promos", "Multi-account matrix"]
+  };
+  return (data[state.lang] || data.ms)
+    .map((item) => `<article>${icon("play-square", 20)}<span>${item}</span></article>`)
+    .join("");
 }
 
 function pricingBullets() {
   const data = {
-    ms: ["2 Video FREE", "UGC Script Studio", "AI Image / Avatar workflow", "Caption generator", "Clone prompt mode", "TikTok posting planner", "WhatsApp support"],
-    zh: ["免费生成 2 条 Video", "UGC 脚本工作台", "AI Image / Avatar 流程", "Caption 生成器", "复刻 Prompt 模式", "TikTok 发布计划器", "WhatsApp 客服支持"],
-    en: ["2 Videos FREE", "UGC Script Studio", "AI Image / Avatar workflow", "Caption generator", "Clone prompt mode", "TikTok posting planner", "WhatsApp support"]
+    ms: ["AI short video selling platform", "Subscribe terus dapat 10 promo credits", "Template short video selling", "Tutorial SOP beginner", "Product selling point breakdown", "Batch hook, skrip dan caption", "Support 100+ video angle sehari", "Image generation RM0.10 setiap gambar", "Video generation RM0.40 setiap video", "Multi-channel content planning", "WhatsApp support"],
+    zh: ["AI 带货视频生成平台", "订阅立即送 10 credits", "短视频带货模板库", "新手教学 SOP", "产品卖点拆解", "批量 hook、脚本、caption", "支持一天 100+ 视频角度", "图片生成 RM0.10 / 张", "视频生成 RM0.40 / 条", "多渠道内容计划", "WhatsApp 客服支持"],
+    en: ["AI short-video selling platform", "Subscribe and get 10 promo credits", "Short-video selling templates", "Beginner SOP tutorials", "Product selling-point breakdown", "Batch hooks, scripts, and captions", "Supports 100+ video angles a day", "Image generation at RM0.10 each", "Video generation at RM0.40 each", "Multi-channel content planning", "WhatsApp support"]
+  };
+  return data[state.lang] || data.ms;
+}
+
+function usagePriceCards() {
+  const data = {
+    ms: [
+      ["Image", "RM0.10", "setiap gambar"],
+      ["Video", "RM0.40", "setiap video"]
+    ],
+    zh: [
+      ["图片", "RM0.10", "每张生成"],
+      ["视频", "RM0.40", "每条生成"]
+    ],
+    en: [
+      ["Image", "RM0.10", "per generation"],
+      ["Video", "RM0.40", "per generation"]
+    ]
+  };
+  return (data[state.lang] || data.ms)
+    .map(([label, price, note]) => `<article><span>${label}</span><b>${price}</b><small>${note}</small></article>`)
+    .join("");
+}
+
+function includedCreditBanner() {
+  const data = {
+    ms: "Promotion sekarang: subscribe dan dapat 10 credits",
+    zh: "现在 promotion：订阅就送 10 credits",
+    en: "Current promotion: subscribe and get 10 credits"
   };
   return data[state.lang] || data.ms;
 }
 
 function controlCards() {
   const data = {
-    ms: ["Manual review sebelum posting", "Tiada final publish tanpa approval anda", "Avatar workflow untuk kurang bergantung pada muka sendiri", "Anda semak claim produk dan compliance", "TikTok API approval diperlukan untuk official auto-post"],
-    zh: ["发布前人工审核", "没有你的确认不会最终发布", "Avatar workflow 降低对真人露脸的依赖", "产品宣称和合规由你最终确认", "官方 auto-post 需要 TikTok API 审批"],
-    en: ["Manual review before posting", "No final publish without your approval", "Avatar workflow reduces dependence on your own face", "You review product claims and compliance", "TikTok API approval is required for official auto-post"]
+    ms: ["RM69/bulan untuk platform, template dan SOP", "Duitok AI bantu output, bukan guarantee income", "Lebih banyak video memberi lebih banyak peluang data", "Anda tetap perlu pilih produk, post dan review result", "RM1000+ student case ialah bukti kemungkinan, bukan janji fixed"],
+    zh: ["RM69/月包含平台、模板和 SOP", "Duitok AI 提高产出，不保证收益", "更多视频带来更多测试数据", "你仍然需要选品、发布和复盘结果", "RM1000+ 学员案例是可能性证明，不是固定承诺"],
+    en: ["RM69/month includes platform, templates, and SOP", "Duitok AI improves output; it does not guarantee income", "More videos create more testing data", "You still choose products, publish, and review results", "The RM1000+ student case shows possibility, not a fixed promise"]
   };
   return (data[state.lang] || data.ms)
     .map((item) => `<article>${icon("check-circle-2", 20)}<p>${item}</p></article>`)
     .join("");
 }
 
+function faqItems() {
+  const data = {
+    ms: [
+      ["Duitok AI guarantee boleh buat duit?", "Tidak. Duitok AI beri platform, template, tutorial dan kaedah untuk mula short video selling dengan AI. Income bergantung pada produk, akaun, posting, content quality, market feedback dan execution."],
+      ["Kenapa tidak guna AI biasa sahaja?", "AI biasa hanya beri output. Duitok beri template, SOP, product method dan platform supaya beginner tahu video apa perlu dibuat, bagaimana post dan bagaimana review data."],
+      ["Saya perlu shoot video sendiri?", "Tidak semestinya. Fokus Duitok AI ialah bantu anda generate video selling, hook, skrip dan caption supaya tidak tersekat pada shooting manual setiap hari."],
+      ["Mesti buat TikTok Affiliate sahaja?", "Tidak. TikTok Affiliate ialah entry scene yang kuat, tetapi Duitok AI sesuai untuk TikTok Shop, produk lokal, Reels, Shorts dan short video selling lain."],
+      ["Betul boleh generate 100+ video sehari?", "Workflow direka untuk batch generation. Jumlah sebenar bergantung pada credit, input produk dan cara anda operate, tetapi matlamatnya ialah jauh lebih laju daripada 2-3 video manual."],
+      ["Student minggu pertama RM1000+ itu confirmed untuk semua?", "Tidak. Itu case daripada student yang ikut tutorial dan guna platform. Result setiap orang berbeza bergantung pada produk, akaun, content, market dan execution."],
+      ["RM69 termasuk apa?", "RM69 ialah yuran membership bulanan untuk akses Duitok AI platform, template short video selling, tutorial SOP, hook/script/caption workflow dan basic support. Promotion sekarang: subscribe dan dapat 10 credits. Generation credit dikira jelas: image RM0.10 dan video RM0.40."]
+    ],
+    zh: [
+      ["Duitok AI 是保证赚钱吗？", "不保证。Duitok AI 提供平台、模板、教程和方法，帮助你更快开始短视频带货。实际收益取决于选品、账号、内容质量、市场反馈和执行力。"],
+      ["为什么不用普通 AI 工具？", "普通 AI 工具只给你生成能力，但不告诉你怎么做短视频带货。Duitok 提供模板、教程、SOP 和平台，让新手可以跟着方法执行。"],
+      ["我不会拍视频可以用吗？", "可以。Duitok AI 主打减少拍摄和剪辑压力，帮助你生成带货视频方向、脚本、caption 和不露脸内容。"],
+      ["一定要做 TikTok Affiliate 吗？", "不一定。TikTok Affiliate 是推荐入门场景，但 Duitok AI 适合任何需要短视频带货的场景。"],
+      ["一天 100+ 视频是真的吗？", "平台流程是为了批量生成视频角度和内容而设计，具体数量取决于使用方式、credit 和产品素材。"],
+      ["学员第一个星期 RM1000+ 是保证吗？", "不是保证。这是已有学员根据教程和平台执行后的案例，结果因人而异。"],
+      ["RM69 包含什么？", "RM69 是每月会员费，包含 Duitok AI 平台使用、短视频带货模板、教学 SOP、hook/script/caption 生成流程和基础支持。现在 promotion：订阅送 10 credits。生成费用另外按 credit 计算：图片 RM0.10，视频 RM0.40。"]
+    ],
+    en: [
+      ["Does Duitok AI guarantee income?", "No. Duitok AI provides a platform, templates, tutorials, and method to help you start short-video selling. Results depend on products, accounts, content quality, market feedback, and execution."],
+      ["Why not use a generic AI tool?", "Generic AI gives generation ability but not a selling method. Duitok provides templates, tutorials, SOP, and a platform so beginners can follow a workflow."],
+      ["Do I need to film videos myself?", "Not necessarily. Duitok AI reduces filming and editing pressure by generating selling video directions, scripts, captions, and no-face content ideas."],
+      ["Must I do TikTok Affiliate only?", "No. TikTok Affiliate is a recommended entry scene, but Duitok AI works for any short-video selling scenario."],
+      ["Can it really generate 100+ videos a day?", "The workflow is designed for batch video angles and content. Actual quantity depends on usage style, credits, and product inputs."],
+      ["Is the RM1000+ first-week student case guaranteed?", "No. It is a case from students who followed the tutorial and used the platform. Results vary by product, account, content, market, and execution."],
+      ["What does RM69 include?", "RM69 is the monthly membership fee. It includes Duitok AI platform access, short-video selling templates, SOP tutorials, hook/script/caption workflow, and basic support. Current promotion: subscribe and get 10 credits. Generation credit is transparent: RM0.10 per image and RM0.40 per video."]
+    ]
+  };
+  return (data[state.lang] || data.ms).map(([q, a]) => ({ q, a }));
+}
+
 function quote(text, name, role) {
   return `<article><p>"${text}"</p><b>${name}</b><span>${role}</span></article>`;
 }
 
-function demoCard(duration, title, text) {
-  return `<article><div class="demo-screen">${icon("play", 36)}</div><span>${duration}</span><h3>${title}</h3><p>${text}</p></article>`;
+function demoCard(category, hook, type, cost, kind) {
+  const ic = kind === "image" ? "image" : "play";
+  return `<article>
+    <div class="demo-screen">
+      ${icon(ic, 34)}
+      <small>${cost}</small>
+    </div>
+    <span>${category}</span>
+    <h3>${hook}</h3>
+    <p>${type}</p>
+  </article>`;
 }
 
 function login() {
@@ -1139,6 +1494,7 @@ function studio() {
       <aside class="sidebar">
         ${brand()}
         <div class="sidebar-language">${languageSwitch()}</div>
+        ${sidebarAccountPanel()}
         <div class="side-section">${icon("layout-dashboard", 18)} Workspace</div>
         <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard">${icon("sparkles")} ${t("dashboard")}</button>
         ${isOwnerAdminAccount() ? `<button class="side-link ${state.page === "admin" ? "active" : ""}" data-page="admin">${icon("shield-check")} Admin CRM</button>` : ""}
@@ -1176,6 +1532,66 @@ function brand(label = "") {
 
 function footerBrand(label = "Duitok AI") {
   return `<footer class="public-footer"><span class="footer-brand"><span class="brand-core footer-brand-core" aria-label="Duitok AI"><img class="brand-logo-mascot" src="${brandAssets.mascot}" alt="" aria-hidden="true"><span class="brand-wordmark"><span>Duitok</span><span>AI</span></span></span><b>${label}</b></span><span>© 2026</span><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="mailto:hello@duitok.com">hello@duitok.com</a></footer>`;
+}
+
+function currentAccountUser() {
+  return state.db?.currentUser || state.user || {};
+}
+
+function subscriptionStatus() {
+  const billing = state.db?.billing || {};
+  const nextBill = billing.nextBill || "";
+  const expiresAt = nextBill ? new Date(`${nextBill}T23:59:59`) : null;
+  const msLeft = expiresAt ? expiresAt.getTime() - Date.now() : 0;
+  const daysLeft = expiresAt ? Math.max(0, Math.ceil(msLeft / 86400000)) : 0;
+  const expired = Boolean(expiresAt && msLeft < 0);
+  return {
+    plan: billing.plan || "Duitok AI Pro",
+    nextBill,
+    daysLeft,
+    expired,
+    label: expired ? "Expired" : `${daysLeft} days left`,
+    expiryText: nextBill ? `Expires ${formatReadableDate(nextBill)}` : "No expiry date"
+  };
+}
+
+function formatReadableDate(value) {
+  if (!value) return "";
+  return new Date(`${value}T12:00:00`).toLocaleDateString(state.lang === "zh" ? "zh-CN" : "en-GB", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+function accountInitials(name = "") {
+  const text = String(name || currentAccountUser().email || "D").trim();
+  const parts = text.split(/\s+/).filter(Boolean);
+  return (parts.length > 1 ? `${parts[0][0]}${parts[1][0]}` : text.slice(0, 1)).toUpperCase();
+}
+
+function sidebarAccountPanel() {
+  const user = currentAccountUser();
+  const billing = state.db?.billing || {};
+  const subscription = subscriptionStatus();
+  return `
+    <section class="sidebar-account-panel">
+      <button class="sidebar-quick-link" data-page="autopost">${icon("send", 22)} <span>Auto Post TikTok</span></button>
+      <button class="sidebar-quick-link" data-page="whatsapp">${icon("message-circle", 22)} <span>Join Discussion WhatsApp</span>${icon("arrow-up-right", 15)}</button>
+      <article class="sidebar-credit-card">
+        <span>${icon("wallet-cards", 18)} Credit Balance</span>
+        <b>${formatCreditNumber(billing.credits || 0)}</b>
+        <button type="button" data-page="topup">${icon("plus", 18)} Top Up</button>
+      </article>
+      <article class="sidebar-subscription-card ${subscription.expired ? "expired" : ""}">
+        <strong><i></i>${subscription.expired ? "Expired" : "Pro"} <em>·</em> ${subscription.label}</strong>
+        <span>${subscription.expiryText}</span>
+      </article>
+      <div class="sidebar-user-card">
+        <span class="sidebar-avatar">${accountInitials(user.name)}</span>
+        <div><b>${esc(user.name || "Duitok User")}</b><small>${esc(user.email || "")}</small></div>
+      </div>
+      <div class="sidebar-account-actions">
+        <button type="button" class="${state.page === "settings" ? "active" : ""}" data-page="settings">${icon("settings", 18)} Settings</button>
+        <button type="button" data-action="logout">${icon("log-out", 18)} Sign out</button>
+      </div>
+    </section>`;
 }
 
 function projectButtons() {
@@ -1626,7 +2042,66 @@ function imagePromptSettings(p) {
 }
 
 function ugcPanel(p) {
-  return `<div class="generator-box"><h2>${icon("video")} UGC Generator</h2><div class="form-grid three">${select("ugc.avatar", "Avatar", ["Malay female", "Chinese male", "Hijab creator"], p.ugc.avatar)}${select("ugc.voice", "Voice", ["BM Casual", "Manglish", "English MY"], p.ugc.voice)}${select("ugc.length", "Length", ["15 seconds", "30 seconds", "45 seconds"], p.ugc.length)}</div></div>${prompt("ugc.script", p.ugc.script, "Write the UGC script.", "generate-ugc", "Generate UGC")}${results(p, "ugc")}`;
+  const provider = p.ugc.provider || "Veo 3.1";
+  const imageMode = p.ugc.imageMode || "Product Reference (AI creates scene)";
+  const promptTemplate = "Create an 8-second TikTok Shop UGC scene. Start with a visual hook in 0-2s, show the product benefit in 2-6s, and end with a clear CTA in 6-8s. Natural Malaysian creator tone, realistic product handling, no exaggerated claims.";
+  return `
+    <div class="generator-box video-generator-box">
+      <h2>🎬 Video Generator</h2>
+      <p class="field-label">Provider</p>
+      <div class="video-provider-grid">
+        ${videoProviderButton("Veo 3.1", "🎬 Veo 3.1 · 8s", provider)}
+        ${videoProviderButton("Sora 2", "⚡ Sora 2 · 8 / 12s", provider)}
+      </div>
+      ${select("ugc.imageMode", "Image Mode", ["Product Reference (AI creates scene)", "Avatar + Product References", "Text to Video"], imageMode)}
+    </div>
+    <section class="ugc-scene-card">
+      <div class="ugc-scene-head">
+        <h2>🎞️ Scene</h2>
+        <button type="button" data-field-set="ugc.script" data-value="${esc(promptTemplate)}">${icon("sparkles", 18)} Prompt Builder</button>
+      </div>
+      <div class="ugc-reference-grid">
+        <div>
+          <p class="ugc-reference-title">Avatar Reference</p>
+          <div class="ugc-reference-row">
+            <label class="ugc-avatar-drop"><input type="file" data-upload="avatar" hidden><span>👤</span></label>
+            <div class="ugc-reference-actions">
+              <label><input type="file" data-upload="avatar" hidden>Attachments</label>
+              <button type="button">x</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p class="ugc-reference-title product">Product Reference (0/3)</p>
+          <div class="ugc-product-row">
+            ${[1, 2, 3].map((index) => `<label class="ugc-product-slot"><input type="file" data-upload="product-${index}" hidden><span>${index}</span></label>`).join("")}
+            <div class="ugc-reference-actions">
+              <label><input type="file" data-upload="product" hidden>Attachments</label>
+              <button type="button">🔍 Scrape ·10¢</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="ugc-scene-note">Both optional. Pick up to 3 products; each picked image is sent as a distinct reference to ${esc(provider.split(" ")[0])}.</p>
+      <div class="ugc-prompt-toolbar">
+        <button class="active" type="button">✍️ Prompt</button>
+        <button type="button">💡 Idea (AI expand)</button>
+      </div>
+      <textarea class="ugc-scene-textarea" data-field="ugc.script" placeholder="Scene description + spoken dialog 0-8s...">${esc(p.ugc.script)}</textarea>
+      <div class="ugc-scene-foot">
+        <span>Each shot = 8s · Sweet spot <b>18-22 words</b> of spoken dialog (split: 0-2s hook ≤6 words · 2-6s middle ≤14 words · 6-8s CTA ≤6 words) · <b>${wordCount(p.ugc.script)}</b> words · 0/1500</span>
+        <button class="gold-button" data-action="generate-ugc">${icon("video")} Generate Video</button>
+      </div>
+    </section>
+    ${results(p, "ugc")}`;
+}
+
+function videoProviderButton(value, label, active) {
+  return `<button class="${active === value ? "active" : ""}" type="button" data-field-set="ugc.provider" data-value="${esc(value)}">${label}</button>`;
+}
+
+function wordCount(value = "") {
+  return String(value).trim().split(/\s+/).filter(Boolean).length;
 }
 
 function autoPanel(p) {
@@ -1715,7 +2190,8 @@ function accountPage() {
     affiliate: [t("affiliate"), "Referral links and payouts.", `<div class="metric-row"><article><span>Code</span><strong>${state.db.affiliate.code}</strong></article><article><span>Clicks</span><strong>${state.db.affiliate.clicks}</strong></article><article><span>Payout</span><strong>RM${state.db.affiliate.payout}</strong></article></div><button class="gold-button" data-action="copy-affiliate">${icon("copy")} Copy referral link</button>`],
     usage: [t("usage"), "Every generated action is written to history.", table(state.db.usage.map((x) => [x.action, `${x.credits} credits`, new Date(x.createdAt).toLocaleString()]))],
     autopost: [t("autopost"), "Chrome extension assisted TikTok publishing queue.", autoPostPage()],
-    whatsapp: [t("whatsapp"), "Community handoff.", `<button class="gold-button" data-action="open-whatsapp">${icon("message-circle")} Open WhatsApp Group</button>`]
+    whatsapp: [t("whatsapp"), "Community handoff.", `<button class="gold-button" data-action="open-whatsapp">${icon("message-circle")} Open WhatsApp Group</button>`],
+    settings: ["Settings", "Account info, WhatsApp support contact, and password.", settingsPage()]
   };
   const [title, subtitle, body] = map[state.page];
   return `<header class="project-head"><div><p class="folder-label">${icon("folder", 18)} ${t("publicTools")}</p><h1>${title}</h1><p class="subtitle">${subtitle}</p></div><button class="sop-button" data-action="export-all">${icon("download")} ${t("export")}</button></header><section class="canvas-card slim">${body}</section>`;
@@ -1802,6 +2278,44 @@ function topupHistory() {
 function formatTopupDate(value) {
   if (!value) return "";
   return new Date(value).toLocaleDateString(state.lang === "zh" ? "zh-CN" : "en-GB", { day: "2-digit", month: "short", year: "2-digit" });
+}
+
+function settingsPage() {
+  const user = currentAccountUser();
+  return `
+    <section class="settings-page">
+      <form class="settings-card" data-form="account-profile">
+        <header>
+          <span>${icon("user-round", 30)}</span>
+          <div><h2>Profile</h2><p>Account info & contact</p></div>
+        </header>
+        <div class="settings-form-grid">
+          <label>Display Name<input name="name" value="${esc(user.name || "")}" autocomplete="name" required></label>
+          <label>Email<input name="email" value="${esc(user.email || "")}" disabled></label>
+        </div>
+        <button class="gold-button" type="submit">${icon("save", 18)} Save Profile</button>
+      </form>
+      <form class="settings-card whatsapp-settings-card" data-form="account-whatsapp">
+        <header>
+          <span>${icon("message-circle", 30)}</span>
+          <div><h2>WhatsApp</h2><p>Untuk login + support notifications</p></div>
+        </header>
+        <label>WhatsApp Number<input name="phone" value="${esc(user.phone || "")}" placeholder="+60123456789" autocomplete="tel"></label>
+        <button class="gold-button" type="submit">Save WhatsApp</button>
+      </form>
+      <form class="settings-card password-settings-card" data-form="account-password">
+        <header>
+          <span>${icon("lock-keyhole", 30)}</span>
+          <div><h2>Change Password</h2><p>Ganti password dari yang dihantar via WhatsApp</p></div>
+        </header>
+        <label>Old Password<input name="oldPassword" type="password" autocomplete="current-password" required></label>
+        <div class="settings-form-grid">
+          <label>New Password<input name="newPassword" type="password" autocomplete="new-password" required></label>
+          <label>Confirm New<input name="confirmPassword" type="password" autocomplete="new-password" required></label>
+        </div>
+        <button class="gold-button" type="submit">Change Password</button>
+      </form>
+    </section>`;
 }
 
 function table(rows) {
@@ -1896,9 +2410,27 @@ function agentWorkMode(text = "") {
 function currentAgent3DMode() {
   const preview = new URLSearchParams(window.location.search).get("agentPreview");
   const canPreview = ["localhost", "127.0.0.1"].includes(window.location.hostname);
-  if (canPreview && ["idle", "image", "video", "copy", "schedule", "command"].includes(preview)) return preview;
+  if (canPreview && ["idle", "image", "video", "copy", "schedule", "command", "chat"].includes(preview)) return preview;
+  if (state.agentVisualPhase && state.agentVisualPhase !== "idle") return state.agentTaskMode || "command";
   if (!state.agentBusy) return "idle";
   return agentWorkMode(latestAgentUserMessage());
+}
+
+function agentVisualBubble(mode, phase) {
+  if (phase === "wake") return "收到任务";
+  if (phase === "chatting") return "沟通中";
+  if (phase === "walking") return "去工位中";
+  if (phase === "done") return "完成，等你查看";
+  if (phase === "returning") return "回去休息";
+  if (phase === "idle") return "休息中";
+  return {
+    image: "图片生成中",
+    video: "影片生成中",
+    copy: "文案生成中",
+    schedule: "排期规划中",
+    command: "沟通中",
+    chat: "沟通中"
+  }[mode] || "处理中";
 }
 
 function agent3DCopy(mode = "idle") {
@@ -1906,8 +2438,8 @@ function agent3DCopy(mode = "idle") {
     idle: {
       label: "Idle mode",
       title: "Mascot sedang rehat, menunggu arahan.",
-      subtitle: "没有任务时它会在生活区休息、跑步或待命。用户一发任务，它就走去对应工位开工。",
-      cards: ["Resting", "Training", "Ready"]
+      subtitle: "没活干的时候它就在生活区睡觉。用户一发消息，它先到中间沟通区回应；需要生成图片或影片时，再去电脑工位开工。",
+      cards: ["Sleeping", "Chatting", "Working"]
     },
     image: {
       label: "Image station",
@@ -1934,10 +2466,16 @@ function agent3DCopy(mode = "idle") {
       cards: ["7 days", "Queue", "Review"]
     },
     command: {
-      label: "Command station",
-      title: "Command station: coordinate the workspace.",
-      subtitle: "复杂任务会进入指挥工位：它会拆任务、调用工具，然后把结果放回 Duitok Studio。",
-      cards: ["Decode", "Generate", "Update"]
+      label: "Chat station",
+      title: "Chat station: talk with the user.",
+      subtitle: "当用户正在跟 Agent 沟通、问问题或交代需求时，它会来到中间交流区，像真人客服一样回应。",
+      cards: ["Listen", "Clarify", "Reply"]
+    },
+    chat: {
+      label: "Chat station",
+      title: "Chat station: talk with the user.",
+      subtitle: "当用户正在跟 Agent 沟通、问问题或交代需求时，它会来到中间交流区，像真人客服一样回应。",
+      cards: ["Listen", "Clarify", "Reply"]
     }
   };
   return copy[mode] || copy.idle;
@@ -1946,17 +2484,25 @@ function agent3DCopy(mode = "idle") {
 function agent3DScene() {
   const mode = currentAgent3DMode();
   const copy = agent3DCopy(mode);
+  const params = new URLSearchParams(window.location.search);
+  const canPreview = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+  const phasePreview = canPreview ? params.get("agentPhase") : "";
+  const idlePreview = canPreview ? params.get("agentIdle") : "";
+  const phase = ["idle", "wake", "chatting", "walking", "working", "done", "returning"].includes(phasePreview) ? phasePreview : state.agentVisualPhase || "idle";
+  const idle = ["sleep"].includes(idlePreview) ? idlePreview : "sleep";
   return `
-    <div class="agent-3d-card agent-life-card" data-agent-mode="${mode}">
+    <div class="agent-3d-card agent-life-card" data-agent-mode="${mode}" data-agent-phase="${phase}" data-idle-activity="${idle}">
       <div class="agent-3d-status">
         <span>${icon(mode === "idle" ? "moon" : "activity", 17)} ${copy.label}</span>
-        <b>${mode === "idle" ? "Standby" : "Working"}</b>
+        <b>${mode === "idle" ? "Standby" : mode === "chat" || mode === "command" ? "Talking" : "Working"}</b>
       </div>
-      <div class="agent-life-stage" aria-label="Duitok Agent work, rest, and training states">
-        <img class="agent-life-render-image" src="/duitok-agent-life-render.png" alt="Duitok Agent working, resting, and training">
-        <span class="agent-life-focus focus-work"></span>
-        <span class="agent-life-focus focus-bed"></span>
-        <span class="agent-life-focus focus-run"></span>
+      <div class="agent-life-stage" aria-label="Duitok Agent work, chat, and rest states">
+        <img class="agent-life-render-image" src="/duitok-agent-stage-chat-bg.png" alt="Duitok Agent workstation, chat station, and sleeping bed">
+        <span class="agent-life-route" aria-hidden="true"></span>
+        <img class="agent-sprite agent-sprite-work" src="/duitok-agent-sprite-work.png" alt="">
+        <img class="agent-sprite agent-sprite-chat" src="/duitok-agent-sprite-chat.png" alt="">
+        <img class="agent-sprite agent-sprite-sleep" src="/duitok-agent-sprite-sleep-v2.png" alt="">
+        <span class="agent-life-bubble">${agentVisualBubble(mode, phase)}</span>
       </div>
       <div class="agent-3d-copy">
         <h2>${copy.title}</h2>
@@ -2040,6 +2586,7 @@ function bind() {
   document.querySelectorAll("[data-agent-prompt]").forEach((el) => el.addEventListener("click", () => sendAgentMessage(el.dataset.agentPrompt)));
   document.querySelectorAll("[data-date-field]").forEach((el) => el.addEventListener("change", () => set({ [el.dataset.dateField]: el.value })));
   document.querySelectorAll("[data-action]").forEach((el) => el.addEventListener("click", (e) => action(e, el.dataset.action)));
+  document.querySelectorAll("[data-field-set]").forEach((el) => el.addEventListener("click", () => saveProjectField(el.dataset.fieldSet, el.dataset.value)));
   document.querySelectorAll("[data-field]").forEach((el) => el.addEventListener("change", fieldChange));
   document.querySelectorAll("[data-upload]").forEach((el) => el.addEventListener("change", uploadChange));
   document.querySelector("[data-agent-input]")?.addEventListener("input", (e) => { state.agentInput = e.target.value; });
@@ -2168,6 +2715,15 @@ async function submit(event) {
   if (event.currentTarget.dataset.form === "affiliate") {
     return notify("Affiliate application saved for the next backend phase.");
   }
+  if (event.currentTarget.dataset.form === "account-profile") {
+    return updateAccountProfile({ name: data.name, phone: currentAccountUser().phone || "" });
+  }
+  if (event.currentTarget.dataset.form === "account-whatsapp") {
+    return updateAccountProfile({ name: currentAccountUser().name || "", phone: data.phone });
+  }
+  if (event.currentTarget.dataset.form === "account-password") {
+    return changeAccountPassword(data);
+  }
   if (event.currentTarget.dataset.form === "project") {
     const form = event.currentTarget;
     if (form.dataset.submitting === "true") return;
@@ -2201,8 +2757,10 @@ async function submit(event) {
 }
 
 async function fieldChange(event) {
-  const field = event.target.dataset.field;
-  const value = event.target.value;
+  return saveProjectField(event.target.dataset.field, event.target.value);
+}
+
+async function saveProjectField(field, value) {
   const projectId = state.projectId;
   const previousDb = state.db;
   set({ db: dbWithProjectField(previousDb, projectId, field, value) });
@@ -2322,12 +2880,36 @@ function applyAgentUiActions(uiActions = [], db) {
   return patch;
 }
 
+function scheduleAgentVisual(patch, delay) {
+  clearTimeout(agentVisualTimer);
+  agentVisualTimer = setTimeout(() => set(patch), delay);
+}
+
+function startAgentVisual(content) {
+  const taskMode = agentWorkMode(content);
+  const isChatOnly = taskMode === "command";
+  const startPhase = "wake";
+  set({ agentTaskMode: taskMode, agentVisualPhase: startPhase });
+  scheduleAgentVisual({ agentTaskMode: isChatOnly ? "chat" : taskMode, agentVisualPhase: isChatOnly ? "chatting" : "walking" }, 700);
+  setTimeout(() => {
+    if (state.agentBusy && !isChatOnly) set({ agentTaskMode: taskMode, agentVisualPhase: "working" });
+  }, 1900);
+}
+
+function completeAgentVisual() {
+  clearTimeout(agentVisualTimer);
+  set({ agentVisualPhase: "done" });
+  setTimeout(() => set({ agentVisualPhase: "returning" }), 1100);
+  setTimeout(() => set({ agentVisualPhase: "idle", agentTaskMode: "idle", agentIdleActivity: "sleep" }), 2400);
+}
+
 async function sendAgentMessage(message) {
   const content = String(message || state.agentInput || "").trim();
   if (!content || state.agentBusy) return;
   const nextMessages = [...state.agentMessages, { role: "user", content }];
   rememberAgentMessages(nextMessages);
   set({ agentMessages: nextMessages, agentInput: "", agentBusy: true });
+  startAgentVisual(content);
   try {
     const res = await api("/agent", {
       method: "POST",
@@ -2347,11 +2929,13 @@ async function sendAgentMessage(message) {
       agentBusy: false,
       ...applyAgentUiActions(res.uiActions, db)
     });
+    completeAgentVisual();
     if (res.toolResults?.length) notify("Duitok Agent updated the workspace.");
   } catch (error) {
     const messages = [...nextMessages, { role: "assistant", content: error.message }];
     rememberAgentMessages(messages);
     set({ agentMessages: messages, agentBusy: false });
+    completeAgentVisual();
     notify(error.message);
   }
 }
@@ -2391,6 +2975,26 @@ async function adminCleanupPayment(paymentId) {
   const db = await api(`/admin/payments/${paymentId}/cleanup`, { method: "POST", body: JSON.stringify({ deleteUser: true }) });
   set({ db });
   notify("Pending checkout cleaned up.");
+}
+
+async function updateAccountProfile(patch) {
+  try {
+    const res = await api("/account/profile", { method: "PATCH", body: JSON.stringify(patch) });
+    localStorage.setItem("duitok-user", JSON.stringify(res.user));
+    set({ user: res.user, db: res.state });
+    notify("Account settings saved.");
+  } catch (error) {
+    notify(error.message);
+  }
+}
+
+async function changeAccountPassword(data) {
+  try {
+    await api("/account/password", { method: "PATCH", body: JSON.stringify(data) });
+    notify("Password changed.");
+  } catch (error) {
+    notify(error.message);
+  }
 }
 
 async function refreshPaymentStatus(orderId) {
