@@ -2103,21 +2103,6 @@ button:disabled [data-lucide="loader-circle"] {
   color: var(--gold);
 }
 
-.live-tab {
-  position: fixed;
-  right: 0;
-  top: 38%;
-  z-index: 25;
-  writing-mode: vertical-rl;
-  min-height: 168px;
-  border: 0;
-  border-radius: 12px 0 0 12px;
-  background: var(--gold);
-  color: #080808;
-  font-weight: 950;
-  box-shadow: var(--shadow);
-}
-
 .chat-bubble {
   position: fixed;
   right: 28px;
@@ -2551,11 +2536,6 @@ button:disabled [data-lucide="loader-circle"] {
     justify-content: flex-start;
   }
 
-  .live-tab {
-    top: auto;
-    bottom: 112px;
-    min-height: 128px;
-  }
 }
 
 /* Duitok AI brand refresh */
@@ -2783,8 +2763,7 @@ body {
 .sop-button,
 .checkout-steps b,
 .chat-panel button,
-.step-tabs button.active,
-.live-tab {
+.step-tabs button.active {
   background: linear-gradient(135deg, var(--pink), var(--coral));
   color: white;
   border-color: transparent;
@@ -3956,12 +3935,6 @@ label {
   padding: 11px 0;
 }
 
-.live-tab {
-  min-height: 118px;
-  font-size: 13px;
-  opacity: 0.9;
-}
-
 .chat-bubble {
   width: 48px;
   height: 48px;
@@ -4452,7 +4425,6 @@ label {
 
 .studio-shell .dark-button,
 .studio-shell .sop-button,
-.studio-shell .live-tab,
 .studio-shell .step-tabs button.active {
   background: #26072d;
   color: #fff;
@@ -4535,9 +4507,6 @@ label {
     width: 100%;
   }
 
-  .studio-shell .live-tab {
-    display: none;
-  }
 }
 
 /* Public homepage refresh: dark conversion hero, calmer light sections below. */

@@ -1144,9 +1144,7 @@ function studio() {
         <button class="side-link ${state.page === "whatsapp" ? "active" : ""}" data-page="whatsapp">${icon("message-circle")} ${t("whatsapp")}${icon("arrow-up-right", 14)}</button>
       </aside>
       <main class="workspace">${page()}</main>
-      <button class="live-tab" data-action="live">${icon("activity", 18)} LIVE - ${state.db.liveCount}</button>
       <button class="chat-bubble support-bubble" data-action="support" title="Contact support">${icon("message-circle", 32)}</button>
-      ${state.live ? livePanel() : ""}
       ${modal()}
     </div>`;
 }
@@ -1976,7 +1974,6 @@ async function action(event, name) {
   }
   if (name === "apply-date") return notify("Dashboard date range applied.");
   if (name === "reset-date") return set({ dateFrom: "2026-05-01", dateTo: "2026-05-26" });
-  if (name === "live") return set({ live: !state.live });
   if (name === "chat") return set({ page: "agent" });
   if (name === "clear-agent") {
     localStorage.removeItem("duitok-agent-messages");
