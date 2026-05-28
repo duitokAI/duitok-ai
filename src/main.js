@@ -2017,39 +2017,6 @@ function dashboardOverview() {
         <div class="card-title"><h2>${icon("trending-up", 22)} Daily Production</h2><span>${stats.results.length} total in range</span></div>
         ${productionChart(stats.results)}
       </article>
-      <article class="next-action-card">
-        <p class="eyebrow">Recommended next action</p>
-        <h2>${nextActionTitle()}</h2>
-        <p>${nextActionCopy(stats)}</p>
-        <div class="next-actions">
-          <button class="gold-button" data-page="autopost">${icon("calendar-plus")} Go to Scheduler</button>
-          <button class="dark-button" data-step-open="ugc">${icon("video")} Generate UGC</button>
-        </div>
-      </article>
-    </section>
-    <section class="dashboard-main-grid">
-      <article class="cost-card">
-        <div class="card-title"><h2>${icon("receipt-text", 22)} Credit Breakdown</h2><span>Usage ledger</span></div>
-        ${costBreakdown(stats)}
-      </article>
-      <article class="activity-card">
-        <div class="card-title"><h2>${icon("activity", 22)} Recent Activity</h2><span>Backend ledger</span></div>
-        ${recentActivity(stats.usage)}
-      </article>
-    </section>
-    <section class="dashboard-main-grid">
-      <article class="activity-card">
-        <div class="card-title"><h2>${icon("list-checks", 22)} Generation Queue</h2><span>${state.db.generationJobs.length} jobs</span></div>
-        ${generationQueueTable(state.db.generationJobs)}
-      </article>
-      <article class="activity-card">
-        <div class="card-title"><h2>${icon("database", 22)} Asset Storage</h2><span>${state.db.storage?.durableAssets ? "CDN ready" : "Proxy ready"}</span></div>
-        ${table([
-          ["Current mode", state.db.storage?.durableAssets ? "Duitok media CDN" : "Duitok media proxy", state.db.storage?.message || ""],
-          ["Content library", `${allResults().length} assets`, "Generated assets stay attached to your account"],
-          ["Publishing", `${state.db.schedule.filter((item) => item.mediaUrl).length} media URLs`, "Scheduler stores the final publish media URL"]
-        ])}
-      </article>
     </section>`;
 }
 
