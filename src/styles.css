@@ -10292,6 +10292,116 @@ label {
   color: #40d36e;
 }
 
+/* Usage page density pass: keep credit analytics compact and scannable. */
+.studio-shell .workspace:has(.usage-experience) .project-head {
+  margin-bottom: 22px;
+}
+
+.studio-shell .workspace:has(.usage-experience) .project-head h1 {
+  font-size: clamp(46px, 5vw, 72px);
+  line-height: 0.95;
+}
+
+.studio-shell .workspace:has(.usage-experience) .project-head .subtitle {
+  font-size: clamp(16px, 1.35vw, 21px);
+}
+
+.studio-shell .workspace:has(.usage-experience) .project-head .sop-button {
+  min-height: 52px;
+  border-radius: 999px;
+  padding: 0 24px;
+  font-size: 16px;
+}
+
+.studio-shell .usage-experience {
+  gap: 20px;
+}
+
+.studio-shell .usage-summary-grid {
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.studio-shell .usage-summary-card {
+  min-height: 106px;
+  gap: 7px;
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.14);
+}
+
+.studio-shell .usage-summary-card span,
+.studio-shell .usage-filter-row > span,
+.studio-shell .usage-ledger-head {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+}
+
+.studio-shell .usage-summary-card b {
+  font-size: clamp(28px, 3.2vw, 42px);
+}
+
+.studio-shell .usage-summary-card small {
+  font-size: 13px;
+}
+
+.studio-shell .usage-ledger-panel {
+  gap: 14px;
+  border-radius: 18px;
+  padding: clamp(18px, 2.6vw, 30px);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.14);
+}
+
+.studio-shell .usage-filter-row {
+  gap: 12px;
+}
+
+.studio-shell .usage-filter-row button {
+  min-height: 34px;
+  border-radius: 9px;
+  padding: 0 11px;
+  font-size: 12px;
+}
+
+.studio-shell .usage-filter-row small {
+  font-size: 12px;
+}
+
+.studio-shell .usage-ledger-head,
+.studio-shell .usage-ledger-table article {
+  min-width: 720px;
+  grid-template-columns: minmax(120px, 0.95fr) minmax(180px, 1.25fr) 92px 126px 66px 66px;
+  gap: 8px;
+}
+
+.studio-shell .usage-ledger-head {
+  min-height: 42px;
+  padding: 0 14px;
+}
+
+.studio-shell .usage-ledger-table article {
+  min-height: 66px;
+  padding: 13px 14px;
+}
+
+.studio-shell .usage-ledger-table strong,
+.studio-shell .usage-ledger-table span,
+.studio-shell .usage-ledger-table b {
+  font-size: 14px;
+}
+
+.studio-shell .usage-ledger-table p,
+.studio-shell .usage-ledger-table time {
+  font-size: 12px;
+}
+
+.studio-shell .usage-ledger-table em {
+  gap: 5px;
+  border-radius: 7px;
+  padding: 5px 8px;
+  font-size: 12px;
+}
+
 .topup-experience {
   display: grid;
   gap: 24px;
