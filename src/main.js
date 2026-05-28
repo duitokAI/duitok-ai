@@ -2147,7 +2147,69 @@ function wordCount(value = "") {
 }
 
 function autoPanel(p) {
-  return `<div class="generator-box"><h2>${icon("wand-sparkles")} Auto Content</h2><div class="form-grid three">${select("auto.platform", "Platform", ["TikTok", "Instagram Reels", "YouTube Shorts"], p.auto.platform)}${select("auto.batch", "Batch", ["3 posts", "7 posts", "14 posts"], p.auto.batch)}${select("auto.tone", "Tone", ["Educational", "Soft sell", "Viral hook"], p.auto.tone)}</div></div><div class="prompt-block"><label>Product URL<input data-field="auto.productUrl" value="${esc(p.auto.productUrl)}" placeholder="https://www.tiktok.com/shop/..."></label><button class="gold-button" data-action="generate-auto">${icon("calendar-plus")} Build Batch</button></div>${schedule()}`;
+  const source = p.auto.source || "Affiliate";
+  const provider = p.auto.provider || "Veo 3.1";
+  const planStyle = p.auto.planStyle || "Normal Flow";
+  const frameworks = [
+    ["UGC", "Hook + Pain (PAS)"],
+    ["PRD", "Product Hero (AIDA)"],
+    ["UGC", "Testimonial"],
+    ["UGC", "FOMO/Urgency"],
+    ["PRD", "Before/After"],
+    ["UGC", "BAB (Before-After-Bridge)"],
+    ["UGC", "4Ps (Promise-Picture-Proof-Push)"],
+    ["PRD", "USP Showcase"],
+    ["UGC", "Action Bias"],
+    ["UGC", "Solution Focus"]
+  ];
+  return `
+    <section class="auto-content-card">
+      <div class="auto-content-head">
+        <h2>🪄 Auto Content</h2>
+        <span>AI → Image → Video → Merge</span>
+      </div>
+      <div class="auto-source-tabs">
+        ${autoButton("auto.source", "Affiliate", "🔗 Affiliate", source)}
+        ${autoButton("auto.source", "Manual Product", "📦 Manual Product", source)}
+      </div>
+      <label class="auto-product-picker">
+        <input data-field="auto.productUrl" value="${esc(p.auto.productUrl)}" placeholder="Pick a product from the dropdown →">
+        <span>🕐 <b>0</b></span>
+      </label>
+      <p class="auto-helper">Untuk Fetch Buka Extension Auto Post Tab Affiliate</p>
+      <div class="auto-persona-card form-grid three">
+        ${select("auto.gender", "Gender", ["Female", "Male"], p.auto.gender || "Female")}
+        ${select("auto.style", "Style", ["Hijab", "Casual", "Professional", "Streetwear"], p.auto.style || "Hijab")}
+        ${select("auto.age", "Age", ["20s", "30s", "40s", "50s"], p.auto.age || "30s")}
+      </div>
+      <p class="field-label">Provider</p>
+      <div class="auto-provider-grid">
+        ${autoButton("auto.provider", "Veo 3.1", "🎬 Veo 3.1", provider)}
+        ${autoButton("auto.provider", "Sora 2", "⚡ Sora 2", provider)}
+        ${autoButton("auto.provider", "GeminiOmni", "🔷 GeminiOmni", provider)}
+      </div>
+      <div class="auto-duration-pill">8s (1 shot)</div>
+      <label class="auto-size-field">Size${select("auto.size", "", ["9:16", "1:1", "16:9"], p.auto.size || "9:16")}</label>
+      <p class="field-label">Plan Style</p>
+      <div class="auto-plan-grid">
+        ${autoPlanButton("Normal Flow", "AI plan biasa — framework drive scene", planStyle)}
+        ${autoPlanButton("Custom Idea", "Client kasi idea — AI buat variants", planStyle, true)}
+      </div>
+      <p class="field-label">Frameworks <small>(pick up to 5 angles)</small></p>
+      <div class="auto-framework-grid">
+        ${frameworks.map(([tag, label]) => '<label><input type="checkbox" data-auto-framework="' + esc(tag + " " + label) + '"><span class="' + (tag === "UGC" ? "ugc-tag" : "prd-tag") + '">' + tag + '</span> ' + label + ' <b>ⓘ</b></label>').join("")}
+      </div>
+      <button class="gold-button auto-generate-button" data-action="generate-auto">${icon("video")} Generate</button>
+    </section>
+    ${schedule()}`;
+}
+
+function autoButton(field, value, label, active) {
+  return `<button class="${active === value ? "active" : ""}" type="button" data-field-set="${field}" data-value="${esc(value)}">${label}</button>`;
+}
+
+function autoPlanButton(value, note, active, isNew = false) {
+  return `<button class="${active === value ? "active" : ""}" type="button" data-field-set="auto.planStyle" data-value="${esc(value)}">${isNew ? "<em>✨ NEW</em>" : ""}<b>${value}</b><span>${note}</span></button>`;
 }
 
 function originalPanel(p) {
