@@ -3298,7 +3298,13 @@ function bind() {
   document.querySelectorAll("[data-field-set]").forEach((el) => el.addEventListener("click", () => saveProjectField(el.dataset.fieldSet, el.dataset.value)));
   document.querySelectorAll("[data-field]").forEach((el) => el.addEventListener("change", fieldChange));
   document.querySelectorAll("[data-upload]").forEach((el) => el.addEventListener("change", uploadChange));
-  document.querySelector("[data-agent-input]")?.addEventListener("input", (e) => { state.agentInput = e.target.value; });
+  const agentInput = document.querySelector("[data-agent-input]");
+  agentInput?.addEventListener("input", (e) => { state.agentInput = e.target.value; });
+  agentInput?.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" || event.shiftKey || event.metaKey || event.ctrlKey || event.altKey || event.isComposing) return;
+    event.preventDefault();
+    event.currentTarget.form?.requestSubmit();
+  });
   document.querySelectorAll("[data-prompt-group]").forEach((el) => el.addEventListener("click", () => set({ imagePromptGroup: el.dataset.promptGroup })));
   document.querySelectorAll("[data-image-preset]").forEach((el) => el.addEventListener("click", () => applyImagePreset(el.dataset.imagePreset)));
   document.querySelectorAll("[data-topup-select]").forEach((el) => el.addEventListener("click", () => set({ topupAmount: Number(el.dataset.topupSelect) })));
