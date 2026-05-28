@@ -8607,15 +8607,17 @@ label {
 }
 
 .agent-page-panel .agent-thread article.assistant > p {
-  color: rgba(31, 6, 38, 0.82);
+  color: rgba(31, 6, 38, 0.92);
+  font-weight: 760;
 }
 
 .agent-page-panel .agent-message {
   display: grid;
   gap: 12px;
-  color: rgba(31, 6, 38, 0.82);
-  font-size: 15px;
-  line-height: 1.55;
+  color: rgba(31, 6, 38, 0.94);
+  font-size: 15.5px;
+  font-weight: 720;
+  line-height: 1.58;
 }
 
 .agent-page-panel .agent-message p,
@@ -8632,7 +8634,7 @@ label {
 }
 
 .agent-page-panel .agent-message strong {
-  color: var(--purple);
+  color: #4f055f;
   font-weight: 950;
 }
 
@@ -8666,7 +8668,7 @@ label {
 
 .agent-message-table th {
   background: rgba(93, 8, 108, 0.06);
-  color: rgba(31, 6, 38, 0.72);
+  color: rgba(31, 6, 38, 0.86);
   font-size: 13px;
   font-weight: 950;
   text-align: left;
@@ -12242,6 +12244,25 @@ label {
   justify-content: flex-end;
   gap: clamp(28px, 5vw, 72px);
   margin-left: auto;
+}
+
+.footer-geo-links {
+  flex: 1 1 420px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 16px;
+}
+
+.public-shell .footer-geo-links a {
+  color: rgba(75, 0, 94, 0.58) !important;
+  font-size: 13px;
+  font-weight: 850;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.public-shell .footer-geo-links a:hover {
+  color: var(--brand-pink) !important;
 }
 
 .public-shell .footer-links a {

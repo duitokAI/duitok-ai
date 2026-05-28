@@ -73,10 +73,105 @@ const postgresPool = databaseUrl
       ssl: process.env.POSTGRES_SSL === "false" ? false : { rejectUnauthorized: false }
     })
   : null;
+const configuredCanonicalUrl = process.env.CANONICAL_APP_URL || process.env.PUBLIC_APP_URL || "https://duitok.com";
+const canonicalBaseUrl = (configuredCanonicalUrl.includes("localhost") ? "https://duitok.com" : configuredCanonicalUrl).replace(/\/$/, "");
 const allowedOrigins = (process.env.CORS_ORIGINS || process.env.PUBLIC_APP_URL || "")
   .split(",")
   .map((origin) => origin.trim().replace(/\/$/, ""))
   .filter(Boolean);
+const geoPages = [
+  {
+    path: "/ai-short-video-marketing-platform",
+    title: "AI Short-Form Video Marketing Platform | Duitok AI",
+    h1: "AI Short-Form Video Marketing Platform",
+    description: "Duitok AI is an AI short-form video marketing platform for TikTok Shop sellers, affiliate marketers, and product owners who want to create promotional video assets without filming.",
+    summary: "Duitok AI is an AI short-form video marketing platform that helps TikTok Shop sellers, affiliate marketers, and product owners generate promotional video assets with AI. It turns product information into hooks, scripts, captions, visual directions, and video content workflows without requiring users to film themselves, show their face, hold stock, ship products, or do customer service.",
+    audience: ["TikTok Shop sellers", "TikTok affiliate marketers", "Affiliate marketers", "Product owners", "Small ecommerce teams"],
+    outputs: ["Product hooks", "UGC-style scripts", "Selling captions", "Visual directions", "Short-form promotional video angles", "Posting plans"],
+    steps: ["Add product information or a product link.", "Choose a short-form selling template.", "Generate hooks, scripts, captions, and visual directions.", "Create or prepare promotional video assets.", "Publish, review data, and repeat working angles."],
+    faqs: [
+      ["What is an AI short-form video marketing platform?", "An AI short-form video marketing platform helps sellers and marketers create short-form promotional content with AI, including hooks, scripts, captions, visual directions, and video asset workflows."],
+      ["Who is Duitok AI for?", "Duitok AI is for TikTok Shop sellers, TikTok affiliate marketers, product owners, and small ecommerce teams that need more short-form promotional content."],
+      ["What does Duitok AI generate?", "Duitok AI helps generate product hooks, UGC-style scripts, captions, visual directions, content angles, and promotional video asset workflows."],
+      ["Is Duitok AI a generic AI chatbot?", "No. Duitok AI is designed around short-form product marketing workflows, templates, SOPs, and content generation for sellers and affiliates."],
+      ["Does Duitok AI guarantee income?", "No. Duitok AI does not guarantee income. Results depend on product selection, account quality, posting volume, content quality, market feedback, and execution."],
+      ["How much does Duitok AI cost?", "The current Duitok AI plan is RM69 per month and includes access to the platform, templates, SOPs, and 10 promo credits."]
+    ]
+  },
+  {
+    path: "/tiktok-shop-ai-video-generator",
+    title: "TikTok Shop AI Video Generator | Duitok AI",
+    h1: "TikTok Shop AI Video Generator",
+    description: "Duitok AI helps TikTok Shop sellers generate product promo video assets, hooks, scripts, captions, and content angles with AI.",
+    summary: "Duitok AI helps TikTok Shop sellers create product promotional video assets with AI. Sellers can turn product information into hooks, scripts, captions, visual directions, and short-form content angles without filming every video manually or needing to show their face.",
+    audience: ["TikTok Shop sellers", "TikTok Shop operators", "Product sellers", "Small ecommerce teams"],
+    outputs: ["TikTok Shop product hooks", "Product promo scripts", "Selling captions", "Product video angles", "Visual directions", "Testing plans"],
+    steps: ["Add product information.", "Select a TikTok Shop selling angle.", "Generate hooks, scripts, and captions.", "Prepare no-face or product-focused video assets.", "Post and test multiple angles."],
+    faqs: [
+      ["Can Duitok AI create TikTok Shop product promo videos?", "Duitok AI helps create the hooks, scripts, captions, visual directions, and promotional video asset workflows used for TikTok Shop product videos."],
+      ["Do TikTok Shop sellers need to film every video manually?", "No. Duitok AI is designed to reduce manual filming by helping sellers generate no-face and product-focused promotional content workflows."],
+      ["Do sellers need to hold stock?", "Duitok AI does not require users to hold stock in order to generate marketing assets. Actual selling and fulfillment depend on the user's chosen business model."],
+      ["Can Duitok AI help with TikTok Shop hooks and captions?", "Yes. Duitok AI helps generate product hooks, scripts, captions, and content angles for TikTok Shop promotional content."],
+      ["Is Duitok AI only for TikTok Shop?", "No. TikTok Shop is a strong use case, but Duitok AI can also support affiliate content, product promo videos, Reels, Shorts, and other short-form channels."],
+      ["Does Duitok AI guarantee TikTok Shop sales?", "No. Duitok AI provides an AI video marketing workflow, but sales depend on product selection, account quality, content quality, market demand, and execution."]
+    ]
+  },
+  {
+    path: "/ai-tiktok-affiliate-video-generator",
+    title: "AI TikTok Affiliate Video Generator | Duitok AI",
+    h1: "AI TikTok Affiliate Video Generator",
+    description: "Duitok AI helps TikTok affiliate marketers generate product recommendation hooks, UGC-style scripts, captions, and short-form content angles with AI.",
+    summary: "Duitok AI helps TikTok affiliate marketers create short-form selling content for product recommendations. It generates hooks, UGC-style scripts, captions, and product content angles so affiliates can test more videos without starting from a blank page.",
+    audience: ["TikTok affiliate marketers", "Affiliate sellers", "Creators", "Product reviewers", "No-face content creators"],
+    outputs: ["Affiliate product hooks", "UGC recommendation scripts", "Soft-sell captions", "Product comparison angles", "CTA ideas", "Posting plans"],
+    steps: ["Choose a product to promote.", "Add product benefits or a product link.", "Generate affiliate hooks, scripts, and captions.", "Create multiple recommendation angles.", "Post, review, and repeat angles that show signals."],
+    faqs: [
+      ["Is Duitok AI useful for TikTok Affiliate?", "Yes. Duitok AI is built for product recommendation workflows that fit TikTok Affiliate and other short-form affiliate marketing channels."],
+      ["Can Duitok AI generate affiliate product video scripts?", "Yes. Duitok AI can generate UGC-style product recommendation scripts, hooks, captions, and CTA ideas."],
+      ["Do affiliates need to show their face?", "No. Duitok AI supports no-face product content workflows and product-focused promotional angles."],
+      ["Can Duitok AI help test more affiliate products?", "Yes. Duitok AI helps affiliates create more content angles faster so they can test products, hooks, audiences, and CTAs."],
+      ["Does Duitok AI replace affiliate strategy?", "No. It provides templates, SOPs, and generation workflows, but users still need product selection, posting consistency, and data review."],
+      ["Does Duitok AI guarantee affiliate income?", "No. Duitok AI does not guarantee income. Results depend on product, account quality, content quality, market feedback, and execution."]
+    ]
+  },
+  {
+    path: "/no-face-ai-product-video-generator",
+    title: "No-Face AI Product Video Generator | Duitok AI",
+    h1: "No-Face AI Product Video Generator",
+    description: "Duitok AI helps sellers and affiliates create no-face product promotional video assets with AI, without filming themselves or showing their face.",
+    summary: "Duitok AI helps users create product promotional video assets without showing their face. It is designed for sellers, affiliates, and product owners who want AI-assisted short-form product content without filming themselves on camera.",
+    audience: ["No-face creators", "Beginner sellers", "TikTok affiliate marketers", "TikTok Shop sellers", "Product owners"],
+    outputs: ["No-face product hooks", "Product-focused scripts", "Captions", "Visual directions", "Short-form video angles", "Product promo workflows"],
+    steps: ["Add the product information.", "Choose a no-face content angle.", "Generate hooks, scripts, captions, and visual direction.", "Create product-focused promotional assets.", "Publish and review performance."],
+    faqs: [
+      ["Can I create product videos without showing my face?", "Yes. Duitok AI is designed to support no-face product promotional content workflows."],
+      ["Do I need to film myself?", "No. Duitok AI helps create hooks, scripts, captions, and visual directions for no-face or product-focused content."],
+      ["Is no-face product content suitable for beginners?", "Yes. No-face content can be a lower-friction way for beginners to start short-form product marketing without camera confidence."],
+      ["What does Duitok AI generate for no-face videos?", "It helps generate product hooks, scripts, captions, content angles, and visual directions for no-face promotional videos."],
+      ["Can no-face content be used for TikTok Shop or TikTok Affiliate?", "Yes. No-face product content can be used for TikTok Shop, TikTok Affiliate, Reels, Shorts, and other short-form product marketing channels."],
+      ["Does no-face content guarantee sales?", "No. Results depend on product selection, content quality, posting volume, market demand, and execution."]
+    ]
+  },
+  {
+    path: "/ai-product-promo-video-generator",
+    title: "AI Product Promo Video Generator | Duitok AI",
+    h1: "AI Product Promo Video Generator",
+    description: "Duitok AI helps product owners and ecommerce sellers generate promotional video assets, hooks, scripts, captions, and visual directions with AI.",
+    summary: "Duitok AI helps product owners and ecommerce sellers generate promotional video assets from product information. It creates selling angles, hooks, scripts, captions, and visual directions for short-form product marketing across TikTok Shop, Reels, Shorts, and other channels.",
+    audience: ["Product owners", "Ecommerce sellers", "Small brands", "Affiliate marketers", "Content teams"],
+    outputs: ["Product promo hooks", "Selling scripts", "Captions", "Visual directions", "Product positioning angles", "Short-form content plans"],
+    steps: ["Add product information.", "Break down selling points.", "Generate hooks, scripts, captions, and visual directions.", "Prepare product promo video assets.", "Publish and repeat working angles."],
+    faqs: [
+      ["What is an AI product promo video generator?", "It is a tool that helps create product promotional video assets with AI, including hooks, scripts, captions, visual directions, and short-form content angles."],
+      ["Can Duitok AI help ecommerce sellers?", "Yes. Duitok AI helps ecommerce sellers and product owners create short-form promotional content workflows for products."],
+      ["What promotional assets does Duitok AI generate?", "Duitok AI helps generate hooks, scripts, captions, visual directions, and product content angles."],
+      ["Can Duitok AI be used beyond TikTok?", "Yes. Duitok AI can support product promo content for TikTok Shop, TikTok Affiliate, Reels, Shorts, and other short-form channels."],
+      ["Do I need a video production team?", "No. Duitok AI is designed to reduce manual production work, though users still need to review and publish content responsibly."],
+      ["Does Duitok AI guarantee revenue?", "No. Duitok AI provides content generation workflows and templates. Revenue depends on product, market, content quality, posting volume, and execution."]
+    ]
+  }
+];
+const publicMarketingPaths = new Set(["/", "/affiliate", "/terms", "/privacy", ...geoPages.map((page) => page.path)]);
 
 const app = express();
 app.use((req, res, next) => {
@@ -87,7 +182,7 @@ app.use((req, res, next) => {
   }
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Signature");
-  res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
+  if (!isIndexablePath(req.path)) res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
   if (/^\/api\/(?:state|export|admin|media|agent|projects)/.test(req.path)) {
     res.setHeader("Cache-Control", "no-store");
   }
@@ -110,6 +205,205 @@ app.get("/api/health", (_req, res) => {
     generation: storage.ready ? "available" : "blocked"
   });
 });
+
+app.get("/robots.txt", (_req, res) => {
+  res
+    .type("text/plain")
+    .send([
+      "User-agent: *",
+      "Allow: /",
+      "Disallow: /api/",
+      "Disallow: /admin",
+      "Disallow: /studio",
+      "Disallow: /login",
+      "Disallow: /register",
+      "",
+      `Sitemap: ${siteUrl("/sitemap.xml")}`,
+      ""
+    ].join("\n"));
+});
+
+app.get("/sitemap.xml", (_req, res) => {
+  const urls = ["/", "/affiliate", "/terms", "/privacy", ...geoPages.map((page) => page.path)];
+  res
+    .type("application/xml")
+    .send(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.map((url) => `  <url><loc>${escapeHtml(siteUrl(url))}</loc></url>`).join("\n")}
+</urlset>`);
+});
+
+for (const page of geoPages) {
+  app.get(page.path, (_req, res) => {
+    res.type("html").send(geoPageHtml(page));
+  });
+}
+
+function isIndexablePath(requestPath = "") {
+  return publicMarketingPaths.has(requestPath) || requestPath === "/robots.txt" || requestPath === "/sitemap.xml";
+}
+
+function escapeHtml(value = "") {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function siteUrl(pathname = "/") {
+  return `${canonicalBaseUrl}${pathname === "/" ? "" : pathname}`;
+}
+
+function softwareSchema(description) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Duitok AI",
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web",
+    url: canonicalBaseUrl,
+    offers: {
+      "@type": "Offer",
+      price: "69",
+      priceCurrency: "MYR",
+      category: "subscription"
+    },
+    description
+  };
+}
+
+function organizationSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Duitok AI",
+    url: canonicalBaseUrl,
+    logo: siteUrl("/duittok-favicon-v2.svg"),
+    email: "hello@duitok.com",
+    description: "Duitok AI is an AI short-form video marketing platform for TikTok Shop sellers, affiliate marketers, and product owners."
+  };
+}
+
+function faqSchema(faqs = []) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map(([question, answer]) => ({
+      "@type": "Question",
+      name: question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: answer
+      }
+    }))
+  };
+}
+
+function breadcrumbSchema(page) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: canonicalBaseUrl },
+      { "@type": "ListItem", position: 2, name: page.h1, item: siteUrl(page.path) }
+    ]
+  };
+}
+
+function jsonLd(data) {
+  return `<script type="application/ld+json">${JSON.stringify(data).replaceAll("</", "<\\/")}</script>`;
+}
+
+function geoPageHtml(page) {
+  const canonical = siteUrl(page.path);
+  const related = geoPages.filter((item) => item.path !== page.path);
+  const schema = [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      name: page.h1,
+      url: canonical,
+      description: page.description,
+      isPartOf: { "@type": "WebSite", name: "Duitok AI", url: canonicalBaseUrl }
+    },
+    softwareSchema(page.description),
+    faqSchema(page.faqs),
+    breadcrumbSchema(page)
+  ];
+  return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${escapeHtml(page.title)}</title>
+    <meta name="description" content="${escapeHtml(page.description)}">
+    <link rel="canonical" href="${escapeHtml(canonical)}">
+    ${schema.map(jsonLd).join("\n    ")}
+    <style>
+      :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#3b1943;background:#fff7fb}
+      *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#fff 0%,#fff7fb 42%,#f8f1ff 100%);color:#3b1943}
+      a{color:#65007d;text-decoration:none;font-weight:850}a:hover{color:#ff3f6e}
+      .wrap{width:min(1120px,calc(100% - 36px));margin:0 auto}
+      header,footer{display:flex;align-items:center;justify-content:space-between;gap:22px;padding:28px 0}
+      .brand{display:flex;align-items:center;gap:12px;font-size:28px;font-weight:950;color:#4b005e}.brand span{color:#ff3f6e}.brand img{width:46px;height:46px}
+      nav{display:flex;flex-wrap:wrap;gap:18px}main{padding:34px 0 76px}.hero{padding:54px 0 42px;border-top:1px solid rgba(75,0,94,.08)}
+      .eyebrow{display:inline-flex;border:1px solid rgba(255,63,110,.16);border-radius:999px;padding:9px 14px;background:#fff0f5;color:#ff3f6e;font-weight:950}
+      h1{max-width:900px;margin:22px 0 18px;color:#4b005e;font-size:clamp(42px,7vw,84px);line-height:.96;letter-spacing:0}
+      .lead{max-width:860px;color:#5f4467;font-size:clamp(19px,2vw,28px);line-height:1.45;font-weight:760}
+      .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:32px 0}.card,section{border:1px solid rgba(75,0,94,.11);border-radius:20px;background:rgba(255,255,255,.88);box-shadow:0 20px 54px rgba(75,0,94,.09)}
+      section{padding:30px;margin:22px 0}.card{padding:24px}.card h3,section h2{margin:0 0 12px;color:#4b005e;font-size:clamp(24px,3vw,38px);line-height:1.06}.card p,section p,li{color:#5f4467;font-size:17px;line-height:1.6;font-weight:650}
+      ul,ol{padding-left:22px}.cta{display:inline-flex;align-items:center;justify-content:center;margin-top:18px;border-radius:16px;padding:16px 22px;background:linear-gradient(180deg,#ffe064,#ffd21a);color:#2a0034;font-size:18px;font-weight:950;box-shadow:0 20px 42px rgba(255,210,26,.28)}
+      .faq details{padding:20px 0;border-top:1px solid rgba(75,0,94,.1)}summary{cursor:pointer;color:#4b005e;font-size:20px;font-weight:950}.related{display:flex;flex-wrap:wrap;gap:12px}.related a{border:1px solid rgba(75,0,94,.12);border-radius:999px;padding:10px 14px;background:#fff}
+      footer{border-top:1px solid rgba(75,0,94,.09);color:#7b687f}.small{font-size:14px;color:#7b687f}
+      @media(max-width:720px){header,footer{align-items:flex-start;flex-direction:column}.grid{grid-template-columns:1fr}main{padding-top:12px}.hero{padding-top:30px}}
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <a class="brand" href="/"><img src="/duitok-mascot-transparent.png" alt="">Duitok <span>AI</span></a>
+        <nav><a href="/">Home</a><a href="/#pricing">Pricing</a><a href="/#faq">FAQ</a><a href="/register">Start</a></nav>
+      </header>
+      <main>
+        <article class="hero">
+          <span class="eyebrow">AI Overview</span>
+          <h1>${escapeHtml(page.h1)}</h1>
+          <p class="lead">${escapeHtml(page.summary)}</p>
+          <a class="cta" href="/register">Join the RM69 plan</a>
+        </article>
+        <div class="grid">
+          <div class="card"><h3>Who It Is For</h3><ul>${page.audience.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>
+          <div class="card"><h3>What Duitok AI Generates</h3><ul>${page.outputs.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>
+        </div>
+        <section>
+          <h2>What Users Do Not Need</h2>
+          <p>Duitok AI is designed for users who want to create short-form product marketing assets without filming, showing their face, holding stock, shipping products, or doing customer service.</p>
+        </section>
+        <section>
+          <h2>How It Works</h2>
+          <ol>${page.steps.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ol>
+        </section>
+        <section>
+          <h2>Duitok AI vs Generic AI Tools</h2>
+          <p>Generic AI tools can generate text, but they do not provide a seller-focused short-form marketing workflow. Duitok AI combines templates, SOPs, product selling angles, captions, scripts, visual directions, and credit-based generation workflows for product promotion.</p>
+        </section>
+        <section class="faq">
+          <h2>FAQ</h2>
+          ${page.faqs.map(([question, answer]) => `<details><summary>${escapeHtml(question)}</summary><p>${escapeHtml(answer)}</p></details>`).join("")}
+        </section>
+        <section>
+          <h2>Related Duitok AI Use Cases</h2>
+          <div class="related">${related.map((item) => `<a href="${item.path}">${escapeHtml(item.h1)}</a>`).join("")}</div>
+        </section>
+        <p class="small">Disclaimer: Duitok AI does not guarantee income. Results depend on product selection, account quality, posting volume, content quality, market feedback, and execution.</p>
+      </main>
+      <footer><span>© 2026 Duitok AI</span><nav><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="mailto:hello@duitok.com">hello@duitok.com</a></nav></footer>
+    </div>
+  </body>
+</html>`;
+}
 
 function defaultBilling() {
   return {
