@@ -1769,19 +1769,228 @@ textarea {
   cursor: pointer;
 }
 
+.video-generator-box {
+  border-color: #ffc400;
+  border-radius: 22px;
+  box-shadow: 0 16px 38px rgba(255, 196, 0, 0.12);
+}
+
+.field-label {
+  margin: 28px 0 14px;
+  color: #8d8d8d;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.video-provider-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 26px;
+}
+
+.video-provider-grid button {
+  min-height: 72px;
+  border: 1px solid var(--soft-line);
+  border-radius: 18px;
+  background: #fffefa;
+  color: var(--ink);
+  font-size: 22px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.video-provider-grid button.active {
+  border-color: transparent;
+  background: linear-gradient(180deg, var(--gold-2), var(--gold));
+  box-shadow: 0 16px 34px rgba(255, 183, 0, 0.22);
+}
+
+.ugc-scene-card {
+  margin-top: 34px;
+  padding: 34px 38px;
+  border: 1px solid var(--soft-line);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 14px 34px rgba(31, 20, 8, 0.06);
+}
+
+.ugc-scene-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.ugc-scene-head h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 24px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ugc-scene-head button {
+  min-height: 44px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #24dfd1, #08bfae);
+  color: #fff;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.ugc-reference-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(420px, 1fr);
+  gap: 34px;
+}
+
+.ugc-reference-title {
+  margin: 0 0 14px;
+  color: var(--gold);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ugc-reference-title.product {
+  color: #f4bd00;
+}
+
+.ugc-reference-row,
+.ugc-product-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.ugc-avatar-drop,
+.ugc-product-slot {
+  width: 122px;
+  height: 122px;
+  display: grid;
+  place-items: center;
+  border: 2px dashed #ffc400;
+  border-radius: 14px;
+  background: #fff7f2;
+  color: #f4bd00;
+  cursor: pointer;
+}
+
+.ugc-avatar-drop span {
+  font-size: 34px;
+}
+
+.ugc-product-slot span {
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.ugc-reference-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.ugc-reference-actions label,
+.ugc-reference-actions button {
+  min-width: 132px;
+  min-height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #ffbc00;
+  border-radius: 7px;
+  background: #fffefa;
+  color: #d69a00;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.ugc-reference-actions button:last-child {
+  background: #fff1f1;
+  color: #c92b2b;
+}
+
+.ugc-product-row .ugc-reference-actions button:last-child {
+  background: #fffefa;
+  color: #935000;
+}
+
+.ugc-scene-note {
+  margin: 22px 0;
+  color: var(--muted);
+  font-size: 17px;
+}
+
+.ugc-prompt-toolbar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.ugc-prompt-toolbar button {
+  min-height: 54px;
+  border: 1px solid var(--soft-line);
+  border-radius: 16px;
+  background: #fffefa;
+  color: var(--ink);
+  font-size: 20px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.ugc-prompt-toolbar button.active {
+  border-color: transparent;
+  background: #171717;
+  color: #fff;
+}
+
+.ugc-scene-textarea {
+  min-height: 210px;
+  resize: vertical;
+}
+
+.ugc-scene-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 18px;
+  color: var(--muted);
+}
+
+.ugc-scene-foot b {
+  color: #d99400;
+}
+
 @media (max-width: 760px) {
   .virtualize-card {
     padding: 24px 18px 28px;
   }
 
   .virtualize-head,
-  .virtualize-grid {
+  .virtualize-grid,
+  .video-provider-grid,
+  .ugc-reference-grid,
+  .ugc-prompt-toolbar {
     grid-template-columns: 1fr;
   }
 
-  .virtualize-head {
+  .virtualize-head,
+  .ugc-scene-head,
+  .ugc-scene-foot {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .ugc-product-row {
+    flex-wrap: wrap;
   }
 }
 
