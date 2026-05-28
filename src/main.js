@@ -2047,8 +2047,23 @@ async function submit(event) {
     return notify("Affiliate application saved for the next backend phase.");
   }
   if (event.currentTarget.dataset.form === "project") {
-    const db = await api("/projects", { method: "POST", body: JSON.stringify(data) });
-    return set({ db, projectId: db.projects.at(-1).id, modal: null, page: "dashboard" });
+    const form = event.currentTarget;
+    if (form.dataset.submitting === "true") return;
+    const submitButton = form.querySelector("button[type='submit']");
+    form.dataset.submitting = "true";
+    if (submitButton) submitButton.disabled = true;
+    try {
+      const db = await api("/projects", { method: "POST", body: JSON.stringify(data) });
+      return set({ db, projectId: db.projects.at(-1).id, modal: null, page: "dashboard" });
+    } catch (error) {
+      notify(error.message);
+    } finally {
+      if (form.isConnected) {
+        delete form.dataset.submitting;
+        if (submitButton) submitButton.disabled = false;
+      }
+    }
+    return;
   }
   if (event.currentTarget.dataset.form === "rename-project") {
     return renameProject(data.name);

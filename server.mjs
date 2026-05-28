@@ -595,6 +595,46 @@ function normalizeDb(db) {
   return db;
 }
 
+function cleanupDuplicateEmptyProjects(db) {
+  const activityByProject = new Map();
+  const addActivity = (projectId, count = 1) => {
+    if (!projectId) return;
+    activityByProject.set(projectId, (activityByProject.get(projectId) || 0) + count);
+  };
+
+  for (const project of db.projects || []) addActivity(project.id, project.results?.length || 0);
+  for (const item of db.attachments || []) addActivity(item.projectId);
+  for (const item of db.schedule || []) addActivity(item.projectId);
+  for (const item of db.generationJobs || []) addActivity(item.projectId);
+
+  const groups = new Map();
+  for (const project of db.projects || []) {
+    const name = String(project.name || "").trim().toLowerCase();
+    if (!name) continue;
+    const key = `${project.userId || adminUserId}\u0000${name}`;
+    const group = groups.get(key) || [];
+    group.push(project);
+    groups.set(key, group);
+  }
+
+  const removeIds = new Set();
+  for (const group of groups.values()) {
+    if (group.length < 2) continue;
+    const ranked = [...group].sort((left, right) => {
+      const activityDelta = (activityByProject.get(right.id) || 0) - (activityByProject.get(left.id) || 0);
+      if (activityDelta) return activityDelta;
+      return new Date(left.createdAt || 0).getTime() - new Date(right.createdAt || 0).getTime();
+    });
+    for (const project of ranked.slice(1)) {
+      if ((activityByProject.get(project.id) || 0) === 0) removeIds.add(project.id);
+    }
+  }
+
+  if (!removeIds.size) return false;
+  db.projects = (db.projects || []).filter((project) => !removeIds.has(project.id));
+  return true;
+}
+
 let postgresReady;
 
 async function ensurePostgresSchema() {
@@ -617,7 +657,8 @@ async function ensureDb() {
       const rawDb = result.rows[0].data;
       const shouldBackfill = !rawDb.users || !rawDb.projects || !rawDb.billing || !rawDb.usage || !rawDb.schedule;
       const db = normalizeDb(rawDb);
-      if (shouldBackfill) await saveDb(db);
+      const shouldCleanup = cleanupDuplicateEmptyProjects(db);
+      if (shouldBackfill || shouldCleanup) await saveDb(db);
       return db;
     }
     const db = structuredClone(seed);
@@ -627,7 +668,9 @@ async function ensureDb() {
 
   await mkdir(dataDir, { recursive: true });
   try {
-    return normalizeDb(JSON.parse(await readFile(dbPath, "utf8")));
+    const db = normalizeDb(JSON.parse(await readFile(dbPath, "utf8")));
+    if (cleanupDuplicateEmptyProjects(db)) await writeFile(dbPath, JSON.stringify(db, null, 2));
+    return db;
   } catch {
     const db = normalizeDb(structuredClone(seed));
     await writeFile(dbPath, JSON.stringify(db, null, 2));
@@ -3094,13 +3137,40 @@ app.post("/api/tiktok/creator-info", async (req, res, next) => {
   }
 });
 
-app.post("/api/projects", async (req, res) => {
-  const { user } = await requireAuth(req);
-  res.json(await mutateDb(async (db) => {
-    db.projects.push(blankProject(crypto.randomUUID(), req.body.name, user.id));
-    await saveDb(db);
-    return publicState(db, user);
-  }));
+app.post("/api/projects", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    res.json(await mutateDb(async (db) => {
+      const ownedProjects = db.projects.filter((project) => hasAdminPrivileges(user) || project.userId === user.id);
+      const name = String(req.body.name || `Project ${ownedProjects.length + 1}`).trim().slice(0, 80);
+      if (!name) {
+        const error = new Error("Project name is required");
+        error.status = 400;
+        throw error;
+      }
+
+      const normalizedName = name.toLowerCase();
+      const duplicateWindowMs = 2 * 60 * 1000;
+      const now = Date.now();
+      const recentDuplicate = ownedProjects.find((project) => {
+        const createdAt = new Date(project.createdAt || 0).getTime();
+        return project.name?.trim().toLowerCase() === normalizedName && Number.isFinite(createdAt) && now - createdAt < duplicateWindowMs;
+      });
+      if (recentDuplicate) return publicState(db, user);
+
+      if (ownedProjects.length >= 5 && !hasAdminPrivileges(user)) {
+        const error = new Error("Project limit reached. Delete or rename an existing project before creating a new one.");
+        error.status = 400;
+        throw error;
+      }
+
+      db.projects.push(blankProject(crypto.randomUUID(), name, user.id));
+      await saveDb(db);
+      return publicState(db, user);
+    }));
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.patch("/api/projects/:id", async (req, res, next) => {
