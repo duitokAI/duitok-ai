@@ -58,6 +58,7 @@ const state = {
   agentTaskMode: "idle",
   agentIdleActivity: "sleep",
   agentMessages: JSON.parse(localStorage.getItem("duitok-agent-messages") || "[]"),
+  agentContextSummary: localStorage.getItem("duitok-agent-context-summary") || "",
   queuePolling: false,
   langOpen: false,
   imagePromptGroup: "avatar",
@@ -4567,7 +4568,10 @@ function chatPanel() {
     <section class="agent-panel agent-page-panel">
       <header>
         <h3>${icon("bot")} Duitok Agent</h3>
-        <button class="icon-only" data-action="clear-agent" title="Clear chat">${icon("trash-2", 18)}</button>
+        <div class="agent-header-actions">
+          <button class="dark-button mini-button" data-action="new-agent-chat" title="保留项目记忆，开始新对话">${icon("message-square-plus", 16)} 新对话</button>
+          <button class="icon-only" data-action="clear-agent-context" title="清空本次上下文">${icon("trash-2", 18)}</button>
+        </div>
       </header>
       <div class="agent-thread">
         ${intro}
@@ -4978,9 +4982,14 @@ async function action(event, name) {
   if (name === "apply-date") return notify(t("toastDashboardDate"));
   if (name === "reset-date") return set({ dateFrom: "2026-05-01", dateTo: "2026-05-26" });
   if (name === "chat") return set({ page: "agent" });
-  if (name === "clear-agent") {
+  if (name === "new-agent-chat") {
     localStorage.removeItem("duitok-agent-messages");
     return set({ agentMessages: [], agentInput: "" });
+  }
+  if (name === "clear-agent-context" || name === "clear-agent") {
+    localStorage.removeItem("duitok-agent-messages");
+    localStorage.removeItem("duitok-agent-context-summary");
+    return set({ agentMessages: [], agentInput: "", agentContextSummary: "" });
   }
   if (name === "clear-agent-confirm") {
     const messages = state.agentMessages.map((item) => item.agentRun?.status === "waiting_confirmation"
@@ -5226,7 +5235,75 @@ async function pollGenerationQueue(attempt = 0) {
 }
 
 function rememberAgentMessages(messages) {
-  localStorage.setItem("duitok-agent-messages", JSON.stringify(messages.slice(-12)));
+  const safeMessages = agentMessagesForStorage(messages);
+  const overflow = safeMessages.slice(0, Math.max(0, safeMessages.length - 10));
+  if (overflow.length) rememberAgentContextSummary(overflow);
+  localStorage.setItem("duitok-agent-messages", JSON.stringify(safeMessages.slice(-10)));
+  state.agentContextSummary = localStorage.getItem("duitok-agent-context-summary") || "";
+}
+
+function agentMessagesForStorage(messages = []) {
+  return (Array.isArray(messages) ? messages : [])
+    .filter((item) => ["user", "assistant"].includes(item.role))
+    .map((item) => ({
+      role: item.role,
+      content: String(item.content || "").slice(0, 1600),
+      ...(item.agentRun ? { agentRun: compactAgentRunForStorage(item.agentRun) } : {})
+    }));
+}
+
+function compactAgentRunForStorage(run) {
+  return {
+    id: run.id,
+    status: run.status,
+    intent: run.intent,
+    confirmation: run.confirmation || null,
+    plan: Array.isArray(run.plan) ? run.plan.slice(0, 6) : [],
+    cards: Array.isArray(run.cards) ? run.cards.slice(0, 4).map(compactAgentCardForStorage) : [],
+    toolResults: Array.isArray(run.toolResults)
+      ? run.toolResults.slice(0, 4).map((item) => ({
+        name: item.name,
+        argsSummary: item.argsSummary || {},
+        result: {
+          ok: Boolean(item.result?.ok),
+          message: String(item.result?.message || item.result?.error || "").slice(0, 240)
+        },
+        card: item.card ? compactAgentCardForStorage(item.card) : undefined
+      }))
+      : []
+  };
+}
+
+function compactAgentCardForStorage(card = {}) {
+  return {
+    type: card.type,
+    title: card.title,
+    summary: card.summary,
+    projectId: card.projectId,
+    resultId: card.resultId,
+    scheduleIds: card.scheduleIds,
+    prompt: typeof card.prompt === "string" ? card.prompt.slice(0, 600) : undefined,
+    plan: Array.isArray(card.plan) ? card.plan.slice(0, 3) : undefined,
+    schedule: card.schedule ? {
+      total: card.schedule.total,
+      ready: card.schedule.ready,
+      draft: card.schedule.draft,
+      latest: Array.isArray(card.schedule.latest) ? card.schedule.latest.slice(0, 3) : []
+    } : undefined
+  };
+}
+
+function rememberAgentContextSummary(messages = []) {
+  const previous = state.agentContextSummary || localStorage.getItem("duitok-agent-context-summary") || "";
+  const lines = messages.map((item) => {
+    const text = String(item.content || "").replace(/\s+/g, " ").slice(0, 180);
+    return `${item.role === "user" ? "User" : "Agent"}: ${text}`;
+  }).filter(Boolean);
+  const next = [
+    previous,
+    lines.length ? `Recent compressed context (${new Date().toLocaleDateString()}): ${lines.join(" | ")}` : ""
+  ].filter(Boolean).join("\n").slice(-1800);
+  localStorage.setItem("duitok-agent-context-summary", next);
 }
 
 function applyAgentUiActions(uiActions = [], db) {
@@ -5298,6 +5375,7 @@ async function sendAgentMessage(message) {
       method: "POST",
       body: JSON.stringify({
         messages: nextMessages,
+        contextSummary: state.agentContextSummary,
         projectId: state.projectId,
         page: state.page,
         step: state.step

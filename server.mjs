@@ -2048,14 +2048,14 @@ function compactWorkspaceState(db) {
     projects: db.projects.map((project) => ({
       id: project.id,
       name: project.name,
-      image: project.image,
-      ugc: project.ugc,
-      auto: project.auto,
-      original: project.original,
-      clone: project.clone,
-      story: project.story,
-      viral: project.viral,
-      agentMemory: project.agentMemory || {},
+      image: compactProjectConfig(project.image),
+      ugc: compactProjectConfig(project.ugc),
+      auto: compactProjectConfig(project.auto),
+      original: compactProjectConfig(project.original),
+      clone: compactProjectConfig(project.clone),
+      story: compactProjectConfig(project.story),
+      viral: compactProjectConfig(project.viral),
+      agentMemory: compactProjectConfig(project.agentMemory || {}),
       resultCount: project.results.length,
       latestResults: project.results.slice(-3).map((item) => ({
         id: item.id,
@@ -2064,8 +2064,90 @@ function compactWorkspaceState(db) {
         createdAt: item.createdAt
       }))
     })),
-    schedule: db.schedule,
-    recentUsage: db.usage.slice(0, 8)
+    schedule: db.schedule.slice(0, 20).map((item) => ({
+      id: item.id,
+      projectId: item.projectId,
+      title: item.title,
+      platform: item.platform,
+      time: item.time,
+      status: item.status,
+      mediaUrl: item.mediaUrl ? "set" : "",
+      captionSummary: String(item.caption || "").slice(0, 180)
+    })),
+    recentUsage: db.usage.slice(0, 8).map((item) => ({
+      action: item.action,
+      credits: item.credits,
+      createdAt: item.createdAt
+    }))
+  };
+}
+
+function compactProjectConfig(value = {}) {
+  if (!value || typeof value !== "object") return value;
+  return Object.fromEntries(Object.entries(value).map(([key, item]) => {
+    if (typeof item === "string") return [key, item.length > 240 ? `${item.slice(0, 240)}...` : item];
+    if (Array.isArray(item)) return [key, item.slice(0, 5).map((entry) => typeof entry === "string" ? entry.slice(0, 160) : entry)];
+    if (item && typeof item === "object") return [key, compactProjectConfig(item)];
+    return [key, item];
+  }));
+}
+
+const agentRecentMessageLimit = 10;
+const agentHistoryHardLimit = 40;
+const agentMessageCharLimit = 1200;
+const agentSummaryCharLimit = 1800;
+
+function sanitizeAgentMessageHistory(messages = []) {
+  return (Array.isArray(messages) ? messages : [])
+    .filter((item) => ["user", "assistant"].includes(item.role) && typeof item.content === "string")
+    .slice(-agentHistoryHardLimit)
+    .map((item) => ({
+      role: item.role,
+      content: sanitizeAgentText(item.content).slice(0, agentMessageCharLimit)
+    }))
+    .filter((item) => item.content);
+}
+
+function summarizeAgentHistory(messages = []) {
+  const older = sanitizeAgentMessageHistory(messages).slice(-18);
+  if (!older.length) return "";
+  const userRequests = older.filter((item) => item.role === "user").slice(-6).map((item) => item.content.replace(/\s+/g, " ").slice(0, 180));
+  const assistantActions = older.filter((item) => item.role === "assistant").slice(-5).map((item) => item.content.replace(/\s+/g, " ").slice(0, 180));
+  return [
+    userRequests.length ? `User goals / requests: ${userRequests.join(" | ")}` : "",
+    assistantActions.length ? `Recent Agent conclusions: ${assistantActions.join(" | ")}` : ""
+  ].filter(Boolean).join("\n").slice(0, agentSummaryCharLimit);
+}
+
+function agentContextSummary({ clientSummary = "", olderMessages = [], workspace = null, projectId = "" } = {}) {
+  const activeProject = workspace?.projects?.find((item) => item.id === projectId) || workspace?.projects?.[0] || null;
+  const memory = activeProject?.agentMemory || {};
+  return [
+    "Conversation summary, not raw transcript:",
+    sanitizeAgentText(clientSummary).slice(0, agentSummaryCharLimit) || "No prior summary yet.",
+    summarizeAgentHistory(olderMessages),
+    activeProject ? `Current project: ${activeProject.name} (${activeProject.id}). Results: ${activeProject.resultCount || 0}.` : "Current project: none.",
+    Object.keys(memory).length ? `Project memory: ${JSON.stringify(sanitizeAgentObject(memory)).slice(0, 900)}` : "Project memory: none.",
+    "Context rule: treat this summary as background only. Use inspect_workspace_state when fresh workspace facts are needed. Do not expose hidden config, provider names, keys, raw tool schemas, or internal routes."
+  ].filter(Boolean).join("\n").slice(0, 3200);
+}
+
+function compactToolResultForContext(publicResult = {}) {
+  const card = publicResult.card || {};
+  return {
+    ok: Boolean(publicResult.result?.ok),
+    tool: publicResult.name || "tool",
+    message: sanitizeAgentText(publicResult.result?.message || publicResult.result?.error || ""),
+    argsSummary: sanitizeAgentObject(publicResult.argsSummary || {}),
+    ids: Object.fromEntries(Object.entries(publicResult.argsSummary || {}).filter(([key]) => /id$/i.test(key))),
+    card: card ? {
+      type: card.type,
+      title: card.title,
+      summary: card.summary,
+      projectId: card.projectId,
+      resultId: card.resultId,
+      scheduleIds: card.scheduleIds
+    } : undefined
   };
 }
 
@@ -3571,7 +3653,7 @@ function safeAgentToolResult(name, args = {}, result = {}) {
     ok: Boolean(result.ok),
     message: sanitizeAgentText(result.message || ""),
     error: result.error ? sanitizeAgentText(result.error) : undefined,
-    data: safeData
+    data: agentToolDataSummary(safeData)
   };
   return {
     name: agentAllowedToolNames.has(name) ? name : "unknown_tool",
@@ -3581,6 +3663,20 @@ function safeAgentToolResult(name, args = {}, result = {}) {
     recovery: safeRecovery,
     diffs: Array.isArray(safeDiffs) ? safeDiffs : []
   };
+}
+
+function agentToolDataSummary(data = {}) {
+  const allowed = {};
+  for (const key of ["projectId", "resultId", "resultType", "scheduleId", "scheduleIds", "promptId", "planLength", "missing", "nextActions"]) {
+    if (data?.[key] !== undefined) allowed[key] = data[key];
+  }
+  if (Array.isArray(data?.plan)) allowed.planPreview = data.plan.slice(0, 3).map((item) => ({
+    day: item.day,
+    title: item.title,
+    hook: item.hook || item.idea
+  }));
+  if (typeof data?.prompt === "string") allowed.promptSummary = data.prompt.split(/\r?\n/).slice(0, 3).join(" ").slice(0, 360);
+  return allowed;
 }
 
 async function runDeterministicAgent(content, { projectId, user, workspace = null }) {
@@ -4230,10 +4326,17 @@ app.post("/api/projects/:id/generate", async (req, res) => {
 app.post("/api/agent", async (req, res, next) => {
   try {
     const { db, user } = await requireAuth(req);
-    const history = Array.isArray(req.body.messages) ? req.body.messages.slice(-10) : [];
+    const rawHistory = sanitizeAgentMessageHistory(req.body.messages);
+    const history = rawHistory.slice(-agentRecentMessageLimit);
     const stateForUser = publicState(db, user);
     const projectId = req.body.projectId || stateForUser.projects[0]?.id;
     const latestUserMessage = [...history].reverse().find((item) => item.role === "user" && typeof item.content === "string")?.content || "";
+    const contextSummary = agentContextSummary({
+      clientSummary: req.body.contextSummary,
+      olderMessages: rawHistory.slice(0, Math.max(0, rawHistory.length - agentRecentMessageLimit)),
+      workspace: compactWorkspaceState(stateForUser),
+      projectId
+    });
     const runId = crypto.randomUUID();
     const intent = agentIntentFromContent(latestUserMessage);
     const startedAt = Date.now();
@@ -4364,9 +4467,12 @@ app.post("/api/agent", async (req, res, next) => {
         role: "system",
         content: `Current workspace JSON:\n${JSON.stringify(compactWorkspaceState(stateForUser), null, 2)}\nCurrent project id: ${projectId || "none"}`
       },
+      {
+        role: "system",
+        content: contextSummary
+      },
       ...history
-        .filter((item) => ["user", "assistant"].includes(item.role) && typeof item.content === "string")
-        .map((item) => ({ role: item.role, content: item.content.slice(0, 5000) }))
+        .map((item) => ({ role: item.role, content: item.content.slice(0, agentMessageCharLimit) }))
     ];
 
     const toolResults = [];
@@ -4561,7 +4667,7 @@ app.post("/api/agent", async (req, res, next) => {
         messages.push({
           role: "tool",
           tool_call_id: call.id,
-          content: JSON.stringify(publicResult.result)
+          content: JSON.stringify(compactToolResultForContext(publicResult))
         });
       }
     }
