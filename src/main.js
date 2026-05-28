@@ -2044,6 +2044,7 @@ function imagePromptSettings(p) {
 function ugcPanel(p) {
   const provider = p.ugc.provider || "Veo 3.1";
   const imageMode = p.ugc.imageMode || "Product Reference (AI creates scene)";
+  const firstFrameMode = imageMode === "First Frame (animate from image)";
   const promptTemplate = "Create an 8-second TikTok Shop UGC scene. Start with a visual hook in 0-2s, show the product benefit in 2-6s, and end with a clear CTA in 6-8s. Natural Malaysian creator tone, realistic product handling, no exaggerated claims.";
   return `
     <div class="generator-box video-generator-box">
@@ -2060,6 +2061,22 @@ function ugcPanel(p) {
         <h2>🎞️ Scene</h2>
         <button type="button" data-field-set="ugc.script" data-value="${esc(promptTemplate)}">${icon("sparkles", 18)} Prompt Builder</button>
       </div>
+      ${firstFrameMode ? ugcFrameReferences() : ugcProductReferences(provider)}
+      <div class="ugc-prompt-toolbar">
+        <button class="active" type="button">✍️ Prompt</button>
+        <button type="button">💡 Idea (AI expand)</button>
+      </div>
+      <textarea class="ugc-scene-textarea" data-field="ugc.script" placeholder="Scene description + spoken dialog 0-8s...">${esc(p.ugc.script)}</textarea>
+      <div class="ugc-scene-foot">
+        <span>Each shot = 8s · Sweet spot <b>18-22 words</b> of spoken dialog (split: 0-2s hook ≤6 words · 2-6s middle ≤14 words · 6-8s CTA ≤6 words) · <b>${wordCount(p.ugc.script)}</b> words · 0/1500</span>
+        <button class="gold-button" data-action="generate-ugc">${icon("video")} Generate Video</button>
+      </div>
+    </section>
+    ${results(p, "ugc")}`;
+}
+
+function ugcProductReferences(provider) {
+  return `
       <div class="ugc-reference-grid">
         <div>
           <p class="ugc-reference-title">Avatar Reference</p>
@@ -2082,18 +2099,38 @@ function ugcPanel(p) {
           </div>
         </div>
       </div>
-      <p class="ugc-scene-note">Both optional. Pick up to 3 products; each picked image is sent as a distinct reference to ${esc(provider.split(" ")[0])}.</p>
-      <div class="ugc-prompt-toolbar">
-        <button class="active" type="button">✍️ Prompt</button>
-        <button type="button">💡 Idea (AI expand)</button>
+      <p class="ugc-scene-note">Both optional. Pick up to 3 products; each picked image is sent as a distinct reference to ${esc(provider.split(" ")[0])}.</p>`;
+}
+
+function ugcFrameReferences() {
+  return `
+      <div class="ugc-frame-grid">
+        <div>
+          <p class="ugc-reference-title">Start Frame *</p>
+          <div class="ugc-frame-row">
+            ${ugcFrameUpload("start-frame", "🖼️", true)}
+            <div class="ugc-reference-actions">
+              <label><input type="file" data-upload="start-frame" hidden>Attachments</label>
+              <button type="button">x</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p class="ugc-reference-title muted">End Frame</p>
+          <div class="ugc-frame-row">
+            ${ugcFrameUpload("end-frame", "🏁", false)}
+            <div class="ugc-reference-actions">
+              <label><input type="file" data-upload="end-frame" hidden>Attachments</label>
+              <button type="button">x</button>
+            </div>
+          </div>
+        </div>
       </div>
-      <textarea class="ugc-scene-textarea" data-field="ugc.script" placeholder="Scene description + spoken dialog 0-8s...">${esc(p.ugc.script)}</textarea>
-      <div class="ugc-scene-foot">
-        <span>Each shot = 8s · Sweet spot <b>18-22 words</b> of spoken dialog (split: 0-2s hook ≤6 words · 2-6s middle ≤14 words · 6-8s CTA ≤6 words) · <b>${wordCount(p.ugc.script)}</b> words · 0/1500</span>
-        <button class="gold-button" data-action="generate-ugc">${icon("video")} Generate Video</button>
-      </div>
-    </section>
-    ${results(p, "ugc")}`;
+      <p class="ugc-scene-note">Upload a required start frame. End frame is optional when you want the animation to land on a specific final image.</p>`;
+}
+
+function ugcFrameUpload(kind, emoji, required) {
+  return `<label class="ugc-frame-drop ${required ? "required" : ""}"><input type="file" data-upload="${kind}" hidden><span>${emoji}</span></label>`;
 }
 
 function videoProviderButton(value, label, active) {
