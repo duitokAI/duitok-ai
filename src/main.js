@@ -4099,13 +4099,37 @@ function chatPanel() {
       <div class="agent-thread">
         ${intro}
         ${state.agentMessages.map((item) => `<article class="${item.role}"><span>${item.role === "user" ? "You" : "Agent"}</span><p>${esc(item.content).replaceAll("\n", "<br>")}</p>${agentRunPanel(item.agentRun)}</article>`).join("")}
-        ${state.agentBusy ? `<article class="assistant"><span>Agent</span><p>${icon("loader-circle", 16)} Thinking and calling Duitok tools...</p></article>` : ""}
+        ${state.agentBusy ? agentThinkingCard() : ""}
       </div>
       <form class="agent-form" data-form="agent">
         <textarea name="message" data-agent-input placeholder="Tell Duitok Agent what you want..." ${state.agentBusy ? "disabled" : ""}>${esc(state.agentInput)}</textarea>
         <button class="gold-button" type="submit" ${state.agentBusy ? "disabled" : ""}>${icon(state.agentBusy ? "loader-circle" : "send")} Send</button>
       </form>
     </section>`;
+}
+
+function agentThinkingCard() {
+  const mode = agentWorkMode(latestAgentUserMessage());
+  const label = {
+    image: "Preparing image workflow",
+    video: "Preparing video workflow",
+    copy: "Writing content structure",
+    schedule: "Checking schedule flow",
+    command: "Understanding your request",
+    chat: "Understanding your request"
+  }[mode] || "Understanding your request";
+  return `
+    <article class="assistant agent-thinking">
+      <span>Agent is working</span>
+      <div class="agent-thinking-row">
+        <b>${icon("loader-circle", 18)}</b>
+        <div>
+          <strong>${esc(label)}</strong>
+          <p>Reading workspace context, planning safe tool calls, and preparing the next update.</p>
+        </div>
+      </div>
+      <div class="agent-thinking-track"><i></i></div>
+    </article>`;
 }
 
 function agentRunStatusLabel(status = "") {

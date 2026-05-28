@@ -8597,7 +8597,17 @@ label {
 .agent-page-panel .agent-thread article {
   max-width: min(720px, 92%);
   border-color: rgba(93, 8, 108, 0.12);
-  background: #171717;
+  background: #fff;
+  box-shadow: 0 14px 34px rgba(93, 8, 108, 0.08);
+}
+
+.agent-page-panel .agent-thread article.assistant {
+  border-color: rgba(93, 8, 108, 0.1);
+  background: linear-gradient(180deg, #fff, #fff8fb);
+}
+
+.agent-page-panel .agent-thread article.assistant > p {
+  color: rgba(31, 6, 38, 0.82);
 }
 
 .agent-page-panel .agent-thread article.user {
@@ -8607,6 +8617,73 @@ label {
 
 .agent-page-panel .agent-thread article.user p {
   color: var(--purple);
+}
+
+.agent-page-panel .agent-thread article.agent-thinking {
+  max-width: min(760px, 96%);
+  border-color: rgba(244, 202, 50, 0.34);
+  background:
+    linear-gradient(90deg, rgba(244, 202, 50, 0.16), transparent 48%),
+    #fffdf6;
+}
+
+.agent-thinking > span {
+  color: rgba(93, 8, 108, 0.58) !important;
+}
+
+.agent-thinking-row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 11px;
+  align-items: center;
+}
+
+.agent-thinking-row b {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: rgba(244, 202, 50, 0.22);
+  color: var(--purple);
+}
+
+.agent-thinking-row b svg {
+  animation: spin 1s linear infinite;
+}
+
+.agent-thinking-row strong {
+  display: block;
+  color: var(--purple);
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+.agent-thinking-row p {
+  margin-top: 3px !important;
+  color: rgba(93, 8, 108, 0.64) !important;
+  font-size: 13px !important;
+}
+
+.agent-thinking-track {
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(93, 8, 108, 0.08);
+}
+
+.agent-thinking-track i {
+  display: block;
+  width: 42%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--gold), var(--pink));
+  animation: agentThinkingSlide 1.25s ease-in-out infinite;
+}
+
+@keyframes agentThinkingSlide {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(250%); }
 }
 
 .agent-run-card {
