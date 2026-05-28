@@ -379,7 +379,7 @@ const copy = {
     stepImage: "图片",
     stepUgc: "UGC",
     stepAuto: "自动内容",
-    stepOriginal: "原视频",
+    stepOriginal: "原创视频",
     stepClone: "复刻提示词",
     stepStory: "故事脚本",
     stepViral: "爆款",
