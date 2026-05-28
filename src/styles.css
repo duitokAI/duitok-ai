@@ -1119,6 +1119,8 @@ textarea {
 .sidebar {
   position: sticky;
   top: 0;
+  display: flex;
+  flex-direction: column;
   height: 100vh;
   overflow-y: auto;
   padding: 24px 14px;
@@ -8203,7 +8205,7 @@ label {
 .sidebar-account-panel {
   display: grid;
   gap: 9px;
-  margin: 12px -2px 0;
+  margin: auto -2px 0;
   padding-top: 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }

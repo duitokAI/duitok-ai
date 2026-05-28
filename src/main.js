@@ -1690,7 +1690,6 @@ function studio() {
       <aside class="sidebar">
         ${brand()}
         <div class="sidebar-language">${languageSwitch()}</div>
-        ${sidebarAccountPanel()}
         <div class="side-section">${icon("layout-dashboard", 18)} Workspace</div>
         <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard">${icon("sparkles")} ${t("dashboard")}</button>
         ${isOwnerAdminAccount() ? `<button class="side-link ${state.page === "admin" ? "active" : ""}" data-page="admin">${icon("shield-check")} Admin CRM</button>` : ""}
@@ -1715,6 +1714,7 @@ function studio() {
         <button class="side-link" data-action="sop">${icon("book-open")} SOP</button>
         <button class="side-link ${state.page === "autopost" ? "active" : ""}" data-page="autopost">${icon("send")} ${t("autopost")}</button>
         <button class="side-link ${state.page === "whatsapp" ? "active" : ""}" data-page="whatsapp">${icon("message-circle")} ${t("whatsapp")}${icon("arrow-up-right", 14)}</button>
+        ${sidebarAccountPanel()}
       </aside>
       <main class="workspace">${page()}</main>
       <button class="chat-bubble support-bubble" data-action="support" title="Contact support">${icon("message-circle", 32)}</button>
