@@ -5,6 +5,7 @@ const toast = document.querySelector("#toast");
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
 const isStudioPath = () => window.location.pathname.startsWith("/studio") || window.location.pathname.startsWith("/admin");
 const pathIs = (path) => window.location.pathname === path;
+const ownerAdminEmail = "admin@duitok.com";
 let sidebarScrollTop = 0;
 
 const steps = [
@@ -1121,7 +1122,7 @@ function studio() {
         <div class="sidebar-language">${languageSwitch()}</div>
         <div class="side-section">${icon("layout-dashboard", 18)} Workspace</div>
         <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard">${icon("sparkles")} ${t("dashboard")}</button>
-        ${state.user?.role === "admin" ? `<button class="side-link ${state.page === "admin" ? "active" : ""}" data-page="admin">${icon("shield-check")} Admin CRM</button>` : ""}
+        ${isOwnerAdminAccount() ? `<button class="side-link ${state.page === "admin" ? "active" : ""}" data-page="admin">${icon("shield-check")} Admin CRM</button>` : ""}
         <button class="side-link ${state.page === "agent" ? "active" : ""}" data-page="agent">${icon("bot")} Duitok Agent</button>
         <button class="side-link ${state.page === "library" ? "active" : ""}" data-page="library">${icon("folder")} Content Library</button>
         <button class="side-link ${state.page === "autopost" ? "active" : ""}" data-page="autopost">${icon("calendar-days")} Scheduler</button>
@@ -1411,8 +1412,12 @@ function contentLibraryPage() {
   return `<header class="project-head"><div><p class="folder-label">${icon("folder", 18)} Content Library</p><h1>Generated Assets</h1><p class="subtitle">All project outputs in one place, ready for export or scheduling.</p></div><button class="sop-button" data-action="export-all">${icon("download")} Export Data</button></header><section class="canvas-card slim"><div class="library-grid">${results.map((item) => `<article><b>${item.title}</b><span>${item.projectName}</span>${resultPreview(item)}<button data-result="${item.id}">${icon("download")} ${t("export")}</button></article>`).join("") || `<p class="empty-text">No generated assets yet.</p>`}</div></section>`;
 }
 
+function isOwnerAdminAccount() {
+  return state.user?.role === "admin" && String(state.user?.email || "").toLowerCase() === ownerAdminEmail;
+}
+
 function adminPage() {
-  if (state.user?.role !== "admin") return `<section class="canvas-card slim"><h1>Admin access required</h1></section>`;
+  if (!isOwnerAdminAccount()) return `<section class="canvas-card slim"><h1>Admin access required</h1></section>`;
   if (state.user?.adminLocked || !state.db?.admin) {
     return `<section class="canvas-card slim"><h1>Admin verification</h1><p class="subtitle">Enter your private admin key to unlock provider operations, costs, endpoints, and user controls.</p><form data-form="admin-key" class="login-form"><label>Admin key<input name="adminKey" type="password" autocomplete="off" required></label><button class="gold-button" type="submit">${icon("shield-check")} Unlock Admin</button></form></section>`;
   }
@@ -2105,16 +2110,40 @@ async function renameProject(name) {
 async function deleteProject() {
   if (!state.editingProjectId) return;
   const deletedId = state.editingProjectId;
-  const db = await api(`/projects/${deletedId}`, { method: "DELETE" });
-  const nextProjectId = deletedId === state.projectId ? db.projects[0]?.id || null : state.projectId;
-  notify("Project deleted.");
+  if ((state.db?.projects || []).length <= 1) {
+    notify("Keep at least one project in the workspace.");
+    return;
+  }
+
+  const previousDb = state.db;
+  const previousProjectId = state.projectId;
+  const previousPage = state.page;
+  const optimisticDb = {
+    ...previousDb,
+    projects: (previousDb.projects || []).filter((project) => project.id !== deletedId),
+    attachments: (previousDb.attachments || []).filter((item) => item.projectId !== deletedId),
+    schedule: (previousDb.schedule || []).filter((item) => item.projectId !== deletedId),
+    generationJobs: (previousDb.generationJobs || []).filter((item) => item.projectId !== deletedId)
+  };
+  const nextProjectId = deletedId === state.projectId ? optimisticDb.projects[0]?.id || null : state.projectId;
+
+  notify("Deleting project...");
   set({
-    db,
+    db: optimisticDb,
     modal: null,
     editingProjectId: null,
     projectId: nextProjectId,
     page: nextProjectId ? state.page : "dashboard"
   });
+
+  try {
+    const db = await api(`/projects/${deletedId}`, { method: "DELETE" });
+    notify("Project deleted.");
+    set({ db });
+  } catch (error) {
+    notify(error.message);
+    set({ db: previousDb, projectId: previousProjectId, page: previousPage });
+  }
 }
 
 async function generate(name) {
