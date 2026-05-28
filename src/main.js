@@ -2942,7 +2942,7 @@ function accountPage() {
     attachments: [t("attachments"), "Upload records saved to backend.", table(state.db.attachments.map((x) => [x.name, x.kind, new Date(x.createdAt).toLocaleString()]))],
     billing: [t("billing"), "Invoices and plan state are persisted.", `<div class="metric-row"><article><span>Plan</span><strong>${state.db.billing.plan}</strong></article><article><span>Credits</span><strong>${state.db.billing.credits}</strong></article><article><span>Next bill</span><strong>${state.db.billing.nextBill}</strong></article></div><div class="plan-grid">${[["Starter", "RM29", "For testing products"], ["Pro", "RM69", "Daily TikTok Shop creation"], ["Agency", "RM199", "Multiple brands and operators"]].map(([name, price, note]) => `<article><span>${name}</span><strong>${price}</strong><small>${note}</small></article>`).join("")}</div>${invoiceTable()}`],
     topup: [t("topup"), "Credit purchases update the backend ledger.", topupPage()],
-    affiliate: [t("affiliate"), "Referral links and payouts.", `<div class="metric-row"><article><span>Code</span><strong>${state.db.affiliate.code}</strong></article><article><span>Clicks</span><strong>${state.db.affiliate.clicks}</strong></article><article><span>Payout</span><strong>RM${state.db.affiliate.payout}</strong></article></div><button class="gold-button" data-action="copy-affiliate">${icon("copy")} Copy referral link</button>`],
+    affiliate: [t("affiliate"), "Manage your referral earnings and cashout.", affiliateDashboard()],
     usage: [t("usage"), "Credit usage from the backend ledger.", usagePage()],
     autopost: [t("autopost"), "Chrome extension assisted TikTok publishing queue.", autoPostPage()],
     whatsapp: [t("whatsapp"), "Community handoff.", `<button class="gold-button" data-action="open-whatsapp">${icon("message-circle")} Open WhatsApp Group</button>`],
@@ -2950,6 +2950,74 @@ function accountPage() {
   };
   const [title, subtitle, body] = map[state.page];
   return `<header class="project-head"><div><p class="folder-label">${icon("folder", 18)} ${t("publicTools")}</p><h1>${title}</h1><p class="subtitle">${subtitle}</p></div><button class="sop-button" data-action="export-all">${icon("download")} ${t("export")}</button></header><section class="canvas-card slim">${body}</section>`;
+}
+
+function affiliateDashboard() {
+  const affiliate = state.db.affiliate || {};
+  const code = affiliate.code || "DUIT2026";
+  const clicks = Number(affiliate.clicks || 0);
+  const payout = Number(affiliate.payout || 0);
+  const totalEarned = payout;
+  const cashedOut = Number(affiliate.cashedOut || 0);
+  const referrals = Number(affiliate.referrals || Math.max(0, Math.floor(clicks / 8)));
+  const available = Math.max(0, payout - cashedOut);
+  const referralLink = `https://duitok.com/ref/${encodeURIComponent(code)}`;
+  return `
+    <section class="affiliate-dashboard">
+      <div class="affiliate-stat-grid">
+        ${affiliateStat("Wallet Balance", `RM ${available.toFixed(2)}`, "wallet-cards", "green")}
+        ${affiliateStat("Total Earned", `RM ${totalEarned.toFixed(2)}`, "trending-up", "blue")}
+        ${affiliateStat("Total Cashed Out", `RM ${cashedOut.toFixed(2)}`, "circle-check", "purple")}
+        ${affiliateStat("Clicks", formatCreditNumber(clicks), "users", "orange")}
+      </div>
+      <section class="affiliate-ref-card">
+        <div class="affiliate-code-row">
+          <div>
+            <p>Your Referral Code</p>
+            <strong>${esc(code)}</strong>
+          </div>
+          <button class="dark-button" data-action="copy-affiliate-code">${icon("copy", 18)} Copy Code</button>
+        </div>
+        <div class="affiliate-link-box">
+          <label>Share this link to invite sellers</label>
+          <input readonly value="${esc(referralLink)}" aria-label="Referral link">
+          <button class="gold-button" data-action="copy-affiliate">${icon("copy", 18)} Copy Link</button>
+        </div>
+      </section>
+      <div class="affiliate-tabs" aria-label="Affiliate sections">
+        <button class="active" type="button">Overview</button>
+        <button type="button">Commissions</button>
+        <button type="button">Referrals</button>
+        <button type="button">Cash Out</button>
+      </div>
+      <section class="affiliate-info-card">
+        <div class="affiliate-how">
+          <h2>How affiliate works</h2>
+          <ul>
+            <li>Share your Duitok link or referral code with sellers.</li>
+            <li>When they subscribe through your link, your commission is tracked.</li>
+            <li>Wallet balance updates after payment is confirmed.</li>
+            <li>Cash out after the minimum RM50 threshold to a Malaysian bank account.</li>
+          </ul>
+        </div>
+        <div class="affiliate-mini-grid">
+          ${affiliateMini("Total referrals", referrals)}
+          ${affiliateMini("Commission events", referrals)}
+          ${affiliateMini("Total earned", `RM ${totalEarned.toFixed(2)}`)}
+          ${affiliateMini("Available to withdraw", `RM ${available.toFixed(2)}`)}
+          ${affiliateMini("Pending cashouts", `RM ${Math.max(0, cashedOut).toFixed(2)}`)}
+          ${affiliateMini("Minimum cashout", "RM 50")}
+        </div>
+      </section>
+    </section>`;
+}
+
+function affiliateStat(label, value, ic, tone) {
+  return `<article class="affiliate-stat ${tone}">${icon(ic, 22)}<span>${label}</span><b>${value}</b></article>`;
+}
+
+function affiliateMini(label, value) {
+  return `<article><span>${label}</span><b>${value}</b></article>`;
 }
 
 function topupPage() {
@@ -4010,8 +4078,74 @@ function agentRunPanel(run) {
       ${Object.keys(confidence).length ? `<div class="agent-confidence">
         ${["intent", "project", "tool", "execution"].map((key) => `<span>${key}<b>${Math.round(Number(confidence[key] || 0) * 100)}%</b></span>`).join("")}
       </div>` : ""}
+      ${agentToolCards(run)}
+      ${agentRecoveryCard(run)}
+      ${agentUndoCard(run)}
       ${agentConfirmationCard(run)}
     </div>`;
+}
+
+function agentToolCards(run) {
+  const cards = [...(run.cards || []), ...(run.toolResults || []).map((item) => item.card).filter(Boolean)];
+  const unique = cards.filter((card, index, list) => index === list.findIndex((item) => `${item.type}:${item.resultId || item.projectId || item.title}` === `${card.type}:${card.resultId || card.projectId || card.title}`));
+  if (!unique.length) return "";
+  return `<div class="agent-tool-cards">${unique.map(agentToolCard).join("")}</div>`;
+}
+
+function agentToolCard(card = {}) {
+  if (card.type === "content_plan") {
+    const plan = Array.isArray(card.plan) ? card.plan.slice(0, 7) : [];
+    return `<section class="agent-tool-card">
+      <header><strong>${icon("calendar-days", 16)} ${esc(card.title || "Content plan")}</strong><span>${esc(card.summary || "")}</span></header>
+      ${plan.length ? `<div class="agent-plan-table">${plan.map((item) => `<p><b>${esc(item.title || `Day ${item.day}`)}</b><span>${esc(item.hook || item.idea || "")}</span></p>`).join("")}</div>` : ""}
+      <div><button class="dark-button" data-page="project">${icon("folder-open", 15)} Open project</button><button class="dark-button" data-agent-prompt="Create scheduler drafts from this content plan">${icon("send", 15)} Create drafts</button></div>
+    </section>`;
+  }
+  if (card.type === "seedance_prompt") {
+    return `<section class="agent-tool-card">
+      <header><strong>${icon("film", 16)} ${esc(card.title || "Seedance prompt")}</strong><span>${esc(card.summary || "")}</span></header>
+      <pre>${esc(String(card.prompt || "").slice(0, 900))}</pre>
+      <div><button class="dark-button" data-page="project">${icon("edit-3", 15)} Edit prompt</button><button class="gold-button" data-agent-prompt="Generate video from the saved Seedance prompt">${icon("sparkles", 15)} Generate video</button></div>
+    </section>`;
+  }
+  if (card.type === "workspace_inspect") {
+    return `<section class="agent-tool-card">
+      <header><strong>${icon("clipboard-check", 16)} ${esc(card.title || "Workspace checklist")}</strong><span>${esc(card.summary || "")}</span></header>
+      ${card.missing?.length ? `<ul>${card.missing.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>` : `<p>Workspace looks ready for the next Agent task.</p>`}
+      ${card.suggestions?.length ? `<div class="agent-suggestions">${card.suggestions.map((item) => `<button class="dark-button" data-agent-prompt="${esc(item)}">${esc(item)}</button>`).join("")}</div>` : ""}
+    </section>`;
+  }
+  if (card.type === "agent_memory") {
+    return `<section class="agent-tool-card">
+      <header><strong>${icon("brain", 16)} ${esc(card.title || "Memory updated")}</strong><span>${esc(card.summary || "")}</span></header>
+      <div><button class="dark-button" data-page="project">${icon("edit-3", 15)} Review memory</button></div>
+    </section>`;
+  }
+  if (card.type === "schedule_drafts") {
+    return `<section class="agent-tool-card">
+      <header><strong>${icon("send", 16)} ${esc(card.title || "Drafts created")}</strong><span>${esc(card.summary || "")}</span></header>
+      <div><button class="dark-button" data-page="autopost">${icon("calendar", 15)} Open Scheduler</button></div>
+    </section>`;
+  }
+  return "";
+}
+
+function agentRecoveryCard(run) {
+  const recovery = run?.recovery;
+  if (!recovery) return "";
+  return `<section class="agent-recovery-card">
+    <strong>${icon("life-buoy", 16)} Recovery</strong>
+    <p>${esc(recovery.reason || "Agent action needs recovery.")}</p>
+    <div>${(recovery.actions || []).map((item) => item.agentPrompt
+      ? `<button class="dark-button" data-agent-prompt="${esc(item.agentPrompt)}">${esc(item.label || "Try")}</button>`
+      : `<button class="dark-button" data-page="${esc(item.uiAction?.page || "agent")}">${esc(item.label || "Open")}</button>`).join("")}</div>
+  </section>`;
+}
+
+function agentUndoCard(run) {
+  const canUndo = run?.status === "completed" && !run.undoedAt && (run.diffs || []).some((item) => item.undoable);
+  if (!canUndo) return "";
+  return `<div class="agent-undo-card"><span>${icon("undo-2", 15)} This run has undoable workspace changes.</span><button class="dark-button" data-agent-undo="${esc(run.id)}">${icon("rotate-ccw", 15)} Undo</button></div>`;
 }
 
 function agentConfirmationCard(run) {
@@ -4053,6 +4187,7 @@ function bind() {
   document.querySelectorAll("[data-agent-permission]").forEach((el) => el.addEventListener("click", () => adminUpdateUser(el.dataset.agentPermission, { agentPermissions: { [el.dataset.permission]: el.dataset.enabled === "true" } })));
   document.querySelectorAll("[data-agent-prompt]").forEach((el) => el.addEventListener("click", () => sendAgentMessage(el.dataset.agentPrompt)));
   document.querySelectorAll("[data-agent-confirm]").forEach((el) => el.addEventListener("click", () => confirmAgentAction(el.dataset.agentConfirm, el.dataset.agentToken)));
+  document.querySelectorAll("[data-agent-undo]").forEach((el) => el.addEventListener("click", () => undoAgentRun(el.dataset.agentUndo)));
   document.querySelectorAll("[data-date-field]").forEach((el) => el.addEventListener("change", () => set({ [el.dataset.dateField]: el.value })));
   document.querySelectorAll("[data-action]").forEach((el) => el.addEventListener("click", (e) => action(e, el.dataset.action)));
   document.querySelectorAll("[data-field-set]").forEach((el) => el.addEventListener("click", () => saveProjectField(el.dataset.fieldSet, el.dataset.value)));
@@ -4143,7 +4278,15 @@ async function action(event, name) {
   if (name === "open-whatsapp") return window.open(whatsappGroupUrl, "_blank", "noopener,noreferrer");
   if (name === "connect-tiktok") return window.location.href = `${apiBaseUrl}/api/tiktok/connect?token=${encodeURIComponent(state.token)}`;
   if (name === "tiktok-creator-info") return tiktokCreatorInfo();
-  if (name === "copy-affiliate") { await navigator.clipboard?.writeText("https://duitok.com/ref/DUIT2026"); return notify("Affiliate link copied."); }
+  if (name === "copy-affiliate") {
+    const code = state.db?.affiliate?.code || "DUIT2026";
+    await navigator.clipboard?.writeText(`https://duitok.com/ref/${code}`);
+    return notify("Affiliate link copied.");
+  }
+  if (name === "copy-affiliate-code") {
+    await navigator.clipboard?.writeText(state.db?.affiliate?.code || "DUIT2026");
+    return notify("Affiliate code copied.");
+  }
   if (name === "support-ticket") return mutate("/support", { method: "POST", body: JSON.stringify({ message: "Support ticket from studio" }) }, "Support ticket saved.");
   if (name === "download-sop") return download("/api/export/sop", "duitok-image-sop.txt");
   if (name === "download-autopost-extension") return download("/api/export/autopost-extension", "duitok-autopost-extension.zip");
@@ -4464,6 +4607,24 @@ async function confirmAgentAction(runId, token) {
     rememberAgentMessages(messages);
     set({ agentMessages: messages, agentBusy: false });
     notify(error.message);
+  }
+}
+
+async function undoAgentRun(runId) {
+  if (!runId || state.agentBusy) return;
+  set({ agentBusy: true });
+  try {
+    const res = await api(`/agent/runs/${runId}/undo`, { method: "POST", body: JSON.stringify({}) });
+    const db = res.db || state.db;
+    const messages = state.agentMessages.map((item) => item.agentRun?.id === runId
+      ? { ...item, agentRun: { ...(res.agentRun || item.agentRun), undoedAt: new Date().toISOString() } }
+      : item);
+    rememberAgentMessages(messages);
+    set({ db, agentMessages: messages, agentBusy: false });
+    notify("Agent changes undone.");
+  } catch (error) {
+    set({ agentBusy: false });
+    notify(error.message || "Undo failed.");
   }
 }
 

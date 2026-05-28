@@ -593,7 +593,9 @@ function normalizeDb(db) {
   db.tiktok.publishes ||= [];
   db.tiktok.publishes = db.tiktok.publishes.map((item) => ({ userId: item.userId || adminUserId, ...item }));
   db.agentRuns ||= [];
-  db.agentRuns = db.agentRuns.slice(0, 100).map((item) => ({ toolResults: [], uiActions: [], plan: [], ...item }));
+  db.agentRuns = db.agentRuns.slice(0, 100).map((item) => ({ toolResults: [], uiActions: [], plan: [], diffs: [], cards: [], ...item }));
+  db.agentMemoryVersions ||= [];
+  db.agentEvaluations ||= [];
   db.supportTickets ||= [];
   db.supportTickets = db.supportTickets.map((item) => ({ userId: item.userId || adminUserId, ...item }));
   db.generationJobs ||= [];
@@ -977,6 +979,10 @@ function setDeep(target, dotted, value) {
     cursor = cursor[key];
   }
   cursor[parts[0]] = value;
+}
+
+function getDeep(target, dotted) {
+  return String(dotted || "").split(".").reduce((cursor, key) => cursor?.[key], target);
 }
 
 function findProject(db, id, user) {
@@ -2628,6 +2634,101 @@ function buildSeedancePrompt({ project, productName, scene, audience, language, 
   ].join("\n");
 }
 
+function agentToolCard(name, result = {}) {
+  const data = sanitizeAgentObject(result.data || {});
+  if (name === "create_content_plan") {
+    return {
+      type: "content_plan",
+      title: `${data.plan?.length || 7}-day TikTok content plan`,
+      summary: data.scheduleIds?.length ? `${data.scheduleIds.length} scheduler drafts created.` : "Plan saved without generating assets.",
+      projectId: data.projectId,
+      resultId: data.resultId,
+      plan: Array.isArray(data.plan) ? data.plan.slice(0, 14) : [],
+      actions: ["create_drafts", "generate_day_1"]
+    };
+  }
+  if (name === "create_seedance_prompt") {
+    return {
+      type: "seedance_prompt",
+      title: "Seedance prompt saved",
+      summary: String(data.prompt || "").split("\n").slice(0, 3).join(" "),
+      projectId: data.projectId,
+      resultId: data.resultId,
+      prompt: data.prompt || "",
+      actions: ["copy", "generate_video"]
+    };
+  }
+  if (name === "inspect_workspace_state") {
+    return {
+      type: "workspace_inspect",
+      title: "Workspace checklist",
+      summary: data.missing?.length ? `${data.missing.length} items need attention.` : "Workspace looks ready.",
+      projectId: data.currentProject?.id,
+      missing: data.missing || [],
+      schedule: data.schedule || {},
+      suggestions: data.nextSuggestions || [],
+      actions: ["fix_context", "create_plan", "open_scheduler"]
+    };
+  }
+  if (name === "remember_agent_context") {
+    return {
+      type: "agent_memory",
+      title: "Project memory updated",
+      summary: "Agent will use this context in future project tasks.",
+      projectId: data.projectId,
+      memory: data.memory || {}
+    };
+  }
+  if (name === "create_schedule_draft") {
+    return {
+      type: "schedule_drafts",
+      title: "Scheduler drafts created",
+      summary: `${data.scheduleIds?.length || 1} draft${data.scheduleIds?.length > 1 ? "s" : ""} saved.`,
+      scheduleIds: data.scheduleIds || (data.scheduleId ? [data.scheduleId] : []),
+      actions: ["open_scheduler"]
+    };
+  }
+  return null;
+}
+
+function agentRecoveryForError(error) {
+  const message = sanitizeAgentText(error?.message || "");
+  if (/tiktok.*connected|account not found|connection/i.test(message)) {
+    return {
+      reason: "TikTok account is not connected",
+      actions: [
+        { label: "Open Scheduler", uiAction: { page: "autopost" } },
+        { label: "Create draft only", agentPrompt: "Create a draft instead of publishing" }
+      ]
+    };
+  }
+  if (/public mediaUrl|media/i.test(message)) {
+    return {
+      reason: "A public video URL is required before publishing",
+      actions: [
+        { label: "Generate a video first", agentPrompt: "Generate a video for this project first" },
+        { label: "Open Scheduler", uiAction: { page: "autopost" } }
+      ]
+    };
+  }
+  if (/credit|balance|top up/i.test(message)) {
+    return {
+      reason: "Credits are not enough for this action",
+      actions: [{ label: "Open Top Up", uiAction: { page: "topup" } }]
+    };
+  }
+  if (/permission/i.test(message)) {
+    return {
+      reason: "This account does not have permission for that Agent action",
+      actions: [{ label: "Contact support", uiAction: { page: "agent" } }]
+    };
+  }
+  return {
+    reason: message || "Agent action failed",
+    actions: [{ label: "Try a smaller task", agentPrompt: "Try again with a smaller, more specific task" }]
+  };
+}
+
 async function executeAgentTool(name, args, user) {
   if (name === "inspect_workspace_state") {
     const db = await ensureDb();
@@ -2659,19 +2760,29 @@ async function executeAgentTool(name, args, user) {
       message: "Project created.",
       db,
       data: { projectId },
+      diffs: [{ type: "created_project", target: { type: "project", id: projectId }, undoable: true }],
       uiAction: { page: "project", projectId }
     };
   }
 
   if (name === "update_project_field") {
     requireAgentPermission(user, "updateProject");
+    let before;
     const db = await mutateDb(async (currentDb) => {
-      setDeep(findProject(currentDb, args.projectId, user), args.field, args.value);
+      const project = findProject(currentDb, args.projectId, user);
+      before = getDeep(project, args.field);
+      setDeep(project, args.field, args.value);
       currentDb.usage.unshift(usage(`Agent updated ${args.field}`, 0, user.id));
       await saveDb(currentDb);
       return publicState(currentDb, user);
     });
-    return { ok: true, message: `${args.field} updated.`, db, data: { projectId: args.projectId, field: args.field } };
+    return {
+      ok: true,
+      message: `${args.field} updated.`,
+      db,
+      data: { projectId: args.projectId, field: args.field },
+      diffs: [{ type: "project_field", target: { type: "project", id: args.projectId }, field: args.field, before, after: args.value, undoable: true }]
+    };
   }
 
   if (name === "generate_project_output") {
@@ -2709,9 +2820,11 @@ async function executeAgentTool(name, args, user) {
     const result = await mutateDb(async (currentDb) => {
       const project = findProject(currentDb, args.projectId, user);
       project.agentMemory ||= {};
+      const memoryBefore = structuredClone(project.agentMemory);
       if (args.productName) project.agentMemory.productName = String(args.productName);
       if (args.audience) project.agentMemory.audience = String(args.audience);
       if (args.language) project.agentMemory.language = String(args.language);
+      const memoryAfter = structuredClone(project.agentMemory);
       const plan = buildContentPlan({ project, ...args });
       project.results ||= [];
       project.results.push({
@@ -2747,13 +2860,21 @@ async function executeAgentTool(name, args, user) {
       }
       currentDb.usage.unshift(usage(`Agent created ${plan.length}-day content plan: ${project.name}`, 0, project.userId));
       await saveDb(currentDb);
-      return { db: publicState(currentDb, user), plan, scheduleIds };
+      return { db: publicState(currentDb, user), plan, scheduleIds, memoryBefore, memoryAfter };
     });
+    const diffs = [
+      { type: "created_result", target: { type: "project", id: args.projectId }, resultId: planId, undoable: true }
+    ];
+    if (result.scheduleIds.length) diffs.push({ type: "created_schedule", scheduleIds: result.scheduleIds, undoable: true });
+    if (JSON.stringify(result.memoryBefore) !== JSON.stringify(result.memoryAfter)) {
+      diffs.push({ type: "agent_memory", target: { type: "project", id: args.projectId }, before: result.memoryBefore, after: result.memoryAfter, undoable: true });
+    }
     return {
       ok: true,
       message: args.saveDrafts ? `${result.plan.length} content plan drafts created.` : `${result.plan.length}-day content plan created.`,
       db: result.db,
       data: { projectId: args.projectId, resultId: planId, plan: result.plan, scheduleIds: result.scheduleIds },
+      diffs,
       uiAction: { page: args.saveDrafts ? "autopost" : "project", projectId: args.projectId }
     };
   }
@@ -2764,6 +2885,8 @@ async function executeAgentTool(name, args, user) {
     const result = await mutateDb(async (currentDb) => {
       const project = findProject(currentDb, args.projectId, user);
       project.agentMemory ||= {};
+      const memoryBefore = structuredClone(project.agentMemory);
+      const imageBefore = structuredClone(project.image || {});
       if (args.productName) project.agentMemory.productName = String(args.productName);
       if (args.audience) project.agentMemory.audience = String(args.audience);
       if (args.language) project.agentMemory.language = String(args.language);
@@ -2784,30 +2907,47 @@ async function executeAgentTool(name, args, user) {
       });
       currentDb.usage.unshift(usage(`Agent created Seedance prompt: ${project.name}`, 0, project.userId));
       await saveDb(currentDb);
-      return { db: publicState(currentDb, user), prompt };
+      return { db: publicState(currentDb, user), prompt, memoryBefore, memoryAfter: structuredClone(project.agentMemory), imageBefore, imageAfter: structuredClone(project.image) };
     });
     return {
       ok: true,
       message: "Seedance prompt saved to the project.",
       db: result.db,
       data: { projectId: args.projectId, resultId: promptId, prompt: result.prompt },
+      diffs: [
+        { type: "project_field", target: { type: "project", id: args.projectId }, field: "image", before: result.imageBefore, after: result.imageAfter, undoable: true },
+        { type: "created_result", target: { type: "project", id: args.projectId }, resultId: promptId, undoable: true },
+        ...(JSON.stringify(result.memoryBefore) !== JSON.stringify(result.memoryAfter) ? [{ type: "agent_memory", target: { type: "project", id: args.projectId }, before: result.memoryBefore, after: result.memoryAfter, undoable: true }] : [])
+      ],
       uiAction: { page: "project", step: "image", projectId: args.projectId }
     };
   }
 
   if (name === "remember_agent_context") {
     requireAgentPermission(user, "updateProject");
-    const db = await mutateDb(async (currentDb) => {
+    const result = await mutateDb(async (currentDb) => {
       const project = findProject(currentDb, args.projectId, user);
       project.agentMemory ||= {};
+      const before = structuredClone(project.agentMemory);
       for (const key of ["productName", "audience", "language", "brandTone", "notes"]) {
         if (args[key] !== undefined) project.agentMemory[key] = String(args[key]).slice(0, 1000);
       }
+      project.agentMemory.updatedAt = new Date().toISOString();
+      project.agentMemory.updatedBy = "agent";
+      currentDb.agentMemoryVersions ||= [];
+      currentDb.agentMemoryVersions.unshift({ id: crypto.randomUUID(), projectId: project.id, userId: project.userId, source: "agent", before, after: structuredClone(project.agentMemory), createdAt: new Date().toISOString() });
+      currentDb.agentMemoryVersions = currentDb.agentMemoryVersions.slice(0, 500);
       currentDb.usage.unshift(usage(`Agent updated memory: ${project.name}`, 0, project.userId));
       await saveDb(currentDb);
-      return publicState(currentDb, user);
+      return { db: publicState(currentDb, user), before, after: structuredClone(project.agentMemory) };
     });
-    return { ok: true, message: "Project Agent memory updated.", db, data: { projectId: args.projectId } };
+    return {
+      ok: true,
+      message: "Project Agent memory updated.",
+      db: result.db,
+      data: { projectId: args.projectId, memory: result.after },
+      diffs: [{ type: "agent_memory", target: { type: "project", id: args.projectId }, before: result.before, after: result.after, undoable: true }]
+    };
   }
 
   if (name === "create_schedule_draft") {
@@ -2861,30 +3001,38 @@ async function executeAgentTool(name, args, user) {
       message: result.scheduleIds.length > 1 ? `${result.scheduleIds.length} scheduler drafts created.` : "Scheduler draft created.",
       db: result.db,
       data: { scheduleId: result.scheduleIds[0], scheduleIds: result.scheduleIds },
+      diffs: [{ type: "created_schedule", scheduleIds: result.scheduleIds, undoable: true }],
       uiAction: { page: "autopost" }
     };
   }
 
   if (name === "toggle_schedule_status") {
     requireAgentPermission(user, "schedule");
+    let before = "";
+    let after = "";
     const db = await mutateDb(async (currentDb) => {
       const item = currentDb.schedule.find((entry) => entry.id === args.scheduleId);
       if (!item) throw Object.assign(new Error("Schedule item not found"), { status: 404 });
       if (!hasAdminPrivileges(user) && item.userId !== user.id) throw Object.assign(new Error("Schedule item not found"), { status: 404 });
+      before = item.status;
       item.status = item.status === "Ready" ? "Posted" : "Ready";
+      after = item.status;
       currentDb.usage.unshift(usage(`Agent updated schedule: ${item.title}`, 0, item.userId));
       await saveDb(currentDb);
       return publicState(currentDb, user);
     });
-    return { ok: true, message: "Schedule updated.", db };
+    return { ok: true, message: "Schedule updated.", db, diffs: [{ type: "schedule_status", scheduleId: args.scheduleId, before, after, undoable: after !== "Posted" }] };
   }
 
   if (name === "update_autopost_job") {
     requireAgentPermission(user, "schedule");
+    let before = null;
+    let after = null;
     const db = await mutateDb(async (currentDb) => {
       const item = currentDb.schedule.find((entry) => entry.id === args.scheduleId);
       if (!item) throw Object.assign(new Error("Auto post job not found"), { status: 404 });
       if (!hasAdminPrivileges(user) && item.userId !== user.id) throw Object.assign(new Error("Auto post job not found"), { status: 404 });
+      before = structuredClone(item);
       if (args.status) item.status = String(args.status);
       if (args.caption !== undefined) item.caption = String(args.caption);
       if (args.hashtags !== undefined) item.hashtags = String(args.hashtags);
@@ -2892,11 +3040,12 @@ async function executeAgentTool(name, args, user) {
       if (args.productUrl !== undefined) item.productUrl = String(args.productUrl);
       item.updatedAt = new Date().toISOString();
       if (item.status === "Posted") item.postedAt = item.updatedAt;
+      after = structuredClone(item);
       currentDb.usage.unshift(usage(`Agent Auto Post ${item.status}: ${item.title}`, 0, item.userId));
       await saveDb(currentDb);
       return publicState(currentDb, user);
     });
-    return { ok: true, message: "Auto post job updated.", db };
+    return { ok: true, message: "Auto post job updated.", db, diffs: [{ type: "schedule_item", scheduleId: args.scheduleId, before, after, undoable: after?.status !== "Posted" && after?.status !== "Processing" }] };
   }
 
   if (name === "query_tiktok_creator_info") {
@@ -3130,6 +3279,35 @@ function agentPublishArgsFromMessage(content = "") {
   });
 }
 
+function agentShortcutToolFromMessage(content = "", projectId = "") {
+  if (!projectId) return null;
+  const intent = inferAgentAction(content);
+  if (intent.wantsProject) return { name: "create_project", args: { name: agentProjectName(content) } };
+  if (intent.wantsSeedancePrompt) {
+    return {
+      name: "create_seedance_prompt",
+      args: {
+        projectId,
+        keyMessage: content,
+        duration: String(content).match(/\b(4|6|8|10|12|15)\s*s(?:ec|econd|秒)?/i)?.[1] || "8"
+      }
+    };
+  }
+  if (intent.wantsContentPlan) {
+    return {
+      name: "create_content_plan",
+      args: {
+        projectId,
+        days: /14|十四/.test(content) ? 14 : 7,
+        objective: /launch|上新|新品/.test(content) ? "launch" : "sales",
+        saveDrafts: /草稿|draft|排期|schedule/.test(content)
+      }
+    };
+  }
+  if (intent.wantsInspect) return { name: "inspect_workspace_state", args: { projectId, focus: /今天|today/i.test(content) ? "today" : "workspace" } };
+  return null;
+}
+
 function agentConfirmationForTool(name, args = {}) {
   return {
     id: crypto.randomUUID(),
@@ -3170,8 +3348,16 @@ function publicAgentRun(run) {
     safe.confirmation = confirmation;
   }
   if (Array.isArray(safe.toolResults)) {
-    safe.toolResults = safe.toolResults.map((item) => safeAgentToolResult(item.name, {}, item.result || item));
+    safe.toolResults = safe.toolResults.map((item) => safeAgentToolResult(item.name, item.argsSummary || {}, {
+      ...(item.result || item),
+      card: item.card,
+      recovery: item.recovery,
+      diffs: item.diffs
+    }));
   }
+  if (Array.isArray(safe.diffs)) safe.diffs = sanitizeAgentObject(safe.diffs);
+  if (Array.isArray(safe.cards)) safe.cards = sanitizeAgentObject(safe.cards);
+  if (safe.recovery) safe.recovery = sanitizeAgentObject(safe.recovery);
   if (safe.userMessage) safe.userMessage = sanitizeAgentText(safe.userMessage);
   return safe;
 }
@@ -3263,6 +3449,25 @@ function sanitizeAgentReply(reply, userMessage = "") {
   return text || "Done.";
 }
 
+function validateAgentMemoryInput(input = {}) {
+  const allowed = ["productName", "audience", "language", "brandTone", "claimsToAvoid", "preferredHooks", "blockedWords", "notes"];
+  const safe = {};
+  for (const key of allowed) {
+    if (input[key] === undefined) continue;
+    const value = String(input[key] || "").slice(0, 1600);
+    for (const pattern of agentSensitiveTextPatterns) {
+      pattern.lastIndex = 0;
+      if (pattern.test(value)) {
+        const error = new Error("Project memory cannot contain sensitive credentials or tokens.");
+        error.status = 400;
+        throw error;
+      }
+    }
+    safe[key] = sanitizeAgentText(value);
+  }
+  return safe;
+}
+
 function validateSafeUrl(value, field) {
   if (!value) return;
   try {
@@ -3322,20 +3527,26 @@ async function executeSafeAgentTool(name, args, user) {
 function safeAgentToolResult(name, args = {}, result = {}) {
   const safeArgs = sanitizeAgentObject(args || {});
   const safeData = sanitizeAgentObject(result.data || {});
+  const safeDiffs = sanitizeAgentObject(result.diffs || []);
+  const safeRecovery = result.recovery ? sanitizeAgentObject(result.recovery) : undefined;
   const summary = {};
   for (const key of ["projectId", "resultId", "resultType", "scheduleId", "field"]) {
     if (safeArgs?.[key]) summary[key] = safeArgs[key];
     if (safeData?.[key]) summary[key] = safeData[key];
   }
+  const baseResult = {
+    ok: Boolean(result.ok),
+    message: sanitizeAgentText(result.message || ""),
+    error: result.error ? sanitizeAgentText(result.error) : undefined,
+    data: safeData
+  };
   return {
     name: agentAllowedToolNames.has(name) ? name : "unknown_tool",
     argsSummary: summary,
-    result: {
-      ok: Boolean(result.ok),
-      message: sanitizeAgentText(result.message || ""),
-      error: result.error ? sanitizeAgentText(result.error) : undefined,
-      data: safeData
-    }
+    result: baseResult,
+    card: result.card ? sanitizeAgentObject(result.card) : agentToolCard(name, baseResult),
+    recovery: safeRecovery,
+    diffs: Array.isArray(safeDiffs) ? safeDiffs : []
   };
 }
 
@@ -3343,6 +3554,8 @@ async function runDeterministicAgent(content, { projectId, user }) {
   const intent = inferAgentAction(content);
   const toolResults = [];
   const uiActions = [];
+  const diffs = [];
+  const cards = [];
   let latestDb = null;
   let activeProjectId = projectId;
 
@@ -3352,7 +3565,10 @@ async function runDeterministicAgent(content, { projectId, user }) {
     if (result.db) latestDb = result.db;
     if (result.uiAction) uiActions.push(result.uiAction);
     if (result.data?.projectId) activeProjectId = result.data.projectId;
-    toolResults.push(safeAgentToolResult(name, safeArgs, result));
+    const publicResult = safeAgentToolResult(name, safeArgs, result);
+    toolResults.push(publicResult);
+    if (result.diffs?.length) diffs.push(...result.diffs);
+    if (publicResult.card) cards.push(publicResult.card);
     return result;
   }
 
@@ -3418,7 +3634,9 @@ async function runDeterministicAgent(content, { projectId, user }) {
       : "Agent 大脑暂时不可用。我还能帮你创建草稿、更新工作台、创建排期草稿；复杂规划恢复后会自动回到完整 Agent 模式。",
     db: latestDb,
     toolResults,
-    uiActions
+    uiActions,
+    diffs,
+    cards
   };
 }
 
@@ -4008,12 +4226,16 @@ app.post("/api/agent", async (req, res, next) => {
 
     if (!hasDeepSeekConfig()) {
       const fallback = await runDeterministicAgent(latestUserMessage, { projectId, user });
+      const fallbackDiffs = fallback.diffs || [];
+      const fallbackCards = fallback.cards || (fallback.toolResults || []).map((item) => item.card).filter(Boolean);
       agentRun = {
         ...agentRun,
         status: fallback.toolResults?.length ? "completed" : "failed",
         plan: fallback.toolResults?.length ? completeAgentPlan(agentRun.plan) : failAgentPlan(agentRun.plan, "Agent 大脑暂时不可用"),
         toolResults: fallback.toolResults || [],
         uiActions: fallback.uiActions || [],
+        diffs: fallbackDiffs,
+        cards: fallbackCards,
         durationMs: Date.now() - startedAt
       };
       await saveAgentRun(agentRun);
@@ -4057,6 +4279,8 @@ app.post("/api/agent", async (req, res, next) => {
 
     const toolResults = [];
     const uiActions = [];
+    const runDiffs = [];
+    const runCards = [];
     let latestDb = stateForUser;
 
     for (let round = 0; round < 3; round += 1) {
@@ -4075,6 +4299,36 @@ app.post("/api/agent", async (req, res, next) => {
       messages.push(message);
       const calls = message.tool_calls || [];
       if (!calls.length) {
+        const shortcut = agentShortcutToolFromMessage(latestUserMessage, projectId);
+        if (shortcut) {
+          const safeArgs = validateAgentToolArgs(shortcut.name, shortcut.args);
+          const result = await executeAgentTool(shortcut.name, safeArgs, user);
+          if (result.db) latestDb = result.db;
+          if (result.uiAction) uiActions.push(result.uiAction);
+        const publicResult = safeAgentToolResult(shortcut.name, safeArgs, result);
+        toolResults.push(publicResult);
+        if (publicResult.card) runCards.push(publicResult.card);
+        if (result.diffs?.length) runDiffs.push(...result.diffs);
+          agentRun = {
+            ...agentRun,
+            status: "completed",
+            plan: completeAgentPlan(planWithTool(agentRun.plan, shortcut.name, "completed", result.message || agentToolLabel(shortcut.name))),
+            toolResults,
+            uiActions,
+            diffs: runDiffs,
+            cards: runCards,
+            confidence: agentConfidence(intent, { projectId, toolName: shortcut.name, executionReady: true }),
+            durationMs: Date.now() - startedAt
+          };
+          await saveAgentRun(agentRun);
+          return res.json({
+            reply: sanitizeAgentReply(result.message || message.content || "Done.", latestUserMessage),
+            db: latestDb,
+            toolResults,
+            uiActions,
+            agentRun: publicAgentRun(agentRun)
+          });
+        }
         const publishArgs = agentPublishArgsFromMessage(latestUserMessage);
         if (publishArgs) {
           const confirmation = agentConfirmationForTool("publish_tiktok_video", publishArgs);
@@ -4087,6 +4341,8 @@ app.post("/api/agent", async (req, res, next) => {
             confidence: agentConfidence("publish", { projectId, toolName: "publish_tiktok_video" }),
             confirmation,
             pendingTool: { name: "publish_tiktok_video", args: publishArgs },
+            diffs: runDiffs,
+            cards: runCards,
             durationMs: Date.now() - startedAt
           };
           await saveAgentRun(agentRun);
@@ -4137,6 +4393,8 @@ app.post("/api/agent", async (req, res, next) => {
             uiActions,
             confirmation,
             pendingTool: { name, args: safeArgs },
+            diffs: runDiffs,
+            cards: runCards,
             durationMs: Date.now() - startedAt
           };
           await saveAgentRun(agentRun);
@@ -4149,13 +4407,41 @@ app.post("/api/agent", async (req, res, next) => {
           });
         }
         agentRun.plan = planWithTool(agentRun.plan, name, "running", agentToolLabel(name));
-        const result = await executeAgentTool(name, safeArgs, user);
+        let result;
+        try {
+          result = await executeAgentTool(name, safeArgs, user);
+        } catch (error) {
+          const recovery = agentRecoveryForError(error);
+          agentRun = {
+            ...agentRun,
+            status: "failed",
+            plan: failAgentPlan(agentRun.plan, sanitizeAgentText(error.message || "Agent tool failed")),
+            toolResults,
+            uiActions,
+            diffs: runDiffs,
+            cards: runCards,
+            recovery,
+            durationMs: Date.now() - startedAt
+          };
+          await saveAgentRun(agentRun);
+          return res.status(error.status || 500).json({
+            reply: sanitizeAgentReply(`I could not complete that action. ${recovery.reason}`, latestUserMessage),
+            db: latestDb,
+            toolResults,
+            uiActions,
+            agentRun: publicAgentRun(agentRun)
+          });
+        }
         if (result.db) latestDb = result.db;
         if (result.uiAction) uiActions.push(result.uiAction);
         const publicResult = safeAgentToolResult(name, safeArgs, result);
         toolResults.push(publicResult);
+        if (publicResult.card) runCards.push(publicResult.card);
+        if (result.diffs?.length) runDiffs.push(...result.diffs);
         agentRun.toolResults = toolResults;
         agentRun.uiActions = uiActions;
+        agentRun.diffs = runDiffs;
+        agentRun.cards = runCards;
         agentRun.plan = planWithTool(agentRun.plan, name, "completed", result.message || agentToolLabel(name));
         messages.push({
           role: "tool",
@@ -4171,6 +4457,8 @@ app.post("/api/agent", async (req, res, next) => {
       plan: completeAgentPlan(agentRun.plan),
       toolResults,
       uiActions,
+      diffs: runDiffs,
+      cards: runCards,
       durationMs: Date.now() - startedAt
     };
     await saveAgentRun(agentRun);
@@ -4212,14 +4500,19 @@ app.post("/api/agent/confirm", async (req, res, next) => {
     const safeArgs = validateAgentToolArgs(pending.name, pending.args || {});
     const result = await executeAgentTool(pending.name, safeArgs, user);
     const latestDb = result.db || publicState(await ensureDb(), user);
-    const toolResults = [...(run.toolResults || []), safeAgentToolResult(pending.name, safeArgs, result)];
+    const publicResult = safeAgentToolResult(pending.name, safeArgs, result);
+    const toolResults = [...(run.toolResults || []), publicResult];
     const uiActions = [...(run.uiActions || []), ...(result.uiAction ? [result.uiAction] : [])];
+    const diffs = [...(run.diffs || []), ...(result.diffs || [])];
+    const cards = [...(run.cards || []), ...(publicResult.card ? [publicResult.card] : [])];
     const completedRun = {
       ...run,
       status: "completed",
       plan: completeAgentPlan(planWithTool(run.plan || [], pending.name, "completed", result.message || agentToolLabel(pending.name))),
       toolResults,
       uiActions,
+      diffs,
+      cards,
       confirmation: null,
       pendingTool: null,
       durationMs: (run.durationMs || 0) + Date.now() - startedAt,
@@ -4233,6 +4526,153 @@ app.post("/api/agent/confirm", async (req, res, next) => {
       uiActions,
       agentRun: publicAgentRun(completedRun)
     });
+  } catch (error) {
+    next(error);
+  }
+});
+
+async function undoAgentDiff(db, diff, user) {
+  if (!diff?.undoable) return;
+  if (diff.type === "project_field") {
+    const project = findProject(db, diff.target?.id, user);
+    const current = getDeep(project, diff.field);
+    if (JSON.stringify(current) !== JSON.stringify(diff.after)) {
+      const error = new Error("Cannot undo because the project field changed after the Agent run.");
+      error.status = 409;
+      throw error;
+    }
+    setDeep(project, diff.field, diff.before);
+    return;
+  }
+  if (diff.type === "agent_memory") {
+    const project = findProject(db, diff.target?.id, user);
+    if (JSON.stringify(project.agentMemory || {}) !== JSON.stringify(diff.after || {})) {
+      const error = new Error("Cannot undo because Agent memory changed after the Agent run.");
+      error.status = 409;
+      throw error;
+    }
+    project.agentMemory = structuredClone(diff.before || {});
+    db.agentMemoryVersions ||= [];
+    db.agentMemoryVersions.unshift({ id: crypto.randomUUID(), projectId: project.id, userId: project.userId, source: "undo", before: diff.after || {}, after: project.agentMemory, createdAt: new Date().toISOString() });
+    return;
+  }
+  if (diff.type === "created_result") {
+    const project = findProject(db, diff.target?.id, user);
+    project.results = (project.results || []).filter((item) => item.id !== diff.resultId);
+    return;
+  }
+  if (diff.type === "created_schedule") {
+    const ids = new Set(diff.scheduleIds || []);
+    for (const item of db.schedule || []) {
+      if (ids.has(item.id) && !["Draft", "Ready"].includes(item.status || "Draft")) {
+        const error = new Error("Cannot undo schedule drafts that are already processing or posted.");
+        error.status = 409;
+        throw error;
+      }
+      if (ids.has(item.id) && !hasAdminPrivileges(user) && item.userId !== user.id) {
+        const error = new Error("Schedule item not found");
+        error.status = 404;
+        throw error;
+      }
+    }
+    db.schedule = (db.schedule || []).filter((item) => !ids.has(item.id));
+    return;
+  }
+  if (diff.type === "schedule_status") {
+    const item = (db.schedule || []).find((entry) => entry.id === diff.scheduleId);
+    if (!item) return;
+    if (!hasAdminPrivileges(user) && item.userId !== user.id) throw Object.assign(new Error("Schedule item not found"), { status: 404 });
+    if (item.status !== diff.after) throw Object.assign(new Error("Cannot undo because schedule status changed after the Agent run."), { status: 409 });
+    item.status = diff.before;
+    item.updatedAt = new Date().toISOString();
+    return;
+  }
+  if (diff.type === "schedule_item") {
+    const item = (db.schedule || []).find((entry) => entry.id === diff.scheduleId);
+    if (!item) return;
+    if (!hasAdminPrivileges(user) && item.userId !== user.id) throw Object.assign(new Error("Schedule item not found"), { status: 404 });
+    Object.assign(item, structuredClone(diff.before || {}), { updatedAt: new Date().toISOString() });
+  }
+}
+
+app.post("/api/agent/runs/:id/undo", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    const payload = await mutateDb(async (db) => {
+      const run = (db.agentRuns || []).find((item) => item.id === req.params.id && item.userId === user.id);
+      if (!run) throw Object.assign(new Error("Agent run not found"), { status: 404 });
+      if (run.undoedAt) throw Object.assign(new Error("Agent run was already undone."), { status: 400 });
+      if (Date.now() - Date.parse(run.createdAt || 0) > 24 * 60 * 60 * 1000) throw Object.assign(new Error("Agent run is too old to undo."), { status: 400 });
+      const diffs = (run.diffs || []).filter((item) => item.undoable);
+      if (!diffs.length) throw Object.assign(new Error("This Agent run has no undoable changes."), { status: 400 });
+      for (const diff of [...diffs].reverse()) await undoAgentDiff(db, diff, user);
+      run.undoedAt = new Date().toISOString();
+      run.status = "completed";
+      run.diffs = run.diffs.map((item) => ({ ...item, undoable: false }));
+      db.usage.unshift(usage("Agent run undone", 0, user.id));
+      await saveDb(db);
+      return { db: publicState(db, user), agentRun: publicAgentRun(run) };
+    });
+    res.json(payload);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.patch("/api/projects/:id/agent-memory", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    const input = validateAgentMemoryInput(req.body || {});
+    const state = await mutateDb(async (db) => {
+      const project = findProject(db, req.params.id, user);
+      const before = structuredClone(project.agentMemory || {});
+      project.agentMemory = {
+        ...(project.agentMemory || {}),
+        ...input,
+        updatedAt: new Date().toISOString(),
+        updatedBy: "user"
+      };
+      db.agentMemoryVersions ||= [];
+      db.agentMemoryVersions.unshift({ id: crypto.randomUUID(), projectId: project.id, userId: project.userId, source: "user", before, after: structuredClone(project.agentMemory), createdAt: new Date().toISOString() });
+      db.agentMemoryVersions = db.agentMemoryVersions.slice(0, 500);
+      db.usage.unshift(usage(`Updated Agent memory: ${project.name}`, 0, project.userId));
+      await saveDb(db);
+      return publicState(db, user);
+    });
+    res.json(state);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/projects/:id/agent-memory/history", async (req, res, next) => {
+  try {
+    const { db, user } = await requireAuth(req);
+    findProject(db, req.params.id, user);
+    const history = (db.agentMemoryVersions || [])
+      .filter((item) => item.projectId === req.params.id && (hasAdminPrivileges(user) || item.userId === user.id))
+      .slice(0, 20)
+      .map((item) => sanitizeAgentObject(item));
+    res.json({ history });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/admin/agent-runs", async (req, res, next) => {
+  try {
+    const { db, user } = await requireAuth(req);
+    requireAdminUser(user);
+    const runs = (db.agentRuns || []).slice(0, 100).map(publicAgentRun);
+    const metrics = runs.reduce((acc, run) => {
+      acc.total += 1;
+      acc.status[run.status || "unknown"] = (acc.status[run.status || "unknown"] || 0) + 1;
+      for (const item of run.toolResults || []) acc.tools[item.name] = (acc.tools[item.name] || 0) + 1;
+      if (run.recovery) acc.recoveries += 1;
+      if (run.status === "waiting_confirmation") acc.confirmations += 1;
+      return acc;
+    }, { total: 0, status: {}, tools: {}, recoveries: 0, confirmations: 0 });
+    res.json({ metrics, runs });
   } catch (error) {
     next(error);
   }

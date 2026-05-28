@@ -1694,6 +1694,74 @@ textarea {
   font-size: 13px;
 }
 
+.agent-memory-panel {
+  width: min(1480px, 100%);
+  margin: -16px auto 28px;
+  border: 1px solid rgba(93, 8, 108, 0.12);
+  border-radius: 8px;
+  padding: 18px;
+  background: #fffdf8;
+  box-shadow: 0 12px 36px rgba(31, 6, 38, 0.08);
+}
+
+.agent-memory-panel header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 14px;
+}
+
+.agent-memory-panel h2,
+.agent-memory-panel p {
+  margin: 0;
+}
+
+.agent-memory-panel header span {
+  color: rgba(93, 8, 108, 0.52);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.agent-memory-form {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.agent-memory-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--purple);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.agent-memory-form label:nth-of-type(n + 5) {
+  grid-column: span 2;
+}
+
+.agent-memory-form input,
+.agent-memory-form textarea {
+  width: 100%;
+  border: 1px solid rgba(93, 8, 108, 0.14);
+  border-radius: 8px;
+  padding: 10px 11px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+}
+
+.agent-memory-form textarea {
+  min-height: 82px;
+  resize: vertical;
+}
+
+.agent-memory-form button {
+  align-self: end;
+  min-height: 42px;
+}
+
 .canvas-card {
   width: min(1480px, 100%);
   min-height: 760px;
@@ -8677,6 +8745,105 @@ label {
   min-height: 38px;
 }
 
+.agent-tool-cards {
+  display: grid;
+  gap: 10px;
+}
+
+.agent-tool-card,
+.agent-recovery-card,
+.agent-undo-card {
+  display: grid;
+  gap: 10px;
+  border: 1px solid rgba(244, 202, 50, 0.2);
+  border-radius: 8px;
+  padding: 12px;
+  background: rgba(244, 202, 50, 0.08);
+}
+
+.agent-tool-card header {
+  display: grid;
+  gap: 3px;
+}
+
+.agent-tool-card strong,
+.agent-recovery-card strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+}
+
+.agent-tool-card header span,
+.agent-tool-card p,
+.agent-recovery-card p,
+.agent-undo-card span {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.agent-tool-card pre {
+  overflow: auto;
+  max-height: 180px;
+  margin: 0;
+  white-space: pre-wrap;
+  color: rgba(255, 255, 255, 0.84);
+  font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.agent-tool-card div,
+.agent-recovery-card div,
+.agent-undo-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.agent-plan-table {
+  display: grid !important;
+  gap: 6px !important;
+}
+
+.agent-plan-table p {
+  display: grid;
+  gap: 2px;
+  border-radius: 8px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.agent-plan-table b {
+  color: #fff;
+}
+
+.agent-plan-table span {
+  color: rgba(255, 255, 255, 0.65) !important;
+  font-size: 12px;
+}
+
+.agent-tool-card ul {
+  margin: 0;
+  padding-left: 18px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.agent-suggestions {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 8px !important;
+}
+
+.agent-recovery-card {
+  border-color: rgba(255, 79, 101, 0.24);
+  background: rgba(255, 79, 101, 0.1);
+}
+
+.agent-undo-card {
+  grid-template-columns: minmax(0, 1fr) auto;
+  justify-content: space-between;
+}
+
 .agent-page-panel .agent-empty,
 .agent-page-panel .agent-thread span {
   color: rgba(93, 8, 108, 0.62);
@@ -8722,8 +8889,13 @@ label {
 
 @media (max-width: 1000px) {
   .agent-page-hero,
-  .agent-page-panel .agent-form {
+  .agent-page-panel .agent-form,
+  .agent-memory-form {
     grid-template-columns: 1fr;
+  }
+
+  .agent-memory-form label:nth-of-type(n + 5) {
+    grid-column: auto;
   }
 
   .agent-3d-card {
