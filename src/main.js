@@ -3572,10 +3572,95 @@ function sopAutoContentContent() {
   return content[state.lang] || content.ms;
 }
 
+function sopOriginalVideoContent() {
+  const content = {
+    ms: {
+      eyebrow: "Panduan",
+      title: "Tab Original Video — Cinematic AI Video",
+      close: "Faham - tutup",
+      path: "Grok Imagine 3 · 6-30 saat · cinematic style",
+      whatTitle: "Apa ini?",
+      what: "Original Video digunakan untuk generate video sinematik seperti drone shots, action sequence, dramatic scene dan brand footage yang tidak perlu face-talking UGC. Ia sesuai untuk landing page hero, brand cinematic, ad transition dan B-roll visual.",
+      whenTitle: "Bila guna tab ni?",
+      when: "Guna tab ini bila korang nak footage cantik macam trailer movie: pemandangan, action shot, slow-motion dramatic, jungle chase, sci-fi scene atau cinematic transition. Bukan untuk product review dan bukan untuk dialog panjang.",
+      guideTitle: "Cara guna",
+      stepLabel: "Step",
+      tipLabel: "Tip",
+      workflowTitle: "Workflow tip",
+      workflow: "Original Video paling kuat sebagai standalone cinematic piece atau B-roll. Combine dengan UGC voice-over dalam CapCut / Premiere untuk tambah variety dalam ads.",
+      sections: { 6: "Dropdown & Pilihan — Apa Maksud Setiap Satu" },
+      steps: [
+        { no: "1", title: "Cinema Generator overview", subtitle: "Image Mode, cinematic prompt, duration, size dan Generate Cinema", copy: "Pilih Image Mode, tulis scene prompt yang panjang, set duration 6-30 saat, pilih size 9:16 atau 16:9, kemudian tekan Generate Cinema." },
+        { no: "2", title: "Pilih Image Mode", copy: "Text to Video ialah default dan guna prompt sahaja. First Frame animate dari gambar permulaan. Last Frame targetkan ending frame tertentu, berguna untuk continuation series." },
+        { no: "3", title: "Tulis Cinematic Prompt", copy: "Berbeza daripada UGC, prompt cinematic patut panjang dan descriptive: characters, actions, camera movement, lighting, mood dan environment. Gunakan bahasa seperti POV tracking shot, dramatic lighting, slow-motion, volumetric haze.", tip: "Lebih detail = lebih sinematik. Contoh: cinematic drone shot over snowy mountain village at sunrise, warm window lights, blue morning haze, slow camera dolly, golden rim lighting." },
+        { no: "4", title: "Pilih Duration", copy: "Default 6 saat. Maximum 30 saat. Cost ikut saat, contohnya RM0.03 per saat. Slider akan update cost secara real-time.", tip: "Untuk hero video landing page, 8-12 saat biasanya sweet spot." },
+        { no: "5", title: "Generate Cinema", copy: "Tekan Generate Cinema. Pending card muncul di history bawah. Cinematic generation biasanya lebih lambat daripada UGC, sekitar 90-180 saat.", tip: "Output akan dilabel Product Ref jika guna reference image, atau Text to Video jika pure text." },
+        { no: "6", title: "Image Mode dropdown", copy: "Text to Video membiarkan AI imagine semua dari prompt. First Frame mula dari image yang korang upload. Last Frame cuba akhiri video pada image sasaran.", tip: "First Frame paling useful: generate cinematic start image di Image tab, kemudian animate di Original Video." },
+        { no: "7", title: "Duration slider", copy: "Minimum 6 saat, maximum 30 saat. 6s murah untuk hook, 10s sweet spot, 15s untuk mid-form story, 30s untuk mini-film.", tip: "15s+ jarang convert lebih baik untuk social kerana ramai orang scroll." },
+        { no: "8", title: "Size dropdown", copy: "9:16 untuk TikTok, Reels dan Shorts. 16:9 untuk YouTube, Facebook dan desktop landing page. 1:1 sesuai untuk Instagram feed lama." }
+      ]
+    },
+    zh: {
+      eyebrow: "指南",
+      title: "Original Video 页面 — 电影感 AI 视频",
+      close: "我明白了 - 关闭",
+      path: "Grok Imagine 3 · 6-30 秒 · cinematic style",
+      whatTitle: "这是什么？",
+      what: "Original Video 用来生成电影感画面，例如航拍、动作镜头、戏剧场景和品牌视觉，不需要 UGC 露脸口播。它适合 landing page hero、品牌 cinematic、广告转场和 B-roll。",
+      whenTitle: "什么时候用？",
+      when: "当你想要像电影 trailer 一样的画面，例如风景、action shot、slow-motion、jungle chase、科幻场景或 cinematic transition 时，用这个 tab。它不是产品 review，也不适合长对白。",
+      guideTitle: "怎么用",
+      stepLabel: "步骤",
+      tipLabel: "提示",
+      workflowTitle: "工作流建议",
+      workflow: "Original Video 最适合作为独立 cinematic piece 或 B-roll。也可以在 CapCut / Premiere 里和 UGC voice-over 混剪，让广告更有层次。",
+      sections: { 6: "下拉选项 — 每个选项是什么意思" },
+      steps: [
+        { no: "1", title: "Cinema Generator 总览", subtitle: "Image Mode、cinematic prompt、duration、size、Generate Cinema", copy: "先选择 Image Mode，写长一点的 scene prompt，设置 6-30 秒 duration，选择 9:16 或 16:9，然后点击 Generate Cinema。" },
+        { no: "2", title: "选择 Image Mode", copy: "Text to Video 是默认模式，只用文字 prompt。First Frame 会从起始图片动画化。Last Frame 会尝试让视频结束在目标图片，适合 continuation series。" },
+        { no: "3", title: "写 Cinematic Prompt", copy: "和 UGC 不同，cinematic prompt 应该更长、更具体，包含角色、动作、镜头运动、灯光、情绪和环境。可以使用 POV tracking shot、dramatic lighting、slow-motion、volumetric haze 等电影语言。", tip: "越具体越电影感。例子：cinematic drone shot over snowy mountain village at sunrise, warm window lights, blue morning haze, slow camera dolly, golden rim lighting." },
+        { no: "4", title: "选择 Duration", copy: "默认 6 秒，最长 30 秒。成本按秒计算，例如 RM0.03 / 秒。拖动 slider 时，cost 会实时更新。", tip: "Landing page hero video 通常 8-12 秒最刚好。" },
+        { no: "5", title: "Generate Cinema", copy: "点击 Generate Cinema 后，下方 history 会出现 pending card。Cinematic generation 通常比 UGC 慢，大约 90-180 秒。", tip: "如果有 reference image，会显示 Product Ref；纯文字生成会显示 Text to Video。" },
+        { no: "6", title: "Image Mode 下拉", copy: "Text to Video 让 AI 完全根据 prompt 想象画面。First Frame 从你上传的起始图开始。Last Frame 尝试把视频结束在指定图片。", tip: "First Frame 最常用：先在 Image tab 生成 cinematic start image，再到 Original Video 里 animate。" },
+        { no: "7", title: "Duration slider", copy: "最短 6 秒，最长 30 秒。6s 适合 hook，10s 是 sweet spot，15s 适合 mid-form story，30s 是 mini-film。", tip: "社媒上 15s+ 不一定更好，因为用户很容易划走。" },
+        { no: "8", title: "Size 下拉", copy: "9:16 用于 TikTok、Reels、Shorts。16:9 用于 YouTube、Facebook 和 desktop landing page。1:1 适合旧版 Instagram feed。" }
+      ]
+    },
+    en: {
+      eyebrow: "Guide",
+      title: "Original Video Tab — Cinematic AI Video",
+      close: "Got it - close",
+      path: "Grok Imagine 3 · 6-30 seconds · cinematic style",
+      whatTitle: "What is this?",
+      what: "Original Video generates cinematic footage such as drone shots, action sequences, dramatic scenes, and brand visuals without UGC face-talking. Use it for landing page heroes, brand films, ad transitions, and B-roll.",
+      whenTitle: "When should I use it?",
+      when: "Use this tab when you want movie-trailer-style footage: landscapes, action shots, slow-motion drama, jungle chase scenes, sci-fi shots, or cinematic transitions. It is not for product reviews or long dialog.",
+      guideTitle: "How to use it",
+      stepLabel: "Step",
+      tipLabel: "Tip",
+      workflowTitle: "Workflow tip",
+      workflow: "Original Video works best as a standalone cinematic piece or B-roll. Combine it with UGC voice-over in CapCut / Premiere to add variety to ads.",
+      sections: { 6: "Dropdowns & Options — What Each One Means" },
+      steps: [
+        { no: "1", title: "Cinema Generator overview", subtitle: "Image Mode, cinematic prompt, duration, size, and Generate Cinema", copy: "Choose Image Mode, write a long scene prompt, set duration from 6-30 seconds, choose 9:16 or 16:9, then click Generate Cinema." },
+        { no: "2", title: "Choose Image Mode", copy: "Text to Video is the default and uses prompt only. First Frame animates from a starting image. Last Frame targets a specific ending frame, useful for continuation series." },
+        { no: "3", title: "Write a Cinematic Prompt", copy: "Unlike UGC, cinematic prompts should be longer and descriptive: characters, actions, camera movement, lighting, mood, and environment. Use language like POV tracking shot, dramatic lighting, slow-motion, and volumetric haze.", tip: "More detail creates a stronger cinematic result. Example: cinematic drone shot over snowy mountain village at sunrise, warm window lights, blue morning haze, slow camera dolly, golden rim lighting." },
+        { no: "4", title: "Choose Duration", copy: "Default is 6 seconds. Maximum is 30 seconds. Cost is calculated per second, for example RM0.03 per second. The slider updates cost in real time.", tip: "For landing page hero videos, 8-12 seconds is usually the sweet spot." },
+        { no: "5", title: "Generate Cinema", copy: "Click Generate Cinema. A pending card appears in history. Cinematic generation is usually slower than UGC, around 90-180 seconds.", tip: "Outputs are labeled Product Ref when using a reference image, or Text to Video for pure prompt generation." },
+        { no: "6", title: "Image Mode dropdown", copy: "Text to Video lets AI imagine everything from the prompt. First Frame starts from your uploaded image. Last Frame tries to end on the target image.", tip: "First Frame is the most useful: create a cinematic start image in Image, then animate it in Original Video." },
+        { no: "7", title: "Duration slider", copy: "Minimum is 6 seconds, maximum is 30 seconds. 6s is cheap for hooks, 10s is the sweet spot, 15s is mid-form story, and 30s is mini-film territory.", tip: "15s+ rarely converts better on social because people scroll quickly." },
+        { no: "8", title: "Size dropdown", copy: "9:16 is for TikTok, Reels, and Shorts. 16:9 is for YouTube, Facebook, and desktop landing pages. 1:1 works for legacy Instagram feed." }
+      ]
+    }
+  };
+  return content[state.lang] || content.ms;
+}
+
 function sopGuideContent() {
   if (state.page === "project" && state.step === "image") return sopImageContent();
   if (state.page === "project" && state.step === "ugc") return sopUgcContent();
   if (state.page === "project" && state.step === "auto") return sopAutoContentContent();
+  if (state.page === "project" && state.step === "original") return sopOriginalVideoContent();
   return sopDashboardContent();
 }
 
