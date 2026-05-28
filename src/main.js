@@ -277,7 +277,7 @@ const copy = {
     support: "Support"
   },
   zh: {
-    contentEngine: "AI 带货系统",
+    contentEngine: "AI 短视频营销平台",
     checkout: "结账",
     studio: "工作台",
     navFeatures: "功能",
@@ -285,16 +285,16 @@ const copy = {
     navAffiliate: "联盟",
     navFaq: "FAQ",
     signIn: "登录",
-    promo: "RM69 加入 AI 带货系统 · 送 10 credits · 模板 + SOP + 平台",
+    promo: "RM69 加入 AI 短视频营销平台 · 送 10 credits · 模板 + SOP + 平台",
     heroEyebrow: "想用 AI 做副业？从短视频带货开始。",
-    heroTitle: "RM69/月加入 AI带货系统",
+    heroTitle: "RM69/月加入 AI短视频营销平台",
     heroTitleLead: "RM69/月加入",
-    heroTitleHot: "AI带货系统",
+    heroTitleHot: "AI短视频营销平台",
     heroTitleTail: "",
     demoCta: "看看如何运作",
     heroCopy: "Duitok AI 把已经跑通的短视频带货打法做成系统：不用囤货、不用发货、不用做客服、不用露脸，也能开始 AI 短视频带货副业，给自己多一个每月收入来源。",
     startCreating: "立即加入 RM69 计划",
-    heroTrust1: "AI 短视频带货系统",
+    heroTrust1: "AI 短视频营销平台",
     heroTrust2: "BM / 中文 / EN",
     heroTrust3: "无需露脸",
     heroTrust4: "发布前人工确认",
@@ -352,12 +352,12 @@ const copy = {
     pricingCopy: "RM69 不是买一个生成按钮，而是进入一套 AI 短视频带货执行系统：选品 SOP、带货模板、教程、生成平台和第一批 10 credits。之后生成按 credit 扣费：图片 RM0.10，视频 RM0.40。",
     launchOffer: "订阅送 10 credits",
     claimPlan: "订阅 RM69 + 拿 10 credits",
-    riskReversal: "Duitok AI 不承诺收入。我们提供的是已经跑通的 AI 带货系统，结果取决于选品、账号、发布量、复盘和执行。",
+    riskReversal: "Duitok AI 不承诺收入。我们提供的是已经跑通的 AI 短视频营销平台，结果取决于选品、账号、发布量、复盘和执行。",
     controlKicker: "信任与合规",
     controlTitle: "我们卖的是系统和打法<br>不是暴富承诺",
     controlCopy: "已有学员根据我们的教程和平台执行，第一个星期赚到 RM1000+。这不是保证每个人都有同样结果，但证明模板、方法、平台和执行量结合起来，可以跑出结果。",
     startNow: "现在开始",
-    registerTitle: "用 RM69 加入<br>AI 短视频带货系统",
+    registerTitle: "用 RM69 加入<br>AI 短视频营销平台",
     registerCopy: "注册后通过 CHIP 付款，付款成功后即可进入 Studio，跟着模板、教程和 SOP 生成第一批带货内容。",
     fullName: "姓名",
     email: "邮箱",
@@ -597,7 +597,7 @@ function promoContent() {
       after: "Tinggal 13 slot dari 80 - 67 seller dah claim hari ini."
     },
     zh: {
-      before: "RM69 AI带货系统名额倒计时 ",
+      before: "RM69 AI短视频营销平台名额倒计时 ",
       after: "80 个名额只剩 13 个，67 位 seller 已加入。"
     },
     en: {
@@ -1416,7 +1416,7 @@ function dreamContent() {
     zh: {
       kicker: "副业梦想与执行系统",
       title: "你买的不是工具<br>是进入 AI 卖家阵营的机会",
-      copy: "很多人想做副业，但一直卡在选品、拍摄、脚本和执行量。Duitok AI 的价值，是让普通人用 RM69 进入一套已经跑通的 AI 短视频带货系统。"
+      copy: "很多人想做副业，但一直卡在选品、拍摄、脚本和执行量。Duitok AI 的价值，是让普通人用 RM69 进入一套已经跑通的 AI 短视频营销平台。"
     },
     en: {
       kicker: "Target imagination",
@@ -1436,7 +1436,7 @@ function dreamCards() {
       ["Multi", "Channel scale", "TikTok, Shop, Reels, Shorts dan produk lokal."]
     ],
     zh: [
-      ["RM69", "系统门票", "低成本进入 AI 短视频带货系统。"],
+      ["RM69", "系统门票", "低成本进入 AI 短视频营销平台。"],
       ["产能", "核心优势", "普通卖家拼体力，AI 卖家拼产能。"],
       ["RM1000+", "学员首周案例", "真实案例，不代表人人保证。"],
       ["多渠道", "放大空间", "TikTok、Shop、Reels、Shorts 和本地产品。"]
@@ -1637,7 +1637,7 @@ function pricingSteps() {
       ["3", "Generate ikut credit", "Image RM0.10, video RM0.40. Guna berapa, tolak berapa."]
     ],
     zh: [
-      ["1", "订阅 RM69/月", "加入 AI 短视频带货系统，开通平台、模板、教程和 SOP。"],
+      ["1", "订阅 RM69/月", "加入 AI 短视频营销平台，开通平台、模板、教程和 SOP。"],
       ["2", "获得 10 credits", "先生成第一批内容，不用一开始大量充值。"],
       ["3", "生成时扣 credits", "图片 RM0.10，视频 RM0.40。生成多少，用多少。"]
     ],
@@ -1655,7 +1655,7 @@ function pricingSteps() {
 function includedCreditBanner() {
   const data = {
     ms: "Promotion sekarang: subscribe dan dapat 10 credits",
-    zh: "RM69 加入 AI 带货系统，订阅送 10 credits",
+    zh: "RM69 加入 AI 短视频营销平台，订阅送 10 credits",
     en: "Current promotion: subscribe and get 10 credits"
   };
   return data[state.lang] || data.ms;
@@ -1664,7 +1664,7 @@ function includedCreditBanner() {
 function controlCards() {
   const data = {
     ms: ["RM69/bulan untuk platform, template dan SOP", "Duitok AI bantu output, bukan guarantee income", "Lebih banyak video memberi lebih banyak peluang data", "Anda tetap perlu pilih produk, post dan review result", "RM1000+ student case ialah bukti kemungkinan, bukan janji fixed"],
-    zh: ["RM69/月进入 AI 短视频带货系统", "Duitok AI 放大执行量，不承诺收入", "更多内容带来更多测试数据", "你仍然需要选品、发布和复盘结果", "RM1000+ 学员案例是可能性证明，不是固定承诺"],
+    zh: ["RM69/月进入 AI 短视频营销平台", "Duitok AI 放大执行量，不承诺收入", "更多内容带来更多测试数据", "你仍然需要选品、发布和复盘结果", "RM1000+ 学员案例是可能性证明，不是固定承诺"],
     en: ["RM69/month includes platform, templates, and SOP", "Duitok AI improves output; it does not guarantee income", "More videos create more testing data", "You still choose products, publish, and review results", "The RM1000+ student case shows possibility, not a fixed promise"]
   };
   return (data[state.lang] || data.ms)
@@ -1687,9 +1687,9 @@ function faqItems() {
       ["RM69 termasuk apa?", "RM69 ialah yuran membership bulanan untuk akses Duitok AI platform, template short video selling, tutorial SOP, hook/script/caption workflow dan basic support. Promotion sekarang: subscribe dan dapat 10 credits. Generation credit dikira jelas: image RM0.10 dan video RM0.40."]
     ],
     zh: [
-      ["Duitok AI 是保证赚钱吗？", "不保证。Duitok AI 提供的是已经跑通的 AI 短视频带货系统，帮助你提高内容产能和执行速度。实际收益取决于选品、账号、发布量、内容质量、市场反馈和复盘能力。"],
+      ["Duitok AI 是保证赚钱吗？", "不保证。Duitok AI 提供的是已经跑通的 AI 短视频营销平台，帮助你提高内容产能和执行速度。实际收益取决于选品、账号、发布量、内容质量、市场反馈和复盘能力。"],
       ["为什么不用普通 AI 工具？", "普通 AI 工具只给你生成能力，但不告诉你怎么做短视频带货。Duitok 提供已跑通打法、模板、教程、SOP 和平台，让新手可以按系统执行。"],
-      ["RM69 是无限生成吗？", "不是。RM69 是每月会员费，用来加入 AI 短视频带货系统，开通平台、模板、教程和 SOP。生成内容会按 credits 扣费，这样成本更清楚。"],
+      ["RM69 是无限生成吗？", "不是。RM69 是每月会员费，用来加入 AI 短视频营销平台，开通平台、模板、教程和 SOP。生成内容会按 credits 扣费，这样成本更清楚。"],
       ["10 credits 可以做什么？", "10 credits 可以先生成第一批内容。你可以混合生成一些 RM0.40 的视频和 RM0.10 的图片，看哪个产品和角度值得继续放大。"],
       ["Credits 用完怎么办？", "之后可以再 top up。Duitok 的逻辑是生成多少用多少，不需要一开始投入很大的内容成本。"],
       ["我不会拍视频可以用吗？", "可以。Duitok AI 主打减少拿货、拍摄和剪辑压力，帮助你生成带货视频方向、脚本、caption 和不露脸内容。"],
