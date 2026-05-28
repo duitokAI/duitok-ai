@@ -1302,7 +1302,16 @@ function demoGalleryCards() {
       ["Supplement", "Before-after angle untuk buyer yang ragu-ragu", "Proof script", "RM0.40", "video"],
       ["Gadget", "3 sebab buyer selalu pilih model ini", "Comparison video", "RM0.40", "video"],
       ["Fashion", "Try-on angle untuk satu produk, banyak gaya", "Style video", "RM0.40", "video"],
-      ["Product cover", "Cover visual untuk hook pertama", "AI product image", "RM0.10", "image"]
+      ["Product cover", "Cover visual untuk hook pertama", "AI product image", "RM0.10", "image"],
+      ["Beauty", "Buat buyer rasa ini rutin pagi yang mudah", "Routine video", "RM0.40", "video"],
+      ["Home", "Masalah kecil rumah yang selalu orang abaikan", "Problem-solution video", "RM0.40", "video"],
+      ["Baby", "Angle ibu baru yang perlukan penyelesaian cepat", "Emotion script", "RM0.40", "video"],
+      ["Fitness", "Satu produk, tiga sebab orang mahu cuba", "Benefit video", "RM0.40", "video"],
+      ["Travel", "Hook visual untuk barang travel ringan", "Lifestyle video", "RM0.40", "video"],
+      ["Pet", "Buat produk nampak berguna dalam 8 saat", "Use-case video", "RM0.40", "video"],
+      ["Food", "Angle rasa, tekstur dan craving dalam satu shot", "Food promo video", "RM0.40", "video"],
+      ["Office", "Barang meja kerja yang nampak premium", "Desk setup video", "RM0.40", "video"],
+      ["Bundle", "Tiga offer angle untuk set produk sama", "Offer script", "RM0.40", "video"]
     ],
     zh: [
       ["Skincare", "为什么你的皮肤一到下午就暗沉？", "UGC 带货视频", "RM0.40", "video"],
@@ -1310,7 +1319,16 @@ function demoGalleryCards() {
       ["Supplement", "给还在犹豫的买家一个 before-after 证明", "证明型脚本", "RM0.40", "video"],
       ["Gadget", "买这个 model 前先看这 3 个点", "对比型视频", "RM0.40", "video"],
       ["Fashion", "一件单品，拆出多个 try-on 角度", "穿搭展示视频", "RM0.40", "video"],
-      ["Product cover", "让用户停下来的第一张封面图", "AI 产品图", "RM0.10", "image"]
+      ["Product cover", "让用户停下来的第一张封面图", "AI 产品图", "RM0.10", "image"],
+      ["Beauty", "把产品拍成一个早晨护肤习惯", "生活方式视频", "RM0.40", "video"],
+      ["Home", "这个家居痛点，很多买家每天都遇到", "痛点解决视频", "RM0.40", "video"],
+      ["Baby", "新手妈妈看到会停下来的角度", "情绪型脚本", "RM0.40", "video"],
+      ["Fitness", "一个产品，拆出 3 个想试的理由", "卖点型视频", "RM0.40", "video"],
+      ["Travel", "轻便旅行用品，先用画面抓注意力", "场景型视频", "RM0.40", "video"],
+      ["Pet", "8 秒内让宠物用品看起来有用", "使用场景视频", "RM0.40", "video"],
+      ["Food", "把口感、味道和想吃感放进一个镜头", "食品推广视频", "RM0.40", "video"],
+      ["Office", "让桌面小物看起来更高级", "桌搭展示视频", "RM0.40", "video"],
+      ["Bundle", "同一组产品，拆出 3 个 offer 角度", "优惠型脚本", "RM0.40", "video"]
     ],
     en: [
       ["Skincare", "Why does your skin look dull by afternoon?", "UGC selling video", "RM0.40", "video"],
@@ -1318,7 +1336,16 @@ function demoGalleryCards() {
       ["Supplement", "A before-after proof angle for hesitant buyers", "Proof script", "RM0.40", "video"],
       ["Gadget", "3 reasons buyers choose this model", "Comparison video", "RM0.40", "video"],
       ["Fashion", "One product, multiple try-on angles", "Style video", "RM0.40", "video"],
-      ["Product cover", "A cover image that stops the scroll", "AI product image", "RM0.10", "image"]
+      ["Product cover", "A cover image that stops the scroll", "AI product image", "RM0.10", "image"],
+      ["Beauty", "Turn the product into a simple morning routine", "Lifestyle video", "RM0.40", "video"],
+      ["Home", "A small home problem buyers see every day", "Problem-solution video", "RM0.40", "video"],
+      ["Baby", "An angle that makes new parents pause", "Emotion script", "RM0.40", "video"],
+      ["Fitness", "One product, three reasons to try it", "Benefit video", "RM0.40", "video"],
+      ["Travel", "A lightweight travel product with a visual hook", "Lifestyle video", "RM0.40", "video"],
+      ["Pet", "Make a pet product look useful in 8 seconds", "Use-case video", "RM0.40", "video"],
+      ["Food", "Show taste, texture, and craving in one shot", "Food promo video", "RM0.40", "video"],
+      ["Office", "Make a desk item look premium", "Desk setup video", "RM0.40", "video"],
+      ["Bundle", "Three offer angles for one product set", "Offer script", "RM0.40", "video"]
     ]
   };
   return (data[state.lang] || data.ms).map(([category, hook, type, cost, kind]) => demoCard(category, hook, type, cost, kind)).join("");
@@ -1724,13 +1751,13 @@ function quote(text, name, role) {
 function demoCard(category, hook, type, cost, kind) {
   const ic = kind === "image" ? "image" : "play";
   return `<article>
+    <span>${category}</span>
+    <h3>${hook}</h3>
+    <p>${type}</p>
     <div class="demo-screen">
       ${icon(ic, 34)}
       <small>${cost}</small>
     </div>
-    <span>${category}</span>
-    <h3>${hook}</h3>
-    <p>${type}</p>
   </article>`;
 }
 
