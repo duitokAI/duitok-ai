@@ -1553,7 +1553,7 @@ function imagePanel(p) {
   const imageModels = ["GPT Image 2", "Nano Banana Pro"];
   const selectedModel = imageModels.includes(p.image.model) ? p.image.model : String(p.image.model || "").toLowerCase().includes("pro") ? "Nano Banana Pro" : "GPT Image 2";
   return `
-    <div class="generator-box"><h2>🖼️ ${t("imageGenerator")}</h2><div class="form-grid three">${select("image.model", t("model"), imageModels, selectedModel)}${select("image.mode", t("mode"), ["Create Image", "Edit Image", "Product Scene"], p.image.mode)}${mediaDurationSelect(selectedModel)}</div></div>
+    <div class="generator-box"><h2>🖼️ ${t("imageGenerator")}</h2><div class="form-grid three">${select("image.model", t("model"), imageModels, selectedModel)}${select("image.mode", t("mode"), ["Create Image", "Virtualize (Poster/Ad)"], p.image.mode)}${mediaDurationSelect(selectedModel)}</div></div>
     ${upload(t("avatarRef"), t("dropAvatar"), "Face / person - used for all variations", "camera", "avatar")}
     ${upload(t("productRef"), t("dropProduct"), "Product - used for all images and videos", "package", "product")}
     ${imagePromptSettings(p)}
