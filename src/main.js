@@ -237,6 +237,7 @@ const copy = {
     search: "Cari",
     projects: "Projects",
     publicTools: "Public Tools",
+    contentLibrary: "Content Library",
     logout: "Sign out",
     project: "Project",
     sopImage: "SOP Image",
@@ -477,6 +478,7 @@ const copy = {
     search: "搜索",
     projects: "项目",
     publicTools: "公开工具",
+    contentLibrary: "内容库",
     logout: "退出登录",
     project: "项目",
     sopImage: "图片 SOP",
@@ -717,6 +719,7 @@ const copy = {
     search: "Search",
     projects: "Projects",
     publicTools: "Public Tools",
+    contentLibrary: "Content Library",
     logout: "Sign out",
     project: "Project",
     sopImage: "SOP Image",
@@ -1134,15 +1137,6 @@ function publicSite() {
         <article>${icon("badge-check", 18)} <b>${t("guarantee")}</b></article>
         <article>${icon("wallet-cards", 18)} <b>${t("videoPrice")}</b></article>
       </section>
-      <section class="opportunity-section">
-        <div>
-          <p class="eyebrow">${opportunityContent().kicker}</p>
-          <h2>${opportunityContent().title}</h2>
-          <p>${opportunityContent().copy}</p>
-          <button class="gold-button section-cta" data-action="open-register">${icon("sparkles")} ${t("startCreating")}</button>
-        </div>
-        <div class="opportunity-grid">${opportunityCards()}</div>
-      </section>
       <section class="test-volume-section">
         <div>
           <p class="eyebrow">${testVolumeContent().kicker}</p>
@@ -1151,13 +1145,43 @@ function publicSite() {
         </div>
         <div class="volume-formula">${testVolumeSteps()}</div>
       </section>
-      <section id="features" class="system-section">
+      <section class="split-section">
+        <div><p class="eyebrow">${t("sellerReality")}</p><h2>${t("painTitle")}</h2><p>${t("painCopy")}</p></div>
+        <div class="pain-list">
+          ${painCards()}
+        </div>
+      </section>
+      <section class="system-section">
         <div>
           <p class="eyebrow">${whyDuitokContent().kicker}</p>
           <h2>${whyDuitokContent().title}</h2>
           <p>${whyDuitokContent().copy}</p>
         </div>
         <div class="system-grid">${whyDuitokCards()}</div>
+      </section>
+      <section class="output-preview-section">
+        <div>
+          <p class="eyebrow">${t("liveOutput")}</p>
+          <h2>${t("outputTitle")}</h2>
+          <p>${t("outputCopy")}</p>
+        </div>
+        <div class="output-preview-grid">${outputPreviewCards()}</div>
+      </section>
+      <section id="features" class="workflow-section">
+        <div>
+          <p class="eyebrow">${t("howKicker")}</p>
+          <h2>${t("howTitle")}</h2>
+          <p>${t("howCopy")}</p>
+          <button class="gold-button section-cta" data-action="open-register">${icon("sparkles")} ${t("startCreating")}</button>
+        </div>
+        <div class="workflow-steps">${workflowSteps()}</div>
+      </section>
+      <section class="feature-section">
+        <p class="eyebrow">${t("advantage")}</p>
+        <h2>${t("weaponsTitle")}</h2>
+        <div class="feature-mosaic">
+          ${featureMosaicCards()}
+        </div>
       </section>
       <section id="demo" class="demo-section">
         <div>
@@ -1177,6 +1201,45 @@ function publicSite() {
           <article><span>${t("oldWay")}</span><h3>${comparisonContent().oldTitle}</h3><ul>${comparisonContent().oldBullets.map((item) => `<li>${item}</li>`).join("")}</ul></article>
           <article class="winner"><span>${t("newWay")}</span><h3>${comparisonContent().newTitle}</h3><ul>${comparisonContent().newBullets.map((item) => `<li>${item}</li>`).join("")}</ul></article>
         </div>
+      </section>
+      <section class="case-section">
+        <div>
+          <p class="eyebrow">${studentCaseContent().kicker}</p>
+          <h2>${studentCaseContent().title}</h2>
+          <p>${studentCaseContent().copy}</p>
+          <p class="risk-note">${studentCaseContent().note}</p>
+        </div>
+        <article class="case-card">
+          <span>${studentCaseContent().badge}</span>
+          <b>RM1000+</b>
+          <p>${studentCaseContent().cardCopy}</p>
+          <ul>${studentCaseContent().bullets.map((item) => `<li>${item}</li>`).join("")}</ul>
+        </article>
+      </section>
+      <section class="testimonial-section dream-section">
+        <p class="eyebrow">${dreamContent().kicker}</p>
+        <h2>${dreamContent().title}</h2>
+        <p>${dreamContent().copy}</p>
+        <div class="quote-grid">
+          ${dreamCards()}
+        </div>
+      </section>
+      <section class="scenario-section">
+        <div>
+          <p class="eyebrow">${scenarioContent().kicker}</p>
+          <h2>${scenarioContent().title}</h2>
+          <p>${scenarioContent().copy}</p>
+        </div>
+        <div class="scenario-grid">${scenarioCards()}</div>
+      </section>
+      <section class="journey-section">
+        <div>
+          <p class="eyebrow">${sevenDayContent().kicker}</p>
+          <h2>${sevenDayContent().title}</h2>
+          <p>${sevenDayContent().copy}</p>
+          <button class="gold-button section-cta" data-action="open-register">${icon("sparkles")} ${t("startCreating")}</button>
+        </div>
+        <div class="journey-grid">${sevenDaySteps()}</div>
       </section>
       <section id="pricing" class="pricing-section">
         <div>
@@ -1198,21 +1261,15 @@ function publicSite() {
           <button class="gold-button" data-action="open-register">${icon("credit-card")} ${t("claimPlan")}</button>
         </article>
       </section>
-      <section class="journey-section">
+      <section class="control-section">
         <div>
-          <p class="eyebrow">${sevenDayContent().kicker}</p>
-          <h2>${sevenDayContent().title}</h2>
-          <p>${sevenDayContent().copy}</p>
-          <button class="gold-button section-cta" data-action="open-register">${icon("sparkles")} ${t("startCreating")}</button>
+          <p class="eyebrow">${t("controlKicker")}</p>
+          <h2>${t("controlTitle")}</h2>
+          <p>${t("controlCopy")}</p>
         </div>
-        <div class="journey-grid">${sevenDaySteps()}</div>
+        <div class="control-grid">${controlCards()}</div>
       </section>
-      <section id="faq" class="faq-section">
-        <p class="eyebrow">${t("navFaq")}</p>
-        <h2>${t("faqTitle")}</h2>
-        ${faqItems().map((item, index) => `<details ${index === 0 ? "open" : ""}><summary>${item.q}</summary><p>${item.a}</p></details>`).join("")}
-      </section>
-      <section class="signup-section final-cta-section">
+      <section class="signup-section">
         <div><p class="eyebrow">${t("startNow")}</p><h2>${t("registerTitle")}</h2><p>${t("registerCopy")}</p><img class="signup-brand-banner" src="${brandAssets.banner}" alt="Duitok AI"></div>
         <form class="lead-form" data-form="lead">
           <label>${t("fullName")}<input name="name" placeholder="Your name"></label>
@@ -1220,6 +1277,11 @@ function publicSite() {
           <label>${t("email")}<input name="email" placeholder="you@duitok.com"></label>
           <button class="gold-button" type="submit">${icon("lock")} ${t("continueRegistration")}</button>
         </form>
+      </section>
+      <section id="faq" class="faq-section">
+        <p class="eyebrow">${t("navFaq")}</p>
+        <h2>${t("faqTitle")}</h2>
+        ${faqItems().map((item, index) => `<details ${index === 0 ? "open" : ""}><summary>${item.q}</summary><p>${item.a}</p></details>`).join("")}
       </section>
       ${footerBrand("Duitok AI")}
     </main>`;
@@ -1503,53 +1565,6 @@ function whyDuitokCards() {
   };
   return (data[state.lang] || data.ms)
     .map(([ic, title, text]) => `<article>${icon(ic, 26)}<h3>${title}</h3><p>${text}</p></article>`)
-    .join("");
-}
-
-function opportunityContent() {
-  const data = {
-    ms: {
-      kicker: "Side income entry",
-      title: "Bukan beli tool baru,<br>ini cara mula side income dengan AI",
-      copy: "Duitok bantu beginner mula short video selling tanpa perlu simpan stok, hantar parcel, buat customer service atau tunjuk muka. Fokus pertama ialah hasilkan content, post, baca data dan ulang angle yang ada signal."
-    },
-    zh: {
-      kicker: "副业机会",
-      title: "不是多买一个 AI 工具<br>是多一个可以开始的副业入口",
-      copy: "不用囤货、不用发货、不用做客服、不用露脸。Duitok AI 让你先用内容测试产品和角度，用更低成本开始 AI 短视频带货副业。"
-    },
-    en: {
-      kicker: "Side income entry",
-      title: "Not another AI tool,<br>but a side-income entry you can start",
-      copy: "Duitok helps beginners start short-video selling without inventory, fulfillment, customer service, or showing their face. The first job is to create content, publish, read data, and repeat angles that show signals."
-    }
-  };
-  return data[state.lang] || data.ms;
-}
-
-function opportunityCards() {
-  const data = {
-    ms: [
-      ["package-x", "Tak perlu simpan stok", "Mulakan dengan content dan product testing dahulu."],
-      ["truck", "Tak perlu fulfill parcel", "Fokus pada angle, hook dan content, bukan operasi backend."],
-      ["headphones", "Tak perlu buat customer service", "Gunakan short video untuk test demand sebelum komit besar."],
-      ["user-round-x", "Tak perlu tunjuk muka", "Generate no-face product video, script, caption dan visual direction."]
-    ],
-    zh: [
-      ["package-x", "不用囤货", "先用内容测试产品和方向，不用一开始压库存。"],
-      ["truck", "不用发货", "把精力放在选品、hook、脚本和内容角度。"],
-      ["headphones", "不用做客服", "先用短视频测试市场反馈，再决定怎么放大。"],
-      ["user-round-x", "不用露脸", "生成不露脸产品视频、脚本、caption 和画面方向。"]
-    ],
-    en: [
-      ["package-x", "No inventory first", "Start with content and product testing before holding stock."],
-      ["truck", "No fulfillment work", "Focus on angles, hooks, and content instead of backend operations."],
-      ["headphones", "No customer service first", "Use short videos to test demand before committing more."],
-      ["user-round-x", "No need to show face", "Generate no-face product videos, scripts, captions, and visual direction."]
-    ]
-  };
-  return (data[state.lang] || data.ms)
-    .map(([ic, title, text]) => `<article>${icon(ic, 24)}<h3>${title}</h3><p>${text}</p></article>`)
     .join("");
 }
 
