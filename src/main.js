@@ -1553,16 +1553,37 @@ function stepPanel(p) {
 function imagePanel(p) {
   const imageModels = ["GPT Image 2", "Nano Banana Pro"];
   const selectedModel = imageModels.includes(p.image.model) ? p.image.model : String(p.image.model || "").toLowerCase().includes("pro") ? "Nano Banana Pro" : "GPT Image 2";
+  const modeOptions = ["Create Image", "Virtualize (Poster/Ad)"];
+  const selectedMode = modeOptions.includes(p.image.mode) ? p.image.mode : "Create Image";
   return `
-    <div class="generator-box"><h2>🖼️ ${t("imageGenerator")}</h2><div class="form-grid three">${select("image.model", t("model"), imageModels, selectedModel)}${select("image.mode", t("mode"), ["Create Image", "Virtualize (Poster/Ad)"], p.image.mode)}${mediaDurationSelect(selectedModel)}</div></div>
-    ${upload(t("avatarRef"), t("dropAvatar"), "Face / person - used for all variations", "camera", "avatar")}
-    ${upload(t("productRef"), t("dropProduct"), "Product - used for all images and videos", "package", "product")}
-    ${imagePromptSettings(p)}
+    <div class="generator-box image-generator-box"><h2>🖼️ ${t("imageGenerator")}</h2><div class="form-grid two">${select("image.model", t("model"), imageModels, selectedModel)}${select("image.mode", t("mode"), modeOptions, selectedMode)}</div></div>
+    ${selectedMode === "Virtualize (Poster/Ad)" ? virtualizePanel() : `
+      ${upload(t("avatarRef"), t("dropAvatar"), "Face / person - used for all variations", "camera", "avatar")}
+      ${upload(t("productRef"), t("dropProduct"), "Product - used for all images and videos", "package", "product")}
+      ${imagePromptSettings(p)}
+    `}
     ${results(p, ["image", "video"])}`;
 }
 
-function mediaDurationSelect(model) {
-  return `<label>Charge<input value="${model === "Nano Banana Pro" ? "0.2" : "0.1"} credit" disabled></label>`;
+function virtualizePanel() {
+  const promptText = "Recreate the uploaded poster/ad design using the uploaded real product photo. Keep the exact poster composition, lighting direction, typography space, product details, labels, and packaging. Replace only the placeholder product with the real product, make it commercial and ready for TikTok Shop.";
+  return `
+    <section class="virtualize-card">
+      <div class="virtualize-head">
+        <h2>🎨 Virtualize</h2>
+        <span>Upload existing poster/ad + product</span>
+      </div>
+      <div class="virtualize-grid">
+        ${virtualizeUpload("Poster / Ad Image", "Upload existing poster or ad design", "🖼️", "poster")}
+        ${virtualizeUpload("Product Photo", "Upload real product photo", "📦", "product")}
+      </div>
+      <p class="virtualize-note">AI will recreate the poster design with your actual product. Keep exact product details, labels, and packaging.</p>
+      <button class="virtualize-example" type="button" data-image-preset="${esc(promptText)}">View Example Prompt</button>
+    </section>`;
+}
+
+function virtualizeUpload(title, main, emoji, kind) {
+  return `<div class="virtualize-upload"><p>${title}</p><label class="drop-zone virtualize-drop"><input type="file" data-upload="${kind}" hidden><span>${emoji}</span><strong>${main}</strong></label></div>`;
 }
 
 function imagePromptSettings(p) {
