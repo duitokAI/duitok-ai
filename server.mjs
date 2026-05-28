@@ -2748,11 +2748,24 @@ async function createChipPurchase({ orderId, amount, email, fullName, productNam
 
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const error = new Error(payload.detail || payload.message || "CHIP purchase creation failed");
+    const error = new Error(chipErrorMessage(payload) || "CHIP purchase creation failed");
     error.status = response.status;
+    error.payload = payload;
     throw error;
   }
   return payload;
+}
+
+function chipErrorMessage(payload = {}) {
+  if (typeof payload.detail === "string") return payload.detail;
+  if (typeof payload.message === "string") return payload.message;
+  for (const value of Object.values(payload)) {
+    if (Array.isArray(value)) {
+      const message = value.find((item) => item?.message)?.message;
+      if (message) return message;
+    }
+  }
+  return "";
 }
 
 function verifyChipSignature(req) {
@@ -2799,6 +2812,25 @@ async function markChipPurchasePaid(db, payload) {
     }));
   }
   return payment;
+}
+
+function publicPaymentStatus(payment) {
+  return {
+    orderId: payment.orderId,
+    status: payment.status,
+    kind: payment.kind || "topup",
+    amount: payment.amount,
+    plan: payment.plan || "",
+    createdAt: payment.createdAt,
+    paidAt: payment.paidAt || null,
+    checkoutUrl: payment.status === "pending" ? payment.checkoutUrl : "",
+    buyer: payment.buyer ? {
+      email: payment.buyer.email || "",
+      fullName: payment.buyer.fullName || "",
+      phone: payment.buyer.phone || ""
+    } : null,
+    canLogin: payment.status === "paid"
+  };
 }
 
 app.get("/api/state", async (req, res, next) => {
@@ -2855,6 +2887,44 @@ app.post("/api/admin/users/:id/credits", async (req, res, next) => {
       }));
       db.usage.unshift(usage(`${note}: ${target.email}`, 0, user.id));
       db.adminAuditLogs.unshift(adminAuditEntry(user, "admin_credit_adjust", { targetUserId: target.id, delta }));
+      db.adminAuditLogs = db.adminAuditLogs.slice(0, 500);
+      await saveDb(db);
+      return publicState(db, user);
+    });
+    res.json(state);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/admin/payments/:id/cleanup", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    requireAdminUser(user);
+    const state = await mutateDb(async (db) => {
+      const payment = db.payments.find((item) => item.id === req.params.id || item.orderId === req.params.id);
+      if (!payment) throw Object.assign(new Error("Payment not found"), { status: 404 });
+      if (payment.status === "paid") throw Object.assign(new Error("Paid payments cannot be cleaned up."), { status: 400 });
+
+      db.payments = db.payments.filter((item) => item !== payment);
+      const target = db.users.find((item) => item.id === payment.userId);
+      const deleteUser = req.body.deleteUser !== false && target && ["pending_payment", "checkout_failed"].includes(target.status || "");
+      const hasPaidPayment = db.payments.some((item) => item.userId === payment.userId && item.status === "paid");
+      if (deleteUser && !hasPaidPayment) {
+        db.users = db.users.filter((item) => item.id !== payment.userId);
+        db.projects = db.projects.filter((item) => item.userId !== payment.userId);
+        db.attachments = db.attachments.filter((item) => item.userId !== payment.userId);
+        db.schedule = db.schedule.filter((item) => item.userId !== payment.userId);
+        db.generationJobs = db.generationJobs.filter((item) => item.userId !== payment.userId);
+        db.creditLedger = db.creditLedger.filter((item) => item.userId !== payment.userId);
+        db.supportTickets = db.supportTickets.filter((item) => item.userId !== payment.userId);
+      }
+      db.adminAuditLogs.unshift(adminAuditEntry(user, "payment_cleanup", {
+        paymentId: payment.id,
+        orderId: payment.orderId,
+        userId: payment.userId,
+        deletedUser: Boolean(deleteUser && !hasPaidPayment)
+      }));
       db.adminAuditLogs = db.adminAuditLogs.slice(0, 500);
       await saveDb(db);
       return publicState(db, user);
@@ -3033,39 +3103,47 @@ app.post("/api/projects", async (req, res) => {
   }));
 });
 
-app.patch("/api/projects/:id", async (req, res) => {
-  const { user } = await requireAuth(req);
-  res.json(await mutateDb(async (db) => {
-    const project = findProject(db, req.params.id, user);
-    const name = String(req.body.name || "").trim();
-    if (!name) {
-      const error = new Error("Project name is required");
-      error.status = 400;
-      throw error;
-    }
-    project.name = name.slice(0, 80);
-    await saveDb(db);
-    return publicState(db, user);
-  }));
+app.patch("/api/projects/:id", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    res.json(await mutateDb(async (db) => {
+      const project = findProject(db, req.params.id, user);
+      const name = String(req.body.name || "").trim();
+      if (!name) {
+        const error = new Error("Project name is required");
+        error.status = 400;
+        throw error;
+      }
+      project.name = name.slice(0, 80);
+      await saveDb(db);
+      return publicState(db, user);
+    }));
+  } catch (error) {
+    next(error);
+  }
 });
 
-app.delete("/api/projects/:id", async (req, res) => {
-  const { user } = await requireAuth(req);
-  res.json(await mutateDb(async (db) => {
-    findProject(db, req.params.id, user);
-    const ownedProjects = db.projects.filter((project) => hasAdminPrivileges(user) || project.userId === user.id);
-    if (ownedProjects.length <= 1) {
-      const error = new Error("Keep at least one project in the workspace.");
-      error.status = 400;
-      throw error;
-    }
-    db.projects = db.projects.filter((project) => project.id !== req.params.id);
-    db.attachments = (db.attachments || []).filter((item) => item.projectId !== req.params.id);
-    db.schedule = (db.schedule || []).filter((item) => item.projectId !== req.params.id);
-    db.generationJobs = (db.generationJobs || []).filter((item) => item.projectId !== req.params.id);
-    await saveDb(db);
-    return publicState(db, user);
-  }));
+app.delete("/api/projects/:id", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    res.json(await mutateDb(async (db) => {
+      findProject(db, req.params.id, user);
+      const ownedProjects = db.projects.filter((project) => hasAdminPrivileges(user) || project.userId === user.id);
+      if (ownedProjects.length <= 1) {
+        const error = new Error("Keep at least one project in the workspace.");
+        error.status = 400;
+        throw error;
+      }
+      db.projects = db.projects.filter((project) => project.id !== req.params.id);
+      db.attachments = (db.attachments || []).filter((item) => item.projectId !== req.params.id);
+      db.schedule = (db.schedule || []).filter((item) => item.projectId !== req.params.id);
+      db.generationJobs = (db.generationJobs || []).filter((item) => item.projectId !== req.params.id);
+      await saveDb(db);
+      return publicState(db, user);
+    }));
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.patch("/api/projects/:id/field", async (req, res) => {
@@ -3241,6 +3319,17 @@ app.post("/api/billing/topup", async (req, res, next) => {
   }
 });
 
+app.get("/api/payments/status/:orderId", async (req, res, next) => {
+  try {
+    const db = await ensureDb();
+    const payment = db.payments.find((item) => item.orderId === req.params.orderId);
+    if (!payment) return res.status(404).json({ error: "Payment not found" });
+    res.json(publicPaymentStatus(payment));
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.post("/api/checkout/register", async (req, res, next) => {
   try {
     const email = String(req.body.email || "").trim().toLowerCase();
@@ -3287,20 +3376,52 @@ app.post("/api/checkout/register", async (req, res, next) => {
       await saveDb(db);
     });
 
-    const chipPurchase = await createChipPurchase({
-      orderId,
-      amount,
-      email,
-      fullName,
-      productName: "Duitok AI Pro monthly launch plan",
-      credits: 0,
-      metadata: {
-        kind: "subscription",
-        plan: "Duitok AI Pro",
-        phone
-      },
-      successPath: "/login"
-    });
+    let chipPurchase;
+    try {
+      chipPurchase = await createChipPurchase({
+        orderId,
+        amount,
+        email,
+        fullName,
+        productName: "Duitok AI Pro monthly launch plan",
+        credits: 0,
+        metadata: {
+          kind: "subscription",
+          plan: "Duitok AI Pro",
+          phone
+        },
+        successPath: "/login"
+      });
+    } catch (error) {
+      await mutateDb(async (db) => {
+        const user = db.users.find((item) => item.id === checkoutUser.id);
+        if (user && user.status === "pending_payment") user.status = "checkout_failed";
+        db.payments.unshift({
+          id: crypto.randomUUID(),
+          userId: checkoutUser.id,
+          orderId,
+          amount,
+          credits: 0,
+          kind: "subscription",
+          plan: "Duitok AI Pro",
+          status: "failed",
+          buyer: { email, fullName, phone },
+          errorMessage: error.message,
+          createdAt: new Date().toISOString()
+        });
+        db.supportTickets.unshift({
+          id: crypto.randomUUID(),
+          userId: checkoutUser.id,
+          message: `Checkout failed for ${email} (${phone}): ${error.message}`,
+          createdAt: new Date().toISOString()
+        });
+        await saveDb(db);
+      });
+      return res.status(502).json({
+        error: "Payment gateway could not open. Your details were saved; please WhatsApp support and we will follow up.",
+        detail: error.message
+      });
+    }
 
     await mutateDb(async (db) => {
       db.payments.unshift({

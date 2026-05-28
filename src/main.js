@@ -52,7 +52,8 @@ const state = {
   imagePromptGroup: "avatar",
   generating: false,
   projectMenuId: null,
-  editingProjectId: null
+  editingProjectId: null,
+  paymentReturn: null
 };
 
 const languages = [
@@ -1075,6 +1076,19 @@ function demoCard(duration, title, text) {
 }
 
 function login() {
+  const payment = state.paymentReturn;
+  const emailValue = payment?.buyer?.email || "";
+  const paymentNotice = payment ? `
+    <div class="payment-return ${payment.status === "paid" ? "paid" : "pending"}">
+      <b>${payment.status === "paid" ? "Payment confirmed" : "Payment status: " + esc(payment.status)}</b>
+      <p>${payment.status === "paid"
+        ? "Your Duitok AI Pro account is active. Sign in with the password you created during checkout."
+        : "If you have just paid, the CHIP callback may need a moment. Refresh the payment status before trying again."}</p>
+      <div>
+        <button class="dark-button mini-button" data-action="refresh-payment-status" data-order="${esc(payment.orderId)}">${icon("refresh-cw", 15)} Refresh status</button>
+        ${payment.checkoutUrl ? `<a class="gold-button mini-button" href="${esc(payment.checkoutUrl)}">${icon("credit-card", 15)} Continue checkout</a>` : ""}
+      </div>
+    </div>` : "";
   return `
     <main class="login-shell">
       <div class="login-brand">${brand()}</div>
@@ -1083,8 +1097,9 @@ function login() {
           <h1>${t("loginTitle")}</h1>
           <p>${t("loginCopy")}</p>
         </div>
+        ${paymentNotice}
         <form data-form="login" class="login-form">
-          <label>${t("email")}<input name="email" type="email" autocomplete="email" required></label>
+          <label>${t("email")}<input name="email" type="email" autocomplete="email" value="${esc(emailValue)}" required></label>
           <label>${t("password")}<input name="password" type="password" autocomplete="current-password" required></label>
           <button class="gold-button" type="submit">${icon("log-in")} ${t("signIn")}</button>
         </form>
@@ -1359,6 +1374,34 @@ function generationQueueTable(jobs) {
   ]));
 }
 
+function paymentAge(payment) {
+  if (!payment.createdAt) return "";
+  const minutes = Math.floor((Date.now() - new Date(payment.createdAt).getTime()) / 60000);
+  if (!Number.isFinite(minutes) || minutes < 0) return "";
+  if (minutes < 60) return `${minutes}m old`;
+  if (minutes < 1440) return `${Math.floor(minutes / 60)}h old`;
+  return `${Math.floor(minutes / 1440)}d old`;
+}
+
+function whatsappLink(phone = "") {
+  const digits = String(phone).replace(/\D/g, "");
+  return digits ? `https://wa.me/${digits}` : "";
+}
+
+function paymentRow(payment, adminActions = false) {
+  const buyer = payment.buyer || {};
+  const phoneLink = whatsappLink(buyer.phone);
+  const kind = payment.kind || "topup";
+  const status = `${payment.status} | ${kind} | RM ${payment.amount}`;
+  const detail = [
+    buyer.fullName || buyer.email || payment.userId || "",
+    buyer.phone ? (phoneLink ? `<a href="${phoneLink}" target="_blank" rel="noreferrer">${esc(buyer.phone)}</a>` : esc(buyer.phone)) : "",
+    payment.errorMessage ? `Error: ${esc(payment.errorMessage)}` : paymentAge(payment),
+    adminActions && payment.status !== "paid" ? `<button class="dark-button mini-button" data-admin-clean-payment="${payment.id}">${icon("trash-2", 15)} Cleanup</button>` : ""
+  ].filter(Boolean).join(" · ");
+  return [payment.orderId, status, detail || (payment.createdAt ? new Date(payment.createdAt).toLocaleString() : "")];
+}
+
 function projectStatusBar(p) {
   const spent = p.results.length * 4;
   const ready = state.db.schedule.filter((item) => item.status === "Ready").length;
@@ -1440,7 +1483,7 @@ function adminPage() {
         <div class="card-title"><h2>${icon("wallet-cards", 22)} Ledger</h2><span>${selectedLedger.length} entries</span></div>
         ${table(selectedLedger.slice(0, 8).map((entry) => [entry.note || entry.type, `${entry.credits > 0 ? "+" : ""}${entry.credits} credits`, entry.createdAt ? new Date(entry.createdAt).toLocaleString() : ""]))}
         <div class="card-title compact-title"><h2>${icon("receipt-text", 20)} Payments</h2><span>${selectedPayments.length}</span></div>
-        ${table(selectedPayments.slice(0, 4).map((payment) => [payment.orderId, `${payment.status} | RM ${payment.amount}`, payment.createdAt ? new Date(payment.createdAt).toLocaleString() : ""]))}
+        ${table(selectedPayments.slice(0, 4).map((payment) => paymentRow(payment, true)))}
       </article>
     </section>
     <section class="dashboard-main-grid">
@@ -1467,7 +1510,7 @@ function adminPage() {
       </article>
       <article class="activity-card">
         <div class="card-title"><h2>${icon("credit-card", 22)} Payments</h2><span>${payments.length} payments</span></div>
-        ${table(payments.slice(0, 12).map((payment) => [payment.orderId, `${payment.status} | RM ${payment.amount}`, payment.createdAt ? new Date(payment.createdAt).toLocaleString() : ""]))}
+        ${table(payments.slice(0, 12).map((payment) => paymentRow(payment, true)))}
       </article>
       <article class="activity-card">
         <div class="card-title"><h2>${icon("shield-check", 22)} Admin Audit</h2><span>${adminAuditLogs.length} events</span></div>
@@ -1788,56 +1831,10 @@ function agent3DScene() {
         <b>${mode === "idle" ? "Standby" : "Working"}</b>
       </div>
       <div class="agent-life-stage" aria-label="Duitok Agent work, rest, and training states">
-        <div class="agent-life-grid">
-          <div class="life-scene life-work">
-            <div class="life-monitor">
-              <span class="screen-window"></span>
-              <span class="screen-line one"></span>
-              <span class="screen-line two"></span>
-              <span class="screen-chart"></span>
-            </div>
-            <div class="life-desk"></div>
-            <div class="life-chair"></div>
-            <div class="life-robot robot-work">
-              <span class="robot-antenna"></span>
-              <span class="robot-ear left"></span>
-              <span class="robot-ear right"></span>
-              <span class="robot-head"></span>
-              <span class="robot-body"></span>
-              <span class="robot-arm left"></span>
-              <span class="robot-arm right"></span>
-              <span class="robot-accent"></span>
-            </div>
-          </div>
-          <div class="life-scene life-bed">
-            <div class="life-bed-frame"></div>
-            <div class="life-pillow"></div>
-            <div class="life-blanket"></div>
-            <div class="life-robot robot-sleep">
-              <span class="robot-antenna"></span>
-              <span class="robot-ear left"></span>
-              <span class="robot-ear right"></span>
-              <span class="robot-head"></span>
-              <span class="robot-body"></span>
-              <span class="robot-accent"></span>
-            </div>
-            <span class="sleep-z">z z Z</span>
-          </div>
-          <div class="life-scene life-run">
-            <div class="life-treadmill"></div>
-            <div class="life-treadmill-rail"></div>
-            <div class="life-robot robot-run">
-              <span class="robot-antenna"></span>
-              <span class="robot-ear left"></span>
-              <span class="robot-ear right"></span>
-              <span class="robot-head"></span>
-              <span class="robot-body"></span>
-              <span class="robot-arm left"></span>
-              <span class="robot-arm right"></span>
-              <span class="robot-accent"></span>
-            </div>
-          </div>
-        </div>
+        <img class="agent-life-render-image" src="/duitok-agent-life-render.png" alt="Duitok Agent working, resting, and training">
+        <span class="agent-life-focus focus-work"></span>
+        <span class="agent-life-focus focus-bed"></span>
+        <span class="agent-life-focus focus-run"></span>
       </div>
       <div class="agent-3d-copy">
         <h2>${copy.title}</h2>
@@ -1915,6 +1912,7 @@ function bind() {
   }));
   document.querySelectorAll("[data-admin-user]").forEach((el) => el.addEventListener("click", () => set({ adminUserId: el.dataset.adminUser })));
   document.querySelectorAll("[data-admin-credit]").forEach((el) => el.addEventListener("click", () => adminAdjustCredits(el.dataset.adminCredit, Number(el.dataset.delta))));
+  document.querySelectorAll("[data-admin-clean-payment]").forEach((el) => el.addEventListener("click", () => adminCleanupPayment(el.dataset.adminCleanPayment)));
   document.querySelectorAll("[data-admin-status]").forEach((el) => el.addEventListener("click", () => adminUpdateUser(el.dataset.adminStatus, { status: el.dataset.status })));
   document.querySelectorAll("[data-agent-permission]").forEach((el) => el.addEventListener("click", () => adminUpdateUser(el.dataset.agentPermission, { agentPermissions: { [el.dataset.permission]: el.dataset.enabled === "true" } })));
   document.querySelectorAll("[data-agent-prompt]").forEach((el) => el.addEventListener("click", () => sendAgentMessage(el.dataset.agentPrompt)));
@@ -1958,6 +1956,7 @@ async function action(event, name) {
   if (name === "register") return set({ modal: "register" });
   if (name === "support") return set({ modal: "support" });
   if (name === "confirm-delete-project") return deleteProject();
+  if (name === "refresh-payment-status") return refreshPaymentStatus(event.currentTarget.dataset.order);
   if (name === "open-home") {
     window.history.pushState({}, "", "/");
     return render();
@@ -2032,12 +2031,16 @@ async function submit(event) {
     return render();
   }
   if (event.currentTarget.dataset.form === "register") {
-    notify("Opening secure CHIP payment page...");
-    const res = await api("/checkout/register", {
-      method: "POST",
-      body: JSON.stringify(data)
-    });
-    window.location.href = res.checkoutUrl;
+    try {
+      notify("Opening secure CHIP payment page...");
+      const res = await api("/checkout/register", {
+        method: "POST",
+        body: JSON.stringify(data)
+      });
+      window.location.href = res.checkoutUrl;
+    } catch (error) {
+      notify(error.message);
+    }
     return;
   }
   if (event.currentTarget.dataset.form === "affiliate") {
@@ -2213,6 +2216,23 @@ async function adminAdjustCredits(userId, delta) {
   notify("Credits updated.");
 }
 
+async function adminCleanupPayment(paymentId) {
+  const db = await api(`/admin/payments/${paymentId}/cleanup`, { method: "POST", body: JSON.stringify({ deleteUser: true }) });
+  set({ db });
+  notify("Pending checkout cleaned up.");
+}
+
+async function refreshPaymentStatus(orderId) {
+  if (!orderId) return;
+  try {
+    const payment = await api(`/payments/status/${encodeURIComponent(orderId)}`);
+    set({ paymentReturn: payment });
+    notify(payment.status === "paid" ? "Payment confirmed. You can sign in now." : `Payment is ${payment.status}.`);
+  } catch (error) {
+    notify(error.message);
+  }
+}
+
 async function tiktokCreatorInfo() {
   try {
     notify("Checking TikTok creator info...");
@@ -2269,18 +2289,28 @@ async function download(url, filename) {
   set({ modal: "export" });
 }
 
-function showPaymentReturnNotice() {
+async function showPaymentReturnNotice() {
   const params = new URLSearchParams(window.location.search);
   const payment = params.get("payment");
   if (!payment) return;
+  const orderId = params.get("order");
 
   const messages = {
-    success: "Payment received. Credits update after CHIP callback.",
+    success: "Payment received. Checking activation status...",
     failed: "Payment failed. Please try again.",
     cancelled: "Payment cancelled."
   };
   window.history.replaceState({}, "", window.location.pathname);
   setTimeout(() => notify(messages[payment] || "Payment status updated."), 400);
+  if (orderId) {
+    try {
+      const status = await api(`/payments/status/${encodeURIComponent(orderId)}`);
+      set({ paymentReturn: status });
+      setTimeout(() => notify(status.status === "paid" ? "Payment confirmed. Sign in to Studio." : `Payment is ${status.status}. Refresh in a moment if you just paid.`), 750);
+    } catch {
+      setTimeout(() => notify("Payment received. Sign in after activation completes."), 750);
+    }
+  }
 }
 
 boot().catch((error) => {
