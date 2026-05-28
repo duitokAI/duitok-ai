@@ -1947,6 +1947,19 @@ textarea {
   font-size: 17px;
 }
 
+.ugc-text-only {
+  min-height: 82px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 24px;
+  border: 2px dashed #ffd7ca;
+  border-radius: 14px;
+  background: #fff8f5;
+  color: #f4bd00;
+  font-size: 20px;
+  font-weight: 900;
+}
+
 .ugc-prompt-toolbar {
   display: grid;
   grid-template-columns: 1fr 1fr;

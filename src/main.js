@@ -2045,6 +2045,7 @@ function ugcPanel(p) {
   const provider = p.ugc.provider || "Veo 3.1";
   const imageMode = p.ugc.imageMode || "Product Reference (AI creates scene)";
   const firstFrameMode = imageMode === "First Frame (animate from image)";
+  const textOnlyMode = imageMode === "Text to Video (no image needed)";
   const promptTemplate = "Create an 8-second TikTok Shop UGC scene. Start with a visual hook in 0-2s, show the product benefit in 2-6s, and end with a clear CTA in 6-8s. Natural Malaysian creator tone, realistic product handling, no exaggerated claims.";
   return `
     <div class="generator-box video-generator-box">
@@ -2061,7 +2062,7 @@ function ugcPanel(p) {
         <h2>🎞️ Scene</h2>
         <button type="button" data-field-set="ugc.script" data-value="${esc(promptTemplate)}">${icon("sparkles", 18)} Prompt Builder</button>
       </div>
-      ${firstFrameMode ? ugcFrameReferences() : ugcProductReferences(provider)}
+      ${textOnlyMode ? ugcTextOnlyNotice() : firstFrameMode ? ugcFrameReferences() : ugcProductReferences(provider)}
       <div class="ugc-prompt-toolbar">
         <button class="active" type="button">✍️ Prompt</button>
         <button type="button">💡 Idea (AI expand)</button>
@@ -2131,6 +2132,10 @@ function ugcFrameReferences() {
 
 function ugcFrameUpload(kind, emoji, required) {
   return `<label class="ugc-frame-drop ${required ? "required" : ""}"><input type="file" data-upload="${kind}" hidden><span>${emoji}</span></label>`;
+}
+
+function ugcTextOnlyNotice() {
+  return `<div class="ugc-text-only">📝 Text only — no image needed</div>`;
 }
 
 function videoProviderButton(value, label, active) {
