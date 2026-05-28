@@ -3354,7 +3354,7 @@ app.post("/api/billing/topup", async (req, res, next) => {
   try {
     const { user } = await requireAuth(req);
     const amount = Number(req.body.amount || 0);
-    if (![10, 30, 50, 100].includes(amount)) return res.status(400).json({ error: "Invalid top up amount" });
+    if (![10, 20, 30, 50, 100].includes(amount)) return res.status(400).json({ error: "Invalid top up amount" });
 
     const orderId = `DT-${Date.now()}`;
     const chipPurchase = await createChipPurchase({

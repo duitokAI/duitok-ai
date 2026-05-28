@@ -54,7 +54,8 @@ const state = {
   generating: false,
   projectMenuId: null,
   editingProjectId: null,
-  paymentReturn: null
+  paymentReturn: null,
+  topupAmount: 50
 };
 
 const languages = [
@@ -1671,7 +1672,7 @@ function accountPage() {
   const map = {
     attachments: [t("attachments"), "Upload records saved to backend.", table(state.db.attachments.map((x) => [x.name, x.kind, new Date(x.createdAt).toLocaleString()]))],
     billing: [t("billing"), "Invoices and plan state are persisted.", `<div class="metric-row"><article><span>Plan</span><strong>${state.db.billing.plan}</strong></article><article><span>Credits</span><strong>${state.db.billing.credits}</strong></article><article><span>Next bill</span><strong>${state.db.billing.nextBill}</strong></article></div><div class="plan-grid">${[["Starter", "RM29", "For testing products"], ["Pro", "RM69", "Daily TikTok Shop creation"], ["Agency", "RM199", "Multiple brands and operators"]].map(([name, price, note]) => `<article><span>${name}</span><strong>${price}</strong><small>${note}</small></article>`).join("")}</div>${invoiceTable()}`],
-    topup: [t("topup"), "Credit purchases update the backend ledger.", `<div class="topup-grid">${[10, 30, 50, 100].map((x) => `<button data-topup="${x}"><strong>${x}</strong><span>credits</span><b>RM${x}</b></button>`).join("")}</div>`],
+    topup: [t("topup"), "Credit purchases update the backend ledger.", topupPage()],
     affiliate: [t("affiliate"), "Referral links and payouts.", `<div class="metric-row"><article><span>Code</span><strong>${state.db.affiliate.code}</strong></article><article><span>Clicks</span><strong>${state.db.affiliate.clicks}</strong></article><article><span>Payout</span><strong>RM${state.db.affiliate.payout}</strong></article></div><button class="gold-button" data-action="copy-affiliate">${icon("copy")} Copy referral link</button>`],
     usage: [t("usage"), "Every generated action is written to history.", table(state.db.usage.map((x) => [x.action, `${x.credits} credits`, new Date(x.createdAt).toLocaleString()]))],
     autopost: [t("autopost"), "Chrome extension assisted TikTok publishing queue.", autoPostPage()],
@@ -1679,6 +1680,89 @@ function accountPage() {
   };
   const [title, subtitle, body] = map[state.page];
   return `<header class="project-head"><div><p class="folder-label">${icon("folder", 18)} ${t("publicTools")}</p><h1>${title}</h1><p class="subtitle">${subtitle}</p></div><button class="sop-button" data-action="export-all">${icon("download")} ${t("export")}</button></header><section class="canvas-card slim">${body}</section>`;
+}
+
+function topupPage() {
+  const credits = Number(state.db.billing?.credits || 0);
+  const selectedAmount = Number(state.topupAmount || 50);
+  const imagePossible = Math.floor(credits / 0.2);
+  const videoPossible = Math.floor(credits / 0.4);
+  const autoBatches = Math.floor(credits / 4);
+  return `
+    <section class="topup-experience">
+      <div class="credit-balance-panel">
+        <div class="credit-balance-main">
+          <span>${icon("wallet-cards", 18)} Credit Balance</span>
+          <p><b>${formatCreditNumber(credits)}</b><em>credits</em></p>
+          <small>Top up anytime. Credits never expire.</small>
+        </div>
+        <div class="credit-usage-grid">
+          <article><span>Image Generate</span><b>~${imagePossible}</b><small>images possible</small></article>
+          <article><span>Video 8s</span><b>~${videoPossible}</b><small>videos possible</small></article>
+          <article><span>Auto Content (10 video pack)</span><b>~${autoBatches} batch</b><small>10 video x 8s + 1 master plan</small></article>
+        </div>
+      </div>
+      <div class="topup-purchase-panel">
+        <div class="topup-panel-head">
+          <div><h2>Select credit package</h2><p>RM1 = 1 credit. No hidden fees.</p></div>
+          <span>${icon("sparkles", 18)} Instant top-up via CHIP</span>
+        </div>
+        <div class="topup-package-grid">
+          ${topupPackages().map((item) => `
+            <button class="topup-package ${item.amount === selectedAmount ? "active" : ""}" type="button" data-topup-select="${item.amount}">
+              ${item.badge ? `<i>${item.badge}</i>` : ""}
+              <strong>${item.amount}</strong>
+              <span>Credits</span>
+              <b>RM${item.amount}</b>
+              <small>${item.note}</small>
+            </button>
+          `).join("")}
+        </div>
+        <button class="topup-pay-button" data-topup="${selectedAmount}">${icon("zap", 22)} Pay RM${selectedAmount} for ${selectedAmount} Credits ${icon("arrow-right", 22)}</button>
+        <p class="topup-secure-note">Secured via Chip · FPX online banking & DuitNow QR</p>
+      </div>
+      ${topupHistory()}
+    </section>`;
+}
+
+function topupPackages() {
+  return [
+    { amount: 10, note: "Starter pack" },
+    { amount: 20, note: "Try it out" },
+    { amount: 30, note: "Common" },
+    { amount: 50, note: "Best value", badge: "Best" },
+    { amount: 100, note: "Power user" }
+  ];
+}
+
+function formatCreditNumber(value) {
+  const number = Number(value || 0);
+  return Number.isInteger(number) ? String(number) : number.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
+}
+
+function topupHistory() {
+  const payments = (state.db.payments || []).filter((payment) => (payment.kind || "topup") === "topup").slice(0, 8);
+  return `<div class="topup-history-panel">
+    <h2>${icon("receipt", 22)} Top up history</h2>
+    <div class="topup-history-list">
+      ${payments.map((payment) => {
+        const status = payment.status || "pending";
+        const credits = Number(payment.credits || payment.amount || 0);
+        return `<div>
+          <time>${formatTopupDate(payment.createdAt)}</time>
+          <b>+${credits} credits</b>
+          <strong>RM${Number(payment.amount || 0).toFixed(2)}</strong>
+          <span class="payment-status ${status}">${icon(status === "paid" ? "check-circle-2" : "clock", 16)} ${status}</span>
+          ${status === "pending" ? `<button class="mini-button" data-action="refresh-payment-status" data-order="${esc(payment.orderId)}">${icon("refresh-cw", 15)} Check</button>` : ""}
+        </div>`;
+      }).join("") || `<p class="empty-text">No top up records yet.</p>`}
+    </div>
+  </div>`;
+}
+
+function formatTopupDate(value) {
+  if (!value) return "";
+  return new Date(value).toLocaleDateString(state.lang === "zh" ? "zh-CN" : "en-GB", { day: "2-digit", month: "short", year: "2-digit" });
 }
 
 function table(rows) {
@@ -1922,6 +2006,7 @@ function bind() {
   document.querySelector("[data-agent-input]")?.addEventListener("input", (e) => { state.agentInput = e.target.value; });
   document.querySelectorAll("[data-prompt-group]").forEach((el) => el.addEventListener("click", () => set({ imagePromptGroup: el.dataset.promptGroup })));
   document.querySelectorAll("[data-image-preset]").forEach((el) => el.addEventListener("click", () => applyImagePreset(el.dataset.imagePreset)));
+  document.querySelectorAll("[data-topup-select]").forEach((el) => el.addEventListener("click", () => set({ topupAmount: Number(el.dataset.topupSelect) })));
   document.querySelectorAll("[data-topup]").forEach((el) => el.addEventListener("click", () => topup(Number(el.dataset.topup))));
   document.querySelectorAll("[data-schedule]").forEach((el) => el.addEventListener("click", () => scheduleUpdate(el.dataset.schedule)));
   document.querySelectorAll("[data-tiktok-publish]").forEach((el) => el.addEventListener("click", () => tiktokPublish(el.dataset.tiktokPublish)));

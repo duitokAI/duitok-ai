@@ -6498,6 +6498,328 @@ label {
   background: linear-gradient(135deg, #ff435e, #ff835e);
 }
 
+.canvas-card.slim:has(.topup-experience) {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.topup-experience {
+  display: grid;
+  gap: 26px;
+}
+
+.credit-balance-panel,
+.topup-purchase-panel,
+.topup-history-panel {
+  border: 1px solid rgba(245, 177, 34, 0.25);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 88% 0%, rgba(245, 177, 34, 0.18), transparent 32%),
+    linear-gradient(135deg, #141313, #110d0b 58%, #20140d);
+  color: #fff;
+  box-shadow: 0 24px 54px rgba(23, 8, 22, 0.18);
+}
+
+.credit-balance-panel {
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) 1.15fr;
+  gap: 32px;
+  min-height: 280px;
+  padding: clamp(34px, 5vw, 56px);
+  overflow: hidden;
+}
+
+.credit-balance-main {
+  display: grid;
+  align-content: center;
+  gap: 24px;
+}
+
+.credit-balance-main > span,
+.topup-panel-head > span {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(245, 177, 34, 0.45);
+  border-radius: 999px;
+  padding: 10px 18px;
+  color: #f5c84b;
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.credit-balance-main p {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  margin: 0;
+}
+
+.credit-balance-main b {
+  color: #f5c84b;
+  font-size: clamp(70px, 10vw, 118px);
+  line-height: 0.85;
+  letter-spacing: 0;
+}
+
+.credit-balance-main em {
+  padding-bottom: 12px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: clamp(24px, 3vw, 34px);
+  font-style: normal;
+  font-weight: 900;
+}
+
+.credit-balance-main small,
+.credit-usage-grid small,
+.topup-secure-note {
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 16px;
+}
+
+.credit-usage-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.credit-usage-grid article {
+  display: grid;
+  align-content: center;
+  gap: 10px;
+  min-height: 116px;
+  border: 1px solid rgba(245, 177, 34, 0.26);
+  border-radius: 18px;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.credit-usage-grid article:last-child {
+  grid-column: 1 / -1;
+}
+
+.credit-usage-grid span,
+.topup-panel-head span {
+  color: #f5c84b;
+  font-size: 13px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.credit-usage-grid b {
+  color: #fff;
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 1;
+}
+
+.topup-purchase-panel {
+  padding: clamp(28px, 4vw, 44px);
+  background: linear-gradient(180deg, #171717, #101010);
+}
+
+.topup-panel-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: start;
+  margin-bottom: 28px;
+}
+
+.topup-panel-head h2,
+.topup-history-panel h2 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(28px, 3.8vw, 44px);
+  line-height: 1.05;
+}
+
+.topup-panel-head p {
+  margin: 10px 0 0;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 18px;
+}
+
+.topup-package-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.topup-package {
+  position: relative;
+  min-height: 144px;
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 7px;
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 22px 24px;
+  background: #151515;
+  color: #fff;
+  text-align: left;
+  box-shadow: none;
+}
+
+.topup-package:hover,
+.topup-package.active {
+  border-color: #f5c84b;
+  background: linear-gradient(135deg, rgba(245, 177, 34, 0.18), rgba(255, 117, 53, 0.08));
+}
+
+.topup-package i {
+  position: absolute;
+  top: -14px;
+  right: 18px;
+  border-radius: 8px;
+  padding: 6px 12px;
+  background: #f5a51d;
+  color: #fff;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 950;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.topup-package strong {
+  color: #fff;
+  font-size: 42px;
+  line-height: 1;
+}
+
+.topup-package span {
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 13px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.topup-package b {
+  color: #fff;
+  font-size: 22px;
+}
+
+.topup-package small {
+  color: rgba(255, 255, 255, 0.36);
+  font-size: 14px;
+}
+
+.topup-pay-button {
+  width: 100%;
+  min-height: 74px;
+  justify-content: center;
+  border: 0;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f5a51d, #f06c2b);
+  color: #fff;
+  font-size: 22px;
+  font-weight: 950;
+  box-shadow: 0 18px 48px rgba(245, 165, 29, 0.28);
+}
+
+.topup-secure-note {
+  margin: 18px 0 0;
+  text-align: center;
+}
+
+.topup-history-panel {
+  padding: clamp(26px, 4vw, 42px);
+  background: #151515;
+}
+
+.topup-history-panel h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  font-size: clamp(24px, 3vw, 34px);
+}
+
+.topup-history-list {
+  display: grid;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.topup-history-list > div {
+  display: grid;
+  grid-template-columns: 1.2fr 1.3fr 1fr auto auto;
+  gap: 20px;
+  align-items: center;
+  min-height: 76px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.topup-history-list time,
+.topup-history-list b,
+.topup-history-list strong {
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 18px;
+}
+
+.topup-history-list time {
+  color: rgba(255, 255, 255, 0.52);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.topup-history-list .mini-button {
+  min-width: 92px;
+  border-color: rgba(255, 255, 255, 0.18);
+  background: #fff;
+  color: #1d1d1d;
+}
+
+.payment-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 112px;
+  border-radius: 999px;
+  padding: 9px 14px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.76);
+  font-weight: 950;
+  text-transform: capitalize;
+}
+
+.payment-status.pending {
+  border: 1px solid #f5c84b;
+  background: #fff7d8;
+  color: #b86115;
+}
+
+.payment-status.paid {
+  border: 1px solid rgba(77, 212, 143, 0.5);
+  background: rgba(77, 212, 143, 0.14);
+  color: #75e0a5;
+}
+
+@media (max-width: 1100px) {
+  .credit-balance-panel,
+  .topup-package-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .topup-panel-head {
+    display: grid;
+  }
+
+  .topup-history-list > div {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 18px 0;
+  }
+}
+
 /* Final homepage video experience */
 .public-shell {
   padding: 0 clamp(18px, 4vw, 58px) 72px;
