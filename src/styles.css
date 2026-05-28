@@ -13862,6 +13862,10 @@ label {
 }
 
 /* Project generator density pass: compact all creation tabs without changing workflow. */
+.studio-shell .workspace:has(.step-tabs) {
+  overflow-x: clip !important;
+}
+
 .studio-shell .workspace:has(.step-tabs) .project-head {
   margin-bottom: 20px !important;
 }
@@ -13879,18 +13883,27 @@ label {
 }
 
 .studio-shell .step-tabs {
+  display: grid !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
   gap: 8px !important;
   margin-bottom: 22px !important;
   padding-bottom: 10px !important;
+  overflow: visible !important;
 }
 
 .studio-shell .step-tabs button {
-  min-width: 126px !important;
+  min-width: 0 !important;
   min-height: 48px !important;
   gap: 6px !important;
   border-radius: 12px !important;
-  padding: 0 12px !important;
+  padding: 0 10px !important;
   font-size: 13px !important;
+}
+
+.studio-shell .step-tabs button span {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 .studio-shell .step-tabs button svg {
