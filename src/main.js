@@ -656,6 +656,24 @@ function project() {
   return state.db.projects.find((item) => item.id === state.projectId) || state.db.projects[0];
 }
 
+function dbWithProjectField(db, projectId, field, value) {
+  const path = field.split(".");
+  return {
+    ...db,
+    projects: db.projects.map((item) => {
+      if (item.id !== projectId) return item;
+      const next = { ...item };
+      let cursor = next;
+      path.slice(0, -1).forEach((key) => {
+        cursor[key] = { ...(cursor[key] || {}) };
+        cursor = cursor[key];
+      });
+      cursor[path.at(-1)] = value;
+      return next;
+    })
+  };
+}
+
 function routeShell(content) {
   const dock = pathIs("/login") ? `<div class="global-lang-dock">${languageSwitch()}</div>` : "";
   return `${dock}${content}`;
@@ -2183,9 +2201,19 @@ async function submit(event) {
 }
 
 async function fieldChange(event) {
-  const db = await api(`/projects/${state.projectId}/field`, { method: "PATCH", body: JSON.stringify({ field: event.target.dataset.field, value: event.target.value }) });
-  set({ db });
-  notify(t("saveDone"));
+  const field = event.target.dataset.field;
+  const value = event.target.value;
+  const projectId = state.projectId;
+  const previousDb = state.db;
+  set({ db: dbWithProjectField(previousDb, projectId, field, value) });
+  try {
+    const db = await api(`/projects/${projectId}/field`, { method: "PATCH", body: JSON.stringify({ field, value }) });
+    set({ db });
+    notify(t("saveDone"));
+  } catch (error) {
+    set({ db: previousDb });
+    notify(error.message || "Save failed.");
+  }
 }
 
 async function applyImagePreset(promptText) {
