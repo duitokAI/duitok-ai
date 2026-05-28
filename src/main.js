@@ -2260,7 +2260,22 @@ function originalChoiceButton(field, value, label, active) {
 }
 
 function clonePanel(p) {
-  return `<div class="generator-box"><h2>${icon("layers-3")} Clone Prompt</h2><label>Reference video URL<input data-field="clone.url" value="${esc(p.clone.url)}" placeholder="Paste viral TikTok URL"></label></div>${prompt("clone.rules", p.clone.rules, "Clone rules.", "clone-prompt", "Generate Clone Prompt")}${results(p, "clone")}`;
+  return `
+    <section class="clone-prompt-shell">
+      <div class="clone-prompt-card">
+        <div class="clone-prompt-head">
+          <h2>📌 Clone Prompt</h2>
+          <span>Frames → AI → Prompt(s)</span>
+        </div>
+        <p>Upload Reference Video</p>
+        <label class="clone-video-drop">
+          <input type="file" data-upload="clone-reference" accept="video/*" hidden>
+          <span>🎬 Click or drop video</span>
+        </label>
+        <button class="clone-generate-button" data-action="clone-prompt">📋 Generate Prompt</button>
+      </div>
+    </section>
+    ${results(p, "clone")}`;
 }
 
 function storyPanel(p) {
