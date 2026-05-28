@@ -2208,7 +2208,7 @@ function sidebarAccountPanel() {
     <section class="sidebar-account-panel">
       <article class="sidebar-credit-card">
         <span>${icon("wallet-cards", 18)} ${t("creditBalance")}</span>
-        <b>${formatCreditNumber(billing.credits || 0)}</b>
+        <b>${formatCreditBalance(billing.credits || 0)}</b>
         <button type="button" data-page="topup">${icon("plus", 18)} ${t("topUpShort")}</button>
       </article>
       <article class="sidebar-subscription-card ${subscription.expired ? "expired" : ""}">
@@ -3429,7 +3429,7 @@ function topupPage() {
       <div class="credit-balance-panel">
         <div class="credit-balance-main">
           <span>${icon("wallet-cards", 18)} ${t("creditBalance")}</span>
-          <p><b>${formatCreditNumber(credits)}</b><em>${t("credits").toLowerCase()}</em></p>
+          <p><b>${formatCreditBalance(credits)}</b><em>${t("credits").toLowerCase()}</em></p>
           <small>${t("creditRateNote")}</small>
         </div>
         <div class="credit-usage-grid">
@@ -3474,6 +3474,10 @@ function topupPackages() {
 function formatCreditNumber(value) {
   const number = Number(value || 0);
   return Number.isInteger(number) ? String(number) : number.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
+}
+
+function formatCreditBalance(value) {
+  return Number(value || 0).toFixed(2);
 }
 
 function topupHistory() {
