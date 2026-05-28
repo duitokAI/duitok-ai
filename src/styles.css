@@ -3791,8 +3791,9 @@ button:disabled [data-lucide="loader-circle"] {
 }
 
 .agent-form textarea {
-  min-height: 92px;
-  max-height: 160px;
+  min-height: 48px;
+  max-height: 132px;
+  resize: none;
 }
 
 .live-panel h3,
@@ -9117,14 +9118,56 @@ label {
 }
 
 .agent-page-panel .agent-form {
-  grid-template-columns: minmax(0, 1fr) minmax(160px, 220px);
-  align-items: stretch;
-  padding-top: 14px;
+  grid-template-columns: minmax(0, 1fr) 52px;
+  gap: 10px;
+  align-items: end;
+  padding: 10px;
   border-top: 1px solid rgba(93, 8, 108, 0.1);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 14px 34px rgba(93, 8, 108, 0.08);
 }
 
 .agent-page-panel .agent-form textarea {
-  min-height: 92px;
+  min-height: 48px;
+  max-height: 132px;
+  overflow-y: auto;
+  border-color: rgba(93, 8, 108, 0.12);
+  border-radius: 14px;
+  padding: 13px 15px;
+  background: #fff;
+  color: rgba(31, 6, 38, 0.94);
+  font-size: 15.5px;
+  font-weight: 760;
+  line-height: 1.35;
+  resize: none;
+}
+
+.agent-page-panel .agent-form textarea:focus {
+  border-color: rgba(152, 28, 169, 0.42);
+  box-shadow: 0 0 0 4px rgba(244, 202, 50, 0.14);
+}
+
+.agent-page-panel .agent-form textarea:disabled {
+  background: rgba(93, 8, 108, 0.04);
+  color: rgba(31, 6, 38, 0.46);
+}
+
+.agent-send-button {
+  width: 52px;
+  min-width: 52px;
+  min-height: 48px;
+  border-radius: 14px;
+  padding: 0;
+}
+
+.agent-send-button span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
 .support-bubble {
@@ -9144,7 +9187,6 @@ label {
 
 @media (max-width: 1000px) {
   .agent-page-hero,
-  .agent-page-panel .agent-form,
   .agent-memory-form {
     grid-template-columns: 1fr;
   }

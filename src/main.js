@@ -4427,6 +4427,12 @@ function chatPanel() {
   const intro = state.agentMessages.length
     ? ""
     : `<p class="agent-empty">Ask me to generate UGC, build a batch, decode a competitor, create a project, or decide what to do next.</p>`;
+  const pendingConfirmation = state.agentMessages.some((item) => item.agentRun?.status === "waiting_confirmation");
+  const inputPlaceholder = state.agentBusy
+    ? "Agent is working..."
+    : pendingConfirmation
+      ? "Confirm or cancel the pending action first"
+      : "Message Duitok Agent...";
   return `
     <section class="agent-panel agent-page-panel">
       <header>
@@ -4439,8 +4445,8 @@ function chatPanel() {
         ${state.agentBusy ? agentThinkingCard() : ""}
       </div>
       <form class="agent-form" data-form="agent">
-        <textarea name="message" data-agent-input placeholder="Tell Duitok Agent what you want..." ${state.agentBusy ? "disabled" : ""}>${esc(state.agentInput)}</textarea>
-        <button class="gold-button" type="submit" ${state.agentBusy ? "disabled" : ""}>${icon(state.agentBusy ? "loader-circle" : "send")} Send</button>
+        <textarea name="message" rows="1" data-agent-input placeholder="${esc(inputPlaceholder)}" ${state.agentBusy || pendingConfirmation ? "disabled" : ""}>${esc(state.agentInput)}</textarea>
+        <button class="gold-button agent-send-button" type="submit" title="Send" ${state.agentBusy || pendingConfirmation ? "disabled" : ""}>${icon(state.agentBusy ? "loader-circle" : "send", 19)}<span>Send</span></button>
       </form>
     </section>`;
 }
@@ -4708,7 +4714,11 @@ function bind() {
   document.querySelectorAll("[data-field]").forEach((el) => el.addEventListener("change", fieldChange));
   document.querySelectorAll("[data-upload]").forEach((el) => el.addEventListener("change", uploadChange));
   const agentInput = document.querySelector("[data-agent-input]");
-  agentInput?.addEventListener("input", (e) => { state.agentInput = e.target.value; });
+  autoResizeAgentInput(agentInput);
+  agentInput?.addEventListener("input", (e) => {
+    state.agentInput = e.target.value;
+    autoResizeAgentInput(e.target);
+  });
   agentInput?.addEventListener("keydown", (event) => {
     if (event.key !== "Enter" || event.shiftKey || event.metaKey || event.ctrlKey || event.altKey || event.isComposing) return;
     event.preventDefault();
@@ -4735,6 +4745,12 @@ function bind() {
     set({ lang: el.dataset.lang, langOpen: false });
   }));
   document.addEventListener("click", closeLangMenu, { once: true });
+}
+
+function autoResizeAgentInput(input) {
+  if (!input) return;
+  input.style.height = "auto";
+  input.style.height = `${Math.min(input.scrollHeight, 132)}px`;
 }
 
 function closeLangMenu(event) {
