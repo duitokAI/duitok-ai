@@ -292,7 +292,7 @@ const copy = {
     heroTitleHot: "AI带货系统",
     heroTitleTail: "",
     demoCta: "看看如何运作",
-    heroCopy: "Duitok AI 把已经跑通的短视频带货打法做成系统，让你不用拿货、不用露脸，也能用 AI 批量测试产品、hook、脚本和内容角度。",
+    heroCopy: "Duitok AI 把已经跑通的短视频带货打法做成系统：不用囤货、不用发货、不用做客服、不用露脸，也能开始 AI 短视频带货副业，给自己多一个每月收入来源。",
     startCreating: "立即加入 RM69 计划",
     heroTrust1: "AI 短视频带货系统",
     heroTrust2: "BM / 中文 / EN",
