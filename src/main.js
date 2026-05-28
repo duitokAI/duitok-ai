@@ -1517,6 +1517,7 @@ function studio() {
         <div class="side-section account">${icon("life-buoy", 18)} Support</div>
         <button class="side-link" data-action="support">${icon("ticket")} Contact Support</button>
         <button class="side-link" data-action="sop">${icon("book-open")} SOP</button>
+        <button class="side-link ${state.page === "autopost" ? "active" : ""}" data-page="autopost">${icon("send")} ${t("autopost")}</button>
         <button class="side-link ${state.page === "whatsapp" ? "active" : ""}" data-page="whatsapp">${icon("message-circle")} ${t("whatsapp")}${icon("arrow-up-right", 14)}</button>
       </aside>
       <main class="workspace">${page()}</main>
@@ -1572,8 +1573,6 @@ function sidebarAccountPanel() {
   const subscription = subscriptionStatus();
   return `
     <section class="sidebar-account-panel">
-      <button class="sidebar-quick-link" data-page="autopost">${icon("send", 22)} <span>Auto Post TikTok</span></button>
-      <button class="sidebar-quick-link" data-page="whatsapp">${icon("message-circle", 22)} <span>Join Discussion WhatsApp</span>${icon("arrow-up-right", 15)}</button>
       <article class="sidebar-credit-card">
         <span>${icon("wallet-cards", 18)} Credit Balance</span>
         <b>${formatCreditNumber(billing.credits || 0)}</b>
