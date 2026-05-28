@@ -6327,17 +6327,17 @@ label {
 /* Project list action menu */
 .studio-shell .project-list {
   display: grid;
-  gap: 12px;
+  gap: 6px;
 }
 
 .project-menu-item {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 38px;
+  grid-template-columns: minmax(0, 1fr) 30px;
   align-items: center;
-  min-height: 74px;
+  min-height: 52px;
   border: 1px solid transparent;
-  border-radius: 14px;
+  border-radius: 12px;
   background: transparent;
   transition:
     border-color 0.18s ease,
@@ -6349,8 +6349,8 @@ label {
   border-color: rgba(255, 78, 120, 0.58);
   background: linear-gradient(135deg, rgba(255, 78, 120, 0.2), rgba(255, 131, 94, 0.08));
   box-shadow:
-    inset 4px 0 0 #ff4e78,
-    0 16px 34px rgba(255, 78, 120, 0.14);
+    inset 3px 0 0 #ff4e78,
+    0 10px 24px rgba(255, 78, 120, 0.12);
 }
 
 .project-menu-item.menu-open {
@@ -6358,13 +6358,17 @@ label {
 }
 
 .studio-shell .project-menu-item .project-button {
-  min-height: 72px;
+  min-height: 50px;
   margin: 0;
   border: 0;
   background: transparent;
   box-shadow: none;
   color: rgba(255, 255, 255, 0.7);
-  font-size: 19px;
+  font-size: 15px;
+  line-height: 1.2;
+  gap: 10px;
+  padding-left: 12px;
+  padding-right: 8px;
 }
 
 .studio-shell .project-menu-item .project-button.active {
@@ -6373,29 +6377,36 @@ label {
   color: #fff;
 }
 
+.studio-shell .project-menu-item .project-button span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .project-icon {
-  width: 46px;
-  height: 46px;
+  width: 32px;
+  height: 32px;
   display: grid;
   place-items: center;
   border: 1px solid rgba(255, 255, 255, 0.13);
-  border-radius: 14px;
+  border-radius: 10px;
   background: rgba(255, 255, 255, 0.06);
   color: rgba(255, 255, 255, 0.72);
-  flex: 0 0 46px;
+  flex: 0 0 32px;
 }
 
 .project-menu-item.active .project-icon {
   border-color: transparent;
   background: linear-gradient(135deg, #ff4e78, #ff835e);
   color: #fff;
-  box-shadow: 0 14px 28px rgba(255, 78, 120, 0.22);
+  box-shadow: 0 10px 20px rgba(255, 78, 120, 0.2);
 }
 
 .studio-shell .project-icon svg,
 .studio-shell .project-button.active .project-icon svg {
-  width: 22px !important;
-  height: 22px !important;
+  width: 18px !important;
+  height: 18px !important;
   padding: 0;
   border: 0;
   border-radius: 0;
@@ -6404,12 +6415,12 @@ label {
 }
 
 .project-more {
-  width: 34px;
-  height: 34px;
+  width: 28px;
+  height: 28px;
   display: grid;
   place-items: center;
   border: 0;
-  border-radius: 10px;
+  border-radius: 9px;
   background: transparent;
   color: rgba(255, 255, 255, 0.48);
   opacity: 0;
