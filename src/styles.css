@@ -2353,7 +2353,7 @@ textarea {
 }
 
 .original-provider-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   margin-bottom: 30px;
 }
 
@@ -7559,15 +7559,34 @@ label {
 /* Duitok Agent dedicated workspace */
 .agent-page {
   display: grid;
+  gap: 0;
+}
+
+.agent-workbench {
+  display: grid;
+  grid-template-columns: minmax(420px, 1.08fr) minmax(420px, 0.92fr);
+  align-items: start;
   gap: 18px;
+  min-height: calc(100vh - 128px);
+}
+
+.agent-visual-column,
+.agent-chat-column {
+  min-width: 0;
+}
+
+.agent-visual-column {
+  position: sticky;
+  top: 18px;
 }
 
 .agent-page-hero {
   display: grid;
   grid-template-columns: 1fr;
   align-items: start;
-  gap: 24px;
-  padding: 24px;
+  gap: 14px;
+  min-height: calc(100vh - 128px);
+  padding: 18px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.94);
@@ -7582,20 +7601,20 @@ label {
 }
 
 .agent-page-hero h1 {
-  max-width: 880px;
-  margin: 8px 0 10px;
+  max-width: 680px;
+  margin: 6px 0 8px;
   color: var(--purple);
-  font-size: clamp(34px, 4vw, 58px);
-  line-height: 0.96;
+  font-size: clamp(26px, 2.8vw, 42px);
+  line-height: 1;
   letter-spacing: 0;
 }
 
 .agent-page-hero .subtitle {
-  max-width: 880px;
+  max-width: 620px;
   margin: 0;
   color: var(--muted);
-  font-size: 17px;
-  line-height: 1.6;
+  font-size: 15px;
+  line-height: 1.45;
 }
 
 .agent-page-hero .dark-button {
@@ -7604,9 +7623,9 @@ label {
 
 .agent-3d-card {
   position: relative;
-  min-height: 430px;
+  min-height: 0;
   display: grid;
-  grid-template-rows: auto minmax(260px, 1fr) auto;
+  grid-template-rows: auto minmax(320px, 1fr) auto;
   overflow: hidden;
   border: 1px solid rgba(93, 8, 108, 0.14);
   border-radius: 8px;
@@ -7629,7 +7648,7 @@ label {
 
 .agent-life-card {
   width: 100%;
-  min-height: 520px;
+  min-height: min(620px, calc(100vh - 300px));
   background: #fff;
 }
 
@@ -8788,9 +8807,10 @@ label {
 
 .agent-page-panel {
   width: 100%;
-  max-height: none;
-  min-height: min(680px, calc(100vh - 260px));
-  grid-template-rows: auto minmax(300px, 1fr) auto;
+  height: calc(100vh - 128px);
+  max-height: calc(100vh - 128px);
+  min-height: 620px;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.95);
@@ -8823,7 +8843,7 @@ label {
 }
 
 .agent-page-panel .agent-thread {
-  min-height: 320px;
+  min-height: 0;
   padding: 16px 4px 16px 0;
 }
 
@@ -9605,16 +9625,28 @@ label {
 }
 
 @media (max-width: 1000px) {
+  .agent-workbench {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .agent-visual-column {
+    position: static;
+  }
+
   .agent-page-hero {
     grid-template-columns: 1fr;
+    min-height: 0;
   }
 
   .agent-3d-card {
     min-height: 400px;
   }
 
-  .agent-quick-actions {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .agent-page-panel {
+    height: auto;
+    max-height: none;
+    min-height: min(720px, calc(100vh - 120px));
   }
 }
 
@@ -9670,8 +9702,8 @@ label {
     font-size: 18px;
   }
 
-  .agent-quick-actions {
-    grid-template-columns: 1fr;
+  .agent-page-panel {
+    min-height: calc(100vh - 96px);
   }
 }
 

@@ -2697,7 +2697,7 @@ function projectPage() {
   return `
     <header class="project-head">
       <div><p class="folder-label">${icon("folder", 18)} ${t("project")}</p><h1>${p.name}</h1></div>
-      <button class="sop-button" data-sop-target="${esc(state.step)}">${icon("book-open", 25)} ${sopButtonLabel()}</button>
+      <button class="sop-button" data-sop-target="${esc(state.step)}" data-sop-modal="true">${icon("book-open", 25)} ${sopButtonLabel()}</button>
     </header>
     <nav class="step-tabs">
       ${steps.map(([id, ic, key, no]) => `<button class="${state.step === id ? "active" : ""}" data-step="${id}">${icon(ic)} <span>${t(key)}</span><b>${no}</b></button>`).join("")}
@@ -2979,8 +2979,38 @@ function autoPlanButton(value, note, active, isNew = false) {
   return `<button class="${active === value ? "active" : ""}" type="button" data-field-set="auto.planStyle" data-value="${esc(value)}">${isNew ? "<em>✨ NEW</em>" : ""}<b>${value}</b><span>${note}</span></button>`;
 }
 
+function originalProviderValue(provider) {
+  const aliases = {
+    Grok: "Grok Imagine Video",
+    GeminiOmni: "Gemini Omni"
+  };
+  return aliases[provider] || provider || "Veo 3.1";
+}
+
+function originalProviderLabel(provider) {
+  const labels = {
+    "Seedance 2.0": "Seedance",
+    "Veo 3.1": "Veo",
+    "Grok Imagine Video": "Grok",
+    "Sora 2": "Sora",
+    "Gemini Omni": "Gemini"
+  };
+  return labels[provider] || String(provider || "Video").split(" ")[0];
+}
+
+function originalProviderCredits(provider) {
+  const credits = {
+    "Seedance 2.0": "0.40",
+    "Veo 3.1": "0.40",
+    "Grok Imagine Video": "0.48",
+    "Sora 2": "0.48",
+    "Gemini Omni": "1.30"
+  };
+  return credits[provider] || "0.40";
+}
+
 function originalPanel(p) {
-  const provider = p.original.provider || "Veo 3.1";
+  const provider = originalProviderValue(p.original.provider);
   const imageMode = p.original.imageMode || "Text only";
   const aspectRatio = p.original.aspectRatio || "9:16 (Vertical)";
   return `
@@ -2991,10 +3021,11 @@ function originalPanel(p) {
       </div>
       <p class="original-field-label">Provider</p>
       <div class="original-provider-grid">
+        ${originalChoiceButton("original.provider", "Seedance 2.0", "🎞️ Seedance 2.0", provider)}
         ${originalChoiceButton("original.provider", "Veo 3.1", "🎬 Veo 3.1", provider)}
-        ${originalChoiceButton("original.provider", "Grok", "⚡ Grok", provider)}
+        ${originalChoiceButton("original.provider", "Grok Imagine Video", "⚡ Grok", provider)}
         ${originalChoiceButton("original.provider", "Sora 2", "✨ Sora 2", provider)}
-        ${originalChoiceButton("original.provider", "GeminiOmni", "🔷 GeminiOmni", provider)}
+        ${originalChoiceButton("original.provider", "Gemini Omni", "🔷 Gemini Omni", provider)}
       </div>
       <p class="original-field-label">Image Mode</p>
       <div class="original-mode-grid">
@@ -3018,7 +3049,7 @@ function originalPanel(p) {
           <b>Fixed 8s</b>
         </div>
       </div>
-      <button class="original-generate-button" data-action="analyze-original">🎬 Generate ${esc(provider.split(" ")[0])} Video · ~RM0.40</button>
+      <button class="original-generate-button" data-action="analyze-original">🎬 Generate ${esc(originalProviderLabel(provider))} Video · ~${esc(originalProviderCredits(provider))} credits</button>
     </section>
     ${results(p, "original")}`;
 }
@@ -4533,26 +4564,23 @@ function agent3DScene() {
 }
 
 function agentPage() {
-  const prompts = [
-    "帮我为这个产品做 7 天 TikTok 内容",
-    "用 Nano Banana Pro 生成一个产品图版本",
-    "分析这个 competitor URL，生成 5 个 hook",
-    "看一下我今天还缺什么内容"
-  ];
   return `
     <section class="agent-page">
-      <header class="agent-page-hero">
-        <div class="agent-hero-copy">
-          <p class="folder-label">${icon("bot", 18)} Duitok Agent</p>
-          <h1>Your AI operator for TikTok Shop content.</h1>
-          <p class="subtitle">Ask it to create projects, write prompts, generate assets, build batches, schedule posts, and decide the next best action.</p>
+      <div class="agent-workbench">
+        <aside class="agent-visual-column">
+          <div class="agent-page-hero">
+            <div class="agent-hero-copy">
+              <p class="folder-label">${icon("bot", 18)} Duitok Agent</p>
+              <h1>Your AI operator for TikTok Shop content.</h1>
+              <p class="subtitle">Chat on the right while the workspace shows what the agent is doing.</p>
+            </div>
+            ${agent3DScene()}
+          </div>
+        </aside>
+        <div class="agent-chat-column">
+          ${chatPanel()}
         </div>
-        ${agent3DScene()}
-      </header>
-      <div class="agent-quick-actions">
-        ${prompts.map((prompt) => `<button type="button" data-agent-prompt="${esc(prompt)}">${icon("sparkles", 17)} ${prompt}</button>`).join("")}
       </div>
-      ${chatPanel()}
     </section>`;
 }
 
@@ -4932,7 +4960,11 @@ function agentConfirmationCard(run) {
 }
 
 function bind() {
-  document.querySelectorAll("[data-sop-target]").forEach((el) => el.addEventListener("click", () => set({ page: "sop", sopTopic: el.dataset.sopTarget || "dashboard", modal: null })));
+  document.querySelectorAll("[data-sop-target]").forEach((el) => el.addEventListener("click", () => {
+    const sopTopic = el.dataset.sopTarget || "dashboard";
+    if (el.dataset.sopModal === "true") return set({ sopTopic, modal: "sop" });
+    set({ page: "sop", sopTopic, modal: null });
+  }));
   document.querySelectorAll("[data-page]").forEach((el) => el.addEventListener("click", () => set({ page: el.dataset.page })));
   document.querySelectorAll("[data-step]").forEach((el) => el.addEventListener("click", () => set({ step: el.dataset.step })));
   document.querySelectorAll("[data-step-open]").forEach((el) => el.addEventListener("click", () => set({ page: "project", step: el.dataset.stepOpen })));
@@ -5109,17 +5141,10 @@ async function submit(event) {
     localStorage.setItem("duitok-admin-key", adminKey);
     state.adminKey = adminKey;
     try {
-      const db = await api("/state");
-      if (!db.admin) {
-        const user = { ...(state.user || {}), adminVerified: false, adminLocked: true };
-        localStorage.setItem("duitok-user", JSON.stringify(user));
-        set({ db, user });
-        return notify("Invalid admin key. Please check and try again.");
-      }
-      const user = { ...(state.user || {}), adminVerified: true, adminLocked: false };
-      localStorage.setItem("duitok-user", JSON.stringify(user));
+      const res = await api("/admin/unlock", { method: "POST", body: JSON.stringify({ adminKey }) });
+      localStorage.setItem("duitok-user", JSON.stringify(res.user));
       notify("Admin unlocked.");
-      return set({ db, user, page: "admin" });
+      return set({ db: res.state, user: res.user, page: "admin" });
     } catch (error) {
       return notify(error.message || "Admin unlock failed.");
     }
