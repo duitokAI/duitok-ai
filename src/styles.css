@@ -4491,8 +4491,8 @@ label {
 }
 
 .sop-modal {
-  width: min(1216px, 78vw);
-  height: min(92vh, 1060px);
+  width: min(1760px, 86vw);
+  height: min(90vh, 980px);
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   overflow: hidden;
@@ -4506,10 +4506,10 @@ label {
 .sop-modal-head {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 18px;
+  gap: 16px;
   align-items: center;
-  min-height: 122px;
-  padding: 24px 46px;
+  min-height: 104px;
+  padding: 18px 48px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   background:
     radial-gradient(circle at 6% 18%, rgba(255, 78, 120, 0.2), transparent 24%),
@@ -4517,8 +4517,8 @@ label {
 }
 
 .sop-modal-icon {
-  width: 64px;
-  height: 64px;
+  width: 56px;
+  height: 56px;
   display: inline-grid;
   place-items: center;
   border-radius: 16px;
@@ -4534,14 +4534,14 @@ label {
   margin: 0;
   color: var(--pink);
   font-weight: 950;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
 .sop-modal-head h2 {
   margin: 5px 0 0;
   color: #fff;
-  font-size: clamp(23px, 1.9vw, 32px);
+  font-size: clamp(22px, 1.65vw, 30px);
   line-height: 1.06;
 }
 
@@ -4561,25 +4561,25 @@ label {
 
 .sop-modal-scroll {
   overflow-y: auto;
-  padding: 42px 46px 48px;
+  padding: 32px 48px 38px;
   scrollbar-color: rgba(255, 255, 255, 0.42) transparent;
 }
 
 .sop-path {
-  margin: 0 0 30px;
+  margin: 0 0 26px;
   color: rgba(255, 255, 255, 0.38);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: clamp(15px, 1.15vw, 21px);
+  font-size: clamp(14px, 1vw, 18px);
   font-weight: 850;
   letter-spacing: 0.04em;
 }
 
 .sop-copy-block p {
   max-width: 1320px;
-  margin: 18px 0 36px;
+  margin: 16px 0 28px;
   color: rgba(255, 255, 255, 0.92);
-  font-size: clamp(17px, 1.22vw, 24px);
-  line-height: 1.62;
+  font-size: clamp(15px, 1.05vw, 19px);
+  line-height: 1.55;
 }
 
 .sop-callout {
@@ -4587,8 +4587,8 @@ label {
   grid-template-columns: auto minmax(0, 1fr);
   gap: 20px;
   align-items: start;
-  margin-bottom: 36px;
-  padding: 24px 32px;
+  margin-bottom: 32px;
+  padding: 20px 28px;
   border: 1px solid rgba(255, 78, 120, 0.36);
   border-radius: 22px;
   background:
@@ -4605,23 +4605,23 @@ label {
 .sop-callout p {
   margin: 12px 0 0;
   color: rgba(255, 255, 255, 0.86);
-  font-size: clamp(16px, 1.05vw, 21px);
-  line-height: 1.5;
+  font-size: clamp(15px, 0.95vw, 18px);
+  line-height: 1.48;
 }
 
 .sop-guide > h3 {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 0 0 24px;
+  margin: 0 0 20px;
   color: #fff;
-  font-size: clamp(20px, 1.45vw, 26px);
+  font-size: clamp(18px, 1.25vw, 23px);
 }
 
 .sop-section-heading {
-  margin: 10px 0 2px;
+  margin: 8px 0 0;
   color: var(--pink);
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 950;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -4629,47 +4629,47 @@ label {
 
 .sop-step-list {
   display: grid;
-  gap: 20px;
+  gap: 18px;
 }
 
 .sop-step-card {
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 22px;
+  border-radius: 18px;
   background: #161417;
 }
 
 .sop-step-title {
   display: flex;
   align-items: center;
-  gap: 18px;
-  padding: 24px 30px;
+  gap: 16px;
+  padding: 18px 28px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .sop-step-title span {
-  width: 52px;
-  height: 52px;
+  width: 44px;
+  height: 44px;
   display: inline-grid;
   place-items: center;
   flex: 0 0 auto;
   border-radius: 14px;
   background: linear-gradient(135deg, var(--pink), var(--coral));
   color: #fff;
-  font-size: 23px;
+  font-size: 20px;
   font-weight: 950;
 }
 
 .sop-step-title h4 {
   margin: 0;
   color: #fff;
-  font-size: clamp(18px, 1.25vw, 24px);
+  font-size: clamp(17px, 1.05vw, 21px);
 }
 
 .sop-step-body {
   display: grid;
-  gap: 12px;
-  padding: 24px 30px 28px;
+  gap: 10px;
+  padding: 18px 28px 22px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   background:
     linear-gradient(135deg, rgba(255, 78, 120, 0.05), rgba(255, 131, 94, 0.025)),
@@ -4678,15 +4678,15 @@ label {
 
 .sop-step-body strong {
   color: rgba(255, 255, 255, 0.92);
-  font-size: 17px;
+  font-size: 15px;
   line-height: 1.45;
 }
 
 .sop-step-body p {
   margin: 0;
   color: rgba(255, 255, 255, 0.72);
-  font-size: 16px;
-  line-height: 1.62;
+  font-size: 14px;
+  line-height: 1.55;
 }
 
 .sop-step-body ul {
@@ -4695,7 +4695,7 @@ label {
   margin: 0;
   padding-left: 20px;
   color: rgba(255, 255, 255, 0.76);
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.5;
 }
 
@@ -4709,7 +4709,7 @@ label {
   gap: 12px;
   align-items: start;
   margin-top: 4px;
-  padding: 16px 18px;
+  padding: 13px 16px;
   border: 1px solid rgba(255, 78, 120, 0.24);
   border-radius: 16px;
   background: rgba(255, 78, 120, 0.08);
@@ -4814,8 +4814,8 @@ label {
 }
 
 .sop-workflow {
-  margin-top: 28px;
-  padding: 24px 28px;
+  margin-top: 24px;
+  padding: 20px 24px;
   border: 1px solid rgba(255, 78, 120, 0.28);
   border-radius: 20px;
   background:
@@ -4834,8 +4834,8 @@ label {
 .sop-workflow p {
   margin: 0;
   color: rgba(255, 255, 255, 0.82);
-  font-size: 16px;
-  line-height: 1.6;
+  font-size: 14px;
+  line-height: 1.55;
 }
 
 .sop-checklist div {
@@ -4863,19 +4863,19 @@ label {
 .sop-modal-foot {
   display: flex;
   justify-content: flex-end;
-  padding: 20px 46px;
+  padding: 16px 48px;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(6, 5, 7, 0.96);
 }
 
 .sop-understood {
-  min-width: 224px;
-  min-height: 58px;
+  min-width: 220px;
+  min-height: 54px;
   border: 0;
   border-radius: 14px;
   background: linear-gradient(135deg, var(--pink), var(--coral));
   color: #fff;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 950;
   box-shadow: 0 20px 54px rgba(255, 78, 120, 0.34);
 }
