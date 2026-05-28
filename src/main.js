@@ -3430,9 +3430,130 @@ function sopUgcContent() {
   return content[state.lang] || content.ms;
 }
 
+function sopAutoContentContent() {
+  const content = {
+    ms: {
+      eyebrow: "Panduan",
+      title: "Tab Auto Content — Banyak Video Sekali Klik",
+      close: "Faham - tutup",
+      path: "AI → Image → Video → Merge · 1-10 video per batch",
+      whatTitle: "Apa ini?",
+      what: "Auto Content digunakan untuk generate banyak video UGC daripada satu produk. Paste link TikTok Shop / Shopee atau upload produk manual, kemudian AI plan beberapa angle seperti UGC, Product dan Lifestyle, fire semua, lalu simpan caption, cover text dan hashtags untuk auto-post.",
+      whenTitle: "Bila guna tab ni?",
+      when: "Guna Auto Content bila korang nak monthly content batch, contohnya 10-30 video untuk satu produk, atau nak test banyak hook dan framework untuk cari angle paling viral. Kalau cuma nak satu video dengan dialog specific, guna UGC tab.",
+      guideTitle: "Cara guna",
+      stepLabel: "Step",
+      tipLabel: "Tip",
+      workflowTitle: "Workflow tip",
+      workflow: "Auto Content paling kuat bila digabungkan dengan Auto Post extension. Generate batch, review hasil, schedule hourly melalui TikTok native scheduler, kemudian biar TikTok handle posting.",
+      sections: { 9: "Dropdown & Pilihan — Apa Maksud Setiap Satu" },
+      steps: [
+        { no: "1", title: "Form Auto Content overview", subtitle: "Affiliate / Manual Product, persona, duration, frameworks, CTA dan quantity", copy: "Mulakan dengan Affiliate link atau Manual Product. Selepas itu set Gender, Style, Age, duration 8s atau 16s, Plan Mode, frameworks, CTA mode dan Quantity 1-10." },
+        { no: "2", title: "Affiliate vs Manual Product", copy: "Affiliate ialah default: paste link TikTok Shop atau Shopee supaya AI fetch nama, harga dan image. Manual Product sesuai untuk produk private, listing baru atau produk yang tidak boleh scrape.", tip: "Link pendek vt.tiktok.com selalunya gagal fetch. Buka link dalam browser, copy URL penuh /pdp/... kemudian paste semula." },
+        { no: "3", title: "History Saved Products", copy: "Kalau produk pernah difetch, icon history di sebelah input akan tunjuk count. Click untuk pilih saved product tanpa burn another scrape call." },
+        { no: "4", title: "Set Avatar Persona", copy: "Pilih Gender Female atau Male. Untuk Female, pilih Style Hijab atau No Hijab. Pilih Age seperti 20s, 30s, 40s Makcik atau 55+ Nenek. Persona ini akan digunakan merentas UGC frameworks." },
+        { no: "5", title: "Pick Duration + Size", copy: "8s ialah paling cepat dan murah. 16s auto-merge dua segmen 8s menjadi satu video. Size default 9:16 untuk TikTok." },
+        { no: "6", title: "Pick Frameworks", copy: "UGC frameworks untuk character speaking. PRD frameworks untuk product-only voiceover. LIFE frameworks untuk lifestyle scene dengan character dan produk.", tip: "Mix UGC + PRD untuk variety. Pick max 5 frameworks untuk 5 angle yang jelas." },
+        { no: "7", title: "CTA Mode", copy: "Shop CTA auto-rotate variasi 'tekan beg kuning'. Custom CTA untuk offer sendiri. No CTA untuk content yang tidak terlalu salesy." },
+        { no: "8", title: "Quantity + Generate", copy: "Pilih 1-10 video per batch. Tekan Generate: AI master-plan dahulu, kemudian image/video generation, lalu merge jika perlu. Batch 5 video biasanya mengambil beberapa minit.", tip: "Caption, cover_title, cover_subtitle dan hashtags akan disimpan untuk setiap video." },
+        { no: "9", title: "Affiliate / Manual Product toggle", copy: "Affiliate auto-scrape info marketplace seperti nama produk, harga, gambar, deskripsi dan sold count. Manual Product membolehkan korang upload gambar dan tulis info sendiri, termasuk multi-product video.", tip: "Try Affiliate dahulu. Kalau fetch gagal, baru fallback ke Manual." },
+        { no: "10", title: "Gender dropdown", copy: "Female sesuai untuk skincare, beauty, fashion, baby, kitchen dan food. Male sesuai untuk gym, gadget, automotive, men's grooming dan business.", tip: "Female biasanya convert lebih tinggi untuk kebanyakan produk Malaysia; Male guna untuk niche produk lelaki." },
+        { no: "11", title: "Style dropdown", copy: "Hijab ialah default untuk Female dan selamat untuk audience Malaysia. No Hijab masih ikut modesty rule. Untuk Male, style tidak relevan dan akan disembunyikan.", tip: "Test Hijab dan No Hijab kalau audience produk korang luas." },
+        { no: "12", title: "Age dropdown", copy: "20s untuk Gen Z/trendy products. 30s untuk mom atau professional. 40s Makcik untuk food, kitchen dan traditional medicine. 55+ Nenek untuk trust-based testimonial.", tip: "30s paling universal. 40s/Makcik kuat untuk housewife audience Malaysia." },
+        { no: "13", title: "8s / 16s toggle", copy: "8s ialah satu Veo generation, RM0.40 per video. 16s ialah dua shot 8s yang auto-chained dan merged, RM0.80 per video. 16s sesuai untuk problem-to-solution story.", tip: "16s lebih sesuai untuk emotional products seperti skincare dan kesihatan. 8s sesuai untuk impulse products." },
+        { no: "14", title: "Size dropdown", copy: "9:16 untuk TikTok, Reels dan Shorts. 16:9 untuk Facebook, YouTube horizontal, landing page hero atau ads horizontal." },
+        { no: "15", title: "Plan Mode toggle", copy: "AI Plan ialah default: AI buat prompts, dialog dan cover text daripada frameworks yang dipilih. Manual Plan untuk advanced user yang mahu paste JSON prompts sendiri.", tip: "AI Plan untuk 95% case. Manual Plan bila korang sudah ada struktur viral competitor." },
+        { no: "16", title: "UGC frameworks", copy: "UGC ialah character on screen speaking. Gunakan PAS Hook+Pain, Testimonial, FOMO, BAB, 4Ps, Action Bias, Solution Focus, Benefit + Result atau Fear of Loss untuk angle yang berbeza.", tip: "PAS dan Testimonial paling konsisten untuk TikTok Shop." },
+        { no: "17", title: "PRD frameworks", copy: "PRD ialah product-only shot dengan voiceover: Product Hero, Before/After, USP Showcase atau Flat Lay / Aesthetic.", tip: "Mix 1-2 PRD dengan 3-4 UGC dalam batch supaya feed tidak nampak sama." },
+        { no: "18", title: "LIFE frameworks", copy: "LIFE ialah aspirational lifestyle scene dengan character dan produk. Soft Sell untuk gentle storytelling. Evening Routine untuk routine aesthetic.", tip: "Lifestyle bagus untuk skincare, supplements dan kitchen tools." },
+        { no: "19", title: "CTA Mode options", copy: "Shop CTA untuk TikTok Shop affiliate. Custom CTA untuk seasonal offer atau campaign sendiri. No CTA untuk awareness atau brand video.", tip: "Shop CTA biasanya paling kuat convert untuk TikTok Shop." },
+        { no: "20", title: "Quantity dropdown", copy: "Quantity 1-10 menentukan jumlah video dalam batch. 5 video ialah sweet spot untuk A/B test. Untuk 30 video, run 3 batches.", tip: "5 frameworks = 5 angle berbeza = cukup variety untuk test hook." }
+      ]
+    },
+    zh: {
+      eyebrow: "指南",
+      title: "Auto Content 页面 — 一次生成多条视频",
+      close: "我明白了 - 关闭",
+      path: "AI → 图片 → 视频 → 合并 · 每批 1-10 条视频",
+      whatTitle: "这是什么？",
+      what: "Auto Content 用来围绕一个产品批量生成多条 UGC 视频。你可以贴 TikTok Shop / Shopee 链接，或手动上传产品资料；AI 会规划多个角度，例如 UGC、Product、Lifestyle，并自动保存 caption、cover text 和 hashtags，方便后续 auto-post。",
+      whenTitle: "什么时候用？",
+      when: "当你要为一个产品做月度内容批次，例如 10-30 条视频，或想一次测试多个 hook / framework 时，用 Auto Content。如果只做一条明确台词的视频，用 UGC tab 就够了。",
+      guideTitle: "怎么用",
+      stepLabel: "步骤",
+      tipLabel: "提示",
+      workflowTitle: "工作流建议",
+      workflow: "Auto Content 最适合搭配 Auto Post Chrome extension：批量生成，review 后用 TikTok native scheduler 排程发布，后续由 TikTok 处理 posting。",
+      sections: { 9: "下拉选项 — 每个选项是什么意思" },
+      steps: [
+        { no: "1", title: "表单总览", subtitle: "Affiliate / Manual Product、persona、duration、framework、CTA、quantity", copy: "先选择 Affiliate link 或 Manual Product，再设置 Gender、Style、Age、8s/16s、Plan Mode、frameworks、CTA mode 和 Quantity 1-10。" },
+        { no: "2", title: "Affiliate vs Manual Product", copy: "Affiliate 是默认模式，粘贴 TikTok Shop 或 Shopee 链接后，AI 会抓取名称、价格和图片。Manual Product 适合 private listing、新产品或无法抓取的产品。", tip: "短链接 vt.tiktok.com 常常抓不到。先在浏览器打开，再复制完整 /pdp/... URL。" },
+        { no: "3", title: "History Saved Products", copy: "之前抓取过的产品会出现在 history icon 里。点击即可复用 saved product，不需要再次消耗 scrape call。" },
+        { no: "4", title: "设置 Avatar Persona", copy: "选择 Female 或 Male。Female 可选择 Hijab / No Hijab。Age 可选 20s、30s、40s Makcik、55+ Nenek。这个 persona 会贯穿 UGC frameworks。" },
+        { no: "5", title: "选择 Duration + Size", copy: "8s 最快最便宜。16s 会自动把两个 8 秒片段合并成一条长视频。Size 默认 9:16，适合 TikTok。" },
+        { no: "6", title: "选择 Frameworks", copy: "UGC 是人物出镜口播。PRD 是产品-only voiceover。LIFE 是人物和产品在生活方式场景里出现。", tip: "混合 UGC + PRD 会更有 variety。最多选 5 个 framework，保持角度清晰。" },
+        { no: "7", title: "CTA Mode", copy: "Shop CTA 会自动轮换 'tekan beg kuning' 结尾。Custom CTA 可以写自己的 offer。No CTA 适合不想太销售感的内容。" },
+        { no: "8", title: "Quantity + Generate", copy: "每批选择 1-10 条视频。点击 Generate 后，AI 会先做 master plan，再生成图片/视频，需要时自动 merge。5 条视频通常需要几分钟。", tip: "每条视频都会保存 caption、cover_title、cover_subtitle 和 hashtags。" },
+        { no: "9", title: "Affiliate / Manual Product toggle", copy: "Affiliate 会自动抓 marketplace 信息。Manual Product 让你自己上传图片和填写资料，也支持 multi-product video。", tip: "优先试 Affiliate。失败后再切 Manual。" },
+        { no: "10", title: "Gender dropdown", copy: "Female 适合 skincare、beauty、fashion、baby、kitchen、food。Male 适合 gym、gadget、automotive、men's grooming、business。", tip: "马来西亚多数产品 Female conversion 更稳；Male 留给男性 niche 产品。" },
+        { no: "11", title: "Style dropdown", copy: "Hijab 是 Female 默认选项，更适合马来西亚大众受众。No Hijab 仍会套用 modesty rule。Male 会隐藏这个选项。", tip: "受众较广时，可以测试 Hijab 和 No Hijab。" },
+        { no: "12", title: "Age dropdown", copy: "20s 适合 Gen Z/trendy 产品。30s 适合妈妈或 professional。40s Makcik 适合 food、kitchen、traditional medicine。55+ Nenek 适合信任型 testimonial。", tip: "30s 最通用；40s/Makcik 对 housewife audience 很强。" },
+        { no: "13", title: "8s / 16s toggle", copy: "8s 是单次 Veo generation，RM0.40。16s 是两个 8 秒片段自动串联并合并，RM0.80。16s 适合 problem-to-solution story。", tip: "情绪型产品用 16s；冲动购买型产品用 8s。" },
+        { no: "14", title: "Size dropdown", copy: "9:16 用于 TikTok、Reels、Shorts。16:9 用于 Facebook、YouTube 横版、landing page hero 或横版广告。" },
+        { no: "15", title: "Plan Mode toggle", copy: "AI Plan 是默认模式，AI 会根据 frameworks 自动写 prompts、dialog 和 cover text。Manual Plan 适合高级用户粘贴自己的 JSON prompts。", tip: "95% 情况用 AI Plan。只有要复刻 competitor 结构时用 Manual Plan。" },
+        { no: "16", title: "UGC frameworks", copy: "UGC 是人物出镜口播。可用 PAS Hook+Pain、Testimonial、FOMO、BAB、4Ps、Action Bias、Solution Focus、Benefit + Result、Fear of Loss 做不同角度。", tip: "PAS 和 Testimonial 对 TikTok Shop 最稳定。" },
+        { no: "17", title: "PRD frameworks", copy: "PRD 是产品-only + voiceover，包括 Product Hero、Before/After、USP Showcase、Flat Lay / Aesthetic。", tip: "一批里混 1-2 条 PRD 和 3-4 条 UGC，feed 会更自然。" },
+        { no: "18", title: "LIFE frameworks", copy: "LIFE 是人物和产品共同出现的 lifestyle 场景。Soft Sell 适合轻叙事，Evening Routine 适合 routine aesthetic。", tip: "Lifestyle 很适合 skincare、supplements 和 kitchen tools。" },
+        { no: "19", title: "CTA Mode options", copy: "Shop CTA 适合 TikTok Shop affiliate。Custom CTA 适合 seasonal offer。No CTA 适合 awareness 或 brand video。", tip: "TikTok Shop conversion 通常先测 Shop CTA。" },
+        { no: "20", title: "Quantity dropdown", copy: "Quantity 1-10 决定每批视频数量。5 条是 A/B test 的 sweet spot。要 30 条就跑 3 批。", tip: "5 个 framework = 5 个不同角度，足够测试 hook。" }
+      ]
+    },
+    en: {
+      eyebrow: "Guide",
+      title: "Auto Content Tab — Batch Videos in One Click",
+      close: "Got it - close",
+      path: "AI → Image → Video → Merge · 1-10 videos per batch",
+      whatTitle: "What is this?",
+      what: "Auto Content generates many UGC videos from one product. Paste a TikTok Shop / Shopee link or enter product details manually, then AI plans multiple angles such as UGC, Product, and Lifestyle, generates the batch, and saves captions, cover text, and hashtags for auto-posting.",
+      whenTitle: "When should I use it?",
+      when: "Use Auto Content for monthly production batches, such as 10-30 videos for one product, or when you want to test multiple hooks and frameworks quickly. If you only need one specific video, use the UGC tab.",
+      guideTitle: "How to use it",
+      stepLabel: "Step",
+      tipLabel: "Tip",
+      workflowTitle: "Workflow tip",
+      workflow: "Auto Content is strongest with the Auto Post Chrome extension. Generate a batch, review the outputs, schedule hourly through TikTok's native scheduler, then let TikTok handle posting.",
+      sections: { 9: "Dropdowns & Options — What Each One Means" },
+      steps: [
+        { no: "1", title: "Auto Content form overview", subtitle: "Affiliate / Manual Product, persona, duration, frameworks, CTA, and quantity", copy: "Start with an Affiliate link or Manual Product. Then set Gender, Style, Age, 8s/16s duration, Plan Mode, frameworks, CTA mode, and Quantity from 1-10." },
+        { no: "2", title: "Affiliate vs Manual Product", copy: "Affiliate is the default: paste a TikTok Shop or Shopee link so AI can fetch name, price, and image. Manual Product is for private listings, new products, or products that cannot be scraped.", tip: "Short vt.tiktok.com links often fail. Open the link in a browser first, then copy the full /pdp/... URL." },
+        { no: "3", title: "History Saved Products", copy: "If a product was fetched before, the history icon beside the input shows a count. Click it to reuse saved products without another scrape call." },
+        { no: "4", title: "Set Avatar Persona", copy: "Choose Female or Male. For Female, choose Hijab or No Hijab. Choose Age such as 20s, 30s, 40s Makcik, or 55+ Nenek. This persona carries across UGC frameworks." },
+        { no: "5", title: "Pick Duration + Size", copy: "8s is fastest and cheapest. 16s auto-merges two 8-second segments into one longer video. Default size is 9:16 for TikTok." },
+        { no: "6", title: "Pick Frameworks", copy: "UGC frameworks create character-speaking videos. PRD frameworks create product-only voiceover videos. LIFE frameworks create lifestyle scenes with character and product.", tip: "Mix UGC + PRD for variety. Pick up to 5 frameworks for clear angles." },
+        { no: "7", title: "CTA Mode", copy: "Shop CTA rotates 'tekan beg kuning' endings. Custom CTA lets you write your own offer. No CTA keeps the video less salesy." },
+        { no: "8", title: "Quantity + Generate", copy: "Choose 1-10 videos per batch. Click Generate: AI creates a master plan, then image/video generation runs, with merge if needed. A 5-video batch usually takes a few minutes.", tip: "Caption, cover_title, cover_subtitle, and hashtags are saved for each video." },
+        { no: "9", title: "Affiliate / Manual Product toggle", copy: "Affiliate auto-scrapes marketplace info. Manual Product lets you upload images and enter details yourself, including multi-product video inputs.", tip: "Try Affiliate first. If fetch fails, fall back to Manual." },
+        { no: "10", title: "Gender dropdown", copy: "Female works well for skincare, beauty, fashion, baby, kitchen, and food. Male works well for gym, gadgets, automotive, men's grooming, and business.", tip: "Female usually converts better for most Malaysia products; use Male for male-focused niches." },
+        { no: "11", title: "Style dropdown", copy: "Hijab is the Female default and fits most Malaysia audiences. No Hijab still follows the modesty rule. For Male, this option is hidden.", tip: "Test both Hijab and No Hijab when the audience is broad." },
+        { no: "12", title: "Age dropdown", copy: "20s fits Gen Z/trendy products. 30s fits moms or professionals. 40s Makcik fits food, kitchen, and traditional medicine. 55+ Nenek fits trust-led testimonials.", tip: "30s is the most universal. 40s/Makcik works strongly for housewife audiences." },
+        { no: "13", title: "8s / 16s toggle", copy: "8s is one Veo generation at RM0.40. 16s is two auto-chained 8s shots merged into one video at RM0.80. Use 16s for problem-to-solution stories.", tip: "Use 16s for emotional products like skincare and health. Use 8s for impulse products." },
+        { no: "14", title: "Size dropdown", copy: "9:16 is for TikTok, Reels, and Shorts. 16:9 is for Facebook, YouTube horizontal, landing page hero videos, or horizontal ads." },
+        { no: "15", title: "Plan Mode toggle", copy: "AI Plan is the default: AI writes prompts, dialog, and cover text from your selected frameworks. Manual Plan is for advanced users who want to paste their own JSON prompts.", tip: "Use AI Plan for most cases. Use Manual Plan only when following an exact competitor structure." },
+        { no: "16", title: "UGC frameworks", copy: "UGC means character on screen speaking. Use PAS Hook+Pain, Testimonial, FOMO, BAB, 4Ps, Action Bias, Solution Focus, Benefit + Result, or Fear of Loss for different angles.", tip: "PAS and Testimonial are the most consistent for TikTok Shop." },
+        { no: "17", title: "PRD frameworks", copy: "PRD means product-only with voiceover: Product Hero, Before/After, USP Showcase, or Flat Lay / Aesthetic.", tip: "Mix 1-2 PRD videos with 3-4 UGC videos so the feed has variety." },
+        { no: "18", title: "LIFE frameworks", copy: "LIFE creates aspirational lifestyle scenes with character and product. Soft Sell is gentle storytelling. Evening Routine is routine aesthetic.", tip: "Lifestyle works well for skincare, supplements, and kitchen tools." },
+        { no: "19", title: "CTA Mode options", copy: "Shop CTA is for TikTok Shop affiliate. Custom CTA is for seasonal offers or custom campaigns. No CTA is for awareness or brand videos.", tip: "Shop CTA usually converts best for TikTok Shop." },
+        { no: "20", title: "Quantity dropdown", copy: "Quantity 1-10 controls how many videos are generated in the batch. 5 videos is a strong A/B test size. For 30 videos, run 3 batches.", tip: "5 frameworks = 5 different angles, enough variety to test hooks." }
+      ]
+    }
+  };
+  return content[state.lang] || content.ms;
+}
+
 function sopGuideContent() {
   if (state.page === "project" && state.step === "image") return sopImageContent();
   if (state.page === "project" && state.step === "ugc") return sopUgcContent();
+  if (state.page === "project" && state.step === "auto") return sopAutoContentContent();
   return sopDashboardContent();
 }
 
