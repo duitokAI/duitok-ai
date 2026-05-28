@@ -1787,8 +1787,6 @@ function studio() {
         <label class="search-box">${icon("search", 18)}<input data-search value="${esc(state.search)}" placeholder="${t("search")}"></label>
         <div class="side-section">${icon("folder", 18)} ${t("projects")}</div>
         <div class="project-list">${projectButtons()}</div>
-        <div class="side-section account">${icon("wand-sparkles", 18)} Create</div>
-        ${steps.map(([id, ic, key]) => `<button class="side-link ${state.page === "project" && state.step === id ? "active" : ""}" data-step-open="${id}">${icon(ic)} ${t(key)}</button>`).join("")}
         <div class="side-section account">${icon("wallet-cards", 18)} Business</div>
         ${[
           ["billing", "credit-card", "billing"],
@@ -2387,7 +2385,31 @@ function projectPage() {
     <nav class="step-tabs">
       ${steps.map(([id, ic, key, no]) => `<button class="${state.step === id ? "active" : ""}" data-step="${id}">${icon(ic)} <span>${t(key)}</span><b>${no}</b></button>`).join("")}
     </nav>
+    ${agentMemoryPanel(p)}
     <section class="canvas-card">${stepPanel(p)}</section>`;
+}
+
+function agentMemoryPanel(p) {
+  const memory = p.agentMemory || {};
+  return `
+    <section class="agent-memory-panel">
+      <header>
+        <div>
+          <p class="folder-label">${icon("brain", 17)} Agent Memory</p>
+          <h2>Project context</h2>
+        </div>
+        <span>${esc(memory.updatedAt ? `Updated ${new Date(memory.updatedAt).toLocaleDateString()}` : "Editable")}</span>
+      </header>
+      <form class="agent-memory-form" data-form="agent-memory">
+        <label>Product name<input name="productName" value="${esc(memory.productName || "")}" placeholder="e.g. Hair growth serum"></label>
+        <label>Audience<input name="audience" value="${esc(memory.audience || "")}" placeholder="e.g. Malaysia women 25-40"></label>
+        <label>Language<input name="language" value="${esc(memory.language || "BM + English")}" placeholder="BM + English"></label>
+        <label>Brand tone<input name="brandTone" value="${esc(memory.brandTone || "")}" placeholder="Professional, friendly, local"></label>
+        <label>Claims to avoid<textarea name="claimsToAvoid" placeholder="Medical claims, guaranteed results...">${esc(memory.claimsToAvoid || "")}</textarea></label>
+        <label>Notes<textarea name="notes" placeholder="Anything Agent should remember for this project...">${esc(memory.notes || "")}</textarea></label>
+        <button class="dark-button" type="submit">${icon("save", 16)} Save memory</button>
+      </form>
+    </section>`;
 }
 
 function stepPanel(p) {
@@ -4045,6 +4067,9 @@ async function submit(event) {
   if (event.currentTarget.dataset.form === "agent") {
     return sendAgentMessage(data.message);
   }
+  if (event.currentTarget.dataset.form === "agent-memory") {
+    return saveAgentMemory(data);
+  }
 }
 
 async function fieldChange(event) {
@@ -4062,6 +4087,16 @@ async function saveProjectField(field, value) {
   } catch (error) {
     set({ db: previousDb });
     notify(error.message || "Save failed.");
+  }
+}
+
+async function saveAgentMemory(data) {
+  try {
+    const db = await api(`/projects/${state.projectId}/agent-memory`, { method: "PATCH", body: JSON.stringify(data) });
+    set({ db });
+    notify("Agent memory saved.");
+  } catch (error) {
+    notify(error.message || "Memory save failed.");
   }
 }
 
