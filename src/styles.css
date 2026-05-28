@@ -6219,52 +6219,17 @@ label {
   }
 
   .agent-life-card {
-    min-height: 780px;
+    min-height: 430px;
   }
 
   .agent-life-stage {
-    min-height: 610px;
+    min-height: 250px;
   }
 
-  .agent-life-grid {
-    inset: 52px 12px 12px;
-    grid-template-columns: 1fr;
-    grid-template-rows: repeat(3, minmax(165px, 1fr));
-    gap: 8px;
-  }
-
-  .life-scene {
-    min-height: 165px;
-  }
-
-  .life-monitor {
-    left: 32%;
-    width: 36%;
-    height: 25%;
-  }
-
-  .life-desk {
-    left: 12%;
-    width: 76%;
-  }
-
-  .life-robot {
-    width: 28%;
-    height: 44%;
-  }
-
-  .robot-work {
-    left: 36%;
-  }
-
-  .robot-sleep {
-    left: 30%;
-    width: 26%;
-  }
-
-  .robot-run {
-    left: 36%;
-    width: 28%;
+  .agent-life-render-image {
+    width: 128%;
+    left: 50%;
+    transform: translateX(-50%);
   }
 
   .agent-3d-status {
