@@ -3291,8 +3291,117 @@ function sopImageContent() {
   return content[state.lang] || content.ms;
 }
 
+function sopUgcContent() {
+  const content = {
+    ms: {
+      eyebrow: "Panduan",
+      title: "Tab UGC — Generate Video Selfie Style",
+      close: "Faham - tutup",
+      path: "Veo 3.1 Fast · 8 saat · vertical 9:16",
+      whatTitle: "Apa ini?",
+      what: "Tab UGC digunakan untuk generate video gaya selfie atau handheld, seolah-olah orang sebenar sedang review produk dalam Bahasa Melayu. Avatar boleh pegang produk, bercakap ke kamera dan ikut dialog yang korang tulis. Format ini paling sesuai untuk affiliate dan TikTok Shop content.",
+      whenTitle: "Bila guna tab ni?",
+      when: "Guna UGC bila korang nak satu video review dengan dialog yang sudah jelas. Kalau nak banyak video sekali gus dengan AI plan, guna Auto Content. Kalau nak AI bantu draft variasi, buka AI Agent UGC di chat panel bawah.",
+      guideTitle: "Cara guna",
+      stepLabel: "Step",
+      tipLabel: "Tip",
+      workflowTitle: "Tip terakhir",
+      workflow: "Modesty rule auto-applied untuk persona Malaysia: long sleeves, no cleavage dan no thigh exposure. Dialog paling stabil ialah 20-24 patah perkataan BM supaya audio sync dalam video 8s lebih natural.",
+      sections: { 1: "Cara guna Manual UGC (form atas)", 7: "Cara guna AI Agent UGC (chat panel)", 10: "Lepas Generate — History Grid", 12: "Dropdown & Pilihan — Apa Maksud Setiap Satu" },
+      steps: [
+        { no: "1", title: "Form UGC overview", subtitle: "Video Generator, Scene, Size, Generate UGC", copy: "Video Generator digunakan untuk duration 8s dan Image Mode. Scene ialah tempat upload produk, tulis prompt atau dialog, dan buka Prompt Builder kalau stuck. Size biasanya 9:16 untuk TikTok. Generate UGC ialah button kuning untuk mula generate.", tip: "Layout sama pada mobile; cuma scroll naik turun." },
+        { no: "2", title: "Pilih Image Mode", copy: "Product Reference ialah default dan paling sesuai untuk product review. First Frame animate gambar yang sudah siap. Text to Video guna description sahaja tanpa image reference.", tip: "Untuk product review natural, pakai Product Reference supaya AI boleh letak avatar pegang produk dalam scene yang sesuai." },
+        { no: "3", title: "Upload Image Reference", copy: "Tekan Upload atau drag gambar produk masuk. Gunakan History kalau nak reuse gambar dari project sebelum ini. Tekan X untuk buang reference.", tip: "Gambar produk yang clear, satu subjek dan lighting baik akan beri hasil video paling stabil. Elakkan background terlalu busy." },
+        { no: "4", title: "Tulis Scene Prompt + Dialog", copy: "Describe setting, action dan dialog yang avatar perlu cakap. Untuk Veo 8s, sweet spot dialog ialah 18-22 perkataan. Tulis dalam 2-3 ayat yang natural macam bercakap dengan kawan.", tip: "Contoh: Malay woman in kitchen, holding a jar of sambal, smiling at camera, says: \"Korang, sambal ni gila pedas! Aku makan setiap hari sekarang. Cuba la!\"" },
+        { no: "5", title: "Tekan Prompt Builder", copy: "Prompt Builder akan tanya persona, scene, hook, framework, voice dan dialog. Selepas itu sistem auto-generate prompt yang korang boleh edit sebelum generate.", tip: "First-timer memang patut guna Prompt Builder. Bila sudah biasa, baru tulis direct." },
+        { no: "6", title: "Set Size + Generate UGC", copy: "Default size ialah 9:16 untuk TikTok. Tekan Generate UGC untuk mula. Pending card muncul di history bawah. Veo 3.1 Fast biasanya siap dalam 60-90 saat. Cost RM0.40 per video.", tip: "Boleh generate beberapa versi dengan prompt yang sedikit berbeza." },
+        { no: "7", title: "Buka AI Agent UGC", copy: "Tekan floating chat button di bottom-right untuk buka AI Agent. Agent boleh chat dalam BM, cadangkan video variants dan submit terus untuk generate.", tip: "Agent ada skill library untuk persona, scene, hook, framework dan voice. Korang cuma explain apa nak buat." },
+        { no: "8", title: "Cerita apa korang nak", copy: "Type natural macam WhatsApp. Contoh: 'Buat 3 video UGC untuk produk skincare aku, persona urban hijabi, hook pain confession'. Boleh attach gambar produk melalui icon clip.", tip: "Agent akan tanya soalan bila perlu seperti duration, voice, hijab/no hijab atau product angle." },
+        { no: "9", title: "Type SUBMIT untuk fire generate", copy: "Bila variants sudah ready, agent akan tunjuk preview dan minta korang type SUBMIT. Confirmation dialog akan keluar supaya korang boleh review, edit jika perlu dan approve.", tip: "Untuk video tanpa orang, cakap 'buat video type product, tanpa orang'. Agent akan switch ke product mode." },
+        { no: "10", title: "History Grid", subtitle: "Generated videos dengan action buttons", copy: "Bawah form ada History — UGC — project semasa. Setiap card ada thumbnail, model label, nama editable dan action buttons seperti Extend, Combine, Improve, Download dan Delete.", tip: "Tekan thumbnail untuk full-screen player. Kalau pending lama, tekan recheck status pada card." },
+        { no: "11", title: "Extend ke 16 saat", copy: "Video status done boleh ditekan Extend untuk generate sambungan 8 saat lagi. Sistem akan merge segment 1 dan segment 2 menjadi video 16s.", tip: "Pakai Frame Anchor last untuk continuation yang lebih natural. Voice dikunci dari segment pertama supaya bunyi sama." },
+        { no: "12", title: "Duration 8s", copy: "UGC fixed 8 saat per generation kerana limit Veo 3.1 Fast dan dialog BM paling sedap pada 18-22 perkataan. Kalau nak 16s, generate 8s dahulu lalu tekan Extend.", tip: "Cost RM0.40 per 8s shot. 16s extended = RM0.80." },
+        { no: "13", title: "Image Mode dropdown", copy: "Product Reference auto-create scene daripada gambar produk. First Frame animate image yang sudah complete. Text to Video guna text sahaja dan tidak perlukan reference, tetapi avatar mungkin kurang consistent.", tip: "95% case gunakan Product Reference. First Frame untuk cinematic shot. Text to Video untuk scene tanpa produk." },
+        { no: "14", title: "Size dropdown", copy: "9:16 ialah default untuk TikTok, Reels dan Shorts. 16:9 sesuai untuk YouTube long-form, Facebook, IG horizontal atau landing page hero video." },
+        { no: "15", title: "Voice dropdown dalam Prompt Builder", copy: "Pilih voice ikut gender, pitch dan vibe. Untuk female casual review, cuba callirrhoe atau leda. Untuk male confident, cuba achird atau alnilam. Voice akan dikunci across segment 1 dan 2 supaya seamless." },
+        { no: "16", title: "Action buttons kat History Card", copy: "Extend tambah 8s continuation. Combine merge 2-4 video. Improve regenerate dengan prompt enhancement. Download simpan MP4. Delete buang video dari history.", tip: "Combine sangat useful untuk jadikan 4 angle berbeza sebagai narrative video yang lebih panjang." }
+      ]
+    },
+    zh: {
+      eyebrow: "指南",
+      title: "UGC 页面 — 自拍风视频生成",
+      close: "我明白了 - 关闭",
+      path: "Veo 3.1 Fast · 8 秒 · 竖屏 9:16",
+      whatTitle: "这是什么？",
+      what: "UGC 页面用来生成自拍感、手持感的视频，就像真实 creator 用马来语对着镜头介绍产品。Avatar 可以拿着产品、看镜头说你写好的台词，适合 affiliate 和 TikTok Shop 内容。",
+      whenTitle: "什么时候用？",
+      when: "当你已经有明确台词，只想生成一条 UGC review 视频时，用 UGC tab。如果要一次做很多条并让 AI 帮你规划，用 Auto Content。如果想边聊边让 AI 起草，用下方的 AI Agent UGC。",
+      guideTitle: "怎么用",
+      stepLabel: "步骤",
+      tipLabel: "提示",
+      workflowTitle: "最后提示",
+      workflow: "系统会自动套用适合马来西亚受众的 modesty rule，例如长袖、避免暴露。马来语台词控制在 20-24 个词以内，8 秒视频的口型和声音同步会更稳定。",
+      sections: { 1: "手动 UGC 表单", 7: "AI Agent UGC 聊天面板", 10: "生成后 — History Grid", 12: "下拉选项 — 每个选项是什么意思" },
+      steps: [
+        { no: "1", title: "UGC 表单总览", subtitle: "Video Generator、Scene、Size、Generate UGC", copy: "Video Generator 用来选择 8s duration 和 Image Mode。Scene 用来上传产品图、写 prompt / dialog，并在卡住时打开 Prompt Builder。Size 通常选 9:16。Generate UGC 是开始生成的黄色按钮。", tip: "手机端也是同一套布局，只是上下滚动。" },
+        { no: "2", title: "选择 Image Mode", copy: "Product Reference 是默认模式，最适合产品 review。First Frame 会把一张完整图片动画化。Text to Video 只靠文字描述，不需要图片。", tip: "自然产品 review 优先用 Product Reference，让 AI 自动安排 avatar 拿着产品出镜。" },
+        { no: "3", title: "上传 Image Reference", copy: "点击 Upload 或把产品图拖进去。也可以用 History 复用之前项目里的图片。点 X 可以移除 reference。", tip: "产品图越清楚越好：单一主体、光线好、背景不乱，视频结果会更稳定。" },
+        { no: "4", title: "写 Scene Prompt + Dialog", copy: "描述场景、动作和 avatar 要说的话。Veo 8 秒最适合 18-22 个词左右的台词。用 2-3 句自然口语来写，像跟朋友讲话。", tip: "例子：Malay woman in kitchen, holding a jar of sambal, smiling at camera, says: \"Korang, sambal ni gila pedas! Aku makan setiap hari sekarang. Cuba la!\"" },
+        { no: "5", title: "使用 Prompt Builder", copy: "Prompt Builder 会依次问 persona、scene、hook、framework、voice 和 dialog，然后自动生成一版可以编辑的 prompt。", tip: "第一次用建议一定走 Prompt Builder。熟悉后再直接手写。" },
+        { no: "6", title: "设置 Size + Generate UGC", copy: "默认 9:16，适合 TikTok。点击 Generate UGC 后，history 里会出现 pending card。Veo 3.1 Fast 通常 60-90 秒完成。每条视频成本 RM0.40。", tip: "可以用略微不同的 prompt 连续生成多个版本。" },
+        { no: "7", title: "打开 AI Agent UGC", copy: "点击右下角 floating chat button 打开 AI Agent。它可以用 BM 和你聊天、提出 video variants，并直接提交生成。", tip: "Agent 有 persona、scene、hook、framework、voice 的 skill library，你只要说清楚想要什么。" },
+        { no: "8", title: "告诉 Agent 你要什么", copy: "像 WhatsApp 一样自然输入。例子：'Buat 3 video UGC untuk produk skincare aku, persona urban hijabi, hook pain confession'。也可以用 clip icon 附上产品图。", tip: "Agent 会在需要时追问 duration、voice、hijab/no hijab 或产品角度。" },
+        { no: "9", title: "输入 SUBMIT 开始生成", copy: "当 variants 准备好后，Agent 会给你 preview，并要求你输入 SUBMIT。之后会出现确认弹窗，让你最后 review、修改和 approve。", tip: "如果要无人物产品视频，说 'buat video type product, tanpa orang'，Agent 会切到 product mode。" },
+        { no: "10", title: "History Grid", subtitle: "生成视频和操作按钮", copy: "表单下方是当前 project 的 UGC history。每张 card 有 thumbnail、model label、可编辑名称，以及 Extend、Combine、Improve、Download、Delete 等按钮。", tip: "点击 thumbnail 可以全屏播放。pending 太久时，点 card 上的 recheck status。" },
+        { no: "11", title: "延长到 16 秒", copy: "done 状态的视频可以点击 Extend，再生成后续 8 秒。系统会把 segment 1 和 segment 2 自动 merge 成 16 秒视频。", tip: "用 Frame Anchor last，延续感会更自然。Voice 会沿用第一段，声音更统一。" },
+        { no: "12", title: "Duration 8s", copy: "UGC 每次固定 8 秒，因为 Veo 3.1 Fast 的限制，也因为 18-22 个 BM 词最适合 8 秒口播。要 16 秒就先生成 8 秒，再 Extend。", tip: "8 秒成本 RM0.40。Extend 到 16 秒总成本 RM0.80。" },
+        { no: "13", title: "Image Mode 下拉", copy: "Product Reference 会根据产品图自动生成场景。First Frame 会把完整图片动画化。Text to Video 只用文字，不需要 reference，但 avatar 一致性会弱一些。", tip: "95% 情况用 Product Reference。Cinematic shot 用 First Frame。无产品场景用 Text to Video。" },
+        { no: "14", title: "Size 下拉", copy: "9:16 是 TikTok、Reels、Shorts 的默认竖屏比例。16:9 适合 YouTube long-form、Facebook、IG 横版或 landing page hero video。" },
+        { no: "15", title: "Prompt Builder 里的 Voice", copy: "Voice 可以按性别、音高和气质选择。Female casual review 可试 callirrhoe 或 leda。Male confident 可试 achird 或 alnilam。Extend 时会锁定同一个 voice。" },
+        { no: "16", title: "History Card 操作按钮", copy: "Extend 生成 8 秒续集。Combine 合并 2-4 条视频。Improve 用增强 prompt 重新生成。Download 保存 MP4。Delete 从 history 删除。", tip: "Combine 很适合把 4 个不同角度合成一条更长的 narrative video。" }
+      ]
+    },
+    en: {
+      eyebrow: "Guide",
+      title: "UGC Tab — Selfie-Style Video Generation",
+      close: "Got it - close",
+      path: "Veo 3.1 Fast · 8 seconds · vertical 9:16",
+      whatTitle: "What is this?",
+      what: "The UGC tab generates selfie-style or handheld product review videos, as if a real creator is speaking Malay to camera. The avatar can hold the product, look at the camera, and deliver the dialog you wrote. It is built for affiliate and TikTok Shop content.",
+      whenTitle: "When should I use it?",
+      when: "Use UGC when you want one specific review video with a clear dialog. Use Auto Content when you want AI to plan many videos at once. Use AI Agent UGC when you want to chat and let AI draft variants with you.",
+      guideTitle: "How to use it",
+      stepLabel: "Step",
+      tipLabel: "Tip",
+      workflowTitle: "Final tip",
+      workflow: "A Malaysia-friendly modesty rule is applied automatically: long sleeves, no cleavage, and no thigh exposure. Keep Malay dialog around 20-24 words for the most stable 8-second audio sync.",
+      sections: { 1: "Manual UGC Form", 7: "AI Agent UGC Chat Panel", 10: "After Generate — History Grid", 12: "Dropdowns & Options — What Each One Means" },
+      steps: [
+        { no: "1", title: "UGC form overview", subtitle: "Video Generator, Scene, Size, Generate UGC", copy: "Video Generator controls 8s duration and Image Mode. Scene is where you upload product images, write prompt/dialog, and open Prompt Builder if you are stuck. Size is usually 9:16 for TikTok. Generate UGC starts the job.", tip: "Mobile uses the same layout; just scroll through the sections." },
+        { no: "2", title: "Choose Image Mode", copy: "Product Reference is the default and best for product reviews. First Frame animates a finished image. Text to Video uses only a written description with no image reference.", tip: "For natural product reviews, use Product Reference so AI can place the avatar holding the product in a fitting scene." },
+        { no: "3", title: "Upload Image Reference", copy: "Click Upload or drag a product image in. Use History to reuse an image from the current project. Click X to remove the reference.", tip: "Clear product images with one subject, good lighting, and a simple background produce the best videos." },
+        { no: "4", title: "Write Scene Prompt + Dialog", copy: "Describe the setting, action, and spoken dialog. For Veo 8s, the sweet spot is 18-22 spoken words. Write 2-3 natural sentences, like talking to a friend.", tip: "Example: Malay woman in kitchen, holding a jar of sambal, smiling at camera, says: \"Korang, sambal ni gila pedas! Aku makan setiap hari sekarang. Cuba la!\"" },
+        { no: "5", title: "Use Prompt Builder", copy: "Prompt Builder asks about persona, scene, hook, framework, voice, and dialog, then generates an editable prompt for you.", tip: "First-time users should use Prompt Builder. Once you understand the pattern, write directly." },
+        { no: "6", title: "Set Size + Generate UGC", copy: "Default size is 9:16 for TikTok. Click Generate UGC to start. A pending card appears in history. Veo 3.1 Fast usually completes in 60-90 seconds. Cost is RM0.40 per video.", tip: "Generate several versions by slightly changing the prompt." },
+        { no: "7", title: "Open AI Agent UGC", copy: "Click the floating chat button at the bottom-right to open AI Agent. It can chat in Malay, propose video variants, and submit jobs directly.", tip: "The agent has a skill library for persona, scene, hook, framework, and voice. Just explain what you need." },
+        { no: "8", title: "Tell Agent what you want", copy: "Type naturally, like WhatsApp. Example: 'Buat 3 video UGC untuk produk skincare aku, persona urban hijabi, hook pain confession'. You can also attach a product image with the clip icon.", tip: "The agent will ask follow-up questions when needed, such as duration, voice, hijab/no hijab, or product angle." },
+        { no: "9", title: "Type SUBMIT to generate", copy: "When variants are ready, the agent shows a preview and asks you to type SUBMIT. A confirmation dialog appears so you can review, edit, and approve.", tip: "For no-person product videos, say 'buat video type product, tanpa orang'. The agent will switch to product mode." },
+        { no: "10", title: "History Grid", subtitle: "Generated videos and action buttons", copy: "Below the form is the UGC history for the current project. Each card includes a thumbnail, model label, editable name, and actions such as Extend, Combine, Improve, Download, and Delete.", tip: "Click a thumbnail for full-screen playback. If a job stays pending too long, use recheck status on the card." },
+        { no: "11", title: "Extend to 16 seconds", copy: "Done videos can be extended with another 8-second continuation. The system merges segment 1 and segment 2 into one 16-second video.", tip: "Use Frame Anchor last for a natural continuation. The voice is locked from segment 1 for consistency." },
+        { no: "12", title: "Duration 8s", copy: "UGC generates 8 seconds per shot because of Veo 3.1 Fast limits and because 18-22 Malay words fit naturally in 8 seconds. For 16s, generate 8s first, then Extend.", tip: "Cost is RM0.40 per 8s shot. A 16s extended video costs RM0.80 total." },
+        { no: "13", title: "Image Mode dropdown", copy: "Product Reference creates a scene from the product image. First Frame animates a finished image. Text to Video uses text only and needs no reference, but avatar consistency may be weaker.", tip: "Use Product Reference for most cases. Use First Frame for cinematic shots. Use Text to Video for scenes without products." },
+        { no: "14", title: "Size dropdown", copy: "9:16 is the default for TikTok, Reels, and Shorts. 16:9 is useful for YouTube long-form, Facebook, horizontal IG, or landing page hero videos." },
+        { no: "15", title: "Voice dropdown in Prompt Builder", copy: "Choose voices by gender, pitch, and vibe. For female casual review, try callirrhoe or leda. For male confident review, try achird or alnilam. Extended segments keep the same voice." },
+        { no: "16", title: "History Card actions", copy: "Extend adds an 8s continuation. Combine merges 2-4 videos. Improve regenerates with prompt enhancement. Download saves MP4. Delete removes the video from history.", tip: "Combine is powerful for turning four different angles into a longer narrative video." }
+      ]
+    }
+  };
+  return content[state.lang] || content.ms;
+}
+
 function sopGuideContent() {
   if (state.page === "project" && state.step === "image") return sopImageContent();
+  if (state.page === "project" && state.step === "ugc") return sopUgcContent();
   return sopDashboardContent();
 }
 

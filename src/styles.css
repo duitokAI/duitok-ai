@@ -11461,6 +11461,40 @@ label {
   color: var(--brand-muted) !important;
 }
 
+.public-shell .split-section p,
+.public-shell .test-volume-section p,
+.public-shell .output-preview-section p,
+.public-shell .workflow-section p,
+.public-shell .system-section p,
+.public-shell .feature-section p,
+.public-shell .demo-section p,
+.public-shell .comparison-section p,
+.public-shell .case-section p,
+.public-shell .scenario-section p,
+.public-shell .journey-section p,
+.public-shell .pricing-section p,
+.public-shell .control-section p,
+.public-shell .signup-section p,
+.public-shell .faq-section p,
+.public-shell .dream-section p {
+  color: #5f4467 !important;
+  font-weight: 720;
+}
+
+.public-shell .output-preview-grid p,
+.public-shell .workflow-steps p,
+.public-shell .system-grid p,
+.public-shell .journey-grid p,
+.public-shell .pain-list p,
+.public-shell .feature-mosaic p,
+.public-shell .compare-grid p,
+.public-shell .case-card p,
+.public-shell .demo-reel p,
+.public-shell .control-grid p {
+  color: #6d5874 !important;
+  font-weight: 680;
+}
+
 .public-shell .pricing-section {
   border-radius: 30px;
   padding-inline: clamp(18px, 3vw, 36px);
