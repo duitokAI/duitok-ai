@@ -11872,3 +11872,114 @@ label {
   color: #fff !important;
   box-shadow: none !important;
 }
+
+/* Image Generator compact studio layout. */
+.studio-shell .canvas-card:has(.image-generator-box) {
+  min-height: auto !important;
+  padding: clamp(22px, 2.4vw, 34px) !important;
+}
+
+.studio-shell .image-generator-box {
+  padding: 24px 28px !important;
+  border-color: rgba(75, 0, 94, 0.12) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 18px 44px rgba(75, 0, 94, 0.08) !important;
+}
+
+.studio-shell .image-generator-box h2 {
+  margin: 0 0 20px !important;
+  font-size: 22px !important;
+  letter-spacing: 0.05em !important;
+}
+
+.studio-shell .virtualize-card {
+  margin-top: 28px !important;
+  padding: clamp(22px, 2.3vw, 30px) !important;
+  border: 1px solid rgba(75, 0, 94, 0.12) !important;
+  border-radius: 22px !important;
+  background:
+    linear-gradient(180deg, rgba(255, 247, 251, 0.72), rgba(255, 255, 255, 0.96)),
+    #fff !important;
+  box-shadow: 0 18px 44px rgba(75, 0, 94, 0.08) !important;
+}
+
+.studio-shell .virtualize-head {
+  margin-bottom: 20px !important;
+  align-items: center !important;
+}
+
+.studio-shell .virtualize-head h2 {
+  font-size: clamp(24px, 2vw, 34px) !important;
+  letter-spacing: 0.06em !important;
+  color: var(--studio-purple-900) !important;
+}
+
+.studio-shell .virtualize-head span {
+  padding: 9px 16px !important;
+  border-color: rgba(255, 63, 110, 0.18) !important;
+  background: rgba(255, 240, 245, 0.82) !important;
+  color: var(--studio-pink) !important;
+  font-size: 13px !important;
+}
+
+.studio-shell .virtualize-grid {
+  gap: 14px !important;
+}
+
+.studio-shell .virtualize-upload p {
+  margin-bottom: 9px !important;
+  color: var(--studio-muted) !important;
+  font-size: 16px !important;
+  letter-spacing: 0 !important;
+}
+
+.studio-shell .drop-zone.virtualize-drop {
+  min-height: 118px !important;
+  gap: 8px !important;
+  border: 1.5px dashed rgba(255, 63, 110, 0.22) !important;
+  border-radius: 18px !important;
+  background: rgba(255, 247, 251, 0.78) !important;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    transform 0.18s ease;
+}
+
+.studio-shell .drop-zone.virtualize-drop:hover {
+  border-color: rgba(255, 63, 110, 0.42) !important;
+  background: rgba(255, 240, 245, 0.95) !important;
+  transform: translateY(-1px);
+}
+
+.studio-shell .drop-zone.virtualize-drop span {
+  font-size: 25px !important;
+}
+
+.studio-shell .drop-zone.virtualize-drop strong {
+  color: var(--studio-purple-900) !important;
+  font-size: clamp(17px, 1.25vw, 22px) !important;
+  line-height: 1.12 !important;
+}
+
+.studio-shell .virtualize-note {
+  margin: 16px 0 14px !important;
+  color: var(--studio-muted) !important;
+  font-size: 15px !important;
+  line-height: 1.45 !important;
+}
+
+.studio-shell .virtualize-example {
+  min-height: 46px !important;
+  border: 1.5px solid rgba(255, 63, 110, 0.38) !important;
+  border-radius: 14px !important;
+  background: rgba(255, 240, 245, 0.78) !important;
+  color: var(--studio-pink) !important;
+  font-size: 16px !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 760px) {
+  .studio-shell .virtualize-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
