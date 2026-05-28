@@ -4187,6 +4187,147 @@ function sopGuideContent() {
   return sopDashboardContent();
 }
 
+function sopLibrary() {
+  const labels = {
+    dashboard: { group: "Getting Started", icon: "layout-dashboard", desc: "Workspace, projects, stats, credits, and daily production rhythm.", content: sopDashboardContent },
+    image: { group: "Create Content", icon: "image", desc: "Generate product visuals, ads, and image assets inside a project.", content: sopImageContent },
+    ugc: { group: "Create Content", icon: "video", desc: "Create UGC-style selling videos with scripts, angles, and output settings.", content: sopUgcContent },
+    auto: { group: "Create Content", icon: "wand-sparkles", desc: "Batch content workflow for testing multiple hooks and angles faster.", content: sopAutoContentContent },
+    original: { group: "Create Content", icon: "film", desc: "Write original video prompts and structure short-form selling scenes.", content: sopOriginalVideoContent },
+    clone: { group: "Create Content", icon: "layers-3", desc: "Reverse-engineer competitor videos and adapt their structure safely.", content: sopClonePromptContent },
+    scheduler: { group: "Publish & Operate", icon: "calendar-days", desc: "Plan posting cadence and turn generated assets into queue drafts." },
+    autopost: { group: "Publish & Operate", icon: "send", desc: "Connect TikTok posting flow and manage publish-ready items." },
+    usage: { group: "Publish & Operate", icon: "activity", desc: "Track credits, usage, and production cost." }
+  };
+  return Object.entries(labels).map(([id, item]) => {
+    const guide = item.content?.();
+    return {
+      id,
+      ...item,
+      title: guide?.title || sopComingSoonTitle(id),
+      path: guide?.path || "SOP Center · coming soon",
+      guide,
+      status: guide ? "Ready" : "Coming soon"
+    };
+  });
+}
+
+function sopComingSoonTitle(id = "") {
+  return {
+    scheduler: "Scheduler SOP",
+    autopost: "Auto Post TikTok SOP",
+    usage: "Usage & Credit SOP"
+  }[id] || "SOP";
+}
+
+function activeSopItem() {
+  const items = sopLibrary();
+  return items.find((item) => item.id === state.sopTopic) || items[0];
+}
+
+function sopPage() {
+  const items = sopLibrary();
+  const active = activeSopItem();
+  const groups = [...new Set(items.map((item) => item.group))];
+  const quickIds = ["dashboard", "image", "ugc", "auto", "original", "clone"];
+  return `
+    <header class="project-head sop-center-head">
+      <div>
+        <p class="folder-label">${icon("book-open", 18)} SOP Center</p>
+        <h1>SOP Center</h1>
+        <p class="subtitle">把 Duitok 平台的完整操作步骤集中在这里。先选任务，再按步骤执行。</p>
+      </div>
+      <div class="head-actions">
+        <button class="dark-button" data-action="support">${icon("message-circle")} Need help?</button>
+        <button class="sop-button" data-action="download-sop">${icon("download", 22)} Export SOP</button>
+      </div>
+    </header>
+    <section class="sop-quick-grid">
+      ${quickIds.map((id) => {
+        const item = items.find((entry) => entry.id === id);
+        return `<button class="${active.id === id ? "active" : ""}" data-sop-target="${id}">${icon(item.icon, 22)}<span>${esc(item.title)}</span><small>${esc(item.desc)}</small></button>`;
+      }).join("")}
+    </section>
+    <section class="sop-center-layout">
+      <aside class="sop-center-nav">
+        ${groups.map((group) => `
+          <div>
+            <h3>${esc(group)}</h3>
+            ${items.filter((item) => item.group === group).map((item) => `
+              <button class="${active.id === item.id ? "active" : ""}" data-sop-target="${esc(item.id)}">
+                ${icon(item.icon, 18)}
+                <span><b>${esc(item.title)}</b><small>${esc(item.status)}</small></span>
+              </button>`).join("")}
+          </div>`).join("")}
+      </aside>
+      <article class="sop-center-content">
+        ${active.guide ? sopGuideArticle(active.guide) : sopComingSoonArticle(active)}
+      </article>
+    </section>`;
+}
+
+function sopGuideArticle(guide) {
+  const stepCards = Array.isArray(guide.steps) ? guide.steps : [];
+  const sectionLabels = guide.sections || {};
+  return `
+    <div class="sop-center-title">
+      <p>${esc(guide.eyebrow || "Guide")}</p>
+      <h2>${esc(guide.title || "SOP")}</h2>
+      <span>${esc(guide.path || "")}</span>
+    </div>
+    <section class="sop-copy-block">
+      <h3>${esc(guide.whatTitle || "What is this?")}</h3>
+      <p>${esc(guide.what || "")}</p>
+    </section>
+    <section class="sop-callout">
+      ${icon("lightbulb", 34)}
+      <div>
+        <h3>${esc(guide.whenTitle || "When should I use this?")}</h3>
+        <p>${esc(guide.when || "")}</p>
+      </div>
+    </section>
+    <section class="sop-guide">
+      <h3>${icon("chevron-right", 28)} ${esc(guide.guideTitle || "How to use it")}</h3>
+      <div class="sop-step-list">
+        ${stepCards.map((item) => `
+          ${sectionLabels[item.no] ? `<h3 class="sop-section-heading">${esc(sectionLabels[item.no])}</h3>` : ""}
+          <article class="sop-step-card">
+            <div class="sop-step-title">
+              <span>${esc(item.no)}</span>
+              <h4>${esc(guide.stepLabel || "Step")} ${esc(item.no)} &mdash; ${esc(item.title)}</h4>
+            </div>
+            <div class="sop-step-body">
+              ${item.subtitle ? `<strong>${esc(item.subtitle)}</strong>` : ""}
+              <p>${esc(item.copy || "")}</p>
+              ${item.bullets ? `<ul>${item.bullets.map((line) => `<li>${esc(line)}</li>`).join("")}</ul>` : ""}
+              ${item.after ? `<p>${esc(item.after)}</p>` : ""}
+              ${item.tip ? `<div class="sop-tip">${icon("lightbulb", 20)} <div><b>${esc(guide.tipLabel || "Tip")}:</b><p>${esc(item.tip)}</p></div></div>` : ""}
+            </div>
+          </article>`).join("")}
+      </div>
+    </section>
+    <section class="sop-workflow">
+      <h3>${esc(guide.workflowTitle || "Workflow tip")}</h3>
+      <p>${esc(guide.workflow || "")}</p>
+    </section>`;
+}
+
+function sopComingSoonArticle(item) {
+  return `
+    <div class="sop-center-title">
+      <p>${esc(item.group)}</p>
+      <h2>${esc(item.title)}</h2>
+      <span>${esc(item.path)}</span>
+    </div>
+    <section class="sop-callout">
+      ${icon("construction", 34)}
+      <div>
+        <h3>Coming soon</h3>
+        <p>${esc(item.desc)} 这份 SOP 会放在这里，不会再用弹窗承载。</p>
+      </div>
+    </section>`;
+}
+
 function sopDashboardModal() {
   const guide = sopGuideContent();
   const stepCards = guide.steps;
@@ -4718,6 +4859,7 @@ function agentConfirmationCard(run) {
 }
 
 function bind() {
+  document.querySelectorAll("[data-sop-target]").forEach((el) => el.addEventListener("click", () => set({ page: "sop", sopTopic: el.dataset.sopTarget || "dashboard", modal: null })));
   document.querySelectorAll("[data-page]").forEach((el) => el.addEventListener("click", () => set({ page: el.dataset.page })));
   document.querySelectorAll("[data-step]").forEach((el) => el.addEventListener("click", () => set({ step: el.dataset.step })));
   document.querySelectorAll("[data-step-open]").forEach((el) => el.addEventListener("click", () => set({ page: "project", step: el.dataset.stepOpen })));
@@ -4796,7 +4938,7 @@ async function action(event, name) {
   if (name === "close-modal" && event.target !== event.currentTarget && event.currentTarget.classList.contains("modal-backdrop")) return;
   if (name === "close-modal") return set({ modal: null });
   if (name === "new-project") return set({ modal: "newProject" });
-  if (name === "sop") return set({ modal: "sop" });
+  if (name === "sop") return set({ page: "sop", sopTopic: state.page === "project" ? state.step : "dashboard", modal: null });
   if (name === "register") return set({ modal: "register" });
   if (name === "support") return window.open(supportWhatsappUrl, "_blank", "noopener,noreferrer");
   if (name === "confirm-delete-project") return deleteProject();
