@@ -11906,11 +11906,9 @@ label {
 .usage-filter-row > span,
 .usage-ledger-head {
   color: rgba(255, 255, 255, 0.48);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 13px;
   font-weight: 950;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  letter-spacing: 0;
 }
 
 .usage-summary-card b {
@@ -12121,10 +12119,15 @@ label {
 }
 
 .studio-shell .usage-summary-card span,
-.studio-shell .usage-filter-row > span,
-.studio-shell .usage-ledger-head {
+.studio-shell .usage-filter-row > span {
   font-size: 11px;
   letter-spacing: 0.12em;
+}
+
+.studio-shell .usage-ledger-head {
+  font-size: 13px;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .studio-shell .usage-summary-card b {
