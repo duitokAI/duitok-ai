@@ -56,7 +56,11 @@ services:
       - key: DEEPSEEK_CHAT_PATH
         value: /chat/completions
       - key: DEEPSEEK_MODEL
-        value: deepseek-v4-flash
+        value: deepseek-v4-pro
+      - key: WEB_SEARCH_BASE_URL
+        value: https://duckduckgo.com/html/
+      - key: WEB_SEARCH_TIMEOUT_MS
+        value: 12000
       - key: GRSAI_API_KEY
         sync: false
       - key: GRSAI_BASE_URL
