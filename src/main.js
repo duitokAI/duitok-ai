@@ -20,8 +20,7 @@ const steps = [
   ["auto", "wand-sparkles", "stepAuto", "03"],
   ["original", "film", "stepOriginal", "04"],
   ["clone", "layers-3", "stepClone", "05"],
-  ["story", "book-open", "stepStory", "06"],
-  ["viral", "film", "stepViral", "07"]
+  ["story", "book-open", "stepStory", "06"]
 ];
 
 const pages = [
@@ -4880,10 +4879,8 @@ function agentTemplateItem(template = {}) {
 function agentPage() {
   return `
     <section class="agent-page">
-      ${agentTopbar()}
       <div class="agent-workspace-shell">
         ${chatPanel()}
-        ${agentBrainPanel()}
       </div>
     </section>`;
 }

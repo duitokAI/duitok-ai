@@ -16765,12 +16765,24 @@ label {
 }
 
 /* Final Agent layout overrides after the Studio density layer. */
+.studio-shell .agent-page {
+  max-width: min(980px, 100%) !important;
+  min-height: calc(100dvh - 92px) !important;
+  align-content: center !important;
+}
+
+.studio-shell .agent-workspace-shell {
+  display: block !important;
+  min-height: 0 !important;
+}
+
 .studio-shell .agent-chat-shell.agent-page-panel {
-  height: clamp(460px, calc(100dvh - 230px), 640px) !important;
+  height: clamp(560px, calc(100dvh - 132px), 760px) !important;
   min-height: 0 !important;
   display: grid !important;
   grid-template-rows: minmax(0, 1fr) auto !important;
-  padding: 18px !important;
+  padding: 20px !important;
+  border-radius: 24px !important;
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel > header {
@@ -16828,9 +16840,14 @@ label {
 }
 
 @media (max-width: 900px) {
+  .studio-shell .agent-page {
+    min-height: 0 !important;
+    align-content: start !important;
+  }
+
   .studio-shell .agent-chat-shell.agent-page-panel {
-    height: auto !important;
-    min-height: 620px !important;
+    height: calc(100dvh - 104px) !important;
+    min-height: 560px !important;
   }
 
   .studio-shell .agent-status-card .agent-life-card {
