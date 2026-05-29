@@ -18743,6 +18743,12 @@ label {
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-thread {
   gap: 12px !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overscroll-behavior-y: contain !important;
+  scrollbar-gutter: stable !important;
+  scroll-padding-bottom: 18px !important;
+  -webkit-overflow-scrolling: touch !important;
   padding: 2px 8px 18px 0 !important;
 }
 
@@ -18915,8 +18921,8 @@ label {
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-form {
-  position: sticky !important;
-  bottom: 0 !important;
+  position: relative !important;
+  bottom: auto !important;
   z-index: 5 !important;
   grid-template-columns: minmax(0, 1fr) 52px !important;
   gap: 10px !important;

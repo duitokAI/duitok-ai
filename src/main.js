@@ -1247,14 +1247,18 @@ function shouldAutoScrollAgentThread(patch = {}) {
 }
 
 function scrollAgentThreadToBottom() {
-  requestAnimationFrame(() => {
+  const scroll = () => {
     const thread = document.querySelector(".agent-chat-shell .agent-thread");
     if (!thread) return;
-    thread.scrollTop = thread.scrollHeight;
-    requestAnimationFrame(() => {
-      thread.scrollTop = thread.scrollHeight;
-    });
+    const lastItem = thread.lastElementChild;
+    thread.scrollTo({ top: thread.scrollHeight, behavior: "auto" });
+    lastItem?.scrollIntoView({ block: "end", inline: "nearest", behavior: "auto" });
+  };
+  requestAnimationFrame(() => {
+    scroll();
+    requestAnimationFrame(scroll);
   });
+  [80, 240, 600].forEach((delay) => window.setTimeout(scroll, delay));
 }
 
 function shouldPatchModalOnly(patch) {
