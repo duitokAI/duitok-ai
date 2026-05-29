@@ -6526,7 +6526,6 @@ function agentToolCard(card = {}) {
     const hooks = Array.isArray(card.hooks) ? card.hooks.slice(0, 5) : [];
     const angles = Array.isArray(card.videoAngles) ? card.videoAngles.slice(0, 3) : [];
     const risks = Array.isArray(card.risks) ? card.risks.slice(0, 3) : [];
-    const sources = Array.isArray(card.sources) ? card.sources.slice(0, 3) : [];
     const nextPrompt = card.recommendedNextAction === "create_seedance_prompt"
       ? `Write a video prompt for ${card.trendName || "this trend"}`
       : `Create a 7-day content plan for ${card.trendName || "this trend"}`;
@@ -6548,8 +6547,6 @@ function agentToolCard(card = {}) {
       ${angles.length ? `<div class="trend-angle-list">${angles.map((item) => `<p><b>${esc(item.title || "Video angle")}</b><span>${esc(item.productPlacement || item.format || "")}</span></p>`).join("")}</div>` : ""}
       ${hooks.length ? `<div class="trend-hook-list"><strong>${icon("lightbulb", 15)} Hooks</strong><ul>${hooks.map((item) => `<li>${esc(item)}</li>`).join("")}</ul></div>` : ""}
       ${risks.length ? `<div class="trend-risk-list"><strong>${icon("triangle-alert", 15)} Risks</strong><ul>${risks.map((item) => `<li>${esc(item)}</li>`).join("")}</ul></div>` : ""}
-      ${sources.length ? `<details class="trend-source-list"><summary>Sources</summary>${sources.map((item) => `<a href="${esc(item.url || "#")}" target="_blank" rel="noopener noreferrer">${esc(item.title || item.url || "Source")}</a>`).join("")}</details>` : ""}
-      <div><button class="dark-button" data-agent-prompt="Remember ${esc(card.trendName || "this trend")} as project context">${icon("brain", 15)} 保存记忆</button><button class="dark-button" data-agent-template-save="trend_research" data-template-title="${esc(card.trendName || card.title || "Trend research")}" data-template-summary="${esc(card.summary || "")}" data-template-content="${esc(templateContent)}">${icon("bookmark-plus", 15)} 存模板</button><button class="gold-button" data-agent-prompt="${esc(nextPrompt)}">${icon("sparkles", 15)} 下一步</button></div>
     </section>`;
   }
   if (card.type === "content_plan") {
@@ -6557,7 +6554,6 @@ function agentToolCard(card = {}) {
     return `<section class="agent-tool-card" data-agent-card-type="content_plan">
       <header><strong>${icon("calendar-days", 16)} ${esc(card.title || "Content plan")}</strong><span>${esc(card.summary || "")}</span></header>
       ${plan.length ? `<div class="agent-plan-table">${plan.map((item) => `<p><b>${esc(item.title || `Day ${item.day}`)}</b><span>${esc(item.hook || item.idea || "")}</span></p>`).join("")}</div>` : ""}
-      <div><button class="dark-button" data-page="project">${icon("folder-open", 15)} Open project</button><button class="dark-button" data-agent-prompt="Create scheduler drafts from this content plan">${icon("send", 15)} Create drafts</button></div>
     </section>`;
   }
   if (card.type === "visual_card") {
@@ -6574,7 +6570,6 @@ function agentToolCard(card = {}) {
         ${sections.length ? `<div>${sections.map((item) => `<b>${esc(item.label || "Point")}</b><small>${esc(item.text || "")}</small>`).join("")}</div>` : ""}
         ${bullets.length ? `<ul>${bullets.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>` : ""}
       </div>
-      <div><button class="dark-button" data-page="project">${icon("folder-open", 15)} Open project</button><button class="dark-button" data-agent-template-save="visual_card" data-template-title="${esc(visual.title || card.title || "Visual card")}" data-template-summary="${esc(card.summary || "")}" data-template-content="${esc(promptContent)}">${icon("bookmark-plus", 15)} 存模板</button><button class="gold-button" data-agent-prompt="Create schedule draft for this visual card">${icon("calendar-plus", 15)} 加入排期</button></div>
     </section>`;
   }
   if (card.type === "seedance_prompt") {
@@ -6582,7 +6577,6 @@ function agentToolCard(card = {}) {
     return `<section class="agent-tool-card" data-agent-card-type="seedance_prompt">
       <header><strong>${icon("film", 16)} ${esc(card.title || "视频 prompt 已保存")}</strong><span>${esc(card.summary || "")}</span></header>
       <pre>${esc(String(card.prompt || "").slice(0, 900))}</pre>
-      <div><button class="dark-button" data-page="project">${icon("edit-3", 15)} 编辑 prompt</button><button class="dark-button" data-agent-template-save="seedance_prompt" data-template-title="${esc(card.title || "Video prompt")}" data-template-summary="${esc(card.summary || "")}" data-template-content="${esc(promptContent)}">${icon("bookmark-plus", 15)} 存模板</button><button class="gold-button" data-agent-prompt="Generate video from the saved video prompt">${icon("sparkles", 15)} 生成视频</button></div>
     </section>`;
   }
   if (card.type === "workspace_inspect") {
@@ -6598,19 +6592,16 @@ function agentToolCard(card = {}) {
       </div>
       ${card.missing?.length ? `<ul>${card.missing.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>` : `<p>Workspace looks ready for the next Agent task.</p>`}
       ${latest.length ? `<div class="agent-mini-schedule">${latest.map((item) => `<p><b>${esc(item.title || "Untitled")}</b><span>${esc(item.time || "")}</span><em data-status="${esc(item.status || "")}">${esc(item.status || "")}</em></p>`).join("")}</div>` : ""}
-      ${card.suggestions?.length ? `<div class="agent-suggestions">${card.suggestions.map((item) => `<button class="dark-button" data-agent-prompt="${esc(item)}">${esc(item)}</button>`).join("")}</div>` : ""}
     </section>`;
   }
   if (card.type === "agent_memory") {
     return `<section class="agent-tool-card" data-agent-card-type="agent_memory">
       <header><strong>${icon("brain", 16)} ${esc(card.title || "Memory updated")}</strong><span>${esc(card.summary || "")}</span></header>
-      <div><button class="dark-button" data-page="project">${icon("edit-3", 15)} Review memory</button></div>
     </section>`;
   }
   if (card.type === "schedule_drafts") {
     return `<section class="agent-tool-card" data-agent-card-type="schedule_drafts">
       <header><strong>${icon("send", 16)} ${esc(card.title || "Drafts created")}</strong><span>${esc(card.summary || "")}</span></header>
-      <div><button class="dark-button" data-page="autopost">${icon("calendar", 15)} ${t("scheduler")}</button></div>
     </section>`;
   }
   return "";
