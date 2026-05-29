@@ -12227,15 +12227,24 @@ label {
 
 .studio-shell .usage-filter-row button {
   border-color: rgba(57, 22, 67, 0.13);
-  background: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.58);
   color: rgba(57, 22, 67, 0.72);
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+.studio-shell .usage-filter-row button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 47, 109, 0.26);
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--purple);
 }
 
 .studio-shell .usage-filter-row button.active {
-  border-color: rgba(255, 47, 109, 0.38);
-  background: linear-gradient(135deg, var(--hot), var(--pink));
-  color: #fff;
-  box-shadow: 0 14px 30px rgba(255, 47, 109, 0.18);
+  border-color: rgba(255, 47, 109, 0.5);
+  background: #fff;
+  color: var(--purple);
+  box-shadow: 0 16px 34px rgba(255, 47, 109, 0.14);
 }
 
 .studio-shell .usage-ledger-head,
