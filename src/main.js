@@ -4315,8 +4315,9 @@ function resultCard(item) {
   const promptText = item.body || "";
   const promptPreview = promptText.replaceAll("\n", " ").trim();
   const canSaveReference = Boolean(item.imageUrl || item.videoUrl);
+  const isLegacyVisual = Boolean(item.visualCard);
   return `
-    <article class="result-card">
+    <article class="result-card ${isLegacyVisual ? "legacy-visual-result" : ""}">
       <header class="result-card-head">
         <span>${icon("circle-check", 18)}</span>
         <b>${esc(model)}</b>
@@ -4359,10 +4360,10 @@ function resultPreview(item) {
 
 function visualCardPreview(card = {}) {
   const sections = Array.isArray(card.sections) ? card.sections.slice(0, 3) : [];
-  const bullets = Array.isArray(card.bullets) ? card.bullets.slice(0, 3) : [];
+  const bullets = Array.isArray(card.bullets) ? card.bullets.slice(0, 2) : [];
   return `<div class="visual-card-preview">
     <div class="visual-card-canvas">
-      <span>${esc(card.eyebrow || "Pokaya Visual Card")}</span>
+      <span>${esc(card.eyebrow || "Legacy Concept")}</span>
       <h3>${esc(card.title || "Publish-ready selling card")}</h3>
       <p>${esc(card.subtitle || card.productName || "Product-first social content")}</p>
       ${sections.length ? `<div class="visual-card-sections">${sections.map((item) => `<b>${esc(item.label || "Point")}</b><small>${esc(item.text || "")}</small>`).join("")}</div>` : ""}

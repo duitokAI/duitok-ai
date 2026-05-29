@@ -10959,13 +10959,75 @@ label {
 }
 
 .visual-card-preview {
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
   padding: 12px;
+  border-radius: 16px 16px 0 0;
   background: linear-gradient(180deg, #fff, #fff7fc);
 }
 
 .visual-card-canvas {
-  min-height: 220px;
+  min-height: 100%;
+  max-height: 100%;
   align-content: start;
+  overflow: hidden;
+}
+
+.visual-card-preview .visual-card-canvas {
+  height: 100%;
+  gap: 7px !important;
+  padding: 13px;
+  border-radius: 13px;
+}
+
+.visual-card-preview .visual-card-canvas span {
+  max-width: 100%;
+  overflow: hidden;
+  padding: 5px 8px;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.visual-card-preview .visual-card-canvas h3 {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: clamp(18px, 8vw, 28px);
+  line-height: 1.02;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.visual-card-preview .visual-card-canvas p {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 1.3;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.visual-card-preview .visual-card-sections {
+  grid-template-columns: 1fr !important;
+  gap: 5px !important;
+}
+
+.visual-card-preview .visual-card-sections small,
+.visual-card-preview .visual-card-canvas li {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.legacy-visual-result .result-meta span::after {
+  content: " · legacy concept";
+  color: rgba(255, 63, 110, 0.76);
+}
+
+.legacy-visual-result .result-actions button:nth-child(1),
+.legacy-visual-result .result-actions button:nth-child(2) {
+  opacity: 0.32;
 }
 
 .visual-card-canvas em {
@@ -20131,4 +20193,18 @@ label {
   .wizard-actions {
     flex-direction: column-reverse;
   }
+}
+
+.studio-shell .result-card {
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+
+.studio-shell .visual-card-preview {
+  border-radius: 12px 12px 0 0 !important;
+  max-height: 380px !important;
+}
+
+.studio-shell .visual-card-preview .visual-card-canvas {
+  padding: 12px !important;
 }
