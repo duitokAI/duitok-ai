@@ -3413,7 +3413,6 @@ function contentLibraryPage() {
   });
   return `<header class="project-head asset-library-head">
     <div><p class="folder-label">${icon("folder", 18)} Pokaya Asset Library</p><h1>Generated Assets</h1><p class="subtitle">Find, reuse, schedule, rename, download, and keep building from every generated asset.</p></div>
-    <button class="sop-button" data-action="export-all">${icon("download")} Export Data</button>
   </header>
   <section class="asset-toolbar">
     <div class="asset-filter-row">
@@ -3571,7 +3570,6 @@ function adminPage() {
       </div>
       <div class="head-actions">
         <button class="dark-button mini-button" data-admin-toggle-ops="true">${icon("activity", 16)} Ops Diagnostics</button>
-        <button class="sop-button" data-action="export-all">${icon("download")} Export CRM Data</button>
       </div>
     </header>
     <section class="admin-health-strip">
@@ -4333,7 +4331,7 @@ function accountPage() {
     settings: [t("settings"), t("accountSettingsSubtitle"), settingsPage()]
   };
   const [title, subtitle, body] = map[state.page];
-  return `<header class="project-head"><div><p class="folder-label">${icon("folder", 18)} ${t("publicTools")}</p><h1>${title}</h1><p class="subtitle">${subtitle}</p></div><button class="sop-button" data-action="export-all">${icon("download")} ${t("export")}</button></header><section class="canvas-card slim">${body}</section>`;
+  return `<header class="project-head"><div><p class="folder-label">${icon("folder", 18)} ${t("publicTools")}</p><h1>${title}</h1><p class="subtitle">${subtitle}</p></div></header><section class="canvas-card slim">${body}</section>`;
 }
 
 function billingPage() {
@@ -4613,7 +4611,6 @@ function autoPostPage() {
       <div class="autopost-hero-actions">
         <button class="gold-button" data-page="library">${icon("folder-open")} ${primaryAction}</button>
         <button class="dark-button" data-action="ask-agent-schedule">${icon("bot")} Ask Agent</button>
-        <button class="dark-button" data-action="export-all">${icon("download")} Export</button>
       </div>
     </section>
     <section class="autopost-metrics">
@@ -5460,7 +5457,6 @@ function sopPage() {
       </div>
       <div class="head-actions">
         <button class="dark-button mini-button" data-action="support">${icon("message-circle", 17)} Help</button>
-        <button class="sop-button mini-button" data-action="download-sop">${icon("download", 17)} Export</button>
       </div>
     </header>
     <section class="sop-command-bar">
