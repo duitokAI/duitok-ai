@@ -18304,9 +18304,9 @@ label {
 
 /* Final Agent layout overrides after the Studio density layer. */
 .studio-shell .agent-page {
-  max-width: min(980px, 100%) !important;
+  max-width: min(1180px, 100%) !important;
   min-height: calc(100dvh - 92px) !important;
-  align-content: center !important;
+  align-content: start !important;
 }
 
 .studio-shell .agent-workspace-shell {
@@ -18315,12 +18315,12 @@ label {
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel {
-  height: clamp(560px, calc(100dvh - 132px), 760px) !important;
+  height: calc(100dvh - 108px) !important;
   min-height: 0 !important;
   display: grid !important;
   grid-template-rows: minmax(0, 1fr) auto !important;
-  padding: 20px !important;
-  border-radius: 24px !important;
+  padding: 18px !important;
+  border-radius: 22px !important;
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel > header {
@@ -18332,9 +18332,30 @@ label {
   overflow-y: auto !important;
   overflow-anchor: none !important;
   gap: 14px !important;
-  padding: 2px 8px 18px 0 !important;
+  padding: 2px 10px 22px 0 !important;
   overscroll-behavior: contain !important;
   scrollbar-gutter: stable !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article {
+  width: fit-content !important;
+  max-width: min(780px, calc(100% - 26px)) !important;
+  align-self: flex-start !important;
+  padding: 16px 18px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.user {
+  max-width: min(660px, calc(100% - 26px)) !important;
+  align-self: flex-end !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-message,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-feedback-row {
+  width: auto !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-run-card {
+  max-width: 100% !important;
 }
 
 .studio-shell .agent-status-card .agent-life-card {
@@ -18355,11 +18376,7 @@ label {
 }
 
 .studio-shell:has(.agent-page) .support-bubble {
-  min-width: 56px !important;
-  width: 56px !important;
-  height: 56px !important;
-  grid-template-columns: 1fr !important;
-  padding: 0 !important;
+  display: none !important;
 }
 
 .studio-shell:has(.agent-page) .support-bubble-copy {
