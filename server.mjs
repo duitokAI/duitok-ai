@@ -382,6 +382,117 @@ function publicUser(user) {
   };
 }
 
+function defaultAgentPreferenceMemory() {
+  return {
+    preferredLanguages: [],
+    preferredStyles: [],
+    preferredCategories: [],
+    preferredVideoFormats: [],
+    adoptedTrends: [],
+    avoidedPatterns: [],
+    positiveSignals: 0,
+    negativeSignals: 0,
+    lastUpdatedAt: null
+  };
+}
+
+function compactSignalList(items = [], limit = 8) {
+  const counts = new Map();
+  for (const item of items.map((value) => String(value || "").trim()).filter(Boolean)) {
+    const key = item.toLowerCase();
+    counts.set(key, { value: item, count: (counts.get(key)?.count || 0) + 1 });
+  }
+  return [...counts.values()].sort((a, b) => b.count - a.count).slice(0, limit).map((item) => item.value);
+}
+
+function agentPreferenceEventSignal(eventType = "") {
+  if (/positive|copied|saved|created|started|downloaded|reused|confirmed|clicked/i.test(eventType)) return "positive";
+  if (/negative|deleted|undone|undo|skipped/i.test(eventType)) return "negative";
+  return "neutral";
+}
+
+function mergeAgentPreferenceMemory(memory = {}, event = {}) {
+  const next = { ...defaultAgentPreferenceMemory(), ...(memory || {}) };
+  const metadata = sanitizeAgentObject(event.metadata || {});
+  const signal = agentPreferenceEventSignal(event.eventType);
+  if (signal === "positive") next.positiveSignals = Number(next.positiveSignals || 0) + 1;
+  if (signal === "negative") next.negativeSignals = Number(next.negativeSignals || 0) + 1;
+
+  if (signal === "positive") {
+    next.adoptedTrends = compactSignalList([...(next.adoptedTrends || []), metadata.trendName], 12);
+    next.preferredCategories = compactSignalList([...(next.preferredCategories || []), metadata.category, ...(metadata.categories || [])], 12);
+    next.preferredStyles = compactSignalList([...(next.preferredStyles || []), metadata.style, metadata.hook, metadata.action], 12);
+    next.preferredVideoFormats = compactSignalList([...(next.preferredVideoFormats || []), metadata.format, metadata.videoFormat], 12);
+    next.preferredLanguages = compactSignalList([...(next.preferredLanguages || []), metadata.language], 8);
+  }
+  if (signal === "negative") {
+    next.avoidedPatterns = compactSignalList([...(next.avoidedPatterns || []), metadata.trendName, metadata.hook, metadata.action, event.targetType], 12);
+  }
+  next.lastUpdatedAt = new Date().toISOString();
+  return next;
+}
+
+function buildAgentPreferenceSummary(db, user) {
+  const memory = { ...defaultAgentPreferenceMemory(), ...(db.agentPreferenceMemory?.[user.id] || {}) };
+  const events = (db.agentFeedbackEvents || []).filter((item) => item.userId === user.id).slice(0, 500);
+  const positive = events.filter((item) => agentPreferenceEventSignal(item.eventType) === "positive");
+  const negative = events.filter((item) => agentPreferenceEventSignal(item.eventType) === "negative");
+  const fromPositive = (key) => compactSignalList(positive.map((item) => item.metadata?.[key]), 8);
+  const adoptedTrends = compactSignalList([...(memory.adoptedTrends || []), ...fromPositive("trendName")], 10);
+  const preferredCategories = compactSignalList([...(memory.preferredCategories || []), ...fromPositive("category")], 10);
+  const preferredStyles = compactSignalList([...(memory.preferredStyles || []), ...fromPositive("hook"), ...fromPositive("style")], 10);
+  const preferredVideoFormats = compactSignalList([...(memory.preferredVideoFormats || []), ...fromPositive("format"), ...fromPositive("videoFormat")], 10);
+  const avoidedPatterns = compactSignalList([...(memory.avoidedPatterns || []), ...negative.map((item) => item.metadata?.trendName || item.metadata?.hook || item.targetType)], 10);
+  return {
+    adoptedTrends,
+    preferredCategories,
+    preferredStyles,
+    preferredVideoFormats,
+    preferredLanguages: memory.preferredLanguages || [],
+    avoidedPatterns,
+    positiveSignals: Number(memory.positiveSignals || 0) + positive.length,
+    negativeSignals: Number(memory.negativeSignals || 0) + negative.length,
+    lastUpdatedAt: memory.lastUpdatedAt || events[0]?.createdAt || null
+  };
+}
+
+function compactPreferenceSummaryForPrompt(summary = {}) {
+  const lines = [
+    summary.adoptedTrends?.length ? `Often accepts trends: ${summary.adoptedTrends.slice(0, 5).join(", ")}.` : "",
+    summary.preferredCategories?.length ? `Preferred categories: ${summary.preferredCategories.slice(0, 5).join(", ")}.` : "",
+    summary.preferredStyles?.length ? `Preferred styles/hooks: ${summary.preferredStyles.slice(0, 5).join(", ")}.` : "",
+    summary.preferredVideoFormats?.length ? `Preferred video formats: ${summary.preferredVideoFormats.slice(0, 5).join(", ")}.` : "",
+    summary.avoidedPatterns?.length ? `Avoid or ask first for: ${summary.avoidedPatterns.slice(0, 5).join(", ")}.` : "",
+    "Use this as soft guidance only. Current user request always wins. Do not expose raw logs."
+  ].filter(Boolean);
+  return lines.length > 1 ? `Preference memory:\n${lines.join("\n")}` : "Preference memory: not enough feedback yet.";
+}
+
+async function recordAgentFeedbackEvent(user, event = {}) {
+  if (!user?.id) return null;
+  return mutateDb(async (db) => {
+    db.agentFeedbackEvents ||= [];
+    db.agentPreferenceMemory ||= {};
+    const safeEvent = {
+      id: crypto.randomUUID(),
+      userId: user.id,
+      projectId: String(event.projectId || ""),
+      agentRunId: String(event.agentRunId || ""),
+      eventType: String(event.eventType || "agent_feedback").slice(0, 80),
+      targetType: String(event.targetType || "").slice(0, 80),
+      targetId: String(event.targetId || "").slice(0, 160),
+      sourceTool: String(event.sourceTool || "").slice(0, 80),
+      metadata: sanitizeAgentObject(event.metadata || {}),
+      createdAt: new Date().toISOString()
+    };
+    db.agentFeedbackEvents.unshift(safeEvent);
+    db.agentFeedbackEvents = db.agentFeedbackEvents.filter((item) => item.userId !== user.id).concat(db.agentFeedbackEvents.filter((item) => item.userId === user.id).slice(0, 500)).slice(0, 2000);
+    db.agentPreferenceMemory[user.id] = mergeAgentPreferenceMemory(db.agentPreferenceMemory[user.id], safeEvent);
+    await saveDb(db);
+    return { event: safeEvent, preferences: buildAgentPreferenceSummary(db, user) };
+  });
+}
+
 function signAuthToken(user) {
   const payload = Buffer.from(JSON.stringify({
     userId: user.id,
@@ -552,6 +663,8 @@ const seed = {
     publishes: []
   },
   agentRuns: [],
+  agentFeedbackEvents: [],
+  agentPreferenceMemory: {},
   supportTickets: []
 };
 
@@ -597,6 +710,9 @@ function normalizeDb(db) {
   db.tiktok.publishes = db.tiktok.publishes.map((item) => ({ userId: item.userId || adminUserId, ...item }));
   db.agentRuns ||= [];
   db.agentRuns = db.agentRuns.slice(0, 100).map((item) => ({ toolResults: [], uiActions: [], plan: [], diffs: [], cards: [], ...item }));
+  db.agentFeedbackEvents ||= [];
+  db.agentFeedbackEvents = db.agentFeedbackEvents.slice(0, 2000).map((item) => ({ metadata: {}, ...item }));
+  db.agentPreferenceMemory ||= {};
   db.agentMemoryVersions ||= [];
   db.agentEvaluations ||= [];
   db.supportTickets ||= [];
@@ -956,6 +1072,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
     creditLedger,
     supportTickets,
     currentUser: user ? publicUser(user) : null,
+    agentPreferences: user ? buildAgentPreferenceSummary(db, user) : defaultAgentPreferenceMemory(),
     admin,
     storage: isAdmin ? storageStatus() : { durableAssets: storageStatus().durableAssets },
     tiktok: {
@@ -3766,6 +3883,39 @@ async function saveAgentRun(run) {
     if (index >= 0) db.agentRuns[index] = stored;
     else db.agentRuns.unshift(stored);
     db.agentRuns = db.agentRuns.slice(0, 100);
+    if (["completed", "waiting_confirmation", "failed"].includes(stored.status)) {
+      db.agentFeedbackEvents ||= [];
+      const eventType = stored.status === "completed" ? "agent_run_completed" : stored.status === "waiting_confirmation" ? "agent_confirmation_prepared" : "agent_run_failed";
+      const exists = db.agentFeedbackEvents.some((item) => item.agentRunId === stored.id && item.eventType === eventType);
+      if (!exists) {
+        const firstTool = stored.toolResults?.[0];
+        const metadata = sanitizeAgentObject({
+          intent: stored.intent,
+          toolNames: (stored.toolResults || []).map((item) => item.name),
+          trendName: firstTool?.result?.data?.trendName || firstTool?.card?.trendName,
+          category: firstTool?.result?.data?.category,
+          action: firstTool?.name,
+          durationMs: stored.durationMs
+        });
+        const event = {
+          id: crypto.randomUUID(),
+          userId: stored.userId,
+          projectId: stored.projectId || "",
+          agentRunId: stored.id,
+          eventType,
+          targetType: "agent_run",
+          targetId: stored.id,
+          sourceTool: firstTool?.name || "",
+          metadata,
+          createdAt: new Date().toISOString()
+        };
+        db.agentFeedbackEvents.unshift(event);
+        db.agentFeedbackEvents = db.agentFeedbackEvents.slice(0, 2000);
+        db.agentPreferenceMemory ||= {};
+        const user = db.users.find((item) => item.id === stored.userId);
+        if (user) db.agentPreferenceMemory[user.id] = mergeAgentPreferenceMemory(db.agentPreferenceMemory[user.id], event);
+      }
+    }
     await saveDb(db);
     return db;
   });
@@ -4735,6 +4885,7 @@ app.post("/api/agent", async (req, res, next) => {
     const rawHistory = sanitizeAgentMessageHistory(req.body.messages);
     const history = rawHistory.slice(-agentRecentMessageLimit);
     const stateForUser = publicState(db, user);
+    const preferenceSummary = buildAgentPreferenceSummary(db, user);
     const projectId = req.body.projectId || stateForUser.projects[0]?.id;
     const latestUserMessage = [...history].reverse().find((item) => item.role === "user" && typeof item.content === "string")?.content || "";
     const contextSummary = agentContextSummary({
@@ -4878,6 +5029,10 @@ app.post("/api/agent", async (req, res, next) => {
       {
         role: "system",
         content: contextSummary
+      },
+      {
+        role: "system",
+        content: compactPreferenceSummaryForPrompt(preferenceSummary)
       },
       ...history
         .map((item) => ({ role: item.role, content: item.content.slice(0, agentMessageCharLimit) }))
@@ -5149,6 +5304,69 @@ app.post("/api/agent", async (req, res, next) => {
   }
 });
 
+app.post("/api/agent/feedback", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    const result = await recordAgentFeedbackEvent(user, {
+      projectId: req.body.projectId,
+      agentRunId: req.body.agentRunId,
+      eventType: req.body.eventType,
+      targetType: req.body.targetType,
+      targetId: req.body.targetId,
+      sourceTool: req.body.sourceTool,
+      metadata: req.body.metadata
+    });
+    res.json({ ok: true, ...result });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/agent/preferences", async (req, res, next) => {
+  try {
+    const { db, user } = await requireAuth(req);
+    res.json({ preferences: buildAgentPreferenceSummary(db, user) });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.patch("/api/agent/preferences", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    const preferences = await mutateDb(async (db) => {
+      db.agentPreferenceMemory ||= {};
+      const current = { ...defaultAgentPreferenceMemory(), ...(db.agentPreferenceMemory[user.id] || {}) };
+      const patch = {};
+      for (const key of ["preferredLanguages", "preferredStyles", "preferredCategories", "preferredVideoFormats", "adoptedTrends", "avoidedPatterns"]) {
+        if (Array.isArray(req.body[key])) patch[key] = compactSignalList(req.body[key], 20);
+      }
+      db.agentPreferenceMemory[user.id] = { ...current, ...patch, lastUpdatedAt: new Date().toISOString() };
+      await saveDb(db);
+      return buildAgentPreferenceSummary(db, user);
+    });
+    res.json({ preferences });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.delete("/api/agent/preferences", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    const preferences = await mutateDb(async (db) => {
+      db.agentPreferenceMemory ||= {};
+      db.agentPreferenceMemory[user.id] = defaultAgentPreferenceMemory();
+      db.agentFeedbackEvents = (db.agentFeedbackEvents || []).filter((item) => item.userId !== user.id);
+      await saveDb(db);
+      return buildAgentPreferenceSummary(db, user);
+    });
+    res.json({ preferences });
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.post("/api/agent/confirm", async (req, res, next) => {
   try {
     const { db, user } = await requireAuth(req);
@@ -5194,6 +5412,18 @@ app.post("/api/agent/confirm", async (req, res, next) => {
       updatedAt: new Date().toISOString()
     };
     await saveAgentRun(completedRun);
+    await recordAgentFeedbackEvent(user, {
+      projectId: completedRun.projectId,
+      agentRunId: completedRun.id,
+      eventType: "agent_confirmation_accepted",
+      targetType: publicResult.card?.type || pending.name,
+      targetId: publicResult.result?.data?.resultId || publicResult.result?.data?.scheduleId || completedRun.id,
+      sourceTool: pending.name,
+      metadata: {
+        trendName: publicResult.result?.data?.trendName || publicResult.card?.trendName,
+        action: pending.name
+      }
+    });
     res.json({
       reply: sanitizeAgentReply(result.message || "Confirmed action completed.", run.userMessage || ""),
       db: latestDb,
@@ -5284,6 +5514,22 @@ app.post("/api/agent/runs/:id/undo", async (req, res, next) => {
       run.undoedAt = new Date().toISOString();
       run.status = "completed";
       run.diffs = run.diffs.map((item) => ({ ...item, undoable: false }));
+      db.agentFeedbackEvents ||= [];
+      const event = {
+        id: crypto.randomUUID(),
+        userId: user.id,
+        projectId: run.projectId || "",
+        agentRunId: run.id,
+        eventType: "agent_run_undone",
+        targetType: "agent_run",
+        targetId: run.id,
+        sourceTool: run.toolResults?.[0]?.name || "",
+        metadata: sanitizeAgentObject({ toolNames: (run.toolResults || []).map((item) => item.name), action: "undo" }),
+        createdAt: new Date().toISOString()
+      };
+      db.agentFeedbackEvents.unshift(event);
+      db.agentPreferenceMemory ||= {};
+      db.agentPreferenceMemory[user.id] = mergeAgentPreferenceMemory(db.agentPreferenceMemory[user.id], event);
       db.usage.unshift(usage("Agent run undone", 0, user.id));
       await saveDb(db);
       return { db: publicState(db, user), agentRun: publicAgentRun(run) };

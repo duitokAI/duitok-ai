@@ -9541,6 +9541,28 @@ label {
   box-shadow: 0 8px 18px rgba(93, 8, 108, 0.06);
 }
 
+.agent-feedback-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.agent-feedback-row button {
+  min-height: 30px;
+  border: 1px solid rgba(93, 8, 108, 0.1);
+  border-radius: 999px;
+  padding: 0 10px;
+  background: rgba(255, 255, 255, 0.76);
+  color: rgba(79, 5, 95, 0.82);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
 .agent-workspace-summary {
   display: grid !important;
   grid-template-columns: repeat(4, minmax(0, 1fr));

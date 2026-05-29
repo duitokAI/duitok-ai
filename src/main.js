@@ -4921,11 +4921,16 @@ function agentMessageArticle(item, index = 0) {
   const expanded = Boolean(state.agentExpandedMessages[index]);
   const body = item.role === "assistant" ? agentMessageMarkdown(item.content) : `<p>${esc(item.content).replaceAll("\n", "<br>")}</p>`;
   const chips = item.role === "assistant" ? agentActionChips(item.content) : "";
+  const runId = item.agentRun?.id || "";
+  const feedback = item.role === "assistant" && runId ? `<div class="agent-feedback-row">
+    <button type="button" data-agent-feedback="positive_feedback" data-agent-run-id="${esc(runId)}">${icon("thumbs-up", 14)} 有用</button>
+    <button type="button" data-agent-feedback="negative_feedback" data-agent-run-id="${esc(runId)}">${icon("thumbs-down", 14)} 不准</button>
+  </div>` : "";
   return `<article class="${item.role} ${longMessage && !expanded ? "is-collapsed" : ""}">
     <span>${item.role === "user" ? c.userLabel : c.agentLabel}</span>
     <div class="agent-message">${body}</div>
     ${longMessage ? `<button class="agent-expand-button" type="button" data-agent-expand="${index}">${expanded ? "收起回复" : "展开完整回复"} ${icon(expanded ? "chevron-up" : "chevron-down", 15)}</button>` : ""}
-    ${chips}${agentRunPanel(item.agentRun)}
+    ${chips}${agentRunPanel(item.agentRun)}${feedback}
   </article>`;
 }
 
@@ -5106,13 +5111,15 @@ function agentRunPanel(run) {
     ? agentRunSummary(steps)
     : "";
   if (completed) {
-    return `<div class="agent-run-card agent-run-meta" data-agent-run-status="${esc(run.status || "")}">
+    return `<div class="agent-run-card agent-run-meta" data-agent-run-status="${esc(run.status || "")}" data-agent-run-id="${esc(run.id || "")}">
       <span>${icon("check-check", 14)} ${agentRunStatusLabel(run.status)}</span>
       ${summary ? `<small>${esc(summary)}</small>` : ""}
+      ${agentToolCards(run)}
+      ${agentUndoCard(run)}
     </div>`;
   }
   return `
-    <div class="agent-run-card" data-agent-run-status="${esc(run.status || "")}">
+    <div class="agent-run-card" data-agent-run-status="${esc(run.status || "")}" data-agent-run-id="${esc(run.id || "")}">
       <div class="agent-run-head">
         <strong>${icon(run.status === "waiting_confirmation" ? "shield-alert" : "list-checks", 16)} ${agentRunStatusLabel(run.status)}</strong>
         ${run.status === "waiting_confirmation" ? `<span>需要确认</span>` : ""}
@@ -5156,7 +5163,7 @@ function agentToolCard(card = {}) {
     const nextPrompt = card.recommendedNextAction === "create_seedance_prompt"
       ? `Write a video prompt for ${card.trendName || "this trend"}`
       : `Create a 7-day content plan for ${card.trendName || "this trend"}`;
-    return `<section class="agent-tool-card trend-research-card">
+    return `<section class="agent-tool-card trend-research-card" data-agent-card-type="trend_research" data-agent-trend-name="${esc(card.trendName || "")}">
       <header><strong>${icon("search-check", 16)} ${esc(card.title || "Trend research")}</strong><span>${esc(card.summary || "")}</span></header>
       <div class="trend-fit-row">
         <p><span>Fit</span><b>${esc(card.marketFit?.label || "usable")}</b></p>
@@ -5172,14 +5179,14 @@ function agentToolCard(card = {}) {
   }
   if (card.type === "content_plan") {
     const plan = Array.isArray(card.plan) ? card.plan.slice(0, 7) : [];
-    return `<section class="agent-tool-card">
+    return `<section class="agent-tool-card" data-agent-card-type="content_plan">
       <header><strong>${icon("calendar-days", 16)} ${esc(card.title || "Content plan")}</strong><span>${esc(card.summary || "")}</span></header>
       ${plan.length ? `<div class="agent-plan-table">${plan.map((item) => `<p><b>${esc(item.title || `Day ${item.day}`)}</b><span>${esc(item.hook || item.idea || "")}</span></p>`).join("")}</div>` : ""}
       <div><button class="dark-button" data-page="project">${icon("folder-open", 15)} Open project</button><button class="dark-button" data-agent-prompt="Create scheduler drafts from this content plan">${icon("send", 15)} Create drafts</button></div>
     </section>`;
   }
   if (card.type === "seedance_prompt") {
-    return `<section class="agent-tool-card">
+    return `<section class="agent-tool-card" data-agent-card-type="seedance_prompt">
       <header><strong>${icon("film", 16)} ${esc(card.title || "视频 prompt 已保存")}</strong><span>${esc(card.summary || "")}</span></header>
       <pre>${esc(String(card.prompt || "").slice(0, 900))}</pre>
       <div><button class="dark-button" data-page="project">${icon("edit-3", 15)} 编辑 prompt</button><button class="gold-button" data-agent-prompt="Generate video from the saved video prompt">${icon("sparkles", 15)} 生成视频</button></div>
@@ -5188,7 +5195,7 @@ function agentToolCard(card = {}) {
   if (card.type === "workspace_inspect") {
     const schedule = card.schedule || {};
     const latest = Array.isArray(schedule.latest) ? schedule.latest.slice(0, 3) : [];
-    return `<section class="agent-tool-card">
+    return `<section class="agent-tool-card" data-agent-card-type="workspace_inspect">
       <header><strong>${icon("clipboard-check", 16)} ${esc(card.title || "Workspace checklist")}</strong><span>${esc(card.summary || "")}</span></header>
       <div class="agent-workspace-summary">
         ${card.projectName ? `<p><span>当前项目</span><b>${esc(card.projectName)}</b></p>` : ""}
@@ -5202,13 +5209,13 @@ function agentToolCard(card = {}) {
     </section>`;
   }
   if (card.type === "agent_memory") {
-    return `<section class="agent-tool-card">
+    return `<section class="agent-tool-card" data-agent-card-type="agent_memory">
       <header><strong>${icon("brain", 16)} ${esc(card.title || "Memory updated")}</strong><span>${esc(card.summary || "")}</span></header>
       <div><button class="dark-button" data-page="project">${icon("edit-3", 15)} Review memory</button></div>
     </section>`;
   }
   if (card.type === "schedule_drafts") {
-    return `<section class="agent-tool-card">
+    return `<section class="agent-tool-card" data-agent-card-type="schedule_drafts">
       <header><strong>${icon("send", 16)} ${esc(card.title || "Drafts created")}</strong><span>${esc(card.summary || "")}</span></header>
       <div><button class="dark-button" data-page="autopost">${icon("calendar", 15)} ${t("scheduler")}</button></div>
     </section>`;
@@ -5283,9 +5290,38 @@ function bind() {
   document.querySelectorAll("[data-admin-status]").forEach((el) => el.addEventListener("click", () => adminUpdateUser(el.dataset.adminStatus, { status: el.dataset.status })));
   document.querySelectorAll("[data-agent-permission]").forEach((el) => el.addEventListener("click", () => adminUpdateUser(el.dataset.agentPermission, { agentPermissions: { [el.dataset.permission]: el.dataset.enabled === "true" } })));
   document.querySelectorAll("[data-agent-fill]").forEach((el) => el.addEventListener("click", () => set({ agentInput: el.dataset.agentFill || "" })));
-  document.querySelectorAll("[data-agent-prompt]").forEach((el) => el.addEventListener("click", () => sendAgentMessage(el.dataset.agentPrompt)));
+  document.querySelectorAll("[data-agent-prompt]").forEach((el) => el.addEventListener("click", () => {
+    const card = el.closest("[data-agent-card-type]");
+    const run = el.closest("[data-agent-run-id]");
+    recordAgentFeedback({
+      agentRunId: run?.dataset.agentRunId || "",
+      eventType: "tool_card_clicked",
+      targetType: card?.dataset.agentCardType || "agent_prompt",
+      targetId: card?.dataset.agentTrendName || el.dataset.agentPrompt || "",
+      sourceTool: card?.dataset.agentCardType || "",
+      metadata: {
+        action: el.dataset.agentPrompt,
+        trendName: card?.dataset.agentTrendName || "",
+        category: card?.dataset.agentCardType || ""
+      }
+    });
+    sendAgentMessage(el.dataset.agentPrompt);
+  }));
+  document.querySelectorAll("[data-agent-feedback]").forEach((el) => el.addEventListener("click", () => {
+    recordAgentFeedback({
+      agentRunId: el.dataset.agentRunId || "",
+      eventType: el.dataset.agentFeedback,
+      targetType: "agent_reply",
+      targetId: el.dataset.agentRunId || "",
+      metadata: { action: el.dataset.agentFeedback }
+    });
+    notify(el.dataset.agentFeedback === "positive_feedback" ? "已记录：这个回复有用。" : "已记录：我会少走这个方向。");
+  }));
   document.querySelectorAll("[data-agent-confirm]").forEach((el) => el.addEventListener("click", () => confirmAgentAction(el.dataset.agentConfirm, el.dataset.agentToken)));
-  document.querySelectorAll("[data-agent-undo]").forEach((el) => el.addEventListener("click", () => undoAgentRun(el.dataset.agentUndo)));
+  document.querySelectorAll("[data-agent-undo]").forEach((el) => el.addEventListener("click", () => {
+    recordAgentFeedback({ agentRunId: el.dataset.agentUndo, eventType: "agent_run_undone", targetType: "agent_run", targetId: el.dataset.agentUndo, metadata: { action: "undo" } });
+    undoAgentRun(el.dataset.agentUndo);
+  }));
   document.querySelectorAll("[data-date-field]").forEach((el) => el.addEventListener("change", () => set({ [el.dataset.dateField]: el.value })));
   document.querySelectorAll("[data-action]").forEach((el) => el.addEventListener("click", (e) => action(e, el.dataset.action)));
   document.querySelectorAll("[data-field-set]").forEach((el) => el.addEventListener("click", () => saveProjectField(el.dataset.fieldSet, el.dataset.value)));
@@ -5821,6 +5857,19 @@ async function sendAgentMessage(message) {
     completeAgentVisual();
     notify(error.message);
   }
+}
+
+function recordAgentFeedback(payload = {}) {
+  if (!state.token) return;
+  api("/agent/feedback", {
+    method: "POST",
+    body: JSON.stringify({
+      projectId: state.projectId || "",
+      ...payload
+    })
+  }).then((res) => {
+    if (res.preferences && state.db) state.db.agentPreferences = res.preferences;
+  }).catch(() => null);
 }
 
 async function confirmAgentAction(runId, token) {
