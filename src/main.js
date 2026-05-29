@@ -3128,7 +3128,7 @@ function dashboardStats() {
     cards: [
       [t("statImage"), typeCount("image"), "image"],
       [t("statUgc"), typeCount("ugc"), "video"],
-      [t("statAuto"), typeCount("auto"), "wand-sparkles"],
+      [t("statAuto"), typeCount("auto"), "bot"],
       [t("statOriginal"), typeCount("original"), "film"],
       [t("statClone"), typeCount("clone") + typeCount("viral"), "layers-3"],
       [t("statReady"), readyPosts, "send"],
