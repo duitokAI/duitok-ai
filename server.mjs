@@ -622,41 +622,7 @@ const seed = {
     usage("UGC generation", 8),
     usage("Viral decode", 3)
   ],
-  schedule: [
-    {
-      id: "s_1",
-      title: "Serum soft sell",
-      platform: "TikTok",
-      time: "Tue 20:30",
-      status: "Ready",
-      caption: "POV kulit nampak kusam walaupun dah pakai skincare. Ini cara soft sell serum tanpa overclaim.",
-      hashtags: "#tiktokshopmalaysia #skincaremalaysia #duitok",
-      mediaUrl: "",
-      productUrl: ""
-    },
-    {
-      id: "s_2",
-      title: "Lunchbox proof video",
-      platform: "TikTok",
-      time: "Wed 12:15",
-      status: "Draft",
-      caption: "Test lunchbox leakproof sebelum bawa pergi kerja. Simple proof, terus nampak value.",
-      hashtags: "#tiktokshop #malaysiaseller #lunchbox",
-      mediaUrl: "",
-      productUrl: ""
-    },
-    {
-      id: "s_3",
-      title: "Wireless mic review",
-      platform: "TikTok",
-      time: "Fri 21:00",
-      status: "Ready",
-      caption: "Before vs after audio test untuk seller yang selalu shoot content sendiri.",
-      hashtags: "#contentcreator #wirelessmic #duitok",
-      mediaUrl: "",
-      productUrl: ""
-    }
-  ],
+  schedule: [],
   tiktok: {
     connections: [],
     oauthStates: [],
@@ -667,6 +633,11 @@ const seed = {
   agentPreferenceMemory: {},
   supportTickets: []
 };
+
+function isSeedScheduleDemo(item = {}) {
+  return ["s_1", "s_2", "s_3"].includes(item.id)
+    && ["Serum soft sell", "Lunchbox proof video", "Wireless mic review"].includes(item.title);
+}
 
 function normalizeDb(db) {
   db.users ||= structuredClone(seed.users);
@@ -694,7 +665,7 @@ function normalizeDb(db) {
   db.usage ||= structuredClone(seed.usage);
   db.usage = db.usage.map((item) => ({ userId: item.userId || adminUserId, ...item }));
   db.schedule ||= structuredClone(seed.schedule);
-  db.schedule = db.schedule.map((item, index) => ({
+  db.schedule = db.schedule.filter((item) => !isSeedScheduleDemo(item)).map((item, index) => ({
     userId: item.userId || adminUserId,
     caption: item.caption || `${item.title || `Post ${index + 1}`}\n\nGenerated with Duitok AI.`,
     hashtags: item.hashtags || "#duitok #tiktokshopmalaysia",
