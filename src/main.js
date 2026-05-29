@@ -3110,8 +3110,6 @@ function dashboardStats() {
   const results = allResults().filter(inDateRange);
   const usage = state.db.usage.filter(inDateRange);
   const typeCount = (type) => results.filter((item) => item.type === type).length;
-  const todayKey = localDateKey(new Date());
-  const todayCount = (type) => results.filter((item) => item.type === type && item.createdAt?.startsWith(todayKey)).length;
   const usedCredits = usage.reduce((sum, item) => sum + Number(item.credits || 0), 0);
   const readyPosts = state.db.schedule.filter((item) => item.status === "Ready").length;
   return {
@@ -3119,13 +3117,13 @@ function dashboardStats() {
     usage,
     usedCredits,
     cards: [
-      [t("statImage"), typeCount("image"), "image", tf("statToday", { count: todayCount("image") }), t("statVisualAssets")],
-      [t("statUgc"), typeCount("ugc"), "video", tf("statToday", { count: todayCount("ugc") }), t("statVideoReady")],
-      [t("statAuto"), typeCount("auto"), "wand-sparkles", tf("statToday", { count: todayCount("auto") }), t("statBatchPlans")],
-      [t("statOriginal"), typeCount("original"), "film", tf("statToday", { count: todayCount("original") }), t("statAnalyzed")],
-      [t("statClone"), typeCount("clone") + typeCount("viral"), "layers-3", tf("statToday", { count: todayCount("clone") + todayCount("viral") }), t("statPatterns")],
-      [t("statReady"), readyPosts, "send", t("statScheduler"), t("statQueued")],
-      [t("statCredits"), usedCredits, "wallet-cards", tf("statCreditsNote", { count: usedCredits }), t("statUsage")]
+      [t("statImage"), typeCount("image"), "image"],
+      [t("statUgc"), typeCount("ugc"), "video"],
+      [t("statAuto"), typeCount("auto"), "wand-sparkles"],
+      [t("statOriginal"), typeCount("original"), "film"],
+      [t("statClone"), typeCount("clone") + typeCount("viral"), "layers-3"],
+      [t("statReady"), readyPosts, "send"],
+      [t("statCredits"), usedCredits, "wallet-cards"]
     ]
   };
 }
@@ -3145,7 +3143,7 @@ function dashboardOverview() {
       </div>
     </header>
     <section class="dashboard-stat-grid">
-      ${stats.cards.map(([label, value, ic, note, meta]) => `<article><div><span>${label}</span><b>${value}</b><small>${note}</small></div>${icon(ic, 24)}<em>${meta}</em></article>`).join("")}
+      ${stats.cards.map(([label, value, ic]) => `<article><div><span>${label}</span><b>${value}</b></div>${icon(ic, 24)}</article>`).join("")}
     </section>
     <section class="date-filter-card">
       <h2>${icon("calendar-days", 22)} ${t("filterDateRange")}</h2>
