@@ -14316,7 +14316,7 @@ label {
 
 .studio-shell .step-tabs {
   display: grid !important;
-  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  grid-template-columns: repeat(6, minmax(132px, 1fr)) !important;
   gap: 8px !important;
   margin-bottom: 22px !important;
   padding-bottom: 10px !important;
@@ -14326,16 +14326,17 @@ label {
 .studio-shell .step-tabs button {
   min-width: 0 !important;
   min-height: 48px !important;
-  gap: 6px !important;
+  gap: 8px !important;
   border-radius: 12px !important;
-  padding: 0 10px !important;
-  font-size: 13px !important;
+  padding: 0 12px !important;
+  font-size: 13.5px !important;
 }
 
 .studio-shell .step-tabs button span {
   min-width: 0 !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: nowrap !important;
 }
 
 .studio-shell .step-tabs button svg {
@@ -16942,7 +16943,7 @@ label {
 
 .studio-shell .workspace:has(.step-tabs) .step-tabs {
   display: grid !important;
-  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  grid-template-columns: repeat(6, minmax(132px, 1fr)) !important;
   gap: 8px !important;
   margin-bottom: 20px !important;
   padding-bottom: 10px !important;
@@ -16954,9 +16955,9 @@ label {
   max-width: none !important;
   min-height: var(--project-tab-height) !important;
   border-radius: 11px !important;
-  gap: 6px !important;
-  padding: 0 10px !important;
-  font-size: 13px !important;
+  gap: 8px !important;
+  padding: 0 12px !important;
+  font-size: 13.5px !important;
   line-height: 1 !important;
 }
 
@@ -16968,8 +16969,8 @@ label {
 .studio-shell .workspace:has(.step-tabs) .step-tabs button span {
   max-width: 100% !important;
   min-width: 0 !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
   white-space: nowrap !important;
 }
 
