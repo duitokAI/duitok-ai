@@ -7324,6 +7324,10 @@ label {
 
 .sidebar-language .lang-options button {
   min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .sidebar .brand-logo {
@@ -17917,6 +17921,82 @@ label {
 .studio-shell .sidebar-language .lang-switch {
   min-height: 50px !important;
   padding: 0 14px !important;
+}
+
+/* Studio language picker: compact menu instead of a tall dropdown block. */
+.studio-shell .sidebar-language {
+  margin: 10px 0 16px !important;
+  padding: 8px !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 16px !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+}
+
+.studio-shell .sidebar-language .lang-switch {
+  min-height: 42px !important;
+  border-radius: 12px !important;
+  padding: 0 10px !important;
+  background: transparent !important;
+}
+
+.studio-shell .sidebar-language .lang-switch small {
+  font-size: 10px !important;
+  letter-spacing: 0.14em !important;
+  color: rgba(255, 255, 255, 0.54) !important;
+}
+
+.studio-shell .sidebar-language .lang-switch span {
+  min-width: 32px !important;
+  color: #fff !important;
+  font-size: 15px !important;
+  font-weight: 950 !important;
+  text-align: right !important;
+}
+
+.studio-shell .sidebar-language .lang-switch i {
+  color: rgba(255, 255, 255, 0.84) !important;
+}
+
+.studio-shell .sidebar-language .lang-options {
+  display: grid !important;
+  gap: 6px !important;
+  max-height: 0 !important;
+  margin-top: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 13px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .sidebar-language .lang-menu.open .lang-options {
+  max-height: 140px !important;
+  margin-top: 6px !important;
+  padding: 4px 0 0 !important;
+}
+
+.studio-shell .sidebar-language .lang-options button {
+  min-height: 34px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 10px !important;
+  padding: 0 11px !important;
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.68) !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  text-align: center !important;
+}
+
+.studio-shell .sidebar-language .lang-options button:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fff !important;
+}
+
+.studio-shell .sidebar-language .lang-options button.active {
+  background: rgba(255, 63, 110, 0.16) !important;
+  color: #ff7fa0 !important;
 }
 
 .studio-shell .side-section {

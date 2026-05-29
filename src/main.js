@@ -1260,7 +1260,7 @@ function publicSite() {
     <main class="public-shell">
       ${promoBar()}
       <nav class="public-nav">
-        ${brand(t("contentEngine"))}
+        ${brand()}
         <div class="public-links">
           <a href="#features">${t("navFeatures")}</a>
           <a href="#pricing">${t("navPricing")}</a>
