@@ -3755,7 +3755,7 @@ function stepPanel(p) {
 
 function imagePanel(p) {
   const imageModels = [
-    ["GPT Image 2", "GPT Image 2 (0.10 Credit)"],
+    ["GPT Image 2", "GPT Image 2 (0.15 Credit)"],
     ["Nano Banana Pro", "Nano Banana Pro (0.20 Credit)"]
   ];
   const imageModelValues = imageModels.map(([value]) => value);
