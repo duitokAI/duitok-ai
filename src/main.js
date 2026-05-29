@@ -3454,19 +3454,37 @@ function paymentRow(payment, adminActions = false) {
 
 function contentLibraryPage() {
   const all = allResults().slice().reverse();
+  const availableKinds = [...new Set(all.map(assetMediaKind).filter((kind) => ["image", "video"].includes(kind)))];
+  const filterOptions = ["all", ...["image", "video"].filter((kind) => availableKinds.includes(kind))];
+  const activeFilter = filterOptions.includes(state.assetTypeFilter) ? state.assetTypeFilter : "all";
   const filtered = all.filter((item) => {
-    const kind = item.videoUrl ? "video" : item.imageUrl ? "image" : "text";
-    return state.assetTypeFilter === "all" || state.assetTypeFilter === kind || state.assetTypeFilter === item.type;
+    const kind = assetMediaKind(item);
+    return activeFilter === "all" || activeFilter === kind || activeFilter === item.type;
   });
   return `<header class="project-head asset-library-head">
     <div><p class="folder-label">${icon("folder", 18)} Pokaya Asset Library</p><h1>Generated Assets</h1><p class="subtitle">Find, reuse, schedule, rename, download, and keep building from every generated asset.</p></div>
   </header>
   <section class="asset-toolbar">
     <div class="asset-filter-row">
-      ${["all", "image", "video"].map((kind) => `<button type="button" class="${state.assetTypeFilter === kind ? "active" : ""}" data-asset-type="${kind}">${kind === "all" ? "All" : kind}</button>`).join("")}
+      ${filterOptions.map((kind) => `<button type="button" class="${activeFilter === kind ? "active" : ""}" data-asset-type="${kind}">${assetTypeLabel(kind)}</button>`).join("")}
     </div>
   </section>
   ${filtered.length ? `<section class="result-grid asset-library-grid">${filtered.map(resultCard).join("")}</section>` : `<section class="empty-result">${icon("folder-search")} No assets match this filter.</section>`}`;
+}
+
+function assetMediaKind(item = {}) {
+  if (item.videoUrl) return "video";
+  if (item.imageUrl || item.visualCard || item.type === "visual_card") return "image";
+  return item.type || "text";
+}
+
+function assetTypeLabel(kind = "all") {
+  const labels = {
+    all: t("All"),
+    image: t("Image"),
+    video: t("Video")
+  };
+  return labels[kind] || kind;
 }
 
 function isOwnerAdminAccount() {
