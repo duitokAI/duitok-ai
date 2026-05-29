@@ -3253,7 +3253,7 @@ function imagePanel(p) {
       ${upload(t("productRef"), t("dropProduct"), "Product - used for all images and videos", "package", "product")}
       ${imagePromptSettings(p)}
     `}
-    ${results(p, ["image", "video"])}`;
+    ${results(p, ["image", "video", "visual_card"])}`;
 }
 
 function virtualizePanel() {
@@ -3783,6 +3783,7 @@ function resultCard(item) {
 
 function resultPreview(item) {
   const token = encodeURIComponent(state.token || "");
+  if (item.visualCard) return visualCardPreview(item.visualCard);
   const imageSrc = item.imageUrl ? `/api/media/result/${encodeURIComponent(item.id)}/image?token=${token}` : "";
   const videoSrc = item.videoUrl ? `/api/media/result/${encodeURIComponent(item.id)}/video?token=${token}` : "";
   const imageError = "this.replaceWith(Object.assign(document.createElement('div'),{className:'result-media-error',textContent:'图片链接已过期，请重新生成或联系客服'}))";
@@ -3790,6 +3791,21 @@ function resultPreview(item) {
   const video = videoSrc ? `<div class="result-video-shell"><video class="result-video" src="${videoSrc}" preload="metadata" playsinline></video><button type="button" class="result-play-button" data-video-play="${esc(item.id)}">${icon("play", 26)}<span>点击播放</span></button></div>` : "";
   const text = !image && !video ? `<div class="result-text-preview">${icon("file-text", 30)}<span>Text result</span></div>` : "";
   return `${image}${video}${text}`;
+}
+
+function visualCardPreview(card = {}) {
+  const sections = Array.isArray(card.sections) ? card.sections.slice(0, 3) : [];
+  const bullets = Array.isArray(card.bullets) ? card.bullets.slice(0, 3) : [];
+  return `<div class="visual-card-preview">
+    <div class="visual-card-canvas">
+      <span>${esc(card.eyebrow || "Pokaya Visual Card")}</span>
+      <h3>${esc(card.title || "Publish-ready selling card")}</h3>
+      <p>${esc(card.subtitle || card.productName || "Product-first social content")}</p>
+      ${sections.length ? `<div class="visual-card-sections">${sections.map((item) => `<b>${esc(item.label || "Point")}</b><small>${esc(item.text || "")}</small>`).join("")}</div>` : ""}
+      ${bullets.length ? `<ul>${bullets.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>` : ""}
+      <em>${esc(card.layout || "social card")} · ${esc(card.language || "BM + English")}</em>
+    </div>
+  </div>`;
 }
 
 function accountPage() {
@@ -6457,6 +6473,24 @@ async function startFirstGenerationWizard() {
     set({ db: prepared.db, projectId: prepared.projectId });
     const db = await patchWizardProjectFields(prepared.projectId, target);
     set({ db, projectId: prepared.projectId, step: target.step });
+    if (state.wizardFeature === "visual-card") {
+      const promptText = wizardPrompt();
+      const res = await api("/agent", {
+        method: "POST",
+        body: JSON.stringify({
+          message: promptText,
+          messages: [],
+          contextSummary: "",
+          projectId: prepared.projectId
+        })
+      });
+      markFirstGenerationWizardDone();
+      set({ db: res.state || db, page: "agent", wizardBusy: false });
+      const messages = [{ role: "user", content: promptText }, { role: "assistant", content: res.reply || "Visual card created.", agentRun: res.agentRun || null }];
+      rememberAgentMessages(messages);
+      notify("Visual card 已创建。");
+      return;
+    }
     if (target.action) {
       notify(t("toastGenerationQueued"));
       const generatedDb = await api(`/projects/${prepared.projectId}/generate`, { method: "POST", body: JSON.stringify({ action: target.action, step: target.step }) });
