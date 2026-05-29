@@ -5170,12 +5170,6 @@ app.post("/api/projects", async (req, res, next) => {
       });
       if (recentDuplicate) return publicState(db, user);
 
-      if (ownedProjects.length >= 5 && !hasAdminPrivileges(user)) {
-        const error = new Error("Project limit reached. Delete or rename an existing project before creating a new one.");
-        error.status = 400;
-        throw error;
-      }
-
       db.projects.push(blankProject(crypto.randomUUID(), name, user.id));
       await saveDb(db);
       return publicState(db, user);

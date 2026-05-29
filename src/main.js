@@ -2723,7 +2723,7 @@ function studio() {
         <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard">${mascotIcon("nav-mascot-icon")} ${t("dashboard")}</button>
         ${isOwnerAdminAccount() ? `<button class="side-link ${state.page === "admin" ? "active" : ""}" data-page="admin">${icon("shield-check")} Admin CRM</button>` : ""}
         <button class="side-link ${state.page === "library" ? "active" : ""}" data-page="library">${icon("folder")} ${t("contentLibrary")}</button>
-        <button class="new-project" data-action="new-project">${icon("plus")} <span>${t("newProject")}</span><b>${state.db.projects.length}/5</b></button>
+        <button class="new-project" data-action="new-project">${icon("plus")} <span>${t("newProject")}</span><b>${state.db.projects.length}</b></button>
         <div class="side-section">${icon("folder", 18)} ${t("projects")}</div>
         <div class="project-list">${projectButtons()}</div>
         <div class="side-section account">${icon("wallet-cards", 18)} ${t("business")}</div>
@@ -4804,7 +4804,7 @@ function sopDashboardContent() {
         { no: "9", title: "Filter by Date Range", copy: "Pilih From Date dan To Date, kemudian tekan Apply. Reset akan kembali ke range default. Tarikh ikut timezone Malaysia." },
         { no: "10", title: "Daily Production chart", copy: "Chart ini tunjuk trend harian. Gunakan untuk cari spike, gap production atau hari campaign berjalan kuat." },
         { no: "11", title: "Logo & Dashboard button", copy: "Logo membawa korang balik ke workspace utama. Dashboard button akan aktif bila korang berada di overview ini." },
-        { no: "12", title: "+ New Project button", copy: "Button ini create project baru. Badge kecil menunjukkan jumlah project semasa berbanding limit plan." },
+        { no: "12", title: "+ New Project button", copy: "Button ini create project baru. Badge kecil menunjukkan jumlah project semasa supaya korang tahu berapa workspace aktif." },
         { no: "13", title: "Projects list", copy: "Senarai project berada di sidebar. Klik row untuk switch project. Menu 3-dot muncul untuk rename atau delete." },
         { no: "14", title: "Account section", copy: "Bahagian account mengandungi Billing, Top Up Credit, Usage, Auto Post TikTok, SOP dan WhatsApp discussion." },
         { no: "15", title: "Credit Balance card", copy: "Kad ini tunjuk baki credit semasa dan shortcut untuk top up." },
@@ -4874,7 +4874,7 @@ function sopDashboardContent() {
         { no: "9", title: "Date Range Filter", copy: "Choose From Date and To Date, then click Apply. Reset returns to the default range. Dates follow Malaysia time." },
         { no: "10", title: "Daily Production chart", copy: "The chart shows daily production trends so you can spot spikes, gaps, or campaign launch activity." },
         { no: "11", title: "Logo & Dashboard button", copy: "The logo brings you back to the main workspace. The Dashboard button is highlighted when this overview is active." },
-        { no: "12", title: "+ New Project button", copy: "Use this button to create a new project. The small badge shows current project count versus your plan limit." },
+        { no: "12", title: "+ New Project button", copy: "Use this button to create a new project. The small badge shows your current project count." },
         { no: "13", title: "Projects list", copy: "All projects live in the sidebar list. Click a row to switch, or use the 3-dot menu to rename or delete." },
         { no: "14", title: "Account section", copy: "The Account section includes Billing, Top Up Credit, Usage, Auto Post TikTok, SOP, and the WhatsApp discussion group." },
         { no: "15", title: "Credit Balance card", copy: "This card shows your current credit balance and gives you a quick Top Up shortcut." },
