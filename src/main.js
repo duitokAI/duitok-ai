@@ -2721,7 +2721,6 @@ function studio() {
         </button>
         <div class="side-section">${icon("layout-dashboard", 18)} ${t("workspace")}</div>
         <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard">${mascotIcon("nav-mascot-icon")} ${t("dashboard")}</button>
-        <button class="side-link ${state.page === "wizard" ? "active" : ""}" data-page="wizard">${icon("sparkles")} ${t("startHere")}</button>
         ${isOwnerAdminAccount() ? `<button class="side-link ${state.page === "admin" ? "active" : ""}" data-page="admin">${icon("shield-check")} Admin CRM</button>` : ""}
         <button class="side-link ${state.page === "library" ? "active" : ""}" data-page="library">${icon("folder")} ${t("contentLibrary")}</button>
         <button class="new-project" data-action="new-project">${icon("plus")} <span>${t("newProject")}</span><b>${state.db.projects.length}/5</b></button>
