@@ -33,6 +33,7 @@ let sidebarScrollTop = 0;
 let promoCountdownTimer = null;
 let assetSearchTimer = null;
 let sopSearchTimer = null;
+let imagePresetSaveTimer = null;
 
 const steps = [
   ["image", "image", "stepImage", "01"],
@@ -7230,9 +7231,22 @@ async function saveProjectField(field, value) {
 }
 
 async function applyImagePreset(promptText) {
-  const db = await api(`/projects/${state.projectId}/field`, { method: "PATCH", body: JSON.stringify({ field: "image.prompt", value: promptText }) });
-  set({ db });
-  notify(t("toastPromptPresetApplied"));
+  const projectId = state.projectId;
+  const previousDb = state.db;
+  set({ db: dbWithProjectField(previousDb, projectId, "image.prompt", promptText) });
+  clearTimeout(imagePresetSaveTimer);
+  imagePresetSaveTimer = setTimeout(async () => {
+    try {
+      const db = await api(`/projects/${projectId}/field`, {
+        method: "PATCH",
+        body: JSON.stringify({ field: "image.prompt", value: promptText })
+      });
+      if (state.projectId === projectId && project()?.image?.prompt === promptText) set({ db });
+    } catch (error) {
+      if (state.projectId === projectId && project()?.image?.prompt === promptText) set({ db: previousDb });
+      notify(error.message || t("toastSaveFailed"));
+    }
+  }, 180);
 }
 
 function wizardTargetForFeature(feature = state.wizardFeature) {
