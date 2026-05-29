@@ -4829,11 +4829,62 @@ function agentNextActions() {
   </section>`;
 }
 
+function agentListChips(items = [], empty = "还没有足够信号") {
+  const values = Array.isArray(items) ? items.filter(Boolean).slice(0, 6) : [];
+  return values.length ? values.map((item) => `<span>${esc(item)}</span>`).join("") : `<em>${esc(empty)}</em>`;
+}
+
+function agentBrainPanel() {
+  const prefs = state.db?.agentPreferences || {};
+  const metrics = state.db?.agentMetrics || {};
+  const templates = (state.db?.agentTemplates || []).slice(0, 4);
+  return `<aside class="agent-brain-panel">
+    <section class="agent-brain-card">
+      <header><strong>${icon("brain", 17)} Agent Brain</strong><button class="icon-only" data-action="clear-agent-preferences" title="清空偏好记忆" aria-label="清空偏好记忆">${icon("trash-2", 16)}</button></header>
+      <p>Agent 不主动打扰，只在你提问后用这些偏好辅助判断。</p>
+      <div class="agent-memory-groups">
+        <div><b>常用方向</b><p>${agentListChips(prefs.adoptedTrends)}</p></div>
+        <div><b>偏好品类</b><p>${agentListChips(prefs.preferredCategories)}</p></div>
+        <div><b>偏好风格</b><p>${agentListChips(prefs.preferredStyles)}</p></div>
+        <div><b>少走方向</b><p>${agentListChips(prefs.avoidedPatterns, "暂无负反馈")}</p></div>
+      </div>
+    </section>
+    <section class="agent-brain-card">
+      <header><strong>${icon("activity", 17)} 学习状态</strong></header>
+      <div class="agent-metric-grid">
+        <p><span>对话执行</span><b>${esc(metrics.completedRuns || 0)}/${esc(metrics.runs || 0)}</b></p>
+        <p><span>正反馈</span><b>${esc(metrics.positiveSignals || 0)}</b></p>
+        <p><span>负反馈</span><b>${esc(metrics.negativeSignals || 0)}</b></p>
+        <p><span>模板</span><b>${esc(metrics.templates || templates.length || 0)}</b></p>
+      </div>
+      ${(metrics.topTools || []).length ? `<div class="agent-tool-chip-row">${metrics.topTools.slice(0, 5).map((item) => `<span>${esc(item)}</span>`).join("")}</div>` : ""}
+    </section>
+    <section class="agent-brain-card">
+      <header><strong>${icon("bookmark", 17)} 成功模板</strong></header>
+      ${templates.length ? `<div class="agent-template-list">${templates.map(agentTemplateItem).join("")}</div>` : `<p>你保存过的趋势、脚本、prompt 会出现在这里。</p>`}
+    </section>
+  </aside>`;
+}
+
+function agentTemplateItem(template = {}) {
+  const prompt = `Use this saved template and adapt it to my current project:\n${template.content || template.summary || template.title || ""}`;
+  return `<article class="agent-template-item">
+    <div><b>${esc(template.title || "Agent template")}</b><span>${esc(template.summary || template.type || "")}</span></div>
+    <menu>
+      <button class="icon-only" data-agent-template-use="${esc(template.id)}" data-agent-prompt="${esc(prompt)}" title="使用模板" aria-label="使用模板">${icon("send", 15)}</button>
+      <button class="icon-only" data-agent-template-delete="${esc(template.id)}" title="删除模板" aria-label="删除模板">${icon("trash-2", 15)}</button>
+    </menu>
+  </article>`;
+}
+
 function agentPage() {
   return `
     <section class="agent-page">
       ${agentTopbar()}
-      ${chatPanel()}
+      <div class="agent-workspace-shell">
+        ${chatPanel()}
+        ${agentBrainPanel()}
+      </div>
     </section>`;
 }
 
@@ -5160,6 +5211,14 @@ function agentToolCard(card = {}) {
     const nextPrompt = card.recommendedNextAction === "create_seedance_prompt"
       ? `Write a video prompt for ${card.trendName || "this trend"}`
       : `Create a 7-day content plan for ${card.trendName || "this trend"}`;
+    const templateContent = [
+      `Trend: ${card.trendName || card.title || "Trend research"}`,
+      card.summary ? `Summary: ${card.summary}` : "",
+      categories.length ? `Best categories: ${categories.join(", ")}` : "",
+      hooks.length ? `Hooks:\n- ${hooks.join("\n- ")}` : "",
+      angles.length ? `Angles:\n- ${angles.map((item) => `${item.title || "Video angle"}: ${item.productPlacement || item.format || ""}`).join("\n- ")}` : "",
+      risks.length ? `Risks:\n- ${risks.join("\n- ")}` : ""
+    ].filter(Boolean).join("\n\n");
     return `<section class="agent-tool-card trend-research-card" data-agent-card-type="trend_research" data-agent-trend-name="${esc(card.trendName || "")}">
       <header><strong>${icon("search-check", 16)} ${esc(card.title || "Trend research")}</strong><span>${esc(card.summary || "")}</span></header>
       <div class="trend-fit-row">
@@ -5171,7 +5230,7 @@ function agentToolCard(card = {}) {
       ${hooks.length ? `<div class="trend-hook-list"><strong>${icon("lightbulb", 15)} Hooks</strong><ul>${hooks.map((item) => `<li>${esc(item)}</li>`).join("")}</ul></div>` : ""}
       ${risks.length ? `<div class="trend-risk-list"><strong>${icon("triangle-alert", 15)} Risks</strong><ul>${risks.map((item) => `<li>${esc(item)}</li>`).join("")}</ul></div>` : ""}
       ${sources.length ? `<details class="trend-source-list"><summary>Sources</summary>${sources.map((item) => `<a href="${esc(item.url || "#")}" target="_blank" rel="noopener noreferrer">${esc(item.title || item.url || "Source")}</a>`).join("")}</details>` : ""}
-      <div><button class="dark-button" data-agent-prompt="Remember ${esc(card.trendName || "this trend")} as project context">${icon("brain", 15)} 保存记忆</button><button class="gold-button" data-agent-prompt="${esc(nextPrompt)}">${icon("sparkles", 15)} 下一步</button></div>
+      <div><button class="dark-button" data-agent-prompt="Remember ${esc(card.trendName || "this trend")} as project context">${icon("brain", 15)} 保存记忆</button><button class="dark-button" data-agent-template-save="trend_research" data-template-title="${esc(card.trendName || card.title || "Trend research")}" data-template-summary="${esc(card.summary || "")}" data-template-content="${esc(templateContent)}">${icon("bookmark-plus", 15)} 存模板</button><button class="gold-button" data-agent-prompt="${esc(nextPrompt)}">${icon("sparkles", 15)} 下一步</button></div>
     </section>`;
   }
   if (card.type === "content_plan") {
@@ -5183,10 +5242,11 @@ function agentToolCard(card = {}) {
     </section>`;
   }
   if (card.type === "seedance_prompt") {
+    const promptContent = String(card.prompt || "");
     return `<section class="agent-tool-card" data-agent-card-type="seedance_prompt">
       <header><strong>${icon("film", 16)} ${esc(card.title || "视频 prompt 已保存")}</strong><span>${esc(card.summary || "")}</span></header>
       <pre>${esc(String(card.prompt || "").slice(0, 900))}</pre>
-      <div><button class="dark-button" data-page="project">${icon("edit-3", 15)} 编辑 prompt</button><button class="gold-button" data-agent-prompt="Generate video from the saved video prompt">${icon("sparkles", 15)} 生成视频</button></div>
+      <div><button class="dark-button" data-page="project">${icon("edit-3", 15)} 编辑 prompt</button><button class="dark-button" data-agent-template-save="seedance_prompt" data-template-title="${esc(card.title || "Video prompt")}" data-template-summary="${esc(card.summary || "")}" data-template-content="${esc(promptContent)}">${icon("bookmark-plus", 15)} 存模板</button><button class="gold-button" data-agent-prompt="Generate video from the saved video prompt">${icon("sparkles", 15)} 生成视频</button></div>
     </section>`;
   }
   if (card.type === "workspace_inspect") {
@@ -5317,6 +5377,13 @@ function bind() {
     });
     notify(el.dataset.agentFeedback === "positive_feedback" ? "已记录：这个回复有用。" : "已记录：我会少走这个方向。");
   }));
+  document.querySelectorAll("[data-agent-template-save]").forEach((el) => el.addEventListener("click", () => saveAgentTemplate(el)));
+  document.querySelectorAll("[data-agent-template-use]").forEach((el) => el.addEventListener("click", () => useAgentTemplate(el.dataset.agentTemplateUse)));
+  document.querySelectorAll("[data-agent-template-delete]").forEach((el) => el.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    deleteAgentTemplate(el.dataset.agentTemplateDelete);
+  }));
   document.querySelectorAll("[data-agent-confirm]").forEach((el) => el.addEventListener("click", () => confirmAgentAction(el.dataset.agentConfirm, el.dataset.agentToken)));
   document.querySelectorAll("[data-agent-undo]").forEach((el) => el.addEventListener("click", () => {
     recordAgentFeedback({ agentRunId: el.dataset.agentUndo, eventType: "agent_run_undone", targetType: "agent_run", targetId: el.dataset.agentUndo, metadata: { action: "undo" } });
@@ -5420,6 +5487,7 @@ async function action(event, name) {
     localStorage.removeItem("duitok-agent-context-summary");
     return set({ agentMessages: [], agentInput: "", agentContextSummary: "", agentExpandedMessages: {} });
   }
+  if (name === "clear-agent-preferences") return clearAgentPreferences();
   if (name === "clear-agent-confirm") {
     const messages = state.agentMessages.map((item) => item.agentRun?.status === "waiting_confirmation"
       ? { ...item, agentRun: { ...item.agentRun, status: "failed", confirmation: null, plan: (item.agentRun.plan || []).map((step) => step.status === "waiting_confirmation" ? { ...step, status: "failed", detail: "用户已取消" } : step) } }
@@ -5878,6 +5946,60 @@ function recordAgentFeedback(payload = {}) {
   }).then((res) => {
     if (res.preferences && state.db) state.db.agentPreferences = res.preferences;
   }).catch(() => null);
+}
+
+async function clearAgentPreferences() {
+  if (!state.token) return;
+  const approved = window.confirm("清空 Agent 偏好记忆？这不会删除项目。");
+  if (!approved) return;
+  try {
+    const res = await api("/agent/preferences", { method: "DELETE" });
+    if (res.state) set({ db: res.state });
+    else if (res.preferences && state.db) set({ db: { ...state.db, agentPreferences: res.preferences } });
+    notify("Agent 偏好记忆已清空。");
+  } catch (error) {
+    notify(error.message);
+  }
+}
+
+async function saveAgentTemplate(el) {
+  if (!state.token || !el) return;
+  try {
+    const res = await api("/agent/templates", {
+      method: "POST",
+      body: JSON.stringify({
+        type: el.dataset.agentTemplateSave || "agent_output",
+        title: el.dataset.templateTitle || "Agent template",
+        summary: el.dataset.templateSummary || "",
+        content: el.dataset.templateContent || "",
+        projectId: state.projectId || ""
+      })
+    });
+    if (res.state) set({ db: res.state });
+    notify("已保存为成功模板。");
+  } catch (error) {
+    notify(error.message);
+  }
+}
+
+function useAgentTemplate(id) {
+  if (!state.token || !id) return;
+  api(`/agent/templates/${id}/use`, { method: "POST", body: JSON.stringify({}) })
+    .then((res) => {
+      if (res.state) set({ db: res.state });
+    })
+    .catch(() => null);
+}
+
+async function deleteAgentTemplate(id) {
+  if (!state.token || !id) return;
+  try {
+    const db = await api(`/agent/templates/${id}`, { method: "DELETE" });
+    set({ db });
+    notify("模板已删除。");
+  } catch (error) {
+    notify(error.message);
+  }
 }
 
 async function confirmAgentAction(runId, token) {

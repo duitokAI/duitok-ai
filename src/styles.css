@@ -9456,6 +9456,162 @@ label {
   font-weight: 780;
 }
 
+.agent-brain-panel {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.agent-brain-card {
+  display: grid;
+  gap: 12px;
+  border: 1px solid rgba(93, 8, 108, 0.12);
+  border-radius: 12px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 18px 45px rgba(55, 8, 65, 0.08);
+}
+
+.agent-brain-card header,
+.agent-template-item,
+.agent-template-item menu {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.agent-brain-card header {
+  justify-content: space-between;
+}
+
+.agent-brain-card strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #4f055f;
+  font-weight: 950;
+}
+
+.agent-brain-card p {
+  margin: 0;
+  color: rgba(31, 6, 38, 0.68);
+  font-size: 13px;
+  font-weight: 760;
+  line-height: 1.45;
+}
+
+.agent-memory-groups {
+  display: grid;
+  gap: 10px;
+}
+
+.agent-memory-groups div {
+  display: grid;
+  gap: 5px;
+}
+
+.agent-memory-groups b {
+  color: rgba(31, 6, 38, 0.88);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.agent-memory-groups p,
+.agent-tool-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.agent-memory-groups span,
+.agent-tool-chip-row span {
+  border: 1px solid rgba(93, 8, 108, 0.1);
+  border-radius: 999px;
+  padding: 5px 8px;
+  background: rgba(255, 47, 109, 0.07);
+  color: #4f055f;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.agent-memory-groups em {
+  color: rgba(31, 6, 38, 0.5);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 780;
+}
+
+.agent-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.agent-metric-grid p {
+  display: grid;
+  gap: 2px;
+  border-radius: 8px;
+  padding: 9px;
+  background: rgba(93, 8, 108, 0.06);
+}
+
+.agent-metric-grid span {
+  color: rgba(31, 6, 38, 0.54);
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.agent-metric-grid b {
+  color: #4f055f;
+  font-size: 16px;
+  font-weight: 950;
+}
+
+.agent-template-list {
+  display: grid;
+  gap: 8px;
+}
+
+.agent-template-item {
+  justify-content: space-between;
+  border: 1px solid rgba(93, 8, 108, 0.1);
+  border-radius: 8px;
+  padding: 9px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.agent-template-item div {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.agent-template-item b,
+.agent-template-item span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agent-template-item b {
+  color: #4f055f;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.agent-template-item span {
+  color: rgba(31, 6, 38, 0.58);
+  font-size: 12px;
+  font-weight: 760;
+}
+
+.agent-template-item menu {
+  margin: 0;
+  padding: 0;
+  flex: 0 0 auto;
+}
+
 .trend-fit-row {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr));

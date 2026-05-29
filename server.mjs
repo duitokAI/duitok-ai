@@ -468,6 +468,42 @@ function compactPreferenceSummaryForPrompt(summary = {}) {
   return lines.length > 1 ? `Preference memory:\n${lines.join("\n")}` : "Preference memory: not enough feedback yet.";
 }
 
+function publicAgentTemplate(template = {}) {
+  return {
+    id: template.id,
+    title: template.title,
+    type: template.type || "agent_output",
+    summary: template.summary || "",
+    content: template.content || "",
+    metadata: sanitizeAgentObject(template.metadata || {}),
+    usageCount: Number(template.usageCount || 0),
+    sourceRunId: template.sourceRunId || "",
+    createdAt: template.createdAt,
+    updatedAt: template.updatedAt,
+    lastUsedAt: template.lastUsedAt || null
+  };
+}
+
+function buildAgentMetrics(db, user) {
+  const events = (db.agentFeedbackEvents || []).filter((item) => item.userId === user.id);
+  const runs = (db.agentRuns || []).filter((item) => item.userId === user.id);
+  const templates = (db.agentTemplates || []).filter((item) => item.userId === user.id);
+  const positive = events.filter((item) => agentPreferenceEventSignal(item.eventType) === "positive").length;
+  const negative = events.filter((item) => agentPreferenceEventSignal(item.eventType) === "negative").length;
+  const completedRuns = runs.filter((item) => item.status === "completed").length;
+  const toolUse = compactSignalList(runs.flatMap((run) => (run.toolResults || []).map((item) => item.name)), 8);
+  return {
+    runs: runs.length,
+    completedRuns,
+    confirmationRate: runs.length ? Number((completedRuns / runs.length).toFixed(2)) : 0,
+    positiveSignals: positive,
+    negativeSignals: negative,
+    templates: templates.length,
+    topTools: toolUse,
+    lastRunAt: runs[0]?.createdAt || null
+  };
+}
+
 async function recordAgentFeedbackEvent(user, event = {}) {
   if (!user?.id) return null;
   return mutateDb(async (db) => {
@@ -631,6 +667,7 @@ const seed = {
   agentRuns: [],
   agentFeedbackEvents: [],
   agentPreferenceMemory: {},
+  agentTemplates: [],
   supportTickets: []
 };
 
@@ -684,6 +721,8 @@ function normalizeDb(db) {
   db.agentFeedbackEvents ||= [];
   db.agentFeedbackEvents = db.agentFeedbackEvents.slice(0, 2000).map((item) => ({ metadata: {}, ...item }));
   db.agentPreferenceMemory ||= {};
+  db.agentTemplates ||= [];
+  db.agentTemplates = db.agentTemplates.slice(0, 500).map((item) => ({ metadata: {}, usageCount: 0, ...item, userId: item.userId || adminUserId }));
   db.agentMemoryVersions ||= [];
   db.agentEvaluations ||= [];
   db.supportTickets ||= [];
@@ -992,6 +1031,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
   const creditLedger = (db.creditLedger || []).filter(owns).map(sanitizeCreditLedger);
   const tiktokConnections = (db.tiktok?.connections || []).filter(owns);
   const tiktokPublishes = (db.tiktok?.publishes || []).filter(owns).map(sanitizePublish);
+  const agentTemplates = (db.agentTemplates || []).filter(owns).map(publicAgentTemplate);
   const userRevenue = (userId) => db.payments.filter((payment) => payment.userId === userId && payment.status === "paid").reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
   const userCost = (userId) => db.generationJobs.filter((job) => job.userId === userId).reduce((sum, job) => sum + Number(job.costRm || 0), 0);
   const userLastUsed = (userId) => {
@@ -1044,6 +1084,8 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
     supportTickets,
     currentUser: user ? publicUser(user) : null,
     agentPreferences: user ? buildAgentPreferenceSummary(db, user) : defaultAgentPreferenceMemory(),
+    agentMetrics: user ? buildAgentMetrics(db, user) : { runs: 0, completedRuns: 0, confirmationRate: 0, positiveSignals: 0, negativeSignals: 0, templates: 0, topTools: [], lastRunAt: null },
+    agentTemplates,
     admin,
     storage: isAdmin ? storageStatus() : { durableAssets: storageStatus().durableAssets },
     tiktok: {
@@ -4973,6 +5015,7 @@ app.post("/api/agent", async (req, res, next) => {
         role: "system",
         content: [
           "You are Duitok Agent inside Duitok AI Studio for Malaysia TikTok Shop sellers.",
+          "Answer only after the user asks. Do not invent daily briefings, proactive tasks, or unsolicited reminders.",
           "Help the user decide what to do next, and call Duitok platform tools when useful.",
           "You can research trends, search the public web, inspect workspace state, remember project context, navigate the UI, create projects, create content plans, create video prompts, update project fields, generate outputs, create scheduler drafts, update schedule status, and create support tickets.",
           "Use trend_research before answering about fresh trends, unfamiliar aesthetic names, product-market fit, what to sell, content angles, competitors, recent demand, or terms that may have a changing meaning. Use raw web_search only for simple fact lookup. After trend_research, synthesize the result into practical TikTok Shop guidance and cite source URLs briefly when useful.",
@@ -5325,14 +5368,90 @@ app.patch("/api/agent/preferences", async (req, res, next) => {
 app.delete("/api/agent/preferences", async (req, res, next) => {
   try {
     const { user } = await requireAuth(req);
-    const preferences = await mutateDb(async (db) => {
+    const result = await mutateDb(async (db) => {
       db.agentPreferenceMemory ||= {};
       db.agentPreferenceMemory[user.id] = defaultAgentPreferenceMemory();
       db.agentFeedbackEvents = (db.agentFeedbackEvents || []).filter((item) => item.userId !== user.id);
       await saveDb(db);
-      return buildAgentPreferenceSummary(db, user);
+      return { preferences: buildAgentPreferenceSummary(db, user), state: publicState(db, user) };
     });
-    res.json({ preferences });
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/agent/templates", async (req, res, next) => {
+  try {
+    const { db, user } = await requireAuth(req);
+    res.json((db.agentTemplates || []).filter((item) => item.userId === user.id).map(publicAgentTemplate));
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/agent/templates", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    const body = req.body || {};
+    const title = String(body.title || "Agent template").trim().slice(0, 120);
+    const content = String(body.content || "").trim().slice(0, 6000);
+    if (!content) throw Object.assign(new Error("Template content is required"), { status: 400 });
+    const result = await mutateDb(async (db) => {
+      db.agentTemplates ||= [];
+      const now = new Date().toISOString();
+      const template = {
+        id: crypto.randomUUID(),
+        userId: user.id,
+        title,
+        type: String(body.type || "agent_output").slice(0, 60),
+        summary: String(body.summary || "").trim().slice(0, 260),
+        content,
+        sourceRunId: String(body.sourceRunId || "").slice(0, 120),
+        metadata: sanitizeAgentObject(body.metadata || {}),
+        usageCount: 0,
+        createdAt: now,
+        updatedAt: now,
+        lastUsedAt: null
+      };
+      db.agentTemplates.unshift(template);
+      db.agentTemplates = db.agentTemplates.slice(0, 500);
+      await saveDb(db);
+      return { template: publicAgentTemplate(template), state: publicState(db, user) };
+    });
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/agent/templates/:id/use", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    const result = await mutateDb(async (db) => {
+      const template = (db.agentTemplates || []).find((item) => item.id === req.params.id && item.userId === user.id);
+      if (!template) throw Object.assign(new Error("Template not found"), { status: 404 });
+      template.usageCount = Number(template.usageCount || 0) + 1;
+      template.lastUsedAt = new Date().toISOString();
+      template.updatedAt = template.lastUsedAt;
+      await saveDb(db);
+      return { template: publicAgentTemplate(template), state: publicState(db, user) };
+    });
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.delete("/api/agent/templates/:id", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    const state = await mutateDb(async (db) => {
+      db.agentTemplates = (db.agentTemplates || []).filter((item) => !(item.id === req.params.id && item.userId === user.id));
+      await saveDb(db);
+      return publicState(db, user);
+    });
+    res.json(state);
   } catch (error) {
     next(error);
   }
