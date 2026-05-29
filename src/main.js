@@ -5616,9 +5616,6 @@ function agentStatusCard() {
     </div>
     <p>${esc(status.hint)}</p>
     ${agent3DScene({ compact: true })}
-    <div class="agent-status-actions">
-      ${c.statusActions.map((item) => `<button type="button" data-agent-fill="${esc(item)}">${esc(item)}</button>`).join("")}
-    </div>
   </section>`;
 }
 
@@ -5643,13 +5640,7 @@ function agentWorkspaceSummary() {
 }
 
 function agentNextActions() {
-  const c = agentUiCopy();
-  return `<section class="agent-context-card agent-task-card">
-    <h2>${icon("sparkles", 18)} ${c.emptyTitle}</h2>
-    <div class="agent-quick-task-row">
-      ${agentQuickTasks().slice(0, 5).map((item) => `<button type="button" data-agent-fill="${esc(item)}">${esc(item)}</button>`).join("")}
-    </div>
-  </section>`;
+  return "";
 }
 
 function agentListChips(items = [], empty = "还没有足够信号") {
@@ -5717,9 +5708,6 @@ function chatPanel() {
     : `<div class="agent-empty-state">
         <strong>${c.emptyTitle}</strong>
         <p>${c.emptyBody}</p>
-        <div class="agent-quick-task-row">
-          ${agentQuickTasks().slice(0, 5).map((item) => `<button type="button" data-agent-fill="${esc(item)}">${esc(item)}</button>`).join("")}
-        </div>
       </div>`;
   const pendingConfirmation = agentHasPendingConfirmation();
   const inputPlaceholder = state.agentBusy
@@ -5784,7 +5772,7 @@ function agentMessageArticle(item, index = 0) {
   const longMessage = item.role === "assistant" && isLongAgentMessage(item.content);
   const expanded = Boolean(state.agentExpandedMessages[index]);
   const body = item.role === "assistant" ? agentMessageMarkdown(item.content) : `<p>${esc(item.content).replaceAll("\n", "<br>")}</p>`;
-  const chips = item.role === "assistant" ? agentActionChips(item.content) : "";
+  const chips = "";
   const runId = item.agentRun?.id || "";
   const feedback = item.role === "assistant" && runId ? `<div class="agent-feedback-row">
     <button type="button" data-agent-feedback="positive_feedback" data-agent-run-id="${esc(runId)}">${icon("thumbs-up", 14)} 有用</button>
@@ -5848,15 +5836,7 @@ function agentMessageMarkdown(content = "") {
 }
 
 function agentActionChips(content = "") {
-  const actions = String(content || "")
-    .split(/\r?\n/)
-    .map((line) => line.trim().match(/^\d+\.\s+(.+?)(?:\s+[—-]\s+(.+))?$/)?.[1])
-    .filter(Boolean)
-    .map((item) => item.replace(/\*\*/g, "").trim())
-    .filter((item) => /补齐|生成|排期|安排|创建|检查|publish|schedule|generate|create|fix/i.test(item))
-    .slice(0, 3);
-  if (!actions.length) return "";
-  return `<div class="agent-action-chips">${actions.map((item) => `<button type="button" data-agent-prompt="${esc(item)}">${esc(item)}</button>`).join("")}</div>`;
+  return "";
 }
 
 function isMarkdownTable(lines, index) {
