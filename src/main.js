@@ -5379,11 +5379,16 @@ function agentUiCopy() {
     zh: {
       title: "Pokaya Agent",
       subtitle: "帮你生成内容、创建排期、检查 workspace",
-      emptyTitle: "你可以直接叫我做事",
-      emptyBody: "我会先理解需求；如果信息不够，会先问你；如果要扣 credits，会让你确认。",
+      emptyTitle: "你今天想做什么？",
+      emptyBody: "直接发一句话就可以。我会在后台记住项目、偏好和历史，但这里只保留聊天体验。",
       inputReady: "告诉 Agent 你想做什么...",
-      inputBusy: "Agent 正在处理，请稍等...",
+      inputBusy: "Agent 正在思考...",
       inputConfirm: "请先确认或取消当前动作",
+      send: "发送",
+      errorUnavailable: "Agent 暂时不可用，请联系管理员配置 AI 服务。",
+      thinkingLabel: "Agent 正在思考",
+      slowTitle: "这次响应比较久",
+      slowDescription: "你可以先继续输入，我会在结果回来后接上。",
       newChat: "新对话",
       history: "历史",
       more: "更多",
@@ -5422,11 +5427,16 @@ function agentUiCopy() {
     ms: {
       title: "Pokaya Agent",
       subtitle: "Bantu generate content, buat schedule, dan semak workspace",
-      emptyTitle: "Terus beritahu apa nak dibuat",
-      emptyBody: "Saya akan fahamkan request dulu. Kalau maklumat tak cukup saya akan tanya; kalau guna credits saya akan minta confirm.",
+      emptyTitle: "Apa nak buat hari ini?",
+      emptyBody: "Tulis satu arahan sahaja. Agent akan ingat project, preference dan sejarah di belakang tabir.",
       inputReady: "Beritahu Agent apa nak buat...",
-      inputBusy: "Agent sedang proses, tunggu sebentar...",
+      inputBusy: "Agent sedang berfikir...",
       inputConfirm: "Sila confirm atau cancel tindakan semasa dulu",
+      send: "Hantar",
+      errorUnavailable: "Agent belum tersedia. Sila hubungi admin untuk konfigurasi servis AI.",
+      thinkingLabel: "Agent sedang berfikir",
+      slowTitle: "Respons kali ini agak lama",
+      slowDescription: "Anda boleh terus taip dulu. Saya akan sambung bila jawapan siap.",
       newChat: "Chat baru",
       history: "Sejarah",
       more: "Lagi",
@@ -5465,11 +5475,16 @@ function agentUiCopy() {
     en: {
       title: "Pokaya Agent",
       subtitle: "Generate content, create schedules, and inspect your workspace",
-      emptyTitle: "Tell me what to do",
-      emptyBody: "I will understand the request first. If details are missing, I will ask; if credits are needed, I will ask for confirmation.",
+      emptyTitle: "What do you want to do today?",
+      emptyBody: "Send one request. Agent remembers projects, preferences, and history in the background.",
       inputReady: "Tell Agent what to do...",
-      inputBusy: "Agent is working, please wait...",
+      inputBusy: "Agent is thinking...",
       inputConfirm: "Confirm or cancel the current action first",
+      send: "Send",
+      errorUnavailable: "Agent is temporarily unavailable. Please ask an admin to configure the AI service.",
+      thinkingLabel: "Agent is thinking",
+      slowTitle: "This response is taking longer",
+      slowDescription: "You can keep typing. I will continue when the result is ready.",
       newChat: "New chat",
       history: "History",
       more: "More",
@@ -5506,7 +5521,25 @@ function agentUiCopy() {
       ]
     }
   };
-  return copy[state.lang] || copy.en;
+  return copy[agentDisplayLang()] || copy.en;
+}
+
+function agentDisplayLang() {
+  const sample = [
+    state.agentInput,
+    [...state.agentMessages].reverse().find((item) => item.role === "user")?.content,
+    [...state.agentMessages].reverse().find((item) => item.role === "assistant")?.content
+  ].filter(Boolean).join(" ");
+  if (/[\u3400-\u9fff]/.test(sample)) return "zh";
+  return state.lang || "en";
+}
+
+function agentUserSafeError(error) {
+  const raw = String(error?.message || error || "");
+  if (/DEE?PSEEK|API[_ -]?KEY|Environment Variables|configure|configured|401|403/i.test(raw)) {
+    return agentUiCopy().errorUnavailable;
+  }
+  return raw || agentUiCopy().errorUnavailable;
 }
 
 function agentHasPendingConfirmation() {
@@ -5704,8 +5737,8 @@ function chatPanel() {
         ${state.agentBusy ? agentThinkingCard() : ""}
       </div>
       <form class="agent-form" data-form="agent">
-        <textarea name="message" rows="1" data-agent-input placeholder="${esc(inputPlaceholder)}" ${state.agentBusy || pendingConfirmation ? "disabled" : ""}>${esc(state.agentInput)}</textarea>
-        <button class="gold-button agent-send-button" type="submit" title="Send" ${state.agentBusy || pendingConfirmation ? "disabled" : ""}>${icon(state.agentBusy ? "loader-circle" : "send", 19)}<span>Send</span></button>
+        <textarea name="message" rows="1" data-agent-input placeholder="${esc(inputPlaceholder)}" ${pendingConfirmation ? "disabled" : ""}>${esc(state.agentInput)}</textarea>
+        <button class="gold-button agent-send-button" type="submit" title="${esc(c.send)}" aria-label="${esc(c.send)}" ${state.agentBusy || pendingConfirmation ? "disabled" : ""}>${icon(state.agentBusy ? "loader-circle" : "send", 19)}<span>${c.send}</span></button>
       </form>
     </section>`;
 }
@@ -5743,12 +5776,7 @@ function visibleAgentMessages() {
 }
 
 function agentCollapsedHistoryBar() {
-  const hiddenCount = Math.max(0, state.agentMessages.length - 8);
-  if (!hiddenCount) return "";
-  const summary = state.agentContextSummary
-    ? state.agentContextSummary.split(/\r?\n/).filter(Boolean).slice(-1)[0]
-    : "较早对话已压缩成上下文摘要，Agent 会继续记住关键结论。";
-  return `<div class="agent-history-compact">${icon("archive", 16)} <span>已收起 ${hiddenCount} 条较早对话</span><small>${esc(summary.slice(0, 180))}</small><button type="button" data-action="new-agent-chat">${icon("message-square-plus", 14)} 新对话</button></div>`;
+  return "";
 }
 
 function agentMessageArticle(item, index = 0) {
@@ -5846,13 +5874,14 @@ function agentInlineMarkdown(value = "") {
 }
 
 function agentThinkingCard() {
+  const c = agentUiCopy();
   const mode = agentWorkMode(latestAgentUserMessage());
   const elapsed = state.agentBusyStartedAt ? Date.now() - state.agentBusyStartedAt : 0;
   const phase = agentWorkingPhase(elapsed, mode);
   const steps = agentWorkingSteps(phase.key);
   return `
     <article class="assistant agent-thinking">
-      <span>Agent 正在处理</span>
+      <span>${esc(c.thinkingLabel)}</span>
       <div class="agent-thinking-row">
         <b>${icon("loader-circle", 18)}</b>
         <div>
@@ -5868,60 +5897,113 @@ function agentThinkingCard() {
 }
 
 function agentWorkingPhase(elapsed = 0, mode = "command") {
+  const c = agentUiCopy();
+  const locale = agentDisplayLang();
+  const phaseCopy = {
+    zh: {
+      tool: "正在处理任务",
+      toolDesc: "涉及扣积分或发布时会先让你确认。",
+      plan: "正在规划下一步",
+      planDesc: "如果信息不够，我会先问你；涉及扣积分会先确认。",
+      inspect: "正在检查 workspace",
+      inspectDesc: "我在看项目资料、生成结果、排期和积分状态。",
+      understand: "正在理解你的需求",
+      understandDesc: "我会判断是直接回答、追问，还是调用工具。"
+    },
+    ms: {
+      tool: "Sedang proses tugas",
+      toolDesc: "Jika perlu credits atau publish, saya akan minta confirm dulu.",
+      plan: "Sedang susun langkah seterusnya",
+      planDesc: "Kalau maklumat tak cukup, saya akan tanya dulu.",
+      inspect: "Sedang semak workspace",
+      inspectDesc: "Saya semak project, hasil, schedule dan credit.",
+      understand: "Sedang fahamkan request",
+      understandDesc: "Saya tentukan sama ada terus jawab, tanya lanjut, atau guna tool."
+    },
+    en: {
+      tool: "Processing the task",
+      toolDesc: "If credits or publishing are involved, I will ask for confirmation first.",
+      plan: "Planning the next step",
+      planDesc: "If details are missing, I will ask before acting.",
+      inspect: "Checking your workspace",
+      inspectDesc: "I am reviewing project details, results, schedule, and credits.",
+      understand: "Understanding your request",
+      understandDesc: "I will decide whether to answer, ask a follow-up, or use a tool."
+    }
+  }[locale] || {};
   if (elapsed >= 8000) {
     return {
       key: "slow",
-      title: "还在处理中",
-      description: "这一步比平时久一点，请不要重复提交。"
+      title: c.slowTitle,
+      description: c.slowDescription
     };
   }
   if (elapsed >= 4500) {
     return {
       key: "tool_calling",
       title: agentWorkingExecutionTitle(mode),
-      description: "我正在处理任务；涉及扣积分或发布时会先让你确认。"
+      description: phaseCopy.toolDesc
     };
   }
   if (elapsed >= 2500) {
     return {
       key: "planning",
-      title: "正在规划下一步",
-      description: "如果信息不够，我会先问你；涉及扣积分会先确认。"
+      title: phaseCopy.plan,
+      description: phaseCopy.planDesc
     };
   }
   if (elapsed >= 1000) {
     return {
       key: "inspecting",
-      title: "正在检查 workspace",
-      description: "我在看项目资料、生成结果、排期和积分状态。"
+      title: phaseCopy.inspect,
+      description: phaseCopy.inspectDesc
     };
   }
   return {
     key: "understanding",
-    title: "正在理解你的需求",
-    description: "我会判断是直接回答、追问，还是调用工具。"
+    title: phaseCopy.understand,
+    description: phaseCopy.understandDesc
   };
 }
 
 function agentWorkingExecutionTitle(mode = "command") {
-  return {
-    image: "正在准备生成内容",
-    video: "正在准备视频任务",
-    copy: "正在整理内容结构",
-    schedule: "正在检查排期动作",
-    chat: "正在整理回复",
-    command: "正在准备执行"
-  }[mode] || "正在准备执行";
+  const locale = agentDisplayLang();
+  const map = {
+    zh: {
+      image: "正在准备生成内容",
+      video: "正在准备视频任务",
+      copy: "正在整理内容结构",
+      schedule: "正在检查排期动作",
+      chat: "正在整理回复",
+      command: "正在准备执行"
+    },
+    ms: {
+      image: "Sedang sediakan content",
+      video: "Sedang sediakan video",
+      copy: "Sedang susun copy",
+      schedule: "Sedang semak schedule",
+      chat: "Sedang susun jawapan",
+      command: "Sedang sediakan tindakan"
+    },
+    en: {
+      image: "Preparing content generation",
+      video: "Preparing video work",
+      copy: "Structuring the content",
+      schedule: "Checking schedule actions",
+      chat: "Drafting the reply",
+      command: "Preparing the action"
+    }
+  }[locale] || {};
+  return map[mode] || map.command || "Preparing the action";
 }
 
 function agentWorkingSteps(activeKey = "understanding") {
   const order = ["understanding", "inspecting", "planning", "tool_calling"];
-  const labels = {
-    understanding: "理解需求",
-    inspecting: "检查资料",
-    planning: "准备执行",
-    tool_calling: "整理结果"
-  };
+  const labels = ({
+    zh: { understanding: "理解需求", inspecting: "检查资料", planning: "准备执行", tool_calling: "整理结果" },
+    ms: { understanding: "Faham request", inspecting: "Semak data", planning: "Sedia tindakan", tool_calling: "Susun hasil" },
+    en: { understanding: "Understand", inspecting: "Check data", planning: "Prepare", tool_calling: "Finalize" }
+  }[agentDisplayLang()]) || {};
   const activeIndex = activeKey === "slow" ? order.length - 1 : Math.max(order.indexOf(activeKey), 0);
   return order.map((key, index) => ({
     label: labels[key],
@@ -6908,11 +6990,12 @@ async function sendAgentMessage(message) {
     completeAgentVisual();
     if (res.toolResults?.length) notify(t("toastAgentWorkspaceUpdated"));
   } catch (error) {
-    const messages = [...nextMessages, { role: "assistant", content: error.message }];
+    const safeError = agentUserSafeError(error);
+    const messages = [...nextMessages, { role: "assistant", content: safeError }];
     rememberAgentMessages(messages);
     set({ agentMessages: messages, agentBusy: false });
     completeAgentVisual();
-    notify(error.message);
+    notify(safeError);
   }
 }
 
