@@ -7640,12 +7640,18 @@ label {
 
 .nav-mascot-icon,
 .label-mascot-icon,
-.pill-mascot-icon {
+.pill-mascot-icon,
+.mascot-icon-inline {
   flex: 0 0 auto;
   display: inline-block;
   object-fit: contain;
   object-position: center;
   pointer-events: none;
+}
+
+.mascot-icon-inline {
+  vertical-align: -0.18em;
+  filter: drop-shadow(0 5px 9px rgba(255, 63, 110, 0.16));
 }
 
 .nav-mascot-icon {

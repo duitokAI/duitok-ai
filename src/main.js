@@ -941,7 +941,12 @@ function heroTitleMarkup() {
     .join("");
 }
 
-const icon = (name, size = 20) => `<i data-lucide="${name}" style="width:${size}px;height:${size}px"></i>`;
+const icon = (name, size = 20) => {
+  if (["sparkles", "wand-sparkles"].includes(name)) {
+    return `<img class="mascot-icon mascot-icon-inline" src="${brandAssets.mascot}" alt="" aria-hidden="true" style="width:${size}px;height:${size}px">`;
+  }
+  return `<i data-lucide="${name}" style="width:${size}px;height:${size}px"></i>`;
+};
 const esc = (value = "") => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
 
 function promoContent() {
