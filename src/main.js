@@ -2770,7 +2770,7 @@ function studio() {
         <button class="agent-primary-card ${state.page === "agent" ? "active" : ""}" data-page="agent">
           <span class="agent-primary-icon">${icon("bot", 21)}</span>
           <span class="agent-primary-copy"><b>${t("pokayaAgent")}</b><small>Your AI operator</small></span>
-          <span class="agent-primary-status"><i></i>Ready</span>
+          <span class="agent-primary-status"><i></i>READY</span>
         </button>
         <div class="side-section">${icon("layout-dashboard", 18)} ${t("workspace")}</div>
         <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard">${icon("layout-dashboard", 22)} ${t("dashboard")}</button>
