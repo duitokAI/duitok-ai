@@ -18076,6 +18076,9 @@ label {
 }
 
 .studio-shell .agent-primary-card {
+  position: relative !important;
+  isolation: isolate;
+  overflow: hidden !important;
   width: 100% !important;
   min-height: 72px !important;
   display: grid !important;
@@ -18092,6 +18095,29 @@ label {
   color: #fff !important;
   box-shadow: 0 16px 34px rgba(255, 63, 110, 0.12) !important;
   text-align: left !important;
+  animation: priority-card-breathe 5.8s ease-in-out infinite;
+}
+
+.studio-shell .agent-primary-card::before,
+.studio-shell .side-link[data-page="affiliate"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 18% 22%, rgba(255, 255, 255, 0.18), transparent 30%),
+    linear-gradient(135deg, rgba(255, 63, 110, 0.16), rgba(255, 255, 255, 0.055) 58%, rgba(117, 255, 174, 0.07));
+  opacity: 0.34;
+  pointer-events: none;
+  transition: opacity 0.24s ease;
+  animation: priority-card-sheen 5.8s ease-in-out infinite;
+}
+
+.studio-shell .agent-primary-card > *,
+.studio-shell .side-link[data-page="affiliate"] > * {
+  position: relative;
+  z-index: 1;
 }
 
 .studio-shell .agent-primary-card:hover,
@@ -18159,6 +18185,47 @@ label {
   border-radius: 999px;
   background: #45e874;
   box-shadow: 0 0 0 4px rgba(69, 232, 116, 0.14);
+}
+
+.studio-shell .side-link[data-page="affiliate"] {
+  position: relative !important;
+  isolation: isolate;
+  overflow: hidden !important;
+  border-color: rgba(255, 255, 255, 0.13) !important;
+  background:
+    linear-gradient(135deg, rgba(255, 63, 110, 0.12), rgba(255, 255, 255, 0.07)),
+    rgba(255, 255, 255, 0.07) !important;
+  box-shadow: 0 12px 26px rgba(255, 63, 110, 0.08) !important;
+  animation: priority-card-breathe 6.6s ease-in-out infinite;
+}
+
+.studio-shell .agent-primary-card:hover::before,
+.studio-shell .agent-primary-card.active::before,
+.studio-shell .side-link[data-page="affiliate"]:hover::before,
+.studio-shell .side-link[data-page="affiliate"].active::before {
+  opacity: 0.58;
+}
+
+@keyframes priority-card-breathe {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+
+  48% {
+    filter: brightness(1.055);
+  }
+}
+
+@keyframes priority-card-sheen {
+  0%,
+  100% {
+    opacity: 0.28;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .studio-shell .side-section {
