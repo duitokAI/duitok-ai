@@ -3801,7 +3801,7 @@ function imagePanel(p) {
   return `
     <div class="generator-box image-generator-box"><h2>🖼️ ${t("imageGenerator")}</h2><div class="form-grid two">${select("image.model", t("model"), imageModels, selectedModel)}${select("image.mode", t("mode"), modeOptions, selectedMode)}</div></div>
     ${selectedMode === "Virtualize (Poster/Ad)" ? virtualizePanel() : `
-      ${upload(t("avatarRef"), t("dropAvatar"), "Face / person - used for all variations", "camera", "avatar")}
+      ${upload(t("avatarRef"), t("dropAvatar"), "Face / person - used for all variations", "circle-user-round", "avatar")}
       ${upload(t("productRef"), t("dropProduct"), "Product - used for all images and videos", "package", "product")}
       ${imagePromptSettings(p)}
     `}
