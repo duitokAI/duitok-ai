@@ -15705,7 +15705,7 @@ label {
   grid-template-columns: minmax(420px, 0.82fr) minmax(0, 1fr) !important;
   align-items: stretch !important;
   gap: 20px !important;
-  min-height: calc(100vh - 190px) !important;
+  min-height: 0 !important;
 }
 
 .studio-shell .agent-status-rail {
@@ -15889,8 +15889,8 @@ label {
 .studio-shell .agent-page-panel {
   position: relative !important;
   width: 100% !important;
-  height: min(680px, calc(100dvh - 190px)) !important;
-  min-height: 560px !important;
+  height: clamp(460px, calc(100dvh - 230px), 640px) !important;
+  min-height: 0 !important;
   max-height: none !important;
   display: grid !important;
   grid-template-rows: minmax(0, 1fr) auto !important;
@@ -16610,8 +16610,8 @@ label {
 
 /* Final Agent layout overrides after the Studio density layer. */
 .studio-shell .agent-chat-shell.agent-page-panel {
-  height: min(680px, calc(100dvh - 190px)) !important;
-  min-height: 560px !important;
+  height: clamp(460px, calc(100dvh - 230px), 640px) !important;
+  min-height: 0 !important;
   display: grid !important;
   grid-template-rows: minmax(0, 1fr) auto !important;
   padding: 18px !important;
