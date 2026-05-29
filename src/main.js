@@ -3756,7 +3756,11 @@ function stepPanel(p) {
 }
 
 function imagePanel(p) {
-  const imageModels = ["GPT Image 2", "Nano Banana Pro"];
+  const imageModels = [
+    ["GPT Image 2", "GPT Image 2 (0.10 Credit)"],
+    ["Nano Banana Pro", "Nano Banana Pro (0.20 Credit)"]
+  ];
+  const imageModelValues = imageModels.map(([value]) => value);
   const selectedModel = imageModels.includes(p.image.model) ? p.image.model : String(p.image.model || "").toLowerCase().includes("pro") ? "Nano Banana Pro" : "GPT Image 2";
   const modeOptions = ["Create Image", "Virtualize (Poster/Ad)"];
   const selectedMode = modeOptions.includes(p.image.mode) ? p.image.mode : "Create Image";
@@ -4241,8 +4245,11 @@ function viralHistoryPanel(p) {
 }
 
 function select(field, label, options, value) {
-  const list = value && !options.includes(value) ? [value, ...options] : options;
-  return `<label>${label}<select data-field="${field}">${list.map((item) => `<option ${item === value ? "selected" : ""}>${item}</option>`).join("")}</select></label>`;
+  const optionValue = (item) => Array.isArray(item) ? item[0] : item;
+  const optionLabel = (item) => Array.isArray(item) ? item[1] : item;
+  const hasValue = options.some((item) => optionValue(item) === value);
+  const list = value && !hasValue ? [value, ...options] : options;
+  return `<label>${label}<select data-field="${field}">${list.map((item) => `<option value="${esc(optionValue(item))}" ${optionValue(item) === value ? "selected" : ""}>${esc(optionLabel(item))}</option>`).join("")}</select></label>`;
 }
 
 function upload(title, main, sub, ic, kind) {
@@ -6246,11 +6253,12 @@ function agentMessageArticle(item, index = 0) {
     <button type="button" data-agent-feedback="positive_feedback" data-agent-run-id="${esc(runId)}">${icon("thumbs-up", 14)} 有用</button>
     <button type="button" data-agent-feedback="negative_feedback" data-agent-run-id="${esc(runId)}">${icon("thumbs-down", 14)} 不准</button>
   </div>` : "";
+  const runPanel = agentVisibleRunPanel(item.agentRun);
   return `<article class="${item.role} ${longMessage && !expanded ? "is-collapsed" : ""}">
     <span>${item.role === "user" ? c.userLabel : c.agentLabel}</span>
     <div class="agent-message">${body}</div>
     ${longMessage ? `<button class="agent-expand-button" type="button" data-agent-expand="${index}">${expanded ? "收起回复" : "展开完整回复"} ${icon(expanded ? "chevron-up" : "chevron-down", 15)}</button>` : ""}
-    ${chips}${agentRunPanel(item.agentRun)}${feedback}
+    ${chips}${runPanel}${feedback}
   </article>`;
 }
 
@@ -6467,6 +6475,14 @@ function agentRunStatusLabel(status = "") {
     completed: "已完成",
     failed: "失败"
   }[status] || status || "处理中";
+}
+
+function agentVisibleRunPanel(run) {
+  if (!run) return "";
+  if (run.status === "waiting_confirmation" || run.status === "failed" || run.confirmation || run.recovery) {
+    return agentRunPanel(run);
+  }
+  return "";
 }
 
 function agentRunPanel(run) {
