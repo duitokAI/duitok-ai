@@ -37,6 +37,7 @@ const pages = [
 
 const wizardFeatures = [
   ["product-image", "image", "AI Product Image"],
+  ["visual-card", "panels-top-left", "Visual Card"],
   ["short-video", "video", "AI Short Video"],
   ["ugc-script", "mic-2", "UGC Script"],
   ["content-plan", "calendar-days", "7-Day Content Plan"],
@@ -2380,6 +2381,7 @@ function wizardCopy() {
       credits: "Estimated credits",
       featureDescriptions: {
         "product-image": ["Generate product images, ad visuals, and poster-style content.", "Good if you do not have a designer."],
+        "visual-card": ["Turn product text or a link into a publish-ready cover, carousel, or selling card.", "Good if you need TikTok covers or social cards fast."],
         "short-video": ["Create TikTok-style short video ideas or prompts.", "Good if you want video selling content but do not know what to shoot."],
         "ugc-script": ["Write hook, talking script, caption, and hashtags.", "Good if you want to record yourself or brief a creator."],
         "content-plan": ["Plan what to post for the next 7 days.", "Good if you do not know what to post every day."],
@@ -2411,6 +2413,7 @@ function wizardCopy() {
       credits: "预计 credits",
       featureDescriptions: {
         "product-image": ["生成产品图、广告图、海报图。", "适合没有设计师、想快速做商品视觉的新手。"],
+        "visual-card": ["把产品文案或链接变成可发布的封面、图文卡、卖点卡。", "适合想快速做 TikTok 封面、小红书图文素材的新手。"],
         "short-video": ["生成 TikTok 商品短视频想法或视频 prompt。", "适合想做短视频带货但不知道怎么拍的新手。"],
         "ugc-script": ["帮你写开头、口播、caption、hashtags。", "适合想自己拍，或给 creator brief 的新手。"],
         "content-plan": ["帮你安排未来 7 天每天发什么。", "适合不知道每天发什么的新手。"],
@@ -2442,6 +2445,7 @@ function wizardCopy() {
       credits: "Estimated credits",
       featureDescriptions: {
         "product-image": ["Generate product images, ad visuals, and poster-style content.", "Good if you do not have a designer."],
+        "visual-card": ["Turn product text or a link into a publish-ready cover, carousel, or selling card.", "Good if you need TikTok covers or social cards fast."],
         "short-video": ["Create TikTok-style short video ideas or prompts.", "Good if you want video selling content but do not know what to shoot."],
         "ugc-script": ["Write hook, talking script, caption, and hashtags.", "Good if you want to record yourself or brief a creator."],
         "content-plan": ["Plan what to post for the next 7 days.", "Good if you do not know what to post every day."],
@@ -2469,6 +2473,7 @@ function wizardPrompt() {
   const style = state.wizardStyle || "Soft sell";
   const prompts = {
     "product-image": `Create a clean product image for ${product}. Make it suitable for TikTok Shop, ads, or social media. Style: ${style}. Language: ${language} if text is needed. Make the product look clear, trustworthy, and easy to sell.`,
+    "visual-card": `Create a publish-ready visual card for ${product}. Use Pokaya brand colors: soft pink, deep purple, coral accent, clean white surface. Language: ${language}. Style: ${style}. Output a TikTok cover or Xiaohongshu-style selling card with hook, proof, CTA, caption, and hashtags. Keep it beginner-friendly and easy to post.`,
     "short-video": `Create a TikTok-style short video idea for ${product}. Style: ${style}. Language: ${language}. Show what to say, what to show, and how to make the product interesting. Keep it simple for a beginner to understand or execute.`,
     "ugc-script": `Write a short UGC-style script for ${product}. Language: ${language}. Style: ${style}. Include hook, short script, caption, and hashtags. Make it beginner-friendly and easy to record.`,
     "content-plan": `Create a 7-day simple content plan for ${product}. Language: ${language}. Style: ${style}. Each day should include what to post, hook idea, content angle, and caption idea. Keep the plan simple enough for a beginner to follow.`,
@@ -4065,49 +4070,162 @@ function invoiceTable() {
 function autoPostPage() {
   const connection = state.db.tiktok?.connections?.[0];
   const publishes = state.db.tiktok?.publishes || [];
+  const jobs = state.db.schedule || [];
+  const counts = autopostCounts(jobs);
+  const health = autopostHealth(jobs, connection);
+  const primaryAction = jobs.length ? "Review Ready" : "Add from Asset Library";
   return `
+    <section class="autopost-hero">
+      <div>
+        <p class="folder-label">${icon("send", 18)} Publishing Command Center</p>
+        <h2>Review, prepare, and publish TikTok content.</h2>
+        <p>Turn generated Pokaya assets into reviewed TikTok drafts, then publish with Extension Mode or Official Direct Post.</p>
+      </div>
+      <div class="autopost-hero-actions">
+        <button class="gold-button" data-page="library">${icon("folder-open")} ${primaryAction}</button>
+        <button class="dark-button" data-action="ask-agent-schedule">${icon("bot")} Ask Agent</button>
+        <button class="dark-button" data-action="export-all">${icon("download")} Export</button>
+      </div>
+    </section>
+    <section class="autopost-metrics">
+      ${autopostMetric("Draft", counts.Draft, "file-clock")}
+      ${autopostMetric("Ready", counts.Ready, "circle-check")}
+      ${autopostMetric("Processing", counts.Processing, "loader-circle")}
+      ${autopostMetric("Posted", counts.Posted, "send")}
+      ${autopostMetric("Failed", counts.Failed, "triangle-alert")}
+    </section>
     <div class="autopost-console">
-      <section class="autopost-sop">
-        <div>
-          <p class="folder-label">${icon("puzzle", 18)} Extension</p>
-          <h2>Pokaya Auto Post - SOP</h2>
-          <p>Local Chrome helper for pulling Pokaya scheduled TikTok posts into TikTok upload pages. It fills captions and hashtags; you still review and click final publish yourself.</p>
-        </div>
-        <button class="gold-button" data-action="download-autopost-extension">${icon("download")} Download Extension</button>
-        <ol>
-          <li><b>1</b><span>Download extension zip</span></li>
-          <li><b>2</b><span>Extract folder</span></li>
-          <li><b>3</b><span>Open <code>chrome://extensions/</code></span></li>
-          <li><b>4</b><span>Enable Developer Mode</span></li>
-          <li><b>5</b><span>Click Load unpacked and select the extracted folder</span></li>
-        </ol>
-      </section>
-      <section class="autopost-sop tiktok-official">
-        <div>
-          <p class="folder-label">${icon("badge-check", 18)} Official API</p>
-          <h2>TikTok Direct Post</h2>
-          <p>${connection ? `Connected: ${connection.displayName || connection.openId || "TikTok account"}` : "Connect a TikTok account after your TikTok Developer app has Content Posting API access."}</p>
-        </div>
-        <div class="official-actions">
-          <button class="gold-button" data-action="connect-tiktok">${icon("plug")} Connect TikTok</button>
-          <button class="dark-button" data-action="tiktok-creator-info">${icon("refresh-cw")} Creator Info</button>
-        </div>
-        <div class="tiktok-publishes">
-          ${publishes.slice(0, 4).map((item) => `<article><b>${item.status}</b><span>${item.publishId || item.id}</span><button data-tiktok-status="${item.publishId || item.id}">${icon("activity")} Check</button></article>`).join("") || `<p class="empty-text">No official API publishes yet.</p>`}
-        </div>
-      </section>
       <section class="autopost-queue">
         <div class="card-title">
           <h2>${icon("calendar-days", 22)} TikTok Queue</h2>
-          <span>${state.db.schedule.length} scheduled items</span>
+          <span>${jobs.length} scheduled items</span>
         </div>
-        ${schedule()}
+        ${schedule({ compact: false })}
       </section>
+      <aside class="autopost-rail">
+        ${autopostHealthCard(health)}
+        ${autopostModeCards(connection)}
+        <section class="autopost-side-card">
+          <header><strong>${icon("activity", 17)} Recent Direct Post</strong></header>
+          <div class="tiktok-publishes">
+            ${publishes.slice(0, 4).map((item) => `<article><b>${esc(item.status)}</b><span>${esc(item.publishId || item.id)}</span><button data-tiktok-status="${esc(item.publishId || item.id)}">${icon("activity")} Check</button></article>`).join("") || `<p class="empty-text">No official API publishes yet.</p>`}
+          </div>
+        </section>
+      </aside>
     </div>`;
 }
 
-function schedule() {
-  return `<section class="schedule-list">${state.db.schedule.map((x) => `<article><b>${x.title}</b><span>${x.platform}</span><small>${x.time}</small><p>${esc([x.caption, x.hashtags].filter(Boolean).join("\n")).replaceAll("\n", "<br>")}</p><button data-schedule="${x.id}">${icon("settings")} ${x.status}</button>${state.page === "autopost" ? `<button data-tiktok-publish="${x.id}">${icon("send")} Official Post</button>` : ""}</article>`).join("")}</section>`;
+function autopostCounts(jobs = []) {
+  return jobs.reduce((acc, item) => {
+    const status = item.status || "Draft";
+    acc[status] = (acc[status] || 0) + 1;
+    return acc;
+  }, { Draft: 0, Ready: 0, Processing: 0, Posted: 0, Failed: 0 });
+}
+
+function autopostMetric(label, value, iconName) {
+  return `<article><span>${icon(iconName, 18)} ${label}</span><b>${Number(value || 0)}</b></article>`;
+}
+
+function autopostReadiness(item = {}, connection = null) {
+  const checks = [
+    { key: "media", label: "Media", ok: Boolean(item.mediaUrl), fix: "Attach generated asset" },
+    { key: "caption", label: "Caption", ok: Boolean(String(item.caption || "").trim()), fix: "Add caption" },
+    { key: "hashtags", label: "Hashtags", ok: Boolean(String(item.hashtags || "").trim()), fix: "Add hashtags" },
+    { key: "product", label: "Product URL", ok: Boolean(String(item.productUrl || "").trim()), fix: "Optional but recommended" },
+    { key: "tiktok", label: "TikTok", ok: Boolean(connection), fix: "Connect TikTok for API mode" }
+  ];
+  const blockers = checks.filter((check) => !check.ok && !["product", "tiktok"].includes(check.key));
+  const directPostBlockers = checks.filter((check) => !check.ok && check.key !== "product");
+  return { checks, blockers, directPostBlockers, ready: blockers.length === 0, directPostReady: directPostBlockers.length === 0 };
+}
+
+function autopostHealth(jobs = [], connection = null) {
+  const mediaReady = jobs.filter((item) => item.mediaUrl).length;
+  const captionsReady = jobs.filter((item) => item.caption && item.hashtags).length;
+  const blocked = jobs.filter((item) => !autopostReadiness(item, connection).ready).length;
+  const directPostReady = jobs.filter((item) => autopostReadiness(item, connection).directPostReady).length;
+  return [
+    { label: "Asset media", ok: mediaReady > 0 || jobs.length === 0, detail: jobs.length ? `${mediaReady}/${jobs.length} jobs have media` : "Add assets from library" },
+    { label: "Captions", ok: captionsReady > 0 || jobs.length === 0, detail: jobs.length ? `${captionsReady}/${jobs.length} jobs have caption + hashtags` : "Agent can create drafts" },
+    { label: "Official Direct Post", ok: Boolean(connection), detail: connection ? `${directPostReady}/${jobs.length || 0} jobs API-ready` : "Optional; Extension Mode still works" },
+    { label: "Blocked drafts", ok: blocked === 0, detail: blocked ? `${blocked} drafts need attention` : "No blocking issues" }
+  ];
+}
+
+function autopostHealthCard(items = []) {
+  return `<section class="autopost-side-card setup-health-card">
+    <header><strong>${icon("clipboard-check", 17)} Publishing setup</strong></header>
+    ${items.map((item) => `<p data-ok="${item.ok ? "true" : "false"}">${icon(item.ok ? "check-circle-2" : "circle-alert", 16)}<span><b>${esc(item.label)}</b><small>${esc(item.detail)}</small></span></p>`).join("")}
+  </section>`;
+}
+
+function autopostModeCards(connection) {
+  return `<section class="autopost-side-card publish-mode-card">
+    <header><strong>${icon("split", 17)} Publishing modes</strong></header>
+    <article>
+      <b>${icon("puzzle", 16)} Extension Mode</b>
+      <p>Chrome helper fills captions and hashtags. You still review and click final publish in TikTok.</p>
+      <button class="gold-button" data-action="download-autopost-extension">${icon("download")} Download Extension</button>
+      <details><summary>Setup steps</summary><ol><li>Download extension zip</li><li>Extract folder</li><li>Open chrome://extensions/</li><li>Enable Developer Mode</li><li>Load unpacked folder</li></ol></details>
+    </article>
+    <article>
+      <b>${icon("badge-check", 16)} Official Direct Post</b>
+      <p>${connection ? `Connected: ${connection.displayName || connection.openId || "TikTok account"}` : "Connect TikTok after Content Posting API access is approved."}</p>
+      <div class="official-actions">
+        <button class="gold-button" data-action="connect-tiktok">${icon("plug")} Connect TikTok</button>
+        <button class="dark-button" data-action="tiktok-creator-info">${icon("refresh-cw")} Creator Info</button>
+      </div>
+    </article>
+  </section>`;
+}
+
+function schedule(options = {}) {
+  const jobs = state.db.schedule || [];
+  const connection = state.db.tiktok?.connections?.[0];
+  if (!jobs.length && state.page === "autopost") return `<section class="autopost-empty-state">
+    ${icon("calendar-plus", 34)}
+    <strong>No scheduled posts yet.</strong>
+    <p>Turn generated assets into TikTok drafts from the Asset Library, or ask Agent to create a posting plan.</p>
+    <div><button class="gold-button" data-page="library">${icon("folder-open")} Open Asset Library</button><button class="dark-button" data-action="ask-agent-schedule">${icon("bot")} Ask Agent</button></div>
+  </section>`;
+  if (state.page === "autopost" && !options.compact) {
+    return `<section class="schedule-list autopost-job-list">${jobs.map((item) => autopostJobCard(item, connection)).join("")}</section>`;
+  }
+  return `<section class="schedule-list">${jobs.map((x) => `<article><b>${esc(x.title)}</b><span>${esc(x.platform)}</span><small>${esc(x.time)}</small><p>${esc([x.caption, x.hashtags].filter(Boolean).join("\n")).replaceAll("\n", "<br>")}</p><button data-schedule="${esc(x.id)}">${icon("settings")} ${esc(x.status)}</button>${state.page === "autopost" ? `<button data-tiktok-publish="${esc(x.id)}">${icon("send")} Official Post</button>` : ""}</article>`).join("")}</section>`;
+}
+
+function autopostJobCard(item = {}, connection = null) {
+  const readiness = autopostReadiness(item, connection);
+  const checks = readiness.checks.filter((check) => check.key !== "tiktok" || state.db.tiktok?.connections?.length);
+  return `<article class="autopost-job-card" data-status="${esc(item.status || "Draft")}">
+    <div class="autopost-job-main">
+      <div>
+        <span class="autopost-status-chip">${esc(item.status || "Draft")}</span>
+        <h3>${esc(item.title || "Untitled TikTok draft")}</h3>
+        <p>${esc(item.caption || "No caption yet.")}</p>
+        <small>${esc([item.hashtags, item.productUrl ? "Product URL ready" : ""].filter(Boolean).join(" · "))}</small>
+      </div>
+      <div class="autopost-job-meta">
+        <b>${icon("clock", 15)} ${esc(item.time || "No time")}</b>
+        <span>${icon("folder", 15)} ${esc(projectNameForSchedule(item))}</span>
+      </div>
+    </div>
+    <div class="autopost-readiness">
+      ${checks.map((check) => `<span data-ok="${check.ok ? "true" : "false"}">${icon(check.ok ? "check" : "x", 13)} ${esc(check.label)}</span>`).join("")}
+    </div>
+    <div class="autopost-job-actions">
+      <button data-autopost-edit="${esc(item.id)}">${icon("edit-3", 14)} Edit</button>
+      <button data-autopost-status="${esc(item.id)}" data-status="${readiness.ready ? "Ready" : "Draft"}">${icon(readiness.ready ? "circle-check" : "wrench", 14)} ${readiness.ready ? "Mark Ready" : "Fix Draft"}</button>
+      <button data-page="library">${icon("image", 14)} Find assets</button>
+      <button data-tiktok-publish="${esc(item.id)}" ${readiness.directPostReady ? "" : "disabled"}>${icon("send", 14)} Direct Post</button>
+      <button data-autopost-delete="${esc(item.id)}">${icon("trash-2", 14)} Delete</button>
+    </div>
+  </article>`;
+}
+
+function projectNameForSchedule(item = {}) {
+  return state.db.projects.find((project) => project.id === item.projectId)?.name || "No project";
 }
 
 function modal() {
@@ -5991,6 +6109,9 @@ function bind() {
   document.querySelectorAll("[data-usage-filter]").forEach((el) => el.addEventListener("click", () => set({ usageFilter: el.dataset.usageFilter })));
   document.querySelectorAll("[data-topup]").forEach((el) => el.addEventListener("click", () => topup(Number(el.dataset.topup))));
   document.querySelectorAll("[data-schedule]").forEach((el) => el.addEventListener("click", () => scheduleUpdate(el.dataset.schedule)));
+  document.querySelectorAll("[data-autopost-edit]").forEach((el) => el.addEventListener("click", () => editAutopostJob(el.dataset.autopostEdit)));
+  document.querySelectorAll("[data-autopost-status]").forEach((el) => el.addEventListener("click", () => setAutopostStatus(el.dataset.autopostStatus, el.dataset.status)));
+  document.querySelectorAll("[data-autopost-delete]").forEach((el) => el.addEventListener("click", () => deleteAutopostJob(el.dataset.autopostDelete)));
   document.querySelectorAll("[data-tiktok-publish]").forEach((el) => el.addEventListener("click", () => tiktokPublish(el.dataset.tiktokPublish)));
   document.querySelectorAll("[data-tiktok-status]").forEach((el) => el.addEventListener("click", () => tiktokStatus(el.dataset.tiktokStatus)));
   document.querySelectorAll("[data-invoice]").forEach((el) => el.addEventListener("click", () => download(`/api/export/invoice/${el.dataset.invoice}`, `${el.dataset.invoice}.txt`)));
@@ -6100,6 +6221,7 @@ async function action(event, name) {
   if (name === "apply-date") return notify(t("toastDashboardDate"));
   if (name === "reset-date") return set({ dateFrom: "2026-05-01", dateTo: "2026-05-26" });
   if (name === "chat") return set({ page: "agent" });
+  if (name === "ask-agent-schedule") return askAgentSchedule();
   if (name === "toggle-agent-history") return set({ agentHistoryOpen: !state.agentHistoryOpen });
   if (name === "new-agent-chat") {
     saveCurrentAgentHistory();
@@ -6276,6 +6398,7 @@ async function applyImagePreset(promptText) {
 function wizardTargetForFeature(feature = state.wizardFeature) {
   return {
     "product-image": { step: "image", action: "generate-image", field: "image.prompt" },
+    "visual-card": { step: "image", action: "", field: "image.prompt" },
     "short-video": { step: "ugc", action: "generate-ugc", field: "ugc.script" },
     "ugc-script": { step: "ugc", action: "generate-ugc", field: "ugc.script" },
     "content-plan": { step: "auto", action: "generate-auto", field: "auto.productUrl" },
@@ -6791,6 +6914,76 @@ async function scheduleUpdate(id) {
   const db = await api(`/schedule/${id}`, { method: "PATCH" });
   set({ db });
   notify(t("toastScheduleUpdated"));
+}
+
+function askAgentSchedule() {
+  set({
+    page: "agent",
+    agentHistoryOpen: false,
+    agentInput: "帮我根据当前资产库和产品，创建 TikTok 发布排期草稿。请检查每条内容缺少什么素材、caption、hashtags 或产品链接，并告诉我下一步要补什么。"
+  });
+  setTimeout(() => {
+    const input = document.querySelector("[data-agent-input]");
+    input?.focus();
+    autoResizeAgentInput(input);
+  }, 0);
+}
+
+async function editAutopostJob(id) {
+  const item = state.db.schedule.find((entry) => entry.id === id);
+  if (!item) return notify("找不到这条排期。");
+  const title = window.prompt("Title", item.title || "");
+  if (title === null) return;
+  const time = window.prompt("Publish time", item.time || "");
+  if (time === null) return;
+  const caption = window.prompt("Caption", item.caption || "");
+  if (caption === null) return;
+  const hashtags = window.prompt("Hashtags", item.hashtags || "");
+  if (hashtags === null) return;
+  const productUrl = window.prompt("Product URL", item.productUrl || "");
+  if (productUrl === null) return;
+  try {
+    const db = await api(`/autopost/jobs/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      body: JSON.stringify({ title, time, caption, hashtags, productUrl })
+    });
+    set({ db });
+    notify("排期已更新。");
+  } catch (error) {
+    notify(error.message);
+  }
+}
+
+async function setAutopostStatus(id, status) {
+  const item = state.db.schedule.find((entry) => entry.id === id);
+  if (!item) return notify("找不到这条排期。");
+  const readiness = autopostReadiness(item, state.db.tiktok?.connections?.[0]);
+  if (status === "Ready" && !readiness.ready) {
+    return notify(`还缺：${readiness.blockers.map((check) => check.label).join(", ")}`);
+  }
+  try {
+    const db = await api(`/autopost/jobs/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      body: JSON.stringify({ status })
+    });
+    set({ db });
+    notify(status === "Ready" ? "已标记为 Ready。" : "已保留为 Draft，请补齐缺少内容。");
+  } catch (error) {
+    notify(error.message);
+  }
+}
+
+async function deleteAutopostJob(id) {
+  const item = state.db.schedule.find((entry) => entry.id === id);
+  if (!item) return notify("找不到这条排期。");
+  if (!window.confirm(`Delete "${item.title || "this draft"}"?`)) return;
+  try {
+    const db = await api(`/autopost/jobs/${encodeURIComponent(id)}`, { method: "DELETE" });
+    set({ db });
+    notify("排期已删除。");
+  } catch (error) {
+    notify(error.message);
+  }
 }
 
 async function adminUpdateUser(userId, patch) {
