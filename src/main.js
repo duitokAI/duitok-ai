@@ -5,7 +5,7 @@ const toast = document.querySelector("#toast");
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
 const isStudioPath = () => window.location.pathname.startsWith("/studio") || window.location.pathname.startsWith("/admin");
 const pathIs = (path) => window.location.pathname === path;
-const ownerAdminEmail = "admin@pokaya.ai";
+const ownerAdminEmails = new Set(["admin@pokaya.ai", "admin@duitok.com", "admin@duitok.ai"]);
 const whatsappGroupUrl = "https://chat.whatsapp.com/ERz2477U1gJFJHFsXtiMJH?mode=gi_t";
 const supportWhatsappUrl = "https://wa.me/60163100131";
 const promoCycleMs = 5 * 60 * 60 * 1000;
@@ -2605,7 +2605,7 @@ function contentLibraryPage() {
 }
 
 function isOwnerAdminAccount() {
-  return state.user?.role === "admin" && String(state.user?.email || "").toLowerCase() === ownerAdminEmail;
+  return state.user?.role === "admin" && ownerAdminEmails.has(String(state.user?.email || "").toLowerCase());
 }
 
 function adminMoney(value) {
