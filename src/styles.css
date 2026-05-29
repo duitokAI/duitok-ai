@@ -10192,23 +10192,6 @@ label {
   background: linear-gradient(180deg, #fff, #fff8fb);
 }
 
-.agent-page-panel .agent-thread article.is-collapsed .agent-message {
-  max-height: 220px;
-  overflow: hidden;
-  position: relative;
-}
-
-.agent-page-panel .agent-thread article.is-collapsed .agent-message::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 72px;
-  background: linear-gradient(180deg, rgba(255, 248, 251, 0), #fff8fb 82%);
-  pointer-events: none;
-}
-
 .agent-history-compact {
   max-width: min(720px, 92%);
   display: grid;
@@ -10237,8 +10220,7 @@ label {
   white-space: nowrap;
 }
 
-.agent-history-compact button,
-.agent-expand-button {
+.agent-history-compact button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -10251,11 +10233,6 @@ label {
   color: var(--purple);
   font-size: 12px;
   font-weight: 950;
-}
-
-.agent-expand-button {
-  width: fit-content;
-  margin-top: -2px;
 }
 
 .agent-page-panel .agent-thread article.assistant > p {
@@ -19041,7 +19018,6 @@ label {
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-feedback-row button,
-.studio-shell .agent-chat-shell.agent-page-panel .agent-expand-button,
 .studio-shell .agent-chat-shell.agent-page-panel .agent-action-chips button {
   box-shadow: none !important;
 }

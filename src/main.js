@@ -6259,8 +6259,6 @@ function agentCollapsedHistoryBar() {
 
 function agentMessageArticle(item, index = 0) {
   const c = agentUiCopy();
-  const longMessage = item.role === "assistant" && isLongAgentMessage(item.content);
-  const expanded = Boolean(state.agentExpandedMessages[index]);
   const body = item.role === "assistant" ? agentMessageMarkdown(item.content) : `<p>${esc(item.content).replaceAll("\n", "<br>")}</p>`;
   const chips = "";
   const runId = item.agentRun?.id || "";
@@ -6269,10 +6267,9 @@ function agentMessageArticle(item, index = 0) {
     <button type="button" data-agent-feedback="negative_feedback" data-agent-run-id="${esc(runId)}">${icon("thumbs-down", 14)} 不准</button>
   </div>` : "";
   const runPanel = agentVisibleRunPanel(item.agentRun);
-  return `<article class="${item.role} ${longMessage && !expanded ? "is-collapsed" : ""}">
+  return `<article class="${item.role}">
     <span>${item.role === "user" ? c.userLabel : c.agentLabel}</span>
     <div class="agent-message">${body}</div>
-    ${longMessage ? `<button class="agent-expand-button" type="button" data-agent-expand="${index}">${expanded ? "收起回复" : "展开完整回复"} ${icon(expanded ? "chevron-up" : "chevron-down", 15)}</button>` : ""}
     ${chips}${runPanel}${feedback}
   </article>`;
 }
@@ -6706,10 +6703,6 @@ function bind() {
   document.querySelectorAll("[data-project-delete]").forEach((el) => el.addEventListener("click", (event) => {
     event.stopPropagation();
     set({ modal: "deleteProject", editingProjectId: el.dataset.projectDelete, projectMenuId: null });
-  }));
-  document.querySelectorAll("[data-agent-expand]").forEach((el) => el.addEventListener("click", () => {
-    const index = el.dataset.agentExpand;
-    set({ agentExpandedMessages: { ...state.agentExpandedMessages, [index]: !state.agentExpandedMessages[index] } });
   }));
   document.querySelectorAll("[data-agent-history-restore]").forEach((el) => el.addEventListener("click", () => restoreAgentHistory(el.dataset.agentHistoryRestore)));
   document.querySelectorAll("[data-agent-history-delete]").forEach((el) => el.addEventListener("click", () => deleteAgentHistory(el.dataset.agentHistoryDelete)));
