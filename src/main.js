@@ -6209,19 +6209,31 @@ function agentHistoryPanel() {
   const c = agentUiCopy();
   const sessions = Array.isArray(state.agentHistorySessions) ? state.agentHistorySessions : [];
   return `<section class="agent-history-panel">
-    <header><strong>${icon("history", 16)} ${c.history}</strong><button class="icon-only" data-action="toggle-agent-history" title="关闭">${icon("x", 16)}</button></header>
+    <header>
+      <strong>${icon("history", 16)} ${c.history}</strong>
+      ${sessions.length ? `<small>${agentHistoryCountLabel(sessions.length)}</small>` : ""}
+      <button class="agent-history-close" data-action="toggle-agent-history" title="关闭" aria-label="关闭">${icon("x", 16)}</button>
+    </header>
     ${sessions.length
       ? `<div class="agent-history-list">${sessions.map((item) => `<article>
-          <div><b>${esc(item.title || "未命名对话")}</b><small>${agentHistoryMeta(item)}</small></div>
-          <button class="dark-button mini-button" data-agent-history-restore="${esc(item.id)}">${icon("rotate-ccw", 14)} 恢复</button>
-          <button class="icon-only" data-agent-history-delete="${esc(item.id)}" title="删除这条历史">${icon("trash-2", 15)}</button>
+          <div class="agent-history-item-main"><b>${esc(item.title || "未命名对话")}</b><small>${agentHistoryMeta(item)}</small></div>
+          <div class="agent-history-actions">
+            <button class="agent-history-action primary" data-agent-history-restore="${esc(item.id)}" title="恢复这条对话" aria-label="恢复这条对话">${icon("rotate-ccw", 15)}</button>
+            <button class="agent-history-action danger" data-agent-history-delete="${esc(item.id)}" title="删除这条历史" aria-label="删除这条历史">${icon("trash-2", 15)}</button>
+          </div>
         </article>`).join("")}</div>`
       : `<p class="agent-history-empty">还没有历史记录。点「新对话」时，当前对话会自动保存到这里。</p>`}
     <div class="agent-history-footer">
-      <button class="dark-button mini-button" data-action="new-agent-chat">${icon("message-square-plus", 14)} ${c.newChat}</button>
-      <button class="dark-button mini-button" data-action="clear-agent-context">${icon("trash-2", 14)} ${c.clearContext}</button>
+      <button class="agent-history-footer-action" data-action="new-agent-chat">${icon("message-square-plus", 14)} ${c.newChat}</button>
+      <button class="agent-history-footer-action danger" data-action="clear-agent-context">${icon("trash-2", 14)} ${c.clearContext}</button>
     </div>
   </section>`;
+}
+
+function agentHistoryCountLabel(count = 0) {
+  if (state.lang === "zh") return `${count} 条`;
+  if (state.lang === "ms") return `${count} chat`;
+  return `${count} chats`;
 }
 
 function agentHistoryMeta(item = {}) {
