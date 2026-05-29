@@ -586,7 +586,7 @@ const copy = {
     workspace: "工作区",
     business: "业务",
     startHere: "新手开始",
-    pokayaAgent: "Pokaya 助手",
+    pokayaAgent: "Pokaya Agent",
     dashboard: "总控",
     newProject: "新项目",
     search: "搜索",
@@ -1409,11 +1409,11 @@ function render() {
 
 function studioChineseDictionary() {
   return {
-    "Language": "语言",
+    "Language": "Language",
     "Workspace": "工作区",
     "Business": "业务",
     "Start Here": "新手开始",
-    "Pokaya Agent": "Pokaya 助手",
+    "Pokaya Agent": "Pokaya Agent",
     "Admin CRM": "管理员 CRM",
     "SOP": "SOP",
     "Dashboard": "总控",
@@ -1483,7 +1483,7 @@ function studioChineseDictionary() {
     "UGC Script": "UGC 脚本",
     "Content Plan": "内容计划",
     "Clone Viral Style": "复刻爆款结构",
-    "Ask Pokaya Agent": "询问 Pokaya 助手",
+    "Ask Pokaya Agent": "询问 Pokaya Agent",
     "Beginner setup": "新手开始",
     "Selected tool": "选择的功能",
     "Prompt preview": "Prompt 预览",
