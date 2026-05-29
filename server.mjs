@@ -1243,7 +1243,7 @@ function roundCredits(value) {
 function creditChargeFor(project, action) {
   if (action !== "generate-image") return 0.1;
   const model = internalMediaModel(project.image?.model);
-  if (model === "GPT Image 2") return 0.1;
+  if (model === "GPT Image 2") return 0.15;
   if (model === "Nano Banana Pro") return 0.2;
   if (model === "Seedance 2.0") return roundCredits(videoDurationFor(project, model) * 0.1);
   if (model === "Veo 3.1") return 0.4;
@@ -2680,27 +2680,6 @@ const agentTools = [
   {
     type: "function",
     function: {
-      name: "create_visual_card",
-      description: "Create a publish-ready visual card concept for TikTok cover, Xiaohongshu/RED carousel, product selling card, tutorial card, quote card, or data card. Saves a structured card asset into the project without charging credits.",
-      parameters: {
-        type: "object",
-        properties: {
-          projectId: { type: "string" },
-          productName: { type: "string" },
-          sourceText: { type: "string", description: "Product info, URL summary, article text, selling point, or user brief." },
-          cardType: { type: "string", description: "product_hook, tiktok_cover, red_carousel, tutorial_steps, quote_card, data_card, before_after." },
-          audience: { type: "string" },
-          language: { type: "string", description: "BM, English, Chinese, or mixed." },
-          objective: { type: "string", description: "sell, educate, compare, hook, proof, announcement." },
-          style: { type: "string", description: "Soft sell, Review, Problem-solution, Offer push, Beginner friendly." }
-        },
-        required: ["projectId"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
       name: "create_content_plan",
       description: "Create a 7-day or 14-day TikTok Shop content plan and optionally save schedule drafts. This plans content without generating image/video assets.",
       parameters: {
@@ -2792,7 +2771,7 @@ const agentTools = [
     type: "function",
     function: {
       name: "generate_project_output",
-      description: "Run one of Pokaya's existing generation functions and save the result.",
+      description: "Run one of Pokaya's existing platform generation models and save the result. This is the only Agent path for rendered images, posters, covers, carousels, videos, or generated media. It deducts credits and the backend must request user confirmation before execution.",
       parameters: {
         type: "object",
         properties: {
@@ -3038,76 +3017,6 @@ function buildContentPlan({ project, productName, audience, language, days, obje
   }));
 }
 
-function buildVisualCard({ project, productName, sourceText, cardType, audience, language, objective, style } = {}) {
-  const memory = project?.agentMemory || {};
-  const product = sanitizeAgentText(productName || memory.productName || project?.name || "this product").slice(0, 80);
-  const target = sanitizeAgentText(audience || memory.audience || "beginner TikTok Shop buyers").slice(0, 120);
-  const lang = sanitizeAgentText(language || memory.language || "BM + English").slice(0, 80);
-  const goal = sanitizeAgentText(objective || "sell").slice(0, 80);
-  const tone = sanitizeAgentText(style || memory.brandTone || "Soft sell").slice(0, 80);
-  const brief = sanitizeAgentText(sourceText || memory.notes || project?.image?.prompt || project?.auto?.productUrl || "").slice(0, 800);
-  const normalizedType = String(cardType || "product_hook").toLowerCase().replace(/\s+/g, "_");
-  const typeLabels = {
-    product_hook: "Product hook card",
-    tiktok_cover: "TikTok cover",
-    red_carousel: "Xiaohongshu carousel",
-    tutorial_steps: "Tutorial steps card",
-    quote_card: "Quote card",
-    data_card: "Data proof card",
-    before_after: "Before / after card"
-  };
-  const titleByType = {
-    product_hook: `Why people notice ${product}`,
-    tiktok_cover: `Stop scrolling for ${product}`,
-    red_carousel: `${product}: beginner selling angles`,
-    tutorial_steps: `How to use ${product}`,
-    quote_card: `${product} selling line`,
-    data_card: `${product} proof points`,
-    before_after: `Before vs after ${product}`
-  };
-  const bulletsByType = {
-    product_hook: ["One clear pain point", "One visible product proof", "One low-pressure CTA"],
-    tiktok_cover: ["Big readable hook", "Product visible in first frame", "Room for price or voucher badge"],
-    red_carousel: ["Slide 1: problem", "Slide 2: product proof", "Slide 3: CTA and next step"],
-    tutorial_steps: ["Step 1: show the problem", "Step 2: use the product", "Step 3: show the result"],
-    quote_card: ["Short line", "Strong contrast", "Creator-style credibility"],
-    data_card: ["One number", "One comparison", "One simple buyer takeaway"],
-    before_after: ["Before state", "Product turning point", "After result"]
-  };
-  const card = {
-    type: normalizedType,
-    title: titleByType[normalizedType] || titleByType.product_hook,
-    subtitle: `${tone} visual for ${target}`,
-    eyebrow: "Pokaya Visual Card",
-    productName: product,
-    language: lang,
-    objective: goal,
-    layout: normalizedType === "red_carousel" ? "3-slide carousel" : normalizedType === "tiktok_cover" ? "9:16 cover" : "single social card",
-    palette: {
-      background: "soft pink white",
-      primary: "deep purple",
-      accent: "coral pink",
-      surface: "white"
-    },
-    sections: [
-      { label: "Hook", text: brief ? brief.split(/[。.!?\n]/).find(Boolean)?.slice(0, 90) || `Make ${product} feel useful fast.` : `Make ${product} feel useful fast.` },
-      { label: "Proof", text: `Show ${product} clearly with one visible benefit for ${target}.` },
-      { label: "CTA", text: goal === "educate" ? "Save this and test the angle." : "Tap product link / yellow bag after the video." }
-    ],
-    bullets: bulletsByType[normalizedType] || bulletsByType.product_hook,
-    caption: `${product} angle: ${goal}. Keep it simple, visual, and beginner-friendly. ${lang}.`,
-    hashtags: "#pokaya #tiktokshopmalaysia #aicontent",
-    prompt: [
-      `Create a ${typeLabels[normalizedType] || typeLabels.product_hook} for ${product}.`,
-      `Brand: Pokaya soft pink, deep purple, coral accent, clean AI content operator style.`,
-      `Audience: ${target}. Language: ${lang}. Objective: ${goal}. Tone: ${tone}.`,
-      brief ? `Source: ${brief}` : "",
-      "Design rules: large readable hook, product-first visual hierarchy, no tiny text, no beige/brown knowledge-blog style, ready for TikTok Shop or short-form selling."
-    ].filter(Boolean).join("\n")
-  };
-  return card;
-}
-
 function buildSeedancePrompt({ project, productName, scene, audience, language, duration, style, keyMessage } = {}) {
   const memory = project?.agentMemory || {};
   const product = productName || memory.productName || project?.name || "TikTok Shop product";
@@ -3298,19 +3207,6 @@ function agentToolCard(name, result = {}) {
       query: data.query || "",
       searchedAt: data.searchedAt || "",
       results
-    };
-  }
-  if (name === "create_visual_card") {
-    const bullets = Array.isArray(data.visualCard?.bullets) ? data.visualCard.bullets.slice(0, 4) : [];
-    return {
-      type: "visual_card",
-      title: data.visualCard?.title || data.title || "Visual card",
-      summary: data.visualCard?.subtitle || "Publish-ready visual card concept saved.",
-      projectId: data.projectId,
-      resultId: data.resultId,
-      visualCard: data.visualCard || {},
-      bullets,
-      prompt: data.visualCard?.prompt || ""
     };
   }
   if (name === "create_content_plan") {
@@ -3520,44 +3416,6 @@ async function executeAgentTool(name, args, user) {
         title: result?.title,
         mediaUrl: result?.videoUrl || result?.imageUrl || ""
       }
-    };
-  }
-
-  if (name === "create_visual_card") {
-    requireAgentPermission(user, "updateProject");
-    const resultId = crypto.randomUUID();
-    const result = await mutateDb(async (currentDb) => {
-      const project = findProject(currentDb, args.projectId, user);
-      project.agentMemory ||= {};
-      const memoryBefore = structuredClone(project.agentMemory);
-      if (args.productName) project.agentMemory.productName = String(args.productName).slice(0, 160);
-      if (args.audience) project.agentMemory.audience = String(args.audience).slice(0, 240);
-      if (args.language) project.agentMemory.language = String(args.language).slice(0, 120);
-      if (args.style) project.agentMemory.brandTone = String(args.style).slice(0, 180);
-      const visualCard = buildVisualCard({ project, ...args });
-      project.results ||= [];
-      project.results.push({
-        id: resultId,
-        type: "visual_card",
-        title: visualCard.title,
-        body: visualCard.prompt,
-        visualCard,
-        createdAt: new Date().toISOString()
-      });
-      currentDb.usage.unshift(usage(`Agent created visual card: ${project.name}`, 0, project.userId));
-      await saveDb(currentDb);
-      return { db: publicState(currentDb, user), visualCard, memoryBefore, memoryAfter: structuredClone(project.agentMemory) };
-    });
-    return {
-      ok: true,
-      message: "Visual card saved to project.",
-      db: result.db,
-      data: { projectId: args.projectId, resultId, resultType: "visual_card", title: result.visualCard.title, visualCard: result.visualCard },
-      diffs: [
-        { type: "created_result", target: { type: "project", id: args.projectId }, resultId, undoable: true },
-        ...(JSON.stringify(result.memoryBefore) !== JSON.stringify(result.memoryAfter) ? [{ type: "agent_memory", target: { type: "project", id: args.projectId }, before: result.memoryBefore, after: result.memoryAfter, undoable: true }] : [])
-      ],
-      uiAction: { page: "project", step: "image", projectId: args.projectId }
     };
   }
 
@@ -3952,7 +3810,6 @@ function agentToolLabel(name = "") {
     trend_research: "研究趋势",
     open_workspace: "打开工作区",
     create_project: "创建项目",
-    create_visual_card: "创建视觉卡片",
     update_project_field: "更新项目字段",
     generate_project_output: "生成内容",
     create_content_plan: "创建内容计划",
@@ -4038,9 +3895,9 @@ function agentClarificationForUncertainAction(content = "", { intent = "chat", p
   const tooVague = /^(做一下|帮我做|帮我弄|do it|make it|buat|生成|做|run)$/i.test(text) || (text.length < 8 && !clearAction);
   if (!tooVague && projectId && !(action.wantsGenerate && !/(图片|image|visual card|视觉卡|图文卡|封面|cover|video|视频|seedance|ugc|auto|批量|海报|poster)/i.test(text))) return null;
   if (/[\u3400-\u9fff]/.test(text)) {
-    return "我还不够确定要做哪一种内容。您想让我做哪一步？请补一句：1. 生成图片/海报；2. 做视觉卡片/封面；3. 写视频 prompt；4. 生成视频；5. 做 7 天内容计划；6. 创建排期草稿。若会扣 credits，我会先弹窗让您确认。";
+    return "我还不够确定要做哪一种内容。您想让我做哪一步？请补一句：1. 生成图片/海报/封面；2. 写视频 prompt；3. 生成视频；4. 做 7 天内容计划；5. 创建排期草稿。若会扣 credits，我会先弹窗让您确认。";
   }
-  return "I need one more detail before I execute. Which action should I take: generate image/poster, create a visual card/cover, write a video prompt, generate video, build a 7-day content plan, or create schedule drafts? If credits will be charged, I will ask for confirmation first.";
+  return "I need one more detail before I execute. Which action should I take: generate image/poster/cover, write a video prompt, generate video, build a 7-day content plan, or create schedule drafts? If credits will be charged, I will ask for confirmation first.";
 }
 
 function agentPublishArgsFromMessage(content = "") {
@@ -4079,17 +3936,6 @@ function agentShortcutToolFromMessage(content = "", projectId = "") {
         days: /14|十四/.test(content) ? 14 : 7,
         objective: /launch|上新|新品/.test(content) ? "launch" : "sales",
         saveDrafts: /草稿|draft|排期|schedule/.test(content)
-      }
-    };
-  }
-  if (intent.wantsVisualCard) {
-    return {
-      name: "create_visual_card",
-      args: {
-        projectId,
-        sourceText: content,
-        cardType: /小红书|小紅書|carousel/i.test(content) ? "red_carousel" : /cover|封面/i.test(content) ? "tiktok_cover" : /教程|tutorial/i.test(content) ? "tutorial_steps" : "product_hook",
-        objective: /教程|tutorial|educat/i.test(content) ? "educate" : "sell"
       }
     };
   }
@@ -4550,12 +4396,8 @@ async function runDeterministicAgent(content, { projectId, user, workspace = nul
   }
 
   if (intent.wantsVisualCard && activeProjectId) {
-    await run("create_visual_card", {
-      projectId: activeProjectId,
-      sourceText: content,
-      cardType: /小红书|小紅書|carousel/i.test(content) ? "red_carousel" : /cover|封面/i.test(content) ? "tiktok_cover" : /教程|tutorial/i.test(content) ? "tutorial_steps" : "product_hook",
-      objective: /教程|tutorial|educat/i.test(content) ? "educate" : "sell"
-    });
+    await run("update_project_field", { projectId: activeProjectId, field: "image.prompt", value: content });
+    await run("generate_project_output", { projectId: activeProjectId, action: "generate-image", step: "image" });
   }
 
   if (intent.wantsSeedancePrompt && activeProjectId) {
@@ -5442,10 +5284,11 @@ app.post("/api/agent", async (req, res, next) => {
           "Present yourself as Pokaya Agent and say you can help the user do anything available on this platform. Do not describe yourself as only for TikTok Shop content creation.",
           "Answer only after the user asks. Do not invent daily briefings, proactive tasks, or unsolicited reminders.",
           "Use web research and Pokaya platform tools quietly in the background when they help, but do not make the reply sound like a platform workflow report.",
-          "You can research trends, search the public web, inspect workspace state, remember project context, navigate the UI, create projects, create visual cards/covers/carousels, create content plans, create video prompts, update project fields, generate outputs, create scheduler drafts, update schedule status, and create support tickets.",
+          "You can research trends, search the public web, inspect workspace state, remember project context, navigate the UI, create projects, create content plans, create video prompts, update project fields, generate outputs through Pokaya's platform models, create scheduler drafts, update schedule status, and create support tickets.",
           "Use trend_research before answering about fresh trends, unfamiliar aesthetic names, product-market fit, what to sell, content angles, competitors, recent demand, or terms that may have a changing meaning. Use raw web_search only for simple fact lookup. After research, answer naturally with practical guidance for the user's goal and cite source URLs briefly when useful.",
           "Act like a capable assistant: when the user asks for an output, fill the relevant project fields and run the matching tool if enough information is available.",
-          "Common workflows: product/content request = inspect_workspace_state -> create_project or update fields -> create_visual_card when the user needs publishable card/cover/carousel, or generate_project_output when the user needs rendered media -> open_workspace. Weekly content plan = inspect_workspace_state -> remember_agent_context when useful -> create_content_plan, and only create schedule drafts when the user asks for drafts. Video prompt request = create_seedance_prompt; video generation request = create_seedance_prompt -> generate_project_output after confirmation if high cost. In user-facing replies, say video prompt or generate video instead of naming the internal video model.",
+          "Common workflows: product/content request = inspect_workspace_state -> create_project or update fields -> generate_project_output when the user needs an image, poster, cover, carousel asset, video, or other rendered media through Pokaya's platform models. Weekly content plan = inspect_workspace_state -> remember_agent_context when useful -> create_content_plan, and only create schedule drafts when the user asks for drafts. Video prompt request = create_seedance_prompt; video generation request = create_seedance_prompt -> generate_project_output after confirmation. In user-facing replies, say video prompt or generate video instead of naming the internal video model.",
+          "Do not use DeepSeek or any hidden design skill to create final design assets. DeepSeek is only the planner/orchestrator. Rendered image/video/design outputs must be created by Pokaya platform generation tools, charged by the platform credit rules, and confirmed by the user before credit deduction.",
           "When the user changes direction, for example 'don't do washing machine, do dryer instead' or '不做洗衣机了，做烘干机', treat it as a product/context update, not as a request for a generic menu. Save the new product/context with remember_agent_context or create_project when needed, then ask one specific next-step question such as whether to create a content plan, image/poster, or video prompt.",
           "Do not answer product/context changes with a fixed list of all possible actions. First infer the new product and user's intent from the message.",
           "For 'what is missing today' or workspace diagnosis, call inspect_workspace_state and answer from the returned summary.",
