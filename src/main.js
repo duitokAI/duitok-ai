@@ -287,6 +287,12 @@ const copy = {
     password: "Password",
     continueRegistration: "Teruskan ke registration",
     faqTitle: "Soalan biasa",
+    changeLanguage: "Tukar bahasa",
+    languageMenuLabel: "Language",
+    workspace: "Workspace",
+    business: "Business",
+    startHere: "Start Here",
+    pokayaAgent: "Pokaya Agent",
     dashboard: "Dashboard",
     newProject: "New project",
     search: "Cari",
@@ -351,6 +357,36 @@ const copy = {
     humanSupport: "Support manusia",
     whatsappSupport: "WhatsApp",
     dashboardSubtitle: "Ringkasan produksi untuk workspace short-video selling anda.",
+    dashboardKicker: "Dashboard",
+    sopDashboard: "SOP Dashboard",
+    statImage: "Image",
+    statUgc: "UGC",
+    statAuto: "Auto Content",
+    statOriginal: "Original Video",
+    statClone: "Clone Prompt",
+    statReady: "Ready to Post",
+    statCredits: "Credits Used",
+    statToday: "{count} hari ini",
+    statVisualAssets: "Visual assets",
+    statVideoReady: "Video-ready",
+    statBatchPlans: "Batch plans",
+    statAnalyzed: "Analyzed",
+    statPatterns: "Patterns",
+    statScheduler: "Scheduler",
+    statQueued: "Queued",
+    statUsage: "Usage",
+    statCreditsNote: "{count} credits",
+    filterDateRange: "Filter by date range",
+    fromDate: "From Date",
+    toDate: "To Date",
+    apply: "Apply",
+    reset: "Reset",
+    dailyProduction: "Daily Production",
+    totalInRange: "{count} total in range",
+    chartVideoResearch: "Video/Research",
+    daysLeft: "{count} hari lagi",
+    expiresOn: "Tamat {date}",
+    noExpiryDate: "Tiada tarikh tamat",
     accountAttachmentsSubtitle: "Rekod upload yang disimpan dalam backend.",
     accountBillingSubtitle: "Plan, renewal, rate dan payment history.",
     accountTopupSubtitle: "Pembelian credit dikemaskini dalam backend ledger.",
@@ -532,6 +568,12 @@ const copy = {
     password: "密码",
     continueRegistration: "继续注册",
     faqTitle: "开始前<br>您可能会问",
+    changeLanguage: "切换语言",
+    languageMenuLabel: "语言",
+    workspace: "工作区",
+    business: "业务",
+    startHere: "新手开始",
+    pokayaAgent: "Pokaya 助手",
     dashboard: "总控",
     newProject: "新项目",
     search: "搜索",
@@ -596,6 +638,36 @@ const copy = {
     humanSupport: "人工客服",
     whatsappSupport: "WhatsApp",
     dashboardSubtitle: "您的短视频带货工作台生产总览。",
+    dashboardKicker: "总控",
+    sopDashboard: "SOP 总控",
+    statImage: "图片",
+    statUgc: "UGC",
+    statAuto: "自动内容",
+    statOriginal: "原创视频",
+    statClone: "复刻提示词",
+    statReady: "待发布",
+    statCredits: "已用 Credit",
+    statToday: "今日 {count}",
+    statVisualAssets: "视觉素材",
+    statVideoReady: "视频素材",
+    statBatchPlans: "批量计划",
+    statAnalyzed: "已分析",
+    statPatterns: "结构模板",
+    statScheduler: "排程器",
+    statQueued: "队列中",
+    statUsage: "用量",
+    statCreditsNote: "{count} credits",
+    filterDateRange: "按日期筛选",
+    fromDate: "开始日期",
+    toDate: "结束日期",
+    apply: "应用",
+    reset: "重置",
+    dailyProduction: "每日产出",
+    totalInRange: "范围内共 {count}",
+    chartVideoResearch: "视频 / 分析",
+    daysLeft: "剩余 {count} 天",
+    expiresOn: "{date} 到期",
+    noExpiryDate: "没有到期日",
     accountAttachmentsSubtitle: "已上传并保存到后台的记录。",
     accountBillingSubtitle: "计划、续费、费率和付款记录。",
     accountTopupSubtitle: "充值记录会同步到后台账本。",
@@ -777,6 +849,12 @@ const copy = {
     password: "Password",
     continueRegistration: "Continue to registration",
     faqTitle: "Common questions",
+    changeLanguage: "Change language",
+    languageMenuLabel: "Language",
+    workspace: "Workspace",
+    business: "Business",
+    startHere: "Start Here",
+    pokayaAgent: "Pokaya Agent",
     dashboard: "Dashboard",
     newProject: "New project",
     search: "Search",
@@ -841,6 +919,36 @@ const copy = {
     humanSupport: "Human Support",
     whatsappSupport: "WhatsApp",
     dashboardSubtitle: "Production summary for your TikTok affiliate workspace.",
+    dashboardKicker: "Dashboard",
+    sopDashboard: "SOP Dashboard",
+    statImage: "Image",
+    statUgc: "UGC",
+    statAuto: "Auto Content",
+    statOriginal: "Original Video",
+    statClone: "Clone Prompt",
+    statReady: "Ready to Post",
+    statCredits: "Credits Used",
+    statToday: "{count} today",
+    statVisualAssets: "Visual assets",
+    statVideoReady: "Video-ready",
+    statBatchPlans: "Batch plans",
+    statAnalyzed: "Analyzed",
+    statPatterns: "Patterns",
+    statScheduler: "Scheduler",
+    statQueued: "Queued",
+    statUsage: "Usage",
+    statCreditsNote: "{count} credits",
+    filterDateRange: "Filter by date range",
+    fromDate: "From Date",
+    toDate: "To Date",
+    apply: "Apply",
+    reset: "Reset",
+    dailyProduction: "Daily Production",
+    totalInRange: "{count} total in range",
+    chartVideoResearch: "Video/Research",
+    daysLeft: "{count} days left",
+    expiresOn: "Expires {date}",
+    noExpiryDate: "No expiry date",
     accountAttachmentsSubtitle: "Upload records saved to backend.",
     accountBillingSubtitle: "Plan, renewal, rates, and payment history.",
     accountTopupSubtitle: "Credit purchases update the backend ledger.",
@@ -950,10 +1058,11 @@ const tf = (key, values = {}) => Object.entries(values).reduce(
 
 function languageSwitch() {
   const current = languages.find(([id]) => id === state.lang) || languages[0];
+  const label = t("changeLanguage");
   return `
     <div class="lang-menu ${state.langOpen ? "open" : ""}">
-      <button class="lang-switch" type="button" data-lang-toggle aria-label="Change language" title="Change language">
-        ${icon("globe-2", 15)}<small>Language</small><span>${current[1]}</span>${icon(state.langOpen ? "chevron-up" : "chevron-down", 14)}
+      <button class="lang-switch" type="button" data-lang-toggle aria-label="${esc(label)}" title="${esc(label)}">
+        ${icon("globe-2", 15)}<small>${t("languageMenuLabel")}</small><span>${current[1]}</span>${icon(state.langOpen ? "chevron-up" : "chevron-down", 14)}
       </button>
       <div class="lang-options" role="menu">
         ${languages.map(([id, label]) => `<button class="${state.lang === id ? "active" : ""}" type="button" data-lang="${id}" role="menuitem">${label}</button>`).join("")}
@@ -2300,9 +2409,9 @@ function studio() {
         <div class="sidebar-language">${languageSwitch()}</div>
         <div class="side-section">${icon("layout-dashboard", 18)} ${t("workspace")}</div>
         <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard">${mascotIcon("nav-mascot-icon")} ${t("dashboard")}</button>
-        <button class="side-link ${state.page === "wizard" ? "active" : ""}" data-page="wizard">${icon("sparkles")} Start Here</button>
+        <button class="side-link ${state.page === "wizard" ? "active" : ""}" data-page="wizard">${icon("sparkles")} ${t("startHere")}</button>
         ${isOwnerAdminAccount() ? `<button class="side-link ${state.page === "admin" ? "active" : ""}" data-page="admin">${icon("shield-check")} Admin CRM</button>` : ""}
-        <button class="side-link ${state.page === "agent" ? "active" : ""}" data-page="agent">${icon("bot")} Pokaya Agent</button>
+        <button class="side-link ${state.page === "agent" ? "active" : ""}" data-page="agent">${icon("bot")} ${t("pokayaAgent")}</button>
         <button class="side-link ${state.page === "library" ? "active" : ""}" data-page="library">${icon("folder")} ${t("contentLibrary")}</button>
         <button class="new-project" data-action="new-project">${icon("plus")} <span>${t("newProject")}</span><b>${state.db.projects.length}/5</b></button>
         <div class="side-section">${icon("folder", 18)} ${t("projects")}</div>
@@ -2365,8 +2474,8 @@ function subscriptionStatus() {
     nextBill,
     daysLeft,
     expired,
-    label: expired ? "Expired" : `${daysLeft} days left`,
-    expiryText: nextBill ? `Expires ${formatReadableDate(nextBill)}` : "No expiry date"
+    label: expired ? t("expired") : tf("daysLeft", { count: daysLeft }),
+    expiryText: nextBill ? tf("expiresOn", { date: formatReadableDate(nextBill) }) : t("noExpiryDate")
   };
 }
 
@@ -2700,13 +2809,13 @@ function dashboardStats() {
     usage,
     usedCredits,
     cards: [
-      ["Image", typeCount("image"), "image", `${todayCount("image")} today`, "Visual assets"],
-      ["UGC", typeCount("ugc"), "video", `${todayCount("ugc")} today`, "Video-ready"],
-      ["Auto Content", typeCount("auto"), "wand-sparkles", `${todayCount("auto")} today`, "Batch plans"],
-      ["Original Video", typeCount("original"), "film", `${todayCount("original")} today`, "Analyzed"],
-      ["Clone Prompt", typeCount("clone") + typeCount("viral"), "layers-3", `${todayCount("clone") + todayCount("viral")} today`, "Patterns"],
-      ["Ready to Post", readyPosts, "send", "Scheduler", "Queued"],
-      ["Credits Used", usedCredits, "wallet-cards", `${usedCredits} credits`, "Usage"]
+      [t("statImage"), typeCount("image"), "image", tf("statToday", { count: todayCount("image") }), t("statVisualAssets")],
+      [t("statUgc"), typeCount("ugc"), "video", tf("statToday", { count: todayCount("ugc") }), t("statVideoReady")],
+      [t("statAuto"), typeCount("auto"), "wand-sparkles", tf("statToday", { count: todayCount("auto") }), t("statBatchPlans")],
+      [t("statOriginal"), typeCount("original"), "film", tf("statToday", { count: todayCount("original") }), t("statAnalyzed")],
+      [t("statClone"), typeCount("clone") + typeCount("viral"), "layers-3", tf("statToday", { count: todayCount("clone") + todayCount("viral") }), t("statPatterns")],
+      [t("statReady"), readyPosts, "send", t("statScheduler"), t("statQueued")],
+      [t("statCredits"), usedCredits, "wallet-cards", tf("statCreditsNote", { count: usedCredits }), t("statUsage")]
     ]
   };
 }
@@ -2716,28 +2825,28 @@ function dashboardOverview() {
   return `
     <header class="project-head dashboard-head">
       <div>
-        <p class="folder-label">${mascotIcon("label-mascot-icon")} Dashboard</p>
+        <p class="folder-label">${mascotIcon("label-mascot-icon")} ${t("dashboardKicker")}</p>
         <h1>${t("dashboard")}</h1>
         <p class="subtitle">${t("dashboardSubtitle")}</p>
       </div>
       <div class="head-actions">
         <button class="dark-button" data-page="topup">${icon("plus")} ${t("topup")}</button>
-        <button class="sop-button" data-sop-target="dashboard">${icon("book-open", 24)} SOP Dashboard</button>
+        <button class="sop-button" data-sop-target="dashboard">${icon("book-open", 24)} ${t("sopDashboard")}</button>
       </div>
     </header>
     <section class="dashboard-stat-grid">
       ${stats.cards.map(([label, value, ic, note, meta]) => `<article><div><span>${label}</span><b>${value}</b><small>${note}</small></div>${icon(ic, 24)}<em>${meta}</em></article>`).join("")}
     </section>
     <section class="date-filter-card">
-      <h2>${icon("calendar-days", 22)} Filter by date range</h2>
-      <label>From Date<input type="date" data-date-field="dateFrom" value="${state.dateFrom}"></label>
-      <label>To Date<input type="date" data-date-field="dateTo" value="${state.dateTo}"></label>
-      <button class="gold-button" data-action="apply-date">Apply</button>
-      <button class="dark-button" data-action="reset-date">Reset</button>
+      <h2>${icon("calendar-days", 22)} ${t("filterDateRange")}</h2>
+      <label>${t("fromDate")}<input type="date" data-date-field="dateFrom" value="${state.dateFrom}"></label>
+      <label>${t("toDate")}<input type="date" data-date-field="dateTo" value="${state.dateTo}"></label>
+      <button class="gold-button" data-action="apply-date">${t("apply")}</button>
+      <button class="dark-button" data-action="reset-date">${t("reset")}</button>
     </section>
     <section class="dashboard-main-grid">
       <article class="chart-card">
-        <div class="card-title"><h2>${icon("trending-up", 22)} Daily Production</h2><span>${stats.results.length} total in range</span></div>
+        <div class="card-title"><h2>${icon("trending-up", 22)} ${t("dailyProduction")}</h2><span>${tf("totalInRange", { count: stats.results.length })}</span></div>
         ${productionChart(stats.results)}
       </article>
     </section>`;
@@ -2764,7 +2873,7 @@ function productionChart(results) {
   });
   const max = Math.max(1, ...counts.map((item) => item.image + item.ugc + item.auto + item.video));
   return `
-    <div class="legend-row"><span><i></i> Image</span><span><i></i> UGC</span><span><i></i> Auto Content</span><span><i></i> Video/Research</span></div>
+    <div class="legend-row"><span><i></i> ${t("statImage")}</span><span><i></i> ${t("statUgc")}</span><span><i></i> ${t("statAuto")}</span><span><i></i> ${t("chartVideoResearch")}</span></div>
     <div class="bar-chart">
       ${counts.map((item) => {
         const total = item.image + item.ugc + item.auto + item.video;
