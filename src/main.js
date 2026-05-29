@@ -92,6 +92,7 @@ const state = {
   agentBusy: false,
   agentBusyStartedAt: 0,
   agentWorkingTick: 0,
+  agentDebugOpen: false,
   agentVisualPhase: "idle",
   agentTaskMode: "idle",
   agentIdleActivity: "sleep",
@@ -1272,7 +1273,7 @@ function publicSite() {
         </div>
       </nav>
       <section class="public-hero video-scene-hero">
-        <img class="video-scene-bg" src="/pokaya-hero-seller-v2.jpg" alt="Pokaya AI workflow board with content, image, video, and promotion outputs">
+        <img class="video-scene-bg" src="/pokaya-hero-seller-v2.jpg" alt="Pokaya AI board with content, image, video, and promotion outputs">
         <div class="video-scene-vignette" aria-hidden="true"></div>
         <div class="video-scene-grid" aria-hidden="true"></div>
         <div class="video-scene-beam beam-one" aria-hidden="true"></div>
@@ -2130,19 +2131,19 @@ function pricingBreakdownRows() {
   const data = {
     ms: [
       ["Plan Pro", "RM79.80/bulan"],
-      ["Workflow access", "Semua tools utama"],
+      ["Tool access", "Semua tools utama"],
       ["Image generation", "20 sen / image"],
       ["Video generation", "RM0.40 / video"]
     ],
     zh: [
       ["Pro 计划", "RM79.80/月"],
-      ["Workflow access", "所有主要工具"],
+      ["工具权限", "所有主要工具"],
       ["图片生成", "20 sen / 张"],
       ["视频生成", "RM0.40 / 条"]
     ],
     en: [
       ["Pro plan", "RM79.80/month"],
-      ["Workflow access", "All main tools"],
+      ["Tool access", "All main tools"],
       ["Image generation", "20 sen / image"],
       ["Video generation", "RM0.40 / video"]
     ]
@@ -2155,17 +2156,17 @@ function pricingBreakdownRows() {
 function pricingSteps() {
   const data = {
     ms: [
-      ["1", "Subscribe RM79.80/bulan", "Unlock semua workflow, studio, prompt library dan tools utama."],
+      ["1", "Subscribe RM79.80/bulan", "Unlock semua studio, prompt library dan tools utama."],
       ["2", "Top up credit bila perlu", "RM1 = 1 credit. Credit digunakan untuk image dan video generation."],
       ["3", "Generate, auto-deduct", "Setiap generation auto-tolak ikut rate. Anda nampak kos sebelum generate."]
     ],
     zh: [
-      ["1", "订阅 RM79.80/月", "解锁所有 workflow、studio、prompt library 和主要工具。"],
+      ["1", "订阅 RM79.80/月", "解锁 studio、prompt library 和主要工具。"],
       ["2", "需要时充值 credit", "RM1 = 1 credit。Credit 用于 image 和 video generation。"],
       ["3", "生成时自动扣费", "每次 generation 按 rate 扣费，生成前需要显示成本。"]
     ],
     en: [
-      ["1", "Subscribe RM79.80/month", "Unlock all workflows, studios, prompt library, and main tools."],
+      ["1", "Subscribe RM79.80/month", "Unlock studios, prompt library, and main tools."],
       ["2", "Top up credits when needed", "RM1 = 1 credit. Credits are used for image and video generation."],
       ["3", "Generate, auto-deduct", "Each generation auto-deducts by rate. Show the cost before generation."]
     ]
@@ -2177,18 +2178,18 @@ function pricingSteps() {
 
 function includedCreditBanner() {
   const data = {
-    ms: "Satu plan untuk image, video, prompt dan workflow AI",
-    zh: "一个计划，解锁 image、video、prompt 和 AI workflow",
-    en: "One plan for image, video, prompt, and AI workflows"
+    ms: "Satu plan untuk image, video, prompt dan AI tools",
+    zh: "一个计划，解锁 image、video、prompt 和 AI 工具",
+    en: "One plan for image, video, prompt, and AI tools"
   };
   return data[state.lang] || data.ms;
 }
 
 function controlCards() {
   const data = {
-    ms: ["RM79.80/bulan untuk akses Pokaya AI Pro", "Pokaya AI bantu output, bukan guarantee income", "Anda tetap perlu pilih peluang, publish dan review result", "TikTok Affiliate ialah workflow pertama, bukan seluruh identiti produk", "Semua kos generation perlu jelas sebelum generate"],
-    zh: ["RM79.80/月开通 Pokaya AI Pro", "Pokaya AI 帮助生成 output，不保证收入", "您仍然需要选择机会、发布和复盘结果", "TikTok Affiliate 是第一个 workflow，不是整个产品身份", "所有 generation 成本都应在生成前清楚显示"],
-    en: ["RM79.80/month for Pokaya AI Pro access", "Pokaya AI helps with output; it does not guarantee income", "You still choose opportunities, publish, and review results", "TikTok Affiliate is the first workflow, not the whole product identity", "Generation costs should be clear before generation"]
+    ms: ["RM79.80/bulan untuk akses Pokaya AI Pro", "Pokaya AI bantu output, bukan guarantee income", "Anda tetap perlu pilih peluang, publish dan review result", "TikTok Affiliate ialah pack pertama, bukan seluruh identiti produk", "Semua kos generation perlu jelas sebelum generate"],
+    zh: ["RM79.80/月开通 Pokaya AI Pro", "Pokaya AI 帮助生成 output，不保证收入", "您仍然需要选择机会、发布和复盘结果", "TikTok Affiliate 是第一个工具包，不是整个产品身份", "所有 generation 成本都应在生成前清楚显示"],
+    en: ["RM79.80/month for Pokaya AI Pro access", "Pokaya AI helps with output; it does not guarantee income", "You still choose opportunities, publish, and review results", "TikTok Affiliate is the first pack, not the whole product identity", "Generation costs should be clear before generation"]
   };
   return (data[state.lang] || data.ms)
     .map((item) => `<article>${icon("check-circle-2", 20)}<p>${item}</p></article>`)
@@ -2198,32 +2199,32 @@ function controlCards() {
 function faqItems() {
   const data = {
     ms: [
-      ["Adakah Pokaya AI guarantee saya dapat income?", "Tidak. Pokaya AI tidak menjanjikan income. Pokaya AI membantu anda hasilkan content, idea, visual, video dan workflow dengan lebih cepat supaya anda boleh test lebih banyak peluang."],
+      ["Adakah Pokaya AI guarantee saya dapat income?", "Tidak. Pokaya AI tidak menjanjikan income. Pokaya AI membantu anda hasilkan content, idea, visual, video dan plan dengan lebih cepat supaya anda boleh test lebih banyak peluang."],
       ["Saya beginner, boleh guna?", "Boleh. Pokaya AI dibina untuk pengguna yang mahu mula guna AI tanpa perlu belajar banyak tool atau prompt yang rumit."],
-      ["Adakah Pokaya AI hanya untuk TikTok Affiliate?", "Tidak. Pokaya AI ialah platform workflow AI untuk content, sales dan online income. TikTok Affiliate ialah workflow pertama yang kami optimalkan secara mendalam."],
-      ["Apa beza Pokaya AI dengan ChatGPT?", "ChatGPT ialah chatbot umum. Pokaya AI membungkus prompt, image, video dan content workflow menjadi tools yang lebih terus guna untuk content dan promotion."],
-      ["Apa yang saya dapat dalam plan Pro?", "Anda dapat akses kepada Image AI, Video AI, Prompt Library, Auto Content, Storytelling, Clone Video, TikTok Affiliate workflow pack dan VIP group."],
-      ["Perlu top up credit lagi?", "Jika generation menggunakan credit, anda hanya top up bila perlu. Plan Pro unlock platform, workflow dan rate generate. Kos generation perlu dipaparkan sebelum anda generate."],
+      ["Adakah Pokaya AI hanya untuk TikTok Affiliate?", "Tidak. Pokaya AI ialah AI toolkit untuk content, sales dan online income. TikTok Affiliate ialah pack pertama yang kami optimalkan secara mendalam."],
+      ["Apa beza Pokaya AI dengan ChatGPT?", "ChatGPT ialah chatbot umum. Pokaya AI membungkus prompt, image, video dan content plan menjadi tools yang lebih terus guna untuk content dan promotion."],
+      ["Apa yang saya dapat dalam plan Pro?", "Anda dapat akses kepada Image AI, Video AI, Prompt Library, Auto Content, Storytelling, Clone Video, TikTok Affiliate Pack dan VIP group."],
+      ["Perlu top up credit lagi?", "Jika generation menggunakan credit, anda hanya top up bila perlu. Plan Pro unlock platform, tools dan rate generate. Kos generation perlu dipaparkan sebelum anda generate."],
       ["Boleh cancel bila-bila?", "Boleh. Anda boleh cancel bila-bila melalui akaun anda atau hubungi support."],
       ["Boleh bayar guna FPX?", "Boleh. Pokaya AI menyokong FPX online banking dan kaedah pembayaran Malaysia yang tersedia."]
     ],
     zh: [
-      ["Pokaya AI 保证赚钱吗？", "不保证。Pokaya AI 不承诺收入。它帮助您更快生成 content、idea、visual、video 和 workflow，让您可以测试更多机会。"],
+      ["Pokaya AI 保证赚钱吗？", "不保证。Pokaya AI 不承诺收入。它帮助您更快生成 content、idea、visual、video 和计划，让您可以测试更多机会。"],
       ["我是新手，可以用吗？", "可以。Pokaya AI 是给想开始用 AI、但不想从很多工具和复杂 prompt 学起的用户设计的。"],
-      ["Pokaya AI 只是 TikTok Affiliate 工具吗？", "不是。Pokaya AI 是用于 content、sales 和 online income 的 AI workflow 平台。TikTok Affiliate 是第一个被深度优化的工作流。"],
-      ["Pokaya AI 和 ChatGPT 有什么不同？", "ChatGPT 是通用 chatbot。Pokaya AI 把 prompt、image、video 和 content workflow 包装成更直接可用的工具，用来做内容和推广。"],
-      ["Pro 计划包含什么？", "Pro 包含 Image AI、Video AI、Prompt Library、Auto Content、Storytelling、Clone Video、TikTok Affiliate workflow pack 和 VIP group。"],
-      ["还需要 top up credit 吗？", "如果 generation 使用 credit，您只在需要时 top up。Pro 计划解锁 platform、workflow 和生成 rate。生成前应该清楚显示成本。"],
+      ["Pokaya AI 只是 TikTok Affiliate 工具吗？", "不是。Pokaya AI 是用于 content、sales 和 online income 的 AI 工具箱。TikTok Affiliate 是第一个被深度优化的工具包。"],
+      ["Pokaya AI 和 ChatGPT 有什么不同？", "ChatGPT 是通用 chatbot。Pokaya AI 把 prompt、image、video 和 content plan 包装成更直接可用的工具，用来做内容和推广。"],
+      ["Pro 计划包含什么？", "Pro 包含 Image AI、Video AI、Prompt Library、Auto Content、Storytelling、Clone Video、TikTok Affiliate Pack 和 VIP group。"],
+      ["还需要 top up credit 吗？", "如果 generation 使用 credit，您只在需要时 top up。Pro 计划解锁 platform、工具和生成 rate。生成前应该清楚显示成本。"],
       ["可以随时取消吗？", "可以。您可以在账号里取消，或联系 support。"],
       ["可以用 FPX 付款吗？", "可以。Pokaya AI 支持 FPX online banking 和可用的马来西亚付款方式。"]
     ],
     en: [
-      ["Does Pokaya AI guarantee income?", "No. Pokaya AI does not promise income. It helps you create content, ideas, visuals, videos, and workflows faster so you can test more opportunities."],
+      ["Does Pokaya AI guarantee income?", "No. Pokaya AI does not promise income. It helps you create content, ideas, visuals, videos, and plans faster so you can test more opportunities."],
       ["Can beginners use it?", "Yes. Pokaya AI is built for users who want to start using AI without learning many tools or complicated prompts first."],
-      ["Is Pokaya AI only for TikTok Affiliate?", "No. Pokaya AI is an AI workflow platform for content, sales, and online income. TikTok Affiliate is the first workflow we optimized deeply."],
-      ["How is Pokaya AI different from ChatGPT?", "ChatGPT is a general chatbot. Pokaya AI packages prompts, images, videos, and content workflows into tools that are more directly usable for content and promotion."],
-      ["What do I get in Pro?", "You get Image AI, Video AI, Prompt Library, Auto Content, Storytelling, Clone Video, TikTok Affiliate workflow pack, and VIP group access."],
-      ["Do I need to top up credits?", "If generation uses credits, top up only when needed. Pro unlocks the platform, workflows, and generation rates. Costs should be shown before generation."],
+      ["Is Pokaya AI only for TikTok Affiliate?", "No. Pokaya AI is an AI toolkit for content, sales, and online income. TikTok Affiliate is the first pack we optimized deeply."],
+      ["How is Pokaya AI different from ChatGPT?", "ChatGPT is a general chatbot. Pokaya AI packages prompts, images, videos, and content plans into tools that are more directly usable for content and promotion."],
+      ["What do I get in Pro?", "You get Image AI, Video AI, Prompt Library, Auto Content, Storytelling, Clone Video, TikTok Affiliate Pack, and VIP group access."],
+      ["Do I need to top up credits?", "If generation uses credits, top up only when needed. Pro unlocks the platform, tools, and generation rates. Costs should be shown before generation."],
       ["Can I cancel anytime?", "Yes. You can cancel in your account or contact support."],
       ["Can I pay with FPX?", "Yes. Pokaya AI supports FPX online banking and available Malaysia payment methods."]
     ]
@@ -4404,7 +4405,7 @@ function sopDashboardContent() {
       guideTitle: "怎么用",
       stepLabel: "步骤",
       tipLabel: "提示",
-      workflowTitle: "工作流建议",
+      workflowTitle: "操作建议",
       workflow: "一个客户、一个 Campaign 或一个产品，尽量对应一个 Project。先批量生成内容，再在 history grid 里复盘，月底用 Dashboard 看总量、成本和节奏，下个月继续沿用同一个 Project 追踪增长。",
       sections: { 7: "细节 — 数据卡片与筛选", 11: "侧边栏 — 每个区域的作用" },
       steps: [
@@ -4507,7 +4508,7 @@ function sopImageContent() {
       guideTitle: "怎么用",
       stepLabel: "步骤",
       tipLabel: "提示",
-      workflowTitle: "工作流建议",
+      workflowTitle: "操作建议",
       workflow: "先生成 5-10 张最稳定的 avatar 或产品场景图，挑出效果最好的保存下来，再在 UGC tab 里复用，这样后续视频会更统一。",
       sections: { 5: "下拉选项 — 每个选项是什么意思" },
       steps: [
@@ -4516,7 +4517,7 @@ function sopImageContent() {
         { no: "3", title: "上传 Product Reference", copy: "如果有产品图，就上传包装、label 和形状都清楚的图片。AI 会尽量把产品保留在新场景里。如果只是生成 avatar，可以跳过这一步。" },
         { no: "4", title: "点击 Generate Image", copy: "点击 Generate Image 开始生成。每张图成本 RM0.20。下方 history 会出现 pending card，通常等待 15-30 秒。完成后可以下载，也可以拿到 UGC tab 作为 reference。" },
         { no: "5", title: "MODEL 下拉 — 选择 AI 引擎", copy: "Banana Pro 是默认选项，适合马来西亚人脸和角色一致性。GPT Image 2 更适合创意场景和 aesthetic visual，但人脸可能没那么稳定。Imagen 4 更适合高真实感产品 hero shot。", tip: "Avatar 先用 Banana Pro。需要特别场景时用 GPT Image 2。产品高级图用 Imagen 4。" },
-        { no: "6", title: "MODE 下拉 — 操作类型", copy: "Create Image 是默认模式，用 prompt 和 reference 生成新图。其它 edit / inpaint 类模式更 advanced，标准 UGC workflow 通常不用。", tip: "95% 情况保持 Create Image 就好。" },
+        { no: "6", title: "MODE 下拉 — 操作类型", copy: "Create Image 是默认模式，用 prompt 和 reference 生成新图。其它 edit / inpaint 类模式更 advanced，标准 UGC 操作通常不用。", tip: "95% 情况保持 Create Image 就好。" },
         { no: "7", title: "AVATAR / PRODUCT / SALES tabs", copy: "Avatar 是人物 preset；Product 是产品图 preset，例如 flat lay、pedestal、splash；Sales 是广告和 banner 风格的营销视觉。", tip: "点击 preset 会自动填 prompt，您可以再按产品修改。" },
         { no: "8", title: "女性 persona presets", copy: "Kebaya 20s 是现代 kebaya 年轻女性；Casual 20s 是 Gen Z 日常风；Makcik 是温暖妈妈感；Kitchen 是厨房场景；Nenek 是长辈信任感；Nenek Garden 是户外花园长辈场景。", tip: "女性产品用 Kebaya 20s 或 Casual 20s；家庭产品用 Makcik；长辈 testimonial 用 Nenek。" },
         { no: "9", title: "男性 persona presets", copy: "Baju Melayu 20s 是年轻传统造型；Casual 20s 是 Gen Z 日常风；Abang Pro 是 30 岁左右专业形象；Pakcik 是温暖可信的叔叔感。", tip: "需要信任背书的产品，可以测试 Pakcik 风格。" }
@@ -4713,7 +4714,7 @@ function sopAutoContentContent() {
       guideTitle: "怎么用",
       stepLabel: "步骤",
       tipLabel: "提示",
-      workflowTitle: "工作流建议",
+      workflowTitle: "操作建议",
       workflow: "Auto Content 最适合搭配 Auto Post Chrome extension：批量生成，review 后用 TikTok native scheduler 排程发布，后续由 TikTok 处理 posting。",
       sections: { 9: "下拉选项 — 每个选项是什么意思" },
       steps: [
@@ -4821,7 +4822,7 @@ function sopOriginalVideoContent() {
       guideTitle: "怎么用",
       stepLabel: "步骤",
       tipLabel: "提示",
-      workflowTitle: "工作流建议",
+      workflowTitle: "操作建议",
       workflow: "Original Video 最适合作为独立 cinematic piece 或 B-roll。也可以在 CapCut / Premiere 里和 UGC voice-over 混剪，让广告更有层次。",
       sections: { 6: "下拉选项 — 每个选项是什么意思" },
       steps: [
@@ -4905,7 +4906,7 @@ function sopClonePromptContent() {
       guideTitle: "怎么用",
       stepLabel: "步骤",
       tipLabel: "提示",
-      workflowTitle: "工作流建议",
+      workflowTitle: "操作建议",
       workflow: "Clone Prompt 是偷结构，不是偷内容。保留 timing、camera logic、hook 和 scene anchor，再换成自己的产品、dialog 和 CTA。",
       sections: { 6: "下拉选项 — 每个选项是什么意思" },
       steps: [
@@ -5389,6 +5390,11 @@ function agentUiCopy() {
       thinkingLabel: "Agent 正在思考",
       slowTitle: "这次响应比较久",
       slowDescription: "你可以先继续输入，我会在结果回来后接上。",
+      abilityDirect: "能直接执行的，我会直接做",
+      abilityAsk: "信息不够时，我会先问清楚",
+      abilityConfirm: "扣费或发布前，一定先确认",
+      debug: "调试",
+      close: "关闭",
       newChat: "新对话",
       history: "历史",
       more: "更多",
@@ -5437,6 +5443,11 @@ function agentUiCopy() {
       thinkingLabel: "Agent sedang berfikir",
       slowTitle: "Respons kali ini agak lama",
       slowDescription: "Anda boleh terus taip dulu. Saya akan sambung bila jawapan siap.",
+      abilityDirect: "Jika boleh terus buat, saya akan buat",
+      abilityAsk: "Jika maklumat kurang, saya akan tanya dulu",
+      abilityConfirm: "Credits atau publish mesti confirm dulu",
+      debug: "Debug",
+      close: "Tutup",
       newChat: "Chat baru",
       history: "Sejarah",
       more: "Lagi",
@@ -5485,6 +5496,11 @@ function agentUiCopy() {
       thinkingLabel: "Agent is thinking",
       slowTitle: "This response is taking longer",
       slowDescription: "You can keep typing. I will continue when the result is ready.",
+      abilityDirect: "If I can act directly, I will",
+      abilityAsk: "If details are missing, I will ask first",
+      abilityConfirm: "Credits or publishing always require confirmation",
+      debug: "Debug",
+      close: "Close",
       newChat: "New chat",
       history: "History",
       more: "More",
@@ -5708,6 +5724,11 @@ function chatPanel() {
     : `<div class="agent-empty-state">
         <strong>${c.emptyTitle}</strong>
         <p>${c.emptyBody}</p>
+        <div class="agent-boundary-list" aria-label="Agent capability boundaries">
+          <span>${icon("check-check", 14)} ${esc(c.abilityDirect)}</span>
+          <span>${icon("message-circle-question", 14)} ${esc(c.abilityAsk)}</span>
+          <span>${icon("shield-check", 14)} ${esc(c.abilityConfirm)}</span>
+        </div>
       </div>`;
   const pendingConfirmation = agentHasPendingConfirmation();
   const inputPlaceholder = state.agentBusy
@@ -5717,7 +5738,9 @@ function chatPanel() {
       : c.inputReady;
   return `
     <section class="agent-panel agent-page-panel agent-chat-shell">
+      ${agentChatToolbar()}
       ${agentHistoryPanel()}
+      ${agentDebugPanel()}
       <div class="agent-thread">
         ${intro}
         ${agentCollapsedHistoryBar()}
@@ -5729,6 +5752,37 @@ function chatPanel() {
         <button class="gold-button agent-send-button" type="submit" title="${esc(c.send)}" aria-label="${esc(c.send)}" ${state.agentBusy || pendingConfirmation ? "disabled" : ""}>${icon(state.agentBusy ? "loader-circle" : "send", 19)}<span>${c.send}</span></button>
       </form>
     </section>`;
+}
+
+function agentChatToolbar() {
+  const c = agentUiCopy();
+  const status = agentStatusInfo();
+  return `<div class="agent-chat-toolbar">
+    <span class="agent-status-pill" data-agent-status="${status.key}">${icon(status.iconName, 15)} ${esc(status.label)}</span>
+    <div>
+      <button class="icon-only" data-action="new-agent-chat" title="${esc(c.newChat)}" aria-label="${esc(c.newChat)}">${icon("message-square-plus", 17)}</button>
+      <button class="icon-only" data-action="toggle-agent-history" title="${esc(c.history)}" aria-label="${esc(c.history)}">${icon("history", 17)}${state.agentHistorySessions.length ? `<b>${state.agentHistorySessions.length}</b>` : ""}</button>
+      ${isOwnerAdminAccount() ? `<button class="icon-only" data-action="toggle-agent-debug" title="${esc(c.debug)}" aria-label="${esc(c.debug)}">${icon("bug", 17)}</button>` : ""}
+    </div>
+  </div>`;
+}
+
+function agentDebugPanel() {
+  if (!state.agentDebugOpen || !isOwnerAdminAccount()) return "";
+  const c = agentUiCopy();
+  const latestRun = [...state.agentMessages].reverse().find((item) => item.agentRun)?.agentRun;
+  const plan = Array.isArray(latestRun?.plan) ? latestRun.plan : [];
+  const cards = Array.isArray(latestRun?.toolCards) ? latestRun.toolCards : [];
+  return `<section class="agent-debug-panel">
+    <header><strong>${icon("bug", 16)} Agent Debug</strong><button class="icon-only" data-action="toggle-agent-debug" title="${esc(c.close)}" aria-label="${esc(c.close)}">${icon("x", 15)}</button></header>
+    <div class="agent-debug-grid">
+      <p><span>Status</span><b>${esc(latestRun?.status || "idle")}</b></p>
+      <p><span>Run</span><b>${esc(latestRun?.id || "-")}</b></p>
+      <p><span>Steps</span><b>${plan.length}</b></p>
+      <p><span>Tool cards</span><b>${cards.length}</b></p>
+    </div>
+    ${plan.length ? `<ol>${plan.slice(0, 6).map((step) => `<li><b>${esc(step.status || "pending")}</b><span>${esc(step.label || step.id || "Step")}</span>${step.detail ? `<small>${esc(step.detail)}</small>` : ""}</li>`).join("")}</ol>` : `<p class="agent-debug-empty">No agent run yet.</p>`}
+  </section>`;
 }
 
 function agentHistoryPanel() {
@@ -6358,7 +6412,7 @@ function bind() {
 function autoResizeAgentInput(input) {
   if (!input) return;
   input.style.height = "auto";
-  input.style.height = `${Math.min(input.scrollHeight, 132)}px`;
+  input.style.height = `${Math.min(input.scrollHeight, 116)}px`;
 }
 
 function fillAgentInput(value = "") {
@@ -6412,10 +6466,11 @@ async function action(event, name) {
   if (name === "chat") return set({ page: "agent" });
   if (name === "ask-agent-schedule") return askAgentSchedule();
   if (name === "toggle-agent-history") return set({ agentHistoryOpen: !state.agentHistoryOpen });
+  if (name === "toggle-agent-debug" && isOwnerAdminAccount()) return set({ agentDebugOpen: !state.agentDebugOpen, agentHistoryOpen: false });
   if (name === "new-agent-chat") {
     saveCurrentAgentHistory();
     localStorage.removeItem(storageKeys.agentMessages);
-    return set({ agentMessages: [], agentInput: "", agentExpandedMessages: {}, agentHistoryOpen: true });
+    return set({ agentMessages: [], agentInput: "", agentExpandedMessages: {}, agentHistoryOpen: false, agentDebugOpen: false });
   }
   if (name === "clear-agent-context" || name === "clear-agent") {
     localStorage.removeItem(storageKeys.agentMessages);
