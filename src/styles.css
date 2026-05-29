@@ -15680,6 +15680,10 @@ label {
   min-height: 0 !important;
 }
 
+.studio-shell .agent-status-card .agent-life-card-compact {
+  grid-template-rows: minmax(0, 1fr) !important;
+}
+
 .studio-shell .agent-status-card .agent-life-stage {
   height: 336px !important;
   min-height: 336px !important;
@@ -16507,6 +16511,11 @@ label {
   grid-template-rows: 44px minmax(0, 1fr) !important;
 }
 
+.studio-shell .agent-status-card .agent-life-card-compact {
+  height: 336px !important;
+  max-height: 336px !important;
+}
+
 .studio-shell .agent-status-card .agent-life-stage {
   height: 336px !important;
   min-height: 336px !important;
@@ -16548,6 +16557,11 @@ label {
     grid-template-rows: 44px minmax(0, 1fr) !important;
   }
 
+  .studio-shell .agent-status-card .agent-life-card-compact {
+    height: 296px !important;
+    max-height: 296px !important;
+  }
+
   .studio-shell .agent-status-card .agent-life-stage {
     height: 296px !important;
     min-height: 296px !important;
@@ -16560,6 +16574,11 @@ label {
     height: 300px !important;
     max-height: 300px !important;
     grid-template-rows: 44px minmax(0, 1fr) !important;
+  }
+
+  .studio-shell .agent-status-card .agent-life-card-compact {
+    height: 256px !important;
+    max-height: 256px !important;
   }
 
   .studio-shell .agent-status-card .agent-life-stage {

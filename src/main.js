@@ -4548,7 +4548,8 @@ function agent3DCopy(mode = "idle") {
   return copy[mode] || copy.idle;
 }
 
-function agent3DScene() {
+function agent3DScene(options = {}) {
+  const compact = Boolean(options.compact);
   const mode = currentAgent3DMode();
   const copy = agent3DCopy(mode);
   const status = agentStatusInfo();
@@ -4559,11 +4560,11 @@ function agent3DScene() {
   const phase = ["idle", "wake", "chatting", "walking", "working", "done", "returning"].includes(phasePreview) ? phasePreview : state.agentVisualPhase || "idle";
   const idle = ["sleep"].includes(idlePreview) ? idlePreview : "sleep";
   return `
-    <div class="agent-3d-card agent-life-card" data-agent-mode="${mode}" data-agent-phase="${phase}" data-idle-activity="${idle}">
-      <div class="agent-3d-status">
+    <div class="agent-3d-card agent-life-card ${compact ? "agent-life-card-compact" : ""}" data-agent-mode="${mode}" data-agent-phase="${phase}" data-idle-activity="${idle}">
+      ${compact ? "" : `<div class="agent-3d-status">
         <span>${icon(status.iconName, 17)} ${status.label}</span>
         <b>${status.label}</b>
-      </div>
+      </div>`}
       <div class="agent-life-stage" aria-label="Duitok Agent work, chat, and rest states">
         <img class="agent-life-render-image agent-life-render-active" src="/duitok-agent-stage-chat-bg.png" alt="Duitok Agent workstation, chat station, and sleeping bed">
         <img class="agent-life-render-image agent-life-render-sleep" src="/duitok-agent-stage-chat-sleep-bg.png" alt="Duitok Agent sleeping in bed">
@@ -4571,15 +4572,15 @@ function agent3DScene() {
         <span class="agent-chair-mask" aria-hidden="true"></span>
         <img class="agent-sprite agent-sprite-work" src="/duitok-agent-sprite-work.png" alt="">
         <img class="agent-sprite agent-sprite-chat" src="/duitok-agent-sprite-chat.png" alt="">
-        <span class="agent-life-bubble">${agentVisualBubble(mode, phase)}</span>
+        ${compact ? "" : `<span class="agent-life-bubble">${agentVisualBubble(mode, phase)}</span>`}
       </div>
-      <div class="agent-3d-copy">
+      ${compact ? "" : `<div class="agent-3d-copy">
         <h2>${copy.title}</h2>
         <p>${copy.subtitle}</p>
         <div class="agent-3d-task-row">
           ${copy.cards.map((item) => `<span>${esc(item)}</span>`).join("")}
         </div>
-      </div>
+      </div>`}
     </div>`;
 }
 
@@ -4780,8 +4781,8 @@ function agentStatusCard() {
     <div class="agent-status-card-head">
       <span>${icon(status.iconName, 16)} ${status.label}</span>
     </div>
-    ${agent3DScene()}
     <p>${esc(status.hint)}</p>
+    ${agent3DScene({ compact: true })}
   </section>`;
 }
 
