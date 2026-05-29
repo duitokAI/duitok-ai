@@ -2745,7 +2745,7 @@ function studio() {
           <span class="agent-primary-status"><i></i>Ready</span>
         </button>
         <div class="side-section">${icon("layout-dashboard", 18)} ${t("workspace")}</div>
-        <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard">${mascotIcon("nav-mascot-icon")} ${t("dashboard")}</button>
+        <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard">${icon("layout-dashboard", 22)} ${t("dashboard")}</button>
         ${isOwnerAdminAccount() ? `<button class="side-link ${state.page === "admin" ? "active" : ""}" data-page="admin">${icon("shield-check")} Admin CRM</button>` : ""}
         <button class="side-link ${state.page === "library" ? "active" : ""}" data-page="library">${icon("folder")} ${t("contentLibrary")}</button>
         <button class="new-project" data-action="new-project">${icon("plus")} <span>${t("newProject")}</span><b>${state.db.projects.length}</b></button>
@@ -3158,7 +3158,7 @@ function dashboardOverview() {
   return `
     <header class="project-head dashboard-head">
       <div>
-        <p class="folder-label">${mascotIcon("label-mascot-icon")} ${t("dashboardKicker")}</p>
+        <p class="folder-label">${icon("layout-dashboard", 18)} ${t("dashboardKicker")}</p>
         <h1>${t("dashboard")}</h1>
         <p class="subtitle">${t("dashboardSubtitle")}</p>
       </div>
