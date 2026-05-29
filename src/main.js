@@ -14,6 +14,7 @@ const agentHistoryLimit = 12;
 let sidebarScrollTop = 0;
 let promoCountdownTimer = null;
 let assetSearchTimer = null;
+let sopSearchTimer = null;
 
 const steps = [
   ["image", "image", "stepImage", "01"],
@@ -65,6 +66,9 @@ const state = {
   live: false,
   chat: false,
   sopTopic: "dashboard",
+  sopSearch: "",
+  sopStepAnchor: "",
+  sopProgress: JSON.parse(localStorage.getItem("pokaya-sop-progress") || "{}"),
   agentInput: "",
   agentBusy: false,
   agentBusyStartedAt: 0,
@@ -1153,6 +1157,7 @@ function render() {
   window.lucide?.createIcons();
   updatePromoCountdown();
   restoreSidebarScroll();
+  scrollToSopAnchor();
 }
 
 function route() {
@@ -1163,6 +1168,14 @@ function route() {
   if (pathIs("/terms")) return legalPage("terms");
   if (pathIs("/privacy")) return legalPage("privacy");
   return publicSite();
+}
+
+function scrollToSopAnchor() {
+  if (!state.sopStepAnchor) return;
+  const target = document.getElementById(`sop-step-${state.sopStepAnchor}`);
+  if (!target) return;
+  requestAnimationFrame(() => target.scrollIntoView({ block: "start", behavior: "smooth" }));
+  state.sopStepAnchor = "";
 }
 
 function publicSite() {
@@ -3169,7 +3182,7 @@ function projectPage() {
   return `
     <header class="project-head">
       <div><p class="folder-label">${icon("folder", 18)} ${t("project")}</p><h1>${p.name}</h1></div>
-      <button class="sop-button" data-sop-target="${esc(state.step)}" data-sop-modal="true">${icon("book-open", 25)} ${sopButtonLabel()}</button>
+      <button class="sop-button" data-sop-target="${esc(state.step)}">${icon("book-open", 25)} ${sopButtonLabel()}</button>
     </header>
     <nav class="step-tabs">
       ${steps.map(([id, ic, key, no]) => `<button class="${state.step === id ? "active" : ""}" data-step="${id}">${icon(ic)} <span>${t(key)}</span><b>${no}</b></button>`).join("")}
@@ -4719,25 +4732,31 @@ function sopGuideContent() {
 
 function sopLibrary() {
   const labels = {
-    dashboard: { group: "Getting Started", icon: "layout-dashboard", desc: "Workspace, projects, stats, credits, and daily production rhythm.", content: sopDashboardContent },
-    image: { group: "Create Content", icon: "image", desc: "Generate product visuals, ads, and image assets inside a project.", content: sopImageContent },
-    ugc: { group: "Create Content", icon: "video", desc: "Create UGC-style selling videos with scripts, angles, and output settings.", content: sopUgcContent },
-    auto: { group: "Create Content", icon: "wand-sparkles", desc: "Batch content workflow for testing multiple hooks and angles faster.", content: sopAutoContentContent },
-    original: { group: "Create Content", icon: "film", desc: "Write original video prompts and structure short-form selling scenes.", content: sopOriginalVideoContent },
-    clone: { group: "Create Content", icon: "layers-3", desc: "Reverse-engineer competitor videos and adapt their structure safely.", content: sopClonePromptContent },
-    scheduler: { group: "Publish & Operate", icon: "calendar-days", desc: "Plan posting cadence and turn generated assets into queue drafts." },
-    autopost: { group: "Publish & Operate", icon: "send", desc: "Connect TikTok posting flow and manage publish-ready items." },
-    usage: { group: "Publish & Operate", icon: "activity", desc: "Track credits, usage, and production cost." }
+    dashboard: { group: "Getting Started", shortTitle: "Start", icon: "layout-dashboard", desc: "Set up projects and read production stats.", time: "5 min", nextLabel: "Create new project", nextPage: "dashboard", nextAction: "new-project", content: sopDashboardContent },
+    image: { group: "Create Content", shortTitle: "Image", icon: "image", desc: "Generate product visuals and avatar images.", time: "7 min", nextLabel: "Go to Image tab", nextStep: "image", content: sopImageContent },
+    ugc: { group: "Create Content", shortTitle: "UGC", icon: "video", desc: "Create selfie-style product videos.", time: "8 min", nextLabel: "Go to UGC tab", nextStep: "ugc", content: sopUgcContent },
+    auto: { group: "Create Content", shortTitle: "Batch", icon: "wand-sparkles", desc: "Batch hooks, scripts, and videos faster.", time: "10 min", nextLabel: "Go to Auto Content", nextStep: "auto", content: sopAutoContentContent },
+    original: { group: "Create Content", shortTitle: "Cinema", icon: "film", desc: "Write original cinematic video prompts.", time: "6 min", nextLabel: "Go to Original Video", nextStep: "original", content: sopOriginalVideoContent },
+    clone: { group: "Create Content", shortTitle: "Clone", icon: "layers-3", desc: "Break down competitor video structure.", time: "6 min", nextLabel: "Go to Clone Prompt", nextStep: "clone", content: sopClonePromptContent },
+    scheduler: { group: "Publish & Operate", shortTitle: "Schedule", icon: "calendar-days", desc: "Plan posting cadence and queue drafts.", time: "Soon" },
+    autopost: { group: "Publish & Operate", shortTitle: "Auto Post", icon: "send", desc: "Connect TikTok posting workflow.", time: "Soon" },
+    usage: { group: "Publish & Operate", shortTitle: "Usage", icon: "activity", desc: "Track credits, usage, and cost.", time: "Soon" }
   };
   return Object.entries(labels).map(([id, item]) => {
     const guide = item.content?.();
+    const steps = guide?.steps?.length || 0;
+    const done = sopProgressCount(id);
+    const progressTotal = guide ? sopProgressTotal(guide) : 0;
     return {
       id,
       ...item,
       title: guide?.title || sopComingSoonTitle(id),
       path: guide?.path || "SOP Center · coming soon",
       guide,
-      status: guide ? "Ready" : "Coming soon"
+      steps,
+      done,
+      progressTotal,
+      status: guide ? `${done}/${progressTotal} done` : "Coming soon"
     };
   });
 }
@@ -4755,63 +4774,138 @@ function activeSopItem() {
   return items.find((item) => item.id === state.sopTopic) || items[0];
 }
 
+function sopProgressCount(topicId) {
+  return Object.values(state.sopProgress?.[topicId] || {}).filter(Boolean).length;
+}
+
+function sopProgressTotal(guide) {
+  return Math.min(4, Math.max(1, Math.ceil((guide?.steps?.length || 1) / 5)));
+}
+
+function sopSearchResults(items, query) {
+  const value = query.trim().toLowerCase();
+  if (!value) return [];
+  return items.flatMap((item) => {
+    const guide = item.guide;
+    if (!guide) return [];
+    const base = [item.shortTitle, item.title, item.desc, guide.path, guide.what, guide.when, guide.workflow].join(" ").toLowerCase();
+    const topicHit = base.includes(value) ? [{ topicId: item.id, topicTitle: item.shortTitle, stepNo: "", stepTitle: item.title, excerpt: item.desc }] : [];
+    const stepHits = (guide.steps || []).filter((step) => [step.title, step.subtitle, step.copy, step.tip, ...(step.bullets || [])].join(" ").toLowerCase().includes(value))
+      .slice(0, 4)
+      .map((step) => ({ topicId: item.id, topicTitle: item.shortTitle, stepNo: step.no, stepTitle: step.title, excerpt: step.copy || step.tip || "" }));
+    return [...topicHit, ...stepHits];
+  }).slice(0, 12);
+}
+
 function sopPage() {
   const items = sopLibrary();
   const active = activeSopItem();
-  const groups = [...new Set(items.map((item) => item.group))];
   const quickIds = ["dashboard", "image", "ugc", "auto", "original", "clone"];
+  const operateItems = items.filter((item) => item.group === "Publish & Operate");
+  const results = sopSearchResults(items, state.sopSearch || "");
+  const progressTotal = active.guide ? sopProgressTotal(active.guide) : 0;
   return `
-    <header class="project-head sop-center-head">
+    <header class="project-head sop-center-head sop-compact-head">
       <div>
         <p class="folder-label">${icon("book-open", 18)} SOP Center</p>
         <h1>SOP Center</h1>
-        <p class="subtitle">把 Pokaya 平台的完整操作步骤集中在这里。先选任务，再按步骤执行。</p>
+        <p class="subtitle">选择一个任务，按步骤完成生成、复盘和发布。</p>
       </div>
       <div class="head-actions">
-        <button class="dark-button" data-action="support">${icon("message-circle")} Need help?</button>
-        <button class="sop-button" data-action="download-sop">${icon("download", 22)} Export SOP</button>
+        <button class="dark-button mini-button" data-action="support">${icon("message-circle", 17)} Help</button>
+        <button class="sop-button mini-button" data-action="download-sop">${icon("download", 17)} Export</button>
       </div>
     </header>
+    <section class="sop-command-bar">
+      <label>${icon("search", 18)}<input data-sop-search placeholder="Search SOP, step, credit, prompt, UGC..." value="${esc(state.sopSearch || "")}"></label>
+      <div class="sop-path-pills">
+        <span>Recommended</span>
+        ${["dashboard", "image", "ugc", "auto"].map((id) => {
+          const item = items.find((entry) => entry.id === id);
+          return `<button type="button" class="${active.id === id ? "active" : ""}" data-sop-target="${id}">${esc(item.shortTitle)}</button>`;
+        }).join("")}
+      </div>
+    </section>
+    ${state.sopSearch ? `<section class="sop-search-results">
+      <div class="card-title"><h2>${icon("search-check", 20)} Search Results</h2><span>${results.length} matches</span></div>
+      ${results.length ? results.map((result) => `<button type="button" data-sop-result-topic="${esc(result.topicId)}" data-sop-result-step="${esc(result.stepNo)}">
+        <b>${esc(result.topicTitle)}${result.stepNo ? ` · Step ${esc(result.stepNo)}` : ""}</b>
+        <span>${esc(result.stepTitle)}</span>
+        <small>${esc(result.excerpt).slice(0, 150)}${result.excerpt.length > 150 ? "..." : ""}</small>
+      </button>`).join("") : `<p class="empty-text">No matching SOP steps yet.</p>`}
+    </section>` : ""}
     <section class="sop-quick-grid">
       ${quickIds.map((id) => {
         const item = items.find((entry) => entry.id === id);
-        return `<button class="${active.id === id ? "active" : ""}" data-sop-target="${id}">${icon(item.icon, 22)}<span>${esc(item.title)}</span><small>${esc(item.desc)}</small></button>`;
+        return `<button class="${active.id === id ? "active" : ""}" data-sop-target="${id}">
+          ${icon(item.icon, 22)}
+          <span>${esc(item.shortTitle)}</span>
+          <small>${esc(item.desc)}</small>
+          <em>${item.steps || 0} steps · ${esc(item.time || "Ready")}</em>
+        </button>`;
       }).join("")}
     </section>
     <section class="sop-center-layout">
       <aside class="sop-center-nav">
-        ${groups.map((group) => `
-          <div>
-            <h3>${esc(group)}</h3>
-            ${items.filter((item) => item.group === group).map((item) => `
+        <div>
+          <h3>SOP Library</h3>
+          ${quickIds.map((id) => {
+            const item = items.find((entry) => entry.id === id);
+            return `<button class="${active.id === item.id ? "active" : ""}" data-sop-target="${esc(item.id)}">
+              ${icon(item.icon, 18)}
+              <span><b>${esc(item.shortTitle)}</b><small>${item.done}/${item.progressTotal} done</small></span>
+            </button>`;
+          }).join("")}
+        </div>
+        ${active.guide ? `<div>
+          <h3>On This SOP</h3>
+          ${(active.guide.steps || []).slice(0, 8).map((step) => `<button type="button" data-sop-step-jump="${esc(active.id)}-${esc(step.no)}">
+            ${icon("list-checks", 18)}
+            <span><b>${esc(step.no)}. ${esc(step.title)}</b><small>${esc(step.subtitle || "Step")}</small></span>
+          </button>`).join("")}
+        </div>` : ""}
+        <div>
+          <h3>Publish & Operate</h3>
+          ${operateItems.map((item) => `
               <button class="${active.id === item.id ? "active" : ""}" data-sop-target="${esc(item.id)}">
                 ${icon(item.icon, 18)}
                 <span><b>${esc(item.title)}</b><small>${esc(item.status)}</small></span>
               </button>`).join("")}
-          </div>`).join("")}
+        </div>
       </aside>
       <article class="sop-center-content">
-        ${active.guide ? sopGuideArticle(active.guide) : sopComingSoonArticle(active)}
+        ${active.guide ? sopGuideArticle(active.guide, active) : sopComingSoonArticle(active)}
+        ${active.guide ? `<footer class="sop-next-panel">
+          <div><span>Progress</span><b>${active.done}/${progressTotal} checklist done</b></div>
+          <button class="gold-button" data-sop-next="${esc(active.id)}">${icon("arrow-right", 18)} ${esc(active.nextLabel || "Continue")}</button>
+        </footer>` : ""}
       </article>
     </section>`;
 }
 
-function sopGuideArticle(guide) {
+function sopGuideArticle(guide, item) {
   const stepCards = Array.isArray(guide.steps) ? guide.steps : [];
   const sectionLabels = guide.sections || {};
+  const progressTotal = sopProgressTotal(guide);
+  const progress = state.sopProgress?.[item.id] || {};
+  const checklist = [
+    "I know where this feature lives",
+    "I know what input is required",
+    "I know what output to expect",
+    "I know the next action"
+  ].slice(0, progressTotal);
   return `
     <div class="sop-center-title">
-      <p>${esc(guide.eyebrow || "Guide")}</p>
+      <p>${esc(item.shortTitle || guide.eyebrow || "Guide")}</p>
       <h2>${esc(guide.title || "SOP")}</h2>
       <span>${esc(guide.path || "")}</span>
     </div>
-    <section class="sop-copy-block">
-      <h3>${esc(guide.whatTitle || "What is this?")}</h3>
-      <p>${esc(guide.what || "")}</p>
-    </section>
-    <section class="sop-callout">
-      ${icon("lightbulb", 34)}
-      <div>
+    <section class="sop-info-grid">
+      <div class="sop-copy-block">
+        <h3>${esc(guide.whatTitle || "What is this?")}</h3>
+        <p>${esc(guide.what || "")}</p>
+      </div>
+      <div class="sop-callout">
         <h3>${esc(guide.whenTitle || "When should I use this?")}</h3>
         <p>${esc(guide.when || "")}</p>
       </div>
@@ -4821,7 +4915,7 @@ function sopGuideArticle(guide) {
       <div class="sop-step-list">
         ${stepCards.map((item) => `
           ${sectionLabels[item.no] ? `<h3 class="sop-section-heading">${esc(sectionLabels[item.no])}</h3>` : ""}
-          <article class="sop-step-card">
+          <article class="sop-step-card" id="sop-step-${esc(state.sopTopic)}-${esc(item.no)}">
             <div class="sop-step-title">
               <span>${esc(item.no)}</span>
               <h4>${esc(guide.stepLabel || "Step")} ${esc(item.no)} &mdash; ${esc(item.title)}</h4>
@@ -4839,6 +4933,13 @@ function sopGuideArticle(guide) {
     <section class="sop-workflow">
       <h3>${esc(guide.workflowTitle || "Workflow tip")}</h3>
       <p>${esc(guide.workflow || "")}</p>
+    </section>
+    <section class="sop-checklist">
+      <h3>Before you leave this SOP</h3>
+      ${checklist.map((label, index) => `<label>
+        <input type="checkbox" data-sop-progress="${esc(item.id)}" data-sop-progress-key="check${index}" ${progress[`check${index}`] ? "checked" : ""}>
+        <span>${esc(label)}</span>
+      </label>`).join("")}
     </section>`;
 }
 
@@ -5776,7 +5877,7 @@ function bind() {
   document.querySelectorAll("[data-sop-target]").forEach((el) => el.addEventListener("click", () => {
     const sopTopic = el.dataset.sopTarget || "dashboard";
     if (el.dataset.sopModal === "true") return set({ sopTopic, modal: "sop" });
-    set({ page: "sop", sopTopic, modal: null });
+    set({ page: "sop", sopTopic, sopSearch: "", sopStepAnchor: "", modal: null });
   }));
   document.querySelectorAll("[data-page]").forEach((el) => el.addEventListener("click", () => set({ page: el.dataset.page })));
   document.querySelectorAll("[data-step]").forEach((el) => el.addEventListener("click", () => set({ step: el.dataset.step })));
@@ -5902,6 +6003,34 @@ function bind() {
     state.assetSearch = event.target.value;
     clearTimeout(assetSearchTimer);
     assetSearchTimer = setTimeout(render, 180);
+  }));
+  document.querySelectorAll("[data-sop-search]").forEach((el) => el.addEventListener("input", (event) => {
+    state.sopSearch = event.target.value;
+    clearTimeout(sopSearchTimer);
+    sopSearchTimer = setTimeout(render, 180);
+  }));
+  document.querySelectorAll("[data-sop-result-topic]").forEach((el) => el.addEventListener("click", () => {
+    const topic = el.dataset.sopResultTopic || "dashboard";
+    const step = el.dataset.sopResultStep || "";
+    set({ sopTopic: topic, sopSearch: "", sopStepAnchor: step ? `${topic}-${step}` : "" });
+  }));
+  document.querySelectorAll("[data-sop-step-jump]").forEach((el) => el.addEventListener("click", () => {
+    set({ sopStepAnchor: el.dataset.sopStepJump || "" });
+  }));
+  document.querySelectorAll("[data-sop-progress]").forEach((el) => el.addEventListener("change", () => {
+    const topic = el.dataset.sopProgress;
+    const key = el.dataset.sopProgressKey;
+    if (!topic || !key) return;
+    const next = { ...(state.sopProgress || {}), [topic]: { ...(state.sopProgress?.[topic] || {}), [key]: el.checked } };
+    localStorage.setItem("pokaya-sop-progress", JSON.stringify(next));
+    set({ sopProgress: next });
+  }));
+  document.querySelectorAll("[data-sop-next]").forEach((el) => el.addEventListener("click", () => {
+    const item = sopLibrary().find((entry) => entry.id === el.dataset.sopNext);
+    if (!item) return;
+    if (item.nextAction) return action({ currentTarget: el, target: el }, item.nextAction);
+    if (item.nextStep) return set({ page: "project", step: item.nextStep, modal: null });
+    if (item.nextPage) return set({ page: item.nextPage, modal: null });
   }));
   document.querySelectorAll("form").forEach((el) => el.addEventListener("submit", submit));
   document.querySelectorAll("[data-lang-toggle]").forEach((el) => el.addEventListener("click", (event) => {
