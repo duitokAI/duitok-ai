@@ -20565,3 +20565,373 @@ label {
     grid-template-columns: 1fr;
   }
 }
+
+/* Landing PRD execution: TikTok Affiliate content-entry positioning. */
+.public-shell {
+  background:
+    radial-gradient(circle at 94% 4%, rgba(255, 122, 92, 0.22), transparent 18%),
+    radial-gradient(circle at 4% 22%, rgba(255, 63, 110, 0.1), transparent 22%),
+    linear-gradient(180deg, #fff 0%, #fff8fc 32%, #f8f0ff 66%, #fff 100%) !important;
+}
+
+.public-shell .promo-bar {
+  min-height: 62px !important;
+  padding-block: 10px !important;
+}
+
+.public-shell .promo-copy {
+  display: grid;
+  gap: 2px;
+  text-align: center;
+}
+
+.public-shell .promo-copy strong {
+  color: #fff !important;
+  font-size: clamp(17px, 2vw, 26px);
+  text-shadow: none !important;
+}
+
+.public-shell .promo-copy span {
+  color: rgba(255, 255, 255, 0.88);
+  font-size: clamp(12px, 1.05vw, 15px);
+  font-weight: 850;
+}
+
+.public-shell .video-scene-hero {
+  display: grid !important;
+  grid-template-columns: minmax(0, 0.98fr) minmax(440px, 0.78fr);
+  align-items: center;
+  gap: clamp(30px, 4vw, 72px);
+  min-height: min(640px, calc(100dvh - 142px)) !important;
+  padding: clamp(24px, 3.4vw, 48px) clamp(24px, 5vw, 70px) !important;
+  overflow: hidden;
+  border-radius: 34px !important;
+  background:
+    linear-gradient(rgba(75, 0, 94, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(75, 0, 94, 0.035) 1px, transparent 1px),
+    radial-gradient(circle at 84% 12%, rgba(255, 63, 110, 0.13), transparent 34%),
+    linear-gradient(135deg, #ffffff 0%, #fff7fb 55%, #f5eaff 100%) !important;
+  background-size: 58px 58px, 58px 58px, auto, auto !important;
+}
+
+.public-shell .video-scene-hero::after,
+.public-shell .video-scene-bg,
+.public-shell .video-scene-vignette,
+.public-shell .video-scene-grid,
+.public-shell .video-scene-beam {
+  display: none !important;
+}
+
+.public-shell .hero-copy-layer {
+  position: relative !important;
+  width: auto !important;
+  max-width: 690px !important;
+  padding: 0 !important;
+  z-index: 2;
+}
+
+.public-shell .video-scene-hero h1.hero-headline {
+  max-width: 720px !important;
+  margin: 14px 0 16px !important;
+  font-size: clamp(42px, 4.1vw, 62px) !important;
+  line-height: 0.98 !important;
+}
+
+.public-shell .video-scene-hero h1.hero-headline-zh {
+  font-size: clamp(46px, 4.6vw, 70px) !important;
+  line-height: 1.02 !important;
+}
+
+.public-shell .video-scene-hero .public-copy {
+  max-width: 590px !important;
+  margin-bottom: 12px !important;
+  font-size: clamp(15px, 1.02vw, 17px);
+  line-height: 1.48;
+}
+
+.hero-offer-copy {
+  max-width: 590px;
+  margin: 0 0 18px;
+  color: #4f3158 !important;
+  font-size: clamp(14px, 0.98vw, 16px);
+  font-weight: 820;
+  line-height: 1.48;
+}
+
+.hero-offer-copy b {
+  color: var(--brand-purple);
+}
+
+.public-shell .public-hero .trust-row {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.public-shell .public-hero .trust-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  border: 1px solid rgba(75, 0, 94, 0.1);
+  border-radius: 999px;
+  padding: 8px 13px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #5f4467 !important;
+  font-size: 13px;
+  font-weight: 900;
+  box-shadow: 0 12px 28px rgba(75, 0, 94, 0.06);
+}
+
+.hero-agent-panel {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 12px;
+  border: 1px solid rgba(75, 0, 94, 0.12);
+  border-radius: 28px;
+  padding: clamp(16px, 1.6vw, 22px);
+  background:
+    radial-gradient(circle at 88% 0%, rgba(255, 63, 110, 0.15), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 247, 251, 0.9));
+  box-shadow: 0 30px 90px rgba(75, 0, 94, 0.16);
+}
+
+.hero-agent-panel::before {
+  content: "";
+  position: absolute;
+  inset: -28px -18px auto auto;
+  width: 150px;
+  height: 150px;
+  border-radius: 999px;
+  background: rgba(255, 63, 110, 0.13);
+  filter: blur(14px);
+  pointer-events: none;
+}
+
+.agent-panel-top,
+.product-input-card,
+.prompt-preview-card,
+.agent-chat-preview p,
+.asset-output-grid article {
+  position: relative;
+  z-index: 1;
+  border: 1px solid rgba(75, 0, 94, 0.09);
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 14px 34px rgba(75, 0, 94, 0.07);
+}
+
+.agent-panel-top {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 13px;
+  border-radius: 20px;
+  padding: 12px;
+}
+
+.agent-panel-top img {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 18px rgba(255, 63, 110, 0.18));
+}
+
+.agent-panel-top b,
+.product-input-card span,
+.asset-output-grid b {
+  color: var(--brand-purple);
+  font-weight: 950;
+}
+
+.agent-panel-top span {
+  display: block;
+  color: var(--brand-muted);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.agent-panel-top em {
+  border-radius: 999px;
+  padding: 8px 11px;
+  background: rgba(55, 210, 111, 0.13);
+  color: #19964a;
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+}
+
+.product-input-card,
+.prompt-preview-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 16px;
+  padding: 14px 16px;
+}
+
+.product-input-card svg,
+.prompt-preview-card svg {
+  color: var(--brand-pink);
+}
+
+.agent-chat-preview {
+  display: grid;
+  gap: 10px;
+}
+
+.agent-chat-preview p {
+  margin: 0;
+  border-radius: 16px;
+  padding: 14px 16px;
+  color: #5f4467 !important;
+  font-size: 14px;
+  font-weight: 780;
+  line-height: 1.45;
+}
+
+.agent-chat-preview .chat-user {
+  justify-self: end;
+  max-width: 72%;
+  background: #fff1d6;
+}
+
+.agent-chat-preview .chat-agent {
+  max-width: 88%;
+}
+
+.asset-output-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.asset-output-grid article {
+  min-height: 102px;
+  display: grid;
+  align-content: space-between;
+  gap: 10px;
+  border-radius: 18px;
+  padding: 14px;
+}
+
+.asset-output-grid span,
+.asset-output-grid small {
+  color: var(--brand-muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.asset-output-grid small {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 6px 9px;
+  background: #fff0f5;
+  color: var(--brand-pink);
+}
+
+.prompt-preview-card p {
+  margin: 0;
+  color: #5f4467 !important;
+  font-size: 13px;
+  font-weight: 760;
+  line-height: 1.4;
+}
+
+.public-shell .test-volume-section .volume-formula {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.public-shell .test-volume-section .volume-formula article {
+  min-height: 190px;
+}
+
+.public-shell .split-section,
+.public-shell .system-section,
+.public-shell .output-preview-section,
+.public-shell .workflow-section,
+.public-shell .feature-section,
+.public-shell .demo-section,
+.public-shell .comparison-section,
+.public-shell .pricing-section,
+.public-shell .control-section,
+.public-shell .signup-section,
+.public-shell .faq-section {
+  margin-top: clamp(38px, 5vw, 72px) !important;
+}
+
+.public-shell .feature-mosaic article,
+.public-shell .workflow-steps article,
+.public-shell .pain-list article,
+.public-shell .system-grid article {
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+
+.public-shell .feature-mosaic article:hover,
+.public-shell .workflow-steps article:hover,
+.public-shell .pain-list article:hover,
+.public-shell .system-grid article:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 63, 110, 0.22) !important;
+  box-shadow: 0 24px 62px rgba(75, 0, 94, 0.13) !important;
+}
+
+.public-shell .pricing-section .price-card .gold-button {
+  width: 100%;
+  justify-content: center;
+}
+
+@media (max-width: 1060px) {
+  .public-shell .video-scene-hero {
+    grid-template-columns: 1fr !important;
+    min-height: 0 !important;
+  }
+
+  .hero-agent-panel {
+    max-width: 680px;
+  }
+
+  .public-shell .test-volume-section .volume-formula {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .public-shell {
+    padding-inline: 14px !important;
+  }
+
+  .public-shell .video-scene-hero {
+    border-radius: 24px !important;
+    padding: 28px 18px !important;
+  }
+
+  .public-shell .video-scene-hero h1.hero-headline,
+  .public-shell .video-scene-hero h1.hero-headline-zh {
+    font-size: clamp(40px, 12vw, 54px) !important;
+  }
+
+  .public-shell .public-actions {
+    width: 100%;
+  }
+
+  .public-shell .public-actions .gold-button,
+  .public-shell .public-actions .demo-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .asset-output-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .agent-chat-preview .chat-user,
+  .agent-chat-preview .chat-agent {
+    max-width: 100%;
+  }
+}
