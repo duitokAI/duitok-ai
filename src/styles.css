@@ -17896,17 +17896,28 @@ label {
 
 .studio-shell .sidebar .brand-lockup {
   min-height: 0 !important;
-  padding: 6px 8px 18px !important;
+  width: 100% !important;
+  padding: 4px 10px 24px !important;
+  border-bottom: 0 !important;
 }
 
 .studio-shell .sidebar .brand-logo-mascot {
-  width: 46px !important;
-  height: 46px !important;
+  width: 52px !important;
+  height: 52px !important;
+  filter: drop-shadow(0 12px 18px rgba(255, 63, 110, 0.24)) !important;
+}
+
+.studio-shell .sidebar .brand-core {
+  width: 100% !important;
+  gap: 11px !important;
+  align-items: center !important;
 }
 
 .studio-shell .sidebar .brand-wordmark {
-  font-size: 28px !important;
-  line-height: 1 !important;
+  align-items: center !important;
+  gap: 5px !important;
+  font-size: 34px !important;
+  line-height: 0.9 !important;
 }
 
 .studio-shell .sidebar .brand-lockup strong {
@@ -17914,7 +17925,7 @@ label {
 }
 
 .studio-shell .sidebar-language {
-  margin: 14px 0 20px !important;
+  margin: 18px 0 20px !important;
   border-radius: 15px !important;
 }
 
