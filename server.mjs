@@ -26,7 +26,7 @@ const apimartTextModel = process.env.APIMART_TEXT_MODEL || "gpt-5-mini";
 const apimartImageModel = process.env.APIMART_IMAGE_MODEL || "gpt-image-2";
 const deepseekBaseUrl = (process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com").replace(/\/$/, "");
 const deepseekChatPath = process.env.DEEPSEEK_CHAT_PATH || "/chat/completions";
-const deepseekModel = process.env.DEEPSEEK_MODEL || "deepseek-v4-flash";
+const deepseekModel = process.env.DEEPSEEK_MODEL || "deepseek-v4-pro";
 const tiktokAuthBaseUrl = (process.env.TIKTOK_AUTH_BASE_URL || "https://www.tiktok.com").replace(/\/$/, "");
 const tiktokOpenApiBaseUrl = (process.env.TIKTOK_OPEN_API_BASE_URL || "https://open.tiktokapis.com").replace(/\/$/, "");
 const tiktokRedirectPath = process.env.TIKTOK_REDIRECT_PATH || "/api/tiktok/oauth/callback";
@@ -47,6 +47,7 @@ const atlasBaseUrl = (process.env.ATLASCLOUD_BASE_URL || "https://api.atlascloud
 const atlasGenerateVideoPath = process.env.ATLASCLOUD_GENERATE_VIDEO_PATH || "/api/v1/model/generateVideo";
 const atlasPredictionPathPrefix = process.env.ATLASCLOUD_PREDICTION_PATH_PREFIX || "/api/v1/model/prediction";
 const atlasSeedanceModel = process.env.ATLASCLOUD_SEEDANCE_MODEL || "bytedance/seedance-2.0/text-to-video";
+const webSearchBaseUrl = process.env.WEB_SEARCH_BASE_URL || "https://duckduckgo.com/html/";
 const allowedMediaModels = new Set(["GPT Image 2", "Nano Banana Pro"]);
 const publicMediaModelMap = {
   "GPT Image 2": "GPT Image 2",
@@ -1178,6 +1179,78 @@ async function deepseekRequest(body) {
     throw error;
   }
   return payload;
+}
+
+function decodeHtmlEntities(value = "") {
+  return String(value)
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCharCode(parseInt(code, 16)))
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+}
+
+function htmlToText(value = "") {
+  return decodeHtmlEntities(String(value).replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim());
+}
+
+function normalizeSearchUrl(value = "") {
+  const decoded = decodeHtmlEntities(value);
+  try {
+    const url = new URL(decoded, "https://duckduckgo.com");
+    const uddg = url.searchParams.get("uddg");
+    return uddg ? decodeURIComponent(uddg) : url.href;
+  } catch {
+    return decoded;
+  }
+}
+
+async function webSearchRequest({ query, limit = 5, region = "wt-wt" } = {}) {
+  const q = sanitizeAgentText(query || "").slice(0, 180);
+  if (!q) {
+    const error = new Error("Search query is required.");
+    error.status = 400;
+    throw error;
+  }
+  const maxResults = Math.min(Math.max(Number(limit) || 5, 1), 5);
+  const url = new URL(webSearchBaseUrl);
+  url.searchParams.set("q", q);
+  url.searchParams.set("kl", String(region || "wt-wt"));
+
+  const response = await fetch(url, {
+    headers: {
+      "User-Agent": "Mozilla/5.0 (compatible; DuitokAgent/1.0; +https://duitok.com)",
+      Accept: "text/html,application/xhtml+xml"
+    },
+    signal: AbortSignal.timeout(Number(process.env.WEB_SEARCH_TIMEOUT_MS || 12000))
+  });
+  if (!response.ok) {
+    const error = new Error(`Web search failed (${response.status})`);
+    error.status = response.status || 502;
+    throw error;
+  }
+
+  const html = await response.text();
+  const linkPattern = /<a[^>]+class="[^"]*\bresult__a\b[^"]*"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi;
+  const matches = [...html.matchAll(linkPattern)].slice(0, maxResults);
+  const results = matches.map((match, index) => {
+    const nextIndex = matches[index + 1]?.index ?? html.length;
+    const block = html.slice(match.index || 0, nextIndex);
+    const snippet = block.match(/class="[^"]*\bresult__snippet\b[^"]*"[^>]*>([\s\S]*?)<\/[^>]+>/i)?.[1] || "";
+    return {
+      title: htmlToText(match[2]).slice(0, 180),
+      url: normalizeSearchUrl(match[1]).slice(0, 500),
+      snippet: htmlToText(snippet).slice(0, 360)
+    };
+  }).filter((item) => item.title && item.url);
+
+  return {
+    query: q,
+    searchedAt: new Date().toISOString(),
+    results
+  };
 }
 
 async function tiktokRequest(pathname, { method = "GET", body, accessToken, headers = {} } = {}) {
@@ -2348,6 +2421,22 @@ const agentTools = [
   {
     type: "function",
     function: {
+      name: "web_search",
+      description: "Search the public web for current trends, unfamiliar terms, TikTok Shop category context, competitor examples, and recent market references. Use this before answering about trend names, viral formats, current products, platform updates, or anything likely to need fresh information.",
+      parameters: {
+        type: "object",
+        properties: {
+          query: { type: "string", description: "Focused search query, for example 'loft girl TikTok aesthetic Malaysia'." },
+          limit: { type: "number", description: "Number of results to return, 1 to 5. Defaults to 5." },
+          region: { type: "string", description: "DuckDuckGo region code. Use wt-wt by default, or my-en for Malaysia English." }
+        },
+        required: ["query"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
       name: "open_workspace",
       description: "Move the user to a Duitok workspace page, step, or project. Use this when navigation helps.",
       parameters: {
@@ -2722,6 +2811,17 @@ function buildSeedancePrompt({ project, productName, scene, audience, language, 
 
 function agentToolCard(name, result = {}) {
   const data = sanitizeAgentObject(result.data || {});
+  if (name === "web_search") {
+    const results = Array.isArray(data.results) ? data.results.slice(0, 5) : Array.isArray(data.webResults) ? data.webResults.slice(0, 5) : [];
+    return {
+      type: "web_search",
+      title: `Web search: ${String(data.query || "").slice(0, 80)}`,
+      summary: `${results.length} result${results.length === 1 ? "" : "s"} found.`,
+      query: data.query || "",
+      searchedAt: data.searchedAt || "",
+      results
+    };
+  }
   if (name === "create_content_plan") {
     return {
       type: "content_plan",
@@ -2819,6 +2919,15 @@ function agentRecoveryForError(error) {
 }
 
 async function executeAgentTool(name, args, user) {
+  if (name === "web_search") {
+    const data = await webSearchRequest(args);
+    return {
+      ok: true,
+      message: data.results.length ? `Found ${data.results.length} web results.` : "No web results found.",
+      data
+    };
+  }
+
   if (name === "inspect_workspace_state") {
     const db = await ensureDb();
     const inspection = buildWorkspaceInspection(db, user, args);
@@ -3671,9 +3780,14 @@ function safeAgentToolResult(name, args = {}, result = {}) {
 
 function agentToolDataSummary(data = {}) {
   const allowed = {};
-  for (const key of ["projectId", "resultId", "resultType", "scheduleId", "scheduleIds", "promptId", "planLength", "missing", "nextActions"]) {
+  for (const key of ["projectId", "resultId", "resultType", "scheduleId", "scheduleIds", "promptId", "planLength", "missing", "nextActions", "query", "searchedAt"]) {
     if (data?.[key] !== undefined) allowed[key] = data[key];
   }
+  if (Array.isArray(data?.results)) allowed.webResults = data.results.slice(0, 5).map((item) => ({
+    title: item.title,
+    url: item.url,
+    snippet: item.snippet
+  }));
   if (Array.isArray(data?.plan)) allowed.planPreview = data.plan.slice(0, 3).map((item) => ({
     day: item.day,
     title: item.title,
@@ -3681,6 +3795,36 @@ function agentToolDataSummary(data = {}) {
   }));
   if (typeof data?.prompt === "string") allowed.promptSummary = data.prompt.split(/\r?\n/).slice(0, 3).join(" ").slice(0, 360);
   return allowed;
+}
+
+function buildWebSearchAgentReply(userMessage = "", toolResults = []) {
+  const searches = toolResults.filter((item) => item.name === "web_search");
+  if (!searches.length) return "";
+  const seen = new Set();
+  const results = searches.flatMap((item) => item.result?.data?.webResults || [])
+    .filter((item) => {
+      if (!item?.url || seen.has(item.url)) return false;
+      seen.add(item.url);
+      return true;
+    })
+    .slice(0, 5);
+  const query = searches.map((item) => item.result?.data?.query).filter(Boolean).slice(0, 2).join(" / ");
+  const sourceLines = results.slice(0, 3).map((item, index) => `${index + 1}. ${item.title}${item.snippet ? ` - ${item.snippet}` : ""}\n${item.url}`).join("\n");
+  const zh = /[\u3400-\u9fff]/.test(String(userMessage || ""));
+  if (zh) {
+    return [
+      `我联网搜了一下：${query || "相关关键词"}。精确的 "loft girl" 结果不算多，更像是 TikTok/Pinterest 上把 loft apartment、downtown girl、clean/soft girl aesthetic 混在一起的一种内容人设。`,
+      "放到 TikTok Shop，可以理解成：住在 loft/公寓里的都市女生，画面重点是干净空间、松弛穿搭、香氛/咖啡/收纳/灯光/家居小物，卖点不是硬推产品，而是“这个东西让生活更有质感”。",
+      "适合卖的品类：香薰、落地灯、床品、收纳、杯子、穿搭配饰、护肤、化妆镜、小型家电、桌面布置。内容可以做 3 条线：1. loft girl morning routine；2. 租房/公寓变高级的 3 个小物；3. 下班回家 30 秒治愈场景。",
+      results.length ? `参考来源：\n${sourceLines}` : "这次搜索结果不多，建议后续用更具体关键词搜，比如 downtown girl aesthetic、apartment aesthetic、loft apartment decor TikTok。"
+    ].join("\n\n");
+  }
+  return [
+    `I searched the web for: ${query || "the related terms"}. Exact "loft girl" results are limited, so it looks more like a blend of loft apartment, downtown girl, clean girl, and soft girl aesthetics than one fixed mainstream label.`,
+    "For TikTok Shop, treat it as an urban apartment lifestyle persona: clean loft space, relaxed styling, coffee/fragrance/storage/lighting/home details, and products shown as part of a better daily routine.",
+    "Best categories: fragrance, lamps, bedding, storage, cups, accessories, skincare, mirrors, small appliances, and desk/home decor. Strong content angles: loft girl morning routine, 3 apartment upgrades, and after-work reset scene.",
+    results.length ? `Sources:\n${sourceLines}` : "Search results were thin; try related terms like downtown girl aesthetic, apartment aesthetic, or loft apartment decor TikTok."
+  ].join("\n\n");
 }
 
 async function runDeterministicAgent(content, { projectId, user, workspace = null }) {
@@ -4470,7 +4614,8 @@ app.post("/api/agent", async (req, res, next) => {
         content: [
           "You are Duitok Agent inside Duitok AI Studio for Malaysia TikTok Shop sellers.",
           "Help the user decide what to do next, and call Duitok platform tools when useful.",
-          "You can inspect workspace state, remember project context, navigate the UI, create projects, create content plans, create video prompts, update project fields, generate outputs, create scheduler drafts, update schedule status, and create support tickets.",
+          "You can search the public web, inspect workspace state, remember project context, navigate the UI, create projects, create content plans, create video prompts, update project fields, generate outputs, create scheduler drafts, update schedule status, and create support tickets.",
+          "Use web_search before answering about fresh trends, unfamiliar aesthetic names, current platform behavior, competitors, recent product demand, or terms that may have a changing meaning. After searching, synthesize the results into practical TikTok Shop guidance and cite source URLs briefly when useful.",
           "Act like an operator, not a passive chatbot: when the user asks for an output, fill the relevant project fields and run the matching tool if enough information is available.",
           "Common workflows: product/content request = inspect_workspace_state -> create_project or update fields -> generate_project_output -> open_workspace. Weekly content plan = inspect_workspace_state -> remember_agent_context when useful -> create_content_plan, and only create schedule drafts when the user asks for drafts. Video prompt request = create_seedance_prompt; video generation request = create_seedance_prompt -> generate_project_output after confirmation if high cost. In user-facing replies and tool cards, say video prompt or generate video instead of naming the internal video model.",
           "When the user changes direction, for example 'don't do washing machine, do dryer instead' or '不做洗衣机了，做烘干机', treat it as a product/context update, not as a request for a generic menu. Save the new product/context with remember_agent_context or create_project when needed, then ask one specific next-step question such as whether to create a content plan, image/poster, or video prompt.",
@@ -4708,8 +4853,30 @@ app.post("/api/agent", async (req, res, next) => {
       durationMs: Date.now() - startedAt
     };
     await saveAgentRun(agentRun);
+    let finalReply = "";
+    if (toolResults.length) {
+      try {
+        const finalCompletion = await deepseekRequest({
+          model: deepseekModel,
+          messages: [
+            ...messages,
+            {
+              role: "system",
+              content: "Tool execution is finished. Do not call more tools. Answer the user's latest message directly in the user's language. If web_search was used, synthesize the findings into practical TikTok Shop guidance and cite 1-3 source URLs briefly when useful."
+            }
+          ],
+          stream: false
+        });
+        finalReply = finalCompletion.choices?.[0]?.message?.content || "";
+      } catch (error) {
+        finalReply = "";
+      }
+      if (!finalReply || /<[^>]*tool_calls|tool_calls|<\/｜｜DSML｜｜invoke>/i.test(finalReply)) {
+        finalReply = buildWebSearchAgentReply(latestUserMessage, toolResults);
+      }
+    }
     res.json({
-      reply: sanitizeAgentReply("I completed the available Duitok actions. Check the updated workspace.", latestUserMessage),
+      reply: sanitizeAgentReply(finalReply || "I completed the available Duitok actions. Check the updated workspace.", latestUserMessage),
       db: latestDb,
       toolResults,
       uiActions,

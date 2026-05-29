@@ -5371,18 +5371,22 @@ async function submit(event) {
   event.preventDefault();
   const data = Object.fromEntries(new FormData(event.currentTarget));
   if (event.currentTarget.dataset.form === "login") {
-    if (data.adminKey) {
-      localStorage.setItem("duitok-admin-key", data.adminKey);
-      state.adminKey = data.adminKey;
+    try {
+      if (data.adminKey) {
+        localStorage.setItem("duitok-admin-key", data.adminKey);
+        state.adminKey = data.adminKey;
+      }
+      const res = await api("/auth/login", { method: "POST", body: JSON.stringify(data) });
+      localStorage.setItem("duitok-user", JSON.stringify(res.user));
+      localStorage.setItem("duitok-auth", res.token);
+      state.token = res.token;
+      state.db = res.state;
+      state.projectId = state.db.projects[0]?.id;
+      window.history.pushState({}, "", "/studio");
+      return set({ user: res.user, modal: null, page: "dashboard" });
+    } catch (error) {
+      return notify(error.message || "Sign in failed. Please try again.");
     }
-    const res = await api("/auth/login", { method: "POST", body: JSON.stringify(data) });
-    localStorage.setItem("duitok-user", JSON.stringify(res.user));
-    localStorage.setItem("duitok-auth", res.token);
-    state.token = res.token;
-    state.db = res.state;
-    state.projectId = state.db.projects[0]?.id;
-    window.history.pushState({}, "", "/studio");
-    return set({ user: res.user, modal: null, page: "dashboard" });
   }
   if (event.currentTarget.dataset.form === "admin-key") {
     const adminKey = String(data.adminKey || "").trim();
