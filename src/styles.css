@@ -8919,7 +8919,7 @@ label {
 }
 
 .agent-page-panel .agent-thread article {
-  max-width: min(720px, 92%);
+  max-width: min(680px, 90%);
   border-color: rgba(93, 8, 108, 0.12);
   background: #fff;
   box-shadow: 0 14px 34px rgba(93, 8, 108, 0.08);
@@ -9003,11 +9003,11 @@ label {
 
 .agent-page-panel .agent-message {
   display: grid;
-  gap: 12px;
+  gap: 10px;
   color: rgba(31, 6, 38, 0.95);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 760;
-  line-height: 1.58;
+  line-height: 1.52;
 }
 
 .agent-page-panel .agent-message p,
@@ -15532,7 +15532,7 @@ label {
 .studio-shell .agent-page-panel .agent-message ul,
 .studio-shell .agent-page-panel .agent-message ol {
   color: rgba(31, 6, 38, 0.92) !important;
-  font-weight: 820 !important;
+  font-weight: 780 !important;
 }
 
 .studio-shell .agent-page-panel .agent-message strong,
@@ -15695,7 +15695,7 @@ label {
 .studio-shell .agent-status-card,
 .studio-shell .agent-context-card {
   display: grid !important;
-  gap: 14px !important;
+  gap: 11px !important;
   border: 1px solid rgba(95, 0, 103, 0.12) !important;
   border-radius: 18px !important;
   padding: 16px !important;
@@ -15726,7 +15726,7 @@ label {
 .studio-shell .agent-context-card > p {
   margin: 0 !important;
   color: rgba(42, 6, 51, 0.68) !important;
-  font-size: 14px !important;
+  font-size: 13.5px !important;
   font-weight: 760 !important;
   line-height: 1.45 !important;
 }
@@ -15748,9 +15748,9 @@ label {
 }
 
 .studio-shell .agent-status-card .agent-life-stage {
-  height: 336px !important;
-  min-height: 336px !important;
-  max-height: 336px !important;
+  height: 286px !important;
+  min-height: 286px !important;
+  max-height: 286px !important;
 }
 
 .studio-shell .agent-status-card .agent-3d-copy {
@@ -15838,6 +15838,29 @@ label {
   color: var(--studio-pink, #f35b6c) !important;
 }
 
+.studio-shell .agent-status-actions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+
+.studio-shell .agent-status-actions button {
+  min-height: 34px !important;
+  border: 1px solid rgba(95, 0, 103, 0.12) !important;
+  border-radius: 999px !important;
+  padding: 0 12px !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  color: var(--studio-purple-900, #2a0633) !important;
+  font-size: 12.5px !important;
+  font-weight: 900 !important;
+  box-shadow: 0 8px 18px rgba(95, 0, 103, 0.045) !important;
+}
+
+.studio-shell .agent-status-actions button:hover {
+  border-color: rgba(243, 91, 108, 0.28) !important;
+  color: var(--studio-pink, #f35b6c) !important;
+}
+
 .studio-shell .agent-chat-shell,
 .studio-shell .agent-page-panel {
   position: relative !important;
@@ -15863,7 +15886,7 @@ label {
   min-height: 0 !important;
   overflow-y: auto !important;
   overflow-anchor: none !important;
-  padding: 4px 6px 16px 0 !important;
+  padding: 2px 4px 14px 0 !important;
 }
 
 .studio-shell .agent-empty-state {
@@ -15918,29 +15941,29 @@ label {
 
 .studio-shell .agent-chat-shell .agent-form {
   position: relative !important;
-  grid-template-columns: minmax(0, 1fr) 56px !important;
+  grid-template-columns: minmax(0, 1fr) 52px !important;
   gap: 10px !important;
   align-items: end !important;
   border: 1px solid rgba(95, 0, 103, 0.11) !important;
-  border-radius: 20px !important;
-  padding: 10px !important;
+  border-radius: 18px !important;
+  padding: 9px !important;
   background: rgba(255, 255, 255, 0.9) !important;
   box-shadow: 0 16px 42px rgba(35, 8, 42, 0.08) !important;
 }
 
 .studio-shell .agent-chat-shell .agent-form textarea {
-  min-height: 52px !important;
-  max-height: 120px !important;
-  border-radius: 16px !important;
-  padding: 15px 16px !important;
-  font-size: 15px !important;
+  min-height: 48px !important;
+  max-height: 108px !important;
+  border-radius: 14px !important;
+  padding: 13px 15px !important;
+  font-size: 14.5px !important;
 }
 
 .studio-shell .agent-chat-shell .agent-send-button {
-  width: 56px !important;
-  min-width: 56px !important;
-  min-height: 52px !important;
-  border-radius: 16px !important;
+  width: 52px !important;
+  min-width: 52px !important;
+  min-height: 48px !important;
+  border-radius: 14px !important;
 }
 
 .studio-shell:has(.agent-page) .support-bubble {
@@ -16467,19 +16490,24 @@ label {
 
 .studio-shell .agent-page-panel .agent-thread {
   min-height: 260px !important;
-  padding: 12px 4px !important;
+  padding: 8px 4px !important;
 }
 
 .studio-shell .agent-page-panel .agent-thread article {
-  max-width: min(760px, 92%) !important;
-  padding: 16px !important;
-  border-radius: 16px !important;
+  max-width: min(700px, 90%) !important;
+  padding: 14px !important;
+  border-radius: 14px !important;
 }
 
 .studio-shell .agent-run-card,
 .studio-shell .agent-history-panel {
   border-radius: 14px !important;
   padding: 12px !important;
+}
+
+.studio-shell .agent-run-meta {
+  border-radius: 999px !important;
+  padding: 7px 11px !important;
 }
 
 .studio-shell .agent-form {
@@ -16565,24 +16593,24 @@ label {
   min-height: 0 !important;
   overflow-y: auto !important;
   overflow-anchor: none !important;
-  padding: 4px 6px 16px 0 !important;
+  padding: 2px 4px 14px 0 !important;
 }
 
 .studio-shell .agent-status-card .agent-life-card {
-  height: 380px !important;
-  max-height: 380px !important;
+  height: 330px !important;
+  max-height: 330px !important;
   grid-template-rows: 44px minmax(0, 1fr) !important;
 }
 
 .studio-shell .agent-status-card .agent-life-card-compact {
-  height: 336px !important;
-  max-height: 336px !important;
+  height: 286px !important;
+  max-height: 286px !important;
 }
 
 .studio-shell .agent-status-card .agent-life-stage {
-  height: 336px !important;
-  min-height: 336px !important;
-  max-height: 336px !important;
+  height: 286px !important;
+  min-height: 286px !important;
+  max-height: 286px !important;
 }
 
 .studio-shell:has(.agent-page) .support-bubble {
@@ -16615,25 +16643,6 @@ label {
   }
 
   .studio-shell .agent-status-card .agent-life-card {
-    height: 340px !important;
-    max-height: 340px !important;
-    grid-template-rows: 44px minmax(0, 1fr) !important;
-  }
-
-  .studio-shell .agent-status-card .agent-life-card-compact {
-    height: 296px !important;
-    max-height: 296px !important;
-  }
-
-  .studio-shell .agent-status-card .agent-life-stage {
-    height: 296px !important;
-    min-height: 296px !important;
-    max-height: 296px !important;
-  }
-}
-
-@media (max-width: 640px) {
-  .studio-shell .agent-status-card .agent-life-card {
     height: 300px !important;
     max-height: 300px !important;
     grid-template-rows: 44px minmax(0, 1fr) !important;
@@ -16648,6 +16657,25 @@ label {
     height: 256px !important;
     min-height: 256px !important;
     max-height: 256px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .studio-shell .agent-status-card .agent-life-card {
+    height: 260px !important;
+    max-height: 260px !important;
+    grid-template-rows: 44px minmax(0, 1fr) !important;
+  }
+
+  .studio-shell .agent-status-card .agent-life-card-compact {
+    height: 216px !important;
+    max-height: 216px !important;
+  }
+
+  .studio-shell .agent-status-card .agent-life-stage {
+    height: 216px !important;
+    min-height: 216px !important;
+    max-height: 216px !important;
   }
 
   .studio-shell:has(.agent-page) .support-bubble {

@@ -4618,6 +4618,9 @@ function agentUiCopy() {
       scheduleLatest: "把已有结果安排到排期",
       createContent: "生成第一批内容",
       ready: "准备好了",
+      userLabel: "你",
+      agentLabel: "Agent",
+      statusActions: ["继续追问", "做内容计划", "生成视频 prompt"],
       quickTasks: [
         "检查今天还缺什么",
         "创建 7 天内容计划",
@@ -4658,6 +4661,9 @@ function agentUiCopy() {
       scheduleLatest: "Masukkan result ke schedule",
       createContent: "Generate content pertama",
       ready: "Ready",
+      userLabel: "Anda",
+      agentLabel: "Agent",
+      statusActions: ["Tanya lanjut", "Buat content plan", "Generate video prompt"],
       quickTasks: [
         "Check hari ini kurang apa",
         "Buat 7-day content plan",
@@ -4698,6 +4704,9 @@ function agentUiCopy() {
       scheduleLatest: "Schedule the existing result",
       createContent: "Generate the first content",
       ready: "Ready",
+      userLabel: "You",
+      agentLabel: "Agent",
+      statusActions: ["Ask a follow-up", "Create a content plan", "Generate a video prompt"],
       quickTasks: [
         "Check what is missing today",
         "Create a 7-day content plan",
@@ -4777,12 +4786,16 @@ function agentStatusRail() {
 
 function agentStatusCard() {
   const status = agentStatusInfo();
+  const c = agentUiCopy();
   return `<section class="agent-status-card" data-agent-status="${status.key}">
     <div class="agent-status-card-head">
       <span>${icon(status.iconName, 16)} ${status.label}</span>
     </div>
     <p>${esc(status.hint)}</p>
     ${agent3DScene({ compact: true })}
+    <div class="agent-status-actions">
+      ${c.statusActions.map((item) => `<button type="button" data-agent-fill="${esc(item)}">${esc(item)}</button>`).join("")}
+    </div>
   </section>`;
 }
 
@@ -4903,12 +4916,13 @@ function agentCollapsedHistoryBar() {
 }
 
 function agentMessageArticle(item, index = 0) {
+  const c = agentUiCopy();
   const longMessage = item.role === "assistant" && isLongAgentMessage(item.content);
   const expanded = Boolean(state.agentExpandedMessages[index]);
   const body = item.role === "assistant" ? agentMessageMarkdown(item.content) : `<p>${esc(item.content).replaceAll("\n", "<br>")}</p>`;
   const chips = item.role === "assistant" ? agentActionChips(item.content) : "";
   return `<article class="${item.role} ${longMessage && !expanded ? "is-collapsed" : ""}">
-    <span>${item.role === "user" ? "You" : "Agent"}</span>
+    <span>${item.role === "user" ? c.userLabel : c.agentLabel}</span>
     <div class="agent-message">${body}</div>
     ${longMessage ? `<button class="agent-expand-button" type="button" data-agent-expand="${index}">${expanded ? "收起回复" : "展开完整回复"} ${icon(expanded ? "chevron-up" : "chevron-down", 15)}</button>` : ""}
     ${chips}${agentRunPanel(item.agentRun)}
@@ -5091,6 +5105,12 @@ function agentRunPanel(run) {
   const summary = completed
     ? agentRunSummary(steps)
     : "";
+  if (completed) {
+    return `<div class="agent-run-card agent-run-meta" data-agent-run-status="${esc(run.status || "")}">
+      <span>${icon("check-check", 14)} ${agentRunStatusLabel(run.status)}</span>
+      ${summary ? `<small>${esc(summary)}</small>` : ""}
+    </div>`;
+  }
   return `
     <div class="agent-run-card" data-agent-run-status="${esc(run.status || "")}">
       <div class="agent-run-head">
