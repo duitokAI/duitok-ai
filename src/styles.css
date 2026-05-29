@@ -2304,15 +2304,15 @@ textarea {
 
 .original-video-card {
   padding: 34px 30px 28px;
-  border: 1px solid rgba(255, 213, 57, 0.28);
+  border: 1px solid rgba(255, 78, 122, 0.2);
   border-radius: 24px;
   background:
-    radial-gradient(circle at 100% 0%, rgba(255, 213, 57, 0.12), transparent 35%),
-    linear-gradient(135deg, #15140d, #0a0a09 58%, #050505);
-  color: #f6f1df;
+    radial-gradient(circle at 100% 0%, rgba(255, 78, 122, 0.1), transparent 34%),
+    linear-gradient(180deg, rgba(255, 241, 247, 0.95), rgba(255, 255, 255, 0.98));
+  color: #2d0d35;
   box-shadow:
-    inset 0 0 0 1px rgba(255, 213, 57, 0.08),
-    0 22px 54px rgba(0, 0, 0, 0.22);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.72),
+    0 18px 44px rgba(75, 0, 94, 0.08);
 }
 
 .original-video-head h2 {
@@ -2320,7 +2320,7 @@ textarea {
   align-items: center;
   gap: 12px;
   margin: 0 0 14px;
-  color: #fffdf5;
+  color: #2d0d35;
   font-size: 28px;
   font-weight: 950;
   letter-spacing: 0;
@@ -2328,7 +2328,7 @@ textarea {
 
 .original-video-head p {
   margin: 0 0 28px;
-  color: rgba(255, 255, 255, 0.62);
+  color: rgba(45, 13, 53, 0.62);
   font-size: 18px;
   line-height: 1.45;
 }
@@ -2338,7 +2338,7 @@ textarea {
 .original-settings-grid span {
   display: block;
   margin: 0 0 14px;
-  color: rgba(255, 255, 255, 0.68);
+  color: rgba(93, 8, 108, 0.72);
   font-size: 14px;
   font-weight: 950;
   letter-spacing: 0.16em;
@@ -2365,10 +2365,10 @@ textarea {
 .original-provider-grid button,
 .original-mode-grid button {
   min-height: 58px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(75, 0, 94, 0.16);
   border-radius: 16px;
-  background: rgba(0, 0, 0, 0.68);
-  color: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.88);
+  color: rgba(45, 13, 53, 0.78);
   font-size: 18px;
   font-weight: 950;
   cursor: pointer;
@@ -2382,15 +2382,16 @@ textarea {
 .original-provider-grid button:hover,
 .original-mode-grid button:hover {
   transform: translateY(-1px);
-  border-color: rgba(255, 213, 57, 0.34);
+  border-color: rgba(255, 78, 122, 0.38);
+  box-shadow: 0 12px 24px rgba(255, 78, 122, 0.1);
 }
 
 .original-provider-grid button.active,
 .original-mode-grid button.active {
   border-color: transparent;
-  background: linear-gradient(135deg, #ffdf46, #eda034);
-  color: #12110b;
-  box-shadow: 0 14px 30px rgba(255, 199, 45, 0.22);
+  background: linear-gradient(135deg, #ff3f6e, #ff7a5c);
+  color: #ffffff;
+  box-shadow: 0 14px 30px rgba(255, 63, 110, 0.22);
 }
 
 .original-prompt-field {
@@ -2401,15 +2402,15 @@ textarea {
 .original-prompt-field textarea {
   width: 100%;
   min-height: 180px;
-  border: 1px solid rgba(255, 255, 255, 0.13);
+  border: 1px solid rgba(75, 0, 94, 0.16);
   border-radius: 12px;
-  background: #050505;
-  color: #fffdf5;
+  background: #ffffff;
+  color: #2d0d35;
   resize: vertical;
 }
 
 .original-prompt-field textarea::placeholder {
-  color: rgba(255, 255, 255, 0.43);
+  color: rgba(45, 13, 53, 0.42);
 }
 
 .original-settings-grid {
@@ -2428,10 +2429,10 @@ textarea {
   display: flex;
   align-items: center;
   min-height: 58px;
-  border: 1px solid rgba(255, 255, 255, 0.13);
+  border: 1px solid rgba(75, 0, 94, 0.16);
   border-radius: 12px;
-  background: rgba(0, 0, 0, 0.58);
-  color: #fffdf5;
+  background: #ffffff;
+  color: #2d0d35;
   font-size: 20px;
   font-weight: 800;
 }
@@ -2443,8 +2444,9 @@ textarea {
 
 .original-settings-grid b {
   justify-content: center;
-  border-color: rgba(255, 213, 57, 0.24);
-  color: #ffd539;
+  border-color: rgba(255, 78, 122, 0.22);
+  background: rgba(255, 241, 247, 0.9);
+  color: #65007d;
 }
 
 .original-generate-button {
@@ -2455,12 +2457,12 @@ textarea {
   min-height: 66px;
   border: 0;
   border-radius: 16px;
-  background: linear-gradient(135deg, #ffdf46, #eda034);
-  color: #12110b;
+  background: linear-gradient(135deg, #ff3f6e, #ff7a5c);
+  color: #ffffff;
   font-size: 22px;
   font-weight: 950;
   cursor: pointer;
-  box-shadow: 0 16px 34px rgba(255, 199, 45, 0.2);
+  box-shadow: 0 16px 34px rgba(255, 63, 110, 0.22);
 }
 
 .clone-prompt-shell {
