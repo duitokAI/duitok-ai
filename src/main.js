@@ -3761,7 +3761,7 @@ function imagePanel(p) {
     ["Nano Banana Pro", "Nano Banana Pro (0.20 Credit)"]
   ];
   const imageModelValues = imageModels.map(([value]) => value);
-  const selectedModel = imageModels.includes(p.image.model) ? p.image.model : String(p.image.model || "").toLowerCase().includes("pro") ? "Nano Banana Pro" : "GPT Image 2";
+  const selectedModel = imageModelValues.includes(p.image.model) ? p.image.model : String(p.image.model || "").toLowerCase().includes("pro") ? "Nano Banana Pro" : "GPT Image 2";
   const modeOptions = ["Create Image", "Virtualize (Poster/Ad)"];
   const selectedMode = modeOptions.includes(p.image.mode) ? p.image.mode : "Create Image";
   return `
