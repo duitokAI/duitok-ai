@@ -4397,29 +4397,28 @@ app.post("/api/agent", async (req, res, next) => {
       });
     }
 
-    const clarification = agentClarificationForUncertainAction(latestUserMessage, { intent, projectId });
-    if (clarification) {
-      agentRun = {
-        ...agentRun,
-        status: "completed",
-        plan: [
-          agentPlanStep("understand", "理解需求", "completed"),
-          agentPlanStep("clarify", "需要补充信息", "completed", "先询问用户，不执行工具")
-        ],
-        confidence: agentConfidence(intent, { projectId, executionReady: false }),
-        durationMs: Date.now() - startedAt
-      };
-      await saveAgentRun(agentRun);
-      return res.json({
-        reply: clarification,
-        db: stateForUser,
-        toolResults: [],
-        uiActions: [],
-        agentRun: publicAgentRun(agentRun)
-      });
-    }
-
     if (!hasDeepSeekConfig()) {
+      const clarification = agentClarificationForUncertainAction(latestUserMessage, { intent, projectId });
+      if (clarification) {
+        agentRun = {
+          ...agentRun,
+          status: "completed",
+          plan: [
+            agentPlanStep("understand", "理解需求", "completed"),
+            agentPlanStep("clarify", "需要补充信息", "completed", "本地 fallback 模式先询问用户，不执行工具")
+          ],
+          confidence: agentConfidence(intent, { projectId, executionReady: false }),
+          durationMs: Date.now() - startedAt
+        };
+        await saveAgentRun(agentRun);
+        return res.json({
+          reply: clarification,
+          db: stateForUser,
+          toolResults: [],
+          uiActions: [],
+          agentRun: publicAgentRun(agentRun)
+        });
+      }
       const fallback = await runDeterministicAgent(latestUserMessage, { projectId, user, workspace: stateForUser });
       const fallbackDiffs = fallback.diffs || [];
       const fallbackCards = fallback.cards || (fallback.toolResults || []).map((item) => item.card).filter(Boolean);
@@ -4474,6 +4473,8 @@ app.post("/api/agent", async (req, res, next) => {
           "You can inspect workspace state, remember project context, navigate the UI, create projects, create content plans, create video prompts, update project fields, generate outputs, create scheduler drafts, update schedule status, and create support tickets.",
           "Act like an operator, not a passive chatbot: when the user asks for an output, fill the relevant project fields and run the matching tool if enough information is available.",
           "Common workflows: product/content request = inspect_workspace_state -> create_project or update fields -> generate_project_output -> open_workspace. Weekly content plan = inspect_workspace_state -> remember_agent_context when useful -> create_content_plan, and only create schedule drafts when the user asks for drafts. Video prompt request = create_seedance_prompt; video generation request = create_seedance_prompt -> generate_project_output after confirmation if high cost. In user-facing replies and tool cards, say video prompt or generate video instead of naming the internal video model.",
+          "When the user changes direction, for example 'don't do washing machine, do dryer instead' or '不做洗衣机了，做烘干机', treat it as a product/context update, not as a request for a generic menu. Save the new product/context with remember_agent_context or create_project when needed, then ask one specific next-step question such as whether to create a content plan, image/poster, or video prompt.",
+          "Do not answer product/context changes with a fixed list of all possible actions. First infer the new product and user's intent from the message.",
           "For 'what is missing today' or workspace diagnosis, call inspect_workspace_state and answer from the returned summary.",
           "When a tool creates a project, result, or schedule draft, use the returned ids for the next tool call.",
           "Be concise, practical, and speak in the user's language. If the user's action request is ambiguous, ask one short clarification question before using tools.",

@@ -1012,6 +1012,7 @@ async function refreshState() {
 
 function set(patch) {
   const modalOnly = shouldPatchModalOnly(patch);
+  const shouldScrollAgentThread = shouldAutoScrollAgentThread(patch);
   rememberSidebarScroll();
   Object.assign(state, patch);
   if (modalOnly) {
@@ -1020,6 +1021,24 @@ function set(patch) {
     return;
   }
   render();
+  if (shouldScrollAgentThread) scrollAgentThreadToBottom();
+}
+
+function shouldAutoScrollAgentThread(patch = {}) {
+  if (state.page !== "agent") return false;
+  return Object.prototype.hasOwnProperty.call(patch, "agentMessages")
+    || Object.prototype.hasOwnProperty.call(patch, "agentBusy");
+}
+
+function scrollAgentThreadToBottom() {
+  requestAnimationFrame(() => {
+    const thread = document.querySelector(".agent-chat-shell .agent-thread");
+    if (!thread) return;
+    thread.scrollTop = thread.scrollHeight;
+    requestAnimationFrame(() => {
+      thread.scrollTop = thread.scrollHeight;
+    });
+  });
 }
 
 function shouldPatchModalOnly(patch) {
@@ -4532,6 +4551,7 @@ function agent3DCopy(mode = "idle") {
 function agent3DScene() {
   const mode = currentAgent3DMode();
   const copy = agent3DCopy(mode);
+  const status = agentStatusInfo();
   const params = new URLSearchParams(window.location.search);
   const canPreview = ["localhost", "127.0.0.1"].includes(window.location.hostname);
   const phasePreview = canPreview ? params.get("agentPhase") : "";
@@ -4541,8 +4561,8 @@ function agent3DScene() {
   return `
     <div class="agent-3d-card agent-life-card" data-agent-mode="${mode}" data-agent-phase="${phase}" data-idle-activity="${idle}">
       <div class="agent-3d-status">
-        <span>${icon(mode === "idle" ? "moon" : "activity", 17)} ${copy.label}</span>
-        <b>${mode === "idle" ? "Standby" : mode === "chat" || mode === "command" ? "Talking" : "Working"}</b>
+        <span>${icon(status.iconName, 17)} ${status.label}</span>
+        <b>${status.label}</b>
       </div>
       <div class="agent-life-stage" aria-label="Duitok Agent work, chat, and rest states">
         <img class="agent-life-render-image agent-life-render-active" src="/duitok-agent-stage-chat-bg.png" alt="Duitok Agent workstation, chat station, and sleeping bed">
@@ -4563,48 +4583,271 @@ function agent3DScene() {
     </div>`;
 }
 
+function agentUiCopy() {
+  const copy = {
+    zh: {
+      title: "Duitok Agent",
+      subtitle: "帮你生成内容、创建排期、检查 workspace",
+      emptyTitle: "你可以直接叫我做事",
+      emptyBody: "我会先理解需求；如果信息不够，会先问你；如果要扣 credits，会让你确认。",
+      inputReady: "告诉 Agent 你想做什么...",
+      inputBusy: "Agent 正在处理，请稍等...",
+      inputConfirm: "请先确认或取消当前动作",
+      newChat: "新对话",
+      history: "历史",
+      more: "更多",
+      clearContext: "清空本次聊天",
+      statusIdle: "待命中",
+      statusBusy: "工作中",
+      statusConfirm: "需要确认",
+      statusDone: "已完成",
+      idleHint: "我现在在待命。你发一句话，我会先理解需求，再决定是否需要问你确认。",
+      busyHint: "正在理解你的需求、检查 workspace，并准备安全执行。",
+      confirmHint: "有动作需要你确认，确认后我才会继续执行。",
+      doneHint: "上一轮任务已完成。你可以继续让我安排下一步。",
+      workspace: "Workspace 摘要",
+      currentProject: "当前项目",
+      credits: "Credits",
+      results: "结果",
+      schedule: "排期",
+      nextStep: "下一步",
+      noProject: "还没有项目",
+      noProjectHint: "可以先让 Agent 帮你创建一个产品项目。",
+      missingProduct: "补产品名和目标人群",
+      scheduleLatest: "把已有结果安排到排期",
+      createContent: "生成第一批内容",
+      ready: "准备好了",
+      quickTasks: [
+        "检查今天还缺什么",
+        "创建 7 天内容计划",
+        "把最新图片安排到今晚发布",
+        "新建一个产品项目",
+        "生成视频 prompt"
+      ]
+    },
+    ms: {
+      title: "Duitok Agent",
+      subtitle: "Bantu generate content, buat schedule, dan semak workspace",
+      emptyTitle: "Terus beritahu apa nak dibuat",
+      emptyBody: "Saya akan fahamkan request dulu. Kalau maklumat tak cukup saya akan tanya; kalau guna credits saya akan minta confirm.",
+      inputReady: "Beritahu Agent apa nak buat...",
+      inputBusy: "Agent sedang proses, tunggu sebentar...",
+      inputConfirm: "Sila confirm atau cancel tindakan semasa dulu",
+      newChat: "Chat baru",
+      history: "Sejarah",
+      more: "Lagi",
+      clearContext: "Kosongkan chat ini",
+      statusIdle: "Standby",
+      statusBusy: "Sedang kerja",
+      statusConfirm: "Perlu confirm",
+      statusDone: "Selesai",
+      idleHint: "Saya sedang standby. Hantar satu arahan, saya akan fahamkan dulu sebelum bertindak.",
+      busyHint: "Sedang fahamkan request, semak workspace, dan sediakan tindakan selamat.",
+      confirmHint: "Ada tindakan perlu confirmation sebelum saya teruskan.",
+      doneHint: "Task tadi sudah selesai. Anda boleh minta langkah seterusnya.",
+      workspace: "Ringkasan workspace",
+      currentProject: "Project",
+      credits: "Credits",
+      results: "Results",
+      schedule: "Schedule",
+      nextStep: "Next step",
+      noProject: "Belum ada project",
+      noProjectHint: "Minta Agent buat product project dulu.",
+      missingProduct: "Tambah nama produk dan audience",
+      scheduleLatest: "Masukkan result ke schedule",
+      createContent: "Generate content pertama",
+      ready: "Ready",
+      quickTasks: [
+        "Check hari ini kurang apa",
+        "Buat 7-day content plan",
+        "Schedule gambar latest malam ini",
+        "Buat product project baru",
+        "Generate video prompt"
+      ]
+    },
+    en: {
+      title: "Duitok Agent",
+      subtitle: "Generate content, create schedules, and inspect your workspace",
+      emptyTitle: "Tell me what to do",
+      emptyBody: "I will understand the request first. If details are missing, I will ask; if credits are needed, I will ask for confirmation.",
+      inputReady: "Tell Agent what to do...",
+      inputBusy: "Agent is working, please wait...",
+      inputConfirm: "Confirm or cancel the current action first",
+      newChat: "New chat",
+      history: "History",
+      more: "More",
+      clearContext: "Clear this chat",
+      statusIdle: "Standby",
+      statusBusy: "Working",
+      statusConfirm: "Needs confirmation",
+      statusDone: "Completed",
+      idleHint: "I am standing by. Send one request and I will understand it before deciding what to do.",
+      busyHint: "Understanding your request, checking workspace, and preparing safe actions.",
+      confirmHint: "One action needs your confirmation before I continue.",
+      doneHint: "The last task is complete. You can ask me for the next step.",
+      workspace: "Workspace Summary",
+      currentProject: "Project",
+      credits: "Credits",
+      results: "Results",
+      schedule: "Schedule",
+      nextStep: "Next step",
+      noProject: "No project yet",
+      noProjectHint: "Ask Agent to create a product project first.",
+      missingProduct: "Add product name and audience",
+      scheduleLatest: "Schedule the existing result",
+      createContent: "Generate the first content",
+      ready: "Ready",
+      quickTasks: [
+        "Check what is missing today",
+        "Create a 7-day content plan",
+        "Schedule the latest image tonight",
+        "Create a new product project",
+        "Generate a video prompt"
+      ]
+    }
+  };
+  return copy[state.lang] || copy.en;
+}
+
+function agentHasPendingConfirmation() {
+  return state.agentMessages.some((item) => item.agentRun?.status === "waiting_confirmation");
+}
+
+function agentStatusInfo() {
+  const c = agentUiCopy();
+  if (agentHasPendingConfirmation()) return { key: "confirm", label: c.statusConfirm, hint: c.confirmHint, iconName: "shield-alert" };
+  if (state.agentBusy) return { key: "busy", label: c.statusBusy, hint: c.busyHint, iconName: "loader-circle" };
+  const lastRun = [...state.agentMessages].reverse().find((item) => item.agentRun)?.agentRun;
+  if (lastRun?.status === "completed") return { key: "done", label: c.statusDone, hint: c.doneHint, iconName: "check-check" };
+  return { key: "idle", label: c.statusIdle, hint: c.idleHint, iconName: "circle-dot" };
+}
+
+function agentProjectSchedule(projectId) {
+  if (!projectId) return [];
+  return (state.db?.schedule || []).filter((item) => !item.projectId || item.projectId === projectId);
+}
+
+function agentWorkspaceSummaryData() {
+  const p = state.db?.projects?.find((item) => item.id === state.projectId) || state.db?.projects?.[0];
+  const schedules = agentProjectSchedule(p?.id);
+  const memory = p?.agentMemory || {};
+  const missingMemory = !memory.productName || !memory.audience;
+  const c = agentUiCopy();
+  return {
+    project: p,
+    credits: formatCreditBalance(state.db?.billing?.credits || 0),
+    resultCount: p?.results?.length || 0,
+    scheduleCount: schedules.length,
+    nextStep: !p ? c.noProjectHint : missingMemory ? c.missingProduct : p.results?.length ? c.scheduleLatest : c.createContent
+  };
+}
+
+function agentQuickTasks() {
+  const c = agentUiCopy();
+  const { project, resultCount } = agentWorkspaceSummaryData();
+  const tasks = [...c.quickTasks];
+  if (!project) return [c.quickTasks[3], c.quickTasks[0], c.quickTasks[1]];
+  if (!resultCount) return [c.quickTasks[1], c.quickTasks[4], c.quickTasks[0], c.quickTasks[3]];
+  return tasks;
+}
+
+function agentTopbar() {
+  const c = agentUiCopy();
+  const status = agentStatusInfo();
+  return `<header class="agent-topbar">
+    <div>
+      <p class="folder-label">${icon("bot", 18)} Duitok Agent</p>
+      <h1>${c.title}</h1>
+      <p>${c.subtitle}</p>
+    </div>
+    <div class="agent-topbar-actions">
+      <span class="agent-status-pill" data-agent-status="${status.key}">${icon(status.iconName, 16)} ${status.label}</span>
+      <button class="dark-button mini-button" data-action="new-agent-chat" title="${esc(c.newChat)}">${icon("message-square-plus", 16)} ${c.newChat}</button>
+      <button class="icon-only" data-action="toggle-agent-history" title="${esc(c.history)}" aria-label="${esc(c.history)}">${icon("history", 18)}${state.agentHistorySessions.length ? `<b>${state.agentHistorySessions.length}</b>` : ""}</button>
+    </div>
+  </header>`;
+}
+
+function agentStatusRail() {
+  return `<aside class="agent-status-rail">
+    ${agentStatusCard()}
+    ${agentWorkspaceSummary()}
+    ${agentNextActions()}
+  </aside>`;
+}
+
+function agentStatusCard() {
+  const status = agentStatusInfo();
+  return `<section class="agent-status-card" data-agent-status="${status.key}">
+    <div class="agent-status-card-head">
+      <span>${icon(status.iconName, 16)} ${status.label}</span>
+    </div>
+    ${agent3DScene()}
+    <p>${esc(status.hint)}</p>
+  </section>`;
+}
+
+function agentWorkspaceSummary() {
+  const c = agentUiCopy();
+  const data = agentWorkspaceSummaryData();
+  if (!data.project) return `<section class="agent-context-card">
+    <h2>${icon("folder-plus", 18)} ${c.workspace}</h2>
+    <strong>${c.noProject}</strong>
+    <p>${c.noProjectHint}</p>
+  </section>`;
+  return `<section class="agent-context-card">
+    <h2>${icon("layout-dashboard", 18)} ${c.workspace}</h2>
+    <div class="agent-context-grid">
+      <p><span>${c.currentProject}</span><b>${esc(data.project.name)}</b></p>
+      <p><span>${c.credits}</span><b>${esc(data.credits)}</b></p>
+      <p><span>${c.results}</span><b>${data.resultCount}</b></p>
+      <p><span>${c.schedule}</span><b>${data.scheduleCount}</b></p>
+    </div>
+    <div class="agent-next-step"><span>${c.nextStep}</span><b>${esc(data.nextStep)}</b></div>
+  </section>`;
+}
+
+function agentNextActions() {
+  const c = agentUiCopy();
+  return `<section class="agent-context-card agent-task-card">
+    <h2>${icon("sparkles", 18)} ${c.emptyTitle}</h2>
+    <div class="agent-quick-task-row">
+      ${agentQuickTasks().slice(0, 5).map((item) => `<button type="button" data-agent-fill="${esc(item)}">${esc(item)}</button>`).join("")}
+    </div>
+  </section>`;
+}
+
 function agentPage() {
   return `
     <section class="agent-page">
-      <div class="agent-workbench">
-        <aside class="agent-visual-column">
-          <div class="agent-page-hero">
-            <div class="agent-hero-copy">
-              <p class="folder-label">${icon("bot", 18)} Duitok Agent</p>
-              <h1>Your AI operator for TikTok Shop content.</h1>
-              <p class="subtitle">Chat on the right while the workspace shows what the agent is doing.</p>
-            </div>
-            ${agent3DScene()}
-          </div>
-        </aside>
-        <div class="agent-chat-column">
-          ${chatPanel()}
-        </div>
+      ${agentTopbar()}
+      <div class="agent-workspace-shell">
+        ${agentStatusRail()}
+        ${chatPanel()}
       </div>
     </section>`;
 }
 
 function chatPanel() {
+  const c = agentUiCopy();
   const visibleMessages = visibleAgentMessages();
   const intro = state.agentMessages.length
     ? ""
-    : `<p class="agent-empty">Ask me to generate UGC, build a batch, decode a competitor, create a project, or decide what to do next.</p>`;
-  const pendingConfirmation = state.agentMessages.some((item) => item.agentRun?.status === "waiting_confirmation");
-  const inputPlaceholder = state.agentBusy
-    ? "Agent 正在处理，请稍等..."
-    : pendingConfirmation
-      ? "请先确认或取消当前动作"
-      : "Message Duitok Agent...";
-  return `
-    <section class="agent-panel agent-page-panel">
-      <header>
-        <h3>${icon("bot")} Duitok Agent</h3>
-        <div class="agent-header-actions">
-          <button class="dark-button mini-button" data-action="toggle-agent-history" title="查看之前保存的 Agent 对话">${icon("history", 16)} 历史记录${state.agentHistorySessions.length ? ` <b>${state.agentHistorySessions.length}</b>` : ""}</button>
-          <button class="dark-button mini-button" data-action="new-agent-chat" title="保留项目记忆，开始新对话">${icon("message-square-plus", 16)} 新对话</button>
-          <button class="icon-only" data-action="clear-agent-context" title="清空本次上下文">${icon("trash-2", 18)}</button>
+    : `<div class="agent-empty-state">
+        <strong>${c.emptyTitle}</strong>
+        <p>${c.emptyBody}</p>
+        <div class="agent-quick-task-row">
+          ${agentQuickTasks().slice(0, 5).map((item) => `<button type="button" data-agent-fill="${esc(item)}">${esc(item)}</button>`).join("")}
         </div>
-      </header>
+      </div>`;
+  const pendingConfirmation = agentHasPendingConfirmation();
+  const inputPlaceholder = state.agentBusy
+    ? c.inputBusy
+    : pendingConfirmation
+      ? c.inputConfirm
+      : c.inputReady;
+  return `
+    <section class="agent-panel agent-page-panel agent-chat-shell">
       ${agentHistoryPanel()}
       <div class="agent-thread">
         ${intro}
@@ -4621,9 +4864,10 @@ function chatPanel() {
 
 function agentHistoryPanel() {
   if (!state.agentHistoryOpen) return "";
+  const c = agentUiCopy();
   const sessions = Array.isArray(state.agentHistorySessions) ? state.agentHistorySessions : [];
   return `<section class="agent-history-panel">
-    <header><strong>${icon("history", 16)} Agent 历史记录</strong><button class="icon-only" data-action="toggle-agent-history" title="关闭">${icon("x", 16)}</button></header>
+    <header><strong>${icon("history", 16)} ${c.history}</strong><button class="icon-only" data-action="toggle-agent-history" title="关闭">${icon("x", 16)}</button></header>
     ${sessions.length
       ? `<div class="agent-history-list">${sessions.map((item) => `<article>
           <div><b>${esc(item.title || "未命名对话")}</b><small>${agentHistoryMeta(item)}</small></div>
@@ -4631,6 +4875,10 @@ function agentHistoryPanel() {
           <button class="icon-only" data-agent-history-delete="${esc(item.id)}" title="删除这条历史">${icon("trash-2", 15)}</button>
         </article>`).join("")}</div>`
       : `<p class="agent-history-empty">还没有历史记录。点「新对话」时，当前对话会自动保存到这里。</p>`}
+    <div class="agent-history-footer">
+      <button class="dark-button mini-button" data-action="new-agent-chat">${icon("message-square-plus", 14)} ${c.newChat}</button>
+      <button class="dark-button mini-button" data-action="clear-agent-context">${icon("trash-2", 14)} ${c.clearContext}</button>
+    </div>
   </section>`;
 }
 
@@ -4992,6 +5240,7 @@ function bind() {
   document.querySelectorAll("[data-admin-clean-payment]").forEach((el) => el.addEventListener("click", () => adminCleanupPayment(el.dataset.adminCleanPayment)));
   document.querySelectorAll("[data-admin-status]").forEach((el) => el.addEventListener("click", () => adminUpdateUser(el.dataset.adminStatus, { status: el.dataset.status })));
   document.querySelectorAll("[data-agent-permission]").forEach((el) => el.addEventListener("click", () => adminUpdateUser(el.dataset.agentPermission, { agentPermissions: { [el.dataset.permission]: el.dataset.enabled === "true" } })));
+  document.querySelectorAll("[data-agent-fill]").forEach((el) => el.addEventListener("click", () => set({ agentInput: el.dataset.agentFill || "" })));
   document.querySelectorAll("[data-agent-prompt]").forEach((el) => el.addEventListener("click", () => sendAgentMessage(el.dataset.agentPrompt)));
   document.querySelectorAll("[data-agent-confirm]").forEach((el) => el.addEventListener("click", () => confirmAgentAction(el.dataset.agentConfirm, el.dataset.agentToken)));
   document.querySelectorAll("[data-agent-undo]").forEach((el) => el.addEventListener("click", () => undoAgentRun(el.dataset.agentUndo)));
