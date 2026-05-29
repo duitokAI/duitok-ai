@@ -3372,6 +3372,12 @@ textarea {
   cursor: pointer;
 }
 
+.attachment-open-zone {
+  width: 100%;
+  min-height: 150px;
+  padding: 22px;
+}
+
 .drop-zone strong {
   font-size: 20px;
   color: #414758;
@@ -19703,6 +19709,11 @@ label {
   border-radius: 13px !important;
   gap: 8px !important;
   padding: 18px !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .attachment-open-zone {
+  width: 100% !important;
+  min-height: 150px !important;
 }
 
 .studio-shell .workspace:has(.step-tabs) .drop-zone svg,
