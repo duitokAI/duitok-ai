@@ -3683,10 +3683,12 @@ button:disabled [data-lucide="loader-circle"] {
 .agent-thread {
   min-height: 0;
   overflow-y: auto;
-  display: grid;
-  align-content: start;
+  display: flex;
+  flex-direction: column;
   gap: 10px;
   padding-right: 4px;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 
 .agent-thread article {
@@ -15701,7 +15703,7 @@ label {
 .studio-shell .agent-workspace-shell {
   display: grid !important;
   grid-template-columns: minmax(420px, 0.82fr) minmax(0, 1fr) !important;
-  align-items: start !important;
+  align-items: stretch !important;
   gap: 20px !important;
   min-height: calc(100vh - 190px) !important;
 }
@@ -15887,8 +15889,8 @@ label {
 .studio-shell .agent-page-panel {
   position: relative !important;
   width: 100% !important;
-  height: calc(100vh - 190px) !important;
-  min-height: 640px !important;
+  height: min(680px, calc(100dvh - 190px)) !important;
+  min-height: 560px !important;
   max-height: none !important;
   display: grid !important;
   grid-template-rows: minmax(0, 1fr) auto !important;
@@ -15908,7 +15910,15 @@ label {
   min-height: 0 !important;
   overflow-y: auto !important;
   overflow-anchor: none !important;
-  padding: 2px 4px 14px 0 !important;
+  gap: 14px !important;
+  padding: 2px 8px 18px 0 !important;
+  overscroll-behavior: contain !important;
+  scrollbar-gutter: stable !important;
+}
+
+.studio-shell .agent-chat-shell .agent-thread::after {
+  content: "";
+  flex: 0 0 8px;
 }
 
 .studio-shell .agent-empty-state {
@@ -16600,8 +16610,8 @@ label {
 
 /* Final Agent layout overrides after the Studio density layer. */
 .studio-shell .agent-chat-shell.agent-page-panel {
-  height: calc(100vh - 190px) !important;
-  min-height: 640px !important;
+  height: min(680px, calc(100dvh - 190px)) !important;
+  min-height: 560px !important;
   display: grid !important;
   grid-template-rows: minmax(0, 1fr) auto !important;
   padding: 18px !important;
@@ -16615,7 +16625,10 @@ label {
   min-height: 0 !important;
   overflow-y: auto !important;
   overflow-anchor: none !important;
-  padding: 2px 4px 14px 0 !important;
+  gap: 14px !important;
+  padding: 2px 8px 18px 0 !important;
+  overscroll-behavior: contain !important;
+  scrollbar-gutter: stable !important;
 }
 
 .studio-shell .agent-status-card .agent-life-card {
