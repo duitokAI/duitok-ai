@@ -1254,7 +1254,8 @@ async function refreshState() {
 
 function set(patch) {
   const modalOnly = shouldPatchModalOnly(patch);
-  const shouldScrollAgentThread = shouldAutoScrollAgentThread(patch);
+  const agentScroll = captureAgentThreadScroll();
+  const shouldScrollAgentThread = shouldAutoScrollAgentThread(patch, agentScroll);
   rememberSidebarScroll();
   Object.assign(state, patch);
   if (modalOnly) {
@@ -1264,12 +1265,38 @@ function set(patch) {
   }
   render();
   if (shouldScrollAgentThread) scrollAgentThreadToBottom();
+  else restoreAgentThreadScroll(agentScroll);
 }
 
-function shouldAutoScrollAgentThread(patch = {}) {
+function shouldAutoScrollAgentThread(patch = {}, scroll = null) {
   if (state.page !== "agent") return false;
-  return Object.prototype.hasOwnProperty.call(patch, "agentMessages")
-    || Object.prototype.hasOwnProperty.call(patch, "agentBusy");
+  const affectsThread = Object.prototype.hasOwnProperty.call(patch, "agentMessages")
+    || Object.prototype.hasOwnProperty.call(patch, "agentBusy")
+    || Object.prototype.hasOwnProperty.call(patch, "agentWorkingTick");
+  return affectsThread && (!scroll || scroll.nearBottom);
+}
+
+function captureAgentThreadScroll() {
+  if (state.page !== "agent") return null;
+  const thread = document.querySelector(".agent-chat-shell .agent-thread");
+  if (!thread) return null;
+  const distanceFromBottom = thread.scrollHeight - thread.scrollTop - thread.clientHeight;
+  return {
+    top: thread.scrollTop,
+    height: thread.scrollHeight,
+    nearBottom: distanceFromBottom < 96
+  };
+}
+
+function restoreAgentThreadScroll(scroll = null) {
+  if (!scroll || state.page !== "agent") return;
+  const restore = () => {
+    const thread = document.querySelector(".agent-chat-shell .agent-thread");
+    if (!thread) return;
+    const heightDelta = thread.scrollHeight - scroll.height;
+    thread.scrollTop = Math.max(0, scroll.top + Math.min(0, heightDelta));
+  };
+  requestAnimationFrame(restore);
 }
 
 function scrollAgentThreadToBottom() {
