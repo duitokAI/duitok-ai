@@ -1398,6 +1398,246 @@ textarea {
   margin: 14px 0 18px;
 }
 
+.admin-crm-head {
+  margin-bottom: 16px;
+}
+
+.admin-health-strip {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.admin-health-strip button,
+.admin-action-item,
+.admin-diagnostics-toggle {
+  border: 1px solid rgba(95, 0, 103, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--purple);
+  text-align: left;
+}
+
+.admin-health-strip button {
+  min-height: 82px;
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 3px 8px;
+  align-items: center;
+  padding: 12px;
+}
+
+.admin-health-strip svg {
+  color: var(--pink);
+}
+
+.admin-health-strip span,
+.admin-health-strip small,
+.admin-action-item span,
+.admin-action-item small,
+.admin-user-row small,
+.admin-profile-head p,
+.admin-mini-section h3 {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-health-strip b {
+  grid-column: 1 / -1;
+  color: var(--purple);
+  font-size: clamp(20px, 2vw, 28px);
+  line-height: 1;
+}
+
+.admin-action-queue,
+.admin-diagnostics {
+  margin-bottom: 18px;
+  border: 1px solid rgba(95, 0, 103, 0.12);
+  border-radius: 12px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 12px 34px rgba(76, 0, 87, 0.06);
+}
+
+.admin-action-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-action-item {
+  min-height: 96px;
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  padding: 14px;
+}
+
+.admin-action-item svg {
+  color: #21a65b;
+}
+
+.admin-action-item.warning svg {
+  color: #d68a00;
+}
+
+.admin-action-item.danger svg {
+  color: #ef4444;
+}
+
+.admin-action-item b {
+  color: var(--purple);
+  font-size: 24px;
+  line-height: 1;
+}
+
+.admin-crm-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(360px, 0.55fr);
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.admin-crm-toolbar {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(150px, 0.32fr) minmax(170px, 0.34fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.admin-crm-toolbar label {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(95, 0, 103, 0.12);
+  border-radius: 10px;
+  padding: 0 12px;
+  background: #fff;
+}
+
+.admin-crm-toolbar input,
+.admin-crm-toolbar select {
+  min-height: 42px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.admin-user-table {
+  display: grid;
+  gap: 6px;
+}
+
+.admin-user-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(220px, 1.2fr) 112px 78px 112px 112px minmax(140px, 0.8fr) 28px;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid rgba(95, 0, 103, 0.08);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--purple);
+  text-align: left;
+}
+
+.admin-user-row.head {
+  min-height: 34px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-user-row.selected {
+  border-color: rgba(243, 91, 108, 0.34);
+  background: #fff5f8;
+}
+
+.admin-user-row b {
+  display: block;
+  color: var(--purple);
+}
+
+.admin-status-badge {
+  width: fit-content;
+  border: 1px solid rgba(37, 201, 120, 0.24);
+  border-radius: 999px;
+  padding: 6px 9px;
+  background: rgba(37, 201, 120, 0.1);
+  color: #0d7a45;
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-status-badge.suspended {
+  border-color: rgba(239, 68, 68, 0.28);
+  background: rgba(239, 68, 68, 0.08);
+  color: #b42318;
+}
+
+.admin-profile-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.admin-profile-head strong {
+  color: var(--purple);
+  font-size: 20px;
+  line-height: 1.1;
+}
+
+.admin-profile-head p {
+  margin: 6px 0 0;
+  text-transform: none;
+}
+
+.admin-profile-metrics {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-mini-section {
+  margin-top: 16px;
+}
+
+.admin-mini-section h3 {
+  margin: 0 0 8px;
+}
+
+.admin-diagnostics-toggle {
+  width: 100%;
+  min-height: 46px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 14px;
+  font-weight: 950;
+}
+
+.admin-diagnostics-body {
+  display: none;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.admin-diagnostics.open .admin-diagnostics-body {
+  display: grid;
+}
+
 .plan-grid article {
   flex: 1 1 180px;
   border: 1px solid var(--line);
@@ -4742,6 +4982,100 @@ label {
 
   .sop-center-content {
     padding: 18px;
+  }
+}
+
+/* Admin CRM operator console overrides. */
+.studio-shell .admin-health-strip {
+  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  margin-bottom: 16px !important;
+}
+
+.studio-shell .admin-health-strip button,
+.studio-shell .admin-action-item,
+.studio-shell .admin-diagnostics-toggle {
+  min-height: 0 !important;
+  border-radius: 10px !important;
+}
+
+.studio-shell .admin-health-strip button {
+  min-height: 82px !important;
+  padding: 12px !important;
+}
+
+.studio-shell .admin-action-queue,
+.studio-shell .admin-diagnostics {
+  border-radius: 12px !important;
+  padding: 16px !important;
+}
+
+.studio-shell .admin-action-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.studio-shell .admin-crm-layout {
+  grid-template-columns: minmax(0, 1.45fr) minmax(360px, 0.55fr) !important;
+  gap: 16px !important;
+}
+
+.studio-shell .admin-crm-toolbar {
+  grid-template-columns: minmax(220px, 1fr) minmax(150px, 0.32fr) minmax(170px, 0.34fr) !important;
+  gap: 10px !important;
+}
+
+.studio-shell .admin-crm-toolbar label {
+  min-height: 42px !important;
+  display: grid !important;
+  grid-template-columns: 18px minmax(0, 1fr) !important;
+  padding: 0 12px !important;
+}
+
+.studio-shell .admin-crm-toolbar input,
+.studio-shell .admin-crm-toolbar select {
+  min-height: 42px !important;
+  border: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+.studio-shell .admin-user-row {
+  grid-template-columns: minmax(220px, 1.2fr) 112px 78px 112px 112px minmax(140px, 0.8fr) 28px !important;
+  padding: 10px 12px !important;
+}
+
+.studio-shell .admin-profile-metrics {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.studio-shell .admin-diagnostics-body {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+@media (max-width: 1180px) {
+  .studio-shell .admin-health-strip,
+  .studio-shell .admin-action-grid,
+  .studio-shell .admin-diagnostics-body {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .studio-shell .admin-crm-layout {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .studio-shell .admin-health-strip,
+  .studio-shell .admin-action-grid,
+  .studio-shell .admin-crm-toolbar,
+  .studio-shell .admin-diagnostics-body {
+    grid-template-columns: 1fr !important;
+  }
+
+  .studio-shell .admin-user-row,
+  .studio-shell .admin-user-row.head {
+    grid-template-columns: 1fr 1fr !important;
   }
 }
 

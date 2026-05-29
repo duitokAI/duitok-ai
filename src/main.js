@@ -5,7 +5,7 @@ const toast = document.querySelector("#toast");
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
 const isStudioPath = () => window.location.pathname.startsWith("/studio") || window.location.pathname.startsWith("/admin");
 const pathIs = (path) => window.location.pathname === path;
-const ownerAdminEmail = "admin@duitok.com";
+const ownerAdminEmail = "admin@pokaya.ai";
 const whatsappGroupUrl = "https://chat.whatsapp.com/ERz2477U1gJFJHFsXtiMJH?mode=gi_t";
 const supportWhatsappUrl = "https://wa.me/60163100131";
 const promoCycleMs = 5 * 60 * 60 * 1000;
@@ -46,6 +46,10 @@ const state = {
   modal: null,
   search: "",
   adminUserId: null,
+  adminSearch: "",
+  adminStatusFilter: "all",
+  adminSort: "lastActivity",
+  adminOpsOpen: false,
   dateFrom: "2026-05-01",
   dateTo: "2026-05-26",
   live: false,
@@ -2604,6 +2608,48 @@ function isOwnerAdminAccount() {
   return state.user?.role === "admin" && String(state.user?.email || "").toLowerCase() === ownerAdminEmail;
 }
 
+function adminMoney(value) {
+  return `RM ${Number(value || 0).toFixed(2)}`;
+}
+
+function adminTime(value) {
+  if (!value) return "No activity";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "No activity" : date.toLocaleString();
+}
+
+function adminLastActivity(user, jobs = [], payments = [], ledger = []) {
+  const values = [
+    user?.lastActiveAt,
+    user?.updatedAt,
+    user?.createdAt,
+    ...jobs.map((item) => item.updatedAt || item.createdAt),
+    ...payments.map((item) => item.updatedAt || item.createdAt),
+    ...ledger.map((item) => item.createdAt)
+  ].filter(Boolean).map((item) => new Date(item).getTime()).filter(Number.isFinite);
+  return values.length ? new Date(Math.max(...values)).toISOString() : "";
+}
+
+function adminStatusBadge(status = "active") {
+  const value = String(status || "active").toLowerCase();
+  return `<span class="admin-status-badge ${value}">${esc(value)}</span>`;
+}
+
+function adminActionQueue(items = []) {
+  const visible = items.filter(Boolean);
+  return `<section class="admin-action-queue">
+    <div class="card-title"><h2>${icon("list-checks", 22)} Action Queue</h2><span>${visible.filter((item) => item.level !== "ok").length} items</span></div>
+    <div class="admin-action-grid">
+      ${visible.map((item) => `<button type="button" class="admin-action-item ${item.level || "ok"}" ${item.action || ""}>
+        ${icon(item.icon || "circle-check", 20)}
+        <span>${esc(item.title)}</span>
+        <b>${esc(item.value)}</b>
+        <small>${esc(item.note)}</small>
+      </button>`).join("")}
+    </div>
+  </section>`;
+}
+
 function adminPage() {
   if (!isOwnerAdminAccount()) return `<section class="canvas-card slim"><h1>Admin access required</h1></section>`;
   if (state.user?.adminLocked || !state.db?.admin) {
@@ -2616,72 +2662,196 @@ function adminPage() {
   const calls = admin.apiCalls || [];
   const adminAuditLogs = admin.adminAuditLogs || [];
   const payments = admin.payments || [];
-  const selectedUser = users.find((user) => user.id === state.adminUserId) || users[0];
+  const creditLedger = admin.creditLedger || [];
+  const projects = admin.projects || state.db.projects || [];
+  const query = state.adminSearch.trim().toLowerCase();
+  const failedCalls = calls.filter((call) => /fail|error|blocked/i.test(`${call.status || ""} ${call.error || ""}`));
+  const pendingPayments = payments.filter((payment) => payment.status && payment.status !== "paid");
+  const userRows = users.map((user) => {
+    const userJobs = jobs.filter((job) => job.userId === user.id);
+    const userPayments = payments.filter((payment) => payment.userId === user.id);
+    const userLedger = creditLedger.filter((entry) => entry.userId === user.id);
+    const failedJobs = userJobs.filter((job) => /fail|error/i.test(`${job.status || ""} ${job.errorMessage || ""}`));
+    const lastActivity = adminLastActivity(user, userJobs, userPayments, userLedger);
+    const credits = Number(user.billing?.credits ?? 0);
+    const lifecycle = Number(user.totalRevenueRm || 0) > 0 ? "paid" : userJobs.length ? "activated" : "new";
+    return { ...user, userJobs, userPayments, userLedger, failedJobs, lastActivity, credits, lifecycle };
+  });
+  const filteredUsers = userRows
+    .filter((user) => {
+      const haystack = [user.email, user.id, user.role, user.status, user.lifecycle].join(" ").toLowerCase();
+      const statusMatch = state.adminStatusFilter === "all"
+        || (state.adminStatusFilter === "lowCredits" ? user.credits < 4 : state.adminStatusFilter === "failed" ? user.failedJobs.length > 0 : haystack.includes(state.adminStatusFilter.toLowerCase()));
+      return statusMatch && (!query || haystack.includes(query));
+    })
+    .sort((a, b) => {
+      if (state.adminSort === "credits") return a.credits - b.credits;
+      if (state.adminSort === "revenue") return Number(b.totalRevenueRm || 0) - Number(a.totalRevenueRm || 0);
+      if (state.adminSort === "cost") return Number(b.totalCostRm || 0) - Number(a.totalCostRm || 0);
+      if (state.adminSort === "profit") return Number(b.totalProfitRm || 0) - Number(a.totalProfitRm || 0);
+      return new Date(b.lastActivity || 0).getTime() - new Date(a.lastActivity || 0).getTime();
+    });
+  const selectedUser = userRows.find((user) => user.id === state.adminUserId) || filteredUsers[0] || userRows[0];
   const selectedJobs = jobs.filter((job) => job.userId === selectedUser?.id);
   const selectedPayments = payments.filter((payment) => payment.userId === selectedUser?.id);
-  const selectedLedger = (admin.creditLedger || []).filter((entry) => entry.userId === selectedUser?.id);
-  const selectedProjects = (admin.projects || state.db.projects || []).filter((project) => project.userId === selectedUser?.id);
+  const selectedLedger = creditLedger.filter((entry) => entry.userId === selectedUser?.id);
+  const selectedProjects = projects.filter((project) => project.userId === selectedUser?.id);
+  const selectedFailedJobs = selectedJobs.filter((job) => /fail|error/i.test(`${job.status || ""} ${job.errorMessage || ""}`));
   const modelCosts = admin.modelCosts || {};
   const permissions = selectedUser?.agentPermissions || {};
+  const lowCreditUsers = userRows.filter((user) => user.credits < 4 && (user.status || "active") !== "suspended");
+  const highCostJobs = jobs.filter((job) => Number(job.costRm || 0) >= 1);
+  const healthItems = [
+    ["Users", totals.users || users.length, "users", `${filteredUsers.length} visible`, "data-admin-filter=\"all\""],
+    ["Active", userRows.filter((user) => (user.status || "active") === "active").length, "user-check", "Active accounts", "data-admin-filter=\"active\""],
+    ["Generations", totals.generations || jobs.length, "sparkles", "All jobs", ""],
+    ["Revenue", adminMoney(totals.revenueRm), "receipt-text", "Paid CHIP", ""],
+    ["Cost", adminMoney(totals.costRm), "wallet-cards", "Provider cost", "data-admin-toggle-ops=\"true\""],
+    ["Failed", totals.failedCalls || failedCalls.length, "triangle-alert", "Needs review", "data-admin-toggle-ops=\"true\""]
+  ];
+  const queueItems = [
+    {
+      level: failedCalls.length ? "danger" : "ok",
+      icon: failedCalls.length ? "triangle-alert" : "circle-check",
+      title: "Failed API calls",
+      value: `${failedCalls.length || totals.failedCalls || 0}`,
+      note: failedCalls.length ? "Review provider/model failures" : "No failed calls in current state",
+      action: "data-admin-toggle-ops=\"true\""
+    },
+    {
+      level: lowCreditUsers.length ? "warning" : "ok",
+      icon: lowCreditUsers.length ? "battery-warning" : "badge-check",
+      title: "Low credit users",
+      value: `${lowCreditUsers.length}`,
+      note: lowCreditUsers.length ? "Users below 4 credits" : "No low-credit active users",
+      action: "data-admin-filter=\"lowCredits\""
+    },
+    {
+      level: pendingPayments.length ? "warning" : "ok",
+      icon: pendingPayments.length ? "receipt-text" : "circle-check",
+      title: "Pending payments",
+      value: `${pendingPayments.length}`,
+      note: pendingPayments.length ? "Payment cleanup may be needed" : "Payments look clean",
+      action: ""
+    },
+    {
+      level: highCostJobs.length ? "warning" : "ok",
+      icon: "gauge",
+      title: "High-cost jobs",
+      value: `${highCostJobs.length}`,
+      note: highCostJobs.length ? "Inspect model cost spikes" : "No high-cost jobs flagged",
+      action: "data-admin-toggle-ops=\"true\""
+    }
+  ];
   return `
-    <header class="project-head dashboard-head">
+    <header class="project-head dashboard-head admin-crm-head">
       <div>
         <p class="folder-label">${icon("shield-check", 18)} Admin CRM</p>
-        <h1>Duitok Multi-User CRM</h1>
-        <p class="subtitle">Users, generation jobs, API calls, costs, assets, payments, and publish records.</p>
+        <h1>Pokaya Multi-User CRM</h1>
+        <p class="subtitle">Operate users, payments, failed calls, credits, and provider diagnostics from one focused workspace.</p>
       </div>
-      <button class="sop-button" data-action="export-all">${icon("download")} Export CRM Data</button>
+      <div class="head-actions">
+        <button class="dark-button mini-button" data-admin-toggle-ops="true">${icon("activity", 16)} Ops Diagnostics</button>
+        <button class="sop-button" data-action="export-all">${icon("download")} Export CRM Data</button>
+      </div>
     </header>
-    <section class="dashboard-stat-grid">
-      ${[
-        ["Users", totals.users || 0, "users", "All accounts", "CRM"],
-        ["Generations", totals.generations || 0, "sparkles", "All jobs", "AI"],
-        ["Revenue", `RM ${Number(totals.revenueRm || 0).toFixed(2)}`, "receipt-text", "Paid CHIP", "Sales"],
-        ["Cost", `RM ${Number(totals.costRm || 0).toFixed(2)}`, "wallet-cards", "Provider cost", "COGS"],
-        ["Profit", `RM ${Number((totals.revenueRm || 0) - (totals.costRm || 0)).toFixed(2)}`, "trending-up", "Revenue - cost", "Margin"],
-        ["Failed Calls", totals.failedCalls || 0, "triangle-alert", "API errors", "Ops"]
-      ].map(([label, value, ic, note, meta]) => `<article><div><span>${label}</span><b>${value}</b><small>${note}</small></div>${icon(ic, 24)}<em>${meta}</em></article>`).join("")}
+    <section class="admin-health-strip">
+      ${healthItems.map(([label, value, ic, note, action]) => `<button type="button" ${action}>
+        ${icon(ic, 18)}
+        <span>${label}</span>
+        <b>${value}</b>
+        <small>${note}</small>
+      </button>`).join("")}
     </section>
-    <section class="dashboard-main-grid">
-      <article class="activity-card">
-        <div class="card-title"><h2>${icon("users", 22)} Users</h2><span>${users.length} accounts</span></div>
-        ${table(users.map((user) => [user.email, `${user.role} | ${user.projectCount} projects`, `<button class="dark-button mini-button" data-admin-user="${user.id}">${icon("eye", 15)} View</button> Credits ${user.billing?.credits ?? 0} | Cost RM ${Number(user.totalCostRm || 0).toFixed(2)}`]))}
+    ${adminActionQueue(queueItems)}
+    <section class="admin-crm-layout">
+      <article class="activity-card admin-users-card">
+        <div class="card-title"><h2>${icon("users", 22)} Users CRM</h2><span>${filteredUsers.length}/${users.length} accounts</span></div>
+        <div class="admin-crm-toolbar">
+          <label>${icon("search", 15)}<input data-admin-search placeholder="Search email, user id, role..." value="${esc(state.adminSearch)}"></label>
+          <select data-admin-status-filter>
+            ${[
+              ["all", "All users"],
+              ["active", "Active"],
+              ["suspended", "Suspended"],
+              ["admin", "Admin"],
+              ["lowCredits", "Low credits"],
+              ["failed", "Has failures"]
+            ].map(([value, label]) => `<option value="${value}" ${state.adminStatusFilter === value ? "selected" : ""}>${label}</option>`).join("")}
+          </select>
+          <select data-admin-sort>
+            ${[
+              ["lastActivity", "Last activity"],
+              ["credits", "Credits low first"],
+              ["revenue", "Revenue"],
+              ["cost", "Cost"],
+              ["profit", "Profit"]
+            ].map(([value, label]) => `<option value="${value}" ${state.adminSort === value ? "selected" : ""}>Sort: ${label}</option>`).join("")}
+          </select>
+        </div>
+        <div class="admin-user-table">
+          <div class="admin-user-row head"><span>User</span><span>Status</span><span>Credits</span><span>Revenue</span><span>Cost</span><span>Last activity</span><span></span></div>
+          ${filteredUsers.map((user) => `<button type="button" class="admin-user-row ${selectedUser?.id === user.id ? "selected" : ""}" data-admin-user="${esc(user.id)}">
+            <span><b>${esc(user.email)}</b><small>${esc(user.role || "user")} | ${esc(user.lifecycle)} | ${user.projectCount || 0} projects</small></span>
+            <span>${adminStatusBadge(user.status)}</span>
+            <span>${user.credits}</span>
+            <span>${adminMoney(user.totalRevenueRm)}</span>
+            <span>${adminMoney(user.totalCostRm)}</span>
+            <span>${adminTime(user.lastActivity)}</span>
+            <span>${icon("chevron-right", 16)}</span>
+          </button>`).join("") || `<p class="empty-text">No users match this filter.</p>`}
+        </div>
       </article>
-      <article class="activity-card">
-        <div class="card-title"><h2>${icon("activity", 22)} API Calls</h2><span>${calls.length} records</span></div>
-        ${table(calls.slice(0, 12).map((call) => [call.model || call.provider, `${call.status} | RM ${Number(call.costRm || 0).toFixed(3)}`, call.endpoint || call.taskId || ""]))}
-      </article>
-    </section>
-    <section class="dashboard-main-grid">
-      <article class="activity-card">
+      <article class="activity-card admin-profile-card">
         <div class="card-title"><h2>${icon("id-card", 22)} User Detail</h2><span>${selectedUser?.email || "No user"}</span></div>
-        ${selectedUser ? `<div class="metric-row">
-      <article><span>Credits</span><strong>${selectedUser.billing?.credits ?? 0}</strong></article>
-          <article><span>Revenue</span><strong>RM ${Number(selectedUser.totalRevenueRm || 0).toFixed(2)}</strong></article>
-          <article><span>Profit</span><strong>RM ${Number(selectedUser.totalProfitRm || 0).toFixed(2)}</strong></article>
+        ${selectedUser ? `<div class="admin-profile-head">
+          <div><strong>${esc(selectedUser.email)}</strong><p>${esc(selectedUser.id)} | ${esc(selectedUser.lifecycle || "user")}</p></div>
+          ${adminStatusBadge(selectedUser.status)}
+        </div>
+        <div class="metric-row admin-profile-metrics">
+          <article><span>Credits</span><strong>${selectedUser.billing?.credits ?? 0}</strong></article>
+          <article><span>Revenue</span><strong>${adminMoney(selectedUser.totalRevenueRm)}</strong></article>
+          <article><span>Profit</span><strong>${adminMoney(selectedUser.totalProfitRm)}</strong></article>
           <article><span>Projects</span><strong>${selectedProjects.length}</strong></article>
           <article><span>Jobs</span><strong>${selectedJobs.length}</strong></article>
-          <article><span>Status</span><strong>${selectedUser.status || "active"}</strong></article>
+          <article><span>Failures</span><strong>${selectedFailedJobs.length}</strong></article>
         </div>
         <div class="admin-actions">
           <button class="gold-button mini-button" data-admin-credit="${selectedUser.id}" data-delta="10">${icon("plus", 15)} +10 credits</button>
           <button class="dark-button mini-button" data-admin-credit="${selectedUser.id}" data-delta="-10">${icon("minus", 15)} -10 credits</button>
           <button class="dark-button mini-button" data-admin-status="${selectedUser.id}" data-status="${selectedUser.status === "suspended" ? "active" : "suspended"}">${icon(selectedUser.status === "suspended" ? "unlock" : "ban", 15)} ${selectedUser.status === "suspended" ? "Unsuspend" : "Suspend"}</button>
+          <button class="dark-button mini-button" data-admin-toggle-ops="true">${icon("bug", 15)} View failures</button>
         </div>
-        ${table(selectedJobs.slice(0, 8).map((job) => [job.model || job.type, `${job.status} | ${job.provider || ""}`, job.imageUrl || job.videoUrl || job.errorMessage || job.taskId || ""]))}` : `<p class="empty-text">No user selected.</p>`}
-      </article>
-      <article class="activity-card">
-        <div class="card-title"><h2>${icon("wallet-cards", 22)} Ledger</h2><span>${selectedLedger.length} entries</span></div>
-        ${table(selectedLedger.slice(0, 8).map((entry) => [entry.note || entry.type, `${entry.credits > 0 ? "+" : ""}${entry.credits} credits`, entry.createdAt ? new Date(entry.createdAt).toLocaleString() : ""]))}
-        <div class="card-title compact-title"><h2>${icon("receipt-text", 20)} Payments</h2><span>${selectedPayments.length}</span></div>
-        ${table(selectedPayments.slice(0, 4).map((payment) => paymentRow(payment, true)))}
+        <div class="admin-mini-section">
+          <h3>Recent jobs</h3>
+          ${table(selectedJobs.slice(0, 5).map((job) => [job.model || job.type || "Job", `${job.status || "queued"} | ${adminMoney(job.costRm)}`, job.errorMessage || job.taskId || job.createdAt || ""]))}
+        </div>
+        <div class="admin-mini-section">
+          <h3>Finance</h3>
+          ${table(selectedLedger.slice(0, 4).map((entry) => [entry.note || entry.type, `${entry.credits > 0 ? "+" : ""}${entry.credits} credits`, adminTime(entry.createdAt)]))}
+          ${table(selectedPayments.slice(0, 3).map((payment) => paymentRow(payment, true)))}
+        </div>
+        <div class="admin-mini-section">
+          <h3>Agent permissions</h3>
+          <div class="permission-grid">${["generate", "updateProject", "schedule", "publish", "support"].map((key) => `<button class="${permissions[key] ? "gold-button" : "dark-button"} mini-button" data-agent-permission="${selectedUser.id}" data-permission="${key}" data-enabled="${permissions[key] ? "false" : "true"}">${permissions[key] ? icon("check", 15) : icon("x", 15)} ${key}</button>`).join("")}</div>
+        </div>` : `<p class="empty-text">No user selected.</p>`}
       </article>
     </section>
-    <section class="dashboard-main-grid">
-      <article class="activity-card">
-        <div class="card-title"><h2>${icon("sliders-horizontal", 22)} Internal Model Costs</h2><span>Admin only</span></div>
-        ${table(Object.entries(modelCosts).map(([model, cost]) => [model, `RM ${Number(cost.costRm || 0).toFixed(3)}`, cost.unit || ""]))}
-      </article>
+    <section class="admin-diagnostics ${state.adminOpsOpen ? "open" : ""}">
+      <button type="button" class="admin-diagnostics-toggle" data-admin-toggle-ops="true">${icon("shield-alert", 18)} Ops Diagnostics <span>${state.adminOpsOpen ? "Hide" : "Reveal"}</span></button>
+      <div class="admin-diagnostics-body">
+        <article class="activity-card">
+          <div class="card-title"><h2>${icon("activity", 22)} API Calls</h2><span>${calls.length} records</span></div>
+          ${table(calls.slice(0, 12).map((call) => [call.model || call.provider || "API call", `${call.status || "unknown"} | RM ${Number(call.costRm || 0).toFixed(3)}`, call.endpoint || call.taskId || call.errorMessage || ""]))}
+        </article>
+        <article class="activity-card">
+          <div class="card-title"><h2>${icon("image", 22)} Generated Assets</h2><span>${jobs.length} jobs</span></div>
+          ${table(jobs.slice(0, 12).map((job) => [job.model || job.type, `${job.provider || "provider"} | ${job.status || "status"}`, `RM ${Number(job.costRm || 0).toFixed(3)} | ${job.taskId || job.errorMessage || ""}`]))}
+        </article>
+        <article class="activity-card">
+          <div class="card-title"><h2>${icon("sliders-horizontal", 22)} Internal Model Costs</h2><span>Admin only</span></div>
+          ${table(Object.entries(modelCosts).map(([model, cost]) => [model, `RM ${Number(cost.costRm || 0).toFixed(3)}`, cost.unit || ""]))}
+        </article>
       <article class="activity-card">
         <div class="card-title"><h2>${icon("shield-check", 22)} Guardrails</h2><span>Active</span></div>
         ${table([
@@ -2690,23 +2860,12 @@ function adminPage() {
           ["Failure ledger", "No credit charge", "Failed API calls are recorded for admin review"],
           ["Admin audit", `${adminAuditLogs.length} events`, "Sensitive admin actions are logged"]
         ])}
-        <div class="card-title compact-title"><h2>${icon("bot", 20)} Agent Permissions</h2><span>${selectedUser?.email || ""}</span></div>
-        ${selectedUser ? `<div class="permission-grid">${["generate", "updateProject", "schedule", "publish", "support"].map((key) => `<button class="${permissions[key] ? "gold-button" : "dark-button"} mini-button" data-agent-permission="${selectedUser.id}" data-permission="${key}" data-enabled="${permissions[key] ? "false" : "true"}">${permissions[key] ? icon("check", 15) : icon("x", 15)} ${key}</button>`).join("")}</div>` : ""}
-      </article>
-    </section>
-    <section class="dashboard-main-grid">
-      <article class="activity-card">
-        <div class="card-title"><h2>${icon("image", 22)} Generated Assets</h2><span>${jobs.length} jobs</span></div>
-        ${table(jobs.slice(0, 12).map((job) => [job.model || job.type, `${job.provider} | ${job.status}`, `RM ${Number(job.costRm || 0).toFixed(3)} | ${job.taskId || ""}`]))}
-      </article>
-      <article class="activity-card">
-        <div class="card-title"><h2>${icon("credit-card", 22)} Payments</h2><span>${payments.length} payments</span></div>
-        ${table(payments.slice(0, 12).map((payment) => paymentRow(payment, true)))}
       </article>
       <article class="activity-card">
         <div class="card-title"><h2>${icon("shield-check", 22)} Admin Audit</h2><span>${adminAuditLogs.length} events</span></div>
         ${table(adminAuditLogs.slice(0, 12).map((entry) => [entry.action, entry.email || entry.userId, entry.createdAt ? new Date(entry.createdAt).toLocaleString() : ""]))}
       </article>
+      </div>
     </section>`;
 }
 
@@ -5339,6 +5498,11 @@ function bind() {
   document.querySelectorAll("[data-agent-history-restore]").forEach((el) => el.addEventListener("click", () => restoreAgentHistory(el.dataset.agentHistoryRestore)));
   document.querySelectorAll("[data-agent-history-delete]").forEach((el) => el.addEventListener("click", () => deleteAgentHistory(el.dataset.agentHistoryDelete)));
   document.querySelectorAll("[data-admin-user]").forEach((el) => el.addEventListener("click", () => set({ adminUserId: el.dataset.adminUser })));
+  document.querySelectorAll("[data-admin-search]").forEach((el) => el.addEventListener("input", () => set({ adminSearch: el.value, adminUserId: null })));
+  document.querySelectorAll("[data-admin-status-filter]").forEach((el) => el.addEventListener("change", () => set({ adminStatusFilter: el.value, adminUserId: null })));
+  document.querySelectorAll("[data-admin-sort]").forEach((el) => el.addEventListener("change", () => set({ adminSort: el.value })));
+  document.querySelectorAll("[data-admin-filter]").forEach((el) => el.addEventListener("click", () => set({ adminStatusFilter: el.dataset.adminFilter || "all", adminUserId: null })));
+  document.querySelectorAll("[data-admin-toggle-ops]").forEach((el) => el.addEventListener("click", () => set({ adminOpsOpen: !state.adminOpsOpen })));
   document.querySelectorAll("[data-admin-credit]").forEach((el) => el.addEventListener("click", () => adminAdjustCredits(el.dataset.adminCredit, Number(el.dataset.delta))));
   document.querySelectorAll("[data-admin-clean-payment]").forEach((el) => el.addEventListener("click", () => adminCleanupPayment(el.dataset.adminCleanPayment)));
   document.querySelectorAll("[data-admin-status]").forEach((el) => el.addEventListener("click", () => adminUpdateUser(el.dataset.adminStatus, { status: el.dataset.status })));
