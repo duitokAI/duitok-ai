@@ -15614,6 +15614,14 @@ label {
   box-shadow: inset 2px 0 0 var(--studio-pink), 0 12px 26px rgba(255, 63, 110, 0.1) !important;
 }
 
+.studio-shell .project-menu-item .project-button,
+.studio-shell .project-menu-item .project-button:hover,
+.studio-shell .project-menu-item .project-button.active {
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
 .studio-shell .project-menu-item .project-button {
   min-height: 54px !important;
   gap: 12px !important;
