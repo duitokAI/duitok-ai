@@ -5286,7 +5286,10 @@ function bind() {
   document.querySelectorAll("[data-admin-clean-payment]").forEach((el) => el.addEventListener("click", () => adminCleanupPayment(el.dataset.adminCleanPayment)));
   document.querySelectorAll("[data-admin-status]").forEach((el) => el.addEventListener("click", () => adminUpdateUser(el.dataset.adminStatus, { status: el.dataset.status })));
   document.querySelectorAll("[data-agent-permission]").forEach((el) => el.addEventListener("click", () => adminUpdateUser(el.dataset.agentPermission, { agentPermissions: { [el.dataset.permission]: el.dataset.enabled === "true" } })));
-  document.querySelectorAll("[data-agent-fill]").forEach((el) => el.addEventListener("click", () => set({ agentInput: el.dataset.agentFill || "" })));
+  document.querySelectorAll("[data-agent-fill]").forEach((el) => el.addEventListener("click", (event) => {
+    event.preventDefault();
+    fillAgentInput(el.dataset.agentFill || "");
+  }));
   document.querySelectorAll("[data-agent-prompt]").forEach((el) => el.addEventListener("click", () => {
     const card = el.closest("[data-agent-card-type]");
     const run = el.closest("[data-agent-run-id]");
@@ -5362,6 +5365,14 @@ function autoResizeAgentInput(input) {
   if (!input) return;
   input.style.height = "auto";
   input.style.height = `${Math.min(input.scrollHeight, 132)}px`;
+}
+
+function fillAgentInput(value = "") {
+  state.agentInput = value;
+  const input = document.querySelector("[data-agent-input]");
+  if (!input) return;
+  input.value = value;
+  autoResizeAgentInput(input);
 }
 
 function closeLangMenu(event) {
