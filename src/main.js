@@ -38,7 +38,7 @@ let imagePresetSaveTimer = null;
 const steps = [
   ["image", "image", "stepImage", "01"],
   ["ugc", "video", "stepUgc", "02"],
-  ["auto", "wand-sparkles", "stepAuto", "03"],
+  ["auto", "layout-template", "stepAuto", "03"],
   ["original", "film", "stepOriginal", "04"],
   ["clone", "layers-3", "stepClone", "05"],
   ["story", "book-open", "stepStory", "06"]
