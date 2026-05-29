@@ -1,9 +1,9 @@
-# Duitok AI Codex Handoff - 2026-05-27
+# Pokaya AI Codex Handoff - 2026-05-27
 
 Reactivation prompt:
 
 ```text
-We are continuing from this handoff. Read docs/codex-handoffs/2026-05-27-duitok-current-state.md first, inspect the current repo state, verify what still applies, and continue from the next steps without assuming the old chat context is available.
+We are continuing from this handoff. Read docs/codex-handoffs/2026-05-27-pokaya-current-state.md first, inspect the current repo state, verify what still applies, and continue from the next steps without assuming the old chat context is available.
 ```
 
 ## Repo
@@ -25,7 +25,7 @@ Keep developing and polishing DuitTok AI while reducing Codex thread drag. This 
   - Relevant file: `src/main.js`.
 
 - Changed homepage background behavior:
-  - Problem: `https://duitok.com/` used a CSS gradient that made only the top portion dark and the lower sections light.
+  - Problem: `https://pokaya.ai/` used a CSS gradient that made only the top portion dark and the lower sections light.
   - Cause: `.public-shell` had `linear-gradient(180deg, #100712 0 760px, #f8f6fa 760px 100%)`.
   - Change: added `home-shell` to the homepage `<main>` and added homepage-only dark full-page overrides in `src/styles.css`.
   - Relevant files: `src/main.js`, `src/styles.css`.
@@ -47,13 +47,13 @@ Current DuitTok model table:
 
 | Frontend name | Actual model | Supplier | Internal cost | User charge | Gross profit |
 |---|---|---|---:|---:|---:|
-| Duitok Image | GPT Image 2 | APIMart | RM0.024 / image | RM0.10 | RM0.076 |
-| Duitok Image Pro | Nano Banana Pro | GRS AI | RM0.105 / image | RM0.20 | RM0.095 |
-| Duitok Video | Seedance 2.0 | Atlas Cloud | RM0.480 / 4s | RM0.40 / 4s | -RM0.080 |
-| Duitok Video Plus | Veo 3.1 | Wuyin / 速创API | RM0.234 / 8s | RM0.40 | RM0.166 |
-| Duitok Story Video | Sora 2 | Wuyin / 速创API | RM0.093 / 8s | RM0.48 / 8s | RM0.387 |
-| Duitok Omni Video | Gemini Omni | Wuyin / 速创API | RM0.584 / 10s | RM1.30 | RM0.716 |
-| Duitok Motion Video | Grok Imagine Video | Wuyin / 速创API | RM0.292 / 10s | RM0.60 / 10s | RM0.308 |
+| Pokaya Image | GPT Image 2 | APIMart | RM0.024 / image | RM0.10 | RM0.076 |
+| Pokaya Image Pro | Nano Banana Pro | GRS AI | RM0.105 / image | RM0.20 | RM0.095 |
+| Pokaya Video | Seedance 2.0 | Atlas Cloud | RM0.480 / 4s | RM0.40 / 4s | -RM0.080 |
+| Pokaya Video Plus | Veo 3.1 | Wuyin / 速创API | RM0.234 / 8s | RM0.40 | RM0.166 |
+| Pokaya Story Video | Sora 2 | Wuyin / 速创API | RM0.093 / 8s | RM0.48 / 8s | RM0.387 |
+| Pokaya Omni Video | Gemini Omni | Wuyin / 速创API | RM0.584 / 10s | RM1.30 | RM0.716 |
+| Pokaya Motion Video | Grok Imagine Video | Wuyin / 速创API | RM0.292 / 10s | RM0.60 / 10s | RM0.308 |
 | Text / Prompt actions | APIMart Text | APIMart | RM0.010 / text | RM0.10 | RM0.090 |
 
 Important business note:

@@ -44,7 +44,7 @@ Set these in Render:
 NODE_ENV=production
 SERVE_STATIC=true
 PUBLIC_APP_URL=https://pokaya.ai
-CORS_ORIGINS=https://pokaya.ai,https://www.pokaya.ai,https://duitok.com,https://www.duitok.com
+CORS_ORIGINS=https://pokaya.ai,https://www.pokaya.ai
 AUTH_SECRET=your_long_random_auth_secret
 ADMIN_USER_IDS=u_1
 ADMIN_EMAILS=admin@pokaya.ai

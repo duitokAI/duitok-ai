@@ -1,10 +1,10 @@
-# Duitok Agent 3D 建模 PRD
+# Pokaya Agent 3D 建模 PRD
 
 ## 1. 目标
 
-为 Duitok Agent 制作一个可在网页实时运行的正式 3D mascot。当前前端 prototype 只作为工程兜底，不作为最终视觉。正式版本必须交付真实 GLB 模型、可播放动画、Blender 源文件和贴图源文件。
+为 Pokaya Agent 制作一个可在网页实时运行的正式 3D mascot。当前前端 prototype 只作为工程兜底，不作为最终视觉。正式版本必须交付真实 GLB 模型、可播放动画、Blender 源文件和贴图源文件。
 
-成功标准不是“页面里有 3D”，而是用户看到后相信：Duitok Agent 是一个正在帮他做 TikTok Shop 内容的数字员工。
+成功标准不是“页面里有 3D”，而是用户看到后相信：Pokaya Agent 是一个正在帮他做 TikTok Shop 内容的数字员工。
 
 ## 2. 视觉方向
 
@@ -14,7 +14,7 @@
 - Malaysian TikTok seller assistant
 - Compact robot mascot
 - Smart, hardworking, friendly
-- Duitok 紫 + 粉色高光 + 少量珊瑚橙/黄色
+- Pokaya 紫 + 粉色高光 + 少量珊瑚橙/黄色
 - 软塑料玩具质感，但不能幼稚廉价
 
 禁止方向：
@@ -27,15 +27,15 @@
 
 ## 3. 角色设定
 
-角色名称：Duitok Agent Mascot
+角色名称：Pokaya Agent Mascot
 
 基础造型：
 
 - 小型圆角方形身体
-- 正面是屏幕脸或 Duitok mascot face
+- 正面是屏幕脸或 Pokaya mascot face
 - 两只短手，两只短脚
 - 头顶有 AI 信号灯或小天线
-- 身上可有小型 `AI` 标识或 Duitok 图形元素
+- 身上可有小型 `AI` 标识或 Pokaya 图形元素
 - 眼睛/屏幕允许轻微 emissive glow
 
 角色感觉：
@@ -64,7 +64,7 @@
 
 放入前端的生产文件：
 
-- `public/models/agent/duitok-agent.glb`
+- `public/models/agent/pokaya-agent.glb`
 
 源文件交付：
 
@@ -138,7 +138,7 @@ MVP 必须有：
 当前前端会优先加载：
 
 ```text
-/models/agent/duitok-agent.glb
+/models/agent/pokaya-agent.glb
 ```
 
 状态映射：
@@ -172,8 +172,8 @@ MVP 必须有：
 
 品牌感：
 
-- 一眼看出是 Duitok
-- 颜色符合 Duitok 紫/粉主视觉
+- 一眼看出是 Pokaya
+- 颜色符合 Pokaya 紫/粉主视觉
 - 不能像通用免费模型
 
 ## 10. 当前工程状态
@@ -207,4 +207,4 @@ MVP 必须有：
 - 任务状态切换通过
 - 没有 GLB 时 fallback 不报错
 
-在没有正式 `duitok-agent.glb` 之前，只能达到工程接入 100%，不能达到最终视觉 100%。
+在没有正式 `pokaya-agent.glb` 之前，只能达到工程接入 100%，不能达到最终视觉 100%。

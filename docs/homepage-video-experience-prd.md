@@ -1,10 +1,10 @@
-# Duitok Homepage Video Experience PRD
+# Pokaya Homepage Video Experience PRD
 
 ## 1. 背景
 
-当前 Duitok 首页是传统 SaaS landing page：左侧文案，右侧 hero card。用户想要的方向不是替换右侧图片，而是把整个首屏改成类似参考视频的动态展示方式：第一眼像一段正在播放的品牌宣传视频，主视觉占满整个画面，文案和 CTA 作为视频层上的 UI 信息出现。
+当前 Pokaya 首页是传统 SaaS landing page：左侧文案，右侧 hero card。用户想要的方向不是替换右侧图片，而是把整个首屏改成类似参考视频的动态展示方式：第一眼像一段正在播放的品牌宣传视频，主视觉占满整个画面，文案和 CTA 作为视频层上的 UI 信息出现。
 
-目标不是做一个普通网页动效，而是做一个“视频化前端”：用户打开页面时，感觉 Duitok 是一个面向 TikTok Shop seller 的内容生产引擎，画面有镜头感、流光、漂浮内容卡、AI 正在生成的状态。
+目标不是做一个普通网页动效，而是做一个“视频化前端”：用户打开页面时，感觉 Pokaya 是一个面向 TikTok Shop seller 的内容生产引擎，画面有镜头感、流光、漂浮内容卡、AI 正在生成的状态。
 
 ## 2. 核心目标
 
@@ -23,12 +23,12 @@
 
 ## 4. 用户感受
 
-用户打开首页后，第一屏应该像看到一段 Duitok 的动态宣传片：
+用户打开首页后，第一屏应该像看到一段 Pokaya 的动态宣传片：
 
 - 背景是完整的 seller 工作场景。
 - 右侧浮动多个 TikTok/UGC 视频卡片。
 - 画面有紫粉色流光和轻微镜头运动。
-- Duitok 的标题、CTA、价格、信任点浮在画面上。
+- Pokaya 的标题、CTA、价格、信任点浮在画面上。
 - 整体更像“正在发生的内容生产系统”，不是静态模板。
 
 ## 5. 信息架构
@@ -37,7 +37,7 @@
 
 首屏采用 full-bleed video scene：
 
-- 背景层：Duitok seller hero image/video，占满 hero。
+- 背景层：Pokaya seller hero image/video，占满 hero。
 - 暗色/紫粉渐变蒙层：保证文字可读。
 - 左侧或中下方文案层：
   - Eyebrow：1,300+ Malaysia sellers
@@ -70,7 +70,7 @@
 
 ### 6.1 色彩
 
-主色保持 Duitok 品牌：
+主色保持 Pokaya 品牌：
 
 - Deep purple / near black background
 - Pink / coral CTA
@@ -122,7 +122,7 @@
 
 使用现有资产：
 
-- `/public/duitok-hero-seller-v2.jpg`
+- `/public/pokaya-hero-seller-v2.jpg`
 
 通过 CSS 动效让静态图变成视频感场景。
 

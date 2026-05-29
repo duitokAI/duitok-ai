@@ -1,12 +1,12 @@
-# Duitok Studio Density System PRD
+# Pokaya Studio Density System PRD
 
 ## 1. 背景
 
-当前 Duitok Studio 的整体视觉尺寸偏大。截图中 Project 页面、左侧导航、步骤 tab、表单卡片、按钮、上传区域和浮动客服入口都占用了过多空间。这个问题不只出现在 Project 页面，也会影响 Billing、Top Up Credit、Usage、Affiliate、Content Library、Agent、Auto Post、WhatsApp、Admin CRM 等几乎所有 Studio 页面。
+当前 Pokaya Studio 的整体视觉尺寸偏大。截图中 Project 页面、左侧导航、步骤 tab、表单卡片、按钮、上传区域和浮动客服入口都占用了过多空间。这个问题不只出现在 Project 页面，也会影响 Billing、Top Up Credit、Usage、Affiliate、Content Library、Agent、Auto Post、WhatsApp、Admin CRM 等几乎所有 Studio 页面。
 
-参考图右侧的 PeningLab Studio 更接近一个高频工作台：左侧导航窄、顶部标题克制、tab 高度低、卡片紧凑、表单可扫读、主内容可在首屏看到更多操作。Duitok 现在更像演示页面或 landing page 延伸，工作效率感不足。
+参考图右侧的 PeningLab Studio 更接近一个高频工作台：左侧导航窄、顶部标题克制、tab 高度低、卡片紧凑、表单可扫读、主内容可在首屏看到更多操作。Pokaya 现在更像演示页面或 landing page 延伸，工作效率感不足。
 
-本 PRD 目标是建立一套 Studio 全局密度规范，把 Duitok Studio 从“视觉很大”调整为“紧凑、专业、可长期使用的 AI 短视频营销工作台”。
+本 PRD 目标是建立一套 Studio 全局密度规范，把 Pokaya Studio 从“视觉很大”调整为“紧凑、专业、可长期使用的 AI 短视频营销工作台”。
 
 ## 2. 核心问题
 
@@ -42,7 +42,7 @@
 - 用户进入任意 Studio 页面，都能在首屏看到当前页面核心操作。
 - 用户能快速扫读导航、项目、账单、生成、历史和排程信息。
 - Studio 观感更像 SaaS 工作台，而不是首页营销模块。
-- 保留 Duitok 品牌的紫 / 粉 / 金色系，但减少大面积渐变和夸张留白。
+- 保留 Pokaya 品牌的紫 / 粉 / 金色系，但减少大面积渐变和夸张留白。
 
 ### 3.2 业务目标
 
@@ -91,7 +91,7 @@ Project 页面首屏必须看到 image generator 与下一段上传区域的开�
 
 ### 5.4 品牌保留，装饰收敛
 
-保留 Duitok 的：
+保留 Pokaya 的：
 
 - 深紫文字
 - 粉色 accent
@@ -273,7 +273,7 @@ Project 页面首屏必须看到 image generator 与下一段上传区域的开�
 
 - Desktop 一行至少显示 4-5 个 asset card。
 
-### 7.8 Duitok Agent
+### 7.8 Pokaya Agent
 
 目标：Agent 是操作员，不是大聊天页。
 
@@ -323,7 +323,7 @@ Project 页面首屏必须看到 image generator 与下一段上传区域的开�
 
 ## 8. 视觉方向
 
-### 8.1 Duitok Studio Compact Theme
+### 8.1 Pokaya Studio Compact Theme
 
 保持亮色 Studio，不切黑底：
 
@@ -468,7 +468,7 @@ Project 页面首屏必须看到 image generator 与下一段上传区域的开�
 
 ## 13. Success Definition
 
-这次优化完成后，Duitok Studio 应该给用户的感觉是：
+这次优化完成后，Pokaya Studio 应该给用户的感觉是：
 
 > “这是一个我每天可以打开来批量做短视频带货的工作台。”
 

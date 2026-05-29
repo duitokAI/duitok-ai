@@ -1,8 +1,8 @@
-# Duitok AI Hero Optimization PRD
+# Pokaya AI Hero Optimization PRD
 
 ## 1. 背景
 
-当前 Duitok AI 首页已经具备基础卖点：TikTok Shop seller、10 videos/day 对比、RM69 价格、三语切换、Studio 入口。但与参考图相比，当前首屏更像一个干净的 SaaS landing page，参考图更像一个高压成交页：情绪更强、场景更具体、视觉冲突更明显、CTA 更有紧迫感。
+当前 Pokaya AI 首页已经具备基础卖点：TikTok Shop seller、10 videos/day 对比、RM69 价格、三语切换、Studio 入口。但与参考图相比，当前首屏更像一个干净的 SaaS landing page，参考图更像一个高压成交页：情绪更强、场景更具体、视觉冲突更明显、CTA 更有紧迫感。
 
 本 PRD 目标是把首页首屏从“说明产品”升级为“让卖家立刻感到自己落后，并马上开始生成”。
 
@@ -48,7 +48,7 @@
 
 - 提升首页首屏注册点击率。
 - 提高 WhatsApp 咨询点击率。
-- 让用户在 5 秒内理解：Duitok AI 帮 TikTok Shop seller 批量生成 UGC/短视频内容。
+- 让用户在 5 秒内理解：Pokaya AI 帮 TikTok Shop seller 批量生成 UGC/短视频内容。
 - 让用户产生“我现在不做，会输给竞争对手”的紧迫感。
 
 ### 3.2 用户目标
@@ -123,19 +123,19 @@ You are still thinking.
 BM 建议：
 
 ```text
-Duitok AI catch up dalam 3 minit. Letak link produk TikTok Shop - AI hasilkan skrip UGC, avatar image, caption, dan idea posting. Tanpa shoot, tanpa hire creator.
+Pokaya AI catch up dalam 3 minit. Letak link produk TikTok Shop - AI hasilkan skrip UGC, avatar image, caption, dan idea posting. Tanpa shoot, tanpa hire creator.
 ```
 
 中文建议：
 
 ```text
-Duitok AI 让你 3 分钟追上内容节奏。放入 TikTok Shop 产品链接，AI 生成 UGC 脚本、头像素材、caption 和发布想法。不用拍摄，不用请 creator。
+Pokaya AI 让你 3 分钟追上内容节奏。放入 TikTok Shop 产品链接，AI 生成 UGC 脚本、头像素材、caption 和发布想法。不用拍摄，不用请 creator。
 ```
 
 英文建议：
 
 ```text
-Duitok AI helps you catch up in 3 minutes. Paste a TikTok Shop product link and generate UGC scripts, avatar images, captions, and posting ideas. No shoot, no creator hiring.
+Pokaya AI helps you catch up in 3 minutes. Paste a TikTok Shop product link and generate UGC scripts, avatar images, captions, and posting ideas. No shoot, no creator hiring.
 ```
 
 ### 4.5 CTA
@@ -186,7 +186,7 @@ Secondary CTA：
 - 加两个对比标签：
   - `Anda: 1 video / hari`
   - `Kompetitor: 10 video / hari`
-- 加底部状态 badge：`Duitok AI catch up`
+- 加底部状态 badge：`Pokaya AI catch up`
 
 理想版本：
 
@@ -332,4 +332,4 @@ Secondary CTA 指向 demo section。
 
 ## 11. 一句话判断
 
-当前版本“好看但不够狠”；参考图“没那么干净，但更会卖”。下一版 Duitok AI 首页要保留品牌精致感，同时把首屏改成能让 seller 产生紧迫感的成交页。
+当前版本“好看但不够狠”；参考图“没那么干净，但更会卖”。下一版 Pokaya AI 首页要保留品牌精致感，同时把首屏改成能让 seller 产生紧迫感的成交页。

@@ -13,7 +13,7 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = process.env.DATA_DIR || path.join(root, "data");
 const dbPath = path.join(dataDir, "db.json");
 const distDir = path.join(root, "dist");
-const autoPostExtensionDir = path.join(root, "public", "duitok-autopost-extension");
+const autoPostExtensionDir = path.join(root, "public", "pokaya-autopost-extension");
 const port = Number(process.env.PORT || 4173);
 const serveStatic = process.env.SERVE_STATIC !== "false";
 const databaseUrl = process.env.DATABASE_URL || process.env.SUPABASE_DB_URL || "";
@@ -64,7 +64,7 @@ const publicMediaModelMap = {
 };
 const internalMediaModelMap = Object.fromEntries(Object.entries(publicMediaModelMap).map(([label, model]) => [model, label]));
 const adminUserId = "u_1";
-const authSecret = process.env.AUTH_SECRET || process.env.CHIP_API_TOKEN || "duitok-local-dev-secret";
+const authSecret = process.env.AUTH_SECRET || process.env.CHIP_API_TOKEN || "pokaya-local-dev-secret";
 const allowPublicSignup = process.env.ALLOW_PUBLIC_SIGNUP === "true" || process.env.NODE_ENV !== "production";
 const defaultUserCredits = Number(process.env.DEFAULT_USER_CREDITS ?? (process.env.NODE_ENV === "production" ? 0 : 83));
 const assetStorageProvider = process.env.ASSET_STORAGE_PROVIDER || "external";
@@ -107,7 +107,7 @@ app.get("/api/health", (_req, res) => {
   const storage = storageStatus();
   res.json({
     ok: true,
-    service: "duitok-ai",
+    service: "pokaya-ai",
     database: postgresPool ? "postgres" : "json",
     storage,
     generation: storage.ready ? "available" : "blocked"
@@ -634,7 +634,7 @@ function requireAdminUser(user) {
 }
 
 const seed = {
-  users: [{ id: adminUserId, email: "admin@pokaya.ai", passwordHash: hashPassword("duitok123"), name: "Pokaya AI Admin", role: "admin", billing: defaultBilling() }],
+  users: [{ id: adminUserId, email: "admin@pokaya.ai", passwordHash: hashPassword("pokaya123"), name: "Pokaya AI Admin", role: "admin", billing: defaultBilling() }],
   liveCount: 10,
   projects: [
     blankProject("p_1", "Project 1"),
@@ -652,7 +652,7 @@ const seed = {
     ]
   },
   payments: [],
-  affiliate: { code: "DUIT2026", clicks: 128, payout: 420 },
+  affiliate: { code: "POKAYA2026", clicks: 128, payout: 420 },
   usage: [
     usage("Image generation", 4),
     usage("UGC generation", 8),
@@ -924,7 +924,7 @@ function safeLedgerMetadata(metadata = {}) {
 }
 
 function publicMediaMarker(value) {
-  return value ? "duitok-media-ready" : undefined;
+  return value ? "pokaya-media-ready" : undefined;
 }
 
 function publicState(db, user = db.users?.find((item) => item.id === adminUserId)) {
@@ -954,7 +954,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
     const publicType = safe.videoUrl ? "video" : safe.imageUrl ? "image" : safe.type;
     return {
       ...safe,
-      assetStorage: safe.imageUrl || safe.videoUrl ? "duitok-media" : undefined,
+      assetStorage: safe.imageUrl || safe.videoUrl ? "pokaya-media" : undefined,
       imageUrl: publicMediaMarker(safe.imageUrl),
       videoUrl: publicMediaMarker(safe.videoUrl),
       title: redactProviderText(safe.title, publicGenerationTitle(publicType)),
@@ -992,7 +992,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
     } = job;
     return {
       ...safe,
-      assetStorage: safe.imageUrl || safe.videoUrl ? "duitok-media" : undefined,
+      assetStorage: safe.imageUrl || safe.videoUrl ? "pokaya-media" : undefined,
       imageUrl: publicMediaMarker(safe.imageUrl),
       videoUrl: publicMediaMarker(safe.videoUrl),
       textOutput: redactProviderText(safe.textOutput, publicGenerationBody(safe.type)),
@@ -1001,7 +1001,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
   };
   const sanitizeSchedule = (item) => isAdmin ? item : ({
     ...item,
-    mediaUrl: item.mediaUrl ? "duitok-media-ready" : "",
+    mediaUrl: item.mediaUrl ? "pokaya-media-ready" : "",
     caption: redactProviderText(item.caption || ""),
     title: redactProviderText(item.title || "")
   });
@@ -3748,7 +3748,7 @@ async function executeAgentTool(name, args, user) {
       const currentJob = currentDb.schedule.find((entry) => entry.id === args.scheduleId);
       if (!currentJob) throw Object.assign(new Error("Auto post job not found"), { status: 404 });
       if (!hasAdminPrivileges(user) && currentJob.userId !== user.id) throw Object.assign(new Error("Auto post job not found"), { status: 404 });
-      const requestedMediaUrl = args.mediaUrl === "duitok-media-ready" ? "" : args.mediaUrl;
+      const requestedMediaUrl = args.mediaUrl === "pokaya-media-ready" ? "" : args.mediaUrl;
       const mediaUrl = requestedMediaUrl || currentJob.mediaUrl;
       if (!mediaUrl) throw Object.assign(new Error("TikTok Direct Post needs a public mediaUrl."), { status: 400 });
 
@@ -6210,7 +6210,7 @@ app.patch("/api/autopost/jobs/:id", async (req, res) => {
     if (req.body.status) item.status = req.body.status;
     if (req.body.caption !== undefined) item.caption = String(req.body.caption);
     if (req.body.hashtags !== undefined) item.hashtags = String(req.body.hashtags);
-    if (req.body.mediaUrl !== undefined && req.body.mediaUrl !== "duitok-media-ready") item.mediaUrl = String(req.body.mediaUrl);
+    if (req.body.mediaUrl !== undefined && req.body.mediaUrl !== "pokaya-media-ready") item.mediaUrl = String(req.body.mediaUrl);
     if (req.body.productUrl !== undefined) item.productUrl = String(req.body.productUrl);
     item.updatedAt = new Date().toISOString();
     if (item.status === "Posted") item.postedAt = item.updatedAt;
@@ -6250,7 +6250,7 @@ app.post("/api/tiktok/publish/:id", async (req, res, next) => {
       await refreshTikTokConnection(connection);
       if (!connection.creatorInfo) await queryTikTokCreatorInfo(connection);
 
-      const requestedMediaUrl = req.body.mediaUrl === "duitok-media-ready" ? "" : req.body.mediaUrl;
+      const requestedMediaUrl = req.body.mediaUrl === "pokaya-media-ready" ? "" : req.body.mediaUrl;
       const mediaUrl = requestedMediaUrl || currentJob.mediaUrl;
       const publishBody = {
         post_info: {

@@ -4,13 +4,13 @@ Last updated: 2026-05-29
 
 ## 1. Background
 
-The product is moving from **Duitok AI** to **Pokaya AI** because the TikTok developer review rejected the current app name. The reviewer explicitly said the app name must not contain `Tik`, `Tok`, or combinations such as `xyzTok` / `Tikxyz`.
+The product is moving from **Pokaya AI** to **Pokaya AI** because the TikTok developer review rejected the current app name. The reviewer explicitly said the app name must not contain `Tik`, `Tok`, or combinations such as `xyzTok` / `Tikxyz`.
 
 The new brand decision is:
 
 - Product name: **Pokaya AI**
 - Primary domain: **pokaya.ai**
-- Existing domain: **duitok.com**
+- Existing domain: **pokaya.ai**
 - Market focus: Malaysia TikTok Shop sellers and affiliate sellers
 - Mascot concept: a wallet mascot, meaning the platform helps users move toward more money
 
@@ -35,10 +35,10 @@ Brand interpretation:
 ### 3.1 Business Goals
 
 - Pass TikTok developer app name review.
-- Move the public brand from Duitok AI to Pokaya AI.
+- Move the public brand from Pokaya AI to Pokaya AI.
 - Make `pokaya.ai` the primary customer-facing domain.
 - Preserve existing users, projects, generated media, schedules, payments, and admin access.
-- Avoid sudden breakage for old `duitok.com` links during migration.
+- Avoid sudden breakage for old `pokaya.ai` links during migration.
 - Set a clean foundation for GEO pages and brand search traffic.
 
 ### 3.2 Product Goals
@@ -53,7 +53,7 @@ Brand interpretation:
 - Keep old storage keys and localStorage keys compatible where changing them would log users out or orphan data.
 - Add new Pokaya-branded aliases gradually instead of destructive renames.
 - Update domain-dependent environment variables and third-party callback URLs in the right order.
-- Keep `duitok.com` as a redirect or secondary domain until all callbacks and review processes are stable.
+- Keep `pokaya.ai` as a redirect or secondary domain until all callbacks and review processes are stable.
 
 ## 4. Non-Goals
 
@@ -68,20 +68,20 @@ This migration does not include:
 
 ## 5. Current Project Findings
 
-The repository has around 998 keyword hits related to `Duitok`, `duitok`, `TikTok`, `PUBLIC_APP_URL`, payment, domain, and storage.
+The repository has around 998 keyword hits related to `Pokaya`, `pokaya`, `TikTok`, `PUBLIC_APP_URL`, payment, domain, and storage.
 
 Key surfaces found:
 
-- `index.html`: page title and favicon still use Duitok assets.
+- `index.html`: page title and favicon still use Pokaya assets.
 - `src/main.js`: most product copy, navigation, Agent copy, SOP copy, localStorage keys, export file names, referral links, billing display, Auto Post copy.
 - `src/styles.css`: visual classes are mostly generic, but some page styling assumes current brand assets.
 - `server.mjs`: health service name, seed admin user, plan names, default captions/hashtags, model labels, payment customer defaults, provider redaction copy, Agent system identity, TikTok callback URL generation.
 - `render.yaml`: Render service name, admin email default, disk name, env template.
 - `DEPLOY.md`: deployment instructions, old domain, admin email, media URL examples, CHIP callback instructions.
-- `public/duitok-autopost-extension/*`: Chrome extension name, host permissions, popup copy, README, download folder name.
-- `public/*`: many Duitok-branded logos, mascot images, favicon, Agent assets, banner assets.
+- `public/pokaya-autopost-extension/*`: Chrome extension name, host permissions, popup copy, README, download folder name.
+- `public/*`: many Pokaya-branded logos, mascot images, favicon, Agent assets, banner assets.
 - `scripts/*`: smoke test admin email, demo recorder production URL, file names.
-- `docs/*`: many PRDs and handoff docs use Duitok as historical product name.
+- `docs/*`: many PRDs and handoff docs use Pokaya as historical product name.
 - Current browser/project context: `pokaya.ai` is already registered on Cloudflare.
 
 ## 6. Migration Principles
@@ -111,7 +111,7 @@ Do not blindly rename every internal key in one release. Some names are safe to 
 - Existing R2 object paths
 - Existing localStorage keys
 - Existing old download endpoints
-- Existing `duitok.com` links while redirects are active
+- Existing `pokaya.ai` links while redirects are active
 
 If we change localStorage keys too quickly, existing users may be logged out or lose client-side Agent chat history.
 
@@ -126,13 +126,13 @@ Allowed:
 
 Avoid:
 
-- Product/app names containing `Tik`, `Tok`, `Duitok`, or anything that looks like a TikTok derivative.
+- Product/app names containing `Tik`, `Tok`, `Pokaya`, or anything that looks like a TikTok derivative.
 - Icons or logos that imply official TikTok affiliation.
 - Copy like "TikTok AI" or "Tok seller AI" as a product name.
 
 ### 6.4 Domain Cutover Must Be Reversible
 
-The first domain switch should add `pokaya.ai` without deleting `duitok.com`. Once payments, TikTok OAuth, API callbacks, and login are verified, we can choose whether `duitok.com` redirects to `pokaya.ai` or remains as a legacy domain.
+The first domain switch should add `pokaya.ai` without deleting `pokaya.ai`. Once payments, TikTok OAuth, API callbacks, and login are verified, we can choose whether `pokaya.ai` redirects to `pokaya.ai` or remains as a legacy domain.
 
 ## 7. Naming System
 
@@ -151,20 +151,20 @@ The first domain switch should add `pokaya.ai` without deleting `duitok.com`. On
 
 ### 7.2 Names To Retire Publicly
 
-- Duitok AI
-- Duitok Agent
-- Duitok Studio
-- Duitok Auto Post
-- `#duitok` in generated hashtags
-- `admin@duitok.com` as visible public/admin default
-- `https://duitok.com/ref/...` referral links
+- Pokaya AI
+- Pokaya Agent
+- Pokaya Studio
+- Pokaya Auto Post
+- `#pokaya` in generated hashtags
+- `admin@pokaya.ai` as visible public/admin default
+- `https://pokaya.ai/ref/...` referral links
 
 ### 7.3 Temporary Internal Aliases
 
 These can remain temporarily for compatibility:
 
-- `localStorage` keys beginning with `duitok-`
-- R2 bucket/object names containing `duitok`
+- `localStorage` keys beginning with `pokaya-`
+- R2 bucket/object names containing `pokaya`
 - Existing database seed IDs
 - Existing exported historical result records
 - Internal repo folder name
@@ -180,10 +180,10 @@ Required:
 - Add `www.pokaya.ai`.
 - Add both custom domains to Render service.
 - Configure DNS records according to Render instructions.
-- Keep `duitok.com` active during migration.
+- Keep `pokaya.ai` active during migration.
 - Decide canonical behavior:
   - Phase 1: both domains work.
-  - Phase 2: `duitok.com` redirects to `pokaya.ai` after TikTok/payment callbacks are updated.
+  - Phase 2: `pokaya.ai` redirects to `pokaya.ai` after TikTok/payment callbacks are updated.
 
 Risks:
 
@@ -195,7 +195,7 @@ Risks:
 Required env updates:
 
 - `PUBLIC_APP_URL=https://pokaya.ai`
-- `CORS_ORIGINS=https://pokaya.ai,https://www.pokaya.ai,https://duitok.com,https://www.duitok.com`
+- `CORS_ORIGINS=https://pokaya.ai,https://www.pokaya.ai,https://pokaya.ai,https://www.pokaya.ai`
 - `R2_PUBLIC_BASE_URL` if media moves to a Pokaya media subdomain.
 - `ADMIN_EMAILS` if a new admin email is created, e.g. `admin@pokaya.ai`.
 
@@ -212,14 +212,14 @@ Required:
 - App name: `Pokaya AI`
 - App description: remove any implication of official TikTok affiliation.
 - Redirect URI: add `https://pokaya.ai/api/tiktok/oauth/callback`.
-- Keep `https://duitok.com/api/tiktok/oauth/callback` until old users/callbacks are confirmed unnecessary.
+- Keep `https://pokaya.ai/api/tiktok/oauth/callback` until old users/callbacks are confirmed unnecessary.
 - Website URL: `https://pokaya.ai`.
 - Privacy policy / terms URLs: ideally `https://pokaya.ai/privacy` and `https://pokaya.ai/terms`.
 
 Important:
 
 - The product can still say it helps sellers create content for TikTok Shop.
-- The app name itself must not include `Tik`, `Tok`, or `Duitok`.
+- The app name itself must not include `Tik`, `Tok`, or `Pokaya`.
 
 ### 8.4 Cloudflare
 
@@ -232,7 +232,7 @@ Required:
 
 Optional:
 
-- Page rule / redirect rule from `duitok.com` to `pokaya.ai`.
+- Page rule / redirect rule from `pokaya.ai` to `pokaya.ai`.
 - Email routing for `admin@pokaya.ai` or `support@pokaya.ai`.
 
 ### 8.5 Frontend Visible Copy
@@ -276,16 +276,16 @@ Required public-facing asset changes:
 
 Current files with old brand patterns:
 
-- `public/duitok-tab-icon-transparent.png`
-- `public/duitok-logo-transparent.png`
-- `public/duitok-logo-horizontal.png`
-- `public/duitok-logo-stacked.png`
-- `public/duitok-brand-banner.png`
-- `public/duitok-brand-banner-transparent.png`
-- `public/duitok-brand-mascot.png`
-- `public/duitok-mascot-transparent.png`
-- `public/duittok-favicon.svg`
-- `public/duittok-favicon-v2.svg`
+- `public/pokaya-tab-icon-transparent.png`
+- `public/pokaya-logo-transparent.png`
+- `public/pokaya-logo-horizontal.png`
+- `public/pokaya-logo-stacked.png`
+- `public/pokaya-brand-banner.png`
+- `public/pokaya-brand-banner-transparent.png`
+- `public/pokaya-brand-mascot.png`
+- `public/pokaya-mascot-transparent.png`
+- `public/pokaya-favicon.svg`
+- `public/pokaya-favicon-v2.svg`
 
 Recommended approach:
 
@@ -297,38 +297,38 @@ Recommended approach:
 
 Update in `server.mjs`:
 
-- `/api/health` service from `duitok-ai` to `pokaya-ai`.
-- `defaultBilling().plan` from `Duitok AI Pro` to `Pokaya AI Pro`.
-- Seed admin name from `Duitok AI Admin` to `Pokaya AI Admin`.
+- `/api/health` service from `pokaya-ai` to `pokaya-ai`.
+- `defaultBilling().plan` from `Pokaya AI Pro` to `Pokaya AI Pro`.
+- Seed admin name from `Pokaya AI Admin` to `Pokaya AI Admin`.
 - Seed billing plan.
-- Default captions such as `Generated with Duitok AI`.
-- Default hashtags from `#duitok` to `#pokaya`.
-- Provider redaction text from `Duitok AI` to `Pokaya AI`.
-- Agent system identity from `You are Duitok AI...` to `You are Pokaya AI...`.
-- `User-Agent` string from `DuitokAgent/1.0` to `PokayaAgent/1.0`.
+- Default captions such as `Generated with Pokaya AI`.
+- Default hashtags from `#pokaya` to `#pokaya`.
+- Provider redaction text from `Pokaya AI` to `Pokaya AI`.
+- Agent system identity from `You are Pokaya AI...` to `You are Pokaya AI...`.
+- `User-Agent` string from `PokayaAgent/1.0` to `PokayaAgent/1.0`.
 - CHIP default customer email/name if no customer email exists.
-- Payment item name from `Duitok AI credits` to `Pokaya AI credits`.
+- Payment item name from `Pokaya AI credits` to `Pokaya AI credits`.
 
 Compatibility:
 
-- Existing users with `Duitok AI Pro` should either be migrated on read or displayed as `Pokaya AI Pro` without rewriting all history.
+- Existing users with `Pokaya AI Pro` should either be migrated on read or displayed as `Pokaya AI Pro` without rewriting all history.
 - Historical invoices can keep old text if already issued, but new invoices should use Pokaya.
 
 ### 8.8 Auth And localStorage
 
 Current frontend keys:
 
-- `duitok-user`
-- `duitok-auth`
-- `duitok-lang`
-- `duitok-admin-key`
-- `duitok-agent-messages`
-- `duitok-agent-context-summary`
+- `pokaya-user`
+- `pokaya-auth`
+- `pokaya-lang`
+- `pokaya-admin-key`
+- `pokaya-agent-messages`
+- `pokaya-agent-context-summary`
 
 Recommendation:
 
 - Phase 1: keep reading old keys and write both old + new keys.
-- Phase 2: read `pokaya-*` first, fallback to `duitok-*`.
+- Phase 2: read `pokaya-*` first, fallback to `pokaya-*`.
 - Phase 3: after 30-60 days, optionally stop writing old keys.
 
 Do not do a hard localStorage rename in the first release.
@@ -341,14 +341,14 @@ Required:
 - Update description.
 - Add host permissions:
   - `https://*.pokaya.ai/*`
-  - keep `https://*.duitok.com/*` temporarily.
+  - keep `https://*.pokaya.ai/*` temporarily.
 - Update popup title/copy.
 - Update README.
-- Update download filename from `duitok-autopost-extension.zip` to `pokaya-autopost-extension.zip`.
+- Update download filename from `pokaya-autopost-extension.zip` to `pokaya-autopost-extension.zip`.
 
 Important:
 
-- Extension package folder may stay `duitok-autopost-extension` internally for one release if renaming folder breaks export code.
+- Extension package folder may stay `pokaya-autopost-extension` internally for one release if renaming folder breaks export code.
 - If distributing to Chrome Web Store later, create a clean package with only Pokaya naming.
 
 ### 8.10 Payments / CHIP
@@ -358,7 +358,7 @@ Required:
 - Update CHIP brand/business display to Pokaya AI.
 - Update callback URL if CHIP requires a domain allowlist:
   - `https://pokaya.ai/api/payments/chip/callback`
-- Keep old callback active while `duitok.com` is live.
+- Keep old callback active while `pokaya.ai` is live.
 - Update product names in payment creation.
 - Update customer-facing receipt/invoice plan labels.
 
@@ -372,7 +372,7 @@ Acceptance:
 
 Current frontend copies:
 
-- `https://duitok.com/ref/${code}`
+- `https://pokaya.ai/ref/${code}`
 
 Change to:
 
@@ -380,19 +380,19 @@ Change to:
 
 Compatibility:
 
-- `duitok.com/ref/*` should redirect to `pokaya.ai/ref/*`.
+- `pokaya.ai/ref/*` should redirect to `pokaya.ai/ref/*`.
 
 ### 8.12 Admin / Email
 
 Current defaults include:
 
-- `admin@duitok.com`
+- `admin@pokaya.ai`
 
 Recommended:
 
 - Create `admin@pokaya.ai` or `support@pokaya.ai`.
 - Add it to `ADMIN_EMAILS`.
-- Keep `admin@duitok.com` in `ADMIN_EMAILS` until admin account migration is complete.
+- Keep `admin@pokaya.ai` in `ADMIN_EMAILS` until admin account migration is complete.
 
 Do not remove existing admin email before confirming login and role access.
 
@@ -406,14 +406,14 @@ Docs should be split into two classes:
    - SOP export docs
    - extension README
 
-2. Historical docs that can keep Duitok with a note:
+2. Historical docs that can keep Pokaya with a note:
    - old handoff files
    - old design PRDs
    - screenshots and QA artifacts
 
 Recommendation:
 
-- Add a note to old docs: "Historical name: Duitok AI. Current brand: Pokaya AI."
+- Add a note to old docs: "Historical name: Pokaya AI. Current brand: Pokaya AI."
 - Do not spend time rewriting every old PRD unless it is actively used.
 
 ## 9. Implementation Plan
@@ -432,7 +432,7 @@ Owner: ops / Codex-assisted
 
 Exit criteria:
 
-- Pokaya domain works without breaking `duitok.com`.
+- Pokaya domain works without breaking `pokaya.ai`.
 
 ### Phase 1: Public Brand Rename
 
@@ -441,7 +441,7 @@ Owner: frontend
 - Add brand constants:
   - `APP_NAME = "Pokaya AI"`
   - `APP_DOMAIN = "pokaya.ai"`
-  - `LEGACY_DOMAIN = "duitok.com"`
+  - `LEGACY_DOMAIN = "pokaya.ai"`
 - Replace visible copy in frontend.
 - Replace title/favicon/logo references.
 - Update referral link.
@@ -451,7 +451,7 @@ Owner: frontend
 
 Exit criteria:
 
-- No user-facing Duitok text appears in normal homepage, login, Studio, Agent, billing, SOP, Auto Post.
+- No user-facing Pokaya text appears in normal homepage, login, Studio, Agent, billing, SOP, Auto Post.
 
 ### Phase 2: Backend Brand Defaults
 
@@ -517,7 +517,7 @@ Timing: after TikTok approval and 30-60 days of stable traffic.
 
 Decide:
 
-- Keep `duitok.com` as permanent redirect, or
+- Keep `pokaya.ai` as permanent redirect, or
 - Keep it as secondary defensive domain, or
 - Retire public use but keep ownership.
 
@@ -544,7 +544,7 @@ Do not retire until:
 
 - `npm run build` passes.
 - `https://pokaya.ai/api/health` returns ok.
-- `https://duitok.com/api/health` still returns ok or redirects safely.
+- `https://pokaya.ai/api/health` still returns ok or redirects safely.
 - Login works on Pokaya domain.
 - Admin login works.
 - Project generation still works.
@@ -555,7 +555,7 @@ Do not retire until:
 
 ### 10.3 Review Safety
 
-- TikTok developer app name does not contain `Tik`, `Tok`, or `Duitok`.
+- TikTok developer app name does not contain `Tik`, `Tok`, or `Pokaya`.
 - App description says the product helps create content for sellers; it does not imply official TikTok ownership.
 - Website domain is `pokaya.ai`.
 - Privacy policy and terms use Pokaya branding.
@@ -609,12 +609,12 @@ Functional:
 Run these and inspect all remaining matches:
 
 ```bash
-rg -n "Duitok|duitok|DuiTok|DUITOK|duittok|#duitok|admin@duitok|duitok\\.com" . --glob '!node_modules/**' --glob '!dist/**' --glob '!test-results/**'
+rg -n "Pokaya|pokaya|Pokaya|POKAYA|pokaya|#pokaya|admin@pokaya|pokaya\\.com" . --glob '!node_modules/**' --glob '!dist/**' --glob '!test-results/**'
 rg -n "TikTok AI|TikTok app|Tik Tok|TikTok-branded|Tok" src public server.mjs index.html render.yaml DEPLOY.md
 rg -n "pokaya|Pokaya|pokaya\\.ai" src public server.mjs index.html render.yaml DEPLOY.md
 ```
 
-Remaining `Duitok` matches are acceptable only if they are:
+Remaining `Pokaya` matches are acceptable only if they are:
 
 - Historical docs.
 - Backward-compatible aliases.
@@ -630,18 +630,18 @@ Remaining `Duitok` matches are acceptable only if they are:
 - CHIP callback fails because callback domain changed before allowlist update.
 - Users get logged out because localStorage keys changed without fallback.
 - Generated media breaks because R2 public base URL changed incorrectly.
-- Old `duitok.com` links break because redirect was applied too early.
+- Old `pokaya.ai` links break because redirect was applied too early.
 
 ### P1 Risks
 
-- SEO/GEO resets if `duitok.com` redirects without canonical planning.
+- SEO/GEO resets if `pokaya.ai` redirects without canonical planning.
 - User confusion if both names appear in the same flow.
 - Chrome extension cannot access `pokaya.ai` because host permissions were not updated.
 - Admin email migration locks out the admin account.
 
 ### P2 Risks
 
-- Old screenshots/docs still show Duitok.
+- Old screenshots/docs still show Pokaya.
 - File names in repo remain mixed for a while.
 - Existing invoices show old brand historically.
 
@@ -664,13 +664,13 @@ Do not do this in the first batch:
 - Rename database IDs.
 - Delete old assets.
 - Delete old domain.
-- Remove `admin@duitok.com`.
+- Remove `admin@pokaya.ai`.
 - Rewrite every historical PRD.
 - Rename every internal file/folder.
 
 ## 15. Open Decisions
 
-1. Should `duitok.com` immediately redirect to `pokaya.ai`, or stay as secondary domain until TikTok approval?
+1. Should `pokaya.ai` immediately redirect to `pokaya.ai`, or stay as secondary domain until TikTok approval?
    - Recommendation: keep both working until TikTok approval.
 
 2. Should we create `support@pokaya.ai` now?
@@ -679,7 +679,7 @@ Do not do this in the first batch:
 3. Should R2 media move to `media.pokaya.ai`?
    - Recommendation: yes eventually, but not in the first domain cutover unless easy.
 
-4. Should internal product labels like `Duitok Image` be renamed to `Pokaya Image`?
+4. Should internal product labels like `Pokaya Image` be renamed to `Pokaya Image`?
    - Recommendation: yes for UI, but preserve backend model mapping aliases.
 
 5. Should the Auto Post extension folder be renamed immediately?

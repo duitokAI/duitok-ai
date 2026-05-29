@@ -1,4 +1,4 @@
-# Duitok Agent Conversation Design PRD
+# Pokaya Agent Conversation Design PRD
 
 ## 1. 背景
 

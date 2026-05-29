@@ -1,11 +1,11 @@
-# Duitok Agent 页面设计与排版优化 PRD
+# Pokaya Agent 页面设计与排版优化 PRD
 
 ## 1. 背景
 
 当前 Agent 页面采用左右双栏：
 
 - 左侧：Agent 介绍、3D 工作区/休息区视觉、状态说明。
-- 右侧：Duitok Agent 聊天窗口、历史记录、新对话、清空按钮、输入框。
+- 右侧：Pokaya Agent 聊天窗口、历史记录、新对话、清空按钮、输入框。
 
 从当前截图看，页面已经具备“Agent operator”概念，但实际视觉体验仍像两个巨大卡片并排：
 
@@ -50,7 +50,7 @@
 
 当前左侧包含：
 
-- `Duitok Agent`
+- `Pokaya Agent`
 - `Your AI operator for TikTok Shop content.`
 - `Chat on the right...`
 - 大面积 3D 图
@@ -176,7 +176,7 @@ WhatsApp 客服按钮在右下角大面积悬浮。
 ```text
 -------------------------------------------------------------+
 | Agent Header                                                |
-| Duitok Agent    待命中                         新对话  ⋯   |
+| Pokaya Agent    待命中                         新对话  ⋯   |
 +----------------------------+--------------------------------+
 | Left Status Rail           | Main Chat Panel                 |
 |                            |                                |
@@ -221,12 +221,12 @@ Mobile 不做左右双栏。
 当前：
 
 - 左侧大标题在左卡。
-- 右侧聊天卡内还有一个 `Duitok Agent` 标题。
+- 右侧聊天卡内还有一个 `Pokaya Agent` 标题。
 
 优化后：
 
 - 页面只保留一个全局 header。
-- 标题：`Duitok Agent`
+- 标题：`Pokaya Agent`
 - 副标题：`帮你生成内容、创建排期、检查 workspace`
 - 状态 pill：`待命中 / 工作中 / 需要确认`
 - 操作区：
@@ -387,7 +387,7 @@ Credits：83
 
 ### 8.1 色彩
 
-继续使用 Duitok 的紫色 + 粉色体系，但降低大面积紫色文字压力。
+继续使用 Pokaya 的紫色 + 粉色体系，但降低大面积紫色文字压力。
 
 推荐：
 

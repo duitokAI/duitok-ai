@@ -1,4 +1,4 @@
-# Duitok Agent Working State UI Optimization PRD
+# Pokaya Agent Working State UI Optimization PRD
 
 ## 1. 背景
 
@@ -265,7 +265,7 @@ Agent 正在处理
 完成后：
 
 - 输入框恢复。
-- placeholder：`Message Duitok Agent...`
+- placeholder：`Message Pokaya Agent...`
 
 ## 8. 视觉规范
 

@@ -1,8 +1,8 @@
-# Duitok AI API Provider Security PRD
+# Pokaya AI API Provider Security PRD
 
 ## 1. Background
 
-Duitok AI currently routes user-facing media generation through a model router. The actual upstream providers are configured on the server through environment variables, but several surfaces can still let a technical user infer which providers, endpoints, or models are being used.
+Pokaya AI currently routes user-facing media generation through a model router. The actual upstream providers are configured on the server through environment variables, but several surfaces can still let a technical user infer which providers, endpoints, or models are being used.
 
 The goal is not to make provider usage impossible to infer under all circumstances. A determined attacker can compare output style, latency, pricing, and metadata. The goal is to remove avoidable leakage from the product, API responses, logs, health checks, generated asset URLs, error messages, and public repository docs.
 
@@ -20,15 +20,15 @@ Users or competitors may inspect:
 - Public docs, examples, and deployment files
 - Task IDs and provider-specific response shapes
 
-From these, they may infer that Duitok uses providers such as APIMart, GRS AI, Wuyin, Atlas Cloud, or specific model families.
+From these, they may infer that Pokaya uses providers such as APIMart, GRS AI, Wuyin, Atlas Cloud, or specific model families.
 
 ## 3. Goals
 
 - Hide upstream provider names from all non-admin product surfaces.
 - Hide upstream endpoint paths from public API responses.
 - Avoid storing or returning provider-specific task IDs to regular users.
-- Normalize all generation errors into Duitok-branded error messages.
-- Proxy generated assets through Duitok-controlled URLs.
+- Normalize all generation errors into Pokaya-branded error messages.
+- Proxy generated assets through Pokaya-controlled URLs.
 - Keep provider diagnostics available only to admins.
 - Make `/api/health` useful for infrastructure checks without revealing provider configuration.
 - Create a repeatable security checklist before adding any new AI provider.
@@ -77,7 +77,7 @@ Required change:
 
 Decision:
 
-- If marketing requires model names such as `Seedance 2.0`, treat that as an intentional product disclosure. Otherwise use Duitok-branded labels.
+- If marketing requires model names such as `Seedance 2.0`, treat that as an intentional product disclosure. Otherwise use Pokaya-branded labels.
 
 ### 5.3 Result Text
 
@@ -88,9 +88,9 @@ Current risk:
 
 Required change:
 
-- Replace all user-facing result text with Duitok-branded text:
-  - `Image generated with Duitok AI.`
-  - `Video generated with Duitok AI.`
+- Replace all user-facing result text with Pokaya-branded text:
+  - `Image generated with Pokaya AI.`
+  - `Video generated with Pokaya AI.`
   - `Your media is ready.`
 - Provider names only appear in admin logs.
 
@@ -104,7 +104,7 @@ Current risk:
 Required change:
 
 - Store two IDs:
-  - `publicJobId`: Duitok UUID shown to users.
+  - `publicJobId`: Pokaya UUID shown to users.
   - `providerTaskId`: encrypted or server-only field for admin diagnostics.
 - Never return `providerTaskId` in normal `publicState`.
 
@@ -145,7 +145,7 @@ Current risk:
 
 Required change:
 
-- Mirror all generated assets to Duitok-controlled storage, preferably Cloudflare R2.
+- Mirror all generated assets to Pokaya-controlled storage, preferably Cloudflare R2.
 - Serve user media through:
   - `/api/media/result/:id/image`
   - `/api/media/result/:id/video`
@@ -171,7 +171,7 @@ Required change:
 
 ### P0: Public Health Endpoint Redaction
 
-As an unauthenticated visitor, I should not be able to determine which AI providers Duitok has configured.
+As an unauthenticated visitor, I should not be able to determine which AI providers Pokaya has configured.
 
 Acceptance criteria:
 
@@ -182,7 +182,7 @@ Acceptance criteria:
 
 ### P0: User-Facing Result Redaction
 
-As a normal user, I should only see Duitok-branded generation status.
+As a normal user, I should only see Pokaya-branded generation status.
 
 Acceptance criteria:
 
@@ -199,7 +199,7 @@ Acceptance criteria:
 
 - `publicState` for non-admin users excludes provider task IDs.
 - Admin state can include provider task IDs.
-- User-visible job ID is a Duitok UUID.
+- User-visible job ID is a Pokaya UUID.
 
 ### P0: Asset Proxy Enforcement
 
@@ -207,7 +207,7 @@ As a normal user, I should never see provider-hosted media URLs.
 
 Acceptance criteria:
 
-- Generated media in the UI uses Duitok URLs.
+- Generated media in the UI uses Pokaya URLs.
 - API responses for non-admin users exclude original provider URLs.
 - If R2 is not configured, `/api/media/result` still proxies provider URLs server-side.
 
@@ -258,7 +258,7 @@ Acceptance criteria:
 Create a single internal provider router module:
 
 ```text
-User request -> Duitok capability -> provider router -> upstream provider
+User request -> Pokaya capability -> provider router -> upstream provider
 ```
 
 The frontend should only know `capability`, not `provider`.
@@ -277,12 +277,12 @@ Normal user response:
 
 ```json
 {
-  "id": "duitok-job-id",
+  "id": "pokaya-job-id",
   "type": "video",
   "status": "completed",
   "modelLabel": "Cinematic Video",
   "mediaUrl": "/api/media/result/result-id/video",
-  "message": "Video generated with Duitok AI."
+  "message": "Video generated with Pokaya AI."
 }
 ```
 
@@ -290,7 +290,7 @@ Admin response:
 
 ```json
 {
-  "id": "duitok-job-id",
+  "id": "pokaya-job-id",
   "provider": "internal-provider-code",
   "providerTaskId": "upstream-task-id",
   "endpoint": "/internal/upstream/path",
@@ -305,7 +305,7 @@ Public:
 ```json
 {
   "ok": true,
-  "service": "duitok-ai",
+  "service": "pokaya-ai",
   "storage": "postgres",
   "generation": "available"
 }
@@ -325,7 +325,7 @@ Admin:
 
 ### 7.4 Media Proxy
 
-All user media should resolve through Duitok:
+All user media should resolve through Pokaya:
 
 ```text
 /api/media/result/:id/image
@@ -346,10 +346,10 @@ Rules:
 
 - Open DevTools Network as a normal user.
 - Generate image and video.
-- Confirm Network requests only hit Duitok domain.
+- Confirm Network requests only hit Pokaya domain.
 - Confirm response JSON has no provider names.
 - Confirm response JSON has no upstream task IDs.
-- Confirm media URL is Duitok URL, not provider URL.
+- Confirm media URL is Pokaya URL, not provider URL.
 - Visit `/api/health` while logged out and confirm no provider names.
 
 ### Automated Checks
@@ -382,7 +382,7 @@ Add CI scan for:
 
 ### Phase 2: Strengthen Media Privacy
 
-- Enforce Duitok media proxy.
+- Enforce Pokaya media proxy.
 - Configure R2 mirror for all generated assets.
 - Remove original provider URLs from normal user state.
 
@@ -416,7 +416,7 @@ Add CI scan for:
 ## 12. Recommended Immediate Fixes
 
 1. Change `/api/health` to remove provider names.
-2. Replace result messages like `Image generated with APIMart` with `Image generated with Duitok AI`.
+2. Replace result messages like `Image generated with APIMart` with `Image generated with Pokaya AI`.
 3. Stop returning upstream `taskId` to non-admin users.
 4. Ensure `originalImageUrl` and `originalVideoUrl` are admin-only.
 5. Add a regression test that searches normal-user JSON for provider names.

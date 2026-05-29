@@ -1,18 +1,18 @@
-# Duitok Agent 3D 吉祥物工作空间最终版 PRD
+# Pokaya Agent 3D 吉祥物工作空间最终版 PRD
 
 ## 1. 背景
 
-当前 Duitok Agent 更像一个聊天面板：用户输入任务，Agent 返回文字，或者在后台调用工具。
+当前 Pokaya Agent 更像一个聊天面板：用户输入任务，Agent 返回文字，或者在后台调用工具。
 
 这个交互能用，但缺少一个关键感受：
 
-**用户没有看到“Duitok Agent 正在替我干活”。**
+**用户没有看到“Pokaya Agent 正在替我干活”。**
 
 腾讯 Marvis 给了一个很好的参考方向。它不是只做聊天框，而是把 Agent 包装成“数字打工人”，通过虚拟办公室、角色状态、工位切换，让用户感到 AI 真的在执行任务。
 
-Duitok 不应该复制 Marvis 的角色、办公室、黑色小马、小牛马设定，也不能复制腾讯视觉资产。
+Pokaya 不应该复制 Marvis 的角色、办公室、黑色小马、小牛马设定，也不能复制腾讯视觉资产。
 
-Duitok 应该借鉴的是它背后的产品机制：
+Pokaya 应该借鉴的是它背后的产品机制：
 
 **用 3D mascot + 任务工位，把 Agent 的工作过程可视化。**
 
@@ -62,7 +62,7 @@ Marvis 是腾讯应用宝团队推出的操作系统级个人 AI 助手。
 
 ### 2.3 Marvis 的视觉机制
 
-最值得 Duitok 学习的是 Marvis 的“可视化办公室”。
+最值得 Pokaya 学习的是 Marvis 的“可视化办公室”。
 
 资料描述中，Marvis 有 6 个数字员工，形象是带角、戴围脖的黑色小马。应用里有一个虚拟办公室，可以看到不同 Agent 的状态。
 
@@ -78,11 +78,11 @@ Marvis 是腾讯应用宝团队推出的操作系统级个人 AI 助手。
 - 工位和状态会表现当前任务。
 - 用户不只是看到 loading，而是看到“有人在工作”。
 
-### 2.4 对 Duitok 的启发
+### 2.4 对 Pokaya 的启发
 
-Duitok 不需要做操作系统级助手，也不需要做 6 个 Agent。
+Pokaya 不需要做操作系统级助手，也不需要做 6 个 Agent。
 
-Duitok 需要借鉴的是：
+Pokaya 需要借鉴的是：
 
 - Agent 不是聊天框，而是一个“会工作的角色”。
 - 空闲状态要有人格记忆点。
@@ -92,18 +92,18 @@ Duitok 需要借鉴的是：
 
 ## 3. 产品目标
 
-把 Duitok Agent 页面升级成一个 3D 动态工作空间。
+把 Pokaya Agent 页面升级成一个 3D 动态工作空间。
 
 用户看到这个页面时，要产生以下感受：
 
-- “Duitok Agent 住在我的工作台里。”
+- “Pokaya Agent 住在我的工作台里。”
 - “我给它任务后，它真的跑去对应工位工作。”
 - “我能看出它现在是在做图片、视频、文案、排程，还是总控任务。”
 - “这不是普通 chatbot，这是 TikTok Shop seller 的内容运营助理。”
 
 一句话目标：
 
-**用户丢一个产品任务，Duitok mascot 就从休息区走到对应 3D 工位开始干活。**
+**用户丢一个产品任务，Pokaya mascot 就从休息区走到对应 3D 工位开始干活。**
 
 ## 4. 非目标
 
@@ -118,11 +118,11 @@ Duitok 需要借鉴的是：
 
 ## 5. 核心概念
 
-### 5.1 Duitok Mascot 3D 工作空间
+### 5.1 Pokaya Mascot 3D 工作空间
 
 页面 Hero 区右侧放一个 3D mini workspace。
 
-这个空间里有 Duitok mascot。
+这个空间里有 Pokaya mascot。
 
 mascot 不是永远站着不动，而是有两类状态：
 
@@ -203,7 +203,7 @@ mascot 不是永远站着不动，而是有两类状态：
 - 素材。
 - Thumbnail。
 - Product shot。
-- Duitok Image。
+- Pokaya Image。
 
 视觉：
 
@@ -226,7 +226,7 @@ mascot 不是永远站着不动，而是有两类状态：
 
 - 视频。
 - 短视频。
-- Duitok Video。
+- Pokaya Video。
 - Seedance。
 - Veo。
 - Sora。
@@ -455,7 +455,7 @@ function agentWorkMode(text = "") {
 
 最小可用版本可以先用现有：
 
-- `/duitok-mascot-transparent.png`
+- `/pokaya-mascot-transparent.png`
 
 做法：
 
@@ -475,7 +475,7 @@ function agentWorkMode(text = "") {
 
 格式：
 
-- `public/duitok-mascot-3d.glb`
+- `public/pokaya-mascot-3d.glb`
 
 需要骨骼和动画：
 
@@ -547,7 +547,7 @@ function agentWorkMode(text = "") {
 - 桌面端 Hero 左右平衡。
 - 移动端不横向溢出。
 - 画面有明确 3D 空间感。
-- Duitok mascot 品牌识别清楚。
+- Pokaya mascot 品牌识别清楚。
 - 不像 Marvis 的小马/小牛马。
 
 ### 性能
@@ -601,7 +601,7 @@ function agentWorkMode(text = "") {
 内容：
 
 - Three.js mini room。
-- 当前 Duitok mascot PNG 做 billboard。
+- 当前 Pokaya mascot PNG 做 billboard。
 - Idle Room。
 - Image / Video / Copy / Schedule / Command 工位。
 - 文案和状态切换。
@@ -615,7 +615,7 @@ function agentWorkMode(text = "") {
 
 内容：
 
-- 制作 `duitok-mascot-3d.glb`。
+- 制作 `pokaya-mascot-3d.glb`。
 - 加骨骼。
 - 加 walk、sleep、run、typing、editing 等动画。
 - 从 billboard 替换成 GLB model。
@@ -624,7 +624,7 @@ function agentWorkMode(text = "") {
 
 目标：
 
-如果 Duitok Agent 后续工具很多，再加入专家角色。
+如果 Pokaya Agent 后续工具很多，再加入专家角色。
 
 可能角色：
 
@@ -636,4 +636,4 @@ function agentWorkMode(text = "") {
 
 但第一版不要做团队。
 
-第一版只做一个 Duitok mascot。
+第一版只做一个 Pokaya mascot。

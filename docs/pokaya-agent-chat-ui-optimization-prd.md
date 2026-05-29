@@ -1,4 +1,4 @@
-# Duitok Agent Chat UI Optimization PRD
+# Pokaya Agent Chat UI Optimization PRD
 
 ## 1. 背景
 
@@ -137,7 +137,7 @@ Agent Run Card 占据大量空间，但展示的信息只是「已完成 / 理�
 推荐文案：
 
 ```text
-你好，我是 Duitok Agent。
+你好，我是 Pokaya Agent。
 
 当前 workspace：
 - 83 credits

@@ -1,10 +1,10 @@
-# Duitok Agent 趋势研究与内容策略智能层 PRD
+# Pokaya Agent 趋势研究与内容策略智能层 PRD
 
 最后更新：2026-05-29
 
 ## 1. 背景
 
-Duitok Agent 当前已经具备基础执行能力：
+Pokaya Agent 当前已经具备基础执行能力：
 
 - 模型已切换为 `deepseek-v4-pro`。
 - 已接入 `web_search`，可以对趋势词、陌生概念、平台变化和市场信息做联网搜索。
@@ -12,7 +12,7 @@ Duitok Agent 当前已经具备基础执行能力：
 - 已有工具调用框架，可执行 workspace 检查、项目创建、内容计划、视频 prompt、排期草稿、生成内容和 TikTok 发布相关动作。
 - 已有安全边界，避免泄露 provider、API key、内部路由、系统 prompt 和工具 schema。
 
-但当前 Agent 仍然更像“会搜索和执行的聊天助手”，还没有形成 Duitok 专属的商业判断层。
+但当前 Agent 仍然更像“会搜索和执行的聊天助手”，还没有形成 Pokaya 专属的商业判断层。
 
 用户问：
 
@@ -31,7 +31,7 @@ Agent 不应该只是解释概念，而应该直接判断：
 - 应该做什么 hook、场景、脚本、排期。
 - 是否值得立刻生成内容。
 
-本 PRD 目标是把 Duitok Agent 从“联网聊天 Agent”升级为“TikTok Shop 趋势研究 + 内容策略 Agent”。
+本 PRD 目标是把 Pokaya Agent 从“联网聊天 Agent”升级为“TikTok Shop 趋势研究 + 内容策略 Agent”。
 
 ## 2. 产品目标
 
@@ -45,7 +45,7 @@ Agent 不应该只是解释概念，而应该直接判断：
 
 ### 2.2 运营侧目标
 
-- Duitok 团队能持续沉淀高质量趋势研究模板。
+- Pokaya 团队能持续沉淀高质量趋势研究模板。
 - 团队能观察哪些趋势词被用户频繁搜索。
 - 团队能判断 Agent 输出是否真的服务“带货”和“批量内容生产”。
 - 团队能把高频趋势转成 SOP、模板和预设。
@@ -88,7 +88,7 @@ Agent 需要知道：
 
 > Loft girl 是一种风格，适合家居、穿搭、香氛。
 
-但 Duitok Agent 应该进一步输出：
+但 Pokaya Agent 应该进一步输出：
 
 - 3 个可卖品类。
 - 5 个短视频开头。
@@ -159,7 +159,7 @@ Agent 需要知道：
 
 - 判断用户输入的趋势词或产品词。
 - 调用 `web_search` 获取外部信息。
-- 整理成 Duitok 固定结构。
+- 整理成 Pokaya 固定结构。
 - 给出 TikTok Shop 可执行建议。
 - 返回可保存到项目的结构化结果。
 

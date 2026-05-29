@@ -21,5 +21,5 @@ Chrome extension for pulling Pokaya scheduled TikTok posts into TikTok upload pa
 2. Open Chrome and go to `chrome://extensions/`.
 3. Enable **Developer Mode**.
 4. Click **Load unpacked**.
-5. Select the extracted `duitok-autopost-extension` folder.
+5. Select the extracted `pokaya-autopost-extension` folder.
 6. Open Pokaya locally or production, then set the API URL in the extension popup.

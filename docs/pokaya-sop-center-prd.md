@@ -1,4 +1,4 @@
-# Duitok SOP Center PRD
+# Pokaya SOP Center PRD
 
 ## 1. 背景
 
@@ -108,7 +108,7 @@ SOP Center 首版分为 3 组：
 
 ```text
 SOP Center
-把 Duitok 平台的完整操作步骤集中在这里。先选任务，再按步骤执行。
+把 Pokaya 平台的完整操作步骤集中在这里。先选任务，再按步骤执行。
 ```
 
 右侧可显示：

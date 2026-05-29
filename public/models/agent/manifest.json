@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "primaryModel": "/models/agent/duitok-agent.glb",
+  "primaryModel": "/models/agent/pokaya-agent.glb",
   "format": "glb",
   "target": "threejs-gltfloader",
   "requiredAnimations": [

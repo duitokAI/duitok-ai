@@ -20,7 +20,7 @@ globalThis.FileReader = class {
 };
 
 const outputDir = path.join(process.cwd(), "public/models/agent");
-const outputPath = path.join(outputDir, "duitok-agent.glb");
+const outputPath = path.join(outputDir, "pokaya-agent.glb");
 
 const colors = {
   purple: 0x5d086c,
@@ -74,7 +74,7 @@ function cylinder(name, radius, depth, color) {
 
 function makeAgent() {
   const root = new THREE.Group();
-  root.name = "DuitokAgent";
+  root.name = "PokayaAgent";
 
   const body = roundedBox("body", [1.05, 1.15, 0.62], colors.purple, 0.18);
   body.position.y = 1.25;
@@ -144,7 +144,7 @@ function makeAgent() {
   rightLegPivot.add(rightLeg);
   root.add(leftLegPivot, rightLegPivot);
 
-  const chest = roundedBox("duitok_ai_badge", [0.38, 0.16, 0.03], colors.white, 0.035);
+  const chest = roundedBox("pokaya_ai_badge", [0.38, 0.16, 0.03], colors.white, 0.035);
   chest.position.set(0, 0.92, 0.34);
   root.add(chest);
 
@@ -260,7 +260,7 @@ async function exportGlb(root, animations) {
 
 fs.mkdirSync(outputDir, { recursive: true });
 const scene = new THREE.Scene();
-scene.name = "DuitokAgentScene";
+scene.name = "PokayaAgentScene";
 const agent = makeAgent();
 scene.add(agent);
 const animations = makeClips(agent);

@@ -1,10 +1,10 @@
-# Duitok Agent 主入口与 Studio 密度统一优化 PRD
+# Pokaya Agent 主入口与 Studio 密度统一优化 PRD
 
 最后更新：2026-05-29
 
 ## 1. 背景
 
-Duitok AI 已经具备完整的 Studio 骨架：Project、Image、UGC、Auto Content、Original Video、Clone Prompt、Storytelling、Agent、Billing、Content Library、Auto Post、Admin、credits 和生成接口。
+Pokaya AI 已经具备完整的 Studio 骨架：Project、Image、UGC、Auto Content、Original Video、Clone Prompt、Storytelling、Agent、Billing、Content Library、Auto Post、Admin、credits 和生成接口。
 
 当前产品最大问题不是缺少功能，而是用户进入 Studio 后仍然需要自己判断：
 
@@ -14,9 +14,9 @@ Duitok AI 已经具备完整的 Studio 骨架：Project、Image、UGC、Auto Con
 - prompt 要怎么写？
 - 生成后下一步怎么保存、排期或发布？
 
-如果 Duitok 继续以 6 个功能 tab 作为主入口，用户感知会停留在“AI 工具集合”。真正应该建立的产品心智是：
+如果 Pokaya 继续以 6 个功能 tab 作为主入口，用户感知会停留在“AI 工具集合”。真正应该建立的产品心智是：
 
-> Duitok 是一个 AI content operator。用户告诉它产品和目标，它帮用户判断内容方向、创建项目、填好 prompt、生成素材、安排下一步。
+> Pokaya 是一个 AI content operator。用户告诉它产品和目标，它帮用户判断内容方向、创建项目、填好 prompt、生成素材、安排下一步。
 
 同时，Studio 近期反复出现尺寸偏大、卡片过高、文案被截断、浮层遮挡、页面密度不统一的问题。这说明需要一套全局 Studio density 规范，而不是每次按截图局部修补。
 
@@ -29,7 +29,7 @@ Duitok AI 已经具备完整的 Studio 骨架：Project、Image、UGC、Auto Con
 
 ### 2.1 当前状态
 
-当前 Duitok 更像：
+当前 Pokaya 更像：
 
 > 一个带 Agent 的 AI 生成工作台。
 
@@ -92,7 +92,7 @@ Studio 首页默认展示 Agent Operating Desk。
 用户看到的第一入口是：
 
 ```text
-Ask Duitok Agent what to create today
+Ask Pokaya Agent what to create today
 ```
 
 而不是先看到 6 个大 tab。
@@ -147,7 +147,7 @@ Studio 不是 marketing page。内部页面不使用过大的 hero 标题、过�
 
 ```text
 ------------------------------------------------------------
-| Header: Duitok Agent                        Credits / SOP |
+| Header: Pokaya Agent                        Credits / SOP |
 ------------------------------------------------------------
 | Agent Command Bar                                         |
 | "What should I create for this product today?"             |
@@ -623,4 +623,4 @@ Schedule publishes or prepares posting
 4. 定义并套用 Studio density token 到 sidebar、tabs、cards、inputs、buttons。
 5. 做 EN / 中文 / BM 的 Project tabs 和 Agent 页面截图 QA。
 
-这 5 件事完成后，Duitok 的产品心智会从“很多 AI 功能按钮”明显转向“AI content operator 工作台”。
+这 5 件事完成后，Pokaya 的产品心智会从“很多 AI 功能按钮”明显转向“AI content operator 工作台”。

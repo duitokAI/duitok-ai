@@ -1,4 +1,4 @@
-const DUITOK_PANEL_ID = "duitok-autopost-panel";
+const POKAYA_PANEL_ID = "pokaya-autopost-panel";
 
 function textFromJob(job) {
   return [job.caption, job.hashtags].filter(Boolean).join("\n\n").trim();
@@ -47,7 +47,7 @@ async function applyJob(job) {
 
 function panelHtml() {
   return `
-    <div class="duitok-card">
+    <div class="pokaya-card">
       <strong>Pokaya Auto Post</strong>
       <p>Open the extension popup, choose a queue item, then come back here to fill caption.</p>
       <small>Review before publishing. Pokaya does not bypass TikTok login, captcha, or final confirmation.</small>
@@ -55,13 +55,13 @@ function panelHtml() {
 }
 
 function installPanel() {
-  if (document.getElementById(DUITOK_PANEL_ID)) return;
+  if (document.getElementById(POKAYA_PANEL_ID)) return;
   const panel = document.createElement("aside");
-  panel.id = DUITOK_PANEL_ID;
+  panel.id = POKAYA_PANEL_ID;
   panel.innerHTML = panelHtml();
   const style = document.createElement("style");
   style.textContent = `
-    #${DUITOK_PANEL_ID} {
+    #${POKAYA_PANEL_ID} {
       position: fixed;
       right: 18px;
       bottom: 18px;
@@ -70,7 +70,7 @@ function installPanel() {
       font-family: Inter, Arial, sans-serif;
       color: #111827;
     }
-    #${DUITOK_PANEL_ID} .duitok-card {
+    #${POKAYA_PANEL_ID} .pokaya-card {
       display: grid;
       gap: 8px;
       padding: 14px;
@@ -79,10 +79,10 @@ function installPanel() {
       background: #fffaf3;
       box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
     }
-    #${DUITOK_PANEL_ID} strong { font-size: 15px; }
-    #${DUITOK_PANEL_ID} p,
-    #${DUITOK_PANEL_ID} small { margin: 0; line-height: 1.35; }
-    #${DUITOK_PANEL_ID} small { color: #6b7280; }
+    #${POKAYA_PANEL_ID} strong { font-size: 15px; }
+    #${POKAYA_PANEL_ID} p,
+    #${POKAYA_PANEL_ID} small { margin: 0; line-height: 1.35; }
+    #${POKAYA_PANEL_ID} small { color: #6b7280; }
   `;
   document.documentElement.append(style, panel);
 }

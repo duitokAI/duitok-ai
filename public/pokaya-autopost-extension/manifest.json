@@ -24,7 +24,6 @@
   "host_permissions": [
     "http://localhost:*/*",
     "https://*.pokaya.ai/*",
-    "https://*.duitok.com/*",
     "https://www.tiktok.com/*"
   ]
 }

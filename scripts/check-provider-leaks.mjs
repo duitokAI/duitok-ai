@@ -16,7 +16,7 @@ const checks = [
   {
     file: "server.mjs",
     pattern: /currentDb\.usage\.unshift\(usage\(`(?:Queued|Failed):|creditEntry\([^)]*,\s*[^)]*,\s*[^)]*,\s*generated\.title/,
-    message: "User-visible usage or credit ledger entries must use Duitok-safe labels."
+    message: "User-visible usage or credit ledger entries must use Pokaya-safe labels."
   },
   {
     file: "server.mjs",

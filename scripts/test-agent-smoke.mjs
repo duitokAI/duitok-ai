@@ -1,5 +1,5 @@
 const baseUrl = (process.env.AGENT_SMOKE_BASE_URL || "http://localhost:4187").replace(/\/$/, "");
-const email = process.env.AGENT_SMOKE_EMAIL || "admin@duitok.com";
+const email = process.env.AGENT_SMOKE_EMAIL || "admin@pokaya.ai";
 const password = process.env.AGENT_SMOKE_PASSWORD;
 const token = process.env.AGENT_SMOKE_TOKEN;
 

@@ -1,10 +1,10 @@
-# Duitok Agent 工作流优化 PRD
+# Pokaya Agent 工作流优化 PRD
 
 最后更新：2026-05-28
 
 ## 1. 背景
 
-Duitok Agent 现在已经有一个真实 Agent 的基础：
+Pokaya Agent 现在已经有一个真实 Agent 的基础：
 
 - 前端已有聊天面板和 3D 工作状态吉祥物。
 - 后端 `/api/agent` 已接入 DeepSeek function calling。
@@ -20,7 +20,7 @@ Duitok Agent 现在已经有一个真实 Agent 的基础：
 
 ## 2. 产品目标
 
-把 Duitok Agent 升级成 TikTok Shop 卖家的 AI 内容运营员。
+把 Pokaya Agent 升级成 TikTok Shop 卖家的 AI 内容运营员。
 
 用户应该可以自然输入：
 
@@ -36,7 +36,7 @@ Agent 应该能理解意图，选择正确工具，安全执行，更新工作�
 
 V1 暂不做：
 
-- Duitok 外部的通用网页浏览。
+- Pokaya 外部的通用网页浏览。
 - 不经确认就全自动发布 TikTok。
 - 多 Agent 团队架构。
 - 跨用户长期记忆。
@@ -213,7 +213,7 @@ Agent 应该：
 
 每次调用 DeepSeek 时，应该传入：
 
-- System prompt：Duitok Agent 身份、工具规则、安全边界。
+- System prompt：Pokaya Agent 身份、工具规则、安全边界。
 - 状态摘要：用户、权限、余额、当前项目、最近结果、TikTok 连接状态。
 - 最近对话历史。
 - 工具定义。
@@ -461,7 +461,7 @@ DB 增加 `agentRuns`：
 
 ## 10. Prompt 要求
 
-DeepSeek system prompt 中，Duitok Agent 的定位：
+DeepSeek system prompt 中，Pokaya Agent 的定位：
 
 > 你是 TikTok Shop 马来西亚卖家的 AI 内容运营员。你帮助用户创建 campaign、产品视觉、UGC 脚本、短视频 prompt、内容计划、排期和发布流程。
 
@@ -793,7 +793,7 @@ Phase 1 不能上线，除非以下全部通过：
 - 没有项目时，Agent 默认创建项目，还是先问用户？
 - credits 超过多少必须确认？
 - Agent memory 是否允许用户手动编辑？
-- “今天还缺什么内容”只基于 Duitok 数据，还是未来接 TikTok performance data？
+- “今天还缺什么内容”只基于 Pokaya 数据，还是未来接 TikTok performance data？
 - TikTok publish 默认 privacy 用 `SELF_ONLY`，还是让用户选择？
 
 ## 18. 推荐下一步

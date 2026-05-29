@@ -4,7 +4,7 @@ Last updated: 2026-05-29
 
 ## 1. Background
 
-Duitok AI is rebranding to **Pokaya AI** after TikTok developer review rejected app names containing `Tik` or `Tok`. The new brand has already been decided:
+Pokaya AI is rebranding to **Pokaya AI** after TikTok developer review rejected app names containing `Tik` or `Tok`. The new brand has already been decided:
 
 - Product name: **Pokaya AI**
 - Primary domain: **pokaya.ai**
@@ -18,7 +18,7 @@ The current visual direction is useful as a starting point:
 - Friendly 3D soft-plastic style
 - Selling / discount / video / AI symbols
 
-But the current assets still say **Duitok AI** and must be redesigned into a clean Pokaya system instead of simple text replacement.
+But the current assets still say **Pokaya AI** and must be redesigned into a clean Pokaya system instead of simple text replacement.
 
 ## 2. Objective
 
@@ -261,7 +261,7 @@ public/pokaya-app-icon-1024.png
 public/apple-touch-icon.png
 ```
 
-Keep old `duitok-*` files temporarily for cached users until the rebrand deploy is stable.
+Keep old `pokaya-*` files temporarily for cached users until the rebrand deploy is stable.
 
 ## 8. Format And Size Requirements
 
@@ -343,7 +343,7 @@ Use:
 
 Goal:
 
-- User should instantly recognize they are entering Pokaya AI, not old Duitok.
+- User should instantly recognize they are entering Pokaya AI, not old Pokaya.
 
 ### 9.3 Studio Sidebar
 
@@ -412,7 +412,7 @@ Create a dark background logo version for Pokaya AI. Deep purple/near-black back
 - Mascot reads as wallet at first glance.
 - App icon reads at 128px.
 - Favicon reads at 32px.
-- No `Duitok` text remains in new assets.
+- No `Pokaya` text remains in new assets.
 - No `Tik` / `Tok` in product name.
 - No TikTok logo, TikTok color split, or official-looking TikTok mark.
 - Works on white and dark UI.

@@ -4,7 +4,7 @@ Last updated: 2026-05-29
 
 ## 1. 背景
 
-TikTok Developer 审核明确拒绝了包含 `Tik` / `Tok` 的 app name。原品牌 **Duitok AI** 中包含 `tok`，后续继续使用会带来审核、合规和品牌风险。
+TikTok Developer 审核明确拒绝了包含 `Tik` / `Tok` 的 app name。原品牌 **Pokaya AI** 中包含 `tok`，后续继续使用会带来审核、合规和品牌风险。
 
 新品牌已确定为：
 
@@ -20,9 +20,9 @@ TikTok Developer 审核明确拒绝了包含 `Tik` / `Tok` 的 app name。原品
 
 ### 2.1 必须达成
 
-- 所有用户可见的品牌名从 `Duitok AI` 改为 `Pokaya AI`。
-- 所有用户可见的 `Duitok Agent` 改为 `Pokaya Agent`。
-- 所有用户可见的 `Duitok Studio` 改为 `Pokaya Studio`。
+- 所有用户可见的品牌名从 `Pokaya AI` 改为 `Pokaya AI`。
+- 所有用户可见的 `Pokaya Agent` 改为 `Pokaya Agent`。
+- 所有用户可见的 `Pokaya Studio` 改为 `Pokaya Studio`。
 - 浏览器标题、favicon、登录页、Studio sidebar、Dashboard、Agent、SOP、Billing、Auto Post extension 全部体现 Pokaya AI。
 - 线上主入口切到 `pokaya.ai`。
 - TikTok Developer app name 使用 `Pokaya AI`，不再出现 `Tik` / `Tok` 派生品牌名。
@@ -57,14 +57,14 @@ TikTok Developer 审核明确拒绝了包含 `Tik` / `Tok` 的 app name。原品
 
 以下内容不应该继续出现在用户界面、审核页面、官网 metadata、extension UI 或支付展示中：
 
-- Duitok AI
-- Duitok
-- Duitok Agent
-- Duitok Studio
-- Duitok Auto Post
-- `#duitok`
-- `admin@duitok.com`
-- `duitok.com/ref/...`
+- Pokaya AI
+- Pokaya
+- Pokaya Agent
+- Pokaya Studio
+- Pokaya Auto Post
+- `#pokaya`
+- `admin@pokaya.ai`
+- `pokaya.ai/ref/...`
 
 ### 3.3 TikTok 的使用边界
 
@@ -136,7 +136,7 @@ TikTok Developer 审核明确拒绝了包含 `Tik` / `Tok` 的 app name。原品
 
 需要改：
 
-- `<title>Duitok AI</title>` -> `Pokaya AI`
+- `<title>Pokaya AI</title>` -> `Pokaya AI`
 - favicon 指向 `public/brand/pokaya/final/favicon.ico` 或对应 PNG
 - 后续如有 metadata，也统一为 Pokaya AI
 
@@ -149,9 +149,9 @@ TikTok Developer 审核明确拒绝了包含 `Tik` / `Tok` 的 app name。原品
 
 需要改：
 
-- 页面文案中的 `Duitok AI` -> `Pokaya AI`
-- `Duitok Agent` -> `Pokaya Agent`
-- `Duitok Studio` -> `Pokaya Studio`
+- 页面文案中的 `Pokaya AI` -> `Pokaya AI`
+- `Pokaya Agent` -> `Pokaya Agent`
+- `Pokaya Studio` -> `Pokaya Studio`
 - Sidebar logo 使用 `public/brand/pokaya/final/pokaya-sidebar-logo-*`
 - Login / Register logo 使用 Pokaya final logo
 - App icon / tab icon 使用 final favicon
@@ -173,12 +173,12 @@ TikTok Developer 审核明确拒绝了包含 `Tik` / `Tok` 的 app name。原品
 需要改：
 
 - 服务健康检查里的 public name
-- Agent system identity：`Duitok Agent` -> `Pokaya Agent`
+- Agent system identity：`Pokaya Agent` -> `Pokaya Agent`
 - 用户可见错误文案 / 成功文案
-- 默认 hashtag：去掉 `#duitok`，改为 `#pokaya` 或不放品牌 hashtag
-- referral / public URL 默认值从 `duitok.com` 切到 `pokaya.ai`
+- 默认 hashtag：去掉 `#pokaya`，改为 `#pokaya` 或不放品牌 hashtag
+- referral / public URL 默认值从 `pokaya.ai` 切到 `pokaya.ai`
 - admin seed display 如有可见内容，改为 Pokaya
-- provider redaction copy：`Duitok AI generation service` -> `Pokaya AI generation service`
+- provider redaction copy：`Pokaya AI generation service` -> `Pokaya AI generation service`
 
 谨慎处理：
 
@@ -205,8 +205,8 @@ P0 需要改：
 
 P1 再改：
 
-- Render service name `duitok-ai` 是否改名
-- disk name `duitok-data` 是否改名
+- Render service name `pokaya-ai` 是否改名
+- disk name `pokaya-data` 是否改名
 - Fly app name 是否继续保留
 
 原则：服务名、disk 名不急着改，避免影响部署和数据。用户看不到的内部基础设施名字可以晚点迁移。
@@ -215,13 +215,13 @@ P1 再改：
 
 旧资源包括：
 
-- `public/duitok-logo-horizontal.png`
-- `public/duitok-logo-transparent.png`
-- `public/duitok-tab-icon-transparent.png`
-- `public/duitok-mascot-transparent.png`
-- `public/duitok-brand-*`
-- `public/duitok-agent-*`
-- `public/duittok-favicon*.svg`
+- `public/pokaya-logo-horizontal.png`
+- `public/pokaya-logo-transparent.png`
+- `public/pokaya-tab-icon-transparent.png`
+- `public/pokaya-mascot-transparent.png`
+- `public/pokaya-brand-*`
+- `public/pokaya-agent-*`
+- `public/pokaya-favicon*.svg`
 - `public/favicon.ico`
 - `public/apple-touch-icon.png`
 
@@ -229,21 +229,21 @@ P1 再改：
 
 - 新页面引用全部切到 `public/brand/pokaya/final/`
 - 根目录 favicon / apple-touch-icon 可以复制 final 版本覆盖
-- 旧 Duitok 素材先保留，不删除，等线上确认稳定后再清理
+- 旧 Pokaya 素材先保留，不删除，等线上确认稳定后再清理
 
 ### 5.6 Auto Post Extension
 
 目录：
 
-- `public/duitok-autopost-extension/`
+- `public/pokaya-autopost-extension/`
 
 需要改：
 
 - manifest name：`Pokaya Auto Post`
-- popup / content 文案：`Duitok` -> `Pokaya`
+- popup / content 文案：`Pokaya` -> `Pokaya`
 - extension icon 改用 Pokaya app icon
 - README 改成 Pokaya
-- panel ID / CSS class 可以暂时保留 `duitok-*`，因为用户不可见，避免一次性改太多
+- panel ID / CSS class 可以暂时保留 `pokaya-*`，因为用户不可见，避免一次性改太多
 
 后续 P1：
 
@@ -252,7 +252,7 @@ P1 再改：
 
 ### 5.7 Docs
 
-大量历史 PRD 仍包含 Duitok。处理策略：
+大量历史 PRD 仍包含 Pokaya。处理策略：
 
 - 当前执行相关文档改成 Pokaya
 - 历史 PRD 不需要全部立即重写
@@ -287,7 +287,7 @@ P0 文档：
 3. Auto Post extension 文件夹 rename。
 4. R2 media domain 改为 `media.pokaya.ai`。
 5. `admin@pokaya.ai` 邮箱正式启用。
-6. 旧 Duitok public assets 清理。
+6. 旧 Pokaya public assets 清理。
 
 ### P2：以后再做
 
@@ -304,18 +304,18 @@ P0 文档：
 
 - 旧 key 继续读
 - 新 key 可以开始写
-- 如必须迁移，做 fallback：先读 Pokaya key，读不到再读 Duitok key
+- 如必须迁移，做 fallback：先读 Pokaya key，读不到再读 Pokaya key
 
 ### 7.2 Domain
 
 第一阶段：
 
-- `pokaya.ai` 和 `duitok.com` 同时可用
+- `pokaya.ai` 和 `pokaya.ai` 同时可用
 - callback 同时支持两个域名
 
 第二阶段：
 
-- TikTok / payment callback 全部稳定后，再把 `duitok.com` redirect 到 `pokaya.ai`
+- TikTok / payment callback 全部稳定后，再把 `pokaya.ai` redirect 到 `pokaya.ai`
 
 ### 7.3 Old Assets
 
@@ -334,22 +334,22 @@ P0 文档：
 - favicon 是 P 钱包
 - 登录页 logo 是 Pokaya
 - Studio sidebar logo 是 Pokaya
-- Dashboard 顶部不出现 Duitok
-- Agent 页面不出现 Duitok Agent
-- SOP 页面不出现 Duitok
-- Billing / top up 页面不出现 Duitok
-- Auto Post extension popup 不出现 Duitok
+- Dashboard 顶部不出现 Pokaya
+- Agent 页面不出现 Pokaya Agent
+- SOP 页面不出现 Pokaya
+- Billing / top up 页面不出现 Pokaya
+- Auto Post extension popup 不出现 Pokaya
 - 控制台无资源 404
 
 ### 8.2 搜索 QA
 
 执行关键词扫描：
 
-- `Duitok`
+- `Pokaya`
 - `DuitTok`
-- `duitok`
-- `duittok`
-- `#duitok`
+- `pokaya`
+- `pokaya`
+- `#pokaya`
 
 验收规则：
 
@@ -377,7 +377,7 @@ P0 文档：
 - 后台整体色调保持当前紫粉体系，没有重做视觉导致返工。
 - `npm run build` 通过。
 - 线上 `pokaya.ai` 可用。
-- 旧 `duitok.com` 不会立刻断。
+- 旧 `pokaya.ai` 不会立刻断。
 
 ## 10. 推荐执行顺序
 

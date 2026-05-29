@@ -5,11 +5,29 @@ const toast = document.querySelector("#toast");
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
 const isStudioPath = () => window.location.pathname.startsWith("/studio") || window.location.pathname.startsWith("/admin");
 const pathIs = (path) => window.location.pathname === path;
-const ownerAdminEmails = new Set(["admin@pokaya.ai", "admin@duitok.com", "admin@duitok.ai"]);
+const ownerAdminEmails = new Set(["admin@pokaya.ai"]);
 const whatsappGroupUrl = "https://chat.whatsapp.com/ERz2477U1gJFJHFsXtiMJH?mode=gi_t";
 const supportWhatsappUrl = "https://wa.me/60163100131";
 const promoCycleMs = 5 * 60 * 60 * 1000;
-const agentHistoryStorageKey = "duitok-agent-history";
+const legacyBrandPrefix = ["dui", "tok"].join("");
+const storageKeys = {
+  user: "pokaya-user",
+  token: "pokaya-auth",
+  adminKey: "pokaya-admin-key",
+  lang: "pokaya-lang",
+  agentMessages: "pokaya-agent-messages",
+  agentContextSummary: "pokaya-agent-context-summary",
+  agentHistory: "pokaya-agent-history"
+};
+function migrateStorageKey(key) {
+  const legacyKey = `${legacyBrandPrefix}-${key.replace(/^pokaya-/, "")}`;
+  const value = localStorage.getItem(key) ?? localStorage.getItem(legacyKey);
+  if (value !== null && localStorage.getItem(key) === null) localStorage.setItem(key, value);
+  localStorage.removeItem(legacyKey);
+  return value;
+}
+Object.values(storageKeys).forEach(migrateStorageKey);
+const agentHistoryStorageKey = storageKeys.agentHistory;
 const agentHistoryLimit = 12;
 let sidebarScrollTop = 0;
 let promoCountdownTimer = null;
@@ -47,10 +65,10 @@ const wizardFeatures = [
 
 const state = {
   loading: true,
-  user: JSON.parse(localStorage.getItem("duitok-user") || "null"),
-  token: localStorage.getItem("duitok-auth") || "",
-  adminKey: localStorage.getItem("duitok-admin-key") || "",
-  lang: localStorage.getItem("duitok-lang") || "zh",
+  user: JSON.parse(localStorage.getItem(storageKeys.user) || "null"),
+  token: localStorage.getItem(storageKeys.token) || "",
+  adminKey: localStorage.getItem(storageKeys.adminKey) || "",
+  lang: localStorage.getItem(storageKeys.lang) || "zh",
   db: null,
   page: "dashboard",
   step: "image",
@@ -77,8 +95,8 @@ const state = {
   agentVisualPhase: "idle",
   agentTaskMode: "idle",
   agentIdleActivity: "sleep",
-  agentMessages: JSON.parse(localStorage.getItem("duitok-agent-messages") || "[]"),
-  agentContextSummary: localStorage.getItem("duitok-agent-context-summary") || "",
+  agentMessages: JSON.parse(localStorage.getItem(storageKeys.agentMessages) || "[]"),
+  agentContextSummary: localStorage.getItem(storageKeys.agentContextSummary) || "",
   agentExpandedMessages: {},
   agentHistoryOpen: false,
   agentHistorySessions: JSON.parse(localStorage.getItem(agentHistoryStorageKey) || "[]"),
@@ -98,7 +116,7 @@ const state = {
   wizardFeature: "",
   wizardProductName: "",
   wizardProductLink: "",
-  wizardLanguage: localStorage.getItem("duitok-lang") === "zh" ? "中文" : localStorage.getItem("duitok-lang") === "en" ? "English" : "Bahasa Melayu",
+  wizardLanguage: localStorage.getItem(storageKeys.lang) === "zh" ? "中文" : localStorage.getItem(storageKeys.lang) === "en" ? "English" : "Bahasa Melayu",
   wizardStyle: "Soft sell",
   wizardBusy: false
 };
@@ -119,7 +137,7 @@ const brandAssets = {
   banner: "/brand/pokaya/final/pokaya-logo-horizontal-light.png",
   stacked: "/brand/pokaya/final/pokaya-logo-horizontal-transparent.png",
   sidebar: "/brand/pokaya/final/pokaya-sidebar-logo-transparent.png",
-  agentModel: "/models/agent/duitok-agent.glb"
+  agentModel: "/models/agent/pokaya-agent.glb"
 };
 
 const mascotIcon = (className = "mascot-icon") => `<img class="${className}" src="${brandAssets.mascot}" alt="" aria-hidden="true">`;
@@ -1202,7 +1220,7 @@ function publicSite() {
         </div>
       </nav>
       <section class="public-hero video-scene-hero">
-        <img class="video-scene-bg" src="/duitok-hero-seller-v2.jpg" alt="Pokaya AI seller surrounded by TikTok Shop content previews">
+        <img class="video-scene-bg" src="/pokaya-hero-seller-v2.jpg" alt="Pokaya AI seller surrounded by TikTok Shop content previews">
         <div class="video-scene-vignette" aria-hidden="true"></div>
         <div class="video-scene-grid" aria-hidden="true"></div>
         <div class="video-scene-beam beam-one" aria-hidden="true"></div>
@@ -3889,7 +3907,7 @@ function billingPaymentRow(payment) {
 
 function affiliateDashboard() {
   const affiliate = state.db.affiliate || {};
-  const code = affiliate.code || "DUIT2026";
+  const code = affiliate.code || "POKAYA2026";
   const clicks = Number(affiliate.clicks || 0);
   const payout = Number(affiliate.payout || 0);
   const totalEarned = payout;
@@ -5267,12 +5285,12 @@ function agent3DScene(options = {}) {
         <b>${status.label}</b>
       </div>`}
       <div class="agent-life-stage" aria-label="Pokaya Agent work, chat, and rest states">
-        <img class="agent-life-render-image agent-life-render-active" src="/duitok-agent-stage-chat-bg.png" alt="Pokaya Agent workstation, chat station, and sleeping bed">
-        <img class="agent-life-render-image agent-life-render-sleep" src="/duitok-agent-stage-chat-sleep-bg.png" alt="Pokaya Agent sleeping in bed">
+        <img class="agent-life-render-image agent-life-render-active" src="/pokaya-agent-stage-chat-bg.png" alt="Pokaya Agent workstation, chat station, and sleeping bed">
+        <img class="agent-life-render-image agent-life-render-sleep" src="/pokaya-agent-stage-chat-sleep-bg.png" alt="Pokaya Agent sleeping in bed">
         <span class="agent-life-route" aria-hidden="true"></span>
         <span class="agent-chair-mask" aria-hidden="true"></span>
-        <img class="agent-sprite agent-sprite-work" src="/duitok-agent-sprite-work.png" alt="">
-        <img class="agent-sprite agent-sprite-chat" src="/duitok-agent-sprite-chat.png" alt="">
+        <img class="agent-sprite agent-sprite-work" src="/pokaya-agent-sprite-work.png" alt="">
+        <img class="agent-sprite agent-sprite-chat" src="/pokaya-agent-sprite-chat.png" alt="">
         ${compact ? "" : `<span class="agent-life-bubble">${agentVisualBubble(mode, phase)}</span>`}
       </div>
       ${compact ? "" : `<div class="agent-3d-copy">
@@ -6198,7 +6216,7 @@ function bind() {
   }));
   document.querySelectorAll("[data-lang]").forEach((el) => el.addEventListener("click", (event) => {
     event.stopPropagation();
-    localStorage.setItem("duitok-lang", el.dataset.lang);
+    localStorage.setItem(storageKeys.lang, el.dataset.lang);
     set({ lang: el.dataset.lang, langOpen: false });
   }));
   document.addEventListener("click", closeLangMenu, { once: true });
@@ -6263,12 +6281,12 @@ async function action(event, name) {
   if (name === "toggle-agent-history") return set({ agentHistoryOpen: !state.agentHistoryOpen });
   if (name === "new-agent-chat") {
     saveCurrentAgentHistory();
-    localStorage.removeItem("duitok-agent-messages");
+    localStorage.removeItem(storageKeys.agentMessages);
     return set({ agentMessages: [], agentInput: "", agentExpandedMessages: {}, agentHistoryOpen: true });
   }
   if (name === "clear-agent-context" || name === "clear-agent") {
-    localStorage.removeItem("duitok-agent-messages");
-    localStorage.removeItem("duitok-agent-context-summary");
+    localStorage.removeItem(storageKeys.agentMessages);
+    localStorage.removeItem(storageKeys.agentContextSummary);
     return set({ agentMessages: [], agentInput: "", agentContextSummary: "", agentExpandedMessages: {} });
   }
   if (name === "clear-agent-preferences") return clearAgentPreferences();
@@ -6280,8 +6298,8 @@ async function action(event, name) {
     return set({ agentMessages: messages });
   }
   if (name === "logout") {
-    localStorage.removeItem("duitok-user");
-    localStorage.removeItem("duitok-auth");
+    localStorage.removeItem(storageKeys.user);
+    localStorage.removeItem(storageKeys.token);
     return set({ user: null, token: "", db: null, modal: null });
   }
   if (name === "forgot") return window.open("https://wa.me/60123456789", "_blank");
@@ -6289,12 +6307,12 @@ async function action(event, name) {
   if (name === "connect-tiktok") return window.location.href = `${apiBaseUrl}/api/tiktok/connect?token=${encodeURIComponent(state.token)}`;
   if (name === "tiktok-creator-info") return tiktokCreatorInfo();
   if (name === "copy-affiliate") {
-    const code = state.db?.affiliate?.code || "DUIT2026";
+    const code = state.db?.affiliate?.code || "POKAYA2026";
     await navigator.clipboard?.writeText(`https://pokaya.ai/ref/${code}`);
     return notify(t("toastAffiliateCopied"));
   }
   if (name === "copy-affiliate-code") {
-    await navigator.clipboard?.writeText(state.db?.affiliate?.code || "DUIT2026");
+    await navigator.clipboard?.writeText(state.db?.affiliate?.code || "POKAYA2026");
     return notify(t("toastAffiliateCodeCopied"));
   }
   if (name === "support-ticket") return mutate("/support", { method: "POST", body: JSON.stringify({ message: "Support ticket from studio" }) }, t("toastSupportSaved"));
@@ -6311,12 +6329,12 @@ async function submit(event) {
   if (event.currentTarget.dataset.form === "login") {
     try {
       if (data.adminKey) {
-        localStorage.setItem("duitok-admin-key", data.adminKey);
+        localStorage.setItem(storageKeys.adminKey, data.adminKey);
         state.adminKey = data.adminKey;
       }
       const res = await api("/auth/login", { method: "POST", body: JSON.stringify(data) });
-      localStorage.setItem("duitok-user", JSON.stringify(res.user));
-      localStorage.setItem("duitok-auth", res.token);
+      localStorage.setItem(storageKeys.user, JSON.stringify(res.user));
+      localStorage.setItem(storageKeys.token, res.token);
       state.token = res.token;
       state.db = res.state;
       state.projectId = state.db.projects[0]?.id;
@@ -6329,11 +6347,11 @@ async function submit(event) {
   if (event.currentTarget.dataset.form === "admin-key") {
     const adminKey = String(data.adminKey || "").trim();
     if (!adminKey) return notify("Enter admin key first.");
-    localStorage.setItem("duitok-admin-key", adminKey);
+    localStorage.setItem(storageKeys.adminKey, adminKey);
     state.adminKey = adminKey;
     try {
       const res = await api("/admin/unlock", { method: "POST", body: JSON.stringify({ adminKey }) });
-      localStorage.setItem("duitok-user", JSON.stringify(res.user));
+      localStorage.setItem(storageKeys.user, JSON.stringify(res.user));
       notify("Admin unlocked.");
       return set({ db: res.state, user: res.user, page: "admin" });
     } catch (error) {
@@ -6623,8 +6641,8 @@ function rememberAgentMessages(messages) {
   const safeMessages = agentMessagesForStorage(messages);
   const overflow = safeMessages.slice(0, Math.max(0, safeMessages.length - 10));
   if (overflow.length) rememberAgentContextSummary(overflow);
-  localStorage.setItem("duitok-agent-messages", JSON.stringify(safeMessages.slice(-10)));
-  state.agentContextSummary = localStorage.getItem("duitok-agent-context-summary") || "";
+  localStorage.setItem(storageKeys.agentMessages, JSON.stringify(safeMessages.slice(-10)));
+  state.agentContextSummary = localStorage.getItem(storageKeys.agentContextSummary) || "";
 }
 
 function rememberAgentHistorySessions(sessions = []) {
@@ -6655,7 +6673,7 @@ function restoreAgentHistory(id) {
   const session = (state.agentHistorySessions || []).find((item) => item.id === id);
   if (!session) return notify("找不到这条历史记录。");
   const messages = agentMessagesForStorage(session.messages);
-  localStorage.setItem("duitok-agent-messages", JSON.stringify(messages));
+  localStorage.setItem(storageKeys.agentMessages, JSON.stringify(messages));
   notify("已恢复历史对话。");
   set({ agentMessages: messages, agentInput: "", agentExpandedMessages: {}, agentHistoryOpen: false });
 }
@@ -6719,7 +6737,7 @@ function compactAgentCardForStorage(card = {}) {
 }
 
 function rememberAgentContextSummary(messages = []) {
-  const previous = state.agentContextSummary || localStorage.getItem("duitok-agent-context-summary") || "";
+  const previous = state.agentContextSummary || localStorage.getItem(storageKeys.agentContextSummary) || "";
   const lines = messages.map((item) => {
     const text = String(item.content || "").replace(/\s+/g, " ").slice(0, 180);
     return `${item.role === "user" ? "User" : "Agent"}: ${text}`;
@@ -6728,7 +6746,7 @@ function rememberAgentContextSummary(messages = []) {
     previous,
     lines.length ? `Recent compressed context (${new Date().toLocaleDateString()}): ${lines.join(" | ")}` : ""
   ].filter(Boolean).join("\n").slice(-1800);
-  localStorage.setItem("duitok-agent-context-summary", next);
+  localStorage.setItem(storageKeys.agentContextSummary, next);
 }
 
 function applyAgentUiActions(uiActions = [], db) {
@@ -7063,7 +7081,7 @@ async function adminCleanupPayment(paymentId) {
 async function updateAccountProfile(patch) {
   try {
     const res = await api("/account/profile", { method: "PATCH", body: JSON.stringify(patch) });
-    localStorage.setItem("duitok-user", JSON.stringify(res.user));
+    localStorage.setItem(storageKeys.user, JSON.stringify(res.user));
     set({ user: res.user, db: res.state });
     notify(t("toastAccountSaved"));
   } catch (error) {

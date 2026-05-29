@@ -1,29 +1,29 @@
-# Duitok Agent 核心卖点与护城河 PRD
+# Pokaya Agent 核心卖点与护城河 PRD
 
 最后更新：2026-05-29
 
 ## 1. 背景
 
-Duitok AI 当前已经不只是一个“AI 生成工具”。平台已经具备：
+Pokaya AI 当前已经不只是一个“AI 生成工具”。平台已经具备：
 
 - Studio 工作区。
 - 项目管理。
 - 图片 / 视频 / 内容计划 / 排期。
 - TikTok Direct Post 基础能力。
-- Duitok Agent。
+- Pokaya Agent。
 - `deepseek-v4-pro` 推理。
 - `web_search` 联网搜索。
 - `trend_research` 趋势研究。
 - 项目记忆。
 - 用户反馈学习闭环。
 
-现在最大的机会不是继续堆更多生成按钮，而是把 Duitok Agent 培养成产品的核心卖点：
+现在最大的机会不是继续堆更多生成按钮，而是把 Pokaya Agent 培养成产品的核心卖点：
 
 **用户不是来买一个 AI 工具，而是来请一个懂 TikTok Shop Malaysia 的内容运营 Agent。**
 
 这份 PRD 目标是定义：
 
-- Duitok Agent 应该成为怎样的核心功能。
+- Pokaya Agent 应该成为怎样的核心功能。
 - 它与普通 AI 工具的差异化是什么。
 - 它如何形成数据飞轮和护城河。
 - 接下来应该优化哪些模块。
@@ -33,7 +33,7 @@ Duitok AI 当前已经不只是一个“AI 生成工具”。平台已经具备�
 
 ### 2.1 当前定位
 
-当前 Duitok Agent 是：
+当前 Pokaya Agent 是：
 
 > 可搜索、可执行、可记忆、可学习的 TikTok Shop 内容运营 Agent。
 
@@ -41,7 +41,7 @@ Duitok AI 当前已经不只是一个“AI 生成工具”。平台已经具备�
 
 目标是升级为：
 
-> Duitok Agent 是一个专为 Malaysia TikTok Shop seller 训练的 AI 内容运营合伙人。它会研究趋势、判断产品适配、生成内容策略、创建素材、安排发布，并根据用户行为越用越懂这个卖家。
+> Pokaya Agent 是一个专为 Malaysia TikTok Shop seller 训练的 AI 内容运营合伙人。它会研究趋势、判断产品适配、生成内容策略、创建素材、安排发布，并根据用户行为越用越懂这个卖家。
 
 ### 2.3 一句话卖点
 
@@ -70,7 +70,7 @@ BM 版本：
 - 生成视频。
 - 回答问题。
 
-Duitok Agent 的差异化应是：
+Pokaya Agent 的差异化应是：
 
 - 懂 TikTok Shop 场景。
 - 懂 Malaysia seller 的实际执行难度。
@@ -87,13 +87,13 @@ Duitok Agent 的差异化应是：
 用户行为数据
 -> Agent 偏好记忆
 -> 高采用率内容模板
--> Duitok 官方 SOP
+-> Pokaya 官方 SOP
 -> 更好的推荐
 -> 更高采用率
 -> 更多用户行为数据
 ```
 
-这叫 Duitok 内容运营飞轮。
+这叫 Pokaya 内容运营飞轮。
 
 ## 4. 产品目标
 
@@ -110,7 +110,7 @@ Duitok Agent 的差异化应是：
 - 提高用户日活和周活。
 - 提高生成次数和 credit 消耗。
 - 提高 RM69 订阅留存。
-- 提高用户感知价值，让 Duitok 不容易被普通 AI 工具替代。
+- 提高用户感知价值，让 Pokaya 不容易被普通 AI 工具替代。
 - 形成高质量内容模板库，降低后续获客和教学成本。
 
 ### 4.3 产品目标
@@ -310,7 +310,7 @@ Research
 
 - 用户保存。
 - 高采用率内容。
-- Duitok 官方推荐。
+- Pokaya 官方推荐。
 - Admin 标记。
 
 ### 7.6 Agent Score 与信任感
@@ -417,7 +417,7 @@ Research
 Studio 内保留 Agent priority panel，但默认不输出每日建议：
 
 ```text
-Ask Duitok Agent
+Ask Pokaya Agent
 用户输入问题后：
 1. 理解用户意图
 2. 联网/读取项目/调用工具
@@ -632,12 +632,12 @@ P2：
 
 ## 16. 成功状态
 
-当 Duitok Agent 成为核心功能时，用户打开平台的第一反应应该是：
+当 Pokaya Agent 成为核心功能时，用户打开平台的第一反应应该是：
 
 > 我今天不用想内容，先问 Agent。
 
-用户不再把 Duitok 当作“生成按钮集合”，而是当作：
+用户不再把 Pokaya 当作“生成按钮集合”，而是当作：
 
 > 我一问，就能推进 TikTok Shop 内容运营的 AI 合伙人。
 
-这就是 Duitok Agent 的核心卖点和长期护城河。
+这就是 Pokaya Agent 的核心卖点和长期护城河。

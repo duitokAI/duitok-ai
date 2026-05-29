@@ -1,12 +1,12 @@
-# Duitok AI Overall Product Optimization PRD
+# Pokaya AI Overall Product Optimization PRD
 
 ## 1. 背景
 
-Duitok AI 目前已经具备一个可上线验证的完整骨架：高压成交首页、注册/登录、Studio 工作台、多模型媒体生成、Seedance 2.0 Atlas Cloud 路由、积分扣费、生成结果保存、TikTok 连接与发布队列、CHIP 支付接口雏形、Duitok Agent、管理员运营面板。
+Pokaya AI 目前已经具备一个可上线验证的完整骨架：高压成交首页、注册/登录、Studio 工作台、多模型媒体生成、Seedance 2.0 Atlas Cloud 路由、积分扣费、生成结果保存、TikTok 连接与发布队列、CHIP 支付接口雏形、Pokaya Agent、管理员运营面板。
 
 当前最大问题不是“功能不够多”，而是产品链路还没有被打磨成一个卖家可以自然付费、自然生成、自然复购的闭环。用户从首页被说服以后，进入 Studio 仍然会遇到几个断点：注册付费不够真实、首次生成路径偏复杂、结果管理和复用偏弱、TikTok auto-post 信任感不足、Agent 还没有成为主操作入口。
 
-本 PRD 目标是把 Duitok AI 从“能展示、能生成”升级为“能转化、能留存、能扩张”。
+本 PRD 目标是把 Pokaya AI 从“能展示、能生成”升级为“能转化、能留存、能扩张”。
 
 ## 2. 产品目标
 
@@ -77,7 +77,7 @@ Duitok AI 目前已经具备一个可上线验证的完整骨架：高压成交�
 
 ### 3.5 Agent
 
-1. Duitok Agent 已经能调用工具，但入口仍像聊天插件。
+1. Pokaya Agent 已经能调用工具，但入口仍像聊天插件。
    它应该成为“帮我做下一步”的核心操作层。
 
 2. Agent 的建议没有和 dashboard insight 强绑定。
@@ -202,7 +202,7 @@ Duitok AI 目前已经具备一个可上线验证的完整骨架：高压成交�
 
 ### 6.2 Content Library
 
-目标：让用户把 Duitok 当成素材资产库，而不是一次性生成器。
+目标：让用户把 Pokaya 当成素材资产库，而不是一次性生成器。
 
 需求：
 
@@ -381,4 +381,4 @@ Duitok AI 目前已经具备一个可上线验证的完整骨架：高压成交�
 
 ## 12. 一句话结论
 
-Duitok AI 下一阶段不要继续堆新模型。最应该优化的是闭环：让 seller 从首页焦虑感进入注册，60 秒内生成第一条 Seedance 视频，然后一键保存、排程、复用，并让后台能看清每一次生成的成本和转化。
+Pokaya AI 下一阶段不要继续堆新模型。最应该优化的是闭环：让 seller 从首页焦虑感进入注册，60 秒内生成第一条 Seedance 视频，然后一键保存、排程、复用，并让后台能看清每一次生成的成本和转化。

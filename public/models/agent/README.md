@@ -2,9 +2,9 @@
 
 Put the production character model here:
 
-- `duitok-agent.glb`
+- `pokaya-agent.glb`
 
-The frontend already tries to load `/models/agent/duitok-agent.glb` with Three.js `GLTFLoader`.
+The frontend already tries to load `/models/agent/pokaya-agent.glb` with Three.js `GLTFLoader`.
 If the file is present and valid, the production model replaces the temporary prototype scene automatically.
 
 Required animation clip names:
@@ -23,7 +23,7 @@ Recommended source delivery:
 
 - `source.blend`
 - `textures/`
-- exported `duitok-agent.glb`
+- exported `pokaya-agent.glb`
 - viewport renders for desktop and mobile QA
 
 Model budget:

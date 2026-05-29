@@ -1,18 +1,18 @@
-# Duitok AI Homepage Design System Optimization PRD
+# Pokaya AI Homepage Design System Optimization PRD
 
 ## 1. 背景
 
-Duitok AI 首页已经从普通 SaaS landing page 逐步改成了一个高转化销售页：首屏强调 RM69/月、AI 短视频营销平台、无需露脸、无需囤货；中段有执行量、系统、输出样例、demo、Manual vs Duitok AI、案例、定价、FAQ；同时已经开始为 GEO 页面群做内容布局。
+Pokaya AI 首页已经从普通 SaaS landing page 逐步改成了一个高转化销售页：首屏强调 RM69/月、AI 短视频营销平台、无需露脸、无需囤货；中段有执行量、系统、输出样例、demo、Manual vs Pokaya AI、案例、定价、FAQ；同时已经开始为 GEO 页面群做内容布局。
 
 当前问题不是单个模块不好看，而是整页还没有完全形成一个统一的视觉系统。部分 section 是明亮粉紫风格，部分 section 是黑底科技风，部分卡片密度偏高，标题尺度和信息层级有时不一致。继续零散改，会让页面变成多个好看的片段拼在一起，而不是一个有节奏、有记忆点、有转化逻辑的完整销售页面。
 
-本 PRD 目标是把 Duitok AI 首页升级成一套稳定、可复用、可扩展到 GEO 页面群的设计系统。
+本 PRD 目标是把 Pokaya AI 首页升级成一套稳定、可复用、可扩展到 GEO 页面群的设计系统。
 
 ## 2. 核心定位
 
 ### 2.1 一句话定位
 
-Duitok AI 是面向卖家和副业新手的 AI 短视频营销平台，用已经跑通的短视频带货打法，帮助用户批量测试产品、hook、脚本、caption 和内容角度。
+Pokaya AI 是面向卖家和副业新手的 AI 短视频营销平台，用已经跑通的短视频带货打法，帮助用户批量测试产品、hook、脚本、caption 和内容角度。
 
 ### 2.2 页面要卖的不是工具
 
@@ -61,7 +61,7 @@ Duitok AI 是面向卖家和副业新手的 AI 短视频营销平台，用已经
 
 - Hero 是视频场景感
 - 中段是浅粉紫卡片系统
-- Manual vs Duitok AI 是黑底强对比
+- Manual vs Pokaya AI 是黑底强对比
 - Demo 区是视频卡片网格
 - Pricing 又回到明亮 SaaS 卡片
 
@@ -73,13 +73,13 @@ Duitok AI 是面向卖家和副业新手的 AI 短视频营销平台，用已经
 
 ### 4.2 信息层级偏满
 
-首页现在 section 很多，且每段都在解释“Duitok 是什么”。用户滚动时可能会感到重复。
+首页现在 section 很多，且每段都在解释“Pokaya 是什么”。用户滚动时可能会感到重复。
 
 需要明确每一段只回答一个问题：
 
 1. 这是什么机会？
 2. 为什么现在做？
-3. Duitok 怎么帮我？
+3. Pokaya 怎么帮我？
 4. 我能产出什么？
 5. 手工 vs AI 差在哪里？
 6. RM69 包含什么？
@@ -135,7 +135,7 @@ Duitok AI 是面向卖家和副业新手的 AI 短视频营销平台，用已经
 
 - 第一屏 3 秒内看懂：RM69/月加入 AI 短视频营销平台
 - 15 秒内看懂：不用囤货、不用发货、不用客服、不用露脸
-- 30 秒内看懂：Duitok 不是随机生成，而是已跑通打法 + SOP + 平台
+- 30 秒内看懂：Pokaya 不是随机生成，而是已跑通打法 + SOP + 平台
 - 60 秒内看懂：订阅得到什么、生成如何扣费、下一步怎么开始
 
 ### 5.3 视觉目标
@@ -222,7 +222,7 @@ Duitok AI 是面向卖家和副业新手的 AI 短视频营销平台，用已经
 5. Test volume section: 短视频带货是测试游戏
 6. System section: 已跑通打法 + SOP + 模板 + 平台
 7. Demo gallery: 15 个 AI 带货内容样例，3 行 5 个
-8. Manual vs Duitok AI: 黑底强对比
+8. Manual vs Pokaya AI: 黑底强对比
 9. Pricing: RM69 不是工具，是入场券
 10. 7-day path: 新手第一周怎么执行
 11. FAQ: 风险、credits、TikTok Affiliate、是否保证收入
@@ -233,7 +233,7 @@ Duitok AI 是面向卖家和副业新手的 AI 短视频营销平台，用已经
 当前部分模块信息相近，建议合并或压缩：
 
 - `split-section` 和 `test-volume-section` 可合并成“为什么普通卖家做不快”
-- `system-section` 和 `feature-section` 可合并成“Duitok 给你的 5 个执行武器”
+- `system-section` 和 `feature-section` 可合并成“Pokaya 给你的 5 个执行武器”
 - `case-section` 和 `dream-section` 可合并成“副业可能性 + 风险提示”
 - `scenario-section` 可以移到 GEO 页面或变成一排横向 chips
 
@@ -328,7 +328,7 @@ CTA：
 
 目标：
 
-- 解释 Duitok 真正的差异是“测试速度”
+- 解释 Pokaya 真正的差异是“测试速度”
 
 标题：
 
@@ -364,7 +364,7 @@ CTA：
 - 尽量使用更真实的产品/人物/UGC 视觉
 - 每张卡要让用户理解“我也可以做这种内容”
 
-### 8.6 Manual vs Duitok AI
+### 8.6 Manual vs Pokaya AI
 
 目标：
 
@@ -374,7 +374,7 @@ CTA：
 
 - 黑底网格
 - 左红：旧方法 / 手工卖家
-- 右绿：Duitok AI 方法 / AI 卖家
+- 右绿：Pokaya AI 方法 / AI 卖家
 
 优化建议：
 
@@ -474,7 +474,7 @@ CTA：
 
 ### 9.3 风险提示标准文案
 
-> Duitok AI 不承诺收入。我们提供的是已经跑通的 AI 短视频营销平台和执行系统，结果取决于选品、账号、发布量、复盘和执行。
+> Pokaya AI 不承诺收入。我们提供的是已经跑通的 AI 短视频营销平台和执行系统，结果取决于选品、账号、发布量、复盘和执行。
 
 ### 9.4 CTA 文案库
 

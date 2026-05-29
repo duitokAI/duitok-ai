@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: duitok-ai
+    name: pokaya-ai
     runtime: node
     plan: starter
     buildCommand: npm ci && npm run build
@@ -24,7 +24,7 @@ services:
       - key: PUBLIC_APP_URL
         sync: false
       - key: CORS_ORIGINS
-        value: https://pokaya.ai,https://www.pokaya.ai,https://duitok.com,https://www.duitok.com
+        value: https://pokaya.ai,https://www.pokaya.ai
       - key: CHIP_API_TOKEN
         sync: false
       - key: CHIP_BRAND_ID
@@ -154,6 +154,6 @@ services:
       - key: R2_PUBLIC_BASE_URL
         sync: false
     disk:
-      name: duitok-data
+      name: pokaya-data
       mountPath: /var/data
       sizeGB: 1

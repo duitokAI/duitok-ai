@@ -1,10 +1,10 @@
-# Duitok Agent 反馈学习与内容表现记忆 PRD
+# Pokaya Agent 反馈学习与内容表现记忆 PRD
 
 最后更新：2026-05-29
 
 ## 1. 背景
 
-Duitok Agent 当前已经具备较完整的智能工作流：
+Pokaya Agent 当前已经具备较完整的智能工作流：
 
 - 使用 `deepseek-v4-pro`。
 - 已接入 `web_search` 和 `trend_research`。
@@ -18,9 +18,9 @@ Duitok Agent 当前已经具备较完整的智能工作流：
 - Prompt 和工具规则。
 - 当前 workspace 状态。
 
-但它还缺少一层最重要的 Duitok 专属大脑：
+但它还缺少一层最重要的 Pokaya 专属大脑：
 
-**它不知道哪些建议在 Duitok 里真的被用户采用、保存、生成、排期或放弃。**
+**它不知道哪些建议在 Pokaya 里真的被用户采用、保存、生成、排期或放弃。**
 
 所以它仍然可能给出“看起来合理但不一定被用户采用”的建议。
 
@@ -38,7 +38,7 @@ Duitok Agent 当前已经具备较完整的智能工作流：
 
 ### 2.2 运营侧目标
 
-- Duitok 团队能看到哪些 Agent 建议被采用。
+- Pokaya 团队能看到哪些 Agent 建议被采用。
 - 能识别高采用率的 trend、hook、video angle、product category。
 - 能把成功案例沉淀为模板库。
 - 能判断 Agent 哪些回答经常被忽略或 undo。
@@ -50,7 +50,7 @@ Duitok Agent 当前已经具备较完整的智能工作流：
 - 建立项目级、用户级和全局级的内容表现记忆。
 - 将反馈数据用于 Agent 的下一次决策。
 - 保持隐私隔离，避免跨用户泄露。
-- 不依赖外部平台真实播放量也能先做“Duitok 内部采用率”学习。
+- 不依赖外部平台真实播放量也能先做“Pokaya 内部采用率”学习。
 
 ## 3. 非目标
 
@@ -122,28 +122,28 @@ Agent 应该下次更优先推荐，而不是每次重新从零思考。
 
 ### 5.1 个性化建议
 
-作为卖家，  
-当我多次选择“家居美学 + soft sell”方向，  
-我希望 Agent 以后优先给我这种风格的内容，  
+作为卖家，
+当我多次选择“家居美学 + soft sell”方向，
+我希望 Agent 以后优先给我这种风格的内容，
 而不是每次都给完全通用的 TikTok 建议。
 
 ### 5.2 成功内容复用
 
-作为内容运营者，  
-当我之前保存过一个表现好的视频 prompt，  
-我希望 Agent 下次能说“可以沿用上次的 morning routine 框架”，  
+作为内容运营者，
+当我之前保存过一个表现好的视频 prompt，
+我希望 Agent 下次能说“可以沿用上次的 morning routine 框架”，
 并快速变体出新的产品版本。
 
 ### 5.3 低质量建议减少
 
-作为用户，  
-当我经常 undo 或删除某类 Agent 结果，  
+作为用户，
+当我经常 undo 或删除某类 Agent 结果，
 我希望 Agent 以后少推荐这种方向。
 
 ### 5.4 团队优化 Agent
 
-作为 Duitok 管理员，  
-我希望看到 Agent 建议到执行的转化漏斗，  
+作为 Pokaya 管理员，
+我希望看到 Agent 建议到执行的转化漏斗，
 这样我能知道哪些能力值得继续优化。
 
 ## 6. 功能方案
@@ -364,7 +364,7 @@ Do not mention private historical details unless useful and non-sensitive.
 
 - 用户点击“保存为模板”。
 - 高采用率 Agent 结果。
-- Duitok 管理员手动标记。
+- Pokaya 管理员手动标记。
 
 ### 11.2 模板 schema
 
@@ -487,7 +487,7 @@ Agent 可在趋势研究后说：
 
 - 聚合高采用率趋势和模板。
 - 管理员标记 recommended / avoid。
-- 将优秀模板加入 Duitok 官方 SOP。
+- 将优秀模板加入 Pokaya 官方 SOP。
 
 ## 16. 风险
 
@@ -542,8 +542,8 @@ P2：
 
 ## 18. 成功状态
 
-当用户连续几天使用 Duitok Agent 后，Agent 应该能说：
+当用户连续几天使用 Pokaya Agent 后，Agent 应该能说：
 
 > 这个产品我建议继续用你之前常采用的 soft sell routine 方向。你最近保存过 loft girl 和 room upgrade 类型内容，这个香薰可以直接套用“下班回家 30 秒 reset”的结构。我可以帮你生成 7 天内容计划。
 
-这就是本阶段要实现的“Duitok 专属智能”。
+这就是本阶段要实现的“Pokaya 专属智能”。

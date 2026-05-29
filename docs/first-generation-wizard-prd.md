@@ -1,32 +1,32 @@
-# Duitok First Generation Wizard PRD
+# Pokaya First Generation Wizard PRD
 
 最后更新：2026-05-29
 
 ## 1. 背景
 
-Duitok AI 当前已经有完整 Studio：Project、Image、UGC、Auto Content、Original Video、Clone Prompt、Storytelling、Agent、Billing、Library、Auto Post 和 credits。
+Pokaya AI 当前已经有完整 Studio：Project、Image、UGC、Auto Content、Original Video、Clone Prompt、Storytelling、Agent、Billing、Library、Auto Post 和 credits。
 
-Duitok 的主要用户不是成熟运营团队，而是大量想用 AI 赚钱的新手。他们可能刚开始做 TikTok Shop、affiliate、短视频带货、AI 内容变现，甚至还没有清楚的产品和内容策略。
+Pokaya 的主要用户不是成熟运营团队，而是大量想用 AI 赚钱的新手。他们可能刚开始做 TikTok Shop、affiliate、短视频带货、AI 内容变现，甚至还没有清楚的产品和内容策略。
 
 这类用户第一次进入 Studio 时，最容易卡在三个问题：
 
-- 不知道 Duitok 每个功能能帮他赚什么钱。
+- 不知道 Pokaya 每个功能能帮他赚什么钱。
 - 不知道自己应该先用哪个功能。
 - 不知道 prompt 怎么写，也不知道第一次应该生成什么。
 
-如果新用户一进来就看到完整 Studio，会感觉这是一个复杂工具；如果第一分钟没有理解 Duitok 能帮他做什么、或者没有完成一个简单结果，用户很容易流失。
+如果新用户一进来就看到完整 Studio，会感觉这是一个复杂工具；如果第一分钟没有理解 Pokaya 能帮他做什么、或者没有完成一个简单结果，用户很容易流失。
 
 First Generation Wizard 的目标是：
 
-> 不让新用户研究 Studio，而是先用最简单的话介绍 Duitok 的赚钱功能，并带他选择一个功能完成第一次使用。
+> 不让新用户研究 Studio，而是先用最简单的话介绍 Pokaya 的赚钱功能，并带他选择一个功能完成第一次使用。
 
-Wizard 是 Duitok 的首次成功路径。它不是复杂问卷，也不是运营教学课，而是一个功能介绍 + 轻量选择流程：告诉用户 Duitok 可以帮他做什么，然后让他选择一个最想先尝试的功能。
+Wizard 是 Pokaya 的首次成功路径。它不是复杂问卷，也不是运营教学课，而是一个功能介绍 + 轻量选择流程：告诉用户 Pokaya 可以帮他做什么，然后让他选择一个最想先尝试的功能。
 
 ## 2. 产品定位
 
 ### 2.1 Wizard 的角色
 
-Wizard 是新用户进入 Duitok 后的第一条高速路。
+Wizard 是新用户进入 Pokaya 后的第一条高速路。
 
 ```text
 Register / Login
@@ -40,11 +40,11 @@ Register / Login
 
 Wizard 负责：
 
-- 用新手听得懂的话介绍 Duitok 核心功能。
+- 用新手听得懂的话介绍 Pokaya 核心功能。
 - 降低选择成本。
 - 帮用户选择第一个想尝试的赚钱动作。
 - 必要时建立第一个 project。
-- 让用户看到 Duitok 能马上帮他产出内容。
+- 让用户看到 Pokaya 能马上帮他产出内容。
 
 Agent 负责：
 
@@ -60,7 +60,7 @@ Agent 负责：
 
 ### 3.1 用户目标
 
-- 第一次进 Studio 就知道 Duitok 能帮他做哪些赚钱动作。
+- 第一次进 Studio 就知道 Pokaya 能帮他做哪些赚钱动作。
 - 用户不需要理解 6 个 tab，也能选到适合自己的功能。
 - 用户只要回答几个简单问题，就能开始第一次使用。
 - 用户生成前清楚知道会扣多少 credits。
@@ -108,7 +108,7 @@ Agent 负责：
 
 用户可以在 Agent 或 Project 页面点击：
 
-- `Explore Duitok features`
+- `Explore Pokaya features`
 - `Start guided generation`
 - `Try another AI tool`
 
@@ -148,13 +148,13 @@ What do you want AI to help you make money with?
    - 说明：把别人的爆款结构变成你的产品版本。
    - 适合：看到别人爆了，但不会拆解的新手。
 
-6. `Ask Duitok Agent`
+6. `Ask Pokaya Agent`
    - 说明：不知道选哪个，就让 Agent 帮你判断。
    - 适合：完全新手、还没想清楚产品或方向的人。
 
 验收：
 
-- 用户第一屏能看懂 Duitok 可以做什么。
+- 用户第一屏能看懂 Pokaya 可以做什么。
 - 每张功能卡片都用“能帮你做什么”表达，不使用技术名堆叠。
 - 用户可以直接选择一个功能进入下一步。
 
@@ -188,7 +188,7 @@ What do you want to try first?
 - UGC script：`Know what to say in your video`
 - 7-day content plan：`Know what to post this week`
 - Clone viral style：`Turn a viral idea into your version`
-- Ask Agent：`Let Duitok choose for you`
+- Ask Agent：`Let Pokaya choose for you`
 
 验收：
 
@@ -201,7 +201,7 @@ What do you want to try first?
 标题：
 
 ```text
-Tell Duitok a little bit about what you sell
+Tell Pokaya a little bit about what you sell
 ```
 
 字段：
@@ -365,13 +365,13 @@ Keep the structure, but rewrite it safely and originally.
 Make the final output easy for a beginner to use.
 ```
 
-### 6.6 Ask Duitok Agent
+### 6.6 Ask Pokaya Agent
 
 映射：
 
 - Page：Agent Operating Desk。
 - Agent 根据用户是否有产品、是否有图片、是否知道平台，推荐一个功能。
-- 如果用户完全没有方向，Agent 先介绍 Duitok 的 3 个最简单起点：
+- 如果用户完全没有方向，Agent 先介绍 Pokaya 的 3 个最简单起点：
   - Product image
   - UGC script
   - 7-day content plan
@@ -390,7 +390,7 @@ Make the final output easy for a beginner to use.
 - 不显示过多说明文字。
 - 不使用巨大 hero 标题。
 - 不出现 6 个功能 tab。
-- 保留 Duitok 品牌色，但整体紧凑。
+- 保留 Pokaya 品牌色，但整体紧凑。
 
 ### 7.2 Desktop 布局
 
@@ -398,7 +398,7 @@ Make the final output easy for a beginner to use.
 
 ```text
 -----------------------------------------------------
-| Duitok logo                         Credits / Help |
+| Pokaya logo                         Credits / Help |
 -----------------------------------------------------
 | Step indicator: 1 Explore -> 2 Choose -> 3 Details -> 4 Start
 -----------------------------------------------------
@@ -443,7 +443,7 @@ Make the final output easy for a beginner to use.
 如果用户没有 project：
 
 ```text
-Let's see how Duitok can help you make money with AI.
+Let's see how Pokaya can help you make money with AI.
 ```
 
 ### 8.2 生成中
@@ -554,7 +554,7 @@ Agent 应该继续用新手语言介绍下一步，而不是突然进入专业�
 
 ```text
 Your first content is ready.
-Next, Duitok can help you:
+Next, Pokaya can help you:
 1. Make another version
 2. Turn this into a 7-day posting plan
 3. Create a product image or video for the same product
@@ -570,7 +570,7 @@ Action cards：
 验收：
 
 - Wizard 成功后用户自然进入 Agent。
-- Agent 继续承接，并继续介绍 Duitok 能帮他做什么。
+- Agent 继续承接，并继续介绍 Pokaya 能帮他做什么。
 
 ## 12. 开发阶段
 
@@ -701,4 +701,4 @@ Action cards：
 5. 自动创建 project 并保存 prompt。
 6. 成功后进入 Agent，并继续介绍下一步可用功能。
 
-这一版完成后，Duitok 的首次体验会从“自己研究复杂工具”变成“先看懂功能，再被带着完成第一次成功”。
+这一版完成后，Pokaya 的首次体验会从“自己研究复杂工具”变成“先看懂功能，再被带着完成第一次成功”。

@@ -1,10 +1,10 @@
-# Duitok Agent 下一阶段优化 PRD
+# Pokaya Agent 下一阶段优化 PRD
 
 最后更新：2026-05-28
 
 ## 1. 背景
 
-Duitok Agent 当前已经完成第一阶段可用闭环：
+Pokaya Agent 当前已经完成第一阶段可用闭环：
 
 - 能理解用户输入并调用后端工具。
 - 有结构化 `agentRun`、timeline、confidence、confirmation card。
@@ -16,7 +16,7 @@ Duitok Agent 当前已经完成第一阶段可用闭环：
 
 **Agent 做得准不准、用户是否信任、失败后是否能恢复、运营团队是否能看懂它每天做了什么。**
 
-本 PRD 目标是把 Duitok Agent 从“可用的 AI operator”升级成“稳定、可解释、可优化的 TikTok Shop 内容运营系统”。
+本 PRD 目标是把 Pokaya Agent 从“可用的 AI operator”升级成“稳定、可解释、可优化的 TikTok Shop 内容运营系统”。
 
 ## 2. 产品目标
 
@@ -704,7 +704,7 @@ Admin 触发安全/回归测试。生产环境可以限制为 admin only。
 
 ## 15. 最终目标
 
-Duitok Agent 下一阶段要解决的不是“多加几个工具”，而是让用户感觉：
+Pokaya Agent 下一阶段要解决的不是“多加几个工具”，而是让用户感觉：
 
 **它像一个靠谱的内容运营助理：知道上下文、做事前会解释、做错能恢复、敏感事情有边界、每天能帮我把 TikTok Shop 内容推进一步。**
 
