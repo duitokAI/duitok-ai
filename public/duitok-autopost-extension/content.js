@@ -48,9 +48,9 @@ async function applyJob(job) {
 function panelHtml() {
   return `
     <div class="duitok-card">
-      <strong>Duitok Auto Post</strong>
+      <strong>Pokaya Auto Post</strong>
       <p>Open the extension popup, choose a queue item, then come back here to fill caption.</p>
-      <small>Review before publishing. Duitok does not bypass TikTok login, captcha, or final confirmation.</small>
+      <small>Review before publishing. Pokaya does not bypass TikTok login, captcha, or final confirmation.</small>
     </div>`;
 }
 

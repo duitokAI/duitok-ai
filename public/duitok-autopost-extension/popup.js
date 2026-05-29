@@ -75,7 +75,7 @@ function renderJobs(jobs) {
         method: "PATCH",
         body: JSON.stringify({ status: "Posted" })
       });
-      setStatus("Marked as posted in Duitok.");
+      setStatus("Marked as posted in Pokaya.");
       await loadJobs();
     });
   });
@@ -93,7 +93,7 @@ async function fillActiveTab(job) {
 
 async function loadJobs() {
   try {
-    setStatus("Loading Duitok queue...");
+    setStatus("Loading Pokaya queue...");
     const { jobs } = await api("/api/autopost/jobs");
     renderJobs(jobs.filter((job) => job.platform === "TikTok" && job.status !== "Posted"));
     setStatus(`${jobs.length} jobs loaded.`);

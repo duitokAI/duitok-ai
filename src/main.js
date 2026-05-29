@@ -13,6 +13,7 @@ const agentHistoryStorageKey = "duitok-agent-history";
 const agentHistoryLimit = 12;
 let sidebarScrollTop = 0;
 let promoCountdownTimer = null;
+let assetSearchTimer = null;
 
 const steps = [
   ["image", "image", "stepImage", "01"],
@@ -31,6 +32,15 @@ const pages = [
   ["usage", "activity", "usage"],
   ["autopost", "send", "autopost"],
   ["whatsapp", "message-circle", "whatsapp"]
+];
+
+const wizardFeatures = [
+  ["product-image", "image", "AI Product Image"],
+  ["short-video", "video", "AI Short Video"],
+  ["ugc-script", "mic-2", "UGC Script"],
+  ["content-plan", "calendar-days", "7-Day Content Plan"],
+  ["clone-style", "copy-check", "Clone Viral Style"],
+  ["ask-agent", "bot", "Ask Pokaya Agent"]
 ];
 
 const state = {
@@ -75,7 +85,17 @@ const state = {
   editingProjectId: null,
   paymentReturn: null,
   topupAmount: 50,
-  usageFilter: "all"
+  usageFilter: "all",
+  assetSearch: "",
+  assetTypeFilter: "all",
+  assetProjectFilter: "all",
+  wizardStep: 1,
+  wizardFeature: "",
+  wizardProductName: "",
+  wizardProductLink: "",
+  wizardLanguage: localStorage.getItem("duitok-lang") === "zh" ? "中文" : localStorage.getItem("duitok-lang") === "en" ? "English" : "Bahasa Melayu",
+  wizardStyle: "Soft sell",
+  wizardBusy: false
 };
 
 let agentVisualTimer = null;
@@ -88,10 +108,12 @@ const languages = [
 ];
 
 const brandAssets = {
-  horizontal: "/duitok-logo-transparent.png",
-  mascot: "/duitok-mascot-transparent.png",
-  banner: "/duitok-brand-banner-transparent.png",
-  stacked: "/duitok-logo-stacked.png",
+  horizontal: "/brand/pokaya/final/pokaya-logo-horizontal-transparent.png",
+  mascot: "/brand/pokaya/final/pokaya-mascot-transparent.png",
+  appIcon: "/brand/pokaya/final/pokaya-app-icon-master.png",
+  banner: "/brand/pokaya/final/pokaya-logo-horizontal-light.png",
+  stacked: "/brand/pokaya/final/pokaya-logo-horizontal-transparent.png",
+  sidebar: "/brand/pokaya/final/pokaya-sidebar-logo-transparent.png",
   agentModel: "/models/agent/duitok-agent.glb"
 };
 
@@ -169,7 +191,7 @@ const copy = {
     heroTitleHot: "mula side income",
     heroTitleTail: "dengan video selling AI",
     demoCta: "Tengok 20 demo",
-    heroCopy: "Duitok AI beri template, tutorial SOP, product method dan pengalaman order sebenar. Ikut sistem, generate 100+ video sehari, post dan test produk dengan lebih laju.",
+    heroCopy: "Pokaya AI beri template, tutorial SOP, product method dan pengalaman order sebenar. Ikut sistem, generate 100+ video sehari, post dan test produk dengan lebih laju.",
     startCreating: "Mula Sekarang — 2 Video FREE →",
     heroTrust1: "AI short video selling",
     heroTrust2: "BM / 中文 / EN",
@@ -187,7 +209,7 @@ const copy = {
     catchUp: "Dari 2-3 video manual ke 100+ video AI",
     speed: "Volume",
     speedTitle: "Lebih banyak video, lebih banyak peluang view",
-    speedCopy: "Short video selling ialah game testing. Duitok bantu anda test lebih banyak produk, hook dan angle dengan cepat.",
+    speedCopy: "Short video selling ialah game testing. Pokaya bantu anda test lebih banyak produk, hook dan angle dengan cepat.",
     price: "RM69",
     priceTitle: "Kos kecil untuk mula mimpi side income",
     priceCopy: "Bukan beli software sahaja. Anda beli sistem template, tutorial dan AI platform untuk mula buat short video selling.",
@@ -196,7 +218,7 @@ const copy = {
     simpleCopy: "Kurangkan masa shoot, pegang stok dan ulang setup produk.",
     sellerReality: "Realiti short video selling",
     painTitle: "Bukan anda tidak rajin, short video selling perlukan testing volume",
-    painCopy: "Setiap hari hanya post 2-3 video memang susah nampak produk, hook dan angle mana yang jalan. Duitok fokus pada SOP dan execution volume, bukan sekadar AI chat biasa.",
+    painCopy: "Setiap hari hanya post 2-3 video memang susah nampak produk, hook dan angle mana yang jalan. Pokaya fokus pada SOP dan execution volume, bukan sekadar AI chat biasa.",
     notEnoughTime: "Tak tahu pilih produk",
     notEnoughTimeCopy: "Produk salah buat semua video susah jalan. Beginner perlukan SOP untuk pilih dan test produk, bukan sekadar idea rawak.",
     ideasDry: "Tak tahu struktur video",
@@ -206,10 +228,10 @@ const copy = {
     competitorsFaster: "Output terlalu kecil",
     competitorsFasterCopy: "2-3 video sehari terlalu perlahan untuk test produk, angle dan akaun. Kurang test bermaksud kurang data.",
     advantage: "AI selling weapons",
-    weaponsTitle: "5 senjata AI selling yang anda dapat dalam Duitok",
-    liveOutput: "Output Duitok AI",
+    weaponsTitle: "5 senjata AI selling yang anda dapat dalam Pokaya",
+    liveOutput: "Output Pokaya AI",
     outputTitle: "Dari product info ke 100+ video selling angle yang boleh diuji",
-    outputCopy: "Duitok AI bantu pecahkan produk kepada hook, skrip, caption, visual direction dan posting plan. Anda ikut template, generate batch, post, baca data dan ulang.",
+    outputCopy: "Pokaya AI bantu pecahkan produk kepada hook, skrip, caption, visual direction dan posting plan. Anda ikut template, generate batch, post, baca data dan ulang.",
     hookTitle: "100+ Hook",
     hookSample: "Satu produk boleh diuji dengan pain angle, proof angle, comparison angle dan offer angle.",
     scriptTitle: "UGC Script",
@@ -224,12 +246,12 @@ const copy = {
     demoTitle: "Contoh output yang boleh terus diuji",
     demoCopy: "Setiap contoh menunjukkan kategori, hook, jenis output dan anggaran credit supaya pricing terasa jelas sebelum anda subscribe.",
     oldWay: "Cara lama",
-    newWay: "Cara Duitok AI",
+    newWay: "Cara Pokaya AI",
     pricingTitle: "RM69/bulan ialah membership, generation guna credit",
     pricingCopy: "RM69 ialah yuran membership bulanan untuk akses platform, template, tutorial dan SOP. Promotion sekarang: subscribe terus dapat 10 credits. Selepas itu generation guna credit: image RM0.10, video RM0.40.",
     launchOffer: "Subscribe dapat 10 credits",
     claimPlan: "Subscribe RM69 + 10 credits",
-    riskReversal: "Duitok AI tidak menjamin income. Result bergantung pada product, akaun, posting consistency dan execution anda.",
+    riskReversal: "Pokaya AI tidak menjamin income. Result bergantung pada product, akaun, posting consistency dan execution anda.",
     controlKicker: "Trust & compliance",
     controlTitle: "Kami jual peluang dan sistem, bukan janji kaya cepat",
     controlCopy: "Ada pelajar ikut tutorial dan guna platform kami lalu capai RM1000+ pada minggu pertama. Ini case sebenar, bukan jaminan untuk semua orang. Result bergantung pada produk, akaun, content, data dan execution.",
@@ -273,7 +295,7 @@ const copy = {
     dropProduct: "Click atau drop gambar produk",
     prompt: "Prompt",
     generateImage: "Generate Media",
-    generating: "Duitok AI is generating...",
+    generating: "Pokaya AI is generating...",
     noResults: "Belum ada result",
     export: "Export",
     saveDone: "Saved.",
@@ -288,7 +310,7 @@ const copy = {
     createProject: "Create New Project",
     choosePlan: "Choose Plan & Register",
     exportReady: "Export Ready",
-    supportTitle: "Duitok AI Support",
+    supportTitle: "Pokaya AI Support",
     supportTicket: "Create Support Ticket",
     liveActivity: "Live Activity",
     support: "Support",
@@ -307,7 +329,7 @@ const copy = {
     accountAffiliateSubtitle: "Urus referral earnings dan cashout.",
     accountUsageSubtitle: "Penggunaan credit daripada backend ledger.",
     accountAutopostSubtitle: "Queue TikTok publishing dibantu Chrome extension.",
-    accountWhatsappSubtitle: "Masuk ke komuniti WhatsApp Duitok.",
+    accountWhatsappSubtitle: "Masuk ke komuniti WhatsApp Pokaya.",
     accountSettingsSubtitle: "Info akaun, WhatsApp support contact dan password.",
     openWhatsappGroup: "Buka WhatsApp Group",
     currentPlan: "Plan Semasa",
@@ -335,7 +357,7 @@ const copy = {
     affiliateReferrals: "Referrals",
     affiliateCashOut: "Cash Out",
     affiliateHowTitle: "How affiliate works",
-    affiliateHow1: "Share your Duitok link or referral code with sellers.",
+    affiliateHow1: "Share your Pokaya link or referral code with sellers.",
     affiliateHow2: "When they subscribe through your link, your commission is tracked.",
     affiliateHow3: "Wallet balance updates after payment is confirmed.",
     affiliateHow4: "Cash out after the minimum RM50 threshold to a Malaysian bank account.",
@@ -410,7 +432,7 @@ const copy = {
     heroTitleHot: "AI 短视频营销平台",
     heroTitleTail: "",
     demoCta: "看看如何运作",
-    heroCopy: "Duitok AI 把已经跑通的短视频带货打法做成系统：不用囤货、不用发货、不用做客服、不用露脸，也能开始 AI 短视频带货副业，给自己多一个每月收入来源。",
+    heroCopy: "Pokaya AI 把已经跑通的短视频带货打法做成系统：不用囤货、不用发货、不用做客服、不用露脸，也能开始 AI 短视频带货副业，给自己多一个每月收入来源。",
     startCreating: "立即加入 RM69 计划",
     heroTrust1: "AI 短视频营销平台",
     heroTrust2: "BM / 中文 / EN",
@@ -447,10 +469,10 @@ const copy = {
     competitorsFaster: "AI 卖家已经提速",
     competitorsFasterCopy: "同一个产品，可以同时测痛点、人群、hook、CTA 和视频角度。",
     advantage: "AI 带货武器",
-    weaponsTitle: "Duitok AI 放大的<br>不是灵感，是执行量",
-    liveOutput: "Duitok AI 输出",
+    weaponsTitle: "Pokaya AI 放大的<br>不是灵感，是执行量",
+    liveOutput: "Pokaya AI 输出",
     outputTitle: "一个产品<br>批量拆出可测试内容角度",
-    outputCopy: "一个产品至少要测几十个内容角度。Duitok AI 把产品拆成 hook、脚本、caption、视觉方向和发布计划，让您更快跑内容、拿数据、复盘，再继续放大。",
+    outputCopy: "一个产品至少要测几十个内容角度。Pokaya AI 把产品拆成 hook、脚本、caption、视觉方向和发布计划，让您更快跑内容、拿数据、复盘，再继续放大。",
     hookTitle: "100+ Hook",
     hookSample: "同一个产品，可以测试痛点角度、证明角度、对比角度、优惠角度。",
     scriptTitle: "UGC 脚本",
@@ -463,14 +485,14 @@ const copy = {
     howTitle: "跟着已跑通流程<br>从选品做到复盘放大",
     howCopy: "流程给新手设计：选产品、拆卖点、套模板、生成内容、发布测试、看数据后复制有效角度。您不是随机使用 AI，而是按短视频带货系统执行。",
     demoTitle: "看清楚 AI 带货内容<br>是怎么批量跑出来的",
-    demoCopy: "每个样例都写清楚类目、hook、生成类型和预计成本，让您订阅前就理解 Duitok 如何帮您提高内容产能。",
+    demoCopy: "每个样例都写清楚类目、hook、生成类型和预计成本，让您订阅前就理解 Pokaya 如何帮您提高内容产能。",
     oldWay: "旧方法",
-    newWay: "Duitok AI 方法",
+    newWay: "Pokaya AI 方法",
     pricingTitle: "RM69 买的不是工具<br>是一套已经跑通的 AI 带货打法",
     pricingCopy: "RM69 不是买一个生成按钮，而是进入一套 AI 短视频带货执行系统：选品 SOP、带货模板、教程、生成平台和第一批 10 credits。之后生成按 credit 扣费：图片 RM0.10，视频 RM0.40。",
     launchOffer: "订阅送 10 credits",
     claimPlan: "订阅 RM69 + 拿 10 credits",
-    riskReversal: "Duitok AI 不承诺收入。我们提供的是已经跑通的 AI 短视频营销平台，结果取决于选品、账号、发布量、复盘和执行。",
+    riskReversal: "Pokaya AI 不承诺收入。我们提供的是已经跑通的 AI 短视频营销平台，结果取决于选品、账号、发布量、复盘和执行。",
     controlKicker: "信任与合规",
     controlTitle: "我们卖的是系统和打法<br>不是暴富承诺",
     controlCopy: "已有学员根据我们的教程和平台执行，第一个星期赚到 RM1000+。这不是保证每个人都有同样结果，但证明模板、方法、平台和执行量结合起来，可以跑出结果。",
@@ -514,7 +536,7 @@ const copy = {
     dropProduct: "点击或拖入产品图片",
     prompt: "提示词",
     generateImage: "生成作品",
-    generating: "Duitok AI 正在生成...",
+    generating: "Pokaya AI 正在生成...",
     noResults: "还没有结果",
     export: "导出",
     saveDone: "已保存。",
@@ -529,7 +551,7 @@ const copy = {
     createProject: "创建新项目",
     choosePlan: "选择计划并注册",
     exportReady: "导出已开始",
-    supportTitle: "Duitok AI 客服",
+    supportTitle: "Pokaya AI 客服",
     supportTicket: "创建客服工单",
     liveActivity: "实时动态",
     support: "客服",
@@ -548,7 +570,7 @@ const copy = {
     accountAffiliateSubtitle: "管理您的推荐链接、收益和提现。",
     accountUsageSubtitle: "后台账本里的 Credit 使用记录。",
     accountAutopostSubtitle: "Chrome extension 辅助的 TikTok 发布队列。",
-    accountWhatsappSubtitle: "进入 Duitok WhatsApp 社群。",
+    accountWhatsappSubtitle: "进入 Pokaya WhatsApp 社群。",
     accountSettingsSubtitle: "账号资料、WhatsApp 客服联系方式和密码。",
     openWhatsappGroup: "打开 WhatsApp 群",
     currentPlan: "当前计划",
@@ -576,7 +598,7 @@ const copy = {
     affiliateReferrals: "推荐用户",
     affiliateCashOut: "提现",
     affiliateHowTitle: "Affiliate 如何运作",
-    affiliateHow1: "把您的 Duitok 链接或推荐码分享给卖家。",
+    affiliateHow1: "把您的 Pokaya 链接或推荐码分享给卖家。",
     affiliateHow2: "对方通过您的链接订阅后，系统会追踪您的佣金。",
     affiliateHow3: "付款确认后，钱包余额会更新。",
     affiliateHow4: "达到最低 RM50 后，可以提现到马来西亚银行账户。",
@@ -651,7 +673,7 @@ const copy = {
     heroTitleHot: "short-video selling",
     heroTitleTail: "with AI",
     demoCta: "See how it works",
-    heroCopy: "Duitok AI gives you templates, SOP tutorials, product methods, and real order experience. Follow the system, generate 100+ videos a day, publish, and test faster.",
+    heroCopy: "Pokaya AI gives you templates, SOP tutorials, product methods, and real order experience. Follow the system, generate 100+ videos a day, publish, and test faster.",
     startCreating: "Subscribe RM69, get 10 credits",
     heroTrust1: "AI short-video selling",
     heroTrust2: "BM / 中文 / EN",
@@ -669,7 +691,7 @@ const copy = {
     catchUp: "From 2-3 manual videos to 100+ AI videos",
     speed: "Volume",
     speedTitle: "More videos means more chances to earn views",
-    speedCopy: "Short-video selling is a testing game. Duitok helps you test more products, hooks, and angles faster.",
+    speedCopy: "Short-video selling is a testing game. Pokaya helps you test more products, hooks, and angles faster.",
     price: "RM69",
     priceTitle: "A small cost to start a side-income dream",
     priceCopy: "You are not buying just a software button. You are buying templates, tutorials, and an AI platform for short-video selling.",
@@ -678,7 +700,7 @@ const copy = {
     simpleCopy: "Reduce the time lost to stock handling, setup, filming, and editing.",
     sellerReality: "The real short-video selling bottleneck",
     painTitle: "It is not lack of effort, short-video selling needs testing volume",
-    painCopy: "Posting only 2-3 videos a day makes it hard to find the product, hook, or angle that works. Duitok solves SOP and execution volume, not just generic AI chat.",
+    painCopy: "Posting only 2-3 videos a day makes it hard to find the product, hook, or angle that works. Pokaya solves SOP and execution volume, not just generic AI chat.",
     notEnoughTime: "No product-selection method",
     notEnoughTimeCopy: "The wrong product makes every video harder to sell. Beginners need a product SOP, not random guessing.",
     ideasDry: "No video structure",
@@ -688,10 +710,10 @@ const copy = {
     competitorsFaster: "Only 2-3 videos/day",
     competitorsFasterCopy: "Too little output means too little testing data to find winning products and videos.",
     advantage: "AI selling weapons",
-    weaponsTitle: "The 5 AI selling weapons inside Duitok",
-    liveOutput: "Duitok AI output",
+    weaponsTitle: "The 5 AI selling weapons inside Pokaya",
+    liveOutput: "Pokaya AI output",
     outputTitle: "Turn one product into 100+ testable selling angles",
-    outputCopy: "Duitok AI breaks products into hooks, scripts, captions, visual directions, and posting plans so you can follow templates, publish, read data, and repeat what works.",
+    outputCopy: "Pokaya AI breaks products into hooks, scripts, captions, visual directions, and posting plans so you can follow templates, publish, read data, and repeat what works.",
     hookTitle: "100+ Hooks",
     hookSample: "Test pain angles, proof angles, comparison angles, and offer angles from the same product.",
     scriptTitle: "UGC Script",
@@ -706,12 +728,12 @@ const copy = {
     demoTitle: "Output examples you can test directly",
     demoCopy: "Each sample shows the category, hook, output type, and estimated cost so the credit model is clear before you subscribe.",
     oldWay: "Old way",
-    newWay: "Duitok AI way",
+    newWay: "Pokaya AI way",
     pricingTitle: "RM69/month is membership, generation uses credits",
     pricingCopy: "RM69 is the monthly membership fee for platform access, templates, tutorials, and SOP. Current promotion: subscribe and get 10 credits. After that, generation uses credits: RM0.10 per image and RM0.40 per video.",
     launchOffer: "Subscribe and get 10 credits",
     claimPlan: "Subscribe RM69 + get 10 credits",
-    riskReversal: "Duitok AI does not guarantee income. Results depend on product choice, account quality, posting frequency, content quality, and execution.",
+    riskReversal: "Pokaya AI does not guarantee income. Results depend on product choice, account quality, posting frequency, content quality, and execution.",
     controlKicker: "Trust & compliance",
     controlTitle: "We sell the opportunity and system, not a get-rich promise",
     controlCopy: "Some students followed our tutorials and used our platform to earn RM1000+ in their first week. This is not a guarantee for everyone, but it proves that templates, methods, platform, and execution volume matter.",
@@ -755,7 +777,7 @@ const copy = {
     dropProduct: "Click or drop product image",
     prompt: "Prompt",
     generateImage: "Generate Media",
-    generating: "Duitok AI is generating...",
+    generating: "Pokaya AI is generating...",
     noResults: "No results yet",
     export: "Export",
     saveDone: "Saved.",
@@ -770,7 +792,7 @@ const copy = {
     createProject: "Create New Project",
     choosePlan: "Choose Plan & Register",
     exportReady: "Export Ready",
-    supportTitle: "Duitok AI Support",
+    supportTitle: "Pokaya AI Support",
     supportTicket: "Create Support Ticket",
     liveActivity: "Live Activity",
     support: "Support",
@@ -789,7 +811,7 @@ const copy = {
     accountAffiliateSubtitle: "Manage your referral earnings and cashout.",
     accountUsageSubtitle: "Credit usage from the backend ledger.",
     accountAutopostSubtitle: "Chrome extension assisted TikTok publishing queue.",
-    accountWhatsappSubtitle: "Enter the Duitok WhatsApp community.",
+    accountWhatsappSubtitle: "Enter the Pokaya WhatsApp community.",
     accountSettingsSubtitle: "Account info, WhatsApp support contact, and password.",
     openWhatsappGroup: "Open WhatsApp Group",
     currentPlan: "Current Plan",
@@ -817,7 +839,7 @@ const copy = {
     affiliateReferrals: "Referrals",
     affiliateCashOut: "Cash Out",
     affiliateHowTitle: "How affiliate works",
-    affiliateHow1: "Share your Duitok link or referral code with sellers.",
+    affiliateHow1: "Share your Pokaya link or referral code with sellers.",
     affiliateHow2: "When they subscribe through your link, your commission is tracked.",
     affiliateHow3: "Wallet balance updates after payment is confirmed.",
     affiliateHow4: "Cash out after the minimum RM50 threshold to a Malaysian bank account.",
@@ -1005,6 +1027,7 @@ async function ensureStudioData() {
   }
   state.db = await api("/state");
   state.projectId = state.db.projects[0]?.id;
+  if (state.page === "dashboard" && shouldShowFirstGenerationWizard()) state.page = "wizard";
 }
 
 async function refreshState() {
@@ -1085,6 +1108,22 @@ function project() {
   return state.db.projects.find((item) => item.id === state.projectId) || state.db.projects[0];
 }
 
+function wizardStorageKey(user = state.user) {
+  return `pokaya-first-wizard:${String(user?.email || user?.id || "guest").toLowerCase()}`;
+}
+
+function shouldShowFirstGenerationWizard(db = state.db, user = state.user) {
+  if (!db || !user || user.role === "admin") return false;
+  if (localStorage.getItem(wizardStorageKey(user)) === "done") return false;
+  const ownedProjects = db.projects || [];
+  const hasResults = ownedProjects.some((item) => (item.results || []).length > 0);
+  return !ownedProjects.length || !hasResults;
+}
+
+function markFirstGenerationWizardDone() {
+  if (state.user) localStorage.setItem(wizardStorageKey(state.user), "done");
+}
+
 function dbWithProjectField(db, projectId, field, value) {
   const path = field.split(".");
   return {
@@ -1144,7 +1183,7 @@ function publicSite() {
         </div>
       </nav>
       <section class="public-hero video-scene-hero">
-        <img class="video-scene-bg" src="/duitok-hero-seller-v2.jpg" alt="Duitok AI seller surrounded by TikTok Shop content previews">
+        <img class="video-scene-bg" src="/duitok-hero-seller-v2.jpg" alt="Pokaya AI seller surrounded by TikTok Shop content previews">
         <div class="video-scene-vignette" aria-hidden="true"></div>
         <div class="video-scene-grid" aria-hidden="true"></div>
         <div class="video-scene-beam beam-one" aria-hidden="true"></div>
@@ -1181,11 +1220,11 @@ function publicSite() {
       </section>
       <section class="system-section">
         <div>
-          <p class="eyebrow">${whyDuitokContent().kicker}</p>
-          <h2>${whyDuitokContent().title}</h2>
-          <p>${whyDuitokContent().copy}</p>
+          <p class="eyebrow">${whyPokayaContent().kicker}</p>
+          <h2>${whyPokayaContent().title}</h2>
+          <p>${whyPokayaContent().copy}</p>
         </div>
-        <div class="system-grid">${whyDuitokCards()}</div>
+        <div class="system-grid">${whyPokayaCards()}</div>
       </section>
       <section class="output-preview-section">
         <div>
@@ -1223,7 +1262,7 @@ function publicSite() {
         </div>
       </section>
       <section class="comparison-section">
-        <p class="eyebrow">Manual vs Duitok AI</p>
+        <p class="eyebrow">Manual vs Pokaya AI</p>
         <h2>${comparisonContent().title}</h2>
         <div class="compare-grid">
           <article><span>${t("oldWay")}</span><h3>${comparisonContent().oldTitle}</h3><ul>${comparisonContent().oldBullets.map((item) => `<li>${item}</li>`).join("")}</ul></article>
@@ -1280,7 +1319,7 @@ function publicSite() {
         <article class="price-card">
           <span>${t("launchOffer")}</span>
           <img class="price-brand-mark" src="${brandAssets.mascot}" alt="" aria-hidden="true">
-          <h3>Duitok AI Pro</h3>
+          <h3>Pokaya AI Pro</h3>
           <div class="price"><s>RM300</s><b>RM69</b><small>${pricePeriodContent().period}</small></div>
           <div class="included-credit-banner">${includedCreditBanner()}</div>
           <div class="usage-price-grid">${usagePriceCards()}</div>
@@ -1298,11 +1337,11 @@ function publicSite() {
         <div class="control-grid">${controlCards()}</div>
       </section>
       <section class="signup-section">
-        <div><p class="eyebrow">${t("startNow")}</p><h2>${t("registerTitle")}</h2><p>${t("registerCopy")}</p><img class="signup-brand-banner" src="${brandAssets.banner}" alt="Duitok AI"></div>
+        <div><p class="eyebrow">${t("startNow")}</p><h2>${t("registerTitle")}</h2><p>${t("registerCopy")}</p><img class="signup-brand-banner" src="${brandAssets.banner}" alt="Pokaya AI"></div>
         <form class="lead-form" data-form="lead">
           <label>${t("fullName")}<input name="name" placeholder="Your name"></label>
           <label>WhatsApp<input name="phone" placeholder="+60"></label>
-          <label>${t("email")}<input name="email" placeholder="you@duitok.com"></label>
+          <label>${t("email")}<input name="email" placeholder="you@pokaya.ai"></label>
           <button class="gold-button" type="submit">${icon("lock")} ${t("continueRegistration")}</button>
         </form>
       </section>
@@ -1311,7 +1350,7 @@ function publicSite() {
         <h2>${t("faqTitle")}</h2>
         ${faqItems().map((item, index) => `<details ${index === 0 ? "open" : ""}><summary>${item.q}</summary><p>${item.a}</p></details>`).join("")}
       </section>
-      ${footerBrand("Duitok AI")}
+      ${footerBrand("Pokaya AI")}
     </main>`;
 }
 
@@ -1329,7 +1368,7 @@ function registerPage() {
         <div>
           <p class="eyebrow">Start now</p>
           <h1>Register, pay, and activate your Studio.</h1>
-          <p class="public-copy">Create your account, pay securely through CHIP, and activate Duitok AI Pro after the payment callback confirms.</p>
+          <p class="public-copy">Create your account, pay securely through CHIP, and activate Pokaya AI Pro after the payment callback confirms.</p>
           <div class="checkout-steps">
             <article><b>1</b><span>Subscribe plan</span><p>RM69/month unlocks the membership and gives 10 promo credits.</p></article>
             <article><b>2</b><span>Use credits</span><p>Images use RM0.10 each. Videos use RM0.40 each.</p></article>
@@ -1339,7 +1378,7 @@ function registerPage() {
         <article class="price-card checkout-card">
           <span>Launch offer</span>
           <img class="price-brand-mark" src="${brandAssets.mascot}" alt="" aria-hidden="true">
-          <h3>Duitok AI Pro</h3>
+          <h3>Pokaya AI Pro</h3>
           <div class="price"><s>RM300</s><b>RM69</b><small>${pricePeriodContent().period}</small></div>
           <div class="included-credit-banner">${includedCreditBanner()}</div>
           <div class="usage-price-grid">${usagePriceCards()}</div>
@@ -1350,12 +1389,12 @@ function registerPage() {
         <div>
           <p class="eyebrow">Buyer details</p>
           <h2>Account info for login and support.</h2>
-          <p>This creates a pending Duitok AI Pro order and redirects you to the secure CHIP payment page.</p>
+          <p>This creates a pending Pokaya AI Pro order and redirects you to the secure CHIP payment page.</p>
         </div>
         <form class="lead-form" data-form="register">
           <label>Full name<input name="name" placeholder="Your full name" required></label>
           <label>WhatsApp<input name="phone" placeholder="+60" required></label>
-          <label>Email<input name="email" type="email" placeholder="you@duitok.com" required></label>
+          <label>Email<input name="email" type="email" placeholder="you@pokaya.ai" required></label>
           <label>Password<input name="password" type="password" placeholder="Create password" minlength="6" required></label>
           <label class="check-label"><input type="checkbox" required> <span>I agree to <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</span></label>
           <button class="gold-button" type="submit">${icon("credit-card")} Pay RM69 - FPX / DuitNow QR</button>
@@ -1378,7 +1417,7 @@ function affiliatePage() {
       <section class="affiliate-hero">
         <div>
           <p class="eyebrow">Affiliate program</p>
-          <h1>Earn monthly commission by sharing Duitok AI.</h1>
+          <h1>Earn monthly commission by sharing Pokaya AI.</h1>
           <p class="public-copy">For creators, agencies, coaches, and seller communities. Share one link, help sellers create faster, and earn on active subscriptions.</p>
           <div class="public-actions">
             <a class="gold-button" href="#affiliate-form">${icon("users")} Apply now</a>
@@ -1415,7 +1454,7 @@ function affiliatePage() {
           <button class="gold-button" type="submit">${icon("send")} Submit application</button>
         </form>
       </section>
-      ${footerBrand("Duitok AI Affiliate")}
+      ${footerBrand("Pokaya AI Affiliate")}
     </main>`;
 }
 
@@ -1425,27 +1464,27 @@ function legalPage(type) {
   const updated = "Last updated: May 26, 2026";
   const sections = isPrivacy
     ? [
-        ["Information we collect", "Duitok AI collects account details, project content, uploaded product or creator references, generation prompts, billing records, usage logs, and TikTok connection data when you choose to connect a TikTok account."],
+        ["Information we collect", "Pokaya AI collects account details, project content, uploaded product or creator references, generation prompts, billing records, usage logs, and TikTok connection data when you choose to connect a TikTok account."],
         ["How we use information", "We use this information to provide the Studio, generate content, manage subscriptions and credits, support your account, improve reliability, and publish or prepare posts only when you request it."],
         ["TikTok data", "If you connect TikTok, we use TikTok OAuth data only to identify the connected account, check creator or posting eligibility, and submit content through approved TikTok APIs. We do not sell TikTok account data."],
         ["Sharing", "We share information with service providers that operate hosting, payments, AI generation, analytics, support, and official publishing integrations. We disclose information if required by law or to protect users and the service."],
-        ["Retention and deletion", "We keep account and project data while your account is active or as needed for legal, tax, security, and operational reasons. You may request deletion by contacting hello@duitok.com."],
-        ["Contact", "For privacy questions, account deletion, or data access requests, contact hello@duitok.com."]
+        ["Retention and deletion", "We keep account and project data while your account is active or as needed for legal, tax, security, and operational reasons. You may request deletion by contacting hello@pokaya.ai."],
+        ["Contact", "For privacy questions, account deletion, or data access requests, contact hello@pokaya.ai."]
       ]
     : [
-        ["Service", "Duitok AI is a web application for TikTok Shop sellers and content teams to create, organize, schedule, and publish or prepare product content."],
+        ["Service", "Pokaya AI is a web application for TikTok Shop sellers and content teams to create, organize, schedule, and publish or prepare product content."],
         ["Accounts", "You are responsible for keeping your login secure, providing accurate information, and using the service only for content and products you are allowed to promote."],
         ["Generated content", "AI output can contain mistakes. You are responsible for reviewing claims, captions, assets, disclosures, music, product details, and compliance before publishing."],
         ["TikTok publishing", "When TikTok integrations are enabled, posts are created only from user-approved queue items. TikTok may review, limit, reject, or remove content according to its own rules and API policies."],
         ["Payments and credits", "Subscription and generation credits unlock product features. Usage-based credits may be deducted when generation or publishing workflows are requested, subject to the plan terms shown at checkout."],
-        ["Acceptable use", "Do not use Duitok AI to infringe intellectual property, impersonate others, bypass platform rules, make unsafe product claims, spam, or publish illegal or harmful content."],
-        ["Contact", "For support or legal questions, contact hello@duitok.com."]
+        ["Acceptable use", "Do not use Pokaya AI to infringe intellectual property, impersonate others, bypass platform rules, make unsafe product claims, spam, or publish illegal or harmful content."],
+        ["Contact", "For support or legal questions, contact hello@pokaya.ai."]
       ];
 
   return `
     <main class="public-shell legal-shell">
       <nav class="public-nav">
-        ${brand("Duitok AI")}
+        ${brand("Pokaya AI")}
         <div class="public-links">
           <a href="/">Home</a>
           <a href="/terms">Terms</a>
@@ -1464,7 +1503,7 @@ function legalPage(type) {
       <section class="legal-content">
         ${sections.map(([heading, body]) => `<article><h2>${heading}</h2><p>${body}</p></article>`).join("")}
       </section>
-      ${footerBrand("Duitok AI")}
+      ${footerBrand("Pokaya AI")}
     </main>`;
 }
 
@@ -1495,7 +1534,7 @@ function featureMosaicCards() {
     ms: [
       ["01", "Product SOP", "Cari produk yang sesuai diuji dengan short video, bukan sekadar pilih ikut rasa.", "search-check"],
       ["02", "Selling template", "Pain, proof, review, comparison, offer dan before-after template untuk mula cepat.", "layout-template"],
-      ["03", "Hook / Script / Caption", "Tidak mula dari blank page. Duitok pecahkan idea kepada struktur content selling.", "message-square-text"],
+      ["03", "Hook / Script / Caption", "Tidak mula dari blank page. Pokaya pecahkan idea kepada struktur content selling.", "message-square-text"],
       ["04", "100+ video angle", "Satu produk boleh jadi banyak angle supaya anda ada volume untuk test data.", "sparkles"],
       ["05", "Review method", "Ikut data, ulang angle yang jalan dan berhenti buang masa pada content yang tidak convert.", "chart-no-axes-combined"]
     ],
@@ -1509,7 +1548,7 @@ function featureMosaicCards() {
     en: [
       ["01", "Product SOP", "Judge whether a product is suitable for short-video testing instead of guessing.", "search-check"],
       ["02", "Selling templates", "Pain, proof, review, comparison, offer, and before-after templates to start fast.", "layout-template"],
-      ["03", "Hook / Script / Caption", "Do not start from a blank page. Duitok turns ideas into selling structures.", "message-square-text"],
+      ["03", "Hook / Script / Caption", "Do not start from a blank page. Pokaya turns ideas into selling structures.", "message-square-text"],
       ["04", "100+ video angles", "Turn one product into many testable angles so you have enough data.", "sparkles"],
       ["05", "Review method", "Read data, repeat what works, and stop wasting time on weak content.", "chart-no-axes-combined"]
     ]
@@ -1549,45 +1588,45 @@ function painCards() {
     .join("");
 }
 
-function whyDuitokContent() {
+function whyPokayaContent() {
   const data = {
     ms: {
       kicker: "Kenapa bukan AI biasa",
-      title: "Guna AI sendiri mudah jadi random, Duitok beri sistem yang boleh diikuti",
-      copy: "AI umum hanya beri output. Duitok gabungkan template short video selling, tutorial SOP, product method dan platform supaya beginner tahu apa perlu dibuat selepas tekan generate."
+      title: "Guna AI sendiri mudah jadi random, Pokaya beri sistem yang boleh diikuti",
+      copy: "AI umum hanya beri output. Pokaya gabungkan template short video selling, tutorial SOP, product method dan platform supaya beginner tahu apa perlu dibuat selepas tekan generate."
     },
     zh: {
       kicker: "为什么不是自己用普通 AI",
-      title: "Duitok AI 不是帮您写文案<br>是帮您放大带货执行量",
-      copy: "普通 AI 只给您生成能力，但不告诉您怎么做短视频带货。Duitok 把已跑通打法、模板、教程、SOP、选品方法和 AI 平台放在一起，让您按系统批量执行。"
+      title: "Pokaya AI 不是帮您写文案<br>是帮您放大带货执行量",
+      copy: "普通 AI 只给您生成能力，但不告诉您怎么做短视频带货。Pokaya 把已跑通打法、模板、教程、SOP、选品方法和 AI 平台放在一起，让您按系统批量执行。"
     },
     en: {
       kicker: "Why not generic AI",
-      title: "Generic AI makes random output, Duitok gives you a system to follow",
-      copy: "Generic AI gives generation ability, but not a selling method. Duitok combines short-video templates, SOP tutorials, product methods, and platform execution so beginners know what to do next."
+      title: "Generic AI makes random output, Pokaya gives you a system to follow",
+      copy: "Generic AI gives generation ability, but not a selling method. Pokaya combines short-video templates, SOP tutorials, product methods, and platform execution so beginners know what to do next."
     }
   };
   return data[state.lang] || data.ms;
 }
 
-function whyDuitokCards() {
+function whyPokayaCards() {
   const data = {
     ms: [
       ["layout-template", "Ada template", "Pain, comparison, proof, review, offer dan before-after template supaya tidak mula dari kosong."],
       ["graduation-cap", "Ada tutorial", "Ikut SOP untuk pilih produk, generate video, post, baca data dan scale angle yang jalan."],
-      ["wand-sparkles", "Ada platform", "Duitok AI bantu gandakan execution dari 2-3 video manual ke 100+ video angle sehari."],
+      ["wand-sparkles", "Ada platform", "Pokaya AI bantu gandakan execution dari 2-3 video manual ke 100+ video angle sehari."],
       ["badge-dollar-sign", "Ada pengalaman", "Student ikut tutorial dan platform kami, ada yang capai RM1000+ pada minggu pertama."]
     ],
     zh: [
       ["layout-template", "有打法", "我们把已经跑通的 AI 短视频带货方法做成新手能跟的流程。"],
       ["graduation-cap", "有 SOP", "跟着步骤做选品、生成视频、发布、看数据、复制有效内容。"],
-      ["wand-sparkles", "有产能", "Duitok AI 帮您把执行速度从每天 2-3 条手工视频，放大到更多视频角度。"],
+      ["wand-sparkles", "有产能", "Pokaya AI 帮您把执行速度从每天 2-3 条手工视频，放大到更多视频角度。"],
       ["badge-dollar-sign", "有案例", "已有学员根据我们的教程和平台执行，第一个星期赚到 RM1000+。"]
     ],
     en: [
       ["layout-template", "Templates", "Pain, comparison, proof, review, offer, and before-after templates so you do not start from zero."],
       ["graduation-cap", "Tutorials", "Follow SOPs for product selection, video generation, posting, data review, and scaling what works."],
-      ["wand-sparkles", "Platform", "Duitok AI expands execution from 2-3 manual videos to 100+ video angles a day."],
+      ["wand-sparkles", "Platform", "Pokaya AI expands execution from 2-3 manual videos to 100+ video angles a day."],
       ["badge-dollar-sign", "Experience", "Some students followed our tutorials and platform to earn RM1000+ in their first week."]
     ]
   };
@@ -1708,10 +1747,10 @@ function demoKickerContent() {
 function comparisonContent() {
   const data = {
     ms: {
-      title: "Cara manual lambat, Duitok bantu anda test lebih banyak angle",
+      title: "Cara manual lambat, Pokaya bantu anda test lebih banyak angle",
       oldTitle: "Cara manual",
       oldBullets: ["Minta barang dari merchant", "Shoot produk dan ulang take", "Fikir hook sendiri", "Edit video dan tulis caption", "Sehari hanya 2-3 video", "Testing volume kecil, data lambat nampak"],
-      newTitle: "Cara Duitok AI",
+      newTitle: "Cara Pokaya AI",
       newBullets: ["Masukkan product info", "Pilih template selling", "Generate hook, script dan caption", "Pecahkan 100+ video angle", "Image RM0.10, video RM0.40", "Post, review data dan ulang angle yang jalan"]
     },
     zh: {
@@ -1722,10 +1761,10 @@ function comparisonContent() {
       newBullets: ["输入产品信息", "套用带货模板", "批量生成 hook、脚本、caption", "同时测试多个内容角度", "图片 RM0.10，视频 RM0.40", "发布测试，复盘后复制有效角度"]
     },
     en: {
-      title: "Manual production is slow, Duitok helps you test more angles",
+      title: "Manual production is slow, Pokaya helps you test more angles",
       oldTitle: "Manual way",
       oldBullets: ["Request products from merchants", "Film products and repeat takes", "Think of hooks alone", "Edit videos and write captions", "Only 2-3 videos a day", "Too little testing volume to see data"],
-      newTitle: "Duitok AI way",
+      newTitle: "Pokaya AI way",
       newBullets: ["Add product info", "Choose selling templates", "Generate hooks, scripts, and captions", "Break into 100+ video angles", "Images RM0.10, videos RM0.40", "Publish, review data, and repeat winning angles"]
     }
   };
@@ -1737,7 +1776,7 @@ function testVolumeContent() {
     ms: {
       kicker: "Kenapa perlu AI",
       title: "Short video selling menang dengan testing volume",
-      copy: "Anda tidak tahu produk, hook atau angle mana yang akan convert sebelum ia dipost dan diuji. Duitok gunakan AI untuk bantu anda test lebih banyak angle dengan kos yang jelas."
+      copy: "Anda tidak tahu produk, hook atau angle mana yang akan convert sebelum ia dipost dan diuji. Pokaya gunakan AI untuk bantu anda test lebih banyak angle dengan kos yang jelas."
     },
     zh: {
       kicker: "为什么一定要用 AI",
@@ -1747,7 +1786,7 @@ function testVolumeContent() {
     en: {
       kicker: "Why AI matters",
       title: "Short-video selling is not inspiration, it is testing volume",
-      copy: "You do not know which product, hook, or angle will convert until it is published and tested. Duitok uses AI to help you test more angles with clear costs."
+      copy: "You do not know which product, hook, or angle will convert until it is published and tested. Pokaya uses AI to help you test more angles with clear costs."
     }
   };
   return data[state.lang] || data.ms;
@@ -1789,7 +1828,7 @@ function dreamContent() {
     zh: {
       kicker: "副业梦想与执行系统",
       title: "您买的不是工具<br>是进入 AI 卖家阵营的机会",
-      copy: "很多人想做副业，但一直卡在选品、拍摄、脚本和执行量。Duitok AI 的价值，是让普通人用 RM69 进入一套已经跑通的 AI 短视频营销平台。"
+      copy: "很多人想做副业，但一直卡在选品、拍摄、脚本和执行量。Pokaya AI 的价值，是让普通人用 RM69 进入一套已经跑通的 AI 短视频营销平台。"
     },
     en: {
       kicker: "Target imagination",
@@ -1831,29 +1870,29 @@ function studentCaseContent() {
     ms: {
       kicker: "Student case",
       title: "Ikut kaedah, ada student minggu pertama capai RM1000+",
-      copy: "Student kami ikut tutorial Duitok, guna platform untuk generate video selling secara batch, kemudian post dan test ikut template. Ada yang capai RM1000+ pada minggu pertama.",
+      copy: "Student kami ikut tutorial Pokaya, guna platform untuk generate video selling secara batch, kemudian post dan test ikut template. Ada yang capai RM1000+ pada minggu pertama.",
       note: "Ini bukan jaminan setiap orang akan dapat result sama. Income bergantung pada produk, akaun, posting frequency, content quality, market feedback dan execution.",
       badge: "Week 1 case",
       cardCopy: "Template + tutorial + platform + execution volume.",
-      bullets: ["Ikut tutorial Duitok", "Generate video dengan platform", "Post dan test ikut template", "RM1000+ case pada minggu pertama"]
+      bullets: ["Ikut tutorial Pokaya", "Generate video dengan platform", "Post dan test ikut template", "RM1000+ case pada minggu pertama"]
     },
     zh: {
       kicker: "学员出单案例",
       title: "跟着已跑通打法执行<br>有人首周做到 RM1000+",
-      copy: "已有学员根据 Duitok 教程和平台流程执行，用 AI 批量生成带货视频，并按照模板持续发布和测试，在第一周跑出 RM1000+ 案例。",
+      copy: "已有学员根据 Pokaya 教程和平台流程执行，用 AI 批量生成带货视频，并按照模板持续发布和测试，在第一周跑出 RM1000+ 案例。",
       note: "这个结果不代表每个人都会一样。实际收益取决于选品、账号状态、发布频率、内容质量、市场反馈和执行力。",
       badge: "Week 1 Case",
       cardCopy: "模板 + 教程 + 平台 + 执行量。",
-      bullets: ["跟着 Duitok 教程执行", "使用 AI 批量生成带货视频", "按模板发布和测试内容", "第一个星期 RM1000+ 案例"]
+      bullets: ["跟着 Pokaya 教程执行", "使用 AI 批量生成带货视频", "按模板发布和测试内容", "第一个星期 RM1000+ 案例"]
     },
     en: {
       kicker: "Student case",
       title: "Some students followed the method and earned RM1000+ in week one",
-      copy: "Students followed Duitok tutorials, used the platform to batch-generate selling videos, then posted and tested content using the templates. Some reached RM1000+ in their first week.",
+      copy: "Students followed Pokaya tutorials, used the platform to batch-generate selling videos, then posted and tested content using the templates. Some reached RM1000+ in their first week.",
       note: "This does not mean everyone will get the same result. Income depends on products, account condition, posting frequency, content quality, market feedback, and execution.",
       badge: "Week 1 case",
       cardCopy: "Templates + tutorials + platform + execution volume.",
-      bullets: ["Followed Duitok tutorials", "Generated videos with the platform", "Posted and tested with templates", "RM1000+ first-week case"]
+      bullets: ["Followed Pokaya tutorials", "Generated videos with the platform", "Posted and tested with templates", "RM1000+ first-week case"]
     }
   };
   return data[state.lang] || data.ms;
@@ -1864,17 +1903,17 @@ function sevenDayContent() {
     ms: {
       kicker: "Beginner path",
       title: "Selepas subscribe, 7 hari pertama boleh jalan ikut plan ini",
-      copy: "Duitok bukan suruh anda tekan butang secara rawak. Ia memberi urutan kerja supaya beginner tahu langkah pertama, batch pertama dan data pertama yang perlu dilihat."
+      copy: "Pokaya bukan suruh anda tekan butang secara rawak. Ia memberi urutan kerja supaya beginner tahu langkah pertama, batch pertama dan data pertama yang perlu dilihat."
     },
     zh: {
       kicker: "新手 7 天路径",
       title: "订阅后第一周<br>按系统执行",
-      copy: "Duitok 不是让您随机按按钮，而是给您一条新手执行路径：先学已跑通打法，再选品，再生成第一批内容，最后根据数据复盘。"
+      copy: "Pokaya 不是让您随机按按钮，而是给您一条新手执行路径：先学已跑通打法，再选品，再生成第一批内容，最后根据数据复盘。"
     },
     en: {
       kicker: "Beginner path",
       title: "After subscribing, your first 7 days can follow this plan",
-      copy: "Duitok does not ask you to press random buttons. It gives beginners a work sequence from learning, product selection, generation, publishing, and review."
+      copy: "Pokaya does not ask you to press random buttons. It gives beginners a work sequence from learning, product selection, generation, publishing, and review."
     }
   };
   return data[state.lang] || data.ms;
@@ -1919,18 +1958,18 @@ function scenarioContent() {
   const data = {
     ms: {
       kicker: "Bukan TikTok sahaja",
-      title: "Duitok AI boleh digunakan untuk mana-mana short video selling",
-      copy: "TikTok Affiliate ialah entry scene yang kuat, tetapi kemampuan Duitok ialah generate content selling untuk produk. Selagi anda mahu jual, test atau promote produk melalui short video, sistem ini boleh bantu."
+      title: "Pokaya AI boleh digunakan untuk mana-mana short video selling",
+      copy: "TikTok Affiliate ialah entry scene yang kuat, tetapi kemampuan Pokaya ialah generate content selling untuk produk. Selagi anda mahu jual, test atau promote produk melalui short video, sistem ini boleh bantu."
     },
     zh: {
       kicker: "不只 TikTok Affiliate",
       title: "不只 TikTok Affiliate<br>任何短视频带货都能用",
-      copy: "TikTok Affiliate 是推荐入门场景，但 Duitok AI 的底层能力是短视频带货内容生产。只要您需要用短视频卖产品、测产品、做内容，Duitok 都可以帮您提高内容产能。"
+      copy: "TikTok Affiliate 是推荐入门场景，但 Pokaya AI 的底层能力是短视频带货内容生产。只要您需要用短视频卖产品、测产品、做内容，Pokaya 都可以帮您提高内容产能。"
     },
     en: {
       kicker: "Beyond TikTok Affiliate",
-      title: "Use Duitok for any AI short-video selling scenario",
-      copy: "TikTok Affiliate is a strong entry scene, but Duitok's core ability is producing short-video selling content. If you need to sell, test, or promote products through short videos, the system can help."
+      title: "Use Pokaya for any AI short-video selling scenario",
+      copy: "TikTok Affiliate is a strong entry scene, but Pokaya's core ability is producing short-video selling content. If you need to sell, test, or promote products through short videos, the system can help."
     }
   };
   return data[state.lang] || data.ms;
@@ -2036,9 +2075,9 @@ function includedCreditBanner() {
 
 function controlCards() {
   const data = {
-    ms: ["RM69/bulan untuk platform, template dan SOP", "Duitok AI bantu output, bukan guarantee income", "Lebih banyak video memberi lebih banyak peluang data", "Anda tetap perlu pilih produk, post dan review result", "RM1000+ student case ialah bukti kemungkinan, bukan janji fixed"],
-    zh: ["RM69/月进入 AI 短视频营销平台", "Duitok AI 放大执行量，不承诺收入", "更多内容带来更多测试数据", "您仍然需要选品、发布和复盘结果", "RM1000+ 学员案例是可能性证明，不是固定承诺"],
-    en: ["RM69/month includes platform, templates, and SOP", "Duitok AI improves output; it does not guarantee income", "More videos create more testing data", "You still choose products, publish, and review results", "The RM1000+ student case shows possibility, not a fixed promise"]
+    ms: ["RM69/bulan untuk platform, template dan SOP", "Pokaya AI bantu output, bukan guarantee income", "Lebih banyak video memberi lebih banyak peluang data", "Anda tetap perlu pilih produk, post dan review result", "RM1000+ student case ialah bukti kemungkinan, bukan janji fixed"],
+    zh: ["RM69/月进入 AI 短视频营销平台", "Pokaya AI 放大执行量，不承诺收入", "更多内容带来更多测试数据", "您仍然需要选品、发布和复盘结果", "RM1000+ 学员案例是可能性证明，不是固定承诺"],
+    en: ["RM69/month includes platform, templates, and SOP", "Pokaya AI improves output; it does not guarantee income", "More videos create more testing data", "You still choose products, publish, and review results", "The RM1000+ student case shows possibility, not a fixed promise"]
   };
   return (data[state.lang] || data.ms)
     .map((item) => `<article>${icon("check-circle-2", 20)}<p>${item}</p></article>`)
@@ -2048,42 +2087,42 @@ function controlCards() {
 function faqItems() {
   const data = {
     ms: [
-      ["Duitok AI guarantee boleh buat duit?", "Tidak. Duitok AI beri platform, template, tutorial dan kaedah untuk mula short video selling dengan AI. Income bergantung pada produk, akaun, posting, content quality, market feedback dan execution."],
-      ["Kenapa tidak guna AI biasa sahaja?", "AI biasa hanya beri output. Duitok beri template, SOP, product method dan platform supaya beginner tahu video apa perlu dibuat, bagaimana post dan bagaimana review data."],
+      ["Pokaya AI guarantee boleh buat duit?", "Tidak. Pokaya AI beri platform, template, tutorial dan kaedah untuk mula short video selling dengan AI. Income bergantung pada produk, akaun, posting, content quality, market feedback dan execution."],
+      ["Kenapa tidak guna AI biasa sahaja?", "AI biasa hanya beri output. Pokaya beri template, SOP, product method dan platform supaya beginner tahu video apa perlu dibuat, bagaimana post dan bagaimana review data."],
       ["RM69 itu unlimited generate?", "Bukan. RM69 ialah membership bulanan untuk akses platform, template, tutorial dan SOP. Generate guna credits supaya kos jelas dan terkawal."],
       ["10 credits boleh buat apa?", "10 credits cukup untuk test batch pertama. Contohnya anda boleh campur beberapa video RM0.40 dan image RM0.10 mengikut produk yang mahu diuji."],
-      ["Credits habis macam mana?", "Anda boleh top up semula. Duitok guna konsep generate berapa, bayar berapa supaya anda tidak perlu komit kos besar dari awal."],
-      ["Saya perlu shoot video sendiri?", "Tidak semestinya. Fokus Duitok AI ialah bantu anda generate video selling, hook, skrip dan caption supaya tidak tersekat pada shooting manual setiap hari."],
-      ["Mesti buat TikTok Affiliate sahaja?", "Tidak. TikTok Affiliate ialah entry scene yang kuat, tetapi Duitok AI sesuai untuk TikTok Shop, produk lokal, Reels, Shorts dan short video selling lain."],
+      ["Credits habis macam mana?", "Anda boleh top up semula. Pokaya guna konsep generate berapa, bayar berapa supaya anda tidak perlu komit kos besar dari awal."],
+      ["Saya perlu shoot video sendiri?", "Tidak semestinya. Fokus Pokaya AI ialah bantu anda generate video selling, hook, skrip dan caption supaya tidak tersekat pada shooting manual setiap hari."],
+      ["Mesti buat TikTok Affiliate sahaja?", "Tidak. TikTok Affiliate ialah entry scene yang kuat, tetapi Pokaya AI sesuai untuk TikTok Shop, produk lokal, Reels, Shorts dan short video selling lain."],
       ["Betul boleh generate 100+ video sehari?", "Workflow direka untuk batch generation. Jumlah sebenar bergantung pada credit, input produk dan cara anda operate, tetapi matlamatnya ialah jauh lebih laju daripada 2-3 video manual."],
       ["Student minggu pertama RM1000+ itu confirmed untuk semua?", "Tidak. Itu case daripada student yang ikut tutorial dan guna platform. Result setiap orang berbeza bergantung pada produk, akaun, content, market dan execution."],
-      ["RM69 termasuk apa?", "RM69 ialah yuran membership bulanan untuk akses Duitok AI platform, template short video selling, tutorial SOP, hook/script/caption workflow dan basic support. Promotion sekarang: subscribe dan dapat 10 credits. Generation credit dikira jelas: image RM0.10 dan video RM0.40."]
+      ["RM69 termasuk apa?", "RM69 ialah yuran membership bulanan untuk akses Pokaya AI platform, template short video selling, tutorial SOP, hook/script/caption workflow dan basic support. Promotion sekarang: subscribe dan dapat 10 credits. Generation credit dikira jelas: image RM0.10 dan video RM0.40."]
     ],
     zh: [
-      ["Duitok AI 是保证赚钱吗？", "不保证。Duitok AI 提供的是已经跑通的 AI 短视频营销平台，帮助您提高内容产能和执行速度。实际收益取决于选品、账号、发布量、内容质量、市场反馈和复盘能力。"],
-      ["为什么不用普通 AI 工具？", "普通 AI 工具只给您生成能力，但不告诉您怎么做短视频带货。Duitok 提供已跑通打法、模板、教程、SOP 和平台，让新手可以按系统执行。"],
+      ["Pokaya AI 是保证赚钱吗？", "不保证。Pokaya AI 提供的是已经跑通的 AI 短视频营销平台，帮助您提高内容产能和执行速度。实际收益取决于选品、账号、发布量、内容质量、市场反馈和复盘能力。"],
+      ["为什么不用普通 AI 工具？", "普通 AI 工具只给您生成能力，但不告诉您怎么做短视频带货。Pokaya 提供已跑通打法、模板、教程、SOP 和平台，让新手可以按系统执行。"],
       ["RM69 是无限生成吗？", "不是。RM69 是每月会员费，用来加入 AI 短视频营销平台，开通平台、模板、教程和 SOP。生成内容会按 credits 扣费，这样成本更清楚。"],
       ["10 credits 可以做什么？", "10 credits 可以先生成第一批内容。您可以混合生成一些 RM0.40 的视频和 RM0.10 的图片，看哪个产品和角度值得继续放大。"],
-      ["Credits 用完怎么办？", "之后可以再 top up。Duitok 的逻辑是生成多少用多少，不需要一开始投入很大的内容成本。"],
-      ["我不会拍视频可以用吗？", "可以。Duitok AI 主打减少拿货、拍摄和剪辑压力，帮助您生成带货视频方向、脚本、caption 和不露脸内容。"],
-      ["一定要做 TikTok Affiliate 吗？", "不一定。TikTok Affiliate 是推荐入门场景，但 Duitok AI 适合任何需要短视频带货的场景。"],
-      ["没有 TikTok Affiliate 账号可以吗？", "可以。您也可以先用 Duitok 做 TikTok Shop、本地产品、Shopee / Lazada、Reels、Shorts 或品牌产品推广内容。"],
+      ["Credits 用完怎么办？", "之后可以再 top up。Pokaya 的逻辑是生成多少用多少，不需要一开始投入很大的内容成本。"],
+      ["我不会拍视频可以用吗？", "可以。Pokaya AI 主打减少拿货、拍摄和剪辑压力，帮助您生成带货视频方向、脚本、caption 和不露脸内容。"],
+      ["一定要做 TikTok Affiliate 吗？", "不一定。TikTok Affiliate 是推荐入门场景，但 Pokaya AI 适合任何需要短视频带货的场景。"],
+      ["没有 TikTok Affiliate 账号可以吗？", "可以。您也可以先用 Pokaya 做 TikTok Shop、本地产品、Shopee / Lazada、Reels、Shorts 或品牌产品推广内容。"],
       ["一天能批量生成很多内容角度吗？", "平台流程是为了批量生成视频角度和内容而设计，具体数量取决于使用方式、credit、产品素材和您的执行节奏。"],
       ["学员第一个星期 RM1000+ 是保证吗？", "不是保证。这是已有学员根据教程和平台执行后的案例，结果因人而异。"],
-      ["RM69 包含什么？", "RM69 是每月会员费，包含 Duitok AI 平台使用、已跑通短视频带货打法、模板、教学 SOP、hook/script/caption 生成流程和基础支持。现在 promotion：订阅送 10 credits。生成费用另外按 credit 计算：图片 RM0.10，视频 RM0.40。"]
+      ["RM69 包含什么？", "RM69 是每月会员费，包含 Pokaya AI 平台使用、已跑通短视频带货打法、模板、教学 SOP、hook/script/caption 生成流程和基础支持。现在 promotion：订阅送 10 credits。生成费用另外按 credit 计算：图片 RM0.10，视频 RM0.40。"]
     ],
     en: [
-      ["Does Duitok AI guarantee income?", "No. Duitok AI provides a platform, templates, tutorials, and method to help you start short-video selling. Results depend on products, accounts, content quality, market feedback, and execution."],
-      ["Why not use a generic AI tool?", "Generic AI gives generation ability but not a selling method. Duitok provides templates, tutorials, SOP, and a platform so beginners can follow a workflow."],
+      ["Does Pokaya AI guarantee income?", "No. Pokaya AI provides a platform, templates, tutorials, and method to help you start short-video selling. Results depend on products, accounts, content quality, market feedback, and execution."],
+      ["Why not use a generic AI tool?", "Generic AI gives generation ability but not a selling method. Pokaya provides templates, tutorials, SOP, and a platform so beginners can follow a workflow."],
       ["Is RM69 unlimited generation?", "No. RM69 is the monthly membership fee for platform access, templates, tutorials, and SOP. Generations use credits so costs stay clear."],
       ["What can I do with 10 credits?", "10 credits lets you test your first content batch. You can mix RM0.40 videos and RM0.10 images depending on the product you want to test."],
-      ["What happens when credits run out?", "You can top up again. Duitok is designed so you pay for what you generate instead of committing a large content budget upfront."],
-      ["Do I need to film videos myself?", "Not necessarily. Duitok AI reduces filming and editing pressure by generating selling video directions, scripts, captions, and no-face content ideas."],
-      ["Must I do TikTok Affiliate only?", "No. TikTok Affiliate is a recommended entry scene, but Duitok AI works for any short-video selling scenario."],
+      ["What happens when credits run out?", "You can top up again. Pokaya is designed so you pay for what you generate instead of committing a large content budget upfront."],
+      ["Do I need to film videos myself?", "Not necessarily. Pokaya AI reduces filming and editing pressure by generating selling video directions, scripts, captions, and no-face content ideas."],
+      ["Must I do TikTok Affiliate only?", "No. TikTok Affiliate is a recommended entry scene, but Pokaya AI works for any short-video selling scenario."],
       ["Can I use it without a TikTok Affiliate account?", "Yes. You can start with TikTok Shop, local products, Shopee / Lazada, Reels, Shorts, or brand product promotions."],
       ["Can it really generate 100+ videos a day?", "The workflow is designed for batch video angles and content. Actual quantity depends on usage style, credits, and product inputs."],
       ["Is the RM1000+ first-week student case guaranteed?", "No. It is a case from students who followed the tutorial and used the platform. Results vary by product, account, content, market, and execution."],
-      ["What does RM69 include?", "RM69 is the monthly membership fee. It includes Duitok AI platform access, short-video selling templates, SOP tutorials, hook/script/caption workflow, and basic support. Current promotion: subscribe and get 10 credits. Generation credit is transparent: RM0.10 per image and RM0.40 per video."]
+      ["What does RM69 include?", "RM69 is the monthly membership fee. It includes Pokaya AI platform access, short-video selling templates, SOP tutorials, hook/script/caption workflow, and basic support. Current promotion: subscribe and get 10 credits. Generation credit is transparent: RM0.10 per image and RM0.40 per video."]
     ]
   };
   return (data[state.lang] || data.ms).map(([q, a]) => ({ q, a }));
@@ -2152,8 +2191,9 @@ function studio() {
         <div class="sidebar-language">${languageSwitch()}</div>
         <div class="side-section">${icon("layout-dashboard", 18)} ${t("workspace")}</div>
         <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard">${mascotIcon("nav-mascot-icon")} ${t("dashboard")}</button>
+        <button class="side-link ${state.page === "wizard" ? "active" : ""}" data-page="wizard">${icon("sparkles")} Start Here</button>
         ${isOwnerAdminAccount() ? `<button class="side-link ${state.page === "admin" ? "active" : ""}" data-page="admin">${icon("shield-check")} Admin CRM</button>` : ""}
-        <button class="side-link ${state.page === "agent" ? "active" : ""}" data-page="agent">${icon("bot")} Duitok Agent</button>
+        <button class="side-link ${state.page === "agent" ? "active" : ""}" data-page="agent">${icon("bot")} Pokaya Agent</button>
         <button class="side-link ${state.page === "library" ? "active" : ""}" data-page="library">${icon("folder")} ${t("contentLibrary")}</button>
         <button class="new-project" data-action="new-project">${icon("plus")} <span>${t("newProject")}</span><b>${state.db.projects.length}/5</b></button>
         <div class="side-section">${icon("folder", 18)} ${t("projects")}</div>
@@ -2181,21 +2221,21 @@ function studio() {
 
 function brand(label = "") {
   const labelMarkup = label ? `<strong class="brand-context">${label}</strong>` : "";
-  return `<div class="brand-lockup"><span class="brand-core" aria-label="Duitok AI"><img class="brand-logo-mascot" src="${brandAssets.mascot}" alt="" aria-hidden="true"><span class="brand-wordmark"><span>Duitok</span><span>AI</span></span></span>${labelMarkup}</div>`;
+  return `<div class="brand-lockup"><span class="brand-core" aria-label="Pokaya AI"><img class="brand-logo-mascot" src="${brandAssets.mascot}" alt="" aria-hidden="true"><span class="brand-wordmark"><span>Pokaya</span><span>AI</span></span></span>${labelMarkup}</div>`;
 }
 
-function footerBrand(label = "Duitok AI") {
-  const labelMarkup = label && label !== "Duitok AI" ? `<b>${label}</b>` : "";
+function footerBrand(label = "Pokaya AI") {
+  const labelMarkup = label && label !== "Pokaya AI" ? `<b>${label}</b>` : "";
   return `
     <footer class="public-footer">
       <div class="footer-left">
-        <span class="footer-brand"><span class="brand-core footer-brand-core" aria-label="Duitok AI"><img class="brand-logo-mascot" src="${brandAssets.mascot}" alt="" aria-hidden="true"><span class="brand-wordmark"><span>Duitok</span><span>AI</span></span></span>${labelMarkup}</span>
+        <span class="footer-brand"><span class="brand-core footer-brand-core" aria-label="Pokaya AI"><img class="brand-logo-mascot" src="${brandAssets.mascot}" alt="" aria-hidden="true"><span class="brand-wordmark"><span>Pokaya</span><span>AI</span></span></span>${labelMarkup}</span>
         <span class="footer-year">© 2026</span>
       </div>
       <nav class="footer-links" aria-label="Footer">
         <a href="/terms">Terms</a>
         <a href="/privacy">Privacy</a>
-        <a href="mailto:hello@duitok.com">hello@duitok.com</a>
+        <a href="mailto:hello@pokaya.ai">hello@pokaya.ai</a>
       </nav>
     </footer>`;
 }
@@ -2212,7 +2252,7 @@ function subscriptionStatus() {
   const daysLeft = expiresAt ? Math.max(0, Math.ceil(msLeft / 86400000)) : 0;
   const expired = Boolean(expiresAt && msLeft < 0);
   return {
-    plan: billing.plan || "Duitok AI Pro",
+    plan: billing.plan || "Pokaya AI Pro",
     nextBill,
     daysLeft,
     expired,
@@ -2249,7 +2289,7 @@ function sidebarAccountPanel() {
       </article>
       <div class="sidebar-user-card">
         <span class="sidebar-avatar">${accountInitials(user.name)}</span>
-        <div><b>${esc(user.name || "Duitok User")}</b><small>${esc(user.email || "")}</small></div>
+        <div><b>${esc(user.name || "Pokaya User")}</b><small>${esc(user.email || "")}</small></div>
       </div>
       <div class="sidebar-account-actions">
         <button type="button" class="${state.page === "settings" ? "active" : ""}" data-page="settings">${icon("settings", 18)} ${t("settings")}</button>
@@ -2282,6 +2322,7 @@ function projectButtons() {
 
 function page() {
   if (state.page === "admin") return adminPage();
+  if (state.page === "wizard") return firstGenerationWizardPage();
   if (state.page === "agent") return agentPage();
   if (state.page === "dashboard") return dashboardOverview();
   if (state.page === "project") return projectPage();
@@ -2297,7 +2338,233 @@ function selectedDateRange() {
 }
 
 function allResults() {
-  return state.db.projects.flatMap((item) => item.results.map((result) => ({ ...result, projectName: item.name })));
+  return state.db.projects.flatMap((item) => item.results.map((result) => ({ ...result, projectId: item.id, projectName: item.name })));
+}
+
+function wizardCopy() {
+  const content = {
+    ms: {
+      eyebrow: "Beginner setup",
+      title: "Nak guna AI untuk buat duit? Mula dari satu fungsi dulu.",
+      subtitle: "Pilih apa yang anda mahu cuba. Pokaya akan bawa anda ke langkah paling mudah, bukan terus bagi semua tab yang complicated.",
+      stepLabels: ["Explore", "Choose", "Details", "Start"],
+      featureTitle: "Apa yang AI boleh bantu anda buat?",
+      chooseTitle: "Nak cuba yang mana dulu?",
+      detailsTitle: "Beritahu sedikit tentang produk anda",
+      reviewTitle: "Ready untuk mula",
+      productLabel: "Product name",
+      productPlaceholder: "contoh: serum, lunchbox, wireless mic",
+      linkLabel: "Product link",
+      linkPlaceholder: "optional: TikTok Shop / Shopee link",
+      languageLabel: "Language",
+      styleLabel: "Style",
+      back: "Back",
+      continue: "Continue",
+      start: "Start now",
+      skip: "Skip setup",
+      selected: "Selected tool",
+      prompt: "Prompt preview",
+      credits: "Estimated credits",
+      featureDescriptions: {
+        "product-image": ["Generate product images, ad visuals, and poster-style content.", "Good if you do not have a designer."],
+        "short-video": ["Create TikTok-style short video ideas or prompts.", "Good if you want video selling content but do not know what to shoot."],
+        "ugc-script": ["Write hook, talking script, caption, and hashtags.", "Good if you want to record yourself or brief a creator."],
+        "content-plan": ["Plan what to post for the next 7 days.", "Good if you do not know what to post every day."],
+        "clone-style": ["Turn a viral structure into your own product version.", "Good if you saw something viral but cannot break it down."],
+        "ask-agent": ["Let Pokaya Agent recommend the easiest starting point.", "Good if you are totally new."]
+      }
+    },
+    zh: {
+      eyebrow: "新手开始",
+      title: "想用 AI 赚钱？先从一个功能开始。",
+      subtitle: "你不用先研究完整 Studio。先看懂 Pokaya 可以帮你做什么，再选一个最想尝试的功能。",
+      stepLabels: ["看功能", "选起点", "填资料", "开始"],
+      featureTitle: "AI 可以先帮你做什么？",
+      chooseTitle: "你想先试哪个？",
+      detailsTitle: "简单告诉 Pokaya 你卖什么",
+      reviewTitle: "准备开始",
+      productLabel: "产品名",
+      productPlaceholder: "例如：serum、lunchbox、wireless mic",
+      linkLabel: "产品链接",
+      linkPlaceholder: "可选：TikTok Shop / Shopee 链接",
+      languageLabel: "语言",
+      styleLabel: "风格",
+      back: "返回",
+      continue: "继续",
+      start: "开始使用",
+      skip: "跳过引导",
+      selected: "选择的功能",
+      prompt: "Prompt 预览",
+      credits: "预计 credits",
+      featureDescriptions: {
+        "product-image": ["生成产品图、广告图、海报图。", "适合没有设计师、想快速做商品视觉的新手。"],
+        "short-video": ["生成 TikTok 商品短视频想法或视频 prompt。", "适合想做短视频带货但不知道怎么拍的新手。"],
+        "ugc-script": ["帮你写开头、口播、caption、hashtags。", "适合想自己拍，或给 creator brief 的新手。"],
+        "content-plan": ["帮你安排未来 7 天每天发什么。", "适合不知道每天发什么的新手。"],
+        "clone-style": ["把别人的爆款结构变成你的产品版本。", "适合看到别人爆了，但不会拆解的新手。"],
+        "ask-agent": ["让 Pokaya Agent 帮你判断最容易的起点。", "适合完全新手，还没想清楚产品或方向的人。"]
+      }
+    },
+    en: {
+      eyebrow: "Beginner setup",
+      title: "Want to make money with AI? Start with one simple tool.",
+      subtitle: "You do not need to learn the full Studio first. See what Pokaya can do, then pick the first tool you want to try.",
+      stepLabels: ["Explore", "Choose", "Details", "Start"],
+      featureTitle: "What can AI help you create first?",
+      chooseTitle: "What do you want to try first?",
+      detailsTitle: "Tell Pokaya a little bit about what you sell",
+      reviewTitle: "Ready to start",
+      productLabel: "Product name",
+      productPlaceholder: "e.g. serum, lunchbox, wireless mic",
+      linkLabel: "Product link",
+      linkPlaceholder: "optional: TikTok Shop / Shopee link",
+      languageLabel: "Language",
+      styleLabel: "Style",
+      back: "Back",
+      continue: "Continue",
+      start: "Start now",
+      skip: "Skip setup",
+      selected: "Selected tool",
+      prompt: "Prompt preview",
+      credits: "Estimated credits",
+      featureDescriptions: {
+        "product-image": ["Generate product images, ad visuals, and poster-style content.", "Good if you do not have a designer."],
+        "short-video": ["Create TikTok-style short video ideas or prompts.", "Good if you want video selling content but do not know what to shoot."],
+        "ugc-script": ["Write hook, talking script, caption, and hashtags.", "Good if you want to record yourself or brief a creator."],
+        "content-plan": ["Plan what to post for the next 7 days.", "Good if you do not know what to post every day."],
+        "clone-style": ["Turn a viral structure into your own product version.", "Good if you saw something viral but cannot break it down."],
+        "ask-agent": ["Let Pokaya Agent recommend the easiest starting point.", "Good if you are totally new."]
+      }
+    }
+  };
+  return content[state.lang] || content.en;
+}
+
+function wizardFeatureLabel(id = state.wizardFeature) {
+  return wizardFeatures.find((item) => item[0] === id)?.[2] || "Ask Pokaya Agent";
+}
+
+function wizardEstimatedCredits(id = state.wizardFeature) {
+  if (id === "product-image") return "0.10";
+  if (id === "ask-agent") return "0";
+  return "0.10";
+}
+
+function wizardPrompt() {
+  const product = state.wizardProductName || "[your product]";
+  const language = state.wizardLanguage || "Bahasa Melayu";
+  const style = state.wizardStyle || "Soft sell";
+  const prompts = {
+    "product-image": `Create a clean product image for ${product}. Make it suitable for TikTok Shop, ads, or social media. Style: ${style}. Language: ${language} if text is needed. Make the product look clear, trustworthy, and easy to sell.`,
+    "short-video": `Create a TikTok-style short video idea for ${product}. Style: ${style}. Language: ${language}. Show what to say, what to show, and how to make the product interesting. Keep it simple for a beginner to understand or execute.`,
+    "ugc-script": `Write a short UGC-style script for ${product}. Language: ${language}. Style: ${style}. Include hook, short script, caption, and hashtags. Make it beginner-friendly and easy to record.`,
+    "content-plan": `Create a 7-day simple content plan for ${product}. Language: ${language}. Style: ${style}. Each day should include what to post, hook idea, content angle, and caption idea. Keep the plan simple enough for a beginner to follow.`,
+    "clone-style": `Analyze a viral content style and turn it into a version for ${product}. Language: ${language}. Keep the structure, rewrite it safely and originally, and make the final output easy for a beginner to use.`,
+    "ask-agent": `I am new and want to use AI to make money. My product is ${product}. Please recommend the easiest Pokaya feature for me to start with.`
+  };
+  return prompts[state.wizardFeature] || prompts["ask-agent"];
+}
+
+function firstGenerationWizardPage() {
+  const c = wizardCopy();
+  return `<section class="first-wizard-shell">
+    <header class="first-wizard-hero">
+      <div>
+        <p class="folder-label">${icon("sparkles", 18)} ${c.eyebrow}</p>
+        <h1>${c.title}</h1>
+        <p>${c.subtitle}</p>
+      </div>
+      <button class="dark-button mini-button" data-action="skip-wizard">${icon("arrow-right", 16)} ${c.skip}</button>
+    </header>
+    <nav class="wizard-stepper" aria-label="Wizard steps">
+      ${c.stepLabels.map((label, index) => `<button type="button" class="${state.wizardStep === index + 1 ? "active" : state.wizardStep > index + 1 ? "done" : ""}" data-wizard-jump="${index + 1}"><b>${index + 1}</b><span>${label}</span></button>`).join("")}
+    </nav>
+    ${state.wizardStep === 1 ? wizardFeatureIntro(c) : state.wizardStep === 2 ? wizardChooseTool(c) : state.wizardStep === 3 ? wizardDetails(c) : wizardReview(c)}
+  </section>`;
+}
+
+function wizardFeatureIntro(c) {
+  return `<section class="wizard-panel">
+    <div class="wizard-panel-head">
+      <h2>${c.featureTitle}</h2>
+      <p>${state.lang === "zh" ? "先看懂每个功能可以帮你做什么，不需要懂模型或 prompt。" : "Start by understanding what each feature can do. No model knowledge needed."}</p>
+    </div>
+    <div class="wizard-feature-grid">
+      ${wizardFeatures.map(([id, ic, label]) => wizardFeatureCard(id, ic, label, c, true)).join("")}
+    </div>
+  </section>`;
+}
+
+function wizardChooseTool(c) {
+  return `<section class="wizard-panel">
+    <div class="wizard-panel-head">
+      <h2>${c.chooseTitle}</h2>
+      <p>${state.lang === "zh" ? "完全不知道就选 Agent，它会帮你判断最容易的起点。" : "Not sure? Choose Agent and let it recommend the easiest starting point."}</p>
+    </div>
+    <div class="wizard-choice-list">
+      ${wizardFeatures.map(([id, ic, label]) => wizardFeatureCard(id, ic, label, c, false)).join("")}
+    </div>
+    <div class="wizard-actions">
+      <button class="dark-button" data-action="wizard-back">${icon("arrow-left", 17)} ${c.back}</button>
+      <button class="gold-button" data-action="wizard-next" ${state.wizardFeature ? "" : "disabled"}>${c.continue} ${icon("arrow-right", 17)}</button>
+    </div>
+  </section>`;
+}
+
+function wizardFeatureCard(id, ic, label, c, autoAdvance = false) {
+  const [body, helper] = c.featureDescriptions[id] || ["", ""];
+  const active = state.wizardFeature === id;
+  return `<button type="button" class="wizard-feature-card ${active ? "active" : ""}" data-wizard-feature="${id}" data-wizard-auto="${autoAdvance ? "true" : "false"}">
+    <span>${icon(ic, 24)}</span>
+    <strong>${label}</strong>
+    <p>${body}</p>
+    <small>${helper}</small>
+  </button>`;
+}
+
+function wizardDetails(c) {
+  return `<section class="wizard-panel wizard-detail-panel">
+    <div class="wizard-panel-head">
+      <h2>${c.detailsTitle}</h2>
+      <p>${state.lang === "zh" ? "产品名和链接都可以之后再补。先开始，比填完美资料更重要。" : "Product details can be added later. Starting is more important than perfect setup."}</p>
+    </div>
+    <form class="wizard-form" data-form="wizard-details">
+      <label>${c.productLabel}<input name="productName" data-wizard-field="wizardProductName" value="${esc(state.wizardProductName)}" placeholder="${esc(c.productPlaceholder)}"></label>
+      <label>${c.linkLabel}<input name="productLink" data-wizard-field="wizardProductLink" value="${esc(state.wizardProductLink)}" placeholder="${esc(c.linkPlaceholder)}"></label>
+      <div class="form-grid two">
+        <label>${c.languageLabel}<select name="language" data-wizard-field="wizardLanguage">${["Bahasa Melayu", "English", "中文"].map((item) => `<option ${state.wizardLanguage === item ? "selected" : ""}>${item}</option>`).join("")}</select></label>
+        <label>${c.styleLabel}<select name="style" data-wizard-field="wizardStyle">${["Soft sell", "Review", "Problem-solution", "Offer push"].map((item) => `<option ${state.wizardStyle === item ? "selected" : ""}>${item}</option>`).join("")}</select></label>
+      </div>
+      <div class="wizard-actions">
+        <button type="button" class="dark-button" data-action="wizard-back">${icon("arrow-left", 17)} ${c.back}</button>
+        <button class="gold-button" type="submit">${c.continue} ${icon("arrow-right", 17)}</button>
+      </div>
+    </form>
+  </section>`;
+}
+
+function wizardReview(c) {
+  const promptText = wizardPrompt();
+  return `<section class="wizard-panel wizard-review-panel">
+    <div class="wizard-review-copy">
+      <h2>${c.reviewTitle}</h2>
+      <p>${state.lang === "zh" ? "确认后 Pokaya 会创建项目、预填 prompt，并帮你进入第一个工具。" : "Pokaya will create a project, prepare the prompt, and take you to the first tool."}</p>
+      <div class="wizard-review-list">
+        <p><span>${c.selected}</span><b>${wizardFeatureLabel()}</b></p>
+        <p><span>${c.productLabel}</span><b>${esc(state.wizardProductName || "Not sure yet")}</b></p>
+        <p><span>${c.languageLabel}</span><b>${esc(state.wizardLanguage)}</b></p>
+        <p><span>${c.credits}</span><b>${wizardEstimatedCredits()} credits</b></p>
+      </div>
+      <div class="wizard-actions">
+        <button type="button" class="dark-button" data-action="wizard-back">${icon("arrow-left", 17)} ${c.back}</button>
+        <button type="button" class="gold-button" data-action="start-wizard" ${state.wizardBusy ? "disabled" : ""}>${icon(state.wizardBusy ? "loader-circle" : "sparkles", 18)} ${state.wizardBusy ? t("generating") : c.start}</button>
+      </div>
+    </div>
+    <aside class="wizard-prompt-preview">
+      <span>${icon("file-text", 18)} ${c.prompt}</span>
+      <p>${esc(promptText)}</p>
+    </aside>
+  </section>`;
 }
 
 function inDateRange(item) {
@@ -2600,8 +2867,36 @@ function paymentRow(payment, adminActions = false) {
 }
 
 function contentLibraryPage() {
-  const results = allResults().slice().reverse();
-  return `<header class="project-head"><div><p class="folder-label">${icon("folder", 18)} Content Library</p><h1>Generated Assets</h1><p class="subtitle">All project outputs in one place, ready for export or scheduling.</p></div><button class="sop-button" data-action="export-all">${icon("download")} Export Data</button></header><section class="canvas-card slim"><div class="library-grid">${results.map((item) => `<article><b>${item.title}</b><span>${item.projectName}</span>${resultPreview(item)}<button data-result="${item.id}">${icon("download")} ${t("export")}</button></article>`).join("") || `<p class="empty-text">No generated assets yet.</p>`}</div></section>`;
+  const all = allResults().slice().reverse();
+  const query = state.assetSearch.trim().toLowerCase();
+  const filtered = all.filter((item) => {
+    const kind = item.videoUrl ? "video" : item.imageUrl ? "image" : "text";
+    const haystack = [item.title, item.body, item.projectName, item.type, ...(item.assetTags || [])].join(" ").toLowerCase();
+    return (state.assetTypeFilter === "all" || state.assetTypeFilter === kind || state.assetTypeFilter === item.type)
+      && (state.assetProjectFilter === "all" || state.assetProjectFilter === item.projectId)
+      && (!query || haystack.includes(query));
+  });
+  const projects = state.db.projects || [];
+  return `<header class="project-head asset-library-head">
+    <div><p class="folder-label">${icon("folder", 18)} Pokaya Asset Library</p><h1>Generated Assets</h1><p class="subtitle">Find, reuse, schedule, rename, download, and keep building from every generated asset.</p></div>
+    <button class="sop-button" data-action="export-all">${icon("download")} Export Data</button>
+  </header>
+  <section class="asset-toolbar">
+    <label>${icon("search", 16)}<input data-asset-search placeholder="Search product, prompt, result..." value="${esc(state.assetSearch)}"></label>
+    <div class="asset-filter-row">
+      ${["all", "image", "video", "text"].map((kind) => `<button type="button" class="${state.assetTypeFilter === kind ? "active" : ""}" data-asset-type="${kind}">${kind === "all" ? "All" : kind}</button>`).join("")}
+    </div>
+    <div class="asset-filter-row project-filter-row">
+      <button type="button" class="${state.assetProjectFilter === "all" ? "active" : ""}" data-asset-project="all">All products</button>
+      ${projects.map((project) => `<button type="button" class="${state.assetProjectFilter === project.id ? "active" : ""}" data-asset-project="${esc(project.id)}">${esc(project.name)}</button>`).join("")}
+    </div>
+  </section>
+  <section class="asset-library-summary">
+    <p><span>Total assets</span><b>${all.length}</b></p>
+    <p><span>Visible</span><b>${filtered.length}</b></p>
+    <p><span>Products</span><b>${projects.length}</b></p>
+  </section>
+  ${filtered.length ? `<section class="result-grid asset-library-grid">${filtered.map(resultCard).join("")}</section>` : `<section class="empty-result">${icon("folder-search")} No assets match this filter.</section>`}`;
 }
 
 function isOwnerAdminAccount() {
@@ -3436,6 +3731,8 @@ function results(p, type) {
 function resultCard(item) {
   const model = item.title || "Generated asset";
   const promptText = item.body || "";
+  const promptPreview = promptText.replaceAll("\n", " ").trim();
+  const canSaveReference = Boolean(item.imageUrl || item.videoUrl);
   return `
     <article class="result-card">
       <header class="result-card-head">
@@ -3444,19 +3741,24 @@ function resultCard(item) {
       </header>
       ${resultPreview(item)}
       <div class="result-meta">
-        <span>${icon("cloud-check", 16)} Duitok asset</span>
+        <span>${icon("cloud-check", 16)} Pokaya asset</span>
         <code>${esc(item.id)}</code>
       </div>
-      <div class="result-name">
+      <div class="result-prompt">
         ${icon("pencil", 18)}
-        <div><b>${esc(item.title)}</b><p>${esc(promptText).replaceAll("\n", " ").slice(0, 120)}${promptText.length > 120 ? "..." : ""}</p></div>
+        <div><b>Prompt</b><p>${promptPreview ? `${esc(promptPreview.slice(0, 260))}${promptPreview.length > 260 ? "..." : ""}` : "No prompt saved for this result."}</p></div>
       </div>
-      <div class="result-actions" aria-label="Result actions preview">
-        <button type="button" title="Copy prompt">${icon("cloud-upload", 20)}</button>
-        <button type="button" title="Full prompt">${icon("palette", 20)}</button>
-        <button type="button" title="Cloud status">${icon("cloud", 20)}</button>
-        <button type="button" title="${t("export")}">${icon("download", 20)}</button>
-        <button type="button" title="Delete">${icon("trash-2", 20)}</button>
+      <div class="result-actions" aria-label="Result actions">
+        <button type="button" data-result-action="avatar" data-result-id="${esc(item.id)}" title="保存人物" ${canSaveReference ? "" : "disabled"}>${icon("user-round", 19)}<span>人物</span></button>
+        <button type="button" data-result-action="product" data-result-id="${esc(item.id)}" title="保存产品图" ${canSaveReference ? "" : "disabled"}>${icon("package", 19)}<span>产品</span></button>
+        <button type="button" data-result-action="download" data-result-id="${esc(item.id)}" data-result-kind="${item.videoUrl ? "video" : item.imageUrl ? "image" : "text"}" title="下载">${icon("download", 20)}<span>下载</span></button>
+        <button type="button" data-result-action="delete" data-result-id="${esc(item.id)}" title="删除">${icon("trash-2", 20)}<span>删除</span></button>
+      </div>
+      <div class="result-workflow-actions" aria-label="Asset workflow actions">
+        <button type="button" data-result-action="copy-prompt" data-result-id="${esc(item.id)}">${icon("copy", 15)} 复制 prompt</button>
+        <button type="button" data-result-action="schedule" data-result-id="${esc(item.id)}">${icon("calendar-plus", 15)} 加入排期</button>
+        <button type="button" data-result-action="rename" data-result-id="${esc(item.id)}">${icon("edit-3", 15)} 改名</button>
+        <button type="button" data-result-action="variant" data-result-id="${esc(item.id)}">${icon("wand-sparkles", 15)} 生成变体</button>
       </div>
     </article>`;
 }
@@ -3465,10 +3767,11 @@ function resultPreview(item) {
   const token = encodeURIComponent(state.token || "");
   const imageSrc = item.imageUrl ? `/api/media/result/${encodeURIComponent(item.id)}/image?token=${token}` : "";
   const videoSrc = item.videoUrl ? `/api/media/result/${encodeURIComponent(item.id)}/video?token=${token}` : "";
-  const imageError = "this.replaceWith(Object.assign(document.createElement('div'),{className:'result-media-error',textContent:'Image link expired or blocked. Try generating again or configure durable storage.'}))";
+  const imageError = "this.replaceWith(Object.assign(document.createElement('div'),{className:'result-media-error',textContent:'图片链接已过期，请重新生成或联系客服'}))";
   const image = imageSrc ? `<img class="result-image" src="${imageSrc}" alt="${esc(item.title)}" loading="lazy" onerror="${esc(imageError)}">` : "";
-  const video = videoSrc ? `<video class="result-video" src="${videoSrc}" controls playsinline></video>` : "";
-  return `${image}${video}`;
+  const video = videoSrc ? `<div class="result-video-shell"><video class="result-video" src="${videoSrc}" preload="metadata" playsinline></video><button type="button" class="result-play-button" data-video-play="${esc(item.id)}">${icon("play", 26)}<span>点击播放</span></button></div>` : "";
+  const text = !image && !video ? `<div class="result-text-preview">${icon("file-text", 30)}<span>Text result</span></div>` : "";
+  return `${image}${video}${text}`;
 }
 
 function accountPage() {
@@ -3489,7 +3792,7 @@ function accountPage() {
 function billingPage() {
   const billing = state.db.billing || {};
   const payments = state.db.payments || [];
-  const plan = billing.plan || "Duitok AI Pro";
+  const plan = billing.plan || "Pokaya AI Pro";
   const nextBill = billing.nextBill || "22 Jun 2026";
   const status = billing.status || "Active";
   return `
@@ -3497,7 +3800,7 @@ function billingPage() {
       <div class="billing-plan-hero">
         <div class="billing-plan-copy">
           <span class="billing-pill">${mascotIcon("pill-mascot-icon")} ${t("currentPlan")}</span>
-          <h2>${esc(plan.replace("Duitok AI ", ""))}</h2>
+          <h2>${esc(plan.replace("Pokaya AI ", ""))}</h2>
           <p>${esc(status)} subscription · Renews ${esc(nextBill)}</p>
           <button class="billing-cancel-button" type="button">${t("cancelSubscription")}</button>
         </div>
@@ -3532,7 +3835,7 @@ function billingPaymentRow(payment) {
   const status = payment.status || "pending";
   const credits = Number(payment.credits ?? payment.amount ?? 0);
   const description = (payment.kind || "topup") === "subscription"
-    ? "Duitok AI Pro subscription"
+    ? "Pokaya AI Pro subscription"
     : `Top up ${formatCreditNumber(credits)} credits`;
   return `<div class="billing-history-row">
     <time>${formatTopupDate(payment.createdAt)}</time>
@@ -3554,7 +3857,7 @@ function affiliateDashboard() {
   const cashedOut = Number(affiliate.cashedOut || 0);
   const referrals = Number(affiliate.referrals || Math.max(0, Math.floor(clicks / 8)));
   const available = Math.max(0, payout - cashedOut);
-  const referralLink = `https://duitok.com/ref/${encodeURIComponent(code)}`;
+  const referralLink = `https://pokaya.ai/ref/${encodeURIComponent(code)}`;
   return `
     <section class="affiliate-dashboard">
       <div class="affiliate-stat-grid">
@@ -3754,8 +4057,8 @@ function autoPostPage() {
       <section class="autopost-sop">
         <div>
           <p class="folder-label">${icon("puzzle", 18)} Extension</p>
-          <h2>Duitok Auto Post - SOP</h2>
-          <p>Local Chrome helper for pulling Duitok scheduled TikTok posts into TikTok upload pages. It fills captions and hashtags; you still review and click final publish yourself.</p>
+          <h2>Pokaya Auto Post - SOP</h2>
+          <p>Local Chrome helper for pulling Pokaya scheduled TikTok posts into TikTok upload pages. It fills captions and hashtags; you still review and click final publish yourself.</p>
         </div>
         <button class="gold-button" data-action="download-autopost-extension">${icon("download")} Download Extension</button>
         <ol>
@@ -3803,12 +4106,12 @@ function modal() {
     newProject: `<form data-form="project"><label>${t("project")}<input name="name" placeholder="Project ${(state.db?.projects.length || 0) + 1}" required></label><button class="gold-button" type="submit">${icon("plus")} ${t("newProject")}</button></form>`,
     renameProject: `<form data-form="rename-project"><label>${t("project")}<input name="name" value="${esc(editProject?.name || "")}" required autofocus></label><button class="gold-button" type="submit">${icon("check")} ${t("saveName")}</button></form>`,
     deleteProject: `<div class="delete-confirm"><p>${tf("deleteProjectConfirm", { name: `<b>${esc(editProject?.name || t("project"))}</b>` })}</p><div><button class="dark-button" data-action="close-modal">${icon("x")} ${t("cancel")}</button><button class="gold-button danger-button" data-action="confirm-delete-project">${icon("trash-2")} ${t("deleteProject")}</button></div></div>`,
-    register: `<form data-form="login"><label>${t("email")}<input name="email" type="email" placeholder="you@duitok.com" required></label><label>${t("password")}<input name="password" type="password" placeholder="${esc(t("createPassword"))}" required></label><button class="gold-button" type="submit">${icon("lock")} ${t("registerEnterStudio")}</button></form>`,
+    register: `<form data-form="login"><label>${t("email")}<input name="email" type="email" placeholder="you@pokaya.ai" required></label><label>${t("password")}<input name="password" type="password" placeholder="${esc(t("createPassword"))}" required></label><button class="gold-button" type="submit">${icon("lock")} ${t("registerEnterStudio")}</button></form>`,
     sop: `<div class="sop-sheet"><b>Image SOP</b><ol><li>Upload avatar face.</li><li>Upload product reference.</li><li>Select model and mode.</li><li>Write prompt.</li><li>Generate, save, export.</li></ol><button class="dark-button" data-action="download-sop">${icon("download")} Download SOP</button></div>`,
     export: `<p>${t("exportStarted")}</p><button class="gold-button" data-action="close-modal">${icon("check")} ${t("done")}</button>`,
     support: `<form data-form="support" class="support-form"><label>${t("supportMessage")}<textarea name="message" placeholder="${esc(t("supportPlaceholder"))}" required></textarea></label><button class="gold-button" type="submit">${icon("send")} ${t("supportTicket")}</button></form>`
   }[state.modal];
-  return `<div class="modal-backdrop" data-action="close-modal"><section class="modal"><button class="icon-only close" data-action="close-modal">${icon("x")}</button><p class="folder-label">${mascotIcon("label-mascot-icon")} Duitok AI</p><h2>${title}</h2>${body}</section></div>`;
+  return `<div class="modal-backdrop" data-action="close-modal"><section class="modal"><button class="icon-only close" data-action="close-modal">${icon("x")}</button><p class="folder-label">${mascotIcon("label-mascot-icon")} Pokaya AI</p><h2>${title}</h2>${body}</section></div>`;
 }
 
 function sopDashboardContent() {
@@ -4462,7 +4765,7 @@ function sopPage() {
       <div>
         <p class="folder-label">${icon("book-open", 18)} SOP Center</p>
         <h1>SOP Center</h1>
-        <p class="subtitle">把 Duitok 平台的完整操作步骤集中在这里。先选任务，再按步骤执行。</p>
+        <p class="subtitle">把 Pokaya 平台的完整操作步骤集中在这里。先选任务，再按步骤执行。</p>
       </div>
       <div class="head-actions">
         <button class="dark-button" data-action="support">${icon("message-circle")} Need help?</button>
@@ -4723,9 +5026,9 @@ function agent3DScene(options = {}) {
         <span>${icon(status.iconName, 17)} ${status.label}</span>
         <b>${status.label}</b>
       </div>`}
-      <div class="agent-life-stage" aria-label="Duitok Agent work, chat, and rest states">
-        <img class="agent-life-render-image agent-life-render-active" src="/duitok-agent-stage-chat-bg.png" alt="Duitok Agent workstation, chat station, and sleeping bed">
-        <img class="agent-life-render-image agent-life-render-sleep" src="/duitok-agent-stage-chat-sleep-bg.png" alt="Duitok Agent sleeping in bed">
+      <div class="agent-life-stage" aria-label="Pokaya Agent work, chat, and rest states">
+        <img class="agent-life-render-image agent-life-render-active" src="/duitok-agent-stage-chat-bg.png" alt="Pokaya Agent workstation, chat station, and sleeping bed">
+        <img class="agent-life-render-image agent-life-render-sleep" src="/duitok-agent-stage-chat-sleep-bg.png" alt="Pokaya Agent sleeping in bed">
         <span class="agent-life-route" aria-hidden="true"></span>
         <span class="agent-chair-mask" aria-hidden="true"></span>
         <img class="agent-sprite agent-sprite-work" src="/duitok-agent-sprite-work.png" alt="">
@@ -4745,7 +5048,7 @@ function agent3DScene(options = {}) {
 function agentUiCopy() {
   const copy = {
     zh: {
-      title: "Duitok Agent",
+      title: "Pokaya Agent",
       subtitle: "帮你生成内容、创建排期、检查 workspace",
       emptyTitle: "你可以直接叫我做事",
       emptyBody: "我会先理解需求；如果信息不够，会先问你；如果要扣 credits，会让你确认。",
@@ -4788,7 +5091,7 @@ function agentUiCopy() {
       ]
     },
     ms: {
-      title: "Duitok Agent",
+      title: "Pokaya Agent",
       subtitle: "Bantu generate content, buat schedule, dan semak workspace",
       emptyTitle: "Terus beritahu apa nak dibuat",
       emptyBody: "Saya akan fahamkan request dulu. Kalau maklumat tak cukup saya akan tanya; kalau guna credits saya akan minta confirm.",
@@ -4831,7 +5134,7 @@ function agentUiCopy() {
       ]
     },
     en: {
-      title: "Duitok Agent",
+      title: "Pokaya Agent",
       subtitle: "Generate content, create schedules, and inspect your workspace",
       emptyTitle: "Tell me what to do",
       emptyBody: "I will understand the request first. If details are missing, I will ask; if credits are needed, I will ask for confirmation.",
@@ -4924,7 +5227,7 @@ function agentTopbar() {
   const status = agentStatusInfo();
   return `<header class="agent-topbar">
     <div>
-      <p class="folder-label">${icon("bot", 18)} Duitok Agent</p>
+      <p class="folder-label">${icon("bot", 18)} Pokaya Agent</p>
       <h1>${c.title}</h1>
       <p>${c.subtitle}</p>
     </div>
@@ -5479,6 +5782,21 @@ function bind() {
   document.querySelectorAll("[data-step]").forEach((el) => el.addEventListener("click", () => set({ step: el.dataset.step })));
   document.querySelectorAll("[data-step-open]").forEach((el) => el.addEventListener("click", () => set({ page: "project", step: el.dataset.stepOpen })));
   document.querySelectorAll("[data-project]").forEach((el) => el.addEventListener("click", () => set({ projectId: el.dataset.project, page: "project", projectMenuId: null })));
+  document.querySelectorAll("[data-wizard-feature]").forEach((el) => el.addEventListener("click", () => {
+    const patch = { wizardFeature: el.dataset.wizardFeature };
+    if (el.dataset.wizardAuto === "true") patch.wizardStep = 2;
+    set(patch);
+  }));
+  document.querySelectorAll("[data-wizard-jump]").forEach((el) => el.addEventListener("click", () => {
+    const step = Number(el.dataset.wizardJump);
+    if (step < state.wizardStep) set({ wizardStep: step });
+  }));
+  document.querySelectorAll("[data-wizard-field]").forEach((el) => el.addEventListener("input", () => {
+    state[el.dataset.wizardField] = el.value;
+  }));
+  document.querySelectorAll("[data-wizard-field]").forEach((el) => el.addEventListener("change", () => {
+    state[el.dataset.wizardField] = el.value;
+  }));
   document.querySelectorAll("[data-project-menu]").forEach((el) => el.addEventListener("click", (event) => {
     event.stopPropagation();
     set({ projectMenuId: state.projectMenuId === el.dataset.projectMenu ? null : el.dataset.projectMenu });
@@ -5575,7 +5893,16 @@ function bind() {
   document.querySelectorAll("[data-tiktok-publish]").forEach((el) => el.addEventListener("click", () => tiktokPublish(el.dataset.tiktokPublish)));
   document.querySelectorAll("[data-tiktok-status]").forEach((el) => el.addEventListener("click", () => tiktokStatus(el.dataset.tiktokStatus)));
   document.querySelectorAll("[data-invoice]").forEach((el) => el.addEventListener("click", () => download(`/api/export/invoice/${el.dataset.invoice}`, `${el.dataset.invoice}.txt`)));
-  document.querySelectorAll("[data-result]").forEach((el) => el.addEventListener("click", () => download(`/api/export/result/${el.dataset.result}`, `duitok-result.txt`)));
+  document.querySelectorAll("[data-result]").forEach((el) => el.addEventListener("click", () => download(`/api/export/result/${el.dataset.result}`, `pokaya-result.txt`)));
+  document.querySelectorAll("[data-video-play]").forEach((el) => el.addEventListener("click", () => playResultVideo(el)));
+  document.querySelectorAll("[data-result-action]").forEach((el) => el.addEventListener("click", () => resultAction(el)));
+  document.querySelectorAll("[data-asset-type]").forEach((el) => el.addEventListener("click", () => set({ assetTypeFilter: el.dataset.assetType })));
+  document.querySelectorAll("[data-asset-project]").forEach((el) => el.addEventListener("click", () => set({ assetProjectFilter: el.dataset.assetProject })));
+  document.querySelectorAll("[data-asset-search]").forEach((el) => el.addEventListener("input", (event) => {
+    state.assetSearch = event.target.value;
+    clearTimeout(assetSearchTimer);
+    assetSearchTimer = setTimeout(render, 180);
+  }));
   document.querySelectorAll("form").forEach((el) => el.addEventListener("submit", submit));
   document.querySelectorAll("[data-lang-toggle]").forEach((el) => el.addEventListener("click", (event) => {
     event.stopPropagation();
@@ -5612,6 +5939,13 @@ async function action(event, name) {
   if (name === "close-modal" && event.target !== event.currentTarget && event.currentTarget.classList.contains("modal-backdrop")) return;
   if (name === "close-modal") return set({ modal: null });
   if (name === "new-project") return set({ modal: "newProject" });
+  if (name === "wizard-back") return set({ wizardStep: Math.max(1, state.wizardStep - 1) });
+  if (name === "wizard-next") return set({ wizardStep: Math.min(4, state.wizardStep + 1) });
+  if (name === "skip-wizard") {
+    markFirstGenerationWizardDone();
+    return set({ page: "agent" });
+  }
+  if (name === "start-wizard") return startFirstGenerationWizard();
   if (name === "sop") return set({ page: "sop", sopTopic: state.page === "project" ? state.step : "dashboard", modal: null });
   if (name === "register") return set({ modal: "register" });
   if (name === "support") return window.open(supportWhatsappUrl, "_blank", "noopener,noreferrer");
@@ -5667,7 +6001,7 @@ async function action(event, name) {
   if (name === "tiktok-creator-info") return tiktokCreatorInfo();
   if (name === "copy-affiliate") {
     const code = state.db?.affiliate?.code || "DUIT2026";
-    await navigator.clipboard?.writeText(`https://duitok.com/ref/${code}`);
+    await navigator.clipboard?.writeText(`https://pokaya.ai/ref/${code}`);
     return notify(t("toastAffiliateCopied"));
   }
   if (name === "copy-affiliate-code") {
@@ -5675,9 +6009,9 @@ async function action(event, name) {
     return notify(t("toastAffiliateCodeCopied"));
   }
   if (name === "support-ticket") return mutate("/support", { method: "POST", body: JSON.stringify({ message: "Support ticket from studio" }) }, t("toastSupportSaved"));
-  if (name === "download-sop") return download("/api/export/sop", "duitok-image-sop.txt");
-  if (name === "download-autopost-extension") return download("/api/export/autopost-extension", "duitok-autopost-extension.zip");
-  if (name === "export-all") return download("/api/export/all", "duitok-data.json");
+  if (name === "download-sop") return download("/api/export/sop", "pokaya-image-sop.txt");
+  if (name === "download-autopost-extension") return download("/api/export/autopost-extension", "pokaya-autopost-extension.zip");
+  if (name === "export-all") return download("/api/export/all", "pokaya-data.json");
   if (name === "export-project") return download(`/api/export/project/${state.projectId}`, `${project().name}.json`);
   if (name?.startsWith("generate") || ["analyze-original", "clone-prompt", "write-story", "decode-viral"].includes(name)) return generate(name);
 }
@@ -5698,7 +6032,7 @@ async function submit(event) {
       state.db = res.state;
       state.projectId = state.db.projects[0]?.id;
       window.history.pushState({}, "", "/studio");
-      return set({ user: res.user, modal: null, page: "dashboard" });
+      return set({ user: res.user, modal: null, page: shouldShowFirstGenerationWizard(res.state, res.user) ? "wizard" : "dashboard" });
     } catch (error) {
       return notify(error.message || "Sign in failed. Please try again.");
     }
@@ -5737,6 +6071,13 @@ async function submit(event) {
   }
   if (event.currentTarget.dataset.form === "affiliate") {
     return notify("Affiliate application saved for the next backend phase.");
+  }
+  if (event.currentTarget.dataset.form === "wizard-details") {
+    state.wizardProductName = String(data.productName || "").trim();
+    state.wizardProductLink = String(data.productLink || "").trim();
+    state.wizardLanguage = String(data.language || state.wizardLanguage);
+    state.wizardStyle = String(data.style || state.wizardStyle);
+    return set({ wizardStep: 4 });
   }
   if (event.currentTarget.dataset.form === "account-profile") {
     return updateAccountProfile({ name: data.name, phone: currentAccountUser().phone || "" });
@@ -5801,6 +6142,87 @@ async function applyImagePreset(promptText) {
   const db = await api(`/projects/${state.projectId}/field`, { method: "PATCH", body: JSON.stringify({ field: "image.prompt", value: promptText }) });
   set({ db });
   notify(t("toastPromptPresetApplied"));
+}
+
+function wizardTargetForFeature(feature = state.wizardFeature) {
+  return {
+    "product-image": { step: "image", action: "generate-image", field: "image.prompt" },
+    "short-video": { step: "ugc", action: "generate-ugc", field: "ugc.script" },
+    "ugc-script": { step: "ugc", action: "generate-ugc", field: "ugc.script" },
+    "content-plan": { step: "auto", action: "generate-auto", field: "auto.productUrl" },
+    "clone-style": { step: "clone", action: "clone-prompt", field: "clone.rules" },
+    "ask-agent": { step: "agent", action: "", field: "" }
+  }[feature] || { step: "agent", action: "", field: "" };
+}
+
+async function createOrPrepareWizardProject() {
+  const productName = state.wizardProductName.trim();
+  let db = state.db;
+  let projectId = state.projectId || db.projects?.[0]?.id || "";
+  if (!projectId) {
+    db = await api("/projects", { method: "POST", body: JSON.stringify({ name: productName || wizardFeatureLabel() }) });
+    projectId = db.projects.at(-1)?.id;
+  }
+  const currentProject = db.projects.find((item) => item.id === projectId);
+  if (productName && /^Project\s+\d+$/i.test(currentProject?.name || "")) {
+    db = await api(`/projects/${projectId}`, { method: "PATCH", body: JSON.stringify({ name: productName }) });
+  }
+  return { db, projectId };
+}
+
+async function patchWizardProjectFields(projectId, target) {
+  const fields = [
+    ["image.prompt", wizardPrompt()],
+    ["image.mode", state.wizardFeature === "product-image" ? "Create Image" : "Create Image"],
+    ["ugc.script", wizardPrompt()],
+    ["original.brief", wizardPrompt()],
+    ["story.notes", wizardPrompt()],
+    ["clone.rules", wizardPrompt()]
+  ];
+  if (state.wizardProductLink) fields.push(["auto.productUrl", state.wizardProductLink]);
+  let db = state.db;
+  for (const [field, value] of fields) {
+    if (!value) continue;
+    db = await api(`/projects/${projectId}/field`, { method: "PATCH", body: JSON.stringify({ field, value }) });
+  }
+  return db;
+}
+
+async function startFirstGenerationWizard() {
+  if (state.wizardBusy) return;
+  if (!state.wizardFeature) return set({ wizardStep: 2 });
+  const target = wizardTargetForFeature();
+  if (state.wizardFeature === "ask-agent") {
+    markFirstGenerationWizardDone();
+    const promptText = wizardPrompt();
+    set({ page: "agent", agentInput: promptText });
+    requestAnimationFrame(() => fillAgentInput(promptText));
+    return notify("Agent is ready to recommend your first step.");
+  }
+  try {
+    set({ wizardBusy: true });
+    const prepared = await createOrPrepareWizardProject();
+    set({ db: prepared.db, projectId: prepared.projectId });
+    const db = await patchWizardProjectFields(prepared.projectId, target);
+    set({ db, projectId: prepared.projectId, step: target.step });
+    if (target.action) {
+      notify(t("toastGenerationQueued"));
+      const generatedDb = await api(`/projects/${prepared.projectId}/generate`, { method: "POST", body: JSON.stringify({ action: target.action, step: target.step }) });
+      markFirstGenerationWizardDone();
+      set({ db: generatedDb, page: "agent", wizardBusy: false });
+      const nextPrompt = `My first ${wizardFeatureLabel()} is ready or queued. Please explain what I should try next as a beginner.`;
+      fillAgentInput(nextPrompt);
+      notify(t("toastGenerationJobQueued"));
+      pollGenerationQueue();
+      return;
+    }
+    markFirstGenerationWizardDone();
+    set({ page: "project", step: target.step, wizardBusy: false });
+    notify("Your first Pokaya tool is ready.");
+  } catch (error) {
+    set({ wizardBusy: false });
+    notify(error.message || t("toastSaveFailed"));
+  }
 }
 
 async function uploadChange(event) {
@@ -6345,6 +6767,83 @@ async function download(url, filename) {
   link.click();
   URL.revokeObjectURL(link.href);
   set({ modal: "export" });
+}
+
+function playResultVideo(button) {
+  const shell = button?.closest(".result-video-shell");
+  const video = shell?.querySelector("video");
+  if (!video) return;
+  video.controls = true;
+  video.play().catch(() => null);
+  shell.classList.add("is-playing");
+}
+
+function findAssetResult(id) {
+  return allResults().find((item) => item.id === id);
+}
+
+async function resultAction(button) {
+  const id = button?.dataset.resultId;
+  const actionName = button?.dataset.resultAction;
+  if (!id || !actionName) return;
+  const item = findAssetResult(id);
+  try {
+    if (actionName === "download") {
+      const kind = button.dataset.resultKind || "text";
+      const filename = kind === "video" ? `pokaya-${id}.mp4` : kind === "image" ? `pokaya-${id}.png` : "pokaya-result.txt";
+      const path = kind === "text" ? `/api/export/result/${id}` : `/api/media/result/${id}/${kind}`;
+      return download(path, filename);
+    }
+    if (actionName === "delete") {
+      const approved = window.confirm("删除这个生成结果？");
+      if (!approved) return;
+      const db = await api(`/results/${id}`, { method: "DELETE" });
+      set({ db });
+      return notify("已删除生成结果。");
+    }
+    if (actionName === "copy-prompt") {
+      const text = item?.body || "";
+      if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text);
+      else {
+        const area = document.createElement("textarea");
+        area.value = text;
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand("copy");
+        area.remove();
+      }
+      return notify("Prompt 已复制。");
+    }
+    if (actionName === "rename") {
+      const title = window.prompt("给这个资产改名", item?.title || "");
+      if (title === null) return;
+      const db = await api(`/results/${id}`, { method: "PATCH", body: JSON.stringify({ title }) });
+      set({ db });
+      return notify("资产已改名。");
+    }
+    if (actionName === "schedule") {
+      const db = await api(`/results/${id}/schedule`, { method: "POST", body: JSON.stringify({}) });
+      set({ db, page: "autopost" });
+      return notify("已加入排期草稿。");
+    }
+    if (actionName === "variant") {
+      if (!item?.projectId) return notify("找不到这个资产所属项目。");
+      const prompt = `${item.body || item.title || ""}\n\nCreate a fresh variation: keep the same product logic, improve the hook, change composition, and make it suitable for TikTok Shop testing.`;
+      const db = await api(`/projects/${item.projectId}/field`, { method: "PATCH", body: JSON.stringify({ field: "image.prompt", value: prompt }) });
+      set({ db, projectId: item.projectId, page: "project", step: item.videoUrl ? "ugc" : "image" });
+      return notify("已把变体 prompt 放回项目，可直接继续生成。");
+    }
+    if (actionName === "avatar" || actionName === "product") {
+      const db = await api(`/results/${id}/save-reference`, {
+        method: "POST",
+        body: JSON.stringify({ kind: actionName })
+      });
+      set({ db });
+      return notify(actionName === "avatar" ? "已保存为人物参考。" : "已保存为产品图参考。");
+    }
+  } catch (error) {
+    notify(error.message);
+  }
 }
 
 async function showPaymentReturnNotice() {

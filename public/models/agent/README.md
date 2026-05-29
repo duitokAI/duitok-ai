@@ -1,4 +1,4 @@
-# Duitok Agent 3D Asset Drop Folder
+# Pokaya Agent 3D Asset Drop Folder
 
 Put the production character model here:
 

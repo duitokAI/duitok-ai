@@ -1,4 +1,4 @@
-# Duitok  AI: What To Do Next
+# Pokaya AI: What To Do Next
 
 You currently have config files for several cloud platforms:
 
@@ -13,7 +13,7 @@ Do not use all four. Use Render first.
 
 ```text
 Render
-  ├─ serves the Duitok  AI frontend
+  ├─ serves the Pokaya AI frontend
   ├─ runs the Node API
   ├─ connects to Supabase Postgres for durable app data
   └─ receives CHIP payment callbacks
@@ -43,11 +43,11 @@ Set these in Render:
 ```env
 NODE_ENV=production
 SERVE_STATIC=true
-PUBLIC_APP_URL=https://duitok.com
-CORS_ORIGINS=
+PUBLIC_APP_URL=https://pokaya.ai
+CORS_ORIGINS=https://pokaya.ai,https://www.pokaya.ai,https://duitok.com,https://www.duitok.com
 AUTH_SECRET=your_long_random_auth_secret
 ADMIN_USER_IDS=u_1
-ADMIN_EMAILS=admin@duitok.com
+ADMIN_EMAILS=admin@pokaya.ai
 ADMIN_API_KEY=your_private_admin_unlock_key
 DATABASE_URL=your_supabase_postgres_connection_string
 POSTGRES_SSL=true
@@ -111,7 +111,7 @@ R2_ENDPOINT=https://your_cloudflare_account_id.r2.cloudflarestorage.com
 R2_BUCKET=your_r2_bucket
 R2_ACCESS_KEY_ID=your_r2_access_key_id
 R2_SECRET_ACCESS_KEY=your_r2_secret_access_key
-R2_PUBLIC_BASE_URL=https://media.your-duitok-domain.com
+R2_PUBLIC_BASE_URL=https://media.pokaya.ai
 ```
 
 After Render deploys, copy its HTTPS domain and paste it into `PUBLIC_APP_URL`.
@@ -127,7 +127,7 @@ After Render deploys, copy its HTTPS domain and paste it into `PUBLIC_APP_URL`.
 5. Paste that value into Render as `DATABASE_URL`. Keep `POSTGRES_SSL=true` and do not add `sslmode=require` to the URL.
 6. Redeploy the Render service.
 
-The app will automatically create one table called `app_state` and store the current Duitok  AI app data there. If `DATABASE_URL` is empty, it falls back to local `data/db.json` for development.
+The app will automatically create one table called `app_state` and store the current Pokaya AI app data there. If `DATABASE_URL` is empty, it falls back to local `data/db.json` for development.
 
 ## Step 5: Connect CHIP
 
@@ -145,7 +145,7 @@ https://your-domain.com/api/payments/chip/callback
 
 ## Step 6: Test Payment
 
-1. Open your deployed Duitok  AI site.
+1. Open your deployed Pokaya AI site.
 2. Sign in.
 3. Go to Top Up Credit.
 4. Click RM10 first.

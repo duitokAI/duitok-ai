@@ -1,13 +1,13 @@
-# Duitok Auto Post
+# Pokaya Auto Post
 
-Chrome extension for pulling Duitok scheduled TikTok posts into TikTok upload pages.
+Chrome extension for pulling Pokaya scheduled TikTok posts into TikTok upload pages.
 
 ## What it does
 
 - Reads scheduled jobs from `/api/autopost/jobs`
 - Opens TikTok upload page
 - Copies or fills caption and hashtags into the visible TikTok caption field
-- Marks a queue item as posted in Duitok after the user confirms it
+- Marks a queue item as posted in Pokaya after the user confirms it
 
 ## What it does not do
 
@@ -22,4 +22,4 @@ Chrome extension for pulling Duitok scheduled TikTok posts into TikTok upload pa
 3. Enable **Developer Mode**.
 4. Click **Load unpacked**.
 5. Select the extracted `duitok-autopost-extension` folder.
-6. Open Duitok locally or production, then set the API URL in the extension popup.
+6. Open Pokaya locally or production, then set the API URL in the extension popup.
