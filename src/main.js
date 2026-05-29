@@ -34,6 +34,10 @@ let promoCountdownTimer = null;
 let assetSearchTimer = null;
 let sopSearchTimer = null;
 let imagePresetSaveTimer = null;
+let autoFrameworkSaveTimer = null;
+let autoFrameworkSaveSeq = 0;
+const quickFieldSaveTimers = new Map();
+let quickFieldSaveSeq = 0;
 
 const steps = [
   ["image", "image", "stepImage", "01"],
@@ -63,6 +67,24 @@ const wizardFeatures = [
   ["clone-style", "copy-check", "Clone Viral Style"],
   ["ask-agent", "bot", "Ask Pokaya Agent"]
 ];
+
+function defaultUgcPromptBuilder() {
+  return {
+    shotType: "Medium",
+    shot: "Medium shot, waist up",
+    subject: "same person from reference image, same appearance, holding the same product",
+    actionType: "Hold + Smile",
+    action: "She holds the product in her right hand facing the camera, smiles naturally, and speaks directly to camera with gentle hand gestures.",
+    beginning: "",
+    middle: "",
+    closing: "",
+    tone: "Santai",
+    voice: "Perempuan 20an",
+    style: "Cinematic",
+    stylePrompt: "Soft natural lighting, shallow depth of field, cinematic film look, audio dialogue only, clean vertical frame.",
+    builtPrompt: ""
+  };
+}
 
 const state = {
   loading: true,
@@ -97,6 +119,7 @@ const state = {
   agentVisualPhase: "idle",
   agentTaskMode: "idle",
   agentIdleActivity: "sleep",
+  agentQueue: [],
   agentMessages: JSON.parse(localStorage.getItem(storageKeys.agentMessages) || "[]"),
   agentContextSummary: localStorage.getItem(storageKeys.agentContextSummary) || "",
   agentAttachments: [],
@@ -115,6 +138,9 @@ const state = {
   affiliateTab: "overview",
   attachmentPickerKind: "avatar",
   attachmentPickerFilter: "avatar",
+  ugcPromptBuilder: defaultUgcPromptBuilder(),
+  activeResultId: null,
+  editImageBusy: false,
   assetSearch: "",
   assetTypeFilter: "all",
   assetProjectFilter: "all",
@@ -423,7 +449,7 @@ const copy = {
     referralClicks: "Clicks",
     referralCode: "Your Referral Code",
     copyCode: "Copy Code",
-    shareReferralLink: "Share this link to invite sellers",
+    shareReferralLink: "Share this link: earn 20% when they top up and use Pokaya",
     referralLink: "Referral link",
     copyLink: "Copy Link",
     affiliateOverview: "Overview",
@@ -432,8 +458,8 @@ const copy = {
     affiliateCashOut: "Cash Out",
     affiliateHowTitle: "How affiliate works",
     affiliateHow1: "Share your Pokaya link or referral code with sellers.",
-    affiliateHow2: "When they subscribe through your link, your commission is tracked.",
-    affiliateHow3: "Wallet balance updates after payment is confirmed.",
+    affiliateHow2: "When they top up and use Pokaya through your link, you earn 20% commission.",
+    affiliateHow3: "Example: they top up RM100, you get RM20. They top up RM1000, you get RM200.",
     affiliateHow4: "Cash out after the minimum RM50 threshold to a Malaysian bank account.",
     totalReferrals: "Total referrals",
     commissionEvents: "Commission events",
@@ -713,7 +739,7 @@ const copy = {
     referralClicks: "点击数",
     referralCode: "您的推荐码",
     copyCode: "复制码",
-    shareReferralLink: "分享这个链接邀请卖家",
+    shareReferralLink: "分享链接：用户入金使用后，您拿 20% 佣金",
     referralLink: "推荐链接",
     copyLink: "复制链接",
     affiliateOverview: "总览",
@@ -721,9 +747,9 @@ const copy = {
     affiliateReferrals: "推荐用户",
     affiliateCashOut: "提现",
     affiliateHowTitle: "Affiliate 如何运作",
-    affiliateHow1: "把您的 Pokaya 链接或推荐码分享给卖家。",
-    affiliateHow2: "对方通过您的链接订阅后，系统会追踪您的佣金。",
-    affiliateHow3: "付款确认后，钱包余额会更新。",
+    affiliateHow1: "把您的 Pokaya 分享链接或推荐码发给用户。",
+    affiliateHow2: "对方通过您的链接入金并使用 Pokaya 后，您可获得 20% 佣金。",
+    affiliateHow3: "例子：用户入金 RM100，您拿 RM20；用户入金 RM1000，您拿 RM200。",
     affiliateHow4: "达到最低 RM50 后，可以提现到马来西亚银行账户。",
     totalReferrals: "总推荐数",
     commissionEvents: "佣金事件",
@@ -1002,7 +1028,7 @@ const copy = {
     referralClicks: "Clicks",
     referralCode: "Your Referral Code",
     copyCode: "Copy Code",
-    shareReferralLink: "Share this link to invite sellers",
+    shareReferralLink: "Share this link: earn 20% when they top up and use Pokaya",
     referralLink: "Referral link",
     copyLink: "Copy Link",
     affiliateOverview: "Overview",
@@ -1010,9 +1036,9 @@ const copy = {
     affiliateReferrals: "Referrals",
     affiliateCashOut: "Cash Out",
     affiliateHowTitle: "How affiliate works",
-    affiliateHow1: "Share your Pokaya link or referral code with sellers.",
-    affiliateHow2: "When they subscribe through your link, your commission is tracked.",
-    affiliateHow3: "Wallet balance updates after payment is confirmed.",
+    affiliateHow1: "Share your Pokaya link or referral code with users.",
+    affiliateHow2: "When they top up and use Pokaya through your link, you earn 20% commission.",
+    affiliateHow3: "Example: they top up RM100, you get RM20. They top up RM1000, you get RM200.",
     affiliateHow4: "Cash out after the minimum RM50 threshold to a Malaysian bank account.",
     totalReferrals: "Total referrals",
     commissionEvents: "Commission events",
@@ -1276,7 +1302,8 @@ function shouldAutoScrollAgentThread(patch = {}, scroll = null) {
   if (state.page !== "agent") return false;
   const affectsThread = Object.prototype.hasOwnProperty.call(patch, "agentMessages")
     || Object.prototype.hasOwnProperty.call(patch, "agentBusy")
-    || Object.prototype.hasOwnProperty.call(patch, "agentWorkingTick");
+    || Object.prototype.hasOwnProperty.call(patch, "agentWorkingTick")
+    || Object.prototype.hasOwnProperty.call(patch, "agentQueue");
   return affectsThread && (!scroll || scroll.nearBottom);
 }
 
@@ -3942,12 +3969,59 @@ function imagePromptSettings(p) {
     </section>`;
 }
 
+const ugcBuilderShotOptions = {
+  "Medium": "Medium shot, waist up",
+  "Close-up": "Close-up shot, face and product clearly visible",
+  "Wide": "Wide shot showing creator, product, and room context",
+  "Selfie": "Selfie-style handheld shot, creator speaking close to camera",
+  "Low Angle": "Low angle shot, confident creator pose, product feels important",
+  "Over Shoulder": "Over-shoulder shot showing creator using the product from a natural POV",
+  "Product ECU": "Extreme close-up on product texture, label, and usage detail",
+  "Arc/Circle": "Slow arc/circle camera movement around creator and product"
+};
+
+const ugcBuilderActionOptions = {
+  "Hold + Smile": "She holds the product in her right hand facing the camera, smiles naturally, and speaks directly to camera with gentle hand gestures.",
+  "Demo": "She demonstrates how to use the product step by step, keeps the product visible, and explains the key benefit naturally.",
+  "Unbox": "She opens the parcel, takes out the product, reacts with a natural smile, and shows the product clearly to camera.",
+  "Use": "She uses the product in a real daily routine, shows the result or practical benefit, and keeps the motion natural."
+};
+
+const ugcBuilderClosingOptions = ["Order sekarang", "Tekan bawah", "COD", "Jom cuba", "Link bawah"];
+
+const ugcBuilderToneOptions = {
+  "Santai": "relaxed and casual",
+  "Excited": "energetic and excited",
+  "Confident": "clear and confident",
+  "Friendly": "warm and friendly",
+  "Urgent": "direct with light urgency",
+  "Storytelling": "storytelling and natural"
+};
+
+const ugcBuilderVoiceOptions = {
+  "Perempuan 20an": "young Malay woman voice in her 20s, cheerful and trendy",
+  "Makcik": "warm makcik voice, trustworthy and familiar",
+  "Nenek": "gentle nenek voice, caring and sincere",
+  "Lelaki 20an": "young Malaysian male voice in his 20s, casual and energetic",
+  "Pakcik": "friendly pakcik voice, practical and believable",
+  "Atuk": "calm atuk voice, patient and wise",
+  "Kanak Perempuan": "young girl voice, bright and innocent",
+  "Kanak Lelaki": "young boy voice, playful and clear"
+};
+
+const ugcBuilderStyleOptions = {
+  "Cinematic": "Soft natural lighting, shallow depth of field, cinematic film look, audio dialogue only, clean vertical frame.",
+  "UGC Raw": "Raw phone-recorded UGC look, realistic handheld movement, natural home lighting, authentic creator review style.",
+  "Golden Hour": "Warm golden-hour light, soft glow, lifestyle upgrade feeling, clean vertical social commerce frame.",
+  "Moody": "Moody indoor lighting, subtle contrast, premium product focus, realistic creator performance.",
+  "Studio": "Bright studio lighting, clean background, sharp product visibility, polished TikTok Shop review style."
+};
+
 function ugcPanel(p) {
   const provider = p.ugc.provider || "Veo 3.1";
   const imageMode = p.ugc.imageMode || "Product Reference (AI creates scene)";
   const firstFrameMode = imageMode === "First Frame (animate from image)";
   const textOnlyMode = imageMode === "Text to Video (no image needed)";
-  const promptTemplate = "Create an 8-second TikTok Shop UGC scene. Start with a visual hook in 0-2s, show the product benefit in 2-6s, and end with a clear CTA in 6-8s. Natural Malaysian creator tone, realistic product handling, no exaggerated claims.";
   return `
     <div class="generator-box video-generator-box">
       <h2>🎬 Video Generator</h2>
@@ -3961,7 +4035,7 @@ function ugcPanel(p) {
     <section class="ugc-scene-card">
       <div class="ugc-scene-head">
         <h2>🎞️ Scene</h2>
-        <button type="button" data-field-set="ugc.script" data-value="${esc(promptTemplate)}">${icon("sparkles", 18)} Prompt Builder</button>
+        <button type="button" data-action="open-ugc-prompt-builder">${icon("sparkles", 18)} Prompt Builder</button>
       </div>
       ${textOnlyMode ? ugcTextOnlyNotice() : firstFrameMode ? ugcFrameReferences() : ugcProductReferences(provider)}
       <div class="ugc-prompt-toolbar">
@@ -4151,7 +4225,7 @@ function autoFrameworkChip([tag, label, info], selected = []) {
   const value = `${tag} ${label}`;
   const checked = selected.includes(value);
   const tagClass = tag === "UGC" ? "ugc-tag" : tag === "PRD" ? "prd-tag" : "pov-tag";
-  return `<label class="${checked ? "selected" : ""}" title="${esc(info)}"><input type="checkbox" data-auto-framework-toggle="${esc(value)}" ${checked ? "checked" : ""}><span class="${tagClass}">${tag}</span><strong>${esc(label)}</strong><b>ⓘ</b></label>`;
+  return `<label class="${checked ? "selected" : ""}" title="${esc(info)}" data-auto-framework-card="${esc(value)}" role="checkbox" aria-checked="${checked ? "true" : "false"}" tabindex="0"><input type="checkbox" data-auto-framework-toggle="${esc(value)}" ${checked ? "checked" : ""}><span class="${tagClass}">${tag}</span><strong>${esc(label)}</strong><b>ⓘ</b></label>`;
 }
 
 function autoProcessLog(p) {
@@ -4480,39 +4554,74 @@ function generationJobCard(job) {
 }
 
 function resultCard(item) {
-  const model = item.title || "Generated asset";
-  const promptText = item.body || "";
+  const title = item.title || "Generated asset";
+  const promptText = resultPromptText(item);
   const promptPreview = promptText.replaceAll("\n", " ").trim();
   const canSaveReference = Boolean(item.imageUrl || item.videoUrl);
   const isLegacyVisual = Boolean(item.visualCard);
+  const modelLabel = resultModelLabel(item);
+  const safeTitle = esc(title);
   return `
     <article class="result-card ${isLegacyVisual ? "legacy-visual-result" : ""}">
       <header class="result-card-head">
         <span>${icon("circle-check", 18)}</span>
-        <b>${esc(model)}</b>
+        <b>${esc(modelLabel)}</b>
       </header>
       ${resultPreview(item)}
       <div class="result-meta">
-        <span>${icon("cloud-check", 16)} Pokaya asset</span>
-        <code>${esc(item.id)}</code>
+        <span>${icon("cloud-check", 16)} ${esc(resultMediaLabel(item))}</span>
+        <code># ${esc(item.taskId || item.providerTaskId || item.id)}</code>
+      </div>
+      <label class="result-name">
+        <span>${icon("pencil-line", 18)}</span>
+        <div>
+          <b>Name</b>
+          <input data-result-title="${esc(item.id)}" value="${safeTitle}" aria-label="Asset name">
+        </div>
+      </label>
+      <div class="result-model-row">
+        <span>${esc(modelLabel)}</span>
+        <small>${item.provider ? esc(String(item.provider).toUpperCase()) : "POKAYA"}</small>
       </div>
       <div class="result-prompt">
         ${icon("pencil", 18)}
         <div><b>Prompt</b><p>${promptPreview ? `${esc(promptPreview.slice(0, 260))}${promptPreview.length > 260 ? "..." : ""}` : "No prompt saved for this result."}</p></div>
       </div>
       <div class="result-actions" aria-label="Result actions">
-        <button type="button" data-result-action="avatar" data-result-id="${esc(item.id)}" title="保存人物" ${canSaveReference ? "" : "disabled"}>${icon("user-round", 19)}<span>人物</span></button>
-        <button type="button" data-result-action="product" data-result-id="${esc(item.id)}" title="保存产品图" ${canSaveReference ? "" : "disabled"}>${icon("package", 19)}<span>产品</span></button>
+        <button type="button" data-result-action="save" data-result-id="${esc(item.id)}" title="保存到附件" ${canSaveReference ? "" : "disabled"}>${icon("cloud-upload", 19)}<span>保存</span></button>
+        <button type="button" data-result-action="edit-image" data-result-id="${esc(item.id)}" title="Edit Image" ${canSaveReference ? "" : "disabled"}>${icon("palette", 19)}<span>编辑</span></button>
         <button type="button" data-result-action="download" data-result-id="${esc(item.id)}" data-result-kind="${item.videoUrl ? "video" : item.imageUrl ? "image" : "text"}" title="下载">${icon("download", 20)}<span>下载</span></button>
         <button type="button" data-result-action="delete" data-result-id="${esc(item.id)}" title="删除">${icon("trash-2", 20)}<span>删除</span></button>
       </div>
-      <div class="result-workflow-actions" aria-label="Asset workflow actions">
-        <button type="button" data-result-action="copy-prompt" data-result-id="${esc(item.id)}">${icon("copy", 15)} 复制 prompt</button>
-        <button type="button" data-result-action="schedule" data-result-id="${esc(item.id)}">${icon("calendar-plus", 15)} 加入排期</button>
-        <button type="button" data-result-action="rename" data-result-id="${esc(item.id)}">${icon("edit-3", 15)} 改名</button>
-        <button type="button" data-result-action="variant" data-result-id="${esc(item.id)}">${icon("wand-sparkles", 15)} 生成变体</button>
-      </div>
     </article>`;
+}
+
+function resultMediaLabel(item) {
+  if (item.videoUrl) return "Generated video";
+  if (item.imageUrl || item.visualCard) return "Generated image";
+  return "Generated text";
+}
+
+function resultModelLabel(item) {
+  const model = item.model || item.providerTitle || item.title || "";
+  if (/nano|banana/i.test(model)) return "NANO BANANA PRO";
+  if (/gpt|apimart/i.test(model)) return "GPT IMAGE 2";
+  return item.videoUrl ? "VIDEO MODEL" : "GPT IMAGE 2";
+}
+
+function resultPromptText(item) {
+  const job = (state.db?.generationJobs || []).find((entry) => entry.resultId === item.id || entry.taskId === item.taskId || entry.providerTaskId === item.providerTaskId);
+  return job?.prompt || item.prompt || item.providerBody || item.body || "";
+}
+
+function resultDownloadFilename(item, kind = "image") {
+  const base = String(item?.title || item?.providerTitle || item?.id || "pokaya-asset")
+    .toLowerCase()
+    .replace(/[^a-z0-9\u4e00-\u9fa5]+/gi, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 72) || "pokaya-asset";
+  const ext = kind === "video" ? "mp4" : kind === "text" ? "txt" : "png";
+  return `${base}.${ext}`;
 }
 
 function resultPreview(item) {
@@ -4671,6 +4780,37 @@ function affiliateMini(label, value) {
   return `<article><span>${label}</span><b>${value}</b></article>`;
 }
 
+function affiliateCommissionExamples() {
+  const content = {
+    zh: {
+      title: "20% 佣金怎么算？",
+      copy: "用户通过您的链接入金并使用 Pokaya，系统按入金金额计算 20% 佣金。",
+      examples: [["用户入金", "RM100", "您获得", "RM20"], ["用户入金", "RM1000", "您获得", "RM200"]]
+    },
+    ms: {
+      title: "Cara kira komisen 20%",
+      copy: "Bila user top up dan guna Pokaya melalui link anda, sistem kira 20% komisen daripada jumlah top up.",
+      examples: [["User top up", "RM100", "Anda dapat", "RM20"], ["User top up", "RM1000", "Anda dapat", "RM200"]]
+    },
+    en: {
+      title: "How the 20% commission works",
+      copy: "When a user tops up and uses Pokaya through your link, you earn 20% of the top-up amount.",
+      examples: [["User tops up", "RM100", "You earn", "RM20"], ["User tops up", "RM1000", "You earn", "RM200"]]
+    }
+  }[state.lang] || {};
+  return `<div class="affiliate-rate-box">
+    <div>
+      <h3>${content.title}</h3>
+      <p>${content.copy}</p>
+    </div>
+    <div class="affiliate-rate-examples">
+      ${content.examples.map(([inLabel, inAmount, outLabel, outAmount]) => `<article>
+        <span>${inLabel}</span><b>${inAmount}</b><em>${outLabel}</em><strong>${outAmount}</strong>
+      </article>`).join("")}
+    </div>
+  </div>`;
+}
+
 function affiliateTabPanel(tab, metrics) {
   const { clicks, totalEarned, cashedOut, referrals, available } = metrics;
   if (tab === "commissions") {
@@ -4725,6 +4865,7 @@ function affiliateTabPanel(tab, metrics) {
         <li>${t("affiliateHow3")}</li>
         <li>${t("affiliateHow4")}</li>
       </ul>
+      ${affiliateCommissionExamples()}
     </div>
     <div class="affiliate-mini-grid">
       ${affiliateMini(t("totalReferrals"), referrals)}
@@ -5056,6 +5197,10 @@ function modal() {
   const editProject = state.db?.projects?.find((item) => item.id === state.editingProjectId);
   if (state.modal === "sop") return sopDashboardModal();
   if (state.modal === "attachmentPicker") return attachmentPickerModal();
+  if (state.modal === "ugcPromptBuilder") return ugcPromptBuilderModal();
+  if (state.modal === "saveResultReference") return saveResultReferenceModal();
+  if (state.modal === "editResultImage") return editResultImageModal();
+  if (state.modal === "deleteResult") return deleteResultModal();
   const title = { newProject: t("createProject"), renameProject: t("renameProject"), deleteProject: t("deleteProject"), register: t("choosePlan"), sop: t("sopImage"), export: t("exportReady"), support: t("supportTitle") }[state.modal];
   const body = {
     newProject: `<form data-form="project"><label>${t("project")}<input name="name" placeholder="Project ${(state.db?.projects.length || 0) + 1}" required></label><button class="gold-button" type="submit">${icon("plus")} ${t("newProject")}</button></form>`,
@@ -5067,6 +5212,196 @@ function modal() {
     support: `<form data-form="support" class="support-form"><label>${t("supportMessage")}<textarea name="message" placeholder="${esc(t("supportPlaceholder"))}" required></textarea></label><button class="gold-button" type="submit">${icon("send")} ${t("supportTicket")}</button></form>`
   }[state.modal];
   return `<div class="modal-backdrop" data-action="close-modal"><section class="modal"><button class="icon-only close" data-action="close-modal">${icon("x")}</button><p class="folder-label">${mascotIcon("label-mascot-icon")} Pokaya AI</p><h2>${title}</h2>${body}</section></div>`;
+}
+
+function ugcPromptBuilderModal() {
+  const builder = state.ugcPromptBuilder || defaultUgcPromptBuilder();
+  const builtPrompt = builder.builtPrompt || buildUgcPrompt(builder);
+  return `<div class="modal-backdrop ugc-builder-backdrop" data-action="close-modal">
+    <section class="ugc-builder-modal" role="dialog" aria-modal="true" aria-label="UGC Prompt Builder">
+      <header class="ugc-builder-head">
+        <div>
+          <span>${icon("sparkles", 26)}</span>
+          <h2>UGC Prompt Builder</h2>
+          <p>5-Part Veo 3.1 Formula</p>
+        </div>
+        <button class="icon-only ugc-builder-close" data-action="close-modal" type="button" aria-label="Close">${icon("x", 28)}</button>
+      </header>
+      <div class="ugc-builder-scroll">
+        <section class="ugc-builder-section">
+          ${ugcBuilderSectionTitle("clapperboard", "Scene Setup", "5-Part Veo Formula")}
+          <p class="ugc-builder-label">Shot Type</p>
+          <div class="ugc-builder-options">
+            ${Object.entries(ugcBuilderShotOptions).map(([label, value]) => ugcBuilderOption("shotType", label, builder.shotType, value, "shot")).join("")}
+          </div>
+          ${ugcBuilderInput("shot", builder.shot)}
+          <p class="ugc-builder-label">Subject (from reference image)</p>
+          ${ugcBuilderInput("subject", builder.subject)}
+          <p class="ugc-builder-help">Veo follows your reference image for character + product</p>
+          <p class="ugc-builder-label">Action</p>
+          <div class="ugc-builder-options">
+            ${Object.entries(ugcBuilderActionOptions).map(([label, value]) => ugcBuilderOption("actionType", label, builder.actionType, value, "action")).join("")}
+          </div>
+          ${ugcBuilderTextarea("action", builder.action, 3)}
+        </section>
+        <section class="ugc-builder-section">
+          ${ugcBuilderSectionTitle("message-circle", "Dialog Script", "8 Seconds")}
+          <div class="ugc-builder-timeline">
+            ${ugcBuilderInput("beginning", builder.beginning, "0-2s: Beginning", "e.g. \"Ini rahsia cik somi balik awal!\"")}
+            ${ugcBuilderTextarea("middle", builder.middle, 3, "2-6s: Middle", "e.g. \"Ramai kawan complain cik somi dia selalu balik lewat...\"")}
+            ${ugcBuilderInput("closing", builder.closing, "6-8s: Closing", "e.g. \"Order yang ni, baru puas hati!\"")}
+          </div>
+          <div class="ugc-builder-small-options">
+            ${ugcBuilderClosingOptions.map((item) => `<button type="button" data-ugc-builder-field="closing" data-ugc-builder-value="${esc(item)}">${esc(item)}</button>`).join("")}
+          </div>
+        </section>
+        <section class="ugc-builder-section">
+          ${ugcBuilderSectionTitle("mic-2", "Tone, Voice & Style", "Social Commerce")}
+          <div class="ugc-builder-three">
+            ${ugcBuilderSelect("tone", "Tone", Object.keys(ugcBuilderToneOptions), builder.tone)}
+            ${ugcBuilderSelect("voice", "Voice", Object.keys(ugcBuilderVoiceOptions), builder.voice)}
+            ${ugcBuilderSelect("style", "Style", Object.keys(ugcBuilderStyleOptions), builder.style)}
+          </div>
+          ${ugcBuilderTextarea("stylePrompt", builder.stylePrompt, 3, "Visual Style")}
+        </section>
+        <section class="ugc-builder-section">
+          ${ugcBuilderSectionTitle("file-pen-line", "Build Prompt", "Final")}
+          <button class="ugc-builder-build" type="button" data-action="build-ugc-prompt">${icon("wand-sparkles", 18)} Build Prompt</button>
+          ${ugcBuilderTextarea("builtPrompt", builtPrompt, 8, "", "Built prompt will appear here...")}
+          <div class="ugc-builder-actions">
+            <button type="button" data-action="copy-ugc-prompt">${icon("copy", 17)} Copy</button>
+            <button type="button" data-action="use-ugc-prompt">${icon("video", 17)} Use in Video</button>
+            <button type="button" data-action="save-ugc-prompt-template">${icon("bookmark", 17)} Save</button>
+          </div>
+        </section>
+      </div>
+    </section>
+  </div>`;
+}
+
+function ugcBuilderSectionTitle(ic, title, pill) {
+  return `<div class="ugc-builder-section-head">
+    <h3>${icon(ic, 24)} ${title}</h3>
+    <span>${pill}</span>
+  </div>`;
+}
+
+function ugcBuilderOption(field, label, active, value, targetField) {
+  const data = targetField ? ` data-ugc-builder-target="${esc(targetField)}" data-ugc-builder-target-value="${esc(value)}"` : "";
+  return `<button type="button" class="${active === label ? "active" : ""}" data-ugc-builder-option="${esc(field)}" data-ugc-builder-value="${esc(label)}"${data}>${esc(label)}</button>`;
+}
+
+function ugcBuilderInput(field, value, label = "", placeholder = "") {
+  return `<label class="ugc-builder-field">${label ? `<span>${esc(label)}</span>` : ""}<input type="text" data-ugc-builder-input="${esc(field)}" value="${esc(value || "")}" placeholder="${esc(placeholder)}"></label>`;
+}
+
+function ugcBuilderTextarea(field, value, rows = 3, label = "", placeholder = "") {
+  return `<label class="ugc-builder-field">${label ? `<span>${esc(label)}</span>` : ""}<textarea rows="${rows}" data-ugc-builder-input="${esc(field)}" placeholder="${esc(placeholder)}">${esc(value || "")}</textarea></label>`;
+}
+
+function ugcBuilderSelect(field, label, options, active) {
+  return `<label class="ugc-builder-field"><span>${esc(label)}</span><select data-ugc-builder-input="${esc(field)}">${options.map((item) => `<option value="${esc(item)}" ${item === active ? "selected" : ""}>${esc(item)}</option>`).join("")}</select></label>`;
+}
+
+function buildUgcPrompt(source = state.ugcPromptBuilder) {
+  const builder = { ...defaultUgcPromptBuilder(), ...(source || {}) };
+  const tone = ugcBuilderToneOptions[builder.tone] || builder.tone;
+  const voice = ugcBuilderVoiceOptions[builder.voice] || builder.voice;
+  const beginning = builder.beginning || "Wait, tengok ni.";
+  const middle = builder.middle || "Produk ni nampak simple, tapi bila guna memang rasa daily routine jadi lagi senang.";
+  const closing = builder.closing || "Tekan bawah.";
+  return [
+    "8-second TikTok Shop UGC video, vertical 9:16.",
+    `Shot: ${builder.shot}.`,
+    `Subject: ${builder.subject}.`,
+    `Action: ${builder.action}`,
+    "Dialog timeline:",
+    `0-2s hook: "${beginning}"`,
+    `2-6s middle: "${middle}"`,
+    `6-8s closing: "${closing}"`,
+    `Tone: ${tone}.`,
+    `Voice: ${voice}.`,
+    `Visual style: ${builder.stylePrompt}`,
+    "Requirements: keep the same person and same product from the reference image, keep product visible, use natural Malaysian creator delivery, avoid exaggerated claims, no fake before-after, no text overlays unless requested."
+  ].join("\n");
+}
+
+function activeResult() {
+  return state.activeResultId ? findAssetResult(state.activeResultId) : null;
+}
+
+function saveResultReferenceModal() {
+  const item = activeResult();
+  return `<div class="modal-backdrop result-modal-backdrop" data-action="close-modal">
+    <section class="modal result-choice-modal" role="dialog" aria-modal="true" aria-label="Save to Attachments">
+      <button class="icon-only close" data-action="close-modal" type="button">${icon("x")}</button>
+      <p class="folder-label">${mascotIcon("label-mascot-icon")} Pokaya AI</p>
+      <h2>保存到 Attachments</h2>
+      <p class="result-modal-copy">把这张图锁成后续生成可复用的参考素材。</p>
+      ${item ? `<div class="result-modal-preview">${resultPreview(item)}</div>` : ""}
+      <div class="result-save-options">
+        <button type="button" data-result-action="save-product" data-result-id="${esc(state.activeResultId || "")}">
+          ${icon("package", 28)}
+          <b>Product</b>
+          <span>产品包装、标签、hero shot，用来锁定产品外观。</span>
+        </button>
+        <button type="button" data-result-action="save-avatar" data-result-id="${esc(state.activeResultId || "")}">
+          ${icon("circle-user-round", 28)}
+          <b>Avatar</b>
+          <span>人物、脸、角色参考，用来保持 UGC 形象一致。</span>
+        </button>
+      </div>
+    </section>
+  </div>`;
+}
+
+function editResultImageModal() {
+  const item = activeResult();
+  const attachments = (state.db?.attachments || []).filter((entry) => !entry.projectId || entry.projectId === item?.projectId);
+  const referenceOptions = attachments.map((entry) => `<option value="${esc(entry.id)}">${esc(entry.kind || "file")} · ${esc(entry.name || "Attachment")}</option>`).join("");
+  return `<div class="modal-backdrop result-modal-backdrop" data-action="close-modal">
+    <section class="modal result-edit-modal" role="dialog" aria-modal="true" aria-label="Edit Image">
+      <button class="icon-only close" data-action="close-modal" type="button">${icon("x")}</button>
+      <p class="folder-label">${icon("palette", 18)} Edit Image</p>
+      <h2>重新编辑这张图片</h2>
+      <form data-form="result-edit-image" class="result-edit-form">
+        ${item ? `<div class="result-edit-preview">${resultPreview(item)}</div>` : ""}
+        <label>生成模型
+          <select name="model">
+            <option value="GPT Image 2" ${resultModelLabel(item || {}).includes("GPT") ? "selected" : ""}>GPT IMAGE 2</option>
+            <option value="Nano Banana Pro" ${resultModelLabel(item || {}).includes("NANO") ? "selected" : ""}>NANO BANANA PRO</option>
+          </select>
+        </label>
+        <label>Edit instruction
+          <textarea name="instruction" required placeholder="例如：保留产品和排版，把背景换成更马来西亚夜市感，CTA 更醒目。">${esc(resultPromptText(item || {}).slice(0, 500))}</textarea>
+        </label>
+        <label>Reference image (optional)
+          <select name="referenceAttachmentId">
+            <option value="">不使用额外参考</option>
+            ${referenceOptions}
+          </select>
+        </label>
+        <div class="result-edit-actions">
+          <button class="gold-button" type="submit" ${state.editImageBusy ? "disabled" : ""}>${icon(state.editImageBusy ? "loader-circle" : "palette")} ${state.editImageBusy ? "生成中" : "Apply Edit"}</button>
+          <button class="dark-button" type="button" data-action="close-modal">Cancel</button>
+        </div>
+      </form>
+    </section>
+  </div>`;
+}
+
+function deleteResultModal() {
+  const item = activeResult();
+  return `<div class="modal-backdrop result-modal-backdrop" data-action="close-modal">
+    <section class="modal result-choice-modal" role="dialog" aria-modal="true" aria-label="Delete result">
+      <button class="icon-only close" data-action="close-modal" type="button">${icon("x")}</button>
+      <p class="folder-label">${icon("trash-2", 18)} Delete</p>
+      <h2>删除这个生成结果？</h2>
+      <p class="result-modal-copy">只删除当前结果卡片；已经保存到 Attachments 的 Product / Avatar 会继续保留。</p>
+      ${item ? `<div class="result-modal-preview">${resultPreview(item)}</div>` : ""}
+      <div class="delete-confirm"><div><button class="dark-button" data-action="close-modal">${icon("x")} 取消</button><button class="gold-button danger-button" data-action="confirm-delete-result">${icon("trash-2")} 删除</button></div></div>
+    </section>
+  </div>`;
 }
 
 function attachmentPickerModal() {
@@ -6160,7 +6495,7 @@ function agentUiCopy() {
       emptyTitle: "你今天想让 Agent 做什么？",
       emptyBody: "直接说一句话就可以。我会记住项目和历史；需要补充信息、扣费或发布时，会先问你确认。",
       inputReady: "告诉 Agent 你想做什么...",
-      inputBusy: "Agent 正在思考...",
+      inputBusy: "Agent 正在处理，你可以继续输入，发送后会排队...",
       inputConfirm: "请先确认或取消当前动作",
       send: "发送",
       errorUnavailable: "Agent 暂时不可用，请联系管理员配置 AI 服务。",
@@ -6213,7 +6548,7 @@ function agentUiCopy() {
       emptyTitle: "Apa yang anda mahu Agent buat hari ini?",
       emptyBody: "Tulis satu arahan sahaja. Saya akan ingat project dan sejarah; jika perlu maklumat, credits atau publish, saya akan confirm dulu.",
       inputReady: "Beritahu Agent apa nak buat...",
-      inputBusy: "Agent sedang berfikir...",
+      inputBusy: "Agent sedang kerja. Anda boleh terus taip; mesej akan queue...",
       inputConfirm: "Sila confirm atau cancel tindakan semasa dulu",
       send: "Hantar",
       errorUnavailable: "Agent belum tersedia. Sila hubungi admin untuk konfigurasi servis AI.",
@@ -6266,7 +6601,7 @@ function agentUiCopy() {
       emptyTitle: "What should Agent do today?",
       emptyBody: "Say it in one sentence. I remember your project and history; if details, credits, or publishing are involved, I will ask first.",
       inputReady: "Tell Agent what to do...",
-      inputBusy: "Agent is thinking...",
+      inputBusy: "Agent is working. Keep typing; sent messages will queue...",
       inputConfirm: "Confirm or cancel the current action first",
       send: "Send",
       errorUnavailable: "Agent is temporarily unavailable. Please ask an admin to configure the AI service.",
@@ -6518,6 +6853,7 @@ function chatPanel() {
         ${agentCollapsedHistoryBar()}
         ${visibleMessages.map(({ item, index }) => agentMessageArticle(item, index)).join("")}
         ${state.agentBusy ? agentThinkingCard() : ""}
+        ${agentQueuedMessages()}
       </div>
       <form class="agent-form" data-form="agent">
         ${agentAttachmentTray()}
@@ -6526,7 +6862,7 @@ function chatPanel() {
           <input type="file" data-agent-file accept="image/*,video/*" multiple hidden>
         </label>
         <textarea name="message" rows="1" data-agent-input placeholder="${esc(inputPlaceholder)}" ${pendingConfirmation ? "disabled" : ""}>${esc(state.agentInput)}</textarea>
-        <button class="gold-button agent-send-button" type="submit" title="${esc(c.send)}" aria-label="${esc(c.send)}" ${state.agentBusy || pendingConfirmation ? "disabled" : ""}>${icon(state.agentBusy ? "loader-circle" : "send", 19)}<span>${c.send}</span></button>
+        <button class="gold-button agent-send-button" type="submit" title="${esc(c.send)}" aria-label="${esc(c.send)}" ${pendingConfirmation ? "disabled" : ""}>${icon("send", 19)}<span>${c.send}</span></button>
       </form>
     </section>`;
 }
@@ -6552,6 +6888,18 @@ function agentMessageAttachments(items = []) {
       <div><b>${esc(item.name || "Attachment")}</b><small>${esc(agentAttachmentLabel(item))}</small></div>
     </article>`).join("")}
   </div>`;
+}
+
+function agentQueuedMessages() {
+  const queue = Array.isArray(state.agentQueue) ? state.agentQueue : [];
+  if (!queue.length) return "";
+  const c = agentUiCopy();
+  const label = state.lang === "zh" ? "排队中" : state.lang === "ms" ? "Dalam queue" : "Queued";
+  return queue.map((item, index) => `<article class="user agent-queued">
+    <span>${c.userLabel} · ${label}${queue.length > 1 ? ` #${index + 1}` : ""}</span>
+    ${agentMessageAttachments(item.attachments)}
+    <div class="agent-message"><p>${esc(item.content).replaceAll("\n", "<br>")}</p></div>
+  </article>`).join("");
 }
 
 function agentAttachmentLabel(item = {}) {
@@ -7172,9 +7520,23 @@ function bind() {
   }));
   document.querySelectorAll("[data-date-field]").forEach((el) => el.addEventListener("change", () => set({ [el.dataset.dateField]: el.value })));
   document.querySelectorAll("[data-action]").forEach((el) => el.addEventListener("click", (e) => action(e, el.dataset.action)));
-  document.querySelectorAll("[data-field-set]").forEach((el) => el.addEventListener("click", () => saveProjectField(el.dataset.fieldSet, el.dataset.value)));
+  document.querySelectorAll("[data-field-set]").forEach((el) => el.addEventListener("click", () => saveProjectFieldQuick(el.dataset.fieldSet, el.dataset.value, el)));
   document.querySelectorAll("[data-field]").forEach((el) => el.addEventListener("change", fieldChange));
-  document.querySelectorAll("[data-auto-framework-toggle]").forEach((el) => el.addEventListener("change", () => toggleAutoFramework(el.dataset.autoFrameworkToggle)));
+  document.querySelectorAll("[data-ugc-builder-option]").forEach((el) => el.addEventListener("click", () => updateUgcBuilderOption(el)));
+  document.querySelectorAll("[data-ugc-builder-field]").forEach((el) => el.addEventListener("click", () => updateUgcBuilderField(el.dataset.ugcBuilderField, el.dataset.ugcBuilderValue, true)));
+  document.querySelectorAll("[data-ugc-builder-input]").forEach((el) => el.addEventListener("input", () => updateUgcBuilderField(el.dataset.ugcBuilderInput, el.value, false)));
+  document.querySelectorAll("[data-ugc-builder-input]").forEach((el) => el.addEventListener("change", () => updateUgcBuilderField(el.dataset.ugcBuilderInput, el.value, true)));
+  document.querySelectorAll("[data-auto-framework-card]").forEach((el) => {
+    el.addEventListener("click", (event) => {
+      event.preventDefault();
+      toggleAutoFramework(el.dataset.autoFrameworkCard, el);
+    });
+    el.addEventListener("keydown", (event) => {
+      if (event.key !== " " && event.key !== "Enter") return;
+      event.preventDefault();
+      toggleAutoFramework(el.dataset.autoFrameworkCard, el);
+    });
+  });
   document.querySelectorAll("[data-upload]").forEach((el) => el.addEventListener("change", uploadChange));
   const agentInput = document.querySelector("[data-agent-input]");
   autoResizeAgentInput(agentInput);
@@ -7182,6 +7544,7 @@ function bind() {
     state.agentInput = e.target.value;
     autoResizeAgentInput(e.target);
   });
+  agentInput?.addEventListener("paste", handleAgentInputPaste);
   agentInput?.addEventListener("keydown", (event) => {
     if (event.key !== "Enter" || event.shiftKey || event.metaKey || event.ctrlKey || event.altKey || event.isComposing) return;
     event.preventDefault();
@@ -7202,6 +7565,14 @@ function bind() {
   document.querySelectorAll("[data-result]").forEach((el) => el.addEventListener("click", () => download(`/api/export/result/${el.dataset.result}`, `pokaya-result.txt`)));
   document.querySelectorAll("[data-video-play]").forEach((el) => el.addEventListener("click", () => playResultVideo(el)));
   document.querySelectorAll("[data-result-action]").forEach((el) => el.addEventListener("click", () => resultAction(el)));
+  document.querySelectorAll("[data-result-title]").forEach((el) => {
+    el.addEventListener("change", () => renameResultInline(el));
+    el.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter") return;
+      event.preventDefault();
+      el.blur();
+    });
+  });
   document.querySelectorAll("[data-asset-type]").forEach((el) => el.addEventListener("click", () => set({ assetTypeFilter: el.dataset.assetType })));
   document.querySelectorAll("[data-asset-project]").forEach((el) => el.addEventListener("click", () => set({ assetProjectFilter: el.dataset.assetProject })));
   document.querySelectorAll("[data-asset-search]").forEach((el) => el.addEventListener("input", (event) => {
@@ -7273,7 +7644,7 @@ function closeLangMenu(event) {
 
 async function action(event, name) {
   if (name === "close-modal" && event.target !== event.currentTarget && event.currentTarget.classList.contains("modal-backdrop")) return;
-  if (name === "close-modal") return set({ modal: null });
+  if (name === "close-modal") return set({ modal: null, activeResultId: null, editImageBusy: false });
   if (name === "new-project") return set({ modal: "newProject" });
   if (name === "wizard-back") return set({ wizardStep: Math.max(1, state.wizardStep - 1) });
   if (name === "wizard-next") return set({ wizardStep: Math.min(4, state.wizardStep + 1) });
@@ -7289,7 +7660,17 @@ async function action(event, name) {
     const kind = event.currentTarget.dataset.attachmentKind || "avatar";
     return set({ modal: "attachmentPicker", attachmentPickerKind: kind, attachmentPickerFilter: kind });
   }
+  if (name === "open-ugc-prompt-builder") return set({ modal: "ugcPromptBuilder" });
+  if (name === "build-ugc-prompt") return buildAndStoreUgcPrompt();
+  if (name === "copy-ugc-prompt") {
+    const promptText = currentUgcBuiltPrompt();
+    await navigator.clipboard?.writeText(promptText);
+    return notify("Prompt copied.");
+  }
+  if (name === "use-ugc-prompt") return useUgcBuiltPrompt();
+  if (name === "save-ugc-prompt-template") return notify("Prompt template saved in this builder.");
   if (name === "confirm-delete-project") return deleteProject();
+  if (name === "confirm-delete-result") return deleteResult();
   if (name === "refresh-payment-status") return refreshPaymentStatus(event.currentTarget.dataset.order);
   if (name === "open-home") {
     window.history.pushState({}, "", "/");
@@ -7317,12 +7698,12 @@ async function action(event, name) {
   if (name === "new-agent-chat") {
     saveCurrentAgentHistory();
     localStorage.removeItem(storageKeys.agentMessages);
-    return set({ agentMessages: [], agentInput: "", agentExpandedMessages: {}, agentHistoryOpen: false, agentDebugOpen: false });
+    return set({ agentMessages: [], agentInput: "", agentAttachments: [], agentQueue: [], agentExpandedMessages: {}, agentHistoryOpen: false, agentDebugOpen: false });
   }
   if (name === "clear-agent-context" || name === "clear-agent") {
     localStorage.removeItem(storageKeys.agentMessages);
     localStorage.removeItem(storageKeys.agentContextSummary);
-    return set({ agentMessages: [], agentInput: "", agentContextSummary: "", agentExpandedMessages: {} });
+    return set({ agentMessages: [], agentInput: "", agentAttachments: [], agentQueue: [], agentContextSummary: "", agentExpandedMessages: {} });
   }
   if (name === "clear-agent-preferences") return clearAgentPreferences();
   if (name === "clear-agent-confirm") {
@@ -7458,6 +7839,9 @@ async function submit(event) {
     notify(t("toastSupportSaved"));
     return set({ db, modal: null });
   }
+  if (event.currentTarget.dataset.form === "result-edit-image") {
+    return editResultImage(data);
+  }
   if (event.currentTarget.dataset.form === "agent") {
     return sendAgentMessage(data.message);
   }
@@ -7465,6 +7849,40 @@ async function submit(event) {
 
 async function fieldChange(event) {
   return saveProjectField(event.target.dataset.field, event.target.value);
+}
+
+function updateUgcBuilderOption(el) {
+  const field = el.dataset.ugcBuilderOption;
+  const value = el.dataset.ugcBuilderValue;
+  const patch = { [field]: value, builtPrompt: "" };
+  if (el.dataset.ugcBuilderTarget) patch[el.dataset.ugcBuilderTarget] = el.dataset.ugcBuilderTargetValue || "";
+  if (field === "style") patch.stylePrompt = ugcBuilderStyleOptions[value] || state.ugcPromptBuilder?.stylePrompt || "";
+  set({ ugcPromptBuilder: { ...defaultUgcPromptBuilder(), ...(state.ugcPromptBuilder || {}), ...patch } });
+}
+
+function updateUgcBuilderField(field, value, shouldRender = false) {
+  const patch = { [field]: value };
+  if (field === "style") patch.stylePrompt = ugcBuilderStyleOptions[value] || state.ugcPromptBuilder?.stylePrompt || "";
+  state.ugcPromptBuilder = { ...defaultUgcPromptBuilder(), ...(state.ugcPromptBuilder || {}), ...patch };
+  if (field !== "builtPrompt") state.ugcPromptBuilder.builtPrompt = "";
+  if (shouldRender) render();
+}
+
+function buildAndStoreUgcPrompt() {
+  const builtPrompt = buildUgcPrompt();
+  set({ ugcPromptBuilder: { ...defaultUgcPromptBuilder(), ...(state.ugcPromptBuilder || {}), builtPrompt } });
+}
+
+function currentUgcBuiltPrompt() {
+  const fromDom = document.querySelector('[data-ugc-builder-input="builtPrompt"]')?.value;
+  return String(fromDom || state.ugcPromptBuilder?.builtPrompt || buildUgcPrompt()).trim();
+}
+
+async function useUgcBuiltPrompt() {
+  const promptText = currentUgcBuiltPrompt();
+  state.ugcPromptBuilder = { ...defaultUgcPromptBuilder(), ...(state.ugcPromptBuilder || {}), builtPrompt: promptText };
+  await saveProjectField("ugc.script", promptText);
+  set({ modal: null });
 }
 
 async function saveProjectField(field, value) {
@@ -7481,17 +7899,100 @@ async function saveProjectField(field, value) {
   }
 }
 
-async function toggleAutoFramework(value = "") {
+function setFieldSetActive(field, value, source = null) {
+  document.querySelectorAll("[data-field-set]").forEach((el) => {
+    if (el.dataset.fieldSet !== field) return;
+    const active = el.dataset.value === value;
+    el.classList.toggle("active", active);
+    el.setAttribute("aria-pressed", active ? "true" : "false");
+  });
+  if (source && source.dataset.fieldSet === field) {
+    source.classList.add("active");
+    source.setAttribute("aria-pressed", "true");
+  }
+  if (field === "original.provider") {
+    const provider = originalProviderValue(value);
+    const button = document.querySelector(".original-generate-button");
+    if (button) button.textContent = `🎬 Generate ${originalProviderLabel(provider)} Video · ~${originalProviderCredits(provider)} credits`;
+  }
+}
+
+function saveProjectFieldQuick(field, value, source = null) {
+  if (!field) return;
+  const projectId = state.projectId;
+  const previousDb = state.db;
+  state.db = dbWithProjectField(previousDb, projectId, field, value);
+  setFieldSetActive(field, value, source);
+  document.querySelectorAll(`[data-field="${field}"]`).forEach((el) => {
+    el.value = value;
+  });
+
+  const timerKey = `${projectId}:${field}`;
+  const previousTimer = quickFieldSaveTimers.get(timerKey);
+  if (previousTimer) clearTimeout(previousTimer.id);
+  const seq = ++quickFieldSaveSeq;
+  const id = window.setTimeout(async () => {
+    try {
+      const db = await api(`/projects/${projectId}/field`, {
+        method: "PATCH",
+        body: JSON.stringify({ field, value })
+      });
+      if (quickFieldSaveTimers.get(timerKey)?.seq !== seq || state.projectId !== projectId) return;
+      state.db = db;
+      quickFieldSaveTimers.delete(timerKey);
+    } catch (error) {
+      if (quickFieldSaveTimers.get(timerKey)?.seq !== seq || state.projectId !== projectId) return;
+      quickFieldSaveTimers.delete(timerKey);
+      state.db = previousDb;
+      render();
+      notify(error.message || t("toastSaveFailed"));
+    }
+  }, 180);
+  quickFieldSaveTimers.set(timerKey, { id, seq });
+}
+
+function setFrameworkChipState(chip, checked) {
+  if (!chip) return;
+  chip.classList.toggle("selected", checked);
+  chip.setAttribute("aria-checked", checked ? "true" : "false");
+  const input = chip.querySelector("input");
+  if (input) input.checked = checked;
+}
+
+function saveAutoFrameworksQuietly(projectId, next, previousDb) {
+  const seq = ++autoFrameworkSaveSeq;
+  clearTimeout(autoFrameworkSaveTimer);
+  autoFrameworkSaveTimer = window.setTimeout(async () => {
+    try {
+      const db = await api(`/projects/${projectId}/field`, {
+        method: "PATCH",
+        body: JSON.stringify({ field: "auto.frameworks", value: next })
+      });
+      if (seq === autoFrameworkSaveSeq && state.projectId === projectId) state.db = db;
+    } catch (error) {
+      if (seq !== autoFrameworkSaveSeq || state.projectId !== projectId) return;
+      state.db = previousDb;
+      render();
+      notify(error.message || t("toastSaveFailed"));
+    }
+  }, 220);
+}
+
+async function toggleAutoFramework(value = "", chip = null) {
   if (!value) return;
+  const projectId = state.projectId;
+  const previousDb = state.db;
   const selected = Array.isArray(project().auto?.frameworks) ? [...project().auto.frameworks] : [];
   const exists = selected.includes(value);
   const next = exists ? selected.filter((item) => item !== value) : [...selected, value];
   if (!exists && selected.length >= 5) {
     notify("最多选择 5 个 frameworks。");
-    render();
+    setFrameworkChipState(chip, false);
     return;
   }
-  return saveProjectField("auto.frameworks", next);
+  state.db = dbWithProjectField(previousDb, projectId, "auto.frameworks", next);
+  setFrameworkChipState(chip, !exists);
+  saveAutoFrameworksQuietly(projectId, next, previousDb);
 }
 
 async function applyImagePreset(promptText) {
@@ -7911,13 +8412,43 @@ async function addAgentAttachments(fileList) {
   if (prepared.length) set({ agentAttachments: [...(state.agentAttachments || []), ...prepared] });
 }
 
+async function handleAgentInputPaste(event) {
+  const files = agentClipboardFiles(event.clipboardData);
+  if (!files.length) return;
+  event.preventDefault();
+  const form = event.currentTarget.closest(".agent-form");
+  form?.classList.add("is-pasting");
+  try {
+    await addAgentAttachments(files);
+  } finally {
+    window.setTimeout(() => form?.classList.remove("is-pasting"), 260);
+  }
+}
+
+function agentClipboardFiles(clipboardData) {
+  const items = Array.from(clipboardData?.items || []);
+  const files = items
+    .filter((item) => item.kind === "file" && (/^image\//.test(item.type) || /^video\//.test(item.type)))
+    .map((item) => item.getAsFile())
+    .filter(Boolean);
+  if (files.length) return files;
+  return Array.from(clipboardData?.files || []).filter((file) => /^image\//.test(file.type) || /^video\//.test(file.type));
+}
+
+function agentPastedFilename(file, kind) {
+  if (file.name && !/^image\.(png|jpe?g|webp|gif)$/i.test(file.name)) return file.name;
+  const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\..+/, "").replace("T", "-");
+  const extension = file.type.split("/")[1]?.replace("jpeg", "jpg") || (kind === "video" ? "mp4" : "jpg");
+  return `pasted-${kind}-${stamp}.${extension}`;
+}
+
 async function prepareAgentAttachment(file) {
   const kind = file.type.startsWith("video/") ? "video" : "image";
   if (kind === "video" && file.size > 80 * 1024 * 1024) throw new Error("Video is too large. Use a file below 80 MB.");
   if (kind === "image" && file.size > 18 * 1024 * 1024) throw new Error("Image is too large. Use a file below 18 MB.");
   const base = {
     id: `att_${Date.now()}_${Math.random().toString(16).slice(2)}`,
-    name: file.name || (kind === "video" ? "video" : "image"),
+    name: agentPastedFilename(file, kind),
     type: file.type || kind,
     size: file.size,
     kind
@@ -7957,13 +8488,44 @@ function imageFileToDataUrl(file) {
   });
 }
 
-async function sendAgentMessage(message) {
+async function sendAgentMessage(message, queuedAttachments = null) {
   const content = String(message || state.agentInput || "").trim();
-  const attachments = Array.isArray(state.agentAttachments) ? state.agentAttachments : [];
-  if ((!content && !attachments.length) || state.agentBusy) return;
+  const attachments = Array.isArray(queuedAttachments) ? queuedAttachments : Array.isArray(state.agentAttachments) ? state.agentAttachments : [];
+  if (!content && !attachments.length) return;
+  if (state.agentBusy) return enqueueAgentMessage(content, attachments);
+  return runAgentMessage(content, attachments);
+}
+
+function enqueueAgentMessage(content, attachments = []) {
+  const userContent = content || "请先看我上传的附件，然后判断下一步应该怎么做。";
+  set({
+    agentQueue: [
+      ...(state.agentQueue || []),
+      {
+        id: `queue_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+        content: userContent,
+        attachments: attachments.map(agentAttachmentForStorage),
+        apiAttachments: attachments.map(agentAttachmentForApi)
+      }
+    ],
+    agentInput: "",
+    agentAttachments: []
+  });
+}
+
+function processAgentQueue() {
+  if (state.agentBusy || !(state.agentQueue || []).length) return;
+  const [next, ...rest] = state.agentQueue;
+  state.agentQueue = rest;
+  runAgentMessage(next.content, next.attachments || [], next.apiAttachments || null);
+}
+
+async function runAgentMessage(message, attachments = [], queuedApiAttachments = null) {
+  const content = String(message || "").trim();
+  if (!content && !attachments.length) return;
   const userContent = content || "请先看我上传的附件，然后判断下一步应该怎么做。";
   const messageAttachments = attachments.map(agentAttachmentForStorage);
-  const apiAttachments = attachments.map(agentAttachmentForApi);
+  const apiAttachments = Array.isArray(queuedApiAttachments) ? queuedApiAttachments : attachments.map(agentAttachmentForApi);
   const nextMessages = [...state.agentMessages, { role: "user", content: userContent, attachments: messageAttachments }];
   rememberAgentMessages(nextMessages);
   set({ agentMessages: nextMessages, agentInput: "", agentAttachments: [], agentBusy: true });
@@ -7992,6 +8554,7 @@ async function sendAgentMessage(message) {
     });
     completeAgentVisual();
     if (res.toolResults?.length) notify(t("toastAgentWorkspaceUpdated"));
+    window.setTimeout(processAgentQueue, 0);
   } catch (error) {
     const safeError = agentUserSafeError(error);
     const messages = [...nextMessages, { role: "assistant", content: safeError }];
@@ -7999,6 +8562,7 @@ async function sendAgentMessage(message) {
     set({ agentMessages: messages, agentBusy: false });
     completeAgentVisual();
     notify(safeError);
+    window.setTimeout(processAgentQueue, 0);
   }
 }
 
@@ -8353,18 +8917,16 @@ async function resultAction(button) {
   if (!id || !actionName) return;
   const item = findAssetResult(id);
   try {
+    if (actionName === "save") return set({ modal: "saveResultReference", activeResultId: id });
+    if (actionName === "edit-image") return set({ modal: "editResultImage", activeResultId: id });
     if (actionName === "download") {
       const kind = button.dataset.resultKind || "text";
-      const filename = kind === "video" ? `pokaya-${id}.mp4` : kind === "image" ? `pokaya-${id}.png` : "pokaya-result.txt";
+      const filename = resultDownloadFilename(item, kind);
       const path = kind === "text" ? `/api/export/result/${id}` : `/api/media/result/${id}/${kind}`;
       return download(path, filename);
     }
     if (actionName === "delete") {
-      const approved = window.confirm("删除这个生成结果？");
-      if (!approved) return;
-      const db = await api(`/results/${id}`, { method: "DELETE" });
-      set({ db });
-      return notify("已删除生成结果。");
+      return set({ modal: "deleteResult", activeResultId: id });
     }
     if (actionName === "copy-prompt") {
       const text = item?.body || "";
@@ -8398,14 +8960,69 @@ async function resultAction(button) {
       set({ db, projectId: item.projectId, page: "project", step: item.videoUrl ? "ugc" : "image" });
       return notify("已把变体 prompt 放回项目，可直接继续生成。");
     }
-    if (actionName === "avatar" || actionName === "product") {
+    if (actionName === "avatar" || actionName === "product" || actionName === "save-avatar" || actionName === "save-product") {
+      const kind = actionName.endsWith("avatar") ? "avatar" : actionName.endsWith("product") ? "product" : actionName;
       const db = await api(`/results/${id}/save-reference`, {
         method: "POST",
-        body: JSON.stringify({ kind: actionName })
+        body: JSON.stringify({ kind })
       });
-      set({ db });
-      return notify(actionName === "avatar" ? "已保存为人物参考。" : "已保存为产品图参考。");
+      set({ db, modal: null, activeResultId: null });
+      return notify(kind === "avatar" ? "已保存为人物参考。" : "已保存为产品图参考。");
     }
+  } catch (error) {
+    notify(error.message);
+  }
+}
+
+async function renameResultInline(input) {
+  const id = input?.dataset.resultTitle;
+  const item = findAssetResult(id);
+  const title = String(input?.value || "").trim();
+  if (!id || !item || title === item.title) return;
+  if (!title) {
+    input.value = item.title || "";
+    return notify("资产名称不能为空。");
+  }
+  try {
+    const db = await api(`/results/${id}`, { method: "PATCH", body: JSON.stringify({ title }) });
+    set({ db });
+    notify("资产名称已保存。");
+  } catch (error) {
+    input.value = item.title || "";
+    notify(error.message);
+  }
+}
+
+async function editResultImage(data) {
+  const id = state.activeResultId;
+  if (!id) return;
+  const instruction = String(data.instruction || "").trim();
+  if (!instruction) return notify("先写 Edit instruction。");
+  set({ editImageBusy: true });
+  try {
+    const db = await api(`/results/${id}/edit-image`, {
+      method: "POST",
+      body: JSON.stringify({
+        instruction,
+        model: data.model || "GPT Image 2",
+        referenceAttachmentId: data.referenceAttachmentId || ""
+      })
+    });
+    set({ db, modal: null, activeResultId: null, editImageBusy: false });
+    notify("已加入图片编辑生成队列。");
+  } catch (error) {
+    set({ editImageBusy: false });
+    notify(error.message);
+  }
+}
+
+async function deleteResult() {
+  const id = state.activeResultId;
+  if (!id) return;
+  try {
+    const db = await api(`/results/${id}`, { method: "DELETE" });
+    set({ db, modal: null, activeResultId: null });
+    notify("已删除生成结果。");
   } catch (error) {
     notify(error.message);
   }

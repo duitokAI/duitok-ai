@@ -5981,17 +5981,74 @@ app.post("/api/results/:id/save-reference", async (req, res, next) => {
         userId: user.id,
         projectId: project.id,
         kind,
-        name: kind === "avatar" ? "Saved avatar reference" : "Saved product reference",
+        name: String(req.body.name || result.title || (kind === "avatar" ? "Saved avatar reference" : "Saved product reference")).slice(0, 120),
         type: result.videoUrl ? "video" : "image",
         mediaKind: result.videoUrl ? "video" : "image",
         sourceResultId: result.id,
-        prompt: result.body || "",
+        prompt: result.providerBody || result.body || "",
         createdAt: new Date().toISOString()
       });
       db.usage.unshift(usage(`Saved ${kind} reference`, 0, user.id));
       await saveDb(db);
       return publicState(db, user);
     }));
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/results/:id/edit-image", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    const instruction = String(req.body.instruction || "").trim();
+    const model = internalMediaModel(String(req.body.model || "GPT Image 2"));
+    const referenceAttachmentId = String(req.body.referenceAttachmentId || "").trim();
+    if (!instruction) {
+      const error = new Error("Edit instruction is required.");
+      error.status = 400;
+      throw error;
+    }
+    if (!allowedMediaModels.has(model)) {
+      const error = new Error("This edit flow supports GPT Image 2 and Nano Banana Pro.");
+      error.status = 400;
+      throw error;
+    }
+    let projectId = "";
+    await mutateDb(async (db) => {
+      const { project, result } = findResultWithProject(db, req.params.id, user);
+      projectId = project.id;
+      if (!result.imageUrl && !result.videoUrl) {
+        const error = new Error("This result has no media to edit.");
+        error.status = 400;
+        throw error;
+      }
+      const reference = referenceAttachmentId
+        ? (db.attachments || []).find((item) => item.id === referenceAttachmentId && (!item.projectId || item.projectId === project.id))
+        : null;
+      if (referenceAttachmentId && !reference) {
+        const error = new Error("Reference attachment not found.");
+        error.status = 404;
+        throw error;
+      }
+      project.image ||= {};
+      project.image.model = model;
+      project.image.mode = "Edit Image";
+      project.image.prompt = [
+        "Edit the existing generated image as the main visual reference.",
+        `Original asset name: ${result.title || "Pokaya asset"}.`,
+        result.providerBody || result.body ? `Original prompt/context: ${result.providerBody || result.body}` : "",
+        reference ? `Extra reference: ${reference.kind || "attachment"} - ${reference.name || reference.id}. ${reference.prompt || ""}` : "",
+        "User edit instruction:",
+        instruction,
+        "",
+        "Keep product identity and commercially useful composition. Improve clarity for Malaysia ecommerce ads. Avoid extra fingers, deformed hands, distorted faces, fake platform logos, and unreadable text."
+      ].filter(Boolean).join("\n");
+      db.usage.unshift(usage("Prepared image edit", 0, project.userId || user.id));
+      await saveDb(db);
+      return publicState(db, user);
+    });
+    const resultState = await enqueueGeneration(projectId, "generate-image", "image", user);
+    res.json(resultState.state);
   } catch (error) {
     next(error);
   }
@@ -6057,7 +6114,6 @@ app.delete("/api/results/:id", async (req, res, next) => {
     res.json(await mutateDb(async (db) => {
       const { project, result } = findResultWithProject(db, req.params.id, user);
       project.results = (project.results || []).filter((item) => item.id !== result.id);
-      db.attachments = (db.attachments || []).filter((item) => item.sourceResultId !== result.id);
       db.usage.unshift(usage("Deleted generated result", 0, user.id));
       await saveDb(db);
       return publicState(db, user);
