@@ -3755,35 +3755,12 @@ textarea {
   align-items: end;
 }
 
-.asset-toolbar,
-.asset-library-summary {
-  display: grid;
-  gap: 12px;
+.asset-toolbar {
   margin-top: 18px;
   border: 1px solid rgba(93, 8, 108, 0.1);
   border-radius: 16px;
   padding: 14px;
   background: rgba(255, 255, 255, 0.86);
-}
-
-.asset-toolbar label {
-  display: grid;
-  grid-template-columns: 20px minmax(0, 1fr);
-  align-items: center;
-  gap: 10px;
-  border: 1px solid rgba(93, 8, 108, 0.12);
-  border-radius: 12px;
-  padding: 0 12px;
-  background: #fff;
-}
-
-.asset-toolbar input {
-  min-height: 42px;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: #2a0633;
-  font-weight: 800;
 }
 
 .asset-filter-row {
@@ -3807,31 +3784,6 @@ textarea {
   border-color: rgba(255, 47, 109, 0.28);
   background: #ff2f6d;
   color: #fff;
-}
-
-.asset-library-summary {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.asset-library-summary p {
-  display: grid;
-  gap: 3px;
-  margin: 0;
-  border-radius: 10px;
-  padding: 10px;
-  background: rgba(93, 8, 108, 0.06);
-}
-
-.asset-library-summary span {
-  color: rgba(42, 6, 51, 0.58);
-  font-size: 12px;
-  font-weight: 850;
-}
-
-.asset-library-summary b {
-  color: #4f055f;
-  font-size: 22px;
-  font-weight: 950;
 }
 
 .result-grid button:not(.result-actions button):not(.result-workflow-actions button),
