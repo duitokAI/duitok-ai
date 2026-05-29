@@ -5935,6 +5935,23 @@ function agentToolCard(card = {}) {
       <div><button class="dark-button" data-page="project">${icon("folder-open", 15)} Open project</button><button class="dark-button" data-agent-prompt="Create scheduler drafts from this content plan">${icon("send", 15)} Create drafts</button></div>
     </section>`;
   }
+  if (card.type === "visual_card") {
+    const visual = card.visualCard || {};
+    const bullets = Array.isArray(visual.bullets) ? visual.bullets.slice(0, 4) : Array.isArray(card.bullets) ? card.bullets.slice(0, 4) : [];
+    const sections = Array.isArray(visual.sections) ? visual.sections.slice(0, 3) : [];
+    const promptContent = String(card.prompt || visual.prompt || "");
+    return `<section class="agent-tool-card visual-card-tool" data-agent-card-type="visual_card">
+      <header><strong>${icon("panels-top-left", 16)} ${esc(card.title || visual.title || "Visual card")}</strong><span>${esc(card.summary || visual.subtitle || "Publish-ready social card saved.")}</span></header>
+      <div class="agent-visual-card-preview">
+        <span>${esc(visual.eyebrow || "Pokaya Visual Card")}</span>
+        <h4>${esc(visual.title || card.title || "Social selling card")}</h4>
+        <p>${esc(visual.subtitle || card.summary || "")}</p>
+        ${sections.length ? `<div>${sections.map((item) => `<b>${esc(item.label || "Point")}</b><small>${esc(item.text || "")}</small>`).join("")}</div>` : ""}
+        ${bullets.length ? `<ul>${bullets.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>` : ""}
+      </div>
+      <div><button class="dark-button" data-page="project">${icon("folder-open", 15)} Open project</button><button class="dark-button" data-agent-template-save="visual_card" data-template-title="${esc(visual.title || card.title || "Visual card")}" data-template-summary="${esc(card.summary || "")}" data-template-content="${esc(promptContent)}">${icon("bookmark-plus", 15)} 存模板</button><button class="gold-button" data-agent-prompt="Create schedule draft for this visual card">${icon("calendar-plus", 15)} 加入排期</button></div>
+    </section>`;
+  }
   if (card.type === "seedance_prompt") {
     const promptContent = String(card.prompt || "");
     return `<section class="agent-tool-card" data-agent-card-type="seedance_prompt">
