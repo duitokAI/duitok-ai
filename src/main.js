@@ -4323,9 +4323,32 @@ function prompt(field, value, placeholder, action, button) {
 
 function results(p, type) {
   const types = Array.isArray(type) ? type : [type];
+  const pending = pendingResultJobs(p, types);
   const items = p.results.filter((item) => types.includes(item.type)).slice(-4).reverse();
-  if (!items.length) return `<section class="empty-result">${icon("sparkles")} ${t("noResults")}</section>`;
-  return `<section class="result-grid">${items.map(resultCard).join("")}</section>`;
+  if (!pending.length && !items.length) return `<section class="empty-result">${icon("sparkles")} ${t("noResults")}</section>`;
+  return `<section class="result-grid">${pending.map(generationJobCard).join("")}${items.map(resultCard).join("")}</section>`;
+}
+
+function pendingResultJobs(projectItem, types) {
+  return (state.db?.generationJobs || [])
+    .filter((job) => job.projectId === projectItem.id && ["queued", "processing"].includes(job.status))
+    .filter((job) => types.includes(job.type) || (job.action === "generate-image" && types.includes("image")))
+    .slice(0, 4);
+}
+
+function generationJobCard(job) {
+  const label = job.status === "processing" ? "Generating..." : "Preparing...";
+  const type = job.type === "video" ? "VIDEO" : job.type === "image" ? "IMAGE" : "OUTPUT";
+  return `<article class="result-card generation-job-card" aria-live="polite">
+    <div class="generation-job-canvas">
+      ${icon("loader-circle", 34)}
+      <strong>${label}</strong>
+    </div>
+    <footer>
+      <span>${icon("loader-circle", 16)}</span>
+      <b>${esc(type)}</b>
+    </footer>
+  </article>`;
 }
 
 function resultCard(item) {
@@ -7525,10 +7548,8 @@ async function generate(name) {
   if (state.generating) return;
   try {
     set({ generating: true });
-    notify(t("toastGenerationQueued"));
     const db = await api(`/projects/${state.projectId}/generate`, { method: "POST", body: JSON.stringify({ action: name, step: state.step }) });
     set({ db, generating: false });
-    notify(t("toastGenerationJobQueued"));
     pollGenerationQueue();
   } catch (error) {
     set({ generating: false });
@@ -7546,7 +7567,6 @@ async function pollGenerationQueue(attempt = 0) {
       setTimeout(() => pollGenerationQueue(attempt + 1), 3000);
       return;
     }
-    if (!hasRunning && attempt > 0) notify(t("toastGenerationQueueUpdated"));
   } catch (error) {
     notify(error.message);
   }

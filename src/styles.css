@@ -3558,6 +3558,52 @@ textarea {
   border-radius: 0;
 }
 
+.generation-job-card {
+  overflow: hidden;
+  border-color: rgba(255, 196, 0, 0.32) !important;
+  background: #0a0a0a !important;
+  color: #ffc400 !important;
+}
+
+.generation-job-canvas {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 14px;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  min-height: 320px;
+  border-radius: 16px 16px 0 0;
+  background: #050505;
+}
+
+.generation-job-canvas svg,
+.generation-job-card footer span svg {
+  animation: spin 0.9s linear infinite;
+}
+
+.generation-job-canvas strong {
+  color: #ffc400;
+  font-size: 18px;
+  font-weight: 950;
+}
+
+.generation-job-card footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 72px;
+  padding: 0 22px;
+  background: #171717;
+}
+
+.generation-job-card footer b {
+  color: #ffd23f;
+  font-size: 14px;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+}
+
 .result-play-button {
   position: absolute;
   inset: 0;
