@@ -5796,8 +5796,8 @@ function agentUiCopy() {
     zh: {
       title: "Pokaya Agent",
       subtitle: "帮你生成内容、创建排期、检查 workspace",
-      emptyTitle: "你今天想做什么？",
-      emptyBody: "直接发一句话就可以。我会在后台记住项目、偏好和历史，但这里只保留聊天体验。",
+      emptyTitle: "你今天想让 Agent 做什么？",
+      emptyBody: "直接说一句话就可以。我会记住项目和历史；需要补充信息、扣费或发布时，会先问你确认。",
       inputReady: "告诉 Agent 你想做什么...",
       inputBusy: "Agent 正在思考...",
       inputConfirm: "请先确认或取消当前动作",
@@ -5849,8 +5849,8 @@ function agentUiCopy() {
     ms: {
       title: "Pokaya Agent",
       subtitle: "Bantu generate content, buat schedule, dan semak workspace",
-      emptyTitle: "Apa nak buat hari ini?",
-      emptyBody: "Tulis satu arahan sahaja. Agent akan ingat project, preference dan sejarah di belakang tabir.",
+      emptyTitle: "Apa yang anda mahu Agent buat hari ini?",
+      emptyBody: "Tulis satu arahan sahaja. Saya akan ingat project dan sejarah; jika perlu maklumat, credits atau publish, saya akan confirm dulu.",
       inputReady: "Beritahu Agent apa nak buat...",
       inputBusy: "Agent sedang berfikir...",
       inputConfirm: "Sila confirm atau cancel tindakan semasa dulu",
@@ -5902,8 +5902,8 @@ function agentUiCopy() {
     en: {
       title: "Pokaya Agent",
       subtitle: "Generate content, create schedules, and inspect your workspace",
-      emptyTitle: "What do you want to do today?",
-      emptyBody: "Send one request. Agent remembers projects, preferences, and history in the background.",
+      emptyTitle: "What should Agent do today?",
+      emptyBody: "Say it in one sentence. I remember your project and history; if details, credits, or publishing are involved, I will ask first.",
       inputReady: "Tell Agent what to do...",
       inputBusy: "Agent is thinking...",
       inputConfirm: "Confirm or cancel the current action first",
@@ -6140,11 +6140,6 @@ function chatPanel() {
     : `<div class="agent-empty-state">
         <strong>${c.emptyTitle}</strong>
         <p>${c.emptyBody}</p>
-        <div class="agent-boundary-list" aria-label="Agent capability boundaries">
-          <span>${icon("check-check", 14)} ${esc(c.abilityDirect)}</span>
-          <span>${icon("message-circle-question", 14)} ${esc(c.abilityAsk)}</span>
-          <span>${icon("shield-check", 14)} ${esc(c.abilityConfirm)}</span>
-        </div>
       </div>`;
   const pendingConfirmation = agentHasPendingConfirmation();
   const inputPlaceholder = state.agentBusy

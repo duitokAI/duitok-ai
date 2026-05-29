@@ -18792,18 +18792,35 @@ label {
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-empty-state {
-  max-width: min(620px, 100%) !important;
-  border-radius: 16px !important;
-  padding: 20px !important;
+  max-width: min(660px, 100%) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: clamp(14px, 2vw, 22px) 4px clamp(8px, 1vw, 14px) !important;
+  background: transparent !important;
   box-shadow: none !important;
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-empty-state strong {
-  font-size: clamp(24px, 2.4vw, 34px) !important;
+  display: block !important;
+  max-width: 780px !important;
+  color: var(--studio-purple-900, #2a0633) !important;
+  font-size: clamp(28px, 4vw, 52px) !important;
+  font-weight: 950 !important;
+  line-height: 1.05 !important;
+  letter-spacing: 0 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-empty-state p {
+  max-width: 640px !important;
+  margin-top: 14px !important;
+  color: rgba(42, 6, 51, 0.58) !important;
+  font-size: clamp(15px, 1.6vw, 19px) !important;
+  font-weight: 760 !important;
+  line-height: 1.5 !important;
 }
 
 .studio-shell .agent-boundary-list {
-  display: grid !important;
+  display: none !important;
   gap: 8px !important;
   margin-top: 4px !important;
 }
@@ -19031,6 +19048,19 @@ label {
 
   .studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.user {
     max-width: calc(100% - 46px) !important;
+  }
+
+  .studio-shell .agent-chat-shell.agent-page-panel .agent-empty-state {
+    padding: 18px 2px 8px !important;
+  }
+
+  .studio-shell .agent-chat-shell.agent-page-panel .agent-empty-state strong {
+    font-size: clamp(25px, 8vw, 34px) !important;
+  }
+
+  .studio-shell .agent-chat-shell.agent-page-panel .agent-empty-state p {
+    max-width: 100% !important;
+    font-size: 15px !important;
   }
 
   .studio-shell .agent-chat-shell.agent-page-panel .agent-form {
