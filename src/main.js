@@ -3398,33 +3398,18 @@ function paymentRow(payment, adminActions = false) {
 
 function contentLibraryPage() {
   const all = allResults().slice().reverse();
-  const query = state.assetSearch.trim().toLowerCase();
   const filtered = all.filter((item) => {
     const kind = item.videoUrl ? "video" : item.imageUrl ? "image" : "text";
-    const haystack = [item.title, item.body, item.projectName, item.type, ...(item.assetTags || [])].join(" ").toLowerCase();
-    return (state.assetTypeFilter === "all" || state.assetTypeFilter === kind || state.assetTypeFilter === item.type)
-      && (state.assetProjectFilter === "all" || state.assetProjectFilter === item.projectId)
-      && (!query || haystack.includes(query));
+    return state.assetTypeFilter === "all" || state.assetTypeFilter === kind || state.assetTypeFilter === item.type;
   });
-  const projects = state.db.projects || [];
   return `<header class="project-head asset-library-head">
     <div><p class="folder-label">${icon("folder", 18)} Pokaya Asset Library</p><h1>Generated Assets</h1><p class="subtitle">Find, reuse, schedule, rename, download, and keep building from every generated asset.</p></div>
     <button class="sop-button" data-action="export-all">${icon("download")} Export Data</button>
   </header>
   <section class="asset-toolbar">
-    <label>${icon("search", 16)}<input data-asset-search placeholder="Search product, prompt, result..." value="${esc(state.assetSearch)}"></label>
     <div class="asset-filter-row">
-      ${["all", "image", "video", "text"].map((kind) => `<button type="button" class="${state.assetTypeFilter === kind ? "active" : ""}" data-asset-type="${kind}">${kind === "all" ? "All" : kind}</button>`).join("")}
+      ${["all", "image", "video"].map((kind) => `<button type="button" class="${state.assetTypeFilter === kind ? "active" : ""}" data-asset-type="${kind}">${kind === "all" ? "All" : kind}</button>`).join("")}
     </div>
-    <div class="asset-filter-row project-filter-row">
-      <button type="button" class="${state.assetProjectFilter === "all" ? "active" : ""}" data-asset-project="all">All products</button>
-      ${projects.map((project) => `<button type="button" class="${state.assetProjectFilter === project.id ? "active" : ""}" data-asset-project="${esc(project.id)}">${esc(project.name)}</button>`).join("")}
-    </div>
-  </section>
-  <section class="asset-library-summary">
-    <p><span>Total assets</span><b>${all.length}</b></p>
-    <p><span>Visible</span><b>${filtered.length}</b></p>
-    <p><span>Products</span><b>${projects.length}</b></p>
   </section>
   ${filtered.length ? `<section class="result-grid asset-library-grid">${filtered.map(resultCard).join("")}</section>` : `<section class="empty-result">${icon("folder-search")} No assets match this filter.</section>`}`;
 }
@@ -5803,7 +5788,7 @@ function agentUiCopy() {
   const copy = {
     zh: {
       title: "Pokaya Agent",
-      subtitle: "帮你生成内容、创建排期、检查 workspace",
+      subtitle: "帮你在 Pokaya 平台上完成任何可执行的事情",
       emptyTitle: "你今天想让 Agent 做什么？",
       emptyBody: "直接说一句话就可以。我会记住项目和历史；需要补充信息、扣费或发布时，会先问你确认。",
       inputReady: "告诉 Agent 你想做什么...",
@@ -5856,7 +5841,7 @@ function agentUiCopy() {
     },
     ms: {
       title: "Pokaya Agent",
-      subtitle: "Bantu generate content, buat schedule, dan semak workspace",
+      subtitle: "Bantu anda buat apa sahaja yang tersedia dalam platform Pokaya",
       emptyTitle: "Apa yang anda mahu Agent buat hari ini?",
       emptyBody: "Tulis satu arahan sahaja. Saya akan ingat project dan sejarah; jika perlu maklumat, credits atau publish, saya akan confirm dulu.",
       inputReady: "Beritahu Agent apa nak buat...",
@@ -5909,7 +5894,7 @@ function agentUiCopy() {
     },
     en: {
       title: "Pokaya Agent",
-      subtitle: "Generate content, create schedules, and inspect your workspace",
+      subtitle: "Help with anything available inside the Pokaya platform",
       emptyTitle: "What should Agent do today?",
       emptyBody: "Say it in one sentence. I remember your project and history; if details, credits, or publishing are involved, I will ask first.",
       inputReady: "Tell Agent what to do...",
