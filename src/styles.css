@@ -11336,6 +11336,131 @@ label {
   font-size: 12px;
 }
 
+/* Usage brand refresh: align credit analytics with the Pokaya light studio system. */
+.studio-shell .usage-summary-card {
+  border: 1px solid rgba(255, 47, 109, 0.14);
+  background:
+    radial-gradient(circle at 88% 0, rgba(255, 47, 109, 0.13), transparent 36%),
+    linear-gradient(180deg, #fff, #fff8fc);
+  color: var(--ink);
+  box-shadow: 0 18px 46px rgba(66, 10, 72, 0.08);
+}
+
+.studio-shell .usage-summary-card span,
+.studio-shell .usage-filter-row > span,
+.studio-shell .usage-ledger-head {
+  color: rgba(57, 22, 67, 0.56);
+}
+
+.studio-shell .usage-summary-card b {
+  color: var(--ink);
+}
+
+.studio-shell .usage-summary-card small {
+  color: rgba(83, 62, 90, 0.76);
+}
+
+.studio-shell .usage-summary-card.spend b {
+  color: var(--hot);
+}
+
+.studio-shell .usage-summary-card.image b {
+  color: #8f3cff;
+}
+
+.studio-shell .usage-summary-card.video b {
+  color: var(--pink);
+}
+
+.studio-shell .usage-summary-card.auto b {
+  color: #f0a51a;
+}
+
+.studio-shell .usage-ledger-panel {
+  border: 1px solid rgba(255, 47, 109, 0.14);
+  background:
+    radial-gradient(circle at 100% 0, rgba(255, 47, 109, 0.1), transparent 34%),
+    rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  box-shadow: 0 20px 54px rgba(66, 10, 72, 0.08);
+}
+
+.studio-shell .usage-filter-row small {
+  color: rgba(83, 62, 90, 0.7);
+}
+
+.studio-shell .usage-filter-row button {
+  border-color: rgba(57, 22, 67, 0.13);
+  background: rgba(255, 255, 255, 0.78);
+  color: rgba(57, 22, 67, 0.72);
+}
+
+.studio-shell .usage-filter-row button.active {
+  border-color: rgba(255, 47, 109, 0.38);
+  background: linear-gradient(135deg, var(--hot), var(--pink));
+  color: #fff;
+  box-shadow: 0 14px 30px rgba(255, 47, 109, 0.18);
+}
+
+.studio-shell .usage-ledger-head,
+.studio-shell .usage-ledger-table article {
+  grid-template-columns: minmax(190px, 1.1fr) minmax(260px, 1.45fr) 112px 138px 82px 88px;
+}
+
+.studio-shell .usage-ledger-head {
+  border: 1px solid rgba(57, 22, 67, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 247, 252, 0.9);
+}
+
+.studio-shell .usage-ledger-table article {
+  border-bottom: 1px solid rgba(57, 22, 67, 0.08);
+}
+
+.studio-shell .usage-ledger-table strong,
+.studio-shell .usage-ledger-table span,
+.studio-shell .usage-ledger-table b {
+  color: var(--ink);
+}
+
+.studio-shell .usage-ledger-table p,
+.studio-shell .usage-ledger-table time {
+  color: rgba(83, 62, 90, 0.68);
+}
+
+.studio-shell .usage-ledger-table em {
+  border-color: rgba(255, 47, 109, 0.28);
+  background: rgba(255, 47, 109, 0.06);
+  color: var(--hot);
+}
+
+.studio-shell .usage-ledger-table em.video,
+.studio-shell .usage-ledger-table em.auto,
+.studio-shell .usage-ledger-table em.clone,
+.studio-shell .usage-ledger-table em.post {
+  border-color: rgba(162, 42, 184, 0.26);
+  background: rgba(162, 42, 184, 0.06);
+  color: #8f2faa;
+}
+
+.studio-shell .usage-ledger-table em.credit {
+  border-color: rgba(240, 165, 26, 0.34);
+  background: rgba(240, 165, 26, 0.08);
+  color: #b86f00;
+}
+
+.studio-shell .usage-ledger-table b.debit {
+  color: var(--hot);
+}
+
+.studio-shell .usage-ledger-table b.credit {
+  color: #22a765;
+}
+
+.studio-shell .usage-ledger-table {
+  scrollbar-color: rgba(255, 47, 109, 0.3) rgba(255, 247, 252, 0.9);
+}
+
 .topup-experience {
   display: grid;
   gap: 24px;
