@@ -17057,7 +17057,11 @@ label {
 }
 
 .studio-shell .affiliate-tabs .active {
-  color: #fff;
+  border: 1px solid rgba(255, 47, 109, 0.26) !important;
+  background:
+    linear-gradient(135deg, rgba(255, 47, 109, 0.96), rgba(255, 125, 88, 0.96)) !important;
+  color: #fff !important;
+  box-shadow: 0 14px 30px rgba(255, 47, 109, 0.2) !important;
 }
 
 .studio-shell .affiliate-how ul {
