@@ -20254,3 +20254,314 @@ label {
 .studio-shell .visual-card-preview .visual-card-canvas {
   padding: 12px !important;
 }
+
+/* Auto Content workbench: Pokaya-branded production controls. */
+.studio-shell .auto-command-card {
+  border: 2px solid rgba(255, 63, 110, 0.3) !important;
+  border-radius: 22px !important;
+  padding: clamp(22px, 2.3vw, 34px) !important;
+  background:
+    radial-gradient(circle at 94% 0%, rgba(255, 63, 110, 0.1), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 249, 253, 0.98)) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.72),
+    0 18px 52px rgba(75, 0, 94, 0.08) !important;
+}
+
+.studio-shell .auto-command-card .auto-content-head {
+  align-items: center !important;
+  margin-bottom: 22px !important;
+}
+
+.studio-shell .auto-command-card .auto-content-head h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--studio-purple-900) !important;
+  font-size: clamp(22px, 2vw, 30px) !important;
+  letter-spacing: 0.13em !important;
+}
+
+.studio-shell .auto-command-card .auto-content-head h2 img {
+  width: 31px !important;
+  height: 31px !important;
+}
+
+.studio-shell .auto-command-card .auto-content-head span {
+  border-color: rgba(255, 63, 110, 0.2) !important;
+  background: #fff !important;
+  color: var(--studio-pink) !important;
+}
+
+.studio-shell .auto-source-tabs {
+  gap: 0 !important;
+  overflow: hidden;
+  border: 1px solid rgba(93, 8, 108, 0.1);
+  border-radius: 13px;
+  background: #fff;
+}
+
+.studio-shell .auto-source-tabs button {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+  color: rgba(43, 6, 56, 0.58) !important;
+  font-weight: 950 !important;
+}
+
+.studio-shell .auto-source-tabs button.active,
+.studio-shell .auto-provider-grid button.active,
+.studio-shell .auto-duration-row button.active {
+  background: linear-gradient(135deg, var(--studio-pink), var(--studio-coral)) !important;
+  color: #fff !important;
+  box-shadow: 0 14px 28px rgba(255, 63, 110, 0.18) !important;
+}
+
+.studio-shell .auto-product-picker {
+  border-color: rgba(93, 8, 108, 0.1) !important;
+  background: #fff !important;
+}
+
+.studio-shell .auto-product-picker input {
+  padding-left: 18px !important;
+  color: var(--studio-purple-900) !important;
+  font-weight: 850;
+}
+
+.studio-shell .auto-product-picker span {
+  border-color: rgba(93, 8, 108, 0.1) !important;
+  background: rgba(255, 247, 252, 0.9);
+}
+
+.studio-shell .auto-product-picker b {
+  background: var(--studio-pink) !important;
+  color: #fff !important;
+}
+
+.studio-shell .auto-persona-card {
+  border-color: rgba(255, 63, 110, 0.16) !important;
+  background: rgba(255, 247, 252, 0.82) !important;
+}
+
+.studio-shell .auto-provider-grid,
+.studio-shell .auto-duration-row,
+.studio-shell .auto-plan-grid {
+  display: grid;
+  gap: 10px !important;
+}
+
+.studio-shell .auto-duration-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 12px 0 16px;
+}
+
+.studio-shell .auto-provider-grid button,
+.studio-shell .auto-duration-row button,
+.studio-shell .auto-plan-grid button {
+  border: 1px solid rgba(93, 8, 108, 0.1) !important;
+  background: #fff !important;
+  color: rgba(43, 6, 56, 0.58) !important;
+}
+
+.studio-shell .auto-plan-grid button {
+  text-align: center;
+}
+
+.studio-shell .auto-plan-grid button.active {
+  border-color: rgba(255, 63, 110, 0.24) !important;
+  background: rgba(255, 244, 250, 0.96) !important;
+  color: var(--studio-purple-900) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 63, 110, 0.08) !important;
+}
+
+.studio-shell .auto-plan-grid button:nth-child(2) {
+  background: linear-gradient(135deg, rgba(255, 247, 252, 0.96), rgba(246, 239, 255, 0.95)) !important;
+}
+
+.studio-shell .auto-size-field {
+  color: var(--studio-purple-700) !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase;
+}
+
+.studio-shell .auto-size-field label {
+  margin-top: 8px;
+  letter-spacing: 0 !important;
+  text-transform: none;
+}
+
+.studio-shell .auto-framework-grid {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 9px !important;
+}
+
+.studio-shell .auto-framework-grid label {
+  width: auto !important;
+  display: inline-flex !important;
+  flex: 0 1 auto;
+  align-items: center !important;
+  gap: 7px !important;
+  min-height: 36px !important;
+  border-color: rgba(93, 8, 108, 0.12) !important;
+  border-radius: 9px !important;
+  padding: 0 11px !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #334155 !important;
+  font-size: 12px !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    transform 0.18s ease;
+}
+
+.studio-shell .auto-framework-grid label.selected {
+  border-color: rgba(255, 63, 110, 0.34) !important;
+  background: rgba(255, 244, 250, 0.96) !important;
+  transform: translateY(-1px);
+}
+
+.studio-shell .auto-framework-grid strong {
+  font-weight: 760;
+}
+
+.studio-shell .auto-framework-grid .pov-tag {
+  color: #7c3aed;
+  font-weight: 950;
+}
+
+.studio-shell .auto-framework-grid b {
+  margin-left: auto;
+}
+
+.studio-shell .auto-cta-card {
+  margin-top: 28px;
+  border: 1px solid rgba(46, 125, 50, 0.14);
+  border-radius: 15px;
+  padding: 16px;
+  background: rgba(246, 253, 246, 0.82);
+}
+
+.studio-shell .auto-cta-card .field-label {
+  margin-top: 0 !important;
+}
+
+.studio-shell .auto-cta-list {
+  display: grid;
+  gap: 8px;
+}
+
+.studio-shell .auto-cta-list button {
+  min-height: 44px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2px;
+  border: 1px solid rgba(93, 8, 108, 0.08);
+  border-radius: 10px;
+  padding: 9px 12px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--studio-ink);
+  text-align: left;
+}
+
+.studio-shell .auto-cta-list button.active {
+  border-color: rgba(255, 63, 110, 0.22);
+  background: rgba(255, 244, 250, 0.95);
+}
+
+.studio-shell .auto-cta-list b {
+  color: var(--studio-purple-900);
+  font-weight: 950;
+}
+
+.studio-shell .auto-cta-list span {
+  color: var(--studio-muted);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.studio-shell .auto-submit-row {
+  display: grid;
+  grid-template-columns: minmax(92px, 130px) minmax(0, 1fr);
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.studio-shell .auto-submit-row > label {
+  gap: 7px;
+  color: var(--studio-purple-700) !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase;
+}
+
+.studio-shell .auto-submit-row select {
+  letter-spacing: 0 !important;
+  text-transform: none;
+}
+
+.studio-shell .auto-submit-row .auto-generate-button {
+  width: 100%;
+  margin: 0 !important;
+}
+
+.studio-shell .auto-process-card,
+.studio-shell .auto-history-card {
+  margin-top: 18px;
+  border: 1px solid rgba(93, 8, 108, 0.09);
+  border-radius: 18px;
+  padding: 18px;
+  background: #fff;
+  box-shadow: 0 12px 34px rgba(35, 8, 42, 0.055);
+}
+
+.studio-shell .auto-process-card header,
+.studio-shell .auto-history-card header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  color: var(--studio-purple-900);
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.studio-shell .auto-process-card pre {
+  overflow: auto;
+  min-height: 54px;
+  margin: 0;
+  border: 1px solid rgba(93, 8, 108, 0.08);
+  border-radius: 10px;
+  padding: 12px;
+  background: rgba(250, 252, 247, 0.85);
+  color: var(--studio-muted);
+  font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: pre-wrap;
+}
+
+.studio-shell .auto-history-card h3 {
+  margin: 0;
+  color: var(--studio-purple-900);
+  font-size: 15px;
+}
+
+.studio-shell .auto-history-card span {
+  color: var(--studio-muted);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+@media (max-width: 820px) {
+  .studio-shell .auto-submit-row,
+  .studio-shell .auto-duration-row {
+    grid-template-columns: 1fr;
+  }
+}

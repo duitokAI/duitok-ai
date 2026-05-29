@@ -3980,23 +3980,17 @@ function autoPanel(p) {
   const source = p.auto.source || "Affiliate";
   const provider = p.auto.provider || "Veo 3.1";
   const planStyle = p.auto.planStyle || "Normal Flow";
-  const frameworks = [
-    ["UGC", "Hook + Pain (PAS)"],
-    ["PRD", "Product Hero (AIDA)"],
-    ["UGC", "Testimonial"],
-    ["UGC", "FOMO/Urgency"],
-    ["PRD", "Before/After"],
-    ["UGC", "BAB (Before-After-Bridge)"],
-    ["UGC", "4Ps (Promise-Picture-Proof-Push)"],
-    ["PRD", "USP Showcase"],
-    ["UGC", "Action Bias"],
-    ["UGC", "Solution Focus"]
-  ];
+  const duration = p.auto.duration || "8s";
+  const size = p.auto.size || "9:16";
+  const ctaMode = p.auto.ctaMode || "Shop CTA";
+  const quantity = String(p.auto.quantity || "5");
+  const selectedFrameworks = Array.isArray(p.auto.frameworks) ? p.auto.frameworks : [];
+  const frameworks = autoFrameworks();
   return `
-    <section class="auto-content-card">
+    <section class="auto-content-card auto-command-card">
       <div class="auto-content-head">
-        <h2>🪄 Auto Content</h2>
-        <span>AI → Image → Video → Merge</span>
+        <h2>${icon("wand-sparkles", 26)} Auto Content</h2>
+        <span>AI → IMAGE → VIDEO → MERGE</span>
       </div>
       <div class="auto-source-tabs">
         ${autoButton("auto.source", "Affiliate", "🔗 Affiliate", source)}
@@ -4009,8 +4003,8 @@ function autoPanel(p) {
       <p class="auto-helper">Untuk Fetch Buka Extension Auto Post Tab Affiliate</p>
       <div class="auto-persona-card form-grid three">
         ${select("auto.gender", "Gender", ["Female", "Male"], p.auto.gender || "Female")}
-        ${select("auto.style", "Style", ["Hijab", "Casual", "Professional", "Streetwear"], p.auto.style || "Hijab")}
-        ${select("auto.age", "Age", ["20s", "30s", "40s", "50s"], p.auto.age || "30s")}
+        ${select("auto.style", "Style", ["Hijab", "No Hijab", "Casual", "Professional"], p.auto.style || "Hijab")}
+        ${select("auto.age", "Age", ["20s", "30s", "40s (Makcik)", "55+ (Nenek)"], p.auto.age || "30s")}
       </div>
       <p class="field-label">Provider</p>
       <div class="auto-provider-grid">
@@ -4018,20 +4012,35 @@ function autoPanel(p) {
         ${autoButton("auto.provider", "Sora 2", "⚡ Sora 2", provider)}
         ${autoButton("auto.provider", "GeminiOmni", "🔷 GeminiOmni", provider)}
       </div>
-      <div class="auto-duration-pill">8s (1 shot)</div>
-      <label class="auto-size-field">Size${select("auto.size", "", ["9:16", "1:1", "16:9"], p.auto.size || "9:16")}</label>
+      <div class="auto-duration-row">
+        ${autoButton("auto.duration", "8s", "8s (1 shot)", duration)}
+        ${autoButton("auto.duration", "16s", "16s (2 shots)", duration)}
+      </div>
+      <label class="auto-size-field">Size${select("auto.size", "", ["9:16", "16:9", "1:1"], size)}</label>
       <p class="field-label">Plan Style</p>
       <div class="auto-plan-grid">
-        ${autoPlanButton("Normal Flow", "AI plan biasa — framework drive scene", planStyle)}
-        ${autoPlanButton("Custom Idea", "Client kasi idea — AI buat variants", planStyle, true)}
+        ${autoPlanButton("Normal Flow", "AI plans the batch from selected frameworks.", planStyle)}
+        ${autoPlanButton("Custom Idea", "Start from your own idea, then create variants.", planStyle, true)}
       </div>
       <p class="field-label">Frameworks <small>(pick up to 5 angles)</small></p>
       <div class="auto-framework-grid">
-        ${frameworks.map(([tag, label]) => `<label><input type="checkbox" data-auto-framework="${esc(`${tag} ${label}`)}"><span class="${tag === "UGC" ? "ugc-tag" : "prd-tag"}">${tag}</span> ${label} <b>ⓘ</b></label>`).join("")}
+        ${frameworks.map((item) => autoFrameworkChip(item, selectedFrameworks)).join("")}
       </div>
-      <button class="gold-button auto-generate-button" data-action="generate-auto">${icon("video")} Generate</button>
+      <section class="auto-cta-card">
+        <p class="field-label">CTA Mode <small>(last 2 seconds)</small></p>
+        <div class="auto-cta-list">
+          ${autoChoiceCard("auto.ctaMode", "Shop CTA", "🛒 SHOP CTA", "\"Tekan beg kuning\" style ending with rotating variants.", ctaMode)}
+          ${autoChoiceCard("auto.ctaMode", "Custom CTA", "✏️ CUSTOM CTA", "Use your own closing line or promotion instruction.", ctaMode)}
+          ${autoChoiceCard("auto.ctaMode", "No CTA", "🚫 NO CTA", "Use the full video for content only.", ctaMode)}
+        </div>
+      </section>
+      <div class="auto-submit-row">
+        <label>Quantity${select("auto.quantity", "", ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"], quantity)}</label>
+        <button class="gold-button auto-generate-button" data-action="generate-auto">${icon("video")} Generate</button>
+      </div>
     </section>
-    ${schedule()}`;
+    ${autoProcessLog(p)}
+    ${autoHistoryPanel(p)}`;
 }
 
 function autoButton(field, value, label, active) {
@@ -4040,6 +4049,54 @@ function autoButton(field, value, label, active) {
 
 function autoPlanButton(value, note, active, isNew = false) {
   return `<button class="${active === value ? "active" : ""}" type="button" data-field-set="auto.planStyle" data-value="${esc(value)}">${isNew ? "<em>✨ NEW</em>" : ""}<b>${value}</b><span>${note}</span></button>`;
+}
+
+function autoChoiceCard(field, value, title, note, active) {
+  return `<button class="${active === value ? "active" : ""}" type="button" data-field-set="${field}" data-value="${esc(value)}"><b>${title}</b><span>${note}</span></button>`;
+}
+
+function autoFrameworks() {
+  return [
+    ["UGC", "Hook + Pain (PAS)", "Pain, agitation, solution. Strong for problem-aware buyers."],
+    ["PRD", "Product Hero (AIDA)", "Attention, interest, desire, action around the product."],
+    ["UGC", "Testimonial", "Creator-style proof and personal recommendation."],
+    ["UGC", "FOMO/Urgency", "Limited deal, stock, time, or trend pressure."],
+    ["PRD", "Before/After", "Contrast the old situation with the product result."],
+    ["UGC", "BAB (Before-After-Bridge)", "Show before state, after state, then bridge with product."],
+    ["UGC", "4Ps (Promise-Picture-Proof-Push)", "Clear promise, visual example, proof, and CTA."],
+    ["PRD", "USP Showcase", "Product-only highlight for one sharp selling point."],
+    ["UGC", "Action Bias", "Push viewers to do one simple next action."],
+    ["UGC", "Solution Focus", "Lead with solution and practical usefulness."],
+    ["PRD", "Flat Lay / Aesthetic", "Clean product composition with lifestyle appeal."],
+    ["UGC", "Benefit + Result", "Tie one feature to a visible buyer result."],
+    ["UGC", "Fear of Loss", "Show what the buyer misses by not acting."],
+    ["UGC", "UGC USP (Strict)", "Tight creator video around one unique claim."],
+    ["PRD", "Product USP (Strict)", "Strict product-only USP breakdown."],
+    ["POV", "PROD Goyang2 (Hand POV)", "Handheld product POV with energetic movement."]
+  ];
+}
+
+function autoFrameworkChip([tag, label, info], selected = []) {
+  const value = `${tag} ${label}`;
+  const checked = selected.includes(value);
+  const tagClass = tag === "UGC" ? "ugc-tag" : tag === "PRD" ? "prd-tag" : "pov-tag";
+  return `<label class="${checked ? "selected" : ""}" title="${esc(info)}"><input type="checkbox" data-auto-framework-toggle="${esc(value)}" ${checked ? "checked" : ""}><span class="${tagClass}">${tag}</span><strong>${esc(label)}</strong><b>ⓘ</b></label>`;
+}
+
+function autoProcessLog(p) {
+  const latest = (p.results || []).filter((item) => item.type === "auto").at(-1);
+  return `<section class="auto-process-card">
+    <header>${icon("clipboard-list", 18)} <b>Process Log</b></header>
+    <pre>${latest ? esc(latest.body || latest.title || "Auto content batch created.") : "Process log will appear here..."}</pre>
+  </section>`;
+}
+
+function autoHistoryPanel(p) {
+  const items = p.results.filter((item) => item.type === "auto").slice(-8).reverse();
+  return `<section class="auto-history-card">
+    <header><h3>${icon("history", 18)} History — Auto Content — ${esc(p.name)}</h3><span>${items.length} items</span></header>
+    ${items.length ? `<div class="result-grid">${items.map(resultCard).join("")}</div>` : `<div class="viral-empty"><b>${icon("history", 28)}</b><strong>Belum ada history.</strong><span>Generate satu, ia akan muncul di sini.</span></div>`}
+  </section>`;
 }
 
 function originalProviderValue(provider) {
@@ -7046,6 +7103,7 @@ function bind() {
   document.querySelectorAll("[data-action]").forEach((el) => el.addEventListener("click", (e) => action(e, el.dataset.action)));
   document.querySelectorAll("[data-field-set]").forEach((el) => el.addEventListener("click", () => saveProjectField(el.dataset.fieldSet, el.dataset.value)));
   document.querySelectorAll("[data-field]").forEach((el) => el.addEventListener("change", fieldChange));
+  document.querySelectorAll("[data-auto-framework-toggle]").forEach((el) => el.addEventListener("change", () => toggleAutoFramework(el.dataset.autoFrameworkToggle)));
   document.querySelectorAll("[data-upload]").forEach((el) => el.addEventListener("change", uploadChange));
   const agentInput = document.querySelector("[data-agent-input]");
   autoResizeAgentInput(agentInput);
@@ -7350,6 +7408,19 @@ async function saveProjectField(field, value) {
     set({ db: previousDb });
     notify(error.message || t("toastSaveFailed"));
   }
+}
+
+async function toggleAutoFramework(value = "") {
+  if (!value) return;
+  const selected = Array.isArray(project().auto?.frameworks) ? [...project().auto.frameworks] : [];
+  const exists = selected.includes(value);
+  const next = exists ? selected.filter((item) => item !== value) : [...selected, value];
+  if (!exists && selected.length >= 5) {
+    notify("最多选择 5 个 frameworks。");
+    render();
+    return;
+  }
+  return saveProjectField("auto.frameworks", next);
 }
 
 async function applyImagePreset(promptText) {
