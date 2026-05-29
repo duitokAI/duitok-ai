@@ -208,15 +208,15 @@ const copy = {
     navFaq: "FAQ",
     signIn: "Log masuk",
     promo: "Harga pengguna awal RM79.80/bulan dibuka untuk masa terhad",
-    heroEyebrow: "AI workflow hub untuk content & online income",
-    heroTitle: "Semua orang cakap AI boleh buat duit. Anda masih tak tahu nak mula dari mana.",
-    heroTitleLead: "Semua orang cakap AI boleh buat duit.",
-    heroTitleHot: "Anda masih tak tahu",
-    heroTitleTail: "nak mula dari mana.",
-    demoCta: "Lihat workflow",
-    heroCopy: "Pokaya AI kumpulkan image AI, video AI, prompt library dan workflow siap guna supaya anda boleh hasilkan content, promote produk dan test peluang income online dengan lebih cepat.",
+    heroEyebrow: "AI tools untuk content, promosi & online income",
+    heroTitle: "Nak guna AI buat duit, tapi tak tahu nak mula dari mana?",
+    heroTitleLead: "Nak guna AI buat duit,",
+    heroTitleHot: "tapi tak tahu",
+    heroTitleTail: "nak mula dari mana?",
+    demoCta: "Lihat cara guna",
+    heroCopy: "Pokaya AI susun image AI, video AI, prompt dan cara buat content dalam satu platform supaya anda boleh mula buat content, promote produk dan test peluang income tanpa pening belajar banyak tool.",
     startCreating: "Mula guna Pokaya AI",
-    heroTrust1: "AI workflow siap guna",
+    heroTrust1: "AI tools siap guna",
     heroTrust2: "BM / 中文 / EN",
     heroTrust3: "Tak perlu tunjuk muka",
     heroTrust4: "Review dulu sebelum post",
@@ -229,32 +229,32 @@ const copy = {
     competitor: "Competitor",
     oneVideo: "1 video / hari",
     tenVideos: "10 video / hari",
-    catchUp: "Dari idea kosong ke workflow AI yang siap guna",
+    catchUp: "Dari idea kosong ke output yang boleh digunakan",
     speed: "Cepat",
-    speedTitle: "Content siap lebih cepat",
-    speedCopy: "Generate idea, prompt, visual, script dan video tanpa buka 10 tool berbeza.",
+    speedTitle: "Buat content tanpa buka 10 tool",
+    speedCopy: "Idea, prompt, image, video dan caption disusun supaya lebih cepat digunakan.",
     price: "RM79.80",
-    priceTitle: "Satu hub AI untuk mula secara praktikal",
-    priceCopy: "Image AI, Video AI, Prompt Library, Auto Content, Storytelling, Clone Video dan workflow affiliate dalam satu platform.",
+    priceTitle: "Satu tempat untuk mula guna AI secara praktikal",
+    priceCopy: "Image AI, Video AI, Prompt Library, Auto Content, Storytelling, Clone Video dan affiliate pack dalam satu platform.",
     simple: "Senang",
-    simpleTitle: "Tak perlu pandai prompt",
-    simpleCopy: "Pilih workflow, isi maklumat ringkas, dan Pokaya bantu susun output yang boleh terus digunakan.",
+    simpleTitle: "Tak perlu jadi prompt expert",
+    simpleCopy: "Pilih tujuan, isi maklumat ringkas, dan Pokaya bantu susun output.",
     sellerReality: "Realiti AI sekarang",
-    painTitle: "Ramai nak guna AI untuk buat duit. Tapi kebanyakan orang stuck di langkah pertama.",
-    painCopy: "Terlalu banyak tool, terlalu banyak prompt, terlalu banyak tutorial. Akhirnya content tak siap, produk tak dipromote, idea hanya tinggal idea.",
+    painTitle: "Masalah anda bukan tak ada AI. Masalahnya AI terlalu bersepah.",
+    painCopy: "Satu tool untuk image, satu tool untuk video, satu tempat cari prompt, satu lagi tutorial ajar cara buat content. Akhirnya anda banyak belajar, tapi content masih belum siap.",
     notEnoughTime: "Tak tahu nak mula",
-    notEnoughTimeCopy: "Anda tahu AI penting, tapi tak jelas workflow pertama yang patut dibuat hari ini.",
+    notEnoughTimeCopy: "Anda tahu AI penting, tapi tak jelas langkah pertama yang patut dibuat hari ini.",
     ideasDry: "Terlalu banyak AI tool",
     ideasDryCopy: "Satu tool untuk gambar, satu untuk video, satu untuk prompt, satu untuk caption. Akhirnya pening.",
     scatteredTools: "Tak pandai prompt",
     scatteredToolsCopy: "Output nampak biasa sebab prompt tak cukup spesifik, tapi belajar prompt dari kosong makan masa.",
     competitorsFaster: "Susah konsisten",
     competitorsFasterCopy: "AI hanya berguna kalau digunakan setiap hari. Tanpa sistem, semangat hilang selepas beberapa hari.",
-    advantage: "Workflow siap guna",
-    weaponsTitle: "5 workflow AI untuk mula hasilkan content yang boleh dipromote",
+    advantage: "AI tools siap guna",
+    weaponsTitle: "Pilih tugas. Isi maklumat. Generate output.",
     liveOutput: "Output Pokaya AI",
     outputTitle: "Bukan teori. Ini jenis output yang anda boleh hasilkan dalam Pokaya AI.",
-    outputCopy: "Contoh image, video, prompt dan workflow content yang boleh digunakan untuk content, produk dan affiliate.",
+    outputCopy: "Contoh image, video, prompt dan content plan yang boleh digunakan untuk content, produk dan affiliate.",
     hookTitle: "Sales Prompt",
     hookSample: "Prompt siap untuk hook, caption, storytelling, sales angle dan content idea.",
     scriptTitle: "Video AI",
@@ -262,24 +262,24 @@ const copy = {
     captionTitle: "Auto Content",
     captionSample: "Dari satu produk atau idea, Pokaya bantu susun angle, script, visual direction dan caption.",
     planTitle: "Affiliate Pack",
-    planSample: "Workflow khas untuk beginner yang mahu mula promote produk dengan hook, script dan visual.",
-    howKicker: "Workflow",
-    howTitle: "Pilih workflow, isi maklumat ringkas, terus generate output",
+    planSample: "Pakej khas untuk beginner yang mahu mula promote produk dengan hook, script dan visual.",
+    howKicker: "Cara guna",
+    howTitle: "Pilih tugas, isi maklumat, terus generate output",
     howCopy: "Pokaya dibina untuk beginner: pilih apa yang anda mahu buat, masukkan produk, niche atau idea, kemudian generate prompt, image, script, video atau content plan.",
     demoTitle: "Output sebenar dari Pokaya AI",
-    demoCopy: "Contoh image, video, prompt dan workflow content yang boleh digunakan untuk content, produk, affiliate dan online promotion.",
+    demoCopy: "Contoh image, video, prompt dan content plan yang boleh digunakan untuk content, produk, affiliate dan online promotion.",
     oldWay: "Cara lama",
     newWay: "Cara Pokaya AI",
-    pricingTitle: "Satu plan. Semua workflow AI.",
-    pricingCopy: "Akses penuh kepada tools utama Pokaya AI. Sesuai untuk beginner yang mahu mula buat content, promote produk dan explore peluang income dengan AI.",
+    pricingTitle: "Satu tempat untuk mula guna AI secara praktikal.",
+    pricingCopy: "RM79.80/bulan untuk akses Pokaya AI Pro: image, video, prompt, content idea dan TikTok Affiliate Pack.",
     launchOffer: "Limited offer · Pokaya AI Pro",
     claimPlan: "Mula guna Pokaya AI sekarang",
-    riskReversal: "Pokaya AI tidak menjamin income. Pokaya membantu anda hasilkan content, idea, visual, video dan workflow dengan lebih cepat supaya anda boleh test lebih banyak peluang.",
+    riskReversal: "Pokaya AI tidak menjamin income. Ia bantu anda hasilkan content, prompt, visual dan video dengan lebih cepat supaya anda boleh test lebih banyak peluang.",
     controlKicker: "Trust & compliance",
-    controlTitle: "Kami jual workflow AI, bukan janji kaya cepat",
+    controlTitle: "Kami jual alat dan cara guna, bukan janji kaya cepat",
     controlCopy: "Pokaya AI membantu anda buat content, visual, video dan prompt dengan lebih tersusun. Anda tetap perlu pilih peluang, publish, test dan review hasil sendiri.",
     startNow: "Mula sekarang",
-    registerTitle: "Daftar & mula dalam 1 minit.",
+    registerTitle: "Daftar & mula guna Pokaya AI.",
     registerCopy: "Isi info anda, bayar melalui FPX atau DuitNow QR, dan akaun Pokaya AI anda akan diaktifkan selepas pembayaran berjaya.",
     fullName: "Nama penuh",
     email: "Email",
@@ -453,15 +453,15 @@ const copy = {
     navFaq: "FAQ",
     signIn: "登录",
     promo: "早鸟价格 RM79.80/月限时开放",
-    heroEyebrow: "给内容、推广和线上收入机会的 AI 工作流中转站",
-    heroTitle: "所有人都说 AI 可以赚钱。您还不知道从哪里开始。",
-    heroTitleLead: "所有人都说 AI 可以赚钱。",
-    heroTitleHot: "您还不知道",
-    heroTitleTail: "从哪里开始。",
-    demoCta: "查看工作流",
-    heroCopy: "Pokaya AI 把 Image AI、Video AI、Prompt Library 和现成工作流放在一个平台，帮助您更快做内容、推广产品、测试线上收入机会。",
+    heroEyebrow: "给内容、推广和线上收入机会的 AI 工具箱",
+    heroTitle: "想用 AI 赚钱，但不知道从哪里开始？",
+    heroTitleLead: "想用 AI 赚钱，",
+    heroTitleHot: "但不知道",
+    heroTitleTail: "从哪里开始？",
+    demoCta: "看看怎么用",
+    heroCopy: "Pokaya AI 把 Image AI、Video AI、Prompt Library 和常用操作步骤放在一个平台，帮您更快做内容、推广产品、测试线上收入机会，不用自己研究一堆工具。",
     startCreating: "开始使用 Pokaya AI",
-    heroTrust1: "现成 AI 工作流",
+    heroTrust1: "现成 AI 工具箱",
     heroTrust2: "BM / 中文 / EN",
     heroTrust3: "无需露脸",
     heroTrust4: "发布前人工确认",
@@ -474,19 +474,19 @@ const copy = {
     competitor: "竞争对手",
     oneVideo: "1 条 / 天",
     tenVideos: "10 条 / 天",
-    catchUp: "从空白想法到现成 AI 工作流",
+    catchUp: "从空白想法到可用成品",
     speed: "快",
-    speedTitle: "更快完成内容",
-    speedCopy: "不用打开 10 个工具，也能生成 idea、prompt、visual、script 和 video。",
+    speedTitle: "不用打开 10 个工具也能做内容",
+    speedCopy: "Idea、prompt、image、video 和 caption 都整理在同一个地方。",
     price: "RM79.80",
-    priceTitle: "一个实用 AI 工作流中心",
-    priceCopy: "Image AI、Video AI、Prompt Library、Auto Content、Storytelling、Clone Video 和 affiliate workflow 集中在一个平台。",
+    priceTitle: "一个能直接开始的 AI 工具箱",
+    priceCopy: "Image AI、Video AI、Prompt Library、Auto Content、Storytelling、Clone Video 和 affiliate pack 集中在一个平台。",
     simple: "简单",
-    simpleTitle: "不用先学 prompt",
-    simpleCopy: "选择工作流，填写简单资料，Pokaya 帮您把 output 整理成可以直接使用的内容。",
+    simpleTitle: "不用先变成 prompt 专家",
+    simpleCopy: "选择目标，填写简单资料，Pokaya 帮您整理出可以直接使用的 output。",
     sellerReality: "现在用 AI 的现实",
-    painTitle: "很多人想用 AI 赚钱<br>但卡在第一步",
-    painCopy: "工具太多、prompt 太多、教程太多。最后内容没有完成，产品没有推广，想法只停留在想法。",
+    painTitle: "问题不是没有 AI<br>是 AI 太分散",
+    painCopy: "图片一个工具，视频一个工具，prompt 到处找，教程又在另一个地方。最后学了很多，内容还是没有做出来。",
     notEnoughTime: "内容产能太低",
     notEnoughTimeCopy: "一天 2-3 条，数据太少，判断只能靠感觉。",
     ideasDry: "拍摄成本太高",
@@ -495,11 +495,11 @@ const copy = {
     scatteredToolsCopy: "没有 SOP，只能刷同行、抄文案、碰运气。",
     competitorsFaster: "AI 卖家已经提速",
     competitorsFasterCopy: "同一个产品，可以同时测痛点、人群、hook、CTA 和视频角度。",
-    advantage: "现成工作流",
-    weaponsTitle: "5 个 AI 工作流<br>帮您开始做可推广内容",
+    advantage: "现成 AI 工具",
+    weaponsTitle: "选择任务<br>填写资料，生成 output",
     liveOutput: "Pokaya AI 输出",
     outputTitle: "不是理论<br>这是 Pokaya AI 可以生成的 output",
-    outputCopy: "展示 image、video、prompt 和 content workflow，用于内容、产品推广、affiliate 和线上机会测试。",
+    outputCopy: "展示 image、video、prompt 和 content plan，用于内容、产品推广、affiliate 和线上机会测试。",
     hookTitle: "Sales Prompt",
     hookSample: "现成 prompt 用来生成 hook、caption、storytelling、sales angle 和 content idea。",
     scriptTitle: "Video AI",
@@ -508,20 +508,20 @@ const copy = {
     captionSample: "从一个产品或想法，整理 angle、script、visual direction 和 caption。",
     planTitle: "Affiliate Pack",
     planSample: "给想开始推广产品的新手使用，包含 hook、script、content angle 和 visual。",
-    howKicker: "工作流",
-    howTitle: "选择工作流<br>填写资料，直接生成 output",
+    howKicker: "使用方式",
+    howTitle: "选择任务<br>填写资料，直接生成 output",
     howCopy: "Pokaya 给新手设计：选择要完成的任务，输入产品、niche 或想法，然后生成 prompt、image、script、video 或 content plan。",
     demoTitle: "Pokaya AI 的真实输出示例",
-    demoCopy: "展示可用于内容、产品、affiliate 和 online promotion 的 image、video、prompt 与 workflow output。",
+    demoCopy: "展示可用于内容、产品、affiliate 和 online promotion 的 image、video、prompt 与 content plan。",
     oldWay: "旧方法",
     newWay: "Pokaya AI 方法",
-    pricingTitle: "一个计划<br>解锁所有 AI 工作流",
-    pricingCopy: "开通 Pokaya AI 主要工具，适合想开始做内容、推广产品、探索 AI 线上收入机会的新手。",
+    pricingTitle: "一个地方<br>开始真正使用 AI",
+    pricingCopy: "RM79.80/月开通 Pokaya AI Pro：image、video、prompt、content idea 和 TikTok Affiliate Pack。",
     launchOffer: "限时优惠 · Pokaya AI Pro",
     claimPlan: "现在开始使用 Pokaya AI",
-    riskReversal: "Pokaya AI 不承诺收入。Pokaya 帮助您更快生成 content、idea、visual、video 和 workflow，让您可以测试更多机会。",
+    riskReversal: "Pokaya AI 不承诺收入。它帮助您更快生成 content、prompt、visual 和 video，让您可以测试更多机会。",
     controlKicker: "信任与合规",
-    controlTitle: "我们卖的是 AI 工作流<br>不是暴富承诺",
+    controlTitle: "我们卖的是 AI 工具和操作步骤<br>不是暴富承诺",
     controlCopy: "Pokaya AI 帮您更有结构地做内容、视觉、视频和 prompt。您仍然需要选择机会、发布内容、测试和复盘结果。",
     startNow: "现在开始",
     registerTitle: "注册并在 1 分钟内开始",
@@ -698,15 +698,15 @@ const copy = {
     navFaq: "FAQ",
     signIn: "Sign in",
     promo: "Early-user price RM79.80/month is open for a limited time",
-    heroEyebrow: "AI workflow hub for content & online income",
+    heroEyebrow: "AI toolkit for content, promotion & online income",
     heroTitle: "Everyone says AI can make money. You still do not know where to start.",
     heroTitleLead: "Everyone says AI can make money.",
     heroTitleHot: "You still do not know",
     heroTitleTail: "where to start.",
-    demoCta: "View workflows",
-    heroCopy: "Pokaya AI brings image AI, video AI, prompt libraries, and ready-to-use workflows into one place so you can create content, promote products, and test online income opportunities faster.",
+    demoCta: "See how it works",
+    heroCopy: "Pokaya AI brings image AI, video AI, prompt libraries, and practical steps into one place so you can create content, promote products, and test online income opportunities faster.",
     startCreating: "Start using Pokaya AI",
-    heroTrust1: "Ready AI workflows",
+    heroTrust1: "Ready AI tools",
     heroTrust2: "BM / 中文 / EN",
     heroTrust3: "No need to show face",
     heroTrust4: "Review before posting",
@@ -719,16 +719,16 @@ const copy = {
     competitor: "Competitor",
     oneVideo: "1 video / day",
     tenVideos: "10 videos / day",
-    catchUp: "From blank ideas to ready AI workflows",
+    catchUp: "From blank ideas to usable outputs",
     speed: "Fast",
     speedTitle: "Create content faster",
     speedCopy: "Generate ideas, prompts, visuals, scripts, and videos without opening 10 different tools.",
     price: "RM79.80",
-    priceTitle: "One practical AI workflow hub",
-    priceCopy: "Image AI, Video AI, Prompt Library, Auto Content, Storytelling, Clone Video, and affiliate workflows in one platform.",
+    priceTitle: "One practical AI toolkit",
+    priceCopy: "Image AI, Video AI, Prompt Library, Auto Content, Storytelling, Clone Video, and affiliate packs in one platform.",
     simple: "Easy",
     simpleTitle: "No prompt expertise needed",
-    simpleCopy: "Choose a workflow, add simple details, and Pokaya helps structure output you can use.",
+    simpleCopy: "Choose a task, add simple details, and Pokaya helps structure output you can use.",
     sellerReality: "The current AI reality",
     painTitle: "Many people want to use AI to earn, but most are stuck at the first step",
     painCopy: "Too many tools, too many prompts, too many tutorials. Content does not get finished, products do not get promoted, and ideas stay as ideas.",
@@ -740,11 +740,11 @@ const copy = {
     scatteredToolsCopy: "Normal AI can generate text, but it does not teach what selling template to use, how to post, or how to review data.",
     competitorsFaster: "Only 2-3 videos/day",
     competitorsFasterCopy: "Too little output means too little testing data to find winning products and videos.",
-    advantage: "Ready workflows",
-    weaponsTitle: "5 AI workflows to start creating promotable content",
+    advantage: "Ready AI tools",
+    weaponsTitle: "5 AI tools to start creating promotable content",
     liveOutput: "Pokaya AI output",
     outputTitle: "Not theory. These are outputs you can create with Pokaya AI.",
-    outputCopy: "Examples of images, videos, prompts, and content workflows for content, products, affiliate, and online promotion.",
+    outputCopy: "Examples of images, videos, prompts, and content plans for content, products, affiliate, and online promotion.",
     hookTitle: "Sales Prompt",
     hookSample: "Ready prompts for hooks, captions, storytelling, sales angles, and content ideas.",
     scriptTitle: "Video AI",
@@ -752,21 +752,21 @@ const copy = {
     captionTitle: "Auto Content",
     captionSample: "From one product or idea, Pokaya helps structure angles, scripts, visual direction, and captions.",
     planTitle: "Affiliate Pack",
-    planSample: "A workflow for beginners who want to promote products with hooks, scripts, content angles, and visuals.",
-    howKicker: "Workflow",
-    howTitle: "Choose a workflow, add details, generate output",
+    planSample: "A starter pack for beginners who want to promote products with hooks, scripts, content angles, and visuals.",
+    howKicker: "How it works",
+    howTitle: "Choose a task, add details, generate output",
     howCopy: "Pokaya is built for beginners: choose what you want to do, add a product, niche, or idea, then generate prompts, images, scripts, videos, or content plans.",
     demoTitle: "Real output from Pokaya AI",
-    demoCopy: "Examples of image, video, prompt, and workflow outputs you can use for content, products, affiliate, and online promotion.",
+    demoCopy: "Examples of image, video, prompt, and content outputs you can use for content, products, affiliate, and online promotion.",
     oldWay: "Old way",
     newWay: "Pokaya AI way",
-    pricingTitle: "One plan. All AI workflows.",
+    pricingTitle: "One plan. Main AI tools included.",
     pricingCopy: "Full access to Pokaya AI's core tools. Built for beginners who want to create content, promote products, and explore online income opportunities with AI.",
     launchOffer: "Limited offer · Pokaya AI Pro",
     claimPlan: "Start using Pokaya AI now",
-    riskReversal: "Pokaya AI does not guarantee income. Pokaya helps you create content, ideas, visuals, videos, and workflows faster so you can test more opportunities.",
+    riskReversal: "Pokaya AI does not guarantee income. Pokaya helps you create content, ideas, visuals, videos, and plans faster so you can test more opportunities.",
     controlKicker: "Trust & compliance",
-    controlTitle: "We sell AI workflows, not a get-rich promise",
+    controlTitle: "We sell AI tools and practical steps, not a get-rich promise",
     controlCopy: "Pokaya AI helps you create content, visuals, videos, and prompts with more structure. You still choose opportunities, publish, test, and review results.",
     startNow: "Start now",
     registerTitle: "Register and start in 1 minute",
@@ -1439,7 +1439,7 @@ function registerPage() {
           <div class="price"><s>RM300</s><b>RM79.80</b><small>${pricePeriodContent().period}</small></div>
           <div class="included-credit-banner">${includedCreditBanner()}</div>
           <div class="usage-price-grid">${usagePriceCards()}</div>
-          <ul><li>Full Studio access</li><li>Prompt Library</li><li>Image AI workflows</li><li>Video AI workflows</li><li>Auto Content workflow</li><li>Clone Video & Storytelling tools</li><li>TikTok Affiliate workflow pack</li><li>VIP workflow updates</li></ul>
+          <ul><li>Full Studio access</li><li>Prompt Library</li><li>Image AI tools</li><li>Video AI tools</li><li>Auto Content tools</li><li>Clone Video & Storytelling tools</li><li>TikTok Affiliate Pack</li><li>VIP tool updates</li></ul>
         </article>
       </section>
       <section id="checkout" class="signup-section checkout-section">
@@ -1465,7 +1465,7 @@ function checkoutPageContent() {
   const data = {
     ms: {
       steps: [
-        ["1", "Subscribe plan", "RM79.80/bulan unlock Pokaya AI Pro workflows."],
+        ["1", "Subscribe plan", "RM79.80/bulan unlock Pokaya AI Pro."],
         ["2", "Use credits", "Image dan video guna credit dengan kos jelas sebelum generate."],
         ["3", "Generate outputs", "Prompt, image, video, clone, story dan content tools deduct automatik."]
       ],
@@ -1481,7 +1481,7 @@ function checkoutPageContent() {
     },
     zh: {
       steps: [
-        ["1", "订阅计划", "RM79.80/月解锁 Pokaya AI Pro 工作流。"],
+        ["1", "订阅计划", "RM79.80/月开通 Pokaya AI Pro。"],
         ["2", "使用 credit", "图片和视频会使用 credit，生成前显示清楚成本。"],
         ["3", "生成 output", "Prompt、image、video、clone、story 和 content tools 会自动扣除。"]
       ],
@@ -1497,7 +1497,7 @@ function checkoutPageContent() {
     },
     en: {
       steps: [
-        ["1", "Subscribe plan", "RM79.80/month unlocks Pokaya AI Pro workflows."],
+        ["1", "Subscribe plan", "RM79.80/month unlocks Pokaya AI Pro."],
         ["2", "Use credits", "Images and videos use credits with clear cost before generation."],
         ["3", "Generate outputs", "Prompt, image, video, clone, story, and content tools deduct automatically."]
       ],
@@ -1551,7 +1551,7 @@ function affiliatePage() {
         <h2>Four steps to start earning.</h2>
         <div class="checkout-steps affiliate-steps">
           <article><b>1</b><span>Apply affiliate</span><p>Send your name, channel, and audience type.</p></article>
-          <article><b>2</b><span>Get account access</span><p>Use the product so your content can show real workflows.</p></article>
+          <article><b>2</b><span>Get account access</span><p>Use the product so your content can show real outputs.</p></article>
           <article><b>3</b><span>Share your link</span><p>Every buyer through your link is tracked to your wallet.</p></article>
           <article><b>4</b><span>Cash out</span><p>Request payout after crossing the minimum threshold.</p></article>
         </div>
@@ -1587,7 +1587,7 @@ function legalPage(type) {
         ["Accounts", "You are responsible for keeping your login secure, providing accurate information, and using the service only for content and products you are allowed to promote."],
         ["Generated content", "AI output can contain mistakes. You are responsible for reviewing claims, captions, assets, disclosures, music, product details, and compliance before publishing."],
         ["TikTok publishing", "When TikTok integrations are enabled, posts are created only from user-approved queue items. TikTok may review, limit, reject, or remove content according to its own rules and API policies."],
-        ["Payments and credits", "Subscription and generation credits unlock product features. Usage-based credits may be deducted when generation or publishing workflows are requested, subject to the plan terms shown at checkout."],
+        ["Payments and credits", "Subscription and generation credits unlock product features. Usage-based credits may be deducted when generation or publishing actions are requested, subject to the plan terms shown at checkout."],
         ["Acceptable use", "Do not use Pokaya AI to infringe intellectual property, impersonate others, bypass platform rules, make unsafe product claims, spam, or publish illegal or harmful content."],
         ["Contact", "For support or legal questions, contact hello@pokaya.ai."]
       ];
@@ -1624,9 +1624,9 @@ function featureCard(kicker, title, text, ic) {
 
 function heroPanelContent() {
   const data = {
-    ms: { label: "AI Workflow Hub", title: "Prompt, image, video<br>dan content workflow" },
-    zh: { label: "AI 工作流中转站", title: "Prompt、图片、视频<br>和内容工作流" },
-    en: { label: "AI Workflow Hub", title: "Prompts, images, videos<br>and content workflows" }
+    ms: { label: "AI Tool Kit", title: "Prompt, image, video<br>dan content plan" },
+    zh: { label: "AI 工具箱", title: "Prompt、图片、视频<br>和内容计划" },
+    en: { label: "AI Tool Kit", title: "Prompts, images, videos<br>and content plans" }
   };
   return data[state.lang] || data.ms;
 }
@@ -1647,21 +1647,21 @@ function featureMosaicCards() {
       ["02", "Video AI", "Buat video pendek untuk TikTok, Reels, Shorts, ads dan product demo tanpa shoot manual.", "video"],
       ["03", "Prompt Library", "Prompt siap untuk hook, caption, storytelling, sales angle dan content idea.", "message-square-text"],
       ["04", "Auto Content", "Dari satu produk atau idea, Pokaya susun angle, script, visual direction dan caption.", "sparkles"],
-      ["05", "TikTok Affiliate Pack", "Workflow pertama yang dioptimumkan untuk beginner yang mahu mula promote produk.", "badge-dollar-sign"]
+      ["05", "TikTok Affiliate Pack", "Pakej pertama yang dioptimumkan untuk beginner yang mahu mula promote produk.", "badge-dollar-sign"]
     ],
     zh: [
       ["01", "Image AI", "生成产品图、creator shot、thumbnail 和日常推广视觉。", "image"],
       ["02", "Video AI", "生成 TikTok、Reels、Shorts、ads 和 product demo 短视频。", "video"],
       ["03", "Prompt Library", "现成 prompt 用于 hook、caption、storytelling、sales angle 和 content idea。", "message-square-text"],
       ["04", "Auto Content", "从产品或想法整理 angle、script、visual direction 和 caption。", "sparkles"],
-      ["05", "TikTok Affiliate Pack", "第一个深度优化工作流，给想开始推广产品的新手使用。", "badge-dollar-sign"]
+      ["05", "TikTok Affiliate Pack", "第一个深度优化工具包，给想开始推广产品的新手使用。", "badge-dollar-sign"]
     ],
     en: [
       ["01", "Image AI", "Create product images, creator shots, thumbnails, and promo visuals for daily content.", "image"],
       ["02", "Video AI", "Create short videos for TikTok, Reels, Shorts, ads, and product demos without manual filming.", "video"],
       ["03", "Prompt Library", "Ready prompts for hooks, captions, storytelling, sales angles, and content ideas.", "message-square-text"],
       ["04", "Auto Content", "From one product or idea, Pokaya structures angles, scripts, visual direction, and captions.", "sparkles"],
-      ["05", "TikTok Affiliate Pack", "The first optimized workflow for beginners who want to start promoting products.", "badge-dollar-sign"]
+      ["05", "TikTok Affiliate Pack", "The first optimized pack for beginners who want to start promoting products.", "badge-dollar-sign"]
     ]
   };
   return (data[state.lang] || data.ms).map(([kicker, title, text, ic]) => featureCard(kicker, title, text, ic)).join("");
@@ -1670,28 +1670,28 @@ function featureMosaicCards() {
 function painCards() {
   const data = {
     ms: [
-      ["map", "Tak tahu nak mula", "Anda tahu AI penting, tapi tak jelas workflow pertama yang patut dibuat hari ini."],
+      ["map", "Tak tahu nak mula", "Anda tahu AI penting, tapi tak jelas langkah pertama yang patut dibuat hari ini."],
       ["layers", "Terlalu banyak AI tool", "Satu tool untuk gambar, satu untuk video, satu untuk prompt, satu untuk caption. Akhirnya pening."],
       ["message-square-text", "Tak pandai prompt", "Output nampak biasa sebab prompt tak cukup spesifik, tapi belajar prompt dari kosong makan masa."],
       ["timer", "Content lambat siap", "Nak buat satu post pun lama. Idea, visual, caption dan video semua kena fikir manual."],
       ["repeat", "Susah konsisten", "AI hanya berguna kalau digunakan setiap hari. Tanpa sistem, semangat hilang selepas beberapa hari."],
-      ["sparkles", "Tiada workflow siap", "Pokaya AI bukan bagi satu lagi chatbot. Pokaya bagi workflow yang boleh terus digunakan."]
+      ["sparkles", "Tiada cara guna yang jelas", "Pokaya AI bukan bagi satu lagi chatbot. Pokaya bagi alat dan langkah yang boleh terus digunakan."]
     ],
     zh: [
-      ["map", "不知道从哪里开始", "知道 AI 重要，但不知道今天第一个工作流应该做什么。"],
+      ["map", "不知道从哪里开始", "知道 AI 重要，但不知道今天第一步应该做什么。"],
       ["layers", "AI 工具太多", "图片一个工具、视频一个工具、prompt 一个工具、caption 又一个工具，最后只剩混乱。"],
       ["message-square-text", "不会写 prompt", "输出普通不是因为 AI 不行，而是 prompt 不够具体；从零学又太慢。"],
       ["timer", "内容完成太慢", "一个 post 要想 idea、visual、caption 和 video，全部手动很难坚持。"],
       ["repeat", "难以持续执行", "AI 只有每天用才有价值。没有系统，热情几天就会掉。"],
-      ["sparkles", "没有现成工作流", "Pokaya AI 不是再给您一个 chatbot，而是给可以直接使用的 workflow。"]
+      ["sparkles", "没有清楚步骤", "Pokaya AI 不是再给您一个 chatbot，而是给可以直接使用的工具和步骤。"]
     ],
     en: [
-      ["map", "Do not know where to start", "You know AI matters, but the first workflow to do today is unclear."],
+      ["map", "Do not know where to start", "You know AI matters, but the first step to do today is unclear."],
       ["layers", "Too many AI tools", "One tool for images, one for video, one for prompts, one for captions. It becomes messy."],
       ["message-square-text", "Prompting feels hard", "Outputs look generic when prompts are not specific, but learning from zero takes time."],
       ["timer", "Content takes too long", "One post needs ideas, visuals, captions, and videos. Manual work slows everything."],
       ["repeat", "Hard to stay consistent", "AI only helps when used repeatedly. Without a system, motivation fades after a few days."],
-      ["sparkles", "No ready workflow", "Pokaya AI is not another chatbot. Pokaya gives ready workflows you can use directly."]
+      ["sparkles", "No clear steps", "Pokaya AI is not another chatbot. Pokaya gives tools and steps you can use directly."]
     ]
   };
   return (data[state.lang] || data.ms)
@@ -1703,18 +1703,18 @@ function whyPokayaContent() {
   const data = {
     ms: {
       kicker: "Kenapa bukan AI biasa",
-      title: "Guna AI sendiri mudah jadi random, Pokaya beri workflow yang boleh diikuti",
-      copy: "AI umum hanya beri jawapan. Pokaya membungkus prompt, image, video dan content workflow menjadi tools yang lebih terus guna untuk content dan promotion."
+      title: "Guna AI sendiri mudah jadi random, Pokaya beri cara guna yang lebih jelas",
+      copy: "AI umum hanya beri jawapan. Pokaya membungkus prompt, image, video dan content plan menjadi tools yang lebih terus guna untuk content dan promotion."
     },
     zh: {
       kicker: "为什么不是自己用普通 AI",
-      title: "普通 AI 容易越用越散<br>Pokaya 给您现成工作流",
-      copy: "普通 AI 只给答案。Pokaya 把 prompt、image、video 和 content workflow 包装成更容易直接使用的工具，用来做内容和推广。"
+      title: "普通 AI 容易越用越散<br>Pokaya 给您现成工具和步骤",
+      copy: "普通 AI 只给答案。Pokaya 把 prompt、image、video 和 content plan 包装成更容易直接使用的工具，用来做内容和推广。"
     },
     en: {
       kicker: "Why not generic AI",
-      title: "Generic AI can become random. Pokaya gives workflows to follow",
-      copy: "Generic AI gives answers. Pokaya packages prompts, images, videos, and content workflows into tools that are easier to use for content and promotion."
+      title: "Generic AI can become random. Pokaya gives tools and steps to follow",
+      copy: "Generic AI gives answers. Pokaya packages prompts, images, videos, and content plans into tools that are easier to use for content and promotion."
     }
   };
   return data[state.lang] || data.ms;
@@ -1723,19 +1723,19 @@ function whyPokayaContent() {
 function whyPokayaCards() {
   const data = {
     ms: [
-      ["layout-template", "Ada workflow", "Pilih tugas seperti image, video, prompt, auto content atau affiliate pack."],
+      ["layout-template", "Ada cara guna", "Pilih tugas seperti image, video, prompt, auto content atau affiliate pack."],
       ["message-square-text", "Ada prompt siap", "Tidak perlu mula dari kosong untuk hook, caption, sales angle atau storytelling."],
       ["wand-sparkles", "Ada platform", "Generate dan simpan output dalam satu tempat, bukan lompat antara banyak tool."],
       ["badge-dollar-sign", "Ada arah income", "Fokus pada content, promotion dan peluang income tanpa menjanjikan hasil tetap."]
     ],
     zh: [
-      ["layout-template", "有工作流", "选择 image、video、prompt、auto content 或 affiliate pack 等任务。"],
+      ["layout-template", "有清楚步骤", "选择 image、video、prompt、auto content 或 affiliate pack 等任务。"],
       ["message-square-text", "有现成 prompt", "hook、caption、sales angle、storytelling 不必从空白页开始。"],
       ["wand-sparkles", "有平台", "在一个地方生成并保存 output，不用在多个工具之间跳来跳去。"],
       ["badge-dollar-sign", "有收入方向", "聚焦内容、推广和线上收入机会，但不承诺固定结果。"]
     ],
     en: [
-      ["layout-template", "Workflows", "Choose tasks such as image, video, prompt, auto content, or affiliate pack."],
+      ["layout-template", "Clear steps", "Choose tasks such as image, video, prompt, auto content, or affiliate pack."],
       ["message-square-text", "Ready prompts", "Hooks, captions, sales angles, and storytelling do not start from a blank page."],
       ["wand-sparkles", "Platform", "Generate and save outputs in one place instead of jumping between tools."],
       ["badge-dollar-sign", "Income direction", "Focused on content, promotion, and online income opportunities without promising results."]
@@ -1760,27 +1760,27 @@ function outputPreviewCards() {
 function workflowSteps() {
   const data = {
     ms: [
-      ["mouse-pointer-2", "Pilih workflow", "Pilih Image AI, Video AI, Prompt Library, Auto Content atau TikTok Affiliate Pack."],
+      ["mouse-pointer-2", "Pilih tugas", "Pilih Image AI, Video AI, Prompt Library, Auto Content atau TikTok Affiliate Pack."],
       ["file-input", "Isi maklumat ringkas", "Masukkan produk, niche, idea, reference atau tujuan content yang anda mahu buat."],
       ["message-square-text", "Generate prompt & plan", "Pokaya bantu susun hook, caption, script, angle atau content plan."],
       ["image", "Generate visual", "Hasilkan image, creator shot, thumbnail atau product visual untuk digunakan."],
-      ["video", "Generate video", "Buat video pendek, UGC, clone prompt atau story output mengikut workflow."],
+      ["video", "Generate video", "Buat video pendek, UGC, clone prompt atau story output mengikut tugas yang dipilih."],
       ["repeat", "Ulang dan test", "Simpan output, guna semula prompt, dan test lebih banyak idea dengan lebih tersusun."]
     ],
     zh: [
-      ["mouse-pointer-2", "选择工作流", "选择 Image AI、Video AI、Prompt Library、Auto Content 或 TikTok Affiliate Pack。"],
+      ["mouse-pointer-2", "选择任务", "选择 Image AI、Video AI、Prompt Library、Auto Content 或 TikTok Affiliate Pack。"],
       ["file-input", "填写简单资料", "输入产品、niche、想法、reference 或内容目标。"],
       ["message-square-text", "生成 prompt 和计划", "Pokaya 帮您整理 hook、caption、script、angle 或 content plan。"],
       ["image", "生成视觉", "生成 image、creator shot、thumbnail 或 product visual。"],
-      ["video", "生成视频", "根据工作流生成短视频、UGC、clone prompt 或 story output。"],
+      ["video", "生成视频", "根据任务生成短视频、UGC、clone prompt 或 story output。"],
       ["repeat", "重复和测试", "保存 output、复用 prompt，用更有结构的方式测试更多想法。"]
     ],
     en: [
-      ["mouse-pointer-2", "Choose a workflow", "Pick Image AI, Video AI, Prompt Library, Auto Content, or TikTok Affiliate Pack."],
+      ["mouse-pointer-2", "Choose a task", "Pick Image AI, Video AI, Prompt Library, Auto Content, or TikTok Affiliate Pack."],
       ["file-input", "Add simple details", "Enter a product, niche, idea, reference, or content goal."],
       ["message-square-text", "Generate prompt and plan", "Pokaya helps structure hooks, captions, scripts, angles, or content plans."],
       ["image", "Generate visuals", "Create images, creator shots, thumbnails, or product visuals."],
-      ["video", "Generate videos", "Create short videos, UGC, clone prompts, or story outputs based on the workflow."],
+      ["video", "Generate videos", "Create short videos, UGC, clone prompts, or story outputs based on the selected task."],
       ["repeat", "Repeat and test", "Save outputs, reuse prompts, and test more ideas with structure."]
     ]
   };
@@ -1862,21 +1862,21 @@ function comparisonContent() {
       oldTitle: "Buat sendiri dengan banyak tool",
       oldBullets: ["Cari prompt di internet", "Buka banyak AI tools berbeza", "Cuba prompt satu-satu", "Generate image di satu tempat", "Generate video di tempat lain", "Tulis caption manual", "Susun content plan sendiri"],
       newTitle: "Cara Pokaya AI",
-      newBullets: ["Pilih workflow yang anda perlukan", "Isi produk, niche atau idea", "Generate prompt, image, script atau video", "Simpan output dalam satu platform", "Gunakan TikTok Affiliate Pack untuk mula promote produk", "Test lebih banyak angle dengan lebih cepat", "Ulang workflow setiap hari"]
+      newBullets: ["Pilih tugas yang anda perlukan", "Isi produk, niche atau idea", "Generate prompt, image, script atau video", "Simpan output dalam satu platform", "Gunakan TikTok Affiliate Pack untuk mula promote produk", "Test lebih banyak angle dengan lebih cepat", "Ulang langkah yang sama setiap hari"]
     },
     zh: {
       title: "旧方式 vs Pokaya AI",
       oldTitle: "自己用很多工具",
       oldBullets: ["到处找 prompt", "打开很多不同 AI 工具", "一个一个试 prompt", "图片在一个地方生成", "视频在另一个地方生成", "caption 手动写", "content plan 自己整理"],
-      newTitle: "选择工作流，直接生成",
-      newBullets: ["选择需要的 workflow", "填写产品、niche 或想法", "生成 prompt、image、script 或 video", "output 保存在一个平台", "用 TikTok Affiliate Pack 开始推广产品", "更快测试更多 angle", "每天重复同一套 workflow"]
+      newTitle: "选择任务，直接生成",
+      newBullets: ["选择需要完成的任务", "填写产品、niche 或想法", "生成 prompt、image、script 或 video", "output 保存在一个平台", "用 TikTok Affiliate Pack 开始推广产品", "更快测试更多 angle", "每天重复同一套步骤"]
     },
     en: {
       title: "Old way vs Pokaya AI way",
       oldTitle: "Do it yourself with many tools",
       oldBullets: ["Search prompts online", "Open many different AI tools", "Try prompts one by one", "Generate images in one place", "Generate videos somewhere else", "Write captions manually", "Build the content plan yourself"],
-      newTitle: "Choose a workflow, then generate",
-      newBullets: ["Choose the workflow you need", "Enter a product, niche, or idea", "Generate prompts, images, scripts, or videos", "Save outputs in one platform", "Use TikTok Affiliate Pack to start promoting products", "Test more angles faster", "Repeat the workflow every day"]
+      newTitle: "Choose a task, then generate",
+      newBullets: ["Choose the task you need", "Enter a product, niche, or idea", "Generate prompts, images, scripts, or videos", "Save outputs in one platform", "Use TikTok Affiliate Pack to start promoting products", "Test more angles faster", "Repeat the same steps every day"]
     }
   };
   return data[state.lang] || data.ms;
@@ -1886,18 +1886,18 @@ function testVolumeContent() {
   const data = {
     ms: {
       kicker: "AI bukan susah",
-      title: "Yang susah ialah susun workflow",
-      copy: "Pokaya AI susun tools AI penting menjadi workflow yang lebih jelas supaya anda boleh buat content, promote produk dan explore peluang income tanpa mula dari kosong."
+      title: "Yang susah ialah tahu langkah seterusnya",
+      copy: "Pokaya AI susun tools AI penting menjadi langkah yang lebih jelas supaya anda boleh buat content, promote produk dan explore peluang income tanpa mula dari kosong."
     },
     zh: {
       kicker: "AI 本身不难",
-      title: "难的是把 AI 变成工作流",
-      copy: "Pokaya AI 把关键 AI 工具整理成更清楚的 workflow，让您不用从空白开始，也能做内容、推广产品、探索线上收入机会。"
+      title: "难的是知道下一步怎么做",
+      copy: "Pokaya AI 把关键 AI 工具整理成更清楚的操作步骤，让您不用从空白开始，也能做内容、推广产品、探索线上收入机会。"
     },
     en: {
       kicker: "AI is not the hard part",
-      title: "The hard part is turning AI into a workflow",
-      copy: "Pokaya AI organizes important AI tools into clearer workflows so you can create content, promote products, and explore online income opportunities without starting from zero."
+      title: "The hard part is knowing the next step",
+      copy: "Pokaya AI organizes important AI tools into clearer steps so you can create content, promote products, and explore online income opportunities without starting from zero."
     }
   };
   return data[state.lang] || data.ms;
@@ -1907,19 +1907,19 @@ function testVolumeSteps() {
   const data = {
     ms: [
       ["1", "Cepat", "Generate idea, prompt, visual, script dan video tanpa buka 10 tool berbeza."],
-      ["2", "Senang", "Pilih workflow, isi maklumat ringkas, dan Pokaya bantu susun output."],
+      ["2", "Senang", "Pilih tujuan, isi maklumat ringkas, dan Pokaya bantu susun output."],
       ["3", "Lengkap", "Image AI, Video AI, Prompt Library, Auto Content dan Affiliate Pack dalam satu platform."],
       ["4", "Praktikal", "Fokus pada output yang boleh digunakan untuk content, produk dan promotion."]
     ],
     zh: [
       ["1", "更快", "不用打开 10 个工具，也能生成 idea、prompt、visual、script 和 video。"],
-      ["2", "更简单", "选择 workflow，填写简单资料，Pokaya 帮您整理 output。"],
+      ["2", "更简单", "选择目标，填写简单资料，Pokaya 帮您整理 output。"],
       ["3", "更完整", "Image AI、Video AI、Prompt Library、Auto Content 和 Affiliate Pack 在一个平台。"],
       ["4", "更实用", "聚焦可以用于内容、产品和推广的真实 output。"]
     ],
     en: [
       ["1", "Fast", "Generate ideas, prompts, visuals, scripts, and videos without opening 10 tools."],
-      ["2", "Easy", "Choose a workflow, enter simple information, and let Pokaya structure the output."],
+      ["2", "Easy", "Choose a goal, enter simple information, and let Pokaya structure the output."],
       ["3", "Complete", "Image AI, Video AI, Prompt Library, Auto Content, and Affiliate Pack in one platform."],
       ["4", "Practical", "Focus on outputs that can be used for content, products, and promotion."]
     ]
@@ -1934,17 +1934,17 @@ function dreamContent() {
     ms: {
       kicker: "Apa yang anda beli",
       title: "Bukan sekadar tool AI. Ini tempat mula guna AI secara praktikal.",
-      copy: "Pokaya AI bantu anda berhenti lompat antara terlalu banyak tool. Anda dapat satu tempat untuk prompt, image, video, content workflow dan affiliate pack."
+      copy: "Pokaya AI bantu anda berhenti lompat antara terlalu banyak tool. Anda dapat satu tempat untuk prompt, image, video, content plan dan affiliate pack."
     },
     zh: {
       kicker: "您买到的是什么",
       title: "不只是 AI 工具<br>而是开始实用 AI 的地方",
-      copy: "Pokaya AI 帮您停止在太多工具之间跳来跳去。您得到的是一个放 prompt、image、video、content workflow 和 affiliate pack 的工作台。"
+      copy: "Pokaya AI 帮您停止在太多工具之间跳来跳去。您得到的是一个放 prompt、image、video、content plan 和 affiliate pack 的工作台。"
     },
     en: {
       kicker: "What you are buying",
       title: "Not just another AI tool. A practical place to start using AI.",
-      copy: "Pokaya AI helps you stop jumping between too many tools. You get one place for prompts, images, videos, content workflows, and affiliate packs."
+      copy: "Pokaya AI helps you stop jumping between too many tools. You get one place for prompts, images, videos, content plans, and affiliate packs."
     }
   };
   return data[state.lang] || data.ms;
@@ -1953,21 +1953,21 @@ function dreamContent() {
 function dreamCards() {
   const data = {
     ms: [
-      ["RM79.80", "Akses Pro", "Satu plan untuk workflow utama Pokaya AI."],
+      ["RM79.80", "Akses Pro", "Satu plan untuk tools utama Pokaya AI."],
       ["Tools", "Image + Video", "Generate visual, video, prompt dan content plan."],
-      ["Pack", "Affiliate workflow", "TikTok Affiliate sebagai workflow pertama yang dioptimumkan."],
+      ["Pack", "Affiliate pack", "TikTok Affiliate sebagai pakej pertama yang dioptimumkan."],
       ["Rutin", "Guna harian", "Bina habit content, promotion dan testing idea."]
     ],
     zh: [
-      ["RM79.80", "Pro 访问", "一个计划解锁 Pokaya AI 主要工作流。"],
+      ["RM79.80", "Pro 访问", "一个计划解锁 Pokaya AI 主要工具。"],
       ["Tools", "图片 + 视频", "生成 visual、video、prompt 和 content plan。"],
-      ["Pack", "Affiliate 工作流", "TikTok Affiliate 是第一个被优化的工作流。"],
+      ["Pack", "Affiliate 工具包", "TikTok Affiliate 是第一个被优化的工具包。"],
       ["习惯", "每天使用", "建立内容、推广和想法测试的日常节奏。"]
     ],
     en: [
-      ["RM79.80", "Pro access", "One plan for Pokaya AI's main workflows."],
+      ["RM79.80", "Pro access", "One plan for Pokaya AI's main tools."],
       ["Tools", "Image + Video", "Generate visuals, videos, prompts, and content plans."],
-      ["Pack", "Affiliate workflow", "TikTok Affiliate is the first optimized workflow."],
+      ["Pack", "Affiliate pack", "TikTok Affiliate is the first optimized pack."],
       ["Routine", "Daily usage", "Build a content, promotion, and idea-testing habit."]
     ]
   };
@@ -1979,28 +1979,28 @@ function dreamCards() {
 function studentCaseContent() {
   const data = {
     ms: {
-      kicker: "First optimized workflow",
+      kicker: "First optimized pack",
       title: "Dioptimumkan dahulu untuk TikTok Affiliate.",
-      copy: "Pokaya AI bermula dengan workflow TikTok Affiliate kerana ramai beginner mahu mula promote produk tetapi tidak tahu nak buat content apa.",
-      note: "TikTok Affiliate ialah use case pertama, bukan limit platform. Pokaya tetap ialah AI workflow hub untuk content, promotion dan online income.",
+      copy: "Pokaya AI bermula dengan TikTok Affiliate Pack kerana ramai beginner mahu mula promote produk tetapi tidak tahu nak buat content apa.",
+      note: "TikTok Affiliate ialah use case pertama, bukan limit platform. Pokaya tetap ialah AI toolkit untuk content, promotion dan online income.",
       badge: "TikTok Affiliate Pack",
       cardCopy: "Hook + script + visual + content angle.",
       bullets: ["Product angle ideas", "Hook & script generator", "Malay content prompt", "Product image and video generation"]
     },
     zh: {
-      kicker: "第一个优化工作流",
+      kicker: "第一个优化工具包",
       title: "先为 TikTok Affiliate 深度优化",
-      copy: "Pokaya AI 从 TikTok Affiliate 工作流开始，因为很多新手想推广产品，却不知道第一批内容该怎么做。",
-      note: "TikTok Affiliate 是第一个 use case，不是平台边界。Pokaya 仍然是面向内容、推广和线上收入机会的 AI workflow hub。",
+      copy: "Pokaya AI 从 TikTok Affiliate Pack 开始，因为很多新手想推广产品，却不知道第一批内容该怎么做。",
+      note: "TikTok Affiliate 是第一个 use case，不是平台边界。Pokaya 仍然是面向内容、推广和线上收入机会的 AI 工具箱。",
       badge: "TikTok Affiliate Pack",
       cardCopy: "Hook + script + visual + content angle。",
       bullets: ["产品角度 ideas", "Hook & script generator", "Malay content prompt", "产品图片和视频生成"]
     },
     en: {
-      kicker: "First optimized workflow",
+      kicker: "First optimized pack",
       title: "Optimized first for TikTok Affiliate.",
       copy: "Pokaya AI starts with TikTok Affiliate because many beginners want to promote products but do not know what content to create first.",
-      note: "TikTok Affiliate is the first use case, not the platform limit. Pokaya is still an AI workflow hub for content, promotion, and online income opportunities.",
+      note: "TikTok Affiliate is the first use case, not the platform limit. Pokaya is still an AI toolkit for content, promotion, and online income opportunities.",
       badge: "TikTok Affiliate Pack",
       cardCopy: "Hook + script + visual + content angle.",
       bullets: ["Product angle ideas", "Hook & script generator", "Malay content prompt", "Product image and video generation"]
@@ -2013,18 +2013,18 @@ function sevenDayContent() {
   const data = {
     ms: {
       kicker: "Beginner path",
-      title: "Selepas subscribe, mula dengan workflow paling mudah dahulu",
-      copy: "Pokaya bukan suruh anda tekan butang secara rawak. Ia memberi urutan kerja supaya beginner tahu langkah pertama, output pertama dan workflow pertama yang boleh diulang."
+      title: "Selepas subscribe, mula dengan tugas paling mudah dahulu",
+      copy: "Pokaya bukan suruh anda tekan butang secara rawak. Ia memberi urutan kerja supaya beginner tahu langkah pertama, output pertama dan cara guna pertama yang boleh diulang."
     },
     zh: {
       kicker: "新手路径",
-      title: "订阅后<br>先从最简单的工作流开始",
-      copy: "Pokaya 不是让您随机按按钮，而是给新手一个执行顺序：先完成第一个 output，再重复第一个 workflow。"
+      title: "订阅后<br>先从最简单的任务开始",
+      copy: "Pokaya 不是让您随机按按钮，而是给新手一个执行顺序：先完成第一个 output，再重复同一套步骤。"
     },
     en: {
       kicker: "Beginner path",
-      title: "After subscribing, start with the easiest workflow first",
-      copy: "Pokaya does not ask you to press random buttons. It gives beginners a sequence for the first output and the first repeatable workflow."
+      title: "After subscribing, start with the easiest task first",
+      copy: "Pokaya does not ask you to press random buttons. It gives beginners a sequence for the first output and repeatable steps."
     }
   };
   return data[state.lang] || data.ms;
@@ -2033,31 +2033,31 @@ function sevenDayContent() {
 function sevenDaySteps() {
   const data = {
     ms: [
-      ["Step 1", "Pilih workflow pertama", "Mula dengan Image AI, Prompt Library atau Auto Content."],
+      ["Step 1", "Pilih tugas pertama", "Mula dengan Image AI, Prompt Library atau Auto Content."],
       ["Step 2", "Isi input", "Masukkan produk, niche, idea atau reference yang anda ada."],
       ["Step 3", "Generate output", "Hasilkan prompt, visual, script, video atau content plan."],
       ["Step 4", "Simpan dan guna", "Download, copy atau simpan output dalam workspace."],
-      ["Step 5", "Cuba Affiliate Pack", "Jika mahu promote produk, buka workflow TikTok Affiliate."],
+      ["Step 5", "Cuba Affiliate Pack", "Jika mahu promote produk, buka TikTok Affiliate Pack."],
       ["Step 6", "Buat variasi", "Generate beberapa versi hook, visual atau script."],
-      ["Step 7", "Ulang rutin", "Gunakan workflow yang sama setiap kali mahu buat content baru."]
+      ["Step 7", "Ulang rutin", "Gunakan langkah yang sama setiap kali mahu buat content baru."]
     ],
     zh: [
-      ["Step 1", "选择第一个工作流", "从 Image AI、Prompt Library 或 Auto Content 开始。"],
+      ["Step 1", "选择第一个任务", "从 Image AI、Prompt Library 或 Auto Content 开始。"],
       ["Step 2", "填写输入", "输入产品、niche、想法或 reference。"],
       ["Step 3", "生成 output", "生成 prompt、visual、script、video 或 content plan。"],
       ["Step 4", "保存并使用", "下载、复制或保存到 workspace。"],
-      ["Step 5", "尝试 Affiliate Pack", "如果要推广产品，打开 TikTok Affiliate workflow。"],
+      ["Step 5", "尝试 Affiliate Pack", "如果要推广产品，打开 TikTok Affiliate Pack。"],
       ["Step 6", "生成变体", "生成多个版本的 hook、visual 或 script。"],
-      ["Step 7", "重复使用", "每次要做新内容时，重复同一套 workflow。"]
+      ["Step 7", "重复使用", "每次要做新内容时，重复同一套步骤。"]
     ],
     en: [
-      ["Step 1", "Choose your first workflow", "Start with Image AI, Prompt Library, or Auto Content."],
+      ["Step 1", "Choose your first task", "Start with Image AI, Prompt Library, or Auto Content."],
       ["Step 2", "Add input", "Enter a product, niche, idea, or reference you already have."],
       ["Step 3", "Generate output", "Create a prompt, visual, script, video, or content plan."],
       ["Step 4", "Save and use it", "Download, copy, or save the output in your workspace."],
-      ["Step 5", "Try Affiliate Pack", "If you want to promote products, open the TikTok Affiliate workflow."],
+      ["Step 5", "Try Affiliate Pack", "If you want to promote products, open the TikTok Affiliate Pack."],
       ["Step 6", "Create variations", "Generate several versions of hooks, visuals, or scripts."],
-      ["Step 7", "Repeat the routine", "Use the same workflow whenever you need new content."]
+      ["Step 7", "Repeat the routine", "Use the same steps whenever you need new content."]
     ]
   };
   return (data[state.lang] || data.ms)
@@ -2068,19 +2068,19 @@ function sevenDaySteps() {
 function scenarioContent() {
   const data = {
     ms: {
-      kicker: "First optimized workflow",
+      kicker: "First optimized pack",
       title: "Dioptimumkan dahulu untuk TikTok Affiliate",
-      copy: "Pokaya AI bermula dengan workflow TikTok Affiliate kerana ramai beginner mahu mula promote produk tetapi tidak tahu nak buat content apa. Gunakan Pokaya untuk cari angle, tulis hook, hasilkan visual, buat script dan susun content harian."
+      copy: "Pokaya AI bermula dengan TikTok Affiliate Pack kerana ramai beginner mahu mula promote produk tetapi tidak tahu nak buat content apa. Gunakan Pokaya untuk cari angle, tulis hook, hasilkan visual, buat script dan susun content harian."
     },
     zh: {
-      kicker: "第一个深度优化工作流",
+      kicker: "第一个深度优化工具包",
       title: "先为 TikTok Affiliate 做深度优化",
-      copy: "Pokaya AI 从 TikTok Affiliate 工作流开始，因为很多新手想推广产品，却不知道该做什么内容。用 Pokaya 找 angle、写 hook、生成 visual、做 script，并整理日常 content。"
+      copy: "Pokaya AI 从 TikTok Affiliate Pack 开始，因为很多新手想推广产品，却不知道该做什么内容。用 Pokaya 找 angle、写 hook、生成 visual、做 script，并整理日常 content。"
     },
     en: {
-      kicker: "First optimized workflow",
+      kicker: "First optimized pack",
       title: "Optimized first for TikTok Affiliate",
-      copy: "Pokaya AI starts with TikTok Affiliate workflows because many beginners want to promote products but do not know what content to create. Use Pokaya to find angles, write hooks, generate visuals, create scripts, and plan daily content."
+      copy: "Pokaya AI starts with TikTok Affiliate Pack because many beginners want to promote products but do not know what content to create. Use Pokaya to find angles, write hooks, generate visuals, create scripts, and plan daily content."
     }
   };
   return data[state.lang] || data.ms;
@@ -2088,9 +2088,9 @@ function scenarioContent() {
 
 function scenarioCards() {
   const data = {
-    ms: ["Product angle ideas", "Hook & script generator", "Malay content prompt", "Product image generation", "Video AI workflow", "Caption and CTA ideas", "Clone/reference workflow", "Daily content plan"],
-    zh: ["Product angle ideas", "Hook & script generator", "Malay content prompt", "产品图生成", "Video AI workflow", "Caption 和 CTA idea", "Clone/reference workflow", "日常 content plan"],
-    en: ["Product angle ideas", "Hook & script generator", "Malay content prompts", "Product image generation", "Video AI workflow", "Caption and CTA ideas", "Clone/reference workflow", "Daily content plan"]
+    ms: ["Product angle ideas", "Hook & script generator", "Malay content prompt", "Product image generation", "Video AI", "Caption and CTA ideas", "Clone/reference tools", "Daily content plan"],
+    zh: ["Product angle ideas", "Hook & script generator", "Malay content prompt", "产品图生成", "Video AI", "Caption 和 CTA idea", "Clone/reference tools", "日常 content plan"],
+    en: ["Product angle ideas", "Hook & script generator", "Malay content prompts", "Product image generation", "Video AI", "Caption and CTA ideas", "Clone/reference tools", "Daily content plan"]
   };
   return (data[state.lang] || data.ms)
     .map((item) => `<article>${icon("play-square", 20)}<span>${item}</span></article>`)
@@ -2099,9 +2099,9 @@ function scenarioCards() {
 
 function pricingBullets() {
   const data = {
-    ms: ["Image AI untuk gambar produk & content", "Video AI untuk TikTok, Reels & ads", "Unlimited Generate", "Prompt Library untuk sales & marketing", "Auto Content idea, hook & script", "Access Image Studio", "Access Video Studio", "Clone Video & Storytelling tools", "TikTok Affiliate workflow pack", "VIP group & workflow updates"],
-    zh: ["Image AI：产品图和内容图", "Video AI：TikTok、Reels 和广告视频", "Unlimited Generate", "销售与营销 Prompt Library", "Auto Content：idea、hook 和 script", "Access Image Studio", "Access Video Studio", "Clone Video 和 Storytelling tools", "TikTok Affiliate workflow pack", "VIP group 和 workflow updates"],
-    en: ["Image AI for product and content images", "Video AI for TikTok, Reels, and ads", "Unlimited Generate", "Prompt Library for sales and marketing", "Auto Content ideas, hooks, and scripts", "Access Image Studio", "Access Video Studio", "Clone Video and Storytelling tools", "TikTok Affiliate workflow pack", "VIP group and workflow updates"]
+    ms: ["Image AI untuk gambar produk & content", "Video AI untuk TikTok, Reels & ads", "Unlimited Generate", "Prompt Library untuk sales & marketing", "Auto Content idea, hook & script", "Access Image Studio", "Access Video Studio", "Clone Video & Storytelling tools", "TikTok Affiliate Pack", "VIP group & tool updates"],
+    zh: ["Image AI：产品图和内容图", "Video AI：TikTok、Reels 和广告视频", "Unlimited Generate", "销售与营销 Prompt Library", "Auto Content：idea、hook 和 script", "Access Image Studio", "Access Video Studio", "Clone Video 和 Storytelling tools", "TikTok Affiliate Pack", "VIP group 和工具更新"],
+    en: ["Image AI for product and content images", "Video AI for TikTok, Reels, and ads", "Unlimited Generate", "Prompt Library for sales and marketing", "Auto Content ideas, hooks, and scripts", "Access Image Studio", "Access Video Studio", "Clone Video and Storytelling tools", "TikTok Affiliate Pack", "VIP group and tool updates"]
   };
   return data[state.lang] || data.ms;
 }
