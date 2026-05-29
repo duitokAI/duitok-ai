@@ -15564,10 +15564,10 @@ label {
 }
 
 .studio-shell .project-menu-item.active .project-icon {
-  border-color: rgba(255, 255, 255, 0.12) !important;
-  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 63, 110, 0.4) !important;
+  background: rgba(255, 63, 110, 0.16) !important;
   color: #fff !important;
-  box-shadow: none !important;
+  box-shadow: 0 10px 24px rgba(255, 63, 110, 0.14) !important;
 }
 
 /* Studio project list: compact, scan-friendly rows. */
