@@ -104,6 +104,7 @@ app.use((req, res, next) => {
   next();
 });
 app.use(express.json({
+  limit: "8mb",
   verify: (req, _res, buffer) => {
     req.rawBody = buffer;
   }
@@ -2353,6 +2354,43 @@ function sanitizeAgentMessageHistory(messages = []) {
       content: sanitizeAgentText(item.content).slice(0, agentMessageCharLimit)
     }))
     .filter((item) => item.content);
+}
+
+function sanitizeAgentAttachments(attachments = []) {
+  return (Array.isArray(attachments) ? attachments : [])
+    .slice(0, 4)
+    .map((item) => {
+      const type = sanitizeAgentText(item?.type || "").slice(0, 80);
+      const kind = type.startsWith("video/") || item?.kind === "video" ? "video" : "image";
+      const dataUrl = kind === "image" && /^data:image\/(?:png|jpe?g|webp);base64,/i.test(item?.dataUrl || "")
+        ? String(item.dataUrl).slice(0, 1400000)
+        : "";
+      return {
+        id: sanitizeAgentText(item?.id || crypto.randomUUID()).slice(0, 80),
+        name: sanitizeAgentText(item?.name || "attachment").slice(0, 160),
+        type,
+        kind,
+        size: Number(item?.size || 0),
+        dataUrl
+      };
+    })
+    .filter((item) => item.kind === "video" || item.dataUrl);
+}
+
+function agentAttachmentPrompt(attachments = []) {
+  if (!attachments.length) return "";
+  const lines = attachments.map((item, index) => {
+    const base = `${index + 1}. ${item.kind.toUpperCase()} "${item.name}" (${item.type || item.kind}, ${Math.round((item.size || 0) / 1024)} KB)`;
+    return item.kind === "image" && item.dataUrl
+      ? `${base}. Image preview is available in the chat UI; use it as uploaded context and ask for one detail if exact visual facts are needed.`
+      : `${base}. Video file content is not uploaded to the model; use filename/type/size as context and ask for details if visual specifics are needed.`;
+  });
+  return [
+    "The user attached media to this Agent message:",
+    ...lines,
+    "Do not automatically navigate or switch pages just because media was attached.",
+    "First infer what the user likely wants from the message plus attachments. If enough information is available, decide the next useful Pokaya action yourself. If visual details are uncertain, ask one short clarifying question instead of pretending."
+  ].join("\n");
 }
 
 function summarizeAgentHistory(messages = []) {
@@ -5282,10 +5320,11 @@ app.post("/api/agent", async (req, res, next) => {
     const { db, user } = await requireAuth(req);
     const rawHistory = sanitizeAgentMessageHistory(req.body.messages);
     const history = rawHistory.slice(-agentRecentMessageLimit);
+    const attachments = sanitizeAgentAttachments(req.body.attachments);
     const stateForUser = publicState(db, user);
     const preferenceSummary = buildAgentPreferenceSummary(db, user);
     const projectId = req.body.projectId || stateForUser.projects[0]?.id;
-    const latestUserMessage = [...history].reverse().find((item) => item.role === "user" && typeof item.content === "string")?.content || "";
+    const latestUserMessage = [...history].reverse().find((item) => item.role === "user" && typeof item.content === "string")?.content || (attachments.length ? "User attached media and wants Agent to decide the next step." : "");
     const contextSummary = agentContextSummary({
       clientSummary: req.body.contextSummary,
       olderMessages: rawHistory.slice(0, Math.max(0, rawHistory.length - agentRecentMessageLimit)),
@@ -5435,6 +5474,7 @@ app.post("/api/agent", async (req, res, next) => {
         role: "system",
         content: compactPreferenceSummaryForPrompt(preferenceSummary)
       },
+      ...(attachments.length ? [{ role: "system", content: agentAttachmentPrompt(attachments) }] : []),
       ...history
         .map((item) => ({ role: item.role, content: item.content.slice(0, agentMessageCharLimit) }))
     ];

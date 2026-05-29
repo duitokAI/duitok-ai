@@ -98,6 +98,7 @@ const state = {
   agentIdleActivity: "sleep",
   agentMessages: JSON.parse(localStorage.getItem(storageKeys.agentMessages) || "[]"),
   agentContextSummary: localStorage.getItem(storageKeys.agentContextSummary) || "",
+  agentAttachments: [],
   agentExpandedMessages: {},
   agentHistoryOpen: false,
   agentHistorySessions: JSON.parse(localStorage.getItem(agentHistoryStorageKey) || "[]"),
@@ -6247,10 +6248,43 @@ function chatPanel() {
         ${state.agentBusy ? agentThinkingCard() : ""}
       </div>
       <form class="agent-form" data-form="agent">
+        ${agentAttachmentTray()}
+        <label class="agent-attach-button" title="Add image or video" aria-label="Add image or video">
+          ${icon("paperclip", 18)}
+          <input type="file" data-agent-file accept="image/*,video/*" multiple hidden>
+        </label>
         <textarea name="message" rows="1" data-agent-input placeholder="${esc(inputPlaceholder)}" ${pendingConfirmation ? "disabled" : ""}>${esc(state.agentInput)}</textarea>
         <button class="gold-button agent-send-button" type="submit" title="${esc(c.send)}" aria-label="${esc(c.send)}" ${state.agentBusy || pendingConfirmation ? "disabled" : ""}>${icon(state.agentBusy ? "loader-circle" : "send", 19)}<span>${c.send}</span></button>
       </form>
     </section>`;
+}
+
+function agentAttachmentTray() {
+  const items = state.agentAttachments || [];
+  if (!items.length) return "";
+  return `<div class="agent-attachment-tray">
+    ${items.map((item) => `<article>
+      ${item.kind === "image" ? `<img src="${esc(item.previewUrl || item.dataUrl || "")}" alt="">` : `<span>${icon("video", 18)}</span>`}
+      <div><b>${esc(item.name)}</b><small>${esc(agentAttachmentLabel(item))}</small></div>
+      <button type="button" data-agent-remove-attachment="${esc(item.id)}" aria-label="Remove attachment">${icon("x", 14)}</button>
+    </article>`).join("")}
+  </div>`;
+}
+
+function agentMessageAttachments(items = []) {
+  const attachments = Array.isArray(items) ? items : [];
+  if (!attachments.length) return "";
+  return `<div class="agent-message-attachments">
+    ${attachments.map((item) => `<article>
+      ${item.kind === "image" && item.previewUrl ? `<img src="${esc(item.previewUrl)}" alt="">` : `<span>${icon(item.kind === "video" ? "video" : "image", 16)}</span>`}
+      <div><b>${esc(item.name || "Attachment")}</b><small>${esc(agentAttachmentLabel(item))}</small></div>
+    </article>`).join("")}
+  </div>`;
+}
+
+function agentAttachmentLabel(item = {}) {
+  const type = item.type || (item.kind === "video" ? "video" : "image");
+  return `${type}${item.size ? ` · ${formatBytes(item.size)}` : ""}`;
 }
 
 function agentChatToolbar() {
@@ -6344,9 +6378,17 @@ function agentMessageArticle(item, index = 0) {
   const runPanel = agentVisibleRunPanel(item.agentRun);
   return `<article class="${item.role}">
     <span>${item.role === "user" ? c.userLabel : c.agentLabel}</span>
+    ${item.role === "user" ? agentMessageAttachments(item.attachments) : ""}
     <div class="agent-message">${body}</div>
     ${chips}${runPanel}${feedback}
   </article>`;
+}
+
+function formatBytes(value = 0) {
+  const bytes = Number(value || 0);
+  if (!bytes) return "0 KB";
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(bytes > 10 * 1024 * 1024 ? 0 : 1)} MB`;
 }
 
 function isLongAgentMessage(content = "") {
@@ -6782,6 +6824,27 @@ function bind() {
   }));
   document.querySelectorAll("[data-agent-history-restore]").forEach((el) => el.addEventListener("click", () => restoreAgentHistory(el.dataset.agentHistoryRestore)));
   document.querySelectorAll("[data-agent-history-delete]").forEach((el) => el.addEventListener("click", () => deleteAgentHistory(el.dataset.agentHistoryDelete)));
+  document.querySelectorAll("[data-agent-file]").forEach((el) => el.addEventListener("change", (event) => {
+    addAgentAttachments(event.target.files);
+    event.target.value = "";
+  }));
+  document.querySelectorAll("[data-agent-remove-attachment]").forEach((el) => el.addEventListener("click", () => removeAgentAttachment(el.dataset.agentRemoveAttachment)));
+  document.querySelectorAll(".agent-form").forEach((el) => {
+    el.addEventListener("dragover", (event) => {
+      const items = Array.from(event.dataTransfer?.items || []);
+      if (!items.some((item) => item.kind === "file")) return;
+      event.preventDefault();
+      el.classList.add("is-dragging");
+    });
+    el.addEventListener("dragleave", () => el.classList.remove("is-dragging"));
+    el.addEventListener("drop", (event) => {
+      const files = event.dataTransfer?.files;
+      if (!files?.length) return;
+      event.preventDefault();
+      el.classList.remove("is-dragging");
+      addAgentAttachments(files);
+    });
+  });
   document.querySelectorAll("[data-admin-user]").forEach((el) => el.addEventListener("click", () => set({ adminUserId: el.dataset.adminUser })));
   document.querySelectorAll("[data-admin-search]").forEach((el) => el.addEventListener("input", () => set({ adminSearch: el.value, adminUserId: null })));
   document.querySelectorAll("[data-admin-status-filter]").forEach((el) => el.addEventListener("change", () => set({ adminStatusFilter: el.value, adminUserId: null })));
@@ -7386,8 +7449,20 @@ function agentMessagesForStorage(messages = []) {
     .map((item) => ({
       role: item.role,
       content: String(item.content || "").slice(0, 1600),
+      ...(Array.isArray(item.attachments) && item.attachments.length ? { attachments: item.attachments.map(agentAttachmentForStorage) } : {}),
       ...(item.agentRun ? { agentRun: compactAgentRunForStorage(item.agentRun) } : {})
     }));
+}
+
+function agentAttachmentForStorage(item = {}) {
+  return {
+    id: item.id,
+    name: item.name,
+    type: item.type,
+    size: item.size,
+    kind: item.kind,
+    previewUrl: item.kind === "image" ? item.previewUrl || item.dataUrl || "" : ""
+  };
 }
 
 function compactAgentRunForStorage(run) {
@@ -7500,19 +7575,86 @@ function completeAgentVisual() {
   }, 2400);
 }
 
+async function addAgentAttachments(fileList) {
+  const files = Array.from(fileList || []).filter((file) => /^image\//.test(file.type) || /^video\//.test(file.type));
+  if (!files.length) return notify("Please attach an image or video.");
+  const slots = Math.max(0, 4 - (state.agentAttachments || []).length);
+  if (!slots) return notify("Agent can read up to 4 attachments at a time.");
+  const prepared = [];
+  for (const file of files.slice(0, slots)) {
+    try {
+      prepared.push(await prepareAgentAttachment(file));
+    } catch (error) {
+      notify(error.message || "Attachment could not be added.");
+    }
+  }
+  if (prepared.length) set({ agentAttachments: [...(state.agentAttachments || []), ...prepared] });
+}
+
+async function prepareAgentAttachment(file) {
+  const kind = file.type.startsWith("video/") ? "video" : "image";
+  if (kind === "video" && file.size > 80 * 1024 * 1024) throw new Error("Video is too large. Use a file below 80 MB.");
+  if (kind === "image" && file.size > 18 * 1024 * 1024) throw new Error("Image is too large. Use a file below 18 MB.");
+  const base = {
+    id: `att_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+    name: file.name || (kind === "video" ? "video" : "image"),
+    type: file.type || kind,
+    size: file.size,
+    kind
+  };
+  if (kind === "video") return { ...base, previewUrl: URL.createObjectURL(file) };
+  const dataUrl = await imageFileToDataUrl(file);
+  return { ...base, dataUrl, previewUrl: dataUrl };
+}
+
+function removeAgentAttachment(id) {
+  const current = state.agentAttachments || [];
+  const removed = current.find((item) => item.id === id);
+  if (removed?.previewUrl?.startsWith("blob:")) URL.revokeObjectURL(removed.previewUrl);
+  set({ agentAttachments: current.filter((item) => item.id !== id) });
+}
+
+function imageFileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Could not read image."));
+    reader.onload = () => {
+      const image = new Image();
+      image.onerror = () => reject(new Error("Could not preview image."));
+      image.onload = () => {
+        const maxSide = 960;
+        const scale = Math.min(1, maxSide / Math.max(image.width, image.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(image.width * scale));
+        canvas.height = Math.max(1, Math.round(image.height * scale));
+        const context = canvas.getContext("2d");
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.78));
+      };
+      image.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 async function sendAgentMessage(message) {
   const content = String(message || state.agentInput || "").trim();
-  if (!content || state.agentBusy) return;
-  const nextMessages = [...state.agentMessages, { role: "user", content }];
+  const attachments = Array.isArray(state.agentAttachments) ? state.agentAttachments : [];
+  if ((!content && !attachments.length) || state.agentBusy) return;
+  const userContent = content || "请先看我上传的附件，然后判断下一步应该怎么做。";
+  const messageAttachments = attachments.map(agentAttachmentForStorage);
+  const apiAttachments = attachments.map(agentAttachmentForApi);
+  const nextMessages = [...state.agentMessages, { role: "user", content: userContent, attachments: messageAttachments }];
   rememberAgentMessages(nextMessages);
-  set({ agentMessages: nextMessages, agentInput: "", agentBusy: true });
+  set({ agentMessages: nextMessages, agentInput: "", agentAttachments: [], agentBusy: true });
   startAgentWorkingTimer();
-  startAgentVisual(content);
+  startAgentVisual(userContent);
   try {
     const res = await api("/agent", {
       method: "POST",
       body: JSON.stringify({
         messages: nextMessages,
+        attachments: apiAttachments,
         contextSummary: state.agentContextSummary,
         projectId: state.projectId,
         page: state.page,
@@ -7538,6 +7680,17 @@ async function sendAgentMessage(message) {
     completeAgentVisual();
     notify(safeError);
   }
+}
+
+function agentAttachmentForApi(item = {}) {
+  return {
+    id: item.id,
+    name: item.name,
+    type: item.type,
+    size: item.size,
+    kind: item.kind,
+    dataUrl: item.kind === "image" ? item.dataUrl || "" : ""
+  };
 }
 
 function recordAgentFeedback(payload = {}) {

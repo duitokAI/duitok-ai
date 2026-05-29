@@ -18985,7 +18985,7 @@ label {
   position: relative !important;
   bottom: auto !important;
   z-index: 5 !important;
-  grid-template-columns: minmax(0, 1fr) 52px !important;
+  grid-template-columns: 44px minmax(0, 1fr) 52px !important;
   gap: 10px !important;
   border: 1px solid rgba(95, 0, 103, 0.1) !important;
   border-radius: 16px !important;
@@ -18993,6 +18993,105 @@ label {
   background: rgba(255, 255, 255, 0.96) !important;
   box-shadow: 0 10px 30px rgba(35, 8, 42, 0.06) !important;
   backdrop-filter: blur(14px) !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-form.is-dragging {
+  border-color: rgba(255, 63, 110, 0.44) !important;
+  background: rgba(255, 247, 252, 0.98) !important;
+  box-shadow: 0 14px 36px rgba(255, 63, 110, 0.16) !important;
+}
+
+.agent-attach-button {
+  width: 44px;
+  min-width: 44px;
+  min-height: 48px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(95, 0, 103, 0.1);
+  border-radius: 13px;
+  background: rgba(95, 0, 103, 0.045);
+  color: rgba(57, 22, 67, 0.72);
+  cursor: pointer;
+}
+
+.agent-attach-button:hover {
+  border-color: rgba(255, 63, 110, 0.28);
+  background: rgba(255, 63, 110, 0.08);
+  color: var(--hot);
+}
+
+.agent-attachment-tray {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.agent-attachment-tray article,
+.agent-message-attachments article {
+  min-width: 180px;
+  max-width: 260px;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 28px;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(95, 0, 103, 0.1);
+  border-radius: 12px;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.agent-attachment-tray img,
+.agent-message-attachments img,
+.agent-attachment-tray article > span,
+.agent-message-attachments article > span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: rgba(95, 0, 103, 0.08);
+  color: var(--purple);
+  object-fit: cover;
+}
+
+.agent-attachment-tray b,
+.agent-message-attachments b {
+  display: block;
+  overflow: hidden;
+  color: rgba(31, 6, 38, 0.88);
+  font-size: 12px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agent-attachment-tray small,
+.agent-message-attachments small {
+  color: rgba(83, 62, 90, 0.62);
+  font-size: 11px;
+  font-weight: 760;
+}
+
+.agent-attachment-tray button {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 8px;
+  background: rgba(95, 0, 103, 0.06);
+  color: rgba(57, 22, 67, 0.62);
+}
+
+.agent-message-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.agent-message-attachments article {
+  grid-template-columns: 42px minmax(0, 1fr);
+  background: rgba(95, 0, 103, 0.045);
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-form textarea {
