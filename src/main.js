@@ -582,7 +582,7 @@ const copy = {
     continueRegistration: "继续注册",
     faqTitle: "开始前<br>您可能会问",
     changeLanguage: "切换语言",
-    languageMenuLabel: "语言",
+    languageMenuLabel: "Language",
     workspace: "工作区",
     business: "业务",
     startHere: "新手开始",
