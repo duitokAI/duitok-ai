@@ -4833,10 +4833,7 @@ function agentPage() {
   return `
     <section class="agent-page">
       ${agentTopbar()}
-      <div class="agent-workspace-shell">
-        ${agentStatusRail()}
-        ${chatPanel()}
-      </div>
+      ${chatPanel()}
     </section>`;
 }
 
