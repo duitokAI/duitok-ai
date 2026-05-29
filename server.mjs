@@ -6170,8 +6170,19 @@ app.use((error, req, res, _next) => {
 });
 
 if (process.env.NODE_ENV === "production" && serveStatic) {
-  app.use(express.static(distDir));
+  app.use(express.static(distDir, {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith(".html")) {
+        res.setHeader("Cache-Control", "no-store");
+        return;
+      }
+      if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+        res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      }
+    }
+  }));
   app.use((_req, res) => {
+    res.setHeader("Cache-Control", "no-store");
     createReadStream(path.join(distDir, "index.html")).pipe(res);
   });
 } else if (process.env.NODE_ENV !== "production") {
