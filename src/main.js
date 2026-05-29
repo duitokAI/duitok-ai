@@ -113,6 +113,8 @@ const state = {
   topupAmount: 50,
   usageFilter: "all",
   affiliateTab: "overview",
+  attachmentPickerKind: "avatar",
+  attachmentPickerFilter: "avatar",
   assetSearch: "",
   assetTypeFilter: "all",
   assetProjectFilter: "all",
@@ -4285,7 +4287,13 @@ function select(field, label, options, value) {
 }
 
 function upload(title, main, sub, ic, kind) {
-  return `<section class="upload-card"><h2>${icon(ic)} ${title}</h2><label class="drop-zone"><input type="file" data-upload="${kind}" hidden><span>${icon(ic, 44)}</span><strong>${main}</strong><small>${sub}</small></label></section>`;
+  const selectedId = kind === "avatar" ? project().image?.avatarAttachmentId : project().image?.productAttachmentId;
+  const selected = selectedId ? (state.db.attachments || []).find((item) => item.id === selectedId) : null;
+  return `<section class="upload-card"><h2>${icon(ic)} ${title}</h2><button class="drop-zone attachment-open-zone" type="button" data-action="open-attachment-picker" data-attachment-kind="${esc(kind)}">
+    <span>${icon(ic, 44)}</span>
+    <strong>${selected ? esc(selected.name || main) : main}</strong>
+    <small>${selected ? `${esc(selected.kind || kind)} reference selected` : sub}</small>
+  </button></section>`;
 }
 
 function prompt(field, value, placeholder, action, button) {
@@ -4874,6 +4882,7 @@ function modal() {
   if (!state.modal) return "";
   const editProject = state.db?.projects?.find((item) => item.id === state.editingProjectId);
   if (state.modal === "sop") return sopDashboardModal();
+  if (state.modal === "attachmentPicker") return attachmentPickerModal();
   const title = { newProject: t("createProject"), renameProject: t("renameProject"), deleteProject: t("deleteProject"), register: t("choosePlan"), sop: t("sopImage"), export: t("exportReady"), support: t("supportTitle") }[state.modal];
   const body = {
     newProject: `<form data-form="project"><label>${t("project")}<input name="name" placeholder="Project ${(state.db?.projects.length || 0) + 1}" required></label><button class="gold-button" type="submit">${icon("plus")} ${t("newProject")}</button></form>`,
@@ -4885,6 +4894,71 @@ function modal() {
     support: `<form data-form="support" class="support-form"><label>${t("supportMessage")}<textarea name="message" placeholder="${esc(t("supportPlaceholder"))}" required></textarea></label><button class="gold-button" type="submit">${icon("send")} ${t("supportTicket")}</button></form>`
   }[state.modal];
   return `<div class="modal-backdrop" data-action="close-modal"><section class="modal"><button class="icon-only close" data-action="close-modal">${icon("x")}</button><p class="folder-label">${mascotIcon("label-mascot-icon")} Pokaya AI</p><h2>${title}</h2>${body}</section></div>`;
+}
+
+function attachmentPickerModal() {
+  const kind = state.attachmentPickerKind || "avatar";
+  const filter = state.attachmentPickerFilter || kind;
+  const items = (state.db?.attachments || []).filter((item) => {
+    const projectMatch = !item.projectId || item.projectId === state.projectId;
+    const filterMatch = filter === "all" || item.kind === filter;
+    return projectMatch && filterMatch;
+  });
+  return `<div class="modal-backdrop attachment-picker-backdrop" data-action="close-modal">
+    <section class="attachment-picker-modal" role="dialog" aria-modal="true" aria-label="Pick from Attachments">
+      <header class="attachment-picker-head">
+        <h2>Pick from Attachments</h2>
+        <div>
+          <label class="attachment-add-button">${icon("upload", 21)} <span>Add new</span><input type="file" data-upload="${esc(kind)}" hidden></label>
+          <button class="icon-only attachment-picker-close" data-action="close-modal" type="button">${icon("x", 28)}</button>
+        </div>
+      </header>
+      <div class="attachment-picker-tabs">
+        ${attachmentPickerTab("product", "box", filter)}
+        ${attachmentPickerTab("avatar", "circle-user-round", filter)}
+        ${attachmentPickerTab("all", "gallery-horizontal", filter)}
+      </div>
+      <div class="attachment-picker-grid">
+        ${items.length ? items.map((item) => attachmentPickerCard(item, kind)).join("") : attachmentPickerEmpty(kind)}
+      </div>
+    </section>
+  </div>`;
+}
+
+function attachmentPickerTab(value, ic, active) {
+  const label = value === "all" ? "All" : value[0].toUpperCase() + value.slice(1);
+  return `<button type="button" class="${active === value ? "active" : ""}" data-attachment-filter="${esc(value)}">${icon(ic, 18)} ${label}</button>`;
+}
+
+function attachmentPickerCard(item, targetKind) {
+  const preview = attachmentPreview(item);
+  const title = item.name || (item.kind === "avatar" ? "Avatar reference" : "Product reference");
+  const isVideo = item.mediaKind === "video" || /^video\//i.test(item.type || "");
+  return `<button class="attachment-picker-card" type="button" data-attachment-pick="${esc(item.id)}" data-attachment-target="${esc(targetKind)}">
+    <span class="attachment-kind-badge">${icon(item.kind === "avatar" ? "circle-user-round" : "box", 14)} ${esc(String(item.kind || "file").toUpperCase())}</span>
+    ${preview}
+    <b>${esc(title)}</b>
+    <small>${isVideo ? icon("video", 14) : icon("image", 14)} ${esc(item.prompt || item.type || "Saved reference")}</small>
+  </button>`;
+}
+
+function attachmentPreview(item) {
+  const token = encodeURIComponent(state.token || "");
+  if (item.sourceResultId && item.mediaKind !== "video") {
+    return `<img src="/api/media/result/${encodeURIComponent(item.sourceResultId)}/image?token=${token}" alt="${esc(item.name || "Attachment")}" loading="lazy">`;
+  }
+  if (item.sourceResultId && item.mediaKind === "video") {
+    return `<div class="attachment-placeholder">${icon("video", 44)}</div>`;
+  }
+  return `<div class="attachment-placeholder">${icon(item.kind === "avatar" ? "camera" : "package", 44)}</div>`;
+}
+
+function attachmentPickerEmpty(kind) {
+  return `<div class="attachment-picker-empty">
+    ${icon(kind === "avatar" ? "camera" : "package", 38)}
+    <strong>No saved ${esc(kind)} references yet.</strong>
+    <p>Use Add new or save a generated result as a reference first.</p>
+  </div>`;
 }
 
 function sopDashboardContent() {
@@ -6989,6 +7063,8 @@ function bind() {
     if (item.nextStep) return set({ page: "project", step: item.nextStep, modal: null });
     if (item.nextPage) return set({ page: item.nextPage, modal: null });
   }));
+  document.querySelectorAll("[data-attachment-filter]").forEach((el) => el.addEventListener("click", () => set({ attachmentPickerFilter: el.dataset.attachmentFilter || "all" })));
+  document.querySelectorAll("[data-attachment-pick]").forEach((el) => el.addEventListener("click", () => pickAttachment(el.dataset.attachmentPick, el.dataset.attachmentTarget)));
   document.querySelectorAll("form").forEach((el) => el.addEventListener("submit", submit));
   document.querySelectorAll("[data-lang-toggle]").forEach((el) => el.addEventListener("click", (event) => {
     event.stopPropagation();
@@ -7035,6 +7111,10 @@ async function action(event, name) {
   if (name === "sop") return set({ page: "sop", sopTopic: state.page === "project" ? state.step : "dashboard", modal: null });
   if (name === "register") return set({ modal: "register" });
   if (name === "support") return window.open(supportWhatsappUrl, "_blank", "noopener,noreferrer");
+  if (name === "open-attachment-picker") {
+    const kind = event.currentTarget.dataset.attachmentKind || "avatar";
+    return set({ modal: "attachmentPicker", attachmentPickerKind: kind, attachmentPickerFilter: kind });
+  }
   if (name === "confirm-delete-project") return deleteProject();
   if (name === "refresh-payment-status") return refreshPaymentStatus(event.currentTarget.dataset.order);
   if (name === "open-home") {
@@ -7352,6 +7432,24 @@ async function uploadChange(event) {
   const db = await api("/attachments", { method: "POST", body: JSON.stringify({ projectId: state.projectId, kind: event.target.dataset.upload, name: file.name, size: file.size, type: file.type }) });
   set({ db });
   notify(tf("toastFileSaved", { name: file.name }));
+}
+
+async function pickAttachment(id, targetKind = state.attachmentPickerKind) {
+  if (!id) return;
+  const field = targetKind === "product" ? "image.productAttachmentId" : "image.avatarAttachmentId";
+  const projectId = state.projectId;
+  const previousDb = state.db;
+  set({ db: dbWithProjectField(previousDb, projectId, field, id), modal: null });
+  try {
+    const db = await api(`/projects/${projectId}/field`, {
+      method: "PATCH",
+      body: JSON.stringify({ field, value: id })
+    });
+    if (state.projectId === projectId) set({ db });
+  } catch (error) {
+    set({ db: previousDb });
+    notify(error.message || t("toastSaveFailed"));
+  }
 }
 
 async function renameProject(name) {

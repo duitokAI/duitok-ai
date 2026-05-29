@@ -4440,6 +4440,194 @@ button:disabled [data-lucide="loader-circle"] {
   color: var(--ink);
 }
 
+.attachment-picker-backdrop {
+  background: rgba(0, 0, 0, 0.68);
+}
+
+.attachment-picker-modal {
+  width: min(90vw, 1480px);
+  max-height: min(82vh, 760px);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 18px;
+  background: #050505;
+  color: #f8f8f8;
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.46);
+}
+
+.attachment-picker-head,
+.attachment-picker-tabs {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 28px 34px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.attachment-picker-head h2 {
+  margin: 0;
+  color: #f4f1f5;
+  font-size: 26px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.attachment-picker-head > div {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.attachment-add-button,
+.attachment-picker-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 42px;
+  border: 0;
+  background: transparent;
+  color: #d8d4da;
+  font-size: 17px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.attachment-picker-close {
+  width: 42px;
+  color: #f8f8f8;
+}
+
+.attachment-picker-tabs {
+  justify-content: flex-start;
+  padding: 22px 34px;
+}
+
+.attachment-picker-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 24px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: transparent;
+  color: #c6c0c9;
+  font-size: 17px;
+  font-weight: 950;
+}
+
+.attachment-picker-tabs button.active {
+  border-color: #22c967;
+  background: #22c967;
+  color: #ffffff;
+}
+
+.attachment-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 22px;
+  min-height: 320px;
+  max-height: 520px;
+  overflow: auto;
+  padding: 34px;
+}
+
+.attachment-picker-card {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  overflow: hidden;
+  min-height: 300px;
+  padding: 0 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  background: #111111;
+  color: #f8f8f8;
+  text-align: left;
+}
+
+.attachment-picker-card:hover {
+  border-color: #22c967;
+  transform: translateY(-1px);
+}
+
+.attachment-picker-card img,
+.attachment-placeholder {
+  width: 100%;
+  aspect-ratio: 4 / 4.2;
+  object-fit: cover;
+  background: #171717;
+}
+
+.attachment-placeholder {
+  display: grid;
+  place-items: center;
+  color: #7f6f86;
+}
+
+.attachment-kind-badge {
+  position: absolute;
+  z-index: 1;
+  top: 12px;
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: #22c967;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.attachment-picker-card b,
+.attachment-picker-card small {
+  padding: 0 14px;
+}
+
+.attachment-picker-card b {
+  overflow: hidden;
+  color: #f5f2f6;
+  font-size: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment-picker-card small {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #b6aeb8;
+  font-size: 13px;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.attachment-picker-empty {
+  grid-column: 1 / -1;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  min-height: 260px;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+  color: #aaa1ad;
+  text-align: center;
+}
+
+.attachment-picker-empty strong {
+  color: #f3eef5;
+  font-size: 20px;
+}
+
+.attachment-picker-empty p {
+  margin: 0;
+}
+
 .icon-only.close {
   position: absolute;
   right: 18px;
