@@ -214,18 +214,18 @@ const copy = {
     navFaq: "FAQ",
     signIn: "Log masuk",
     promo: "Harga pengguna awal RM79.80/bulan dibuka untuk masa terhad",
-    heroEyebrow: "AI tools untuk content, promosi & online income",
-    heroTitle: "Nak guna AI buat duit, tapi tak tahu nak mula dari mana?",
-    heroTitleLead: "Nak guna AI buat duit,",
+    heroEyebrow: "AI content tool untuk TikTok Affiliate",
+    heroTitle: "Nak guna AI buat content, tapi tak tahu mula dari produk mana?",
+    heroTitleLead: "Nak guna AI buat content,",
     heroTitleHot: "tapi tak tahu",
-    heroTitleTail: "nak mula dari mana?",
+    heroTitleTail: "mula dari produk mana?",
     demoCta: "Lihat cara guna",
-    heroCopy: "Pokaya AI susun image AI, video AI, prompt dan cara buat content dalam satu platform supaya anda boleh mula buat content, promote produk dan test peluang income tanpa pening belajar banyak tool.",
+    heroCopy: "Pokaya AI bantu anda tukar satu produk menjadi visual, short-video direction, script dan content angle untuk TikTok Affiliate. Mula dengan produk, bukan dengan 10 tool berasingan.",
     startCreating: "Mula guna Pokaya AI",
-    heroTrust1: "AI tools siap guna",
-    heroTrust2: "BM / 中文 / EN",
-    heroTrust3: "Tak perlu tunjuk muka",
-    heroTrust4: "Review dulu sebelum post",
+    heroTrust1: "RM79.80/bulan",
+    heroTrust2: "Image serendah 20 sen",
+    heroTrust3: "Video serendah RM0.40",
+    heroTrust4: "Confirm credit sebelum generate",
     whatsappCta: "WhatsApp",
     rating: "30-day money back",
     sellersNow: "Cancel bila-bila",
@@ -513,9 +513,9 @@ const copy = {
     heroCopy: "Pokaya AI 帮您先从 TikTok Affiliate 内容开始。不用一开始就会拍摄、剪辑或写脚本，您可以用 AI 更快生成产品素材、短视频内容、口播文案和推广内容。",
     startCreating: "开始使用 Pokaya AI",
     heroTrust1: "RM79.80/月",
-    heroTrust2: "30 天退款保障",
-    heroTrust3: "FPX / DuitNow QR",
-    heroTrust4: "生成前显示费用",
+    heroTrust2: "图片低至 20 sen",
+    heroTrust3: "视频低至 RM0.40",
+    heroTrust4: "扣费前先确认",
     whatsappCta: "WhatsApp",
     rating: "30 天退款保障",
     sellersNow: "随时取消",
@@ -793,18 +793,18 @@ const copy = {
     navFaq: "FAQ",
     signIn: "Sign in",
     promo: "Early-user price RM79.80/month is open for a limited time",
-    heroEyebrow: "AI toolkit for content, promotion & online income",
-    heroTitle: "Everyone says AI can make money. You still do not know where to start.",
-    heroTitleLead: "Everyone says AI can make money.",
-    heroTitleHot: "You still do not know",
-    heroTitleTail: "where to start.",
+    heroEyebrow: "AI content tool for TikTok Affiliate",
+    heroTitle: "Want to use AI for content, but do not know which product to start with?",
+    heroTitleLead: "Want to use AI for content,",
+    heroTitleHot: "but do not know",
+    heroTitleTail: "which product to start with?",
     demoCta: "See how it works",
-    heroCopy: "Pokaya AI brings image AI, video AI, prompt libraries, and practical steps into one place so you can create content, promote products, and test online income opportunities faster.",
+    heroCopy: "Pokaya AI helps turn one product into visuals, short-video direction, voiceover scripts, and promotion angles for TikTok Affiliate. Start from a product, not from ten separate AI tools.",
     startCreating: "Start using Pokaya AI",
-    heroTrust1: "Ready AI tools",
-    heroTrust2: "BM / 中文 / EN",
-    heroTrust3: "No need to show face",
-    heroTrust4: "Review before posting",
+    heroTrust1: "RM79.80/month",
+    heroTrust2: "Image from 20 sen",
+    heroTrust3: "Video from RM0.40",
+    heroTrust4: "Confirm credit first",
     whatsappCta: "WhatsApp",
     rating: "30-day money back",
     sellersNow: "Cancel anytime",
@@ -1740,42 +1740,49 @@ function heroOfferCopy() {
 function heroAgentPanel() {
   const data = {
     ms: {
-      product: "Produk: wireless earbuds",
-      user: "Saya nak mula promote produk ini.",
-      agent: "Pokaya Agent fahamkan produk, pilih angle, dan sediakan content untuk TikTok Affiliate.",
-      assets: [["Image", "Product visual", "20 sen"], ["Video", "Short demo", "RM0.40"], ["Script", "Voiceover copy", "Ready"]],
-      prompt: "Prompt: show one clear benefit for busy students in Malaysia."
+      product: "Wireless earbuds",
+      audience: "Students, commuters, office workers",
+      question: "How can I promote this product on TikTok?",
+      answer: "Focus on one pain: cheap earbuds sound weak. Generate a comparison visual, a 12s demo idea, and a Bahasa voiceover.",
+      assets: [["Image", "Comparison visual", "20 sen"], ["Video", "12s demo direction", "RM0.40"], ["Script", "Bahasa voiceover", "Ready"]],
+      confirm: "Pokaya will ask before spending credits."
     },
     zh: {
-      product: "产品：蓝牙耳机",
-      user: "我想开始推广这个产品。",
-      agent: "Pokaya Agent 会先理解产品，判断内容角度，再准备 TikTok Affiliate 可用的素材和文案。",
-      assets: [["图片", "产品素材", "20 sen"], ["视频", "短视频方向", "RM0.40"], ["文案", "口播脚本", "Ready"]],
-      prompt: "Prompt：突出一个马来西亚学生会在意的清楚卖点。"
+      product: "蓝牙耳机",
+      audience: "学生、通勤族、办公室人群",
+      question: "这个产品要怎么做 TikTok Affiliate 内容？",
+      answer: "先抓一个痛点：便宜耳机音质差。生成对比图片、12 秒短视频方向和 Bahasa 口播脚本。",
+      assets: [["图片", "对比素材", "20 sen"], ["视频", "12 秒方向", "RM0.40"], ["文案", "Bahasa 口播", "Ready"]],
+      confirm: "真正扣 credit 前，Pokaya 会先让用户确认。"
     },
     en: {
-      product: "Product: wireless earbuds",
-      user: "I want to start promoting this product.",
-      agent: "Pokaya Agent understands the product, chooses the angle, and prepares TikTok Affiliate content.",
-      assets: [["Image", "Product visual", "20 sen"], ["Video", "Short demo", "RM0.40"], ["Script", "Voiceover copy", "Ready"]],
-      prompt: "Prompt: show one clear benefit for busy students in Malaysia."
+      product: "Wireless earbuds",
+      audience: "Students, commuters, office workers",
+      question: "How should I promote this product on TikTok?",
+      answer: "Start with one pain: cheap earbuds sound weak. Generate a comparison visual, a 12s demo direction, and a Bahasa voiceover.",
+      assets: [["Image", "Comparison visual", "20 sen"], ["Video", "12s demo direction", "RM0.40"], ["Script", "Bahasa voiceover", "Ready"]],
+      confirm: "Pokaya asks before spending credits."
     }
   };
   const content = data[state.lang] || data.ms;
   return `
-    <aside class="hero-agent-panel" aria-label="Pokaya Agent content workflow preview">
-      <div class="agent-panel-top">
+    <aside class="hero-agent-panel hero-workbench" aria-label="Pokaya Agent content workflow preview">
+      <div class="agent-panel-top hero-workbench-top">
         <img src="${brandAssets.mascot}" alt="" aria-hidden="true">
         <div><b>Pokaya Agent</b><span>Your AI operator</span></div>
         <em>READY</em>
       </div>
-      <div class="product-input-card">
-        ${icon("package", 19)}
-        <span>${content.product}</span>
+      <div class="hero-product-brief">
+        <div class="hero-product-image">${icon("headphones", 34)}</div>
+        <div>
+          <span>Product brief</span>
+          <b>${content.product}</b>
+          <small>${content.audience}</small>
+        </div>
       </div>
       <div class="agent-chat-preview">
-        <p class="chat-user">${content.user}</p>
-        <p class="chat-agent">${content.agent}</p>
+        <p class="chat-user">${content.question}</p>
+        <p class="chat-agent">${content.answer}</p>
       </div>
       <div class="asset-output-grid">
         ${content.assets.map(([kind, title, cost]) => `
@@ -1785,9 +1792,9 @@ function heroAgentPanel() {
             <small>${cost}</small>
           </article>`).join("")}
       </div>
-      <div class="prompt-preview-card">
-        ${icon("file-text", 18)}
-        <p>${content.prompt}</p>
+      <div class="prompt-preview-card hero-credit-confirm">
+        ${icon("shield-check", 18)}
+        <p>${content.confirm}</p>
       </div>
     </aside>`;
 }
