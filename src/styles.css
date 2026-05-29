@@ -15622,17 +15622,18 @@ label {
 }
 
 .studio-shell .project-menu-item .project-icon {
-  width: 34px !important;
-  height: 34px !important;
-  flex-basis: 34px !important;
-  border-radius: 11px !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
-  background: rgba(255, 255, 255, 0.055) !important;
+  width: 40px !important;
+  height: 40px !important;
+  flex-basis: 40px !important;
+  border-radius: 13px !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  background: rgba(255, 255, 255, 0.085) !important;
+  color: rgba(255, 255, 255, 0.84) !important;
 }
 
 .studio-shell .project-menu-item .project-icon svg {
-  width: 17px !important;
-  height: 17px !important;
+  width: 21px !important;
+  height: 21px !important;
 }
 
 .studio-shell .project-more {
@@ -16706,7 +16707,14 @@ label {
   color: rgba(255, 255, 255, 0.46);
   font: inherit;
   font-weight: 900;
-  cursor: default;
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+.affiliate-tabs button:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.76);
 }
 
 .affiliate-tabs .active {
@@ -16734,6 +16742,19 @@ label {
   color: rgba(255, 255, 255, 0.68);
   font-size: 17px;
   line-height: 1.55;
+}
+
+.affiliate-how p {
+  max-width: 760px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+.affiliate-cashout-button {
+  width: fit-content;
+  margin-top: 18px;
 }
 
 .affiliate-mini-grid {
@@ -17032,6 +17053,12 @@ label {
 
 .studio-shell .affiliate-how ul {
   color: rgba(83, 62, 90, 0.74);
+}
+
+.studio-shell .affiliate-how p {
+  color: rgba(83, 62, 90, 0.74);
+  font-size: 14px;
+  line-height: 1.45;
 }
 
 .studio-shell .affiliate-mini-grid article {

@@ -110,6 +110,7 @@ const state = {
   paymentReturn: null,
   topupAmount: 50,
   usageFilter: "all",
+  affiliateTab: "overview",
   assetSearch: "",
   assetTypeFilter: "all",
   assetProjectFilter: "all",
@@ -4418,6 +4419,14 @@ function affiliateDashboard() {
   const referrals = Number(affiliate.referrals || Math.max(0, Math.floor(clicks / 8)));
   const available = Math.max(0, payout - cashedOut);
   const referralLink = `https://pokaya.ai/ref/${encodeURIComponent(code)}`;
+  const activeTab = ["overview", "commissions", "referrals", "cashout"].includes(state.affiliateTab) ? state.affiliateTab : "overview";
+  const tabs = [
+    ["overview", t("affiliateOverview")],
+    ["commissions", t("affiliateCommissions")],
+    ["referrals", t("affiliateReferrals")],
+    ["cashout", t("affiliateCashOut")]
+  ];
+  const metrics = { clicks, payout, totalEarned, cashedOut, referrals, available };
   return `
     <section class="affiliate-dashboard">
       <div class="affiliate-stat-grid">
@@ -4441,30 +4450,9 @@ function affiliateDashboard() {
         </div>
       </section>
       <div class="affiliate-tabs" aria-label="Affiliate sections">
-        <button class="active" type="button">${t("affiliateOverview")}</button>
-        <button type="button">${t("affiliateCommissions")}</button>
-        <button type="button">${t("affiliateReferrals")}</button>
-        <button type="button">${t("affiliateCashOut")}</button>
+        ${tabs.map(([id, label]) => `<button class="${activeTab === id ? "active" : ""}" type="button" data-affiliate-tab="${id}" aria-selected="${activeTab === id ? "true" : "false"}">${label}</button>`).join("")}
       </div>
-      <section class="affiliate-info-card">
-        <div class="affiliate-how">
-          <h2>${t("affiliateHowTitle")}</h2>
-          <ul>
-            <li>${t("affiliateHow1")}</li>
-            <li>${t("affiliateHow2")}</li>
-            <li>${t("affiliateHow3")}</li>
-            <li>${t("affiliateHow4")}</li>
-          </ul>
-        </div>
-        <div class="affiliate-mini-grid">
-          ${affiliateMini(t("totalReferrals"), referrals)}
-          ${affiliateMini(t("commissionEvents"), referrals)}
-          ${affiliateMini(t("totalEarned"), `RM ${totalEarned.toFixed(2)}`)}
-          ${affiliateMini(t("availableWithdraw"), `RM ${available.toFixed(2)}`)}
-          ${affiliateMini(t("pendingCashouts"), `RM ${Math.max(0, cashedOut).toFixed(2)}`)}
-          ${affiliateMini(t("minimumCashout"), "RM 50")}
-        </div>
-      </section>
+      ${affiliateTabPanel(activeTab, metrics)}
     </section>`;
 }
 
@@ -4474,6 +4462,93 @@ function affiliateStat(label, value, ic, tone) {
 
 function affiliateMini(label, value) {
   return `<article><span>${label}</span><b>${value}</b></article>`;
+}
+
+function affiliateTabPanel(tab, metrics) {
+  const { clicks, totalEarned, cashedOut, referrals, available } = metrics;
+  if (tab === "commissions") {
+    return `<section class="affiliate-info-card">
+      <div class="affiliate-how">
+        <h2>${t("affiliateCommissions")}</h2>
+        <p>${affiliateTabCopy("commissions")}</p>
+      </div>
+      <div class="affiliate-mini-grid">
+        ${affiliateMini(t("commissionEvents"), referrals)}
+        ${affiliateMini(t("totalEarned"), `RM ${totalEarned.toFixed(2)}`)}
+        ${affiliateMini(t("availableWithdraw"), `RM ${available.toFixed(2)}`)}
+        ${affiliateMini(t("pendingCashouts"), `RM ${Math.max(0, cashedOut).toFixed(2)}`)}
+      </div>
+    </section>`;
+  }
+  if (tab === "referrals") {
+    return `<section class="affiliate-info-card">
+      <div class="affiliate-how">
+        <h2>${t("affiliateReferrals")}</h2>
+        <p>${affiliateTabCopy("referrals")}</p>
+      </div>
+      <div class="affiliate-mini-grid">
+        ${affiliateMini(t("totalReferrals"), referrals)}
+        ${affiliateMini(t("referralClicks"), formatCreditNumber(clicks))}
+        ${affiliateMini(t("commissionEvents"), referrals)}
+        ${affiliateMini(t("totalEarned"), `RM ${totalEarned.toFixed(2)}`)}
+      </div>
+    </section>`;
+  }
+  if (tab === "cashout") {
+    return `<section class="affiliate-info-card">
+      <div class="affiliate-how">
+        <h2>${t("affiliateCashOut")}</h2>
+        <p>${affiliateTabCopy("cashout")}</p>
+        <button class="gold-button affiliate-cashout-button" type="button" ${available >= 50 ? "" : "disabled"}>${icon("wallet-cards", 18)} ${t("affiliateCashOut")}</button>
+      </div>
+      <div class="affiliate-mini-grid">
+        ${affiliateMini(t("availableWithdraw"), `RM ${available.toFixed(2)}`)}
+        ${affiliateMini(t("pendingCashouts"), `RM ${Math.max(0, cashedOut).toFixed(2)}`)}
+        ${affiliateMini(t("referralTotalCashedOut"), `RM ${cashedOut.toFixed(2)}`)}
+        ${affiliateMini(t("minimumCashout"), "RM 50")}
+      </div>
+    </section>`;
+  }
+  return `<section class="affiliate-info-card">
+    <div class="affiliate-how">
+      <h2>${t("affiliateHowTitle")}</h2>
+      <ul>
+        <li>${t("affiliateHow1")}</li>
+        <li>${t("affiliateHow2")}</li>
+        <li>${t("affiliateHow3")}</li>
+        <li>${t("affiliateHow4")}</li>
+      </ul>
+    </div>
+    <div class="affiliate-mini-grid">
+      ${affiliateMini(t("totalReferrals"), referrals)}
+      ${affiliateMini(t("commissionEvents"), referrals)}
+      ${affiliateMini(t("totalEarned"), `RM ${totalEarned.toFixed(2)}`)}
+      ${affiliateMini(t("availableWithdraw"), `RM ${available.toFixed(2)}`)}
+      ${affiliateMini(t("pendingCashouts"), `RM ${Math.max(0, cashedOut).toFixed(2)}`)}
+      ${affiliateMini(t("minimumCashout"), "RM 50")}
+    </div>
+  </section>`;
+}
+
+function affiliateTabCopy(tab) {
+  const copy = {
+    zh: {
+      commissions: "这里汇总所有已追踪的佣金事件和可提现金额。",
+      referrals: "这里查看通过您的链接或推荐码带来的推荐数据。",
+      cashout: "达到最低 RM50 后，可以提交提现到马来西亚银行账户。"
+    },
+    ms: {
+      commissions: "Lihat semua event komisen yang sudah dijejak dan jumlah yang boleh dikeluarkan.",
+      referrals: "Semak referral yang datang daripada link atau kod anda.",
+      cashout: "Bila capai minimum RM50, anda boleh request cash out ke akaun bank Malaysia."
+    },
+    en: {
+      commissions: "Review tracked commission events and the amount available to withdraw.",
+      referrals: "Check referrals coming through your link or referral code.",
+      cashout: "Once you reach the RM50 minimum, request cash out to a Malaysian bank account."
+    }
+  }[state.lang] || {};
+  return copy[tab] || "";
 }
 
 function topupPage() {
@@ -6676,6 +6751,7 @@ function bind() {
   document.querySelectorAll("[data-page]").forEach((el) => el.addEventListener("click", () => set({ page: el.dataset.page })));
   document.querySelectorAll("[data-step]").forEach((el) => el.addEventListener("click", () => set({ step: el.dataset.step })));
   document.querySelectorAll("[data-step-open]").forEach((el) => el.addEventListener("click", () => set({ page: "project", step: el.dataset.stepOpen })));
+  document.querySelectorAll("[data-affiliate-tab]").forEach((el) => el.addEventListener("click", () => set({ affiliateTab: el.dataset.affiliateTab })));
   document.querySelectorAll("[data-project]").forEach((el) => el.addEventListener("click", () => set({ projectId: el.dataset.project, page: "project", projectMenuId: null })));
   document.querySelectorAll("[data-wizard-feature]").forEach((el) => el.addEventListener("click", () => {
     const patch = { wizardFeature: el.dataset.wizardFeature };
