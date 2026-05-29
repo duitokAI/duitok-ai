@@ -15615,7 +15615,7 @@ label {
 
 .studio-shell .agent-workspace-shell {
   display: grid !important;
-  grid-template-columns: minmax(340px, 400px) minmax(0, 1fr) !important;
+  grid-template-columns: minmax(420px, 0.82fr) minmax(0, 1fr) !important;
   align-items: start !important;
   gap: 20px !important;
   min-height: calc(100vh - 190px) !important;
@@ -15670,7 +15670,7 @@ label {
 
 .studio-shell .agent-status-card .agent-3d-card {
   min-height: 0 !important;
-  grid-template-rows: auto minmax(190px, 240px) !important;
+  grid-template-rows: 44px minmax(0, 1fr) !important;
   overflow: hidden !important;
   border-radius: 16px !important;
   box-shadow: none !important;
@@ -15681,8 +15681,9 @@ label {
 }
 
 .studio-shell .agent-status-card .agent-life-stage {
-  min-height: 220px !important;
-  max-height: 240px !important;
+  height: 336px !important;
+  min-height: 336px !important;
+  max-height: 336px !important;
 }
 
 .studio-shell .agent-status-card .agent-3d-copy {
@@ -15690,9 +15691,9 @@ label {
 }
 
 .studio-shell .agent-status-card .agent-life-render-image {
-  object-fit: cover !important;
-  object-position: center 48% !important;
-  transform: scale(1.18) !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  transform: none !important;
 }
 
 .studio-shell .agent-status-card .agent-3d-status {
@@ -15901,7 +15902,7 @@ label {
 
 @media (max-width: 1180px) {
   .studio-shell .agent-workspace-shell {
-    grid-template-columns: 320px minmax(0, 1fr) !important;
+    grid-template-columns: minmax(380px, 0.82fr) minmax(0, 1fr) !important;
   }
 
   .studio-shell .agent-context-grid {
@@ -16501,15 +16502,15 @@ label {
 }
 
 .studio-shell .agent-status-card .agent-life-card {
-  height: 286px !important;
-  max-height: 286px !important;
-  grid-template-rows: 44px 242px !important;
+  height: 380px !important;
+  max-height: 380px !important;
+  grid-template-rows: 44px minmax(0, 1fr) !important;
 }
 
 .studio-shell .agent-status-card .agent-life-stage {
-  height: 242px !important;
-  min-height: 242px !important;
-  max-height: 242px !important;
+  height: 336px !important;
+  min-height: 336px !important;
+  max-height: 336px !important;
 }
 
 .studio-shell:has(.agent-page) .support-bubble {
@@ -16542,29 +16543,29 @@ label {
   }
 
   .studio-shell .agent-status-card .agent-life-card {
-    height: 246px !important;
-    max-height: 246px !important;
-    grid-template-rows: 44px 202px !important;
+    height: 340px !important;
+    max-height: 340px !important;
+    grid-template-rows: 44px minmax(0, 1fr) !important;
   }
 
   .studio-shell .agent-status-card .agent-life-stage {
-    height: 202px !important;
-    min-height: 202px !important;
-    max-height: 202px !important;
+    height: 296px !important;
+    min-height: 296px !important;
+    max-height: 296px !important;
   }
 }
 
 @media (max-width: 640px) {
   .studio-shell .agent-status-card .agent-life-card {
-    height: 220px !important;
-    max-height: 220px !important;
-    grid-template-rows: 44px 176px !important;
+    height: 300px !important;
+    max-height: 300px !important;
+    grid-template-rows: 44px minmax(0, 1fr) !important;
   }
 
   .studio-shell .agent-status-card .agent-life-stage {
-    height: 176px !important;
-    min-height: 176px !important;
-    max-height: 176px !important;
+    height: 256px !important;
+    min-height: 256px !important;
+    max-height: 256px !important;
   }
 
   .studio-shell:has(.agent-page) .support-bubble {

@@ -4771,8 +4771,6 @@ function agentTopbar() {
 function agentStatusRail() {
   return `<aside class="agent-status-rail">
     ${agentStatusCard()}
-    ${agentWorkspaceSummary()}
-    ${agentNextActions()}
   </aside>`;
 }
 
