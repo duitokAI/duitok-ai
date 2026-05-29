@@ -31,6 +31,12 @@ const tiktokAuthBaseUrl = (process.env.TIKTOK_AUTH_BASE_URL || "https://www.tikt
 const tiktokOpenApiBaseUrl = (process.env.TIKTOK_OPEN_API_BASE_URL || "https://open.tiktokapis.com").replace(/\/$/, "");
 const tiktokRedirectPath = process.env.TIKTOK_REDIRECT_PATH || "/api/tiktok/oauth/callback";
 const tiktokScopes = process.env.TIKTOK_SCOPES || "user.info.basic,video.publish";
+const googleAuthBaseUrl = "https://accounts.google.com/o/oauth2/v2/auth";
+const googleTokenUrl = "https://oauth2.googleapis.com/token";
+const googleTokenInfoUrl = "https://oauth2.googleapis.com/tokeninfo";
+const googleClientId = process.env.GOOGLE_CLIENT_ID || "";
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET || "";
+const googleRedirectPath = process.env.GOOGLE_REDIRECT_PATH || "/api/auth/google/callback";
 const wuyinBaseUrl = (process.env.WUYIN_BASE_URL || "https://api.wuyinkeji.com").replace(/\/$/, "");
 const wuyinImagePaths = {
   "Veo 3.1": "/api/async/video_veo3.1_fast",
@@ -366,6 +372,25 @@ function verifyPassword(password, stored) {
   const actual = crypto.scryptSync(password, salt, 64);
   const expected = Buffer.from(hash, "hex");
   return expected.length === actual.length && crypto.timingSafeEqual(expected, actual);
+}
+
+function requestOrigin(req) {
+  const configured = (process.env.PUBLIC_APP_URL || process.env.APP_URL || "").replace(/\/$/, "");
+  if (configured) return configured;
+  const proto = String(req.get("x-forwarded-proto") || req.protocol || "http").split(",")[0].trim();
+  return `${proto}://${req.get("host")}`;
+}
+
+function googleRedirectUri(req) {
+  return process.env.GOOGLE_REDIRECT_URI || `${requestOrigin(req)}${googleRedirectPath}`;
+}
+
+function requireGoogleAuthConfig() {
+  if (!googleClientId || !googleClientSecret) {
+    const error = new Error("Google login is not configured.");
+    error.status = 503;
+    throw error;
+  }
 }
 
 function publicUser(user) {
@@ -716,6 +741,10 @@ function normalizeDb(db) {
   db.tiktok.oauthStates ||= [];
   db.tiktok.publishes ||= [];
   db.tiktok.publishes = db.tiktok.publishes.map((item) => ({ userId: item.userId || adminUserId, ...item }));
+  db.oauthStates ||= [];
+  db.oauthStates = db.oauthStates.filter((item) => Date.now() - new Date(item.createdAt || 0).getTime() < 10 * 60 * 1000).slice(0, 50);
+  db.oauthSessions ||= [];
+  db.oauthSessions = db.oauthSessions.filter((item) => Date.now() - new Date(item.createdAt || 0).getTime() < 5 * 60 * 1000).slice(0, 50);
   db.agentRuns ||= [];
   db.agentRuns = db.agentRuns.slice(0, 100).map((item) => ({ toolResults: [], uiActions: [], plan: [], diffs: [], cards: [], ...item }));
   db.agentFeedbackEvents ||= [];
@@ -4865,6 +4894,160 @@ app.post("/api/auth/login", async (req, res) => {
     return { user: publicUser(sessionUser), token: signAuthToken(user), state: publicState(db, sessionUser) };
   });
   res.json(payload);
+});
+
+app.get("/api/auth/google/start", async (req, res, next) => {
+  try {
+    requireGoogleAuthConfig();
+    const state = crypto.randomBytes(24).toString("base64url");
+    await mutateDb(async (db) => {
+      db.oauthStates ||= [];
+      db.oauthStates.unshift({ provider: "google", state, createdAt: new Date().toISOString() });
+      db.oauthStates = db.oauthStates.slice(0, 50);
+      await saveDb(db);
+    });
+    const url = new URL(googleAuthBaseUrl);
+    url.searchParams.set("client_id", googleClientId);
+    url.searchParams.set("redirect_uri", googleRedirectUri(req));
+    url.searchParams.set("response_type", "code");
+    url.searchParams.set("scope", "openid email profile");
+    url.searchParams.set("state", state);
+    url.searchParams.set("prompt", "select_account");
+    res.redirect(url.toString());
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/auth/google/callback", async (req, res, next) => {
+  try {
+    requireGoogleAuthConfig();
+    const code = String(req.query.code || "");
+    const state = String(req.query.state || "");
+    if (!code || !state) return res.redirect(`${requestOrigin(req)}/login?oauth_error=missing_google_code`);
+
+    const stateOk = await mutateDb(async (db) => {
+      db.oauthStates ||= [];
+      const index = db.oauthStates.findIndex((item) => item.provider === "google" && item.state === state);
+      const found = index >= 0 ? db.oauthStates[index] : null;
+      if (index >= 0) db.oauthStates.splice(index, 1);
+      await saveDb(db);
+      return found && Date.now() - new Date(found.createdAt || 0).getTime() < 10 * 60 * 1000;
+    });
+    if (!stateOk) return res.redirect(`${requestOrigin(req)}/login?oauth_error=invalid_google_state`);
+
+    const tokenBody = new URLSearchParams({
+      code,
+      client_id: googleClientId,
+      client_secret: googleClientSecret,
+      redirect_uri: googleRedirectUri(req),
+      grant_type: "authorization_code"
+    });
+    const tokenRes = await fetch(googleTokenUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: tokenBody
+    });
+    const tokenPayload = await tokenRes.json().catch(() => ({}));
+    if (!tokenRes.ok || !tokenPayload.id_token) {
+      console.warn("Google OAuth token exchange failed", { status: tokenRes.status, error: tokenPayload.error });
+      return res.redirect(`${requestOrigin(req)}/login?oauth_error=google_token_failed`);
+    }
+
+    const infoUrl = new URL(googleTokenInfoUrl);
+    infoUrl.searchParams.set("id_token", tokenPayload.id_token);
+    const infoRes = await fetch(infoUrl);
+    const profile = await infoRes.json().catch(() => ({}));
+    if (!infoRes.ok || profile.aud !== googleClientId || !["true", true].includes(profile.email_verified) || !profile.email || !profile.sub) {
+      console.warn("Google OAuth id token verification failed", { status: infoRes.status, aud: profile.aud, email: profile.email });
+      return res.redirect(`${requestOrigin(req)}/login?oauth_error=google_verify_failed`);
+    }
+
+    const sessionCode = await mutateDb(async (db) => {
+      const email = String(profile.email || "").trim().toLowerCase();
+      let user = db.users.find((item) => String(item.email || "").toLowerCase() === email);
+      if (!user) {
+        user = {
+          id: crypto.randomUUID(),
+          email,
+          name: String(profile.name || email.split("@")[0] || "Pokaya User"),
+          role: email === "admin@pokaya.ai" ? "admin" : "user",
+          status: "active",
+          billing: defaultBilling(),
+          agentPermissions: defaultAgentPermissions(),
+          avatarUrl: String(profile.picture || ""),
+          authProviders: []
+        };
+        db.users.push(user);
+        db.projects.push(blankProject(crypto.randomUUID(), "Project 1", user.id));
+        db.usage.unshift(usage("Created account with Google", 0, user.id));
+      }
+      user.authProviders ||= [];
+      if (!user.authProviders.some((item) => item.provider === "google" && item.providerUserId === profile.sub)) {
+        user.authProviders.push({
+          provider: "google",
+          providerUserId: String(profile.sub),
+          email,
+          linkedAt: new Date().toISOString()
+        });
+      }
+      if (!user.avatarUrl && profile.picture) user.avatarUrl = String(profile.picture);
+      if (!user.name && profile.name) user.name = String(profile.name);
+      user.updatedAt = new Date().toISOString();
+      const exchangeCode = crypto.randomBytes(24).toString("base64url");
+      db.oauthSessions ||= [];
+      db.oauthSessions.unshift({ code: exchangeCode, userId: user.id, createdAt: new Date().toISOString() });
+      db.oauthSessions = db.oauthSessions.slice(0, 50);
+      await saveDb(db);
+      return exchangeCode;
+    });
+
+    res.redirect(`${requestOrigin(req)}/login?oauth=${encodeURIComponent(sessionCode)}`);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/auth/oauth-session", async (req, res, next) => {
+  try {
+    const code = String(req.body.code || "");
+    if (!code) return res.status(400).json({ error: "OAuth session code is required." });
+    const payload = await mutateDb(async (db) => {
+      db.oauthSessions ||= [];
+      const index = db.oauthSessions.findIndex((item) => item.code === code);
+      const session = index >= 0 ? db.oauthSessions[index] : null;
+      if (index >= 0) db.oauthSessions.splice(index, 1);
+      if (!session || Date.now() - new Date(session.createdAt || 0).getTime() > 5 * 60 * 1000) {
+        await saveDb(db);
+        const error = new Error("Google login session expired. Please try again.");
+        error.status = 401;
+        throw error;
+      }
+      const user = db.users.find((item) => item.id === session.userId);
+      if (!user) {
+        const error = new Error("User not found.");
+        error.status = 404;
+        throw error;
+      }
+      if ((user.status || "active") === "suspended") {
+        const error = new Error("Account suspended. Please contact support.");
+        error.status = 403;
+        throw error;
+      }
+      if ((user.status || "active") === "pending_payment") {
+        const error = new Error("Payment is still pending. Please complete checkout to activate Studio access.");
+        error.status = 402;
+        throw error;
+      }
+      db.usage.unshift(usage("Signed in with Google", 0, user.id));
+      await saveDb(db);
+      const sessionUser = { ...user, __adminVerified: verifyAdminAccess(null, user) };
+      return { user: publicUser(sessionUser), token: signAuthToken(user), state: publicState(db, sessionUser) };
+    });
+    res.json(payload);
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.get("/api/tiktok/connect", async (req, res, next) => {

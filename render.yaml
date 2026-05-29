@@ -25,6 +25,12 @@ services:
         sync: false
       - key: CORS_ORIGINS
         value: https://pokaya.ai,https://www.pokaya.ai
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        value: https://pokaya.ai/api/auth/google/callback
       - key: CHIP_API_TOKEN
         sync: false
       - key: CHIP_BRAND_ID
