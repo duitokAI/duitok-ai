@@ -5127,6 +5127,29 @@ function agentToolCards(run) {
 }
 
 function agentToolCard(card = {}) {
+  if (card.type === "trend_research") {
+    const categories = Array.isArray(card.bestCategories) ? card.bestCategories.slice(0, 6) : [];
+    const hooks = Array.isArray(card.hooks) ? card.hooks.slice(0, 5) : [];
+    const angles = Array.isArray(card.videoAngles) ? card.videoAngles.slice(0, 3) : [];
+    const risks = Array.isArray(card.risks) ? card.risks.slice(0, 3) : [];
+    const sources = Array.isArray(card.sources) ? card.sources.slice(0, 3) : [];
+    const nextPrompt = card.recommendedNextAction === "create_seedance_prompt"
+      ? `Write a video prompt for ${card.trendName || "this trend"}`
+      : `Create a 7-day content plan for ${card.trendName || "this trend"}`;
+    return `<section class="agent-tool-card trend-research-card">
+      <header><strong>${icon("search-check", 16)} ${esc(card.title || "Trend research")}</strong><span>${esc(card.summary || "")}</span></header>
+      <div class="trend-fit-row">
+        <p><span>Fit</span><b>${esc(card.marketFit?.label || "usable")}</b></p>
+        <p><span>Score</span><b>${esc(card.marketFit?.score ?? "-")}/5</b></p>
+      </div>
+      ${categories.length ? `<div class="trend-chip-row">${categories.map((item) => `<span>${esc(item)}</span>`).join("")}</div>` : ""}
+      ${angles.length ? `<div class="trend-angle-list">${angles.map((item) => `<p><b>${esc(item.title || "Video angle")}</b><span>${esc(item.productPlacement || item.format || "")}</span></p>`).join("")}</div>` : ""}
+      ${hooks.length ? `<div class="trend-hook-list"><strong>${icon("lightbulb", 15)} Hooks</strong><ul>${hooks.map((item) => `<li>${esc(item)}</li>`).join("")}</ul></div>` : ""}
+      ${risks.length ? `<div class="trend-risk-list"><strong>${icon("triangle-alert", 15)} Risks</strong><ul>${risks.map((item) => `<li>${esc(item)}</li>`).join("")}</ul></div>` : ""}
+      ${sources.length ? `<details class="trend-source-list"><summary>Sources</summary>${sources.map((item) => `<a href="${esc(item.url || "#")}" target="_blank" rel="noopener noreferrer">${esc(item.title || item.url || "Source")}</a>`).join("")}</details>` : ""}
+      <div><button class="dark-button" data-agent-prompt="Remember ${esc(card.trendName || "this trend")} as project context">${icon("brain", 15)} 保存记忆</button><button class="gold-button" data-agent-prompt="${esc(nextPrompt)}">${icon("sparkles", 15)} 下一步</button></div>
+    </section>`;
+  }
   if (card.type === "content_plan") {
     const plan = Array.isArray(card.plan) ? card.plan.slice(0, 7) : [];
     return `<section class="agent-tool-card">

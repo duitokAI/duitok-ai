@@ -9452,6 +9452,67 @@ label {
   font-weight: 780;
 }
 
+.trend-fit-row {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px !important;
+}
+
+.trend-fit-row p,
+.trend-angle-list p {
+  display: grid;
+  gap: 2px;
+  border-radius: 8px;
+  padding: 8px;
+  background: rgba(93, 8, 108, 0.06);
+}
+
+.trend-fit-row span,
+.trend-angle-list span {
+  color: rgba(31, 6, 38, 0.62) !important;
+  font-size: 12px;
+}
+
+.trend-fit-row b,
+.trend-angle-list b {
+  color: #4f055f;
+}
+
+.trend-chip-row {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 6px !important;
+}
+
+.trend-chip-row span {
+  border-radius: 999px;
+  padding: 6px 10px;
+  color: #4f055f;
+  background: rgba(255, 78, 122, 0.1);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.trend-angle-list,
+.trend-hook-list,
+.trend-risk-list {
+  display: grid !important;
+  gap: 6px !important;
+}
+
+.trend-source-list {
+  color: rgba(31, 6, 38, 0.72);
+  font-weight: 800;
+}
+
+.trend-source-list a {
+  display: block;
+  margin-top: 6px;
+  color: #4f055f;
+  text-decoration: none;
+  word-break: break-word;
+}
+
 .agent-suggestions {
   display: flex !important;
   flex-wrap: wrap;
@@ -16589,5 +16650,295 @@ label {
 
   .studio-shell:has(.agent-page) .support-bubble {
     display: none !important;
+  }
+}
+
+/* Final Project generator scale: compact the 1-7 creation tabs after global density rules. */
+.studio-shell .workspace:has(.step-tabs) {
+  --project-page-pad-y: 18px;
+  --project-page-pad-x: clamp(22px, 2.4vw, 36px);
+  --project-card-pad: clamp(18px, 1.8vw, 26px);
+  --project-inner-pad: clamp(16px, 1.45vw, 22px);
+  --project-control-height: 44px;
+  --project-tab-height: 46px;
+  padding: var(--project-page-pad-y) var(--project-page-pad-x) 56px !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) > * {
+  max-width: min(1480px, 100%) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .project-head {
+  gap: 16px !important;
+  margin-bottom: 14px !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .project-head h1 {
+  font-size: clamp(40px, 3.8vw, 58px) !important;
+  line-height: 0.94 !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .folder-label {
+  margin-bottom: 6px !important;
+  font-size: 11px !important;
+  letter-spacing: 0.18em !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .folder-label svg {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .sop-button {
+  min-width: 142px !important;
+  min-height: 44px !important;
+  border-radius: 14px !important;
+  padding: 0 18px !important;
+  font-size: 14px !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .sop-button svg {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .step-tabs {
+  display: grid !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  margin-bottom: 20px !important;
+  padding-bottom: 10px !important;
+  overflow: visible !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .step-tabs button {
+  min-width: 0 !important;
+  max-width: none !important;
+  min-height: var(--project-tab-height) !important;
+  border-radius: 11px !important;
+  gap: 6px !important;
+  padding: 0 10px !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .step-tabs button svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .step-tabs button span {
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .step-tabs b {
+  font-size: 10px !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .canvas-card {
+  border-radius: 20px !important;
+  padding: var(--project-card-pad) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .generator-box,
+.studio-shell .workspace:has(.step-tabs) .upload-card,
+.studio-shell .workspace:has(.step-tabs) .prompt-settings,
+.studio-shell .workspace:has(.step-tabs) .prompt-block,
+.studio-shell .workspace:has(.step-tabs) .ugc-scene-card,
+.studio-shell .workspace:has(.step-tabs) .auto-content-card,
+.studio-shell .workspace:has(.step-tabs) .auto-persona-card,
+.studio-shell .workspace:has(.step-tabs) .original-video-card,
+.studio-shell .workspace:has(.step-tabs) .clone-prompt-shell,
+.studio-shell .workspace:has(.step-tabs) .clone-prompt-card,
+.studio-shell .workspace:has(.step-tabs) .storytelling-card,
+.studio-shell .workspace:has(.step-tabs) .story-cta-card,
+.studio-shell .workspace:has(.step-tabs) .viral-shell,
+.studio-shell .workspace:has(.step-tabs) .viral-feature-card,
+.studio-shell .workspace:has(.step-tabs) .viral-form-card,
+.studio-shell .workspace:has(.step-tabs) .viral-history-card {
+  border-radius: 14px !important;
+  padding: var(--project-inner-pad) !important;
+  box-shadow: 0 10px 28px rgba(35, 8, 42, 0.05) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .generator-box,
+.studio-shell .workspace:has(.step-tabs) .upload-card {
+  margin-top: 16px !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .generator-box:first-child {
+  margin-top: 0 !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .generator-box h2,
+.studio-shell .workspace:has(.step-tabs) .upload-card h2,
+.studio-shell .workspace:has(.step-tabs) .prompt-settings h2,
+.studio-shell .workspace:has(.step-tabs) .auto-content-head h2,
+.studio-shell .workspace:has(.step-tabs) .ugc-scene-head h2,
+.studio-shell .workspace:has(.step-tabs) .original-video-head h2,
+.studio-shell .workspace:has(.step-tabs) .clone-prompt-head h2,
+.studio-shell .workspace:has(.step-tabs) .storytelling-head h2,
+.studio-shell .workspace:has(.step-tabs) .viral-feature-card h2 {
+  font-size: clamp(18px, 1.45vw, 23px) !important;
+  line-height: 1.08 !important;
+  margin-bottom: 14px !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .form-grid,
+.studio-shell .workspace:has(.step-tabs) .form-grid.two,
+.studio-shell .workspace:has(.step-tabs) .form-grid.three,
+.studio-shell .workspace:has(.step-tabs) .virtualize-grid,
+.studio-shell .workspace:has(.step-tabs) .ugc-reference-grid,
+.studio-shell .workspace:has(.step-tabs) .ugc-frame-grid,
+.studio-shell .workspace:has(.step-tabs) .original-settings-grid,
+.studio-shell .workspace:has(.step-tabs) .story-select-row {
+  gap: 12px !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) label,
+.studio-shell .workspace:has(.step-tabs) .field-label,
+.studio-shell .workspace:has(.step-tabs) .original-field-label,
+.studio-shell .workspace:has(.step-tabs) .story-section-label,
+.studio-shell .workspace:has(.step-tabs) .viral-field-label {
+  font-size: 11px !important;
+  letter-spacing: 0.12em !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) input,
+.studio-shell .workspace:has(.step-tabs) select,
+.studio-shell .workspace:has(.step-tabs) textarea {
+  min-height: var(--project-control-height) !important;
+  border-radius: 10px !important;
+  padding: 0 14px !important;
+  font-size: 14px !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) textarea {
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) button,
+.studio-shell .workspace:has(.step-tabs) .gold-button,
+.studio-shell .workspace:has(.step-tabs) .dark-button,
+.studio-shell .workspace:has(.step-tabs) .mini-button {
+  min-height: 42px !important;
+  border-radius: 10px !important;
+  font-size: 13px !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .drop-zone,
+.studio-shell .workspace:has(.step-tabs) .upload-zone,
+.studio-shell .workspace:has(.step-tabs) .virtualize-upload,
+.studio-shell .workspace:has(.step-tabs) .clone-video-drop {
+  min-height: 136px !important;
+  border-radius: 13px !important;
+  gap: 8px !important;
+  padding: 18px !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .drop-zone svg,
+.studio-shell .workspace:has(.step-tabs) .upload-zone svg,
+.studio-shell .workspace:has(.step-tabs) .virtualize-upload svg {
+  width: 32px !important;
+  height: 32px !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .drop-zone strong,
+.studio-shell .workspace:has(.step-tabs) .upload-zone p,
+.studio-shell .workspace:has(.step-tabs) .virtualize-upload strong,
+.studio-shell .workspace:has(.step-tabs) .clone-video-drop span {
+  font-size: 16px !important;
+  line-height: 1.2 !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .drop-zone small,
+.studio-shell .workspace:has(.step-tabs) .upload-zone small,
+.studio-shell .workspace:has(.step-tabs) .upload-card > p,
+.studio-shell .workspace:has(.step-tabs) .prompt-block p,
+.studio-shell .workspace:has(.step-tabs) .virtualize-note,
+.studio-shell .workspace:has(.step-tabs) .ugc-scene-note,
+.studio-shell .workspace:has(.step-tabs) small {
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .prompt-block textarea,
+.studio-shell .workspace:has(.step-tabs) .ugc-scene-textarea,
+.studio-shell .workspace:has(.step-tabs) .original-prompt-field textarea,
+.studio-shell .workspace:has(.step-tabs) .story-main-prompt textarea {
+  min-height: 108px !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .video-provider-grid,
+.studio-shell .workspace:has(.step-tabs) .auto-provider-grid,
+.studio-shell .workspace:has(.step-tabs) .auto-plan-grid,
+.studio-shell .workspace:has(.step-tabs) .auto-framework-grid,
+.studio-shell .workspace:has(.step-tabs) .original-provider-grid,
+.studio-shell .workspace:has(.step-tabs) .original-mode-grid,
+.studio-shell .workspace:has(.step-tabs) .story-style-grid,
+.studio-shell .workspace:has(.step-tabs) .story-voice-grid,
+.studio-shell .workspace:has(.step-tabs) .story-cta-grid,
+.studio-shell .workspace:has(.step-tabs) .viral-feature-grid,
+.studio-shell .workspace:has(.step-tabs) .viral-choice-grid {
+  gap: 10px !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .ugc-avatar-drop,
+.studio-shell .workspace:has(.step-tabs) .ugc-product-slot,
+.studio-shell .workspace:has(.step-tabs) .ugc-frame-drop {
+  min-height: 92px !important;
+  border-radius: 12px !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .story-steps div,
+.studio-shell .workspace:has(.step-tabs) .story-cost-grid article,
+.studio-shell .workspace:has(.step-tabs) .viral-choice-grid button,
+.studio-shell .workspace:has(.step-tabs) .viral-feature-grid button,
+.studio-shell .workspace:has(.step-tabs) .auto-plan-grid button,
+.studio-shell .workspace:has(.step-tabs) .auto-framework-grid label,
+.studio-shell .workspace:has(.step-tabs) .original-provider-grid button,
+.studio-shell .workspace:has(.step-tabs) .original-mode-grid button {
+  min-height: 46px !important;
+  padding: 12px !important;
+  border-radius: 12px !important;
+}
+
+@media (max-width: 1180px) {
+  .studio-shell .workspace:has(.step-tabs) .step-tabs {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 680px) {
+  .studio-shell .workspace:has(.step-tabs) {
+    --project-page-pad-x: 14px;
+    --project-page-pad-y: 16px;
+  }
+
+  .studio-shell .workspace:has(.step-tabs) .project-head {
+    grid-template-columns: 1fr !important;
+  }
+
+  .studio-shell .workspace:has(.step-tabs) .project-head h1 {
+    font-size: clamp(32px, 10vw, 42px) !important;
+  }
+
+  .studio-shell .workspace:has(.step-tabs) .step-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .studio-shell .workspace:has(.step-tabs) .form-grid.two,
+  .studio-shell .workspace:has(.step-tabs) .form-grid.three,
+  .studio-shell .workspace:has(.step-tabs) .virtualize-grid,
+  .studio-shell .workspace:has(.step-tabs) .ugc-reference-grid,
+  .studio-shell .workspace:has(.step-tabs) .ugc-frame-grid,
+  .studio-shell .workspace:has(.step-tabs) .original-settings-grid,
+  .studio-shell .workspace:has(.step-tabs) .story-select-row {
+    grid-template-columns: 1fr !important;
   }
 }

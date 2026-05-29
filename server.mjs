@@ -2437,6 +2437,26 @@ const agentTools = [
   {
     type: "function",
     function: {
+      name: "trend_research",
+      description: "Research a trend, aesthetic, product angle, or competitor clue and turn it into practical Malaysia TikTok Shop strategy. Internally searches the web, scores commerce fit, suggests product categories, hooks, scenes, risks, and the next Duitok action. Use this instead of raw web_search when the user asks what a trend means, whether it can sell, what to sell, or how to turn it into content.",
+      parameters: {
+        type: "object",
+        properties: {
+          query: { type: "string", description: "Trend, aesthetic, product, or competitor clue to research." },
+          market: { type: "string", description: "Target market. Defaults to Malaysia TikTok Shop." },
+          productName: { type: "string", description: "Optional user product name." },
+          category: { type: "string", description: "Optional product category." },
+          audience: { type: "string", description: "Optional target audience." },
+          language: { type: "string", description: "Preferred output language." },
+          depth: { type: "string", description: "quick, standard, or deep. Defaults to standard." }
+        },
+        required: ["query"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
       name: "open_workspace",
       description: "Move the user to a Duitok workspace page, step, or project. Use this when navigation helps.",
       parameters: {
@@ -2809,8 +2829,167 @@ function buildSeedancePrompt({ project, productName, scene, audience, language, 
   ].join("\n");
 }
 
+function uniqueStrings(items = [], limit = 8) {
+  const seen = new Set();
+  return items.map((item) => String(item || "").trim()).filter((item) => {
+    const key = item.toLowerCase();
+    if (!item || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).slice(0, limit);
+}
+
+function extractTrendName(query = "") {
+  const cleaned = String(query || "").replace(/[？?。,.，]/g, " ").replace(/\s+/g, " ").trim();
+  const quoted = cleaned.match(/["“']([^"”']+)["”']/)?.[1];
+  if (quoted) return quoted.trim();
+  return cleaned
+    .replace(/你知道|是什么|可以卖什么|适合卖什么|适合|怎么做|帮我|研究|卖什么|嗎|吗|呢|trend|aesthetic|meaning|style|TikTok|Shop|Malaysia/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 48) || cleaned.slice(0, 48) || "Trend";
+}
+
+function trendSearchQueries({ query, market = "Malaysia TikTok Shop", productName = "", category = "" } = {}) {
+  const trend = extractTrendName(query);
+  return uniqueStrings([
+    `${trend} TikTok trend ${market}`,
+    `"${trend}" aesthetic style meaning trend`,
+    `${trend} TikTok Shop ${category || productName || "product ideas"}`,
+    `${trend} Malaysia TikTok Shop`
+  ], 4);
+}
+
+function scoreTrendResearch({ sources = [], productName = "", category = "" } = {}) {
+  const text = sources.map((item) => `${item.title} ${item.snippet}`).join(" ").toLowerCase();
+  let score = 2;
+  if (/tiktok|shop|aesthetic|trend|style|fashion|decor|beauty|home|product/.test(text)) score += 1;
+  if (productName || category) score += 1;
+  if (sources.length >= 6) score += 1;
+  score = Math.max(1, Math.min(5, score));
+  return {
+    score,
+    label: score >= 4 ? "strong" : score >= 3 ? "usable" : "weak",
+    confidence: sources.length >= 6 ? "medium" : sources.length >= 3 ? "medium" : "low"
+  };
+}
+
+function buildTrendResearch({ query, market = "Malaysia TikTok Shop", productName = "", category = "", audience = "", language = "Chinese / BM / English", depth = "standard" } = {}, searches = []) {
+  const trendName = extractTrendName(query);
+  const seen = new Set();
+  const sources = searches.flatMap((item) => item.results || []).filter((item) => {
+    if (!item?.url || seen.has(item.url)) return false;
+    seen.add(item.url);
+    return true;
+  }).slice(0, depth === "deep" ? 12 : 8);
+  const fit = scoreTrendResearch({ sources, productName, category });
+  const product = productName || category || "the product";
+  const bestCategories = uniqueStrings([
+    category,
+    productName,
+    "home decor",
+    "fragrance",
+    "storage",
+    "cups and drinkware",
+    "fashion accessories",
+    "skincare",
+    "desk setup",
+    "small appliances"
+  ], 8);
+  const hooks = [
+    `POV: your room finally has ${trendName} energy`,
+    `3 small items that make your space feel more ${trendName}`,
+    `If you like ${trendName}, this is the detail you are missing`,
+    `Before vs after: boring corner to ${trendName} setup`,
+    `Things I bought to make my daily routine feel more expensive`
+  ];
+  const sceneIdeas = [
+    "morning routine with soft light and close-up product shots",
+    "after-work reset in a clean apartment corner",
+    "desk or vanity upgrade using three small products",
+    "rental room before-after transformation",
+    "packing or unboxing scene with calm lifestyle voiceover"
+  ];
+  const videoAngles = [
+    {
+      title: `${trendName} starter kit for ${market}`,
+      format: "listicle",
+      productPlacement: `Show ${product} as one of the practical upgrades.`
+    },
+    {
+      title: `Make a normal room feel like ${trendName}`,
+      format: "before-after",
+      productPlacement: "Use the product as the visible turning point."
+    },
+    {
+      title: `${trendName} routine, but make it shoppable`,
+      format: "routine",
+      productPlacement: "Place the product inside a daily habit, not as a hard ad."
+    }
+  ];
+  return {
+    trendName,
+    query: query || trendName,
+    market,
+    productName,
+    category,
+    audience: audience || `${market} buyers`,
+    language,
+    summary: `A practical ${trendName} content direction for TikTok Shop: lifestyle-first visuals, product shown as a daily upgrade, and soft-sell hooks built around identity and room/routine improvement.`,
+    confidence: fit.confidence,
+    marketFit: {
+      score: fit.score,
+      label: fit.label,
+      reason: fit.score >= 4
+        ? `Search signals and visual-commerce fit suggest ${trendName} can work for ${market}, especially for lifestyle products.`
+        : `Search signals are limited, so treat ${trendName} as a testable content angle rather than a proven mass-market trend.`
+    },
+    commerceFit: {
+      bestCategories,
+      weakCategories: ["products with no visible transformation", "high-claim products that need heavy proof", "items that cannot fit a lifestyle scene"],
+      priceBand: "low to mid",
+      buyerMotivation: "identity, lifestyle upgrade, convenience, aesthetic proof"
+    },
+    contentStrategy: {
+      positioning: `Frame ${product} as a small upgrade that helps the buyer live the ${trendName} vibe.`,
+      visualCodes: ["clean apartment corner", "warm light", "desk or vanity close-ups", "coffee or fragrance detail", "low-clutter styling"],
+      sceneIdeas,
+      hooks,
+      videoAngles
+    },
+    execution: {
+      beginnerDifficulty: "easy",
+      shootingNeeds: ["phone tripod", "window light", "clean desk or room corner", "one close-up product shot"],
+      canBatch: true,
+      recommendedNextAction: productName || category ? "create_seedance_prompt" : "create_content_plan"
+    },
+    risks: [
+      "Do not over-promise sales or lifestyle transformation.",
+      "If exact trend search volume is low, test it as an aesthetic angle first.",
+      "Keep product proof visible so the video does not become pure mood content."
+    ],
+    sources: sources.slice(0, 5),
+    searchedAt: new Date().toISOString()
+  };
+}
+
 function agentToolCard(name, result = {}) {
   const data = sanitizeAgentObject(result.data || {});
+  if (name === "trend_research") {
+    return {
+      type: "trend_research",
+      title: `${data.trendName || "Trend"} research`,
+      summary: `${data.marketFit?.label || "usable"} fit · ${data.confidence || "medium"} confidence`,
+      trendName: data.trendName || "",
+      marketFit: data.marketFit || {},
+      bestCategories: data.commerceFit?.bestCategories || [],
+      hooks: data.contentStrategy?.hooks || [],
+      videoAngles: data.contentStrategy?.videoAngles || [],
+      risks: data.risks || [],
+      sources: data.sources || [],
+      recommendedNextAction: data.execution?.recommendedNextAction || "create_content_plan"
+    };
+  }
   if (name === "web_search") {
     const results = Array.isArray(data.results) ? data.results.slice(0, 5) : Array.isArray(data.webResults) ? data.webResults.slice(0, 5) : [];
     return {
@@ -2919,6 +3098,26 @@ function agentRecoveryForError(error) {
 }
 
 async function executeAgentTool(name, args, user) {
+  if (name === "trend_research") {
+    const queries = trendSearchQueries(args);
+    const searches = [];
+    for (const query of queries) {
+      try {
+        searches.push(await webSearchRequest({ query, limit: args.depth === "quick" ? 3 : 5, region: "wt-wt" }));
+      } catch (error) {
+        searches.push({ query, searchedAt: new Date().toISOString(), results: [], error: sanitizeAgentText(error.message || "Search failed") });
+      }
+    }
+    const data = buildTrendResearch(args, searches);
+    const card = agentToolCard("trend_research", { data });
+    return {
+      ok: true,
+      message: `${data.trendName} trend research completed.`,
+      data,
+      card
+    };
+  }
+
   if (name === "web_search") {
     const data = await webSearchRequest(args);
     return {
@@ -3373,7 +3572,8 @@ function inferAgentAction(content) {
     wantsMemory: /记住|remember|保存.*语气|品牌语气|目标人群|audience|language/.test(text),
     wantsGenerate: /generate|生成|hasilkan|buat|run|create|做|产出/.test(text),
     wantsSchedule: /schedule|排期|发布|posting|post|draft|草稿|日历|calendar/.test(text),
-    wantsAutoBatch: /7\s*天|七天|week|weekly|batch|content plan|内容计划|內容計劃|auto content/.test(text)
+    wantsAutoBatch: /7\s*天|七天|week|weekly|batch|content plan|内容计划|內容計劃|auto content/.test(text),
+    wantsTrendResearch: /trend|趋势|趨勢|aesthetic|风格|風格|适合卖|可以卖|卖什么|帶貨|带货|选题|對標|对标|爆款|流行|loft girl|clean girl|dopamine|downtown girl/i.test(text)
   };
 }
 
@@ -3397,6 +3597,7 @@ function agentIntentFromContent(content = "") {
 function agentToolLabel(name = "") {
   return {
     inspect_workspace_state: "检查工作区",
+    trend_research: "研究趋势",
     open_workspace: "打开工作区",
     create_project: "创建项目",
     update_project_field: "更新项目字段",
@@ -3422,6 +3623,7 @@ function baseAgentPlan(intent) {
   const steps = [agentPlanStep("understand", "理解需求", "completed")];
   if (intent === "chat") {
     steps.push(agentPlanStep("reply", "回复建议", "pending"));
+    steps.push(agentPlanStep("tools", "调用 Duitok 工具", "pending"));
   } else {
     steps.push(agentPlanStep("plan", "制定执行计划", "completed"));
     steps.push(agentPlanStep("tools", "调用 Duitok 工具", "pending"));
@@ -3502,8 +3704,9 @@ function agentPublishArgsFromMessage(content = "") {
 }
 
 function agentShortcutToolFromMessage(content = "", projectId = "") {
-  if (!projectId) return null;
   const intent = inferAgentAction(content);
+  if (intent.wantsTrendResearch) return { name: "trend_research", args: { query: content, market: "Malaysia TikTok Shop", depth: "standard" } };
+  if (!projectId) return null;
   if (intent.wantsProject) return { name: "create_project", args: { name: agentProjectName(content) } };
   if (intent.wantsSeedancePrompt) {
     return {
@@ -3780,7 +3983,7 @@ function safeAgentToolResult(name, args = {}, result = {}) {
 
 function agentToolDataSummary(data = {}) {
   const allowed = {};
-  for (const key of ["projectId", "resultId", "resultType", "scheduleId", "scheduleIds", "promptId", "planLength", "missing", "nextActions", "query", "searchedAt"]) {
+  for (const key of ["projectId", "resultId", "resultType", "scheduleId", "scheduleIds", "promptId", "planLength", "missing", "nextActions", "query", "searchedAt", "trendName", "summary", "confidence", "marketFit", "commerceFit", "contentStrategy", "execution", "risks", "sources"]) {
     if (data?.[key] !== undefined) allowed[key] = data[key];
   }
   if (Array.isArray(data?.results)) allowed.webResults = data.results.slice(0, 5).map((item) => ({
@@ -3825,6 +4028,41 @@ function buildWebSearchAgentReply(userMessage = "", toolResults = []) {
     "Best categories: fragrance, lamps, bedding, storage, cups, accessories, skincare, mirrors, small appliances, and desk/home decor. Strong content angles: loft girl morning routine, 3 apartment upgrades, and after-work reset scene.",
     results.length ? `Sources:\n${sourceLines}` : "Search results were thin; try related terms like downtown girl aesthetic, apartment aesthetic, or loft apartment decor TikTok."
   ].join("\n\n");
+}
+
+function buildTrendResearchAgentReply(userMessage = "", toolResults = []) {
+  const research = toolResults
+    .filter((item) => item.name === "trend_research" && item.result?.data?.trendName)
+    .sort((a, b) => String(a.result.data.trendName).length - String(b.result.data.trendName).length)[0]?.result?.data;
+  if (!research?.trendName) return "";
+  const zh = /[\u3400-\u9fff]/.test(String(userMessage || ""));
+  const categories = (research.commerceFit?.bestCategories || []).slice(0, 5).join("、");
+  const hooks = (research.contentStrategy?.hooks || []).slice(0, 3).map((item, index) => `${index + 1}. ${item}`).join("\n");
+  const angles = (research.contentStrategy?.videoAngles || []).slice(0, 3).map((item, index) => `${index + 1}. ${item.title} - ${item.productPlacement || item.format || ""}`).join("\n");
+  const risks = (research.risks || []).slice(0, 2).join("；");
+  const sources = (research.sources || []).slice(0, 2).map((item, index) => `${index + 1}. ${item.title}\n${item.url}`).join("\n");
+  if (zh) {
+    return [
+      `我查了一下，${research.trendName} 对 ${research.market || "Malaysia TikTok Shop"} 的判断是：${research.marketFit?.label || "usable"}，信心 ${research.confidence || "medium"}。`,
+      `它的用法不是硬解释概念，而是把产品包装成一种生活方式升级：${research.summary || ""}`,
+      `适合品类：${categories || "家居、香氛、收纳、配饰、护肤、小家电"}`,
+      `可拍角度：\n${angles}`,
+      `可用开头：\n${hooks}`,
+      `风险：${risks || "不要过度承诺效果，先做小批量内容测试。"}`,
+      `建议下一步：${research.execution?.recommendedNextAction === "create_seedance_prompt" ? "先写一个视频 prompt。" : "先生成 7 天内容计划。"}`,
+      sources ? `参考来源：\n${sources}` : ""
+    ].filter(Boolean).join("\n\n");
+  }
+  return [
+    `I researched ${research.trendName} for ${research.market || "Malaysia TikTok Shop"}. Fit: ${research.marketFit?.label || "usable"}, confidence: ${research.confidence || "medium"}.`,
+    research.summary || "",
+    `Best categories: ${categories || "home decor, fragrance, storage, accessories, skincare, small appliances"}`,
+    `Video angles:\n${angles}`,
+    `Hooks:\n${hooks}`,
+    `Risks: ${risks || "Avoid over-promising results; test with a small batch first."}`,
+    `Recommended next step: ${research.execution?.recommendedNextAction === "create_seedance_prompt" ? "write a video prompt" : "create a 7-day content plan"}.`,
+    sources ? `Sources:\n${sources}` : ""
+  ].filter(Boolean).join("\n\n");
 }
 
 async function runDeterministicAgent(content, { projectId, user, workspace = null }) {
@@ -4614,8 +4852,8 @@ app.post("/api/agent", async (req, res, next) => {
         content: [
           "You are Duitok Agent inside Duitok AI Studio for Malaysia TikTok Shop sellers.",
           "Help the user decide what to do next, and call Duitok platform tools when useful.",
-          "You can search the public web, inspect workspace state, remember project context, navigate the UI, create projects, create content plans, create video prompts, update project fields, generate outputs, create scheduler drafts, update schedule status, and create support tickets.",
-          "Use web_search before answering about fresh trends, unfamiliar aesthetic names, current platform behavior, competitors, recent product demand, or terms that may have a changing meaning. After searching, synthesize the results into practical TikTok Shop guidance and cite source URLs briefly when useful.",
+          "You can research trends, search the public web, inspect workspace state, remember project context, navigate the UI, create projects, create content plans, create video prompts, update project fields, generate outputs, create scheduler drafts, update schedule status, and create support tickets.",
+          "Use trend_research before answering about fresh trends, unfamiliar aesthetic names, product-market fit, what to sell, content angles, competitors, recent demand, or terms that may have a changing meaning. Use raw web_search only for simple fact lookup. After trend_research, synthesize the result into practical TikTok Shop guidance and cite source URLs briefly when useful.",
           "Act like an operator, not a passive chatbot: when the user asks for an output, fill the relevant project fields and run the matching tool if enough information is available.",
           "Common workflows: product/content request = inspect_workspace_state -> create_project or update fields -> generate_project_output -> open_workspace. Weekly content plan = inspect_workspace_state -> remember_agent_context when useful -> create_content_plan, and only create schedule drafts when the user asks for drafts. Video prompt request = create_seedance_prompt; video generation request = create_seedance_prompt -> generate_project_output after confirmation if high cost. In user-facing replies and tool cards, say video prompt or generate video instead of naming the internal video model.",
           "When the user changes direction, for example 'don't do washing machine, do dryer instead' or '不做洗衣机了，做烘干机', treat it as a product/context update, not as a request for a generic menu. Save the new product/context with remember_agent_context or create_project when needed, then ask one specific next-step question such as whether to create a content plan, image/poster, or video prompt.",
@@ -4667,6 +4905,27 @@ app.post("/api/agent", async (req, res, next) => {
       messages.push(message);
       const calls = message.tool_calls || [];
       if (!calls.length) {
+        if (toolResults.some((item) => item.name === "trend_research")) {
+          agentRun = {
+            ...agentRun,
+            status: "completed",
+            plan: completeAgentPlan(agentRun.plan),
+            toolResults,
+            uiActions,
+            diffs: runDiffs,
+            cards: runCards,
+            confidence: agentConfidence(intent, { projectId, toolName: "trend_research", executionReady: true }),
+            durationMs: Date.now() - startedAt
+          };
+          await saveAgentRun(agentRun);
+          return res.json({
+            reply: sanitizeAgentReply(buildTrendResearchAgentReply(latestUserMessage, toolResults), latestUserMessage),
+            db: latestDb,
+            toolResults,
+            uiActions,
+            agentRun: publicAgentRun(agentRun)
+          });
+        }
         const shortcut = agentShortcutToolFromMessage(latestUserMessage, projectId);
         if (shortcut) {
           const safeArgs = validateAgentToolArgs(shortcut.name, shortcut.args);
@@ -4712,8 +4971,11 @@ app.post("/api/agent", async (req, res, next) => {
             durationMs: Date.now() - startedAt
           };
           await saveAgentRun(agentRun);
+          const reply = shortcut.name === "trend_research"
+            ? buildTrendResearchAgentReply(latestUserMessage, toolResults)
+            : result.message || message.content || "Done.";
           return res.json({
-            reply: sanitizeAgentReply(result.message || message.content || "Done.", latestUserMessage),
+            reply: sanitizeAgentReply(reply, latestUserMessage),
             db: latestDb,
             toolResults,
             uiActions,
@@ -4871,8 +5133,8 @@ app.post("/api/agent", async (req, res, next) => {
       } catch (error) {
         finalReply = "";
       }
-      if (!finalReply || /<[^>]*tool_calls|tool_calls|<\/｜｜DSML｜｜invoke>/i.test(finalReply)) {
-        finalReply = buildWebSearchAgentReply(latestUserMessage, toolResults);
+      if (!finalReply || /<[^>]*tool_calls|tool_calls|<\/｜｜DSML｜｜invoke>|research completed|web results found/i.test(finalReply) || (toolResults.some((item) => item.name === "trend_research") && finalReply.length < 160)) {
+        finalReply = buildTrendResearchAgentReply(latestUserMessage, toolResults) || buildWebSearchAgentReply(latestUserMessage, toolResults);
       }
     }
     res.json({
