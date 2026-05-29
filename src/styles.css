@@ -4524,6 +4524,11 @@ button:disabled [data-lucide="loader-circle"] {
   color: #ffffff;
 }
 
+.attachment-picker-tabs button.active[data-filter-kind="product"] {
+  border-color: #ffa30b;
+  background: #ffa30b;
+}
+
 .attachment-picker-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -4619,13 +4624,14 @@ button:disabled [data-lucide="loader-circle"] {
   text-align: center;
 }
 
-.attachment-picker-empty strong {
-  color: #f3eef5;
+.attachment-picker-empty p {
+  margin: 0;
+  color: #88828b;
   font-size: 20px;
 }
 
-.attachment-picker-empty p {
-  margin: 0;
+.attachment-picker-empty b {
+  color: #cfc9d1;
 }
 
 .icon-only.close {

@@ -4919,7 +4919,7 @@ function attachmentPickerModal() {
         ${attachmentPickerTab("all", "gallery-horizontal", filter)}
       </div>
       <div class="attachment-picker-grid">
-        ${items.length ? items.map((item) => attachmentPickerCard(item, kind)).join("") : attachmentPickerEmpty(kind)}
+        ${items.length ? items.map((item) => attachmentPickerCard(item, kind)).join("") : attachmentPickerEmpty(filter)}
       </div>
     </section>
   </div>`;
@@ -4927,7 +4927,7 @@ function attachmentPickerModal() {
 
 function attachmentPickerTab(value, ic, active) {
   const label = value === "all" ? "All" : value[0].toUpperCase() + value.slice(1);
-  return `<button type="button" class="${active === value ? "active" : ""}" data-attachment-filter="${esc(value)}">${icon(ic, 18)} ${label}</button>`;
+  return `<button type="button" class="${active === value ? "active" : ""}" data-filter-kind="${esc(value)}" data-attachment-filter="${esc(value)}">${icon(ic, 18)} ${label}</button>`;
 }
 
 function attachmentPickerCard(item, targetKind) {
@@ -4954,10 +4954,10 @@ function attachmentPreview(item) {
 }
 
 function attachmentPickerEmpty(kind) {
+  const noun = kind === "all" ? "attachments" : kind === "avatar" ? "avatars" : "products";
   return `<div class="attachment-picker-empty">
-    ${icon(kind === "avatar" ? "camera" : "package", 38)}
-    <strong>No saved ${esc(kind)} references yet.</strong>
-    <p>Use Add new or save a generated result as a reference first.</p>
+    ${icon(kind === "avatar" ? "camera" : kind === "product" ? "package" : "image", 38)}
+    <p>No ${esc(noun)} here yet. Click <b>Add new</b> above to upload one.</p>
   </div>`;
 }
 
