@@ -946,9 +946,9 @@ function requestedMediaModelFromText(content = "") {
 }
 
 function generationModelOptionsText(kind = "auto") {
-  if (kind === "image") return "GPT Image 2（0.15 credit）或 Nano Banana Pro（0.20 credit）";
-  if (kind === "video") return "Veo 3.1（0.40 credit）、Seedance 2.0（按秒计费）或 Sora 2（按秒计费）";
-  return "图片：GPT Image 2 / Nano Banana Pro；视频：Veo 3.1 / Seedance 2.0 / Sora 2";
+  if (kind === "image") return "GPT Image 2（0.15 credit/张）或 Nano Banana Pro（0.20 credit/张）";
+  if (kind === "video") return "Veo 3.1（0.40 credit/8秒）、Seedance 2.0（0.40 credit/4秒）、Sora 2（0.48 credit/8秒）";
+  return "图片：GPT Image 2（0.15）/ Nano Banana Pro（0.20）；视频：Veo 3.1（0.40）/ Seedance 2.0（0.40）/ Sora 2（0.48）";
 }
 
 function redactProviderText(value, fallback = "") {
@@ -4180,9 +4180,9 @@ function agentClarificationForUncertainAction(content = "", { intent = "chat", p
   const tooVague = /^(做一下|帮我做|帮我弄|do it|make it|buat|生成|做|run)$/i.test(text) || (text.length < 8 && !clearAction);
   if (!tooVague && projectId && !(action.wantsGenerate && !/(图片|image|visual card|视觉卡|图文卡|封面|cover|video|视频|seedance|ugc|auto|批量|海报|poster)/i.test(text))) return null;
   if (/[\u3400-\u9fff]/.test(text)) {
-    return "我还不够确定要做哪一种内容。您想让我做哪一步？请补一句：1. 生成图片/海报/封面；2. 写视频 prompt；3. 生成视频；4. 做 7 天内容计划；5. 创建排期草稿。若会扣 credits，我会先弹窗让您确认。";
+    return `我还不够确定要做哪一种内容。您想让我做哪一步？请补一句：1. 生成图片/海报/封面（${generationModelOptionsText("image")}）；2. 写视频 prompt；3. 生成视频（${generationModelOptionsText("video")}）；4. 做 7 天内容计划；5. 创建排期草稿。若会扣 credits，我会先弹窗让您确认。`;
   }
-  return "I need one more detail before I execute. Which action should I take: generate image/poster/cover, write a video prompt, generate video, build a 7-day content plan, or create schedule drafts? If credits will be charged, I will ask for confirmation first.";
+  return `I need one more detail before I execute. Which action should I take: generate image/poster/cover (${generationModelOptionsText("image")}), write a video prompt, generate video (${generationModelOptionsText("video")}), build a 7-day content plan, or create schedule drafts? If credits will be charged, I will ask for confirmation first.`;
 }
 
 function agentPublishArgsFromMessage(content = "") {
@@ -5647,7 +5647,7 @@ app.post("/api/agent", async (req, res, next) => {
           "Act like a capable assistant: when the user asks for an output, fill the relevant project fields and run the matching tool if enough information is available.",
           "Pokaya AI is the platform, not a generation model. Never present Pokaya AI as a model option.",
           "User-facing model names are allowed and should be shown when relevant: GPT Image 2 and Nano Banana Pro for images; Veo 3.1, Seedance 2.0, and Sora 2 for videos. Do not mention provider names, base URLs, routes, keys, or infrastructure.",
-          "Before generating a video, make sure the user has selected a video model. If no model is selected or the request is ambiguous, ask one short question with the video model choices instead of generating.",
+          "Before generating a video, make sure the user has selected a video model. If no model is selected or the request is ambiguous, ask one short question with the video model choices and estimated credits instead of generating. Use these user-facing estimates: Veo 3.1 = 0.40 credit/8s, Seedance 2.0 = 0.40 credit/4s, Sora 2 = 0.48 credit/8s.",
           "If the user already says a model name such as Veo, Seedance, or Sora, save that model to the project before creating the prompt or queuing generation.",
           "Common workflows: product/content request = inspect_workspace_state -> create_project or update fields -> generate_project_output when the user needs an image, poster, cover, carousel asset, video, or other rendered media through Pokaya's platform models. Weekly content plan = inspect_workspace_state -> remember_agent_context when useful -> create_content_plan, and only create schedule drafts when the user asks for drafts. Video prompt request = create_seedance_prompt; video generation request = create_seedance_prompt -> generate_project_output after confirmation. In user-facing replies, say video prompt or generate video instead of naming the internal video model.",
           "Do not use DeepSeek or any hidden design skill to create final design assets. DeepSeek is only the planner/orchestrator. Rendered image/video/design outputs must be created by Pokaya platform generation tools, charged by the platform credit rules, and confirmed by the user before credit deduction.",
