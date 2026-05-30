@@ -16824,6 +16824,90 @@ label {
   filter: drop-shadow(0 0 10px rgba(255, 63, 110, 0.24));
 }
 
+.studio-nav-mark {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 70% 28%, rgba(255, 204, 76, 0.5), transparent 19%),
+    linear-gradient(135deg, rgba(255, 63, 110, 0.28), rgba(109, 76, 255, 0.16));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.studio-nav-mark::before,
+.studio-nav-mark::after,
+.studio-nav-mark span,
+.studio-nav-mark i,
+.studio-nav-mark b {
+  content: "";
+  position: absolute;
+  display: block;
+  box-sizing: border-box;
+}
+
+.studio-nav-mark::before {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #fff;
+  border-radius: 5px;
+  transform: rotate(-10deg);
+  opacity: 0.96;
+}
+
+.studio-nav-mark::after {
+  width: 9px;
+  height: 9px;
+  right: 8px;
+  bottom: 8px;
+  border-radius: 3px;
+  background: #ffcc4c;
+  box-shadow: -14px -14px 0 -2px #ff3f6e;
+}
+
+.studio-nav-mark span {
+  left: 9px;
+  top: 10px;
+  width: 12px;
+  height: 2px;
+  border-radius: 999px;
+  background: #fff;
+  transform: rotate(-10deg);
+}
+
+.studio-nav-mark i {
+  left: 11px;
+  bottom: 10px;
+  width: 16px;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  transform: rotate(-10deg);
+}
+
+.studio-nav-mark b {
+  right: 9px;
+  top: 8px;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: #28f0dc;
+}
+
+.studio-shell .studio-nav-button.active .studio-nav-mark {
+  border-color: rgba(255, 63, 110, 0.42);
+  background:
+    radial-gradient(circle at 70% 28%, rgba(255, 204, 76, 0.72), transparent 20%),
+    linear-gradient(135deg, rgba(255, 63, 110, 0.58), rgba(109, 76, 255, 0.26));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 12px 28px rgba(255, 63, 110, 0.18);
+}
+
 .studio-shell .project-menu-item.active .project-icon {
   border-color: rgba(255, 63, 110, 0.4) !important;
   background: rgba(255, 63, 110, 0.16) !important;
