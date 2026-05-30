@@ -63,7 +63,7 @@ const atlasGenerateVideoPath = process.env.ATLASCLOUD_GENERATE_VIDEO_PATH || "/a
 const atlasPredictionPathPrefix = process.env.ATLASCLOUD_PREDICTION_PATH_PREFIX || "/api/v1/model/prediction";
 const atlasSeedanceModel = process.env.ATLASCLOUD_SEEDANCE_MODEL || "bytedance/seedance-2.0/text-to-video";
 const webSearchBaseUrl = process.env.WEB_SEARCH_BASE_URL || "https://duckduckgo.com/html/";
-const allowedMediaModels = new Set(["GPT Image 2", "Nano Banana Pro"]);
+const allowedMediaModels = new Set(["GPT Image 2", "Nano Banana Pro", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"]);
 const publicMediaModelMap = {
   "GPT Image 2": "GPT Image 2",
   "Nano Banana Pro": "Nano Banana Pro",
@@ -895,13 +895,6 @@ const providerLeakPatterns = [
   /速创API/gi,
   /\bWuyin\b/gi,
   /无垠科技/gi,
-  /\bGPT Image 2\b/gi,
-  /\bNano Banana Pro\b/gi,
-  /\bSeedance 2\.0\b/gi,
-  /\bVeo 3\.1\b/gi,
-  /\bSora 2\b/gi,
-  /\bGemini Omni\b/gi,
-  /\bGrok Imagine Video\b/gi,
   /\bDeepSeek\b/gi,
   /api\.deepseek\.com/gi,
   /api\.apimart\.ai/gi,
@@ -938,6 +931,24 @@ function publicMediaModel(model) {
 
 function isVideoMediaModel(model) {
   return ["Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"].includes(internalMediaModel(model));
+}
+
+function requestedMediaModelFromText(content = "") {
+  const text = String(content || "");
+  if (/\bveo\b|veo\s*3(?:\.1)?|谷歌\s*veo/i.test(text)) return "Veo 3.1";
+  if (/seedance|seedance\s*2(?:\.0)?|豆包|即梦/i.test(text)) return "Seedance 2.0";
+  if (/\bsora\b|sora\s*2/i.test(text)) return "Sora 2";
+  if (/nano\s*banana|banana\s*pro|香蕉|nano\s*pro/i.test(text)) return "Nano Banana Pro";
+  if (/gpt\s*image|gpt-image|image\s*2/i.test(text)) return "GPT Image 2";
+  if (/gemini\s*omni/i.test(text)) return "Gemini Omni";
+  if (/grok|imagine/i.test(text)) return "Grok Imagine Video";
+  return "";
+}
+
+function generationModelOptionsText(kind = "auto") {
+  if (kind === "image") return "GPT Image 2（0.15 credit）或 Nano Banana Pro（0.20 credit）";
+  if (kind === "video") return "Veo 3.1（0.40 credit）、Seedance 2.0（按秒计费）或 Sora 2（按秒计费）";
+  return "图片：GPT Image 2 / Nano Banana Pro；视频：Veo 3.1 / Seedance 2.0 / Sora 2";
 }
 
 function redactProviderText(value, fallback = "") {
@@ -2041,7 +2052,7 @@ async function generateWithProvider(project, action, step) {
   if (action === "generate-image") {
     const model = internalMediaModel(project.image?.model);
     if (!allowedMediaModels.has(model)) {
-      const error = new Error("This Pokaya plan only supports GPT Image 2 and Nano Banana Pro.");
+      const error = new Error(`请选择支持的模型：${generationModelOptionsText("auto")}。`);
       error.status = 400;
       throw error;
     }
@@ -2946,7 +2957,7 @@ const agentTools = [
     type: "function",
     function: {
       name: "create_seedance_prompt",
-      description: "Create a structured video generation prompt for the current project and save it into image.prompt with the internal video model selected.",
+      description: "Create a structured video generation prompt for the current project and save it into image.prompt with the selected user-facing video model.",
       parameters: {
         type: "object",
         properties: {
@@ -2957,6 +2968,11 @@ const agentTools = [
           language: { type: "string" },
           duration: { type: "string", description: "4, 6, 8, 10, 12, or 15 seconds." },
           style: { type: "string", description: "POV, product demo, unboxing, before-after, cinematic, UGC." },
+          model: {
+            type: "string",
+            enum: ["Seedance 2.0", "Veo 3.1", "Sora 2"],
+            description: "The video model the user chose. Do not invent a model. If the user has not chosen, ask first."
+          },
           keyMessage: { type: "string" }
         },
         required: ["projectId"]
@@ -3028,6 +3044,11 @@ const agentTools = [
           step: {
             type: "string",
             enum: ["image", "ugc", "auto", "original", "clone", "story", "viral"]
+          },
+          model: {
+            type: "string",
+            enum: ["GPT Image 2", "Nano Banana Pro", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"],
+            description: "User-selected generation model. Ask the user to choose before passing this when the requested media type is unclear."
           }
         },
         required: ["projectId", "action", "step"]
@@ -3637,6 +3658,21 @@ async function executeAgentTool(name, args, user) {
 
   if (name === "generate_project_output") {
     requireAgentPermission(user, "generate");
+    const selectedModel = args.model ? internalMediaModel(args.model) : "";
+    if (selectedModel) {
+      if (!allowedMediaModels.has(selectedModel)) {
+        const error = new Error("Please choose a supported Pokaya model before generating.");
+        error.status = 400;
+        throw error;
+      }
+      await mutateDb(async (currentDb) => {
+        const project = findProject(currentDb, args.projectId, user);
+        project.image ||= {};
+        project.image.model = selectedModel;
+        await saveDb(currentDb);
+        return publicState(currentDb, user);
+      });
+    }
     const queued = await enqueueGeneration(args.projectId, args.action, args.step, user);
     const job = (queued.state?.generationJobs || []).find((item) => item.id === queued.jobId);
     return {
@@ -3732,8 +3768,14 @@ async function executeAgentTool(name, args, user) {
       if (args.language) project.agentMemory.language = String(args.language);
       if (args.keyMessage) project.agentMemory.notes = String(args.keyMessage);
       const prompt = buildSeedancePrompt({ project, ...args });
+      const selectedModel = internalMediaModel(args.model || requestedMediaModelFromText(args.keyMessage || "") || project.image?.model || "Seedance 2.0");
+      if (!isVideoMediaModel(selectedModel)) {
+        const error = new Error(`请选择视频模型：${generationModelOptionsText("video")}。`);
+        error.status = 400;
+        throw error;
+      }
       project.image ||= {};
-      project.image.model = "Seedance 2.0";
+      project.image.model = selectedModel;
       project.image.mode = project.image.mode || "Create Image";
       project.image.duration = String(args.duration || project.image.duration || "8").match(/\d+/)?.[0] || "8";
       project.image.prompt = prompt;
@@ -4106,8 +4148,11 @@ function agentToolCreditEstimate(name, args = {}, workspace = {}, user = null) {
   if (name !== "generate_project_output") return { credits: 0, balance: Number(user?.billing?.credits ?? workspace?.billing?.credits ?? 0) };
   const project = (workspace?.projects || []).find((item) => item.id === args.projectId);
   if (!project) return { credits: 0, balance: Number(user?.billing?.credits ?? workspace?.billing?.credits ?? 0) };
+  const projectForEstimate = args.model
+    ? { ...project, image: { ...(project.image || {}), model: internalMediaModel(args.model) } }
+    : project;
   return {
-    credits: creditChargeFor(project, args.action),
+    credits: creditChargeFor(projectForEstimate, args.action),
     balance: Number(user?.billing?.credits ?? workspace?.billing?.credits ?? 0)
   };
 }
@@ -4126,6 +4171,11 @@ function agentClarificationForUncertainAction(content = "", { intent = "chat", p
   const actionable = intent !== "chat" || action.wantsGenerate || action.wantsSchedule || action.wantsContentPlan || action.wantsSeedance || action.wantsProject || action.wantsVisualCard;
   if (!actionable) return null;
   const text = String(content || "").trim();
+  if (action.wantsGenerate && action.wantsSeedance && !requestedMediaModelFromText(text)) {
+    return /[\u3400-\u9fff]/.test(text)
+      ? `你要生成视频的话，先选模型：${generationModelOptionsText("video")}。你要用哪一个？`
+      : `Before generating video, choose a model: ${generationModelOptionsText("video")}. Which one do you want?`;
+  }
   const clearAction = /(图片|image|海报|poster|visual card|视觉卡|图文卡|封面|cover|video|视频|seedance|ugc|7\s*天|七天|内容计划|content plan|排期|schedule|草稿|draft|发布|publish)/i.test(text);
   const tooVague = /^(做一下|帮我做|帮我弄|do it|make it|buat|生成|做|run)$/i.test(text) || (text.length < 8 && !clearAction);
   if (!tooVague && projectId && !(action.wantsGenerate && !/(图片|image|visual card|视觉卡|图文卡|封面|cover|video|视频|seedance|ugc|auto|批量|海报|poster)/i.test(text))) return null;
@@ -4154,10 +4204,12 @@ function agentShortcutToolFromMessage(content = "", projectId = "") {
   if (!projectId) return null;
   if (intent.wantsProject) return { name: "create_project", args: { name: agentProjectName(content) } };
   if (intent.wantsSeedancePrompt) {
+    const model = requestedMediaModelFromText(content);
     return {
       name: "create_seedance_prompt",
       args: {
         projectId,
+        ...(model && isVideoMediaModel(model) ? { model } : {}),
         keyMessage: content,
         duration: String(content).match(/\b(4|6|8|10|12|15)\s*s(?:ec|econd|秒)?/i)?.[1] || "8"
       }
@@ -4176,10 +4228,13 @@ function agentShortcutToolFromMessage(content = "", projectId = "") {
   }
   if (intent.wantsInspect) return { name: "inspect_workspace_state", args: { projectId, focus: /今天|today/i.test(content) ? "today" : "workspace" } };
   if (intent.wantsGenerate) {
+    const model = requestedMediaModelFromText(content);
+    if (intent.wantsSeedance && !model) return null;
     return {
       name: "generate_project_output",
       args: {
         projectId,
+        ...(model ? { model } : {}),
         action: intent.wantsAutoBatch ? "generate-auto" : "generate-image",
         step: intent.wantsAutoBatch ? "auto" : "image"
       }
@@ -4190,8 +4245,11 @@ function agentShortcutToolFromMessage(content = "", projectId = "") {
 
 function agentConfirmationForTool(name, args = {}, context = {}) {
   const credit = agentToolCreditEstimate(name, args, context.workspace, context.user);
+  const project = (context.workspace?.projects || []).find((item) => item.id === args.projectId);
+  const selectedModel = args.model ? internalMediaModel(args.model) : project?.image?.model ? internalMediaModel(project.image.model) : "";
+  const modelMessage = name === "generate_project_output" && selectedModel ? `将使用模型：${selectedModel}。` : "";
   const creditMessage = credit.credits > 0
-    ? `预计会扣 ${credit.credits} credits。当前余额约 ${roundCredits(credit.balance)} credits。确认后才会执行。`
+    ? `${modelMessage}${modelMessage ? " " : ""}预计会扣 ${credit.credits} credits。当前余额约 ${roundCredits(credit.balance)} credits。确认后才会执行。`
     : "";
   return {
     id: crypto.randomUUID(),
@@ -4657,13 +4715,40 @@ async function runDeterministicAgent(content, { projectId, user, workspace = nul
   }
 
   if (intent.wantsSeedancePrompt && activeProjectId) {
+    const model = requestedMediaModelFromText(content);
+    if (intent.wantsSeedance && !model) {
+      return {
+        reply: `你要生成视频的话，先选模型：${generationModelOptionsText("video")}。你要用哪一个？`,
+        db: latestDb,
+        toolResults,
+        uiActions,
+        diffs,
+        cards,
+        pendingTool,
+        confirmation
+      };
+    }
     await run("create_seedance_prompt", {
       projectId: activeProjectId,
+      ...(model ? { model } : {}),
       keyMessage: content,
       duration: String(content).match(/\b(4|6|8|10|12|15)\s*s(?:ec|econd|秒)?/i)?.[1] || "8"
     });
   } else if (intent.wantsSeedance) {
-    await run("update_project_field", { projectId: activeProjectId, field: "image.model", value: "Seedance 2.0" });
+    const model = requestedMediaModelFromText(content);
+    if (!model) {
+      return {
+        reply: `你要生成视频的话，先选模型：${generationModelOptionsText("video")}。你要用哪一个？`,
+        db: latestDb,
+        toolResults,
+        uiActions,
+        diffs,
+        cards,
+        pendingTool,
+        confirmation
+      };
+    }
+    await run("update_project_field", { projectId: activeProjectId, field: "image.model", value: model });
     await run("update_project_field", { projectId: activeProjectId, field: "image.prompt", value: content });
     const duration = String(content).match(/\b(4|6|8|10|12|15)\s*s(?:ec|econd|秒)?/i)?.[1];
     if (duration) await run("update_project_field", { projectId: activeProjectId, field: "image.duration", value: duration });
@@ -5560,6 +5645,10 @@ app.post("/api/agent", async (req, res, next) => {
           "You can research trends, search the public web, inspect workspace state, remember project context, navigate the UI, create projects, create content plans, create video prompts, update project fields, generate outputs through Pokaya's platform models, create scheduler drafts, update schedule status, and create support tickets.",
           "Use trend_research before answering about fresh trends, unfamiliar aesthetic names, product-market fit, what to sell, content angles, competitors, recent demand, or terms that may have a changing meaning. Use raw web_search only for simple fact lookup. After research, answer naturally with practical guidance for the user's goal and cite source URLs briefly when useful.",
           "Act like a capable assistant: when the user asks for an output, fill the relevant project fields and run the matching tool if enough information is available.",
+          "Pokaya AI is the platform, not a generation model. Never present Pokaya AI as a model option.",
+          "User-facing model names are allowed and should be shown when relevant: GPT Image 2 and Nano Banana Pro for images; Veo 3.1, Seedance 2.0, and Sora 2 for videos. Do not mention provider names, base URLs, routes, keys, or infrastructure.",
+          "Before generating a video, make sure the user has selected a video model. If no model is selected or the request is ambiguous, ask one short question with the video model choices instead of generating.",
+          "If the user already says a model name such as Veo, Seedance, or Sora, save that model to the project before creating the prompt or queuing generation.",
           "Common workflows: product/content request = inspect_workspace_state -> create_project or update fields -> generate_project_output when the user needs an image, poster, cover, carousel asset, video, or other rendered media through Pokaya's platform models. Weekly content plan = inspect_workspace_state -> remember_agent_context when useful -> create_content_plan, and only create schedule drafts when the user asks for drafts. Video prompt request = create_seedance_prompt; video generation request = create_seedance_prompt -> generate_project_output after confirmation. In user-facing replies, say video prompt or generate video instead of naming the internal video model.",
           "Do not use DeepSeek or any hidden design skill to create final design assets. DeepSeek is only the planner/orchestrator. Rendered image/video/design outputs must be created by Pokaya platform generation tools, charged by the platform credit rules, and confirmed by the user before credit deduction.",
           "When the user changes direction, for example 'don't do washing machine, do dryer instead' or '不做洗衣机了，做烘干机', treat it as a product/context update, not as a request for a generic menu. Save the new product/context with remember_agent_context or create_project when needed, then ask one specific next-step question such as whether to create a content plan, image/poster, or video prompt.",
