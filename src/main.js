@@ -93,7 +93,7 @@ const state = {
   adminKey: localStorage.getItem(storageKeys.adminKey) || "",
   lang: localStorage.getItem(storageKeys.lang) || "zh",
   db: null,
-  page: "dashboard",
+  page: "project",
   step: "image",
   projectId: null,
   modal: null,
@@ -1255,7 +1255,7 @@ async function handleOAuthRedirect() {
     state.user = res.user;
     state.db = res.state;
     state.projectId = res.state.projects[0]?.id;
-    state.page = shouldShowFirstGenerationWizard(res.state, res.user) ? "wizard" : "dashboard";
+    state.page = shouldShowFirstGenerationWizard(res.state, res.user) ? "wizard" : "project";
     window.history.replaceState({}, "", "/studio");
     notify(t("googleLoginSuccess"));
     return true;
@@ -2903,12 +2903,9 @@ function studio() {
           <span class="agent-primary-status"><i></i>READY</span>
         </button>
         <div class="side-section">${icon("layout-dashboard", 18)} ${t("workspace")}</div>
-        <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard">${icon("layout-dashboard", 22)} ${t("dashboard")}</button>
+        <button class="side-primary ${state.page === "project" ? "active" : ""}" data-page="project">${icon("layout-dashboard", 22)} ${t("projects")}</button>
         ${isOwnerAdminAccount() ? `<button class="side-link ${state.page === "admin" ? "active" : ""}" data-page="admin">${icon("shield-check")} Admin CRM</button>` : ""}
         <button class="side-link ${state.page === "library" ? "active" : ""}" data-page="library">${icon("folder")} ${t("contentLibrary")}</button>
-        <button class="new-project" data-action="new-project">${icon("plus")} <span>${t("newProject")}</span><b>${state.db.projects.length}</b></button>
-        <div class="side-section">${icon("folder", 18)} ${t("projects")}</div>
-        <div class="project-list">${projectButtons()}</div>
         <div class="side-section account">${icon("wallet-cards", 18)} ${t("business")}</div>
         ${[
           ["billing", "credit-card", "billing"],
@@ -3882,7 +3879,7 @@ function projectPage() {
   const p = project();
   return `
     <header class="project-head">
-      <div><p class="folder-label">${icon("folder", 18)} ${t("project")}</p><h1>${p.name}</h1></div>
+      <div><p class="folder-label">${icon("sparkles", 18)} Pokaya AI</p><h1>${t("projects")}</h1></div>
       <button class="sop-button" data-sop-target="${esc(state.step)}">${icon("book-open", 25)} ${sopButtonLabel()}</button>
     </header>
     <nav class="step-tabs">
@@ -7916,7 +7913,7 @@ async function submit(event) {
       state.db = res.state;
       state.projectId = state.db.projects[0]?.id;
       window.history.pushState({}, "", "/studio");
-      return set({ user: res.user, modal: null, page: shouldShowFirstGenerationWizard(res.state, res.user) ? "wizard" : "dashboard" });
+      return set({ user: res.user, modal: null, page: shouldShowFirstGenerationWizard(res.state, res.user) ? "wizard" : "project" });
     } catch (error) {
       return notify(error.message || "Sign in failed. Please try again.");
     }
@@ -7980,7 +7977,7 @@ async function submit(event) {
     if (submitButton) submitButton.disabled = true;
     try {
       const db = await api("/projects", { method: "POST", body: JSON.stringify(data) });
-      return set({ db, projectId: db.projects.at(-1).id, modal: null, page: "dashboard" });
+      return set({ db, projectId: db.projects.at(-1).id, modal: null, page: "project" });
     } catch (error) {
       notify(error.message);
     } finally {
