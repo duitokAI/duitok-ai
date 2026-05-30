@@ -17344,9 +17344,10 @@ label {
 }
 
 .studio-shell .result-grid {
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)) !important;
-  gap: 12px !important;
-  margin-top: 18px !important;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)) !important;
+  gap: 18px !important;
+  align-items: start !important;
+  margin-top: 20px !important;
 }
 
 .studio-shell .result-image,
@@ -21560,8 +21561,19 @@ label {
 .studio-shell .result-card .visual-card-preview {
   display: block;
   width: 100% !important;
-  min-height: 430px;
-  object-fit: cover;
+  min-height: 0 !important;
+  aspect-ratio: 9 / 16 !important;
+  object-fit: cover !important;
+}
+
+.studio-shell .result-card .result-preview-trigger {
+  aspect-ratio: 9 / 16 !important;
+  overflow: hidden;
+}
+
+.studio-shell .result-card .result-preview-trigger .result-image,
+.studio-shell .result-card .result-preview-trigger .visual-card-preview {
+  height: 100% !important;
 }
 
 .studio-shell .result-card .result-meta {
