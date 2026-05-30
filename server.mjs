@@ -3497,6 +3497,17 @@ function agentToolCard(name, result = {}) {
       actions: ["copy", "generate_video"]
     };
   }
+  if (name === "generate_project_output") {
+    return {
+      type: "generation_job",
+      title: data.title || "生成任务已加入队列",
+      summary: data.resultType === "video" ? "视频生成中，完成后会在这里显示。" : data.resultType === "image" ? "图片生成中，完成后会在这里显示。" : "生成中，完成后会在这里显示。",
+      projectId: data.projectId,
+      jobId: data.jobId,
+      resultId: data.resultId,
+      resultType: data.resultType || "media"
+    };
+  }
   if (name === "inspect_workspace_state") {
     return {
       type: "workspace_inspect",
@@ -3685,8 +3696,7 @@ async function executeAgentTool(name, args, user) {
         resultType: job?.type || "media",
         title: "Generation queued",
         mediaUrl: ""
-      },
-      uiAction: { page: "project", projectId: args.projectId }
+      }
     };
   }
 
@@ -3800,8 +3810,7 @@ async function executeAgentTool(name, args, user) {
         { type: "project_field", target: { type: "project", id: args.projectId }, field: "image", before: result.imageBefore, after: result.imageAfter, undoable: true },
         { type: "created_result", target: { type: "project", id: args.projectId }, resultId: promptId, undoable: true },
         ...(JSON.stringify(result.memoryBefore) !== JSON.stringify(result.memoryAfter) ? [{ type: "agent_memory", target: { type: "project", id: args.projectId }, before: result.memoryBefore, after: result.memoryAfter, undoable: true }] : [])
-      ],
-      uiAction: { page: "project", step: "image", projectId: args.projectId }
+      ]
     };
   }
 
@@ -4518,7 +4527,7 @@ function safeAgentToolResult(name, args = {}, result = {}) {
   const safeDiffs = sanitizeAgentObject(result.diffs || []);
   const safeRecovery = result.recovery ? sanitizeAgentObject(result.recovery) : undefined;
   const summary = {};
-  for (const key of ["projectId", "resultId", "resultType", "scheduleId", "field"]) {
+  for (const key of ["projectId", "resultId", "resultType", "jobId", "scheduleId", "field"]) {
     if (safeArgs?.[key]) summary[key] = safeArgs[key];
     if (safeData?.[key]) summary[key] = safeData[key];
   }
@@ -4540,7 +4549,7 @@ function safeAgentToolResult(name, args = {}, result = {}) {
 
 function agentToolDataSummary(data = {}) {
   const allowed = {};
-  for (const key of ["projectId", "resultId", "resultType", "scheduleId", "scheduleIds", "promptId", "planLength", "missing", "nextActions", "query", "searchedAt", "trendName", "summary", "confidence", "marketFit", "commerceFit", "contentStrategy", "execution", "risks", "sources", "visualCard", "title"]) {
+  for (const key of ["projectId", "resultId", "resultType", "jobId", "scheduleId", "scheduleIds", "promptId", "planLength", "missing", "nextActions", "query", "searchedAt", "trendName", "summary", "confidence", "marketFit", "commerceFit", "contentStrategy", "execution", "risks", "sources", "visualCard", "title"]) {
     if (data?.[key] !== undefined) allowed[key] = data[key];
   }
   if (Array.isArray(data?.results)) allowed.webResults = data.results.slice(0, 5).map((item) => ({
@@ -4768,8 +4777,6 @@ async function runDeterministicAgent(content, { projectId, user, workspace = nul
       hashtags: "#pokaya #tiktokshop",
       status: "Draft"
     });
-  } else if (activeProjectId) {
-    uiActions.push({ page: "project", projectId: activeProjectId });
   }
 
   const actionNames = toolResults.map((item) => item.name).join(", ");

@@ -7487,6 +7487,9 @@ function agentToolCards(run) {
 }
 
 function agentToolCard(card = {}) {
+  if (card.type === "generation_job") {
+    return agentGenerationJobCard(card);
+  }
   if (card.type === "trend_research") {
     const categories = Array.isArray(card.bestCategories) ? card.bestCategories.slice(0, 6) : [];
     const hooks = Array.isArray(card.hooks) ? card.hooks.slice(0, 5) : [];
@@ -7571,6 +7574,35 @@ function agentToolCard(card = {}) {
     </section>`;
   }
   return "";
+}
+
+function agentGenerationJobCard(card = {}) {
+  const job = (state.db?.generationJobs || []).find((item) => item.id === card.jobId)
+    || (state.db?.generationJobs || []).find((item) => item.resultId && item.resultId === card.resultId);
+  const result = job?.resultId
+    ? (state.db?.projects || []).flatMap((project) => project.results || []).find((item) => item.id === job.resultId)
+    : null;
+  const status = job?.status || "queued";
+  const isDone = status === "succeeded" && result;
+  const isFailed = status === "failed";
+  const mediaType = job?.type || card.resultType || resultMediaKind(result || {});
+  const title = isDone
+    ? mediaType === "video" ? "视频已生成" : mediaType === "image" ? "图片已生成" : "内容已生成"
+    : isFailed
+      ? "生成失败"
+      : mediaType === "video" ? "视频生成中" : mediaType === "image" ? "图片生成中" : "生成中";
+  const summary = isDone
+    ? "结果已保存在当前项目，也可以直接在这里预览。"
+    : isFailed
+      ? (job?.errorMessage || "生成失败，请调整 prompt 后再试一次。")
+      : status === "processing" ? "模型正在生成，完成后会自动出现在这里。" : "任务已加入队列，马上开始生成。";
+  const preview = isDone && result
+    ? `<div class="agent-generation-preview">${resultPreview(result, { full: mediaType === "video" })}</div>`
+    : `<div class="agent-generation-pending">${icon(isFailed ? "triangle-alert" : "loader-circle", 28)}<strong>${esc(title)}</strong><span>${esc(summary)}</span></div>`;
+  return `<section class="agent-tool-card agent-generation-card" data-agent-card-type="generation_job" data-agent-job-status="${esc(status)}">
+    <header><strong>${icon(mediaType === "video" ? "video" : mediaType === "image" ? "image" : "sparkles", 16)} ${esc(title)}</strong><span>${esc(summary)}</span></header>
+    ${preview}
+  </section>`;
 }
 
 function agentRecoveryCard(run) {
@@ -8546,6 +8578,8 @@ function compactAgentCardForStorage(card = {}) {
     title: card.title,
     summary: card.summary,
     projectId: card.projectId,
+    jobId: card.jobId,
+    resultType: card.resultType,
     resultId: card.resultId,
     scheduleIds: card.scheduleIds,
     prompt: typeof card.prompt === "string" ? card.prompt.slice(0, 600) : undefined,
@@ -8575,8 +8609,8 @@ function rememberAgentContextSummary(messages = []) {
 function applyAgentUiActions(uiActions = [], db) {
   const patch = {};
   for (const item of uiActions) {
-    if (item.page) patch.page = item.page;
-    if (item.step) patch.step = item.step;
+    if (state.page !== "agent" && item.page) patch.page = item.page;
+    if (state.page !== "agent" && item.step) patch.step = item.step;
     if (item.projectId && db?.projects?.some((project) => project.id === item.projectId)) patch.projectId = item.projectId;
   }
   return patch;
@@ -8858,6 +8892,7 @@ async function runAgentMessage(message, attachments = [], queuedApiAttachments =
     });
     completeAgentVisual();
     if (res.toolResults?.length) notify(t("toastAgentWorkspaceUpdated"));
+    if ((db.generationJobs || []).some((job) => ["queued", "processing"].includes(job.status))) pollGenerationQueue();
     window.setTimeout(processAgentQueue, 0);
   } catch (error) {
     const safeError = agentUserSafeError(error);
@@ -8976,6 +9011,7 @@ async function confirmAgentAction(runId, token) {
       ...applyAgentUiActions(res.uiActions, db)
     });
     completeAgentVisual();
+    if ((db.generationJobs || []).some((job) => ["queued", "processing"].includes(job.status))) pollGenerationQueue();
     notify(t("toastAgentConfirmCompleted"));
   } catch (error) {
     const messages = state.agentMessages.map((item) => item.agentRun?.id === runId
