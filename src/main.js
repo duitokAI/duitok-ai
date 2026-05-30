@@ -6818,6 +6818,13 @@ function agentDisplayLang() {
 
 function agentUserSafeError(error) {
   const raw = String(error?.message || error || "");
+  if (/failed to fetch|networkerror|load failed/i.test(raw)) {
+    return state.lang === "zh"
+      ? "生成请求连接中断了，通常是生成任务太久或网络断开。请刷新后再试一次；如果已经扣 credit，请先不要重复生成，联系我查记录。"
+      : state.lang === "ms"
+        ? "Permintaan generate terputus. Biasanya kerana task terlalu lama atau network putus. Refresh dan cuba lagi; kalau credit sudah ditolak, jangan generate semula dulu."
+        : "The generation request was interrupted, usually because the task took too long or the network dropped. Refresh and try again; if credits were deducted, do not regenerate yet.";
+  }
   if (/DEE?PSEEK|API[_ -]?KEY|Environment Variables|configure|configured|401|403/i.test(raw)) {
     return agentUiCopy().errorUnavailable;
   }
@@ -6826,6 +6833,15 @@ function agentUserSafeError(error) {
 
 function agentHasPendingConfirmation() {
   return state.agentMessages.some((item) => item.agentRun?.status === "waiting_confirmation");
+}
+
+function latestPendingAgentConfirmation() {
+  return [...state.agentMessages].reverse().find((item) => item.agentRun?.status === "waiting_confirmation" && item.agentRun?.confirmation)?.agentRun || null;
+}
+
+function isAgentConfirmIntent(content = "") {
+  const text = String(content || "").trim().toLowerCase();
+  return /^(生成|确认|确认生成|开始生成|直接生成|可以|ok|okay|yes|confirm|generate|run|do it)$/i.test(text);
 }
 
 function agentStatusInfo() {
@@ -8742,6 +8758,11 @@ function imageFileToDataUrl(file) {
 async function sendAgentMessage(message, queuedAttachments = null) {
   const content = String(message || state.agentInput || "").trim();
   const attachments = Array.isArray(queuedAttachments) ? queuedAttachments : Array.isArray(state.agentAttachments) ? state.agentAttachments : [];
+  const pendingRun = latestPendingAgentConfirmation();
+  if (pendingRun && !attachments.length && isAgentConfirmIntent(content)) {
+    set({ agentInput: "" });
+    return confirmAgentAction(pendingRun.id, pendingRun.confirmation?.token);
+  }
   if (!content && !attachments.length) return;
   if (state.agentBusy) return enqueueAgentMessage(content, attachments);
   return runAgentMessage(content, attachments);

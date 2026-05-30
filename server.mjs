@@ -3637,30 +3637,20 @@ async function executeAgentTool(name, args, user) {
 
   if (name === "generate_project_output") {
     requireAgentPermission(user, "generate");
-    const db = await ensureDb();
-    const projectSnapshot = structuredClone(findProject(db, args.projectId, user));
-    assertGenerationAccess(db, user, creditChargeFor(projectSnapshot, args.action));
-    let generated;
-    try {
-      generated = await generateWithProvider(projectSnapshot, args.action, args.step);
-    } catch (error) {
-      await saveFailedGeneration(args.projectId, args.action, args.step, error, user).catch(() => null);
-      throw error;
-    }
-    const nextDb = await saveGeneratedResult(args.projectId, args.action, args.step, generated, user);
-    const project = nextDb.projects.find((item) => item.id === args.projectId);
-    const result = project?.results?.[project.results.length - 1];
+    const queued = await enqueueGeneration(args.projectId, args.action, args.step, user);
+    const job = (queued.state?.generationJobs || []).find((item) => item.id === queued.jobId);
     return {
       ok: true,
-      message: `${result?.title || "Pokaya AI Result"} saved.`,
-      db: nextDb,
+      message: "Generation queued. Pokaya will save the result to this project when it is ready.",
+      db: queued.state,
       data: {
         projectId: args.projectId,
-        resultId: result?.id,
-        resultType: result?.type,
-        title: result?.title,
-        mediaUrl: result?.videoUrl || result?.imageUrl || ""
-      }
+        jobId: queued.jobId,
+        resultType: job?.type || "media",
+        title: "Generation queued",
+        mediaUrl: ""
+      },
+      uiAction: { page: "project", projectId: args.projectId }
     };
   }
 
@@ -4185,6 +4175,16 @@ function agentShortcutToolFromMessage(content = "", projectId = "") {
     };
   }
   if (intent.wantsInspect) return { name: "inspect_workspace_state", args: { projectId, focus: /今天|today/i.test(content) ? "today" : "workspace" } };
+  if (intent.wantsGenerate) {
+    return {
+      name: "generate_project_output",
+      args: {
+        projectId,
+        action: intent.wantsAutoBatch ? "generate-auto" : "generate-image",
+        step: intent.wantsAutoBatch ? "auto" : "image"
+      }
+    };
+  }
   return null;
 }
 
