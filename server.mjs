@@ -25,6 +25,9 @@ const apimartTaskPathPrefix = process.env.APIMART_TASK_PATH_PREFIX || "/v1/tasks
 const apimartTextModel = process.env.APIMART_TEXT_MODEL || "gpt-5-mini";
 const agentVisionModel = process.env.AGENT_VISION_MODEL || process.env.APIMART_VISION_MODEL || "gpt-4o-mini";
 const apimartImageModel = process.env.APIMART_IMAGE_MODEL || "gpt-image-2";
+const openaiBaseUrl = (process.env.OPENAI_BASE_URL || "https://api.openai.com").replace(/\/$/, "");
+const openaiChatPath = process.env.OPENAI_CHAT_PATH || "/v1/chat/completions";
+const openaiVisionModel = process.env.OPENAI_VISION_MODEL || "gpt-4o-mini";
 const deepseekBaseUrl = (process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com").replace(/\/$/, "");
 const deepseekChatPath = process.env.DEEPSEEK_CHAT_PATH || "/chat/completions";
 const deepseekModel = process.env.DEEPSEEK_MODEL || "deepseek-v4-pro";
@@ -1214,6 +1217,10 @@ function hasApimartConfig() {
   return Boolean(process.env.APIMART_API_KEY && !process.env.APIMART_API_KEY.includes("replace_with"));
 }
 
+function hasOpenAiConfig() {
+  return Boolean(process.env.OPENAI_API_KEY && !process.env.OPENAI_API_KEY.includes("replace_with"));
+}
+
 function providerForMediaModel(model) {
   model = internalMediaModel(model);
   if (model === "GPT Image 2") return process.env.APIMART_API_KEY ? "apimart" : "mock";
@@ -1351,6 +1358,31 @@ async function deepseekRequest(body) {
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
     const error = new Error(sanitizeAgentText(payload.error?.message || payload.message || `Agent model request failed (${response.status})`));
+    error.status = response.status || 502;
+    throw error;
+  }
+  return payload;
+}
+
+async function openaiRequest(pathname, body) {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey || apiKey.includes("replace_with")) {
+    const error = new Error("OpenAI vision is not configured.");
+    error.status = 503;
+    throw error;
+  }
+  const response = await fetch(`${openaiBaseUrl}${pathname}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(Number(process.env.OPENAI_TIMEOUT_MS || 120000))
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(sanitizeAgentText(payload.error?.message || payload.message || `Vision request failed (${response.status})`));
     error.status = response.status || 502;
     throw error;
   }
@@ -2409,7 +2441,7 @@ function agentVisualInputs(attachments = []) {
 
 async function summarizeAgentVisualAttachments(attachments = [], latestUserMessage = "") {
   const inputs = agentVisualInputs(attachments);
-  if (!inputs.length || !hasApimartConfig()) return "";
+  if (!inputs.length) return "";
   const textBlock = [
     "User message:",
     sanitizeAgentText(latestUserMessage).slice(0, 800) || "(no text)",
@@ -2427,29 +2459,52 @@ async function summarizeAgentVisualAttachments(attachments = [], latestUserMessa
       ...inputs.map((item) => ({ type: "image_url", image_url: item.dataUrl }))
     ]
   ];
+  const systemMessage = "You analyze user-uploaded images and video keyframes for Pokaya Agent. Describe only visible facts, likely product/content purpose, strengths, issues, and practical next actions. If unsure, say unsure.";
+  const apimartModels = [...new Set([agentVisionModel, "gpt-4o", "gpt-4o-mini", apimartTextModel].filter(Boolean))];
+  const providers = [
+    ...(hasApimartConfig() ? apimartModels.map((model) => ({
+      label: `apimart:${model}`,
+      request: (content) => apimartRequest(apimartChatPath, {
+        method: "POST",
+        body: JSON.stringify({
+          model,
+          stream: false,
+          messages: [
+            { role: "system", content: systemMessage },
+            { role: "user", content }
+          ]
+        })
+      })
+    })) : []),
+    ...(hasOpenAiConfig() ? [{
+      label: `openai:${openaiVisionModel}`,
+      request: (content) => openaiRequest(openaiChatPath, {
+        model: openaiVisionModel,
+        stream: false,
+        messages: [
+          { role: "system", content: systemMessage },
+          { role: "user", content }
+        ]
+      })
+    }] : [])
+  ];
+  if (!providers.length) return "";
+  let lastError = null;
   try {
-    for (const content of contentVariants) {
-      try {
-        const data = await apimartRequest(apimartChatPath, {
-          method: "POST",
-          body: JSON.stringify({
-            model: agentVisionModel,
-            stream: false,
-            messages: [
-              {
-                role: "system",
-                content: "You analyze user-uploaded images and video keyframes for Pokaya Agent. Describe only visible facts, likely product/content purpose, strengths, issues, and practical next actions. If unsure, say unsure."
-              },
-              { role: "user", content }
-            ]
-          })
-        });
+    for (const provider of providers) {
+      for (const content of contentVariants) {
+        let data;
+        try {
+          data = await provider.request(content);
+        } catch (error) {
+          lastError = error;
+          continue;
+        }
         const summary = sanitizeAgentText(data.choices?.[0]?.message?.content || data.output_text || data.text || "").slice(0, 1800);
         if (summary) return summary;
-      } catch (error) {
-        if (content === contentVariants.at(-1)) throw error;
       }
     }
+    if (lastError) throw lastError;
     return "";
   } catch (error) {
     console.warn("Agent visual analysis skipped:", error.message);
@@ -2472,6 +2527,12 @@ function agentAttachmentPrompt(attachments = [], visualSummary = "") {
     "Do not automatically navigate or switch pages just because media was attached.",
     "First infer what the user likely wants from the message plus attachments. If enough information is available, decide the next useful Pokaya action yourself. If visual details are uncertain, ask one short clarifying question instead of pretending."
   ].join("\n");
+}
+
+function agentVisionUnavailableReply(lang = "zh") {
+  if (lang === "ms") return "Saya nampak anda sudah upload media, tapi visual recognition di server belum berjaya membaca gambar/video itu. Cuba hantar semula sebentar lagi, atau beritahu nama produk + fungsi utama supaya saya boleh terus bantu.";
+  if (lang === "en") return "I can see that you attached media, but the server-side visual recognition could not read the image/video yet. Please try sending it again in a moment, or tell me the product name and main benefit so I can continue.";
+  return "我看到你已经上传图片/视频了，但服务器这次没有成功读到画面内容。你可以再发一次试试，或者直接告诉我产品名和主要卖点，我就能继续帮你写 prompt。";
 }
 
 function summarizeAgentHistory(messages = []) {
@@ -5369,6 +5430,22 @@ app.post("/api/agent", async (req, res, next) => {
     }
 
     const visualSummary = attachments.length ? await summarizeAgentVisualAttachments(attachments, latestUserMessage) : "";
+    if (attachments.length && !visualSummary) {
+      agentRun = {
+        ...agentRun,
+        status: "failed",
+        plan: failAgentPlan(agentRun.plan, "视觉识别暂时不可用"),
+        durationMs: Date.now() - startedAt
+      };
+      await saveAgentRun(agentRun);
+      return res.json({
+        reply: agentVisionUnavailableReply(user.lang || stateForUser.lang || "zh"),
+        db: stateForUser,
+        toolResults: [],
+        uiActions: [],
+        agentRun: publicAgentRun(agentRun)
+      });
+    }
     const messages = [
       {
         role: "system",
