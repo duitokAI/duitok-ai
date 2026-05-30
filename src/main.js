@@ -1285,8 +1285,10 @@ async function refreshState() {
 function set(patch) {
   const modalOnly = shouldPatchModalOnly(patch);
   const agentScroll = captureAgentThreadScroll();
+  const agentInputFocus = captureAgentInputFocus(patch);
   const shouldScrollAgentThread = shouldAutoScrollAgentThread(patch, agentScroll);
   rememberSidebarScroll();
+  if (agentInputFocus && !Object.prototype.hasOwnProperty.call(patch, "agentInput")) state.agentInput = agentInputFocus.value;
   Object.assign(state, patch);
   if (modalOnly) {
     updateModalRoot();
@@ -1294,15 +1296,41 @@ function set(patch) {
     return;
   }
   render();
+  restoreAgentInputFocus(agentInputFocus);
   if (shouldScrollAgentThread) scrollAgentThreadToBottom();
   else restoreAgentThreadScroll(agentScroll);
+}
+
+function captureAgentInputFocus(patch = {}) {
+  if (state.page !== "agent") return null;
+  const input = document.querySelector("[data-agent-input]");
+  if (!input || document.activeElement !== input) return null;
+  if (Object.prototype.hasOwnProperty.call(patch, "agentMessages") || Object.prototype.hasOwnProperty.call(patch, "agentBusy")) return null;
+  return {
+    value: input.value,
+    start: input.selectionStart,
+    end: input.selectionEnd
+  };
+}
+
+function restoreAgentInputFocus(snapshot = null) {
+  if (!snapshot || state.page !== "agent") return;
+  requestAnimationFrame(() => {
+    const input = document.querySelector("[data-agent-input]");
+    if (!input) return;
+    input.focus({ preventScroll: true });
+    input.value = snapshot.value;
+    state.agentInput = snapshot.value;
+    const end = Math.min(snapshot.end ?? snapshot.value.length, snapshot.value.length);
+    input.setSelectionRange(Math.min(snapshot.start ?? end, end), end);
+    autoResizeAgentInput(input);
+  });
 }
 
 function shouldAutoScrollAgentThread(patch = {}, scroll = null) {
   if (state.page !== "agent") return false;
   const affectsThread = Object.prototype.hasOwnProperty.call(patch, "agentMessages")
     || Object.prototype.hasOwnProperty.call(patch, "agentBusy")
-    || Object.prototype.hasOwnProperty.call(patch, "agentWorkingTick")
     || Object.prototype.hasOwnProperty.call(patch, "agentQueue");
   return affectsThread && (!scroll || scroll.nearBottom);
 }
