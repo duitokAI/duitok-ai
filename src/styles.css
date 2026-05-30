@@ -349,7 +349,7 @@
   bottom: 0;
   z-index: 10;
   display: grid;
-  grid-template-columns: 48px minmax(260px, 1fr) minmax(260px, 0.8fr) minmax(240px, 0.62fr) 160px;
+  grid-template-columns: 54px minmax(420px, 1.55fr) minmax(230px, 0.55fr) minmax(220px, 0.5fr) minmax(150px, 0.36fr);
   align-items: stretch;
   gap: 10px;
   border-top: 1px solid rgba(57, 22, 67, 0.1);
@@ -373,23 +373,28 @@
 .image-console-add {
   display: grid;
   place-items: center;
+  min-height: 88px;
   background: rgba(95, 0, 103, 0.045);
   color: var(--studio-purple-900, #260033);
 }
 
+.image-console-prompt {
+  min-width: 0;
+}
+
 .image-console-prompt textarea {
   width: 100%;
-  min-height: 110px;
-  max-height: 150px;
+  min-height: 88px;
+  max-height: 132px;
   resize: vertical;
   border: 1px solid rgba(57, 22, 67, 0.1);
   border-radius: 14px;
-  padding: 16px;
+  padding: 14px 16px;
   background: #fff;
   color: var(--studio-purple-900, #260033);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 760;
-  line-height: 1.5;
+  line-height: 1.42;
 }
 
 .image-console-tools {
@@ -400,14 +405,15 @@
 
 .image-console-tools label,
 .image-console-tools span {
-  min-height: 48px;
+  min-width: 0;
+  min-height: 40px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 0 12px;
+  padding: 0 10px;
   background: rgba(255, 247, 252, 0.86);
   color: rgba(57, 22, 67, 0.72);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 900;
 }
 
@@ -420,6 +426,12 @@
   display: none;
 }
 
+.image-console-tools select {
+  min-height: 40px;
+  padding: 0 30px 0 10px;
+  font-size: 12px;
+}
+
 .image-console-references {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -429,10 +441,10 @@
 .image-reference-thumb {
   min-width: 0;
   display: grid;
-  grid-template-columns: 54px minmax(0, 1fr);
+  grid-template-columns: 42px minmax(0, 1fr);
   align-items: center;
-  gap: 9px;
-  padding: 7px;
+  gap: 8px;
+  padding: 7px 8px;
   background: rgba(255, 247, 252, 0.86);
   text-align: left;
 }
@@ -440,8 +452,8 @@
 .image-reference-thumb img,
 .image-reference-thumb .attachment-placeholder,
 .image-reference-thumb > span {
-  width: 54px;
-  height: 54px;
+  width: 42px;
+  height: 42px;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -452,8 +464,8 @@
 }
 
 .image-reference-thumb .attachment-placeholder svg {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
 }
 
 .image-reference-thumb b,
@@ -487,6 +499,9 @@
   place-items: center;
   align-content: center;
   gap: 3px;
+  min-width: 0;
+  min-height: 88px;
+  padding: 0 12px;
   border: 0;
   background: linear-gradient(135deg, var(--hot), var(--studio-coral, #ff7a5c));
   color: #fff;
@@ -494,8 +509,11 @@
 }
 
 .image-console-generate b {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-align: center;
   color: #fff;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 950;
 }
 

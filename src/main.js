@@ -4041,13 +4041,14 @@ function imageGenerateConsole(p, selectedModel) {
   const avatar = selectedImageReference("avatar");
   const product = selectedImageReference("product");
   const credit = selectedModel === "Nano Banana Pro" ? "0.20" : "0.15";
+  const modelOptions = [["GPT Image 2", "GPT Image 2"], ["Nano Banana Pro", "Nano Pro"]];
   return `<section class="image-generate-console">
     <button class="image-console-add" type="button" data-action="open-attachment-picker" data-attachment-kind="product" title="Add reference">${icon("plus", 20)}</button>
     <label class="image-console-prompt">
       <textarea data-field="image.prompt" data-image-console-prompt rows="3" placeholder="Create a high-converting TikTok Shop product image...">${esc(p.image.prompt || "")}</textarea>
     </label>
     <div class="image-console-tools">
-      <label>${icon("sparkles", 15)}${select("image.model", "", [["GPT Image 2", "GPT Image 2"], ["Nano Banana Pro", "Nano Banana Pro"]], selectedModel)}</label>
+      <label>${select("image.model", "", modelOptions, selectedModel)}</label>
       <span>${icon("smartphone", 15)} 9:16</span>
       <span>${icon("gem", 15)} 2k</span>
       <span>${icon("coins", 15)} ~${credit} credit</span>
@@ -4070,11 +4071,13 @@ function selectedImageReference(kind) {
 }
 
 function imageReferenceThumb(kind, item, emptyLabel) {
-  const label = kind === "avatar" ? t("avatarRef") : t("productRef");
+  const zh = state.lang === "zh";
+  const label = kind === "avatar" ? (zh ? "人物" : "Avatar") : (zh ? "产品" : "Product");
+  const helper = item ? (zh ? "更换" : "Change") : (zh ? "可选" : emptyLabel.replace(/\s*optional$/i, ""));
   const preview = item ? attachmentPreview(item) : `<span>${icon(kind === "avatar" ? "circle-user-round" : "package", 20)}</span>`;
   return `<button class="image-reference-thumb ${item ? "has-ref" : ""}" type="button" data-action="open-attachment-picker" data-attachment-kind="${esc(kind)}">
     ${preview}
-    <div><b>${esc(item?.name || label)}</b><small>${esc(item ? "Change" : emptyLabel)}</small></div>
+    <div><b>${esc(item?.name || label)}</b><small>${esc(helper)}</small></div>
   </button>`;
 }
 
