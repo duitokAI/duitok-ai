@@ -3885,11 +3885,23 @@ function projectPage() {
       <button class="sop-button" data-sop-target="${esc(state.step)}">${icon("book-open", 25)} ${sopButtonLabel()}</button>
     </header>
     <section class="canvas-card studio-workbench-card">
-      <nav class="step-tabs studio-step-tabs">
-        ${steps.map(([id, ic, key, no]) => `<button class="${state.step === id ? "active" : ""}" data-step="${id}">${icon(ic)} <span>${t(key)}</span><b>${no}</b></button>`).join("")}
-      </nav>
       <div class="studio-step-panel">${stepPanel(p)}</div>
     </section>`;
+}
+
+function studioStepMenu(extraClass = "") {
+  const current = steps.find(([id]) => id === state.step) || steps[0];
+  const [, currentIcon, currentKey, currentNo] = current;
+  return `<details class="studio-step-menu ${esc(extraClass)}">
+    <summary>
+      ${icon(currentIcon, 19)}
+      <span><b>${t(currentKey)}</b><small>${currentNo}</small></span>
+      ${icon("chevron-up", 16)}
+    </summary>
+    <div class="step-tabs studio-step-menu-list">
+      ${steps.map(([id, ic, key, no]) => `<button class="${state.step === id ? "active" : ""}" data-step="${id}" type="button">${icon(ic)} <span>${t(key)}</span><b>${no}</b></button>`).join("")}
+    </div>
+  </details>`;
 }
 
 function sopButtonLabel() {
@@ -4045,6 +4057,7 @@ function imageGenerateConsole(p, selectedModel) {
   const credit = selectedModel === "Nano Banana Pro" ? "0.20" : "0.15";
   const modelOptions = [["GPT Image 2", "GPT Image 2"], ["Nano Banana Pro", "Nano Pro"]];
   return `<section class="image-generate-console">
+    ${studioStepMenu("image-console-step-menu")}
     <button class="image-console-add" type="button" data-action="open-attachment-picker" data-attachment-kind="product" title="Add reference">${icon("plus", 20)}</button>
     <label class="image-console-prompt">
       <textarea data-field="image.prompt" data-image-console-prompt rows="3" placeholder="Create a high-converting TikTok Shop product image...">${esc(p.image.prompt || "")}</textarea>
