@@ -3884,10 +3884,12 @@ function projectPage() {
       <div><p class="folder-label">${icon("sparkles", 18)} Pokaya AI</p><h1>${t("projects")}</h1></div>
       <button class="sop-button" data-sop-target="${esc(state.step)}">${icon("book-open", 25)} ${sopButtonLabel()}</button>
     </header>
-    <nav class="step-tabs">
-      ${steps.map(([id, ic, key, no]) => `<button class="${state.step === id ? "active" : ""}" data-step="${id}">${icon(ic)} <span>${t(key)}</span><b>${no}</b></button>`).join("")}
-    </nav>
-    <section class="canvas-card">${stepPanel(p)}</section>`;
+    <section class="canvas-card studio-workbench-card">
+      <nav class="step-tabs studio-step-tabs">
+        ${steps.map(([id, ic, key, no]) => `<button class="${state.step === id ? "active" : ""}" data-step="${id}">${icon(ic)} <span>${t(key)}</span><b>${no}</b></button>`).join("")}
+      </nav>
+      <div class="studio-step-panel">${stepPanel(p)}</div>
+    </section>`;
 }
 
 function sopButtonLabel() {
