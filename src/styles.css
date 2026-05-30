@@ -21064,6 +21064,10 @@ label {
 }
 
 .studio-shell .workspace:has(.step-tabs) .step-tabs button {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  justify-items: start !important;
   min-width: 0 !important;
   max-width: none !important;
   min-height: var(--project-tab-height) !important;
@@ -21082,12 +21086,13 @@ label {
 .studio-shell .workspace:has(.step-tabs) .step-tabs button span {
   max-width: 100% !important;
   min-width: 0 !important;
-  overflow: visible !important;
-  text-overflow: clip !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
   white-space: nowrap !important;
 }
 
 .studio-shell .workspace:has(.step-tabs) .step-tabs b {
+  justify-self: end !important;
   font-size: 10px !important;
 }
 

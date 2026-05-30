@@ -337,7 +337,7 @@ const copy = {
     sopImage: "SOP Image",
     stepImage: "Image",
     stepUgc: "UGC",
-    stepAuto: "Product Scanner",
+    stepAuto: "商品扫描器",
     stepOriginal: "Original Video",
     stepClone: "Clone Prompt",
     stepStory: "Storytelling",
