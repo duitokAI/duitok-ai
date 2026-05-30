@@ -4723,7 +4723,7 @@ function resultCard(item) {
         <span>${icon("circle-check", 18)}</span>
         <b>${esc(modelLabel)}</b>
       </header>
-      ${resultPreview(item)}
+      ${resultPreview(item, { clickable: true })}
       <div class="result-meta">
         <span>${icon("cloud-check", 16)} ${esc(resultMediaLabel(item))}</span>
         <code># ${esc(item.taskId || item.providerTaskId || item.id)}</code>
@@ -4780,15 +4780,20 @@ function resultDownloadFilename(item, kind = "image") {
   return `${base}.${ext}`;
 }
 
-function resultPreview(item) {
+function resultPreview(item, options = {}) {
   const token = encodeURIComponent(state.token || "");
-  if (item.visualCard) return visualCardPreview(item.visualCard);
+  if (item.visualCard) {
+    const visual = visualCardPreview(item.visualCard);
+    if (options.clickable) return `<button type="button" class="result-preview-trigger" data-result-preview="${esc(item.id)}" aria-label="Open full preview">${visual}</button>`;
+    return visual;
+  }
   const imageSrc = item.imageUrl ? `/api/media/result/${encodeURIComponent(item.id)}/image?token=${token}` : "";
   const videoSrc = item.videoUrl ? `/api/media/result/${encodeURIComponent(item.id)}/video?token=${token}` : "";
   const imageError = "this.replaceWith(Object.assign(document.createElement('div'),{className:'result-media-error',textContent:'图片链接已过期，请重新生成或联系客服'}))";
-  const image = imageSrc ? `<img class="result-image" src="${imageSrc}" alt="${esc(item.title)}" loading="lazy" onerror="${esc(imageError)}">` : "";
+  const image = imageSrc ? `<img class="result-image" src="${imageSrc}" alt="${esc(item.title)}" loading="${options.full ? "eager" : "lazy"}" onerror="${esc(imageError)}">` : "";
   const video = videoSrc ? `<div class="result-video-shell"><video class="result-video" src="${videoSrc}" preload="metadata" playsinline></video><button type="button" class="result-play-button" data-video-play="${esc(item.id)}">${icon("play", 26)}<span>点击播放</span></button></div>` : "";
   const text = !image && !video ? `<div class="result-text-preview">${icon("file-text", 30)}<span>Text result</span></div>` : "";
+  if (options.clickable && imageSrc) return `<button type="button" class="result-preview-trigger" data-result-preview="${esc(item.id)}" aria-label="Open full image preview">${image}</button>`;
   return `${image}${video}${text}`;
 }
 
@@ -5354,6 +5359,7 @@ function modal() {
   if (state.modal === "sop") return sopDashboardModal();
   if (state.modal === "attachmentPicker") return attachmentPickerModal();
   if (state.modal === "ugcPromptBuilder") return ugcPromptBuilderModal();
+  if (state.modal === "previewResult") return resultPreviewModal();
   if (state.modal === "saveResultReference") return saveResultReferenceModal();
   if (state.modal === "editResultImage") return editResultImageModal();
   if (state.modal === "deleteResult") return deleteResultModal();
@@ -5484,6 +5490,23 @@ function buildUgcPrompt(source = state.ugcPromptBuilder) {
 
 function activeResult() {
   return state.activeResultId ? findAssetResult(state.activeResultId) : null;
+}
+
+function resultPreviewModal() {
+  const item = activeResult();
+  const title = item?.title || "Generated result";
+  return `<div class="modal-backdrop result-lightbox-backdrop" data-action="close-modal">
+    <section class="result-lightbox" role="dialog" aria-modal="true" aria-label="Result preview">
+      <header>
+        <div>
+          <small>${esc(resultModelLabel(item || {}))}</small>
+          <b>${esc(title)}</b>
+        </div>
+        <button class="icon-only close" data-action="close-modal" type="button" aria-label="Close">${icon("x", 24)}</button>
+      </header>
+      <div class="result-lightbox-media">${item ? resultPreview(item, { full: true }) : ""}</div>
+    </section>
+  </div>`;
 }
 
 function saveResultReferenceModal() {
@@ -7738,6 +7761,7 @@ function bind() {
   document.querySelectorAll("[data-result]").forEach((el) => el.addEventListener("click", () => download(`/api/export/result/${el.dataset.result}`, `pokaya-result.txt`)));
   document.querySelectorAll("[data-video-play]").forEach((el) => el.addEventListener("click", () => playResultVideo(el)));
   document.querySelectorAll("[data-result-action]").forEach((el) => el.addEventListener("click", () => resultAction(el)));
+  document.querySelectorAll("[data-result-preview]").forEach((el) => el.addEventListener("click", () => set({ modal: "previewResult", activeResultId: el.dataset.resultPreview })));
   document.querySelectorAll("[data-image-canvas-result]").forEach((el) => el.addEventListener("click", () => set({ imageCanvasSelectedResultId: el.dataset.imageCanvasResult })));
   document.querySelectorAll("[data-image-console-prompt]").forEach((el) => el.addEventListener("input", () => updateImagePromptLocal(el.value)));
   document.querySelectorAll("[data-result-title]").forEach((el) => {
