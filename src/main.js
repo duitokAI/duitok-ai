@@ -2903,7 +2903,8 @@ function studio() {
           <span class="agent-primary-status"><i></i>READY</span>
         </button>
         <div class="side-section">${icon("layout-dashboard", 18)} ${t("workspace")}</div>
-        <button class="side-primary ${state.page === "project" ? "active" : ""}" data-page="project">${icon("layout-dashboard", 22)} ${t("projects")}</button>
+        <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard">${icon("layout-dashboard", 22)} ${t("dashboard")}</button>
+        <button class="side-primary ${state.page === "project" ? "active" : ""}" data-page="project">${icon("sparkles", 22)} ${t("projects")}</button>
         ${isOwnerAdminAccount() ? `<button class="side-link ${state.page === "admin" ? "active" : ""}" data-page="admin">${icon("shield-check")} Admin CRM</button>` : ""}
         <button class="side-link ${state.page === "library" ? "active" : ""}" data-page="library">${icon("folder")} ${t("contentLibrary")}</button>
         <div class="side-section account">${icon("wallet-cards", 18)} ${t("business")}</div>
