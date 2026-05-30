@@ -53,9 +53,11 @@ const wuyinImagePaths = {
 };
 const wuyinVideoModel = process.env.WUYIN_VIDEO_MODEL || "veo3.1-fast";
 const grsaiBaseUrl = (process.env.GRSAI_BASE_URL || "https://grsaiapi.com").replace(/\/$/, "");
+const grsaiChatPath = process.env.GRSAI_CHAT_PATH || "/v1/chat/completions";
 const grsaiDrawPath = process.env.GRSAI_DRAW_PATH || "/v1/draw/nano-banana";
 const grsaiResultPath = process.env.GRSAI_RESULT_PATH || "/v1/draw/result";
 const grsaiNanoModel = process.env.GRSAI_NANO_MODEL || "nano-banana-pro";
+const grsaiVisionModel = process.env.GRSAI_VISION_MODEL || "gemini-2.5-flash-lite";
 const atlasBaseUrl = (process.env.ATLASCLOUD_BASE_URL || "https://api.atlascloud.ai").replace(/\/$/, "");
 const atlasGenerateVideoPath = process.env.ATLASCLOUD_GENERATE_VIDEO_PATH || "/api/v1/model/generateVideo";
 const atlasPredictionPathPrefix = process.env.ATLASCLOUD_PREDICTION_PATH_PREFIX || "/api/v1/model/prediction";
@@ -1547,6 +1549,10 @@ function requireGrsaiConfig() {
   return apiKey;
 }
 
+function hasGrsaiConfig() {
+  return Boolean(process.env.GRSAI_API_KEY && !process.env.GRSAI_API_KEY.includes("replace_with"));
+}
+
 function parseJsonishPayload(text) {
   if (!text) return {};
   try {
@@ -1586,6 +1592,26 @@ async function grsaiRequest(pathname, { method = "POST", body } = {}) {
     throw error;
   }
   return payload;
+}
+
+async function grsaiChatRequest(body) {
+  const apiKey = requireGrsaiConfig();
+  const response = await fetch(`${grsaiBaseUrl}${grsaiChatPath}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(Number(process.env.GRSAI_TIMEOUT_MS || 120000))
+  });
+  const payload = parseJsonishPayload(await response.text());
+  if (!response.ok || (payload.code && payload.code !== 0)) {
+    const error = new Error(payload.msg || payload.message || payload.error?.message || payload.error || `GRS AI chat request failed (${response.status})`);
+    error.status = response.status || 502;
+    throw error;
+  }
+  return payload.data || payload;
 }
 
 async function atlasRequest(pathname, { method = "POST", body } = {}) {
@@ -2514,7 +2540,19 @@ async function summarizeAgentVisualAttachments(attachments = [], latestUserMessa
   ];
   const systemMessage = "You analyze user-uploaded images and video keyframes for Pokaya Agent. Describe only visible facts, likely product/content purpose, strengths, issues, and practical next actions. If unsure, say unsure.";
   const apimartModels = [...new Set([agentVisionModel, "gpt-4o", "gpt-4o-mini", apimartTextModel].filter(Boolean))];
+  const grsaiModels = [...new Set([grsaiVisionModel, "gemini-2.5-flash-lite", "gemini-2.5-flash"].filter(Boolean))];
   const providers = [
+    ...(hasGrsaiConfig() ? grsaiModels.map((model) => ({
+      label: `grsai:${model}`,
+      request: (content) => grsaiChatRequest({
+        model,
+        stream: false,
+        messages: [
+          { role: "system", content: systemMessage },
+          { role: "user", content }
+        ]
+      })
+    })) : []),
     ...(hasGeminiConfig() ? [{
       label: `gemini:${geminiVisionModel}`,
       request: () => geminiGenerateContent(geminiVisionModel, {
