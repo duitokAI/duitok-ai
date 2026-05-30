@@ -19759,22 +19759,6 @@ label {
   transform: scaleY(1);
 }
 
-.studio-shell .side-primary > svg {
-  width: 22px !important;
-  height: 22px !important;
-  flex: 0 0 38px !important;
-  padding: 8px !important;
-  border-radius: 13px !important;
-  background: rgba(255, 255, 255, 0.06) !important;
-  color: rgba(255, 255, 255, 0.78) !important;
-}
-
-.studio-shell .side-primary.active > svg {
-  background: rgba(255, 255, 255, 0.12) !important;
-  color: #fff !important;
-  filter: drop-shadow(0 0 12px rgba(255, 63, 110, 0.22));
-}
-
 .studio-shell .studio-nav-button {
   padding-left: 14px !important;
 }
