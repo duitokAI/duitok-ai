@@ -126,6 +126,7 @@ const state = {
   agentExpandedMessages: {},
   agentHistoryOpen: false,
   agentHistorySessions: JSON.parse(localStorage.getItem(agentHistoryStorageKey) || "[]"),
+  activeAgentRunId: null,
   queuePolling: false,
   langOpen: false,
   imagePromptGroup: "avatar",
@@ -1378,7 +1379,7 @@ function scrollAgentThreadToBottom() {
 function shouldPatchModalOnly(patch) {
   if (!isStudioPath() || state.loading || !document.getElementById("modal-root")) return false;
   const keys = Object.keys(patch);
-  return keys.includes("modal") && keys.every((key) => ["modal", "editingProjectId", "projectMenuId"].includes(key));
+  return keys.includes("modal") && keys.every((key) => ["modal", "editingProjectId", "projectMenuId", "activeAgentRunId"].includes(key));
 }
 
 function updateModalRoot() {
@@ -5376,6 +5377,7 @@ function modal() {
   if (state.modal === "saveResultReference") return saveResultReferenceModal();
   if (state.modal === "editResultImage") return editResultImageModal();
   if (state.modal === "deleteResult") return deleteResultModal();
+  if (state.modal === "agentConfirm") return agentConfirmModal();
   const title = { newProject: t("createProject"), renameProject: t("renameProject"), deleteProject: t("deleteProject"), register: t("choosePlan"), sop: t("sopImage"), export: t("exportReady"), support: t("supportTitle") }[state.modal];
   const body = {
     newProject: `<form data-form="project"><label>${t("project")}<input name="name" placeholder="Project ${(state.db?.projects.length || 0) + 1}" required></label><button class="gold-button" type="submit">${icon("plus")} ${t("newProject")}</button></form>`,
@@ -7623,6 +7625,47 @@ function agentUndoCard(run) {
   return `<div class="agent-undo-card"><span>${icon("undo-2", 15)} This run has undoable workspace changes.</span><button class="dark-button" data-agent-undo="${esc(run.id)}">${icon("rotate-ccw", 15)} Undo</button></div>`;
 }
 
+function agentRunById(runId = "") {
+  return state.agentMessages.find((item) => item.agentRun?.id === runId)?.agentRun || null;
+}
+
+function openAgentConfirmModal(runId = "") {
+  const run = agentRunById(runId);
+  if (!run?.confirmation || run.status !== "waiting_confirmation") return;
+  set({ modal: "agentConfirm", activeAgentRunId: runId });
+}
+
+function agentConfirmModal() {
+  const run = agentRunById(state.activeAgentRunId);
+  const confirmation = run?.confirmation || {};
+  if (!run || run.status !== "waiting_confirmation" || !confirmation.token) {
+    return `<div class="modal-backdrop" data-action="close-modal"><section class="modal agent-confirm-modal"><button class="icon-only close" data-action="close-modal">${icon("x")}</button><h2>确认已失效</h2><p>这个生成确认已经过期或被取消。</p><button class="gold-button" data-action="close-modal">${icon("check", 16)} 知道了</button></section></div>`;
+  }
+  const credits = Number(confirmation.creditsRequired || 0);
+  const balance = Number(confirmation.creditBalance || 0);
+  const remaining = credits ? Math.max(0, Math.round((balance - credits) * 100) / 100) : null;
+  const model = confirmation.args?.model || "";
+  const actionLabel = confirmation.toolName === "generate_project_output" ? "生成内容" : confirmation.toolName === "publish_tiktok_video" ? "发布到 TikTok" : "执行动作";
+  return `<div class="modal-backdrop" data-action="close-modal">
+    <section class="modal agent-confirm-modal" role="dialog" aria-modal="true" aria-label="Agent confirmation">
+      <button class="icon-only close" data-action="close-modal">${icon("x")}</button>
+      <p class="folder-label">${icon("shield-check", 18)} Agent 确认</p>
+      <h2>${esc(confirmation.title || "确认执行")}</h2>
+      <p class="agent-confirm-modal-copy">${esc(confirmation.message || "确认后才会执行。")}</p>
+      <div class="agent-confirm-modal-grid">
+        <p><span>动作</span><b>${esc(actionLabel)}</b></p>
+        ${model ? `<p><span>模型</span><b>${esc(model)}</b></p>` : ""}
+        <p><span>预计消耗</span><b>${credits ? `${esc(credits)} credits` : "不扣 credits"}</b></p>
+        ${credits ? `<p><span>当前余额</span><b>${esc(balance)} credits</b></p><p><span>确认后剩余</span><b>${esc(remaining)} credits</b></p>` : ""}
+      </div>
+      <div class="agent-confirm-modal-actions">
+        <button class="dark-button" data-action="clear-agent-confirm">${icon("x", 16)} 取消这次生成</button>
+        <button class="gold-button" data-action="confirm-agent-modal">${icon("check", 16)} ${credits ? `确认生成，扣 ${esc(credits)} credits` : "确认执行"}</button>
+      </div>
+    </section>
+  </div>`;
+}
+
 function agentConfirmationCard(run) {
   const confirmation = run?.confirmation;
   if (!confirmation || run.status !== "waiting_confirmation") return "";
@@ -7632,7 +7675,7 @@ function agentConfirmationCard(run) {
       <p>${esc(confirmation.message || "确认后才会执行。")}</p>
       <small>${esc(confirmation.impact || "工作区动作")}</small>
       <div>
-        <button class="gold-button" data-agent-confirm="${esc(run.id)}" data-agent-token="${esc(confirmation.token || "")}">${icon("check", 16)} ${confirmation.creditsRequired ? "确认并扣 credits" : "确认执行"}</button>
+        <button class="gold-button" data-action="open-agent-confirm" data-agent-run-id="${esc(run.id)}">${icon("shield-check", 16)} 打开确认弹窗</button>
         <button class="dark-button" data-action="clear-agent-confirm">${icon("x", 16)} 取消</button>
       </div>
     </div>`;
@@ -7886,7 +7929,7 @@ function closeLangMenu(event) {
 
 async function action(event, name) {
   if (name === "close-modal" && event.target !== event.currentTarget && event.currentTarget.classList.contains("modal-backdrop")) return;
-  if (name === "close-modal") return set({ modal: null, activeResultId: null, editImageBusy: false });
+  if (name === "close-modal") return set({ modal: null, activeResultId: null, activeAgentRunId: null, editImageBusy: false });
   if (name === "new-project") return set({ modal: "newProject" });
   if (name === "wizard-back") return set({ wizardStep: Math.max(1, state.wizardStep - 1) });
   if (name === "wizard-next") return set({ wizardStep: Math.min(4, state.wizardStep + 1) });
@@ -7953,7 +7996,14 @@ async function action(event, name) {
       ? { ...item, agentRun: { ...item.agentRun, status: "failed", confirmation: null, plan: (item.agentRun.plan || []).map((step) => step.status === "waiting_confirmation" ? { ...step, status: "failed", detail: "用户已取消" } : step) } }
       : item);
     rememberAgentMessages(messages);
-    return set({ agentMessages: messages });
+    return set({ agentMessages: messages, modal: null, activeAgentRunId: null });
+  }
+  if (name === "open-agent-confirm") return openAgentConfirmModal(event.currentTarget.dataset.agentRunId);
+  if (name === "confirm-agent-modal") {
+    const run = agentRunById(state.activeAgentRunId);
+    if (!run?.confirmation?.token) return set({ modal: null, activeAgentRunId: null });
+    set({ modal: null, activeAgentRunId: null });
+    return confirmAgentAction(run.id, run.confirmation.token);
   }
   if (name === "logout") {
     localStorage.removeItem(storageKeys.user);
@@ -8827,7 +8877,8 @@ async function sendAgentMessage(message, queuedAttachments = null) {
   const pendingRun = latestPendingAgentConfirmation();
   if (pendingRun && !attachments.length && isAgentConfirmIntent(content)) {
     set({ agentInput: "" });
-    return confirmAgentAction(pendingRun.id, pendingRun.confirmation?.token);
+    openAgentConfirmModal(pendingRun.id);
+    return notify("请在确认弹窗里检查模型和 credits 后再生成。");
   }
   if (!content && !attachments.length) return;
   if (state.agentBusy) return enqueueAgentMessage(content, attachments);
@@ -8986,12 +9037,6 @@ async function deleteAgentTemplate(id) {
 
 async function confirmAgentAction(runId, token) {
   if (!runId || !token || state.agentBusy) return;
-  const run = state.agentMessages.find((item) => item.agentRun?.id === runId)?.agentRun;
-  const confirmation = run?.confirmation || {};
-  if (confirmation.creditsRequired) {
-    const approved = window.confirm(tf("confirmCreditDialog", { credits: confirmation.creditsRequired, balance: confirmation.creditBalance ?? "-" }));
-    if (!approved) return;
-  }
   set({ agentBusy: true });
   startAgentWorkingTimer();
   try {
