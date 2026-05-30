@@ -19707,6 +19707,102 @@ label {
   font-size: 14px !important;
 }
 
+/* Sidebar primary entries: calmer, branded selection state. */
+.studio-shell .side-primary {
+  position: relative !important;
+  min-height: 54px !important;
+  gap: 13px !important;
+  border: 1px solid transparent !important;
+  border-radius: 16px !important;
+  padding: 0 15px !important;
+  color: rgba(255, 255, 255, 0.72) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: 16px !important;
+  font-weight: 900 !important;
+}
+
+.studio-shell .side-primary::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ff3f6e, #ff7a66);
+  opacity: 0;
+  transform: scaleY(0.55);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.studio-shell .side-primary:hover {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  background: rgba(255, 255, 255, 0.065) !important;
+  color: #fff !important;
+  transform: translateX(1px);
+}
+
+.studio-shell .side-primary.active {
+  border-color: rgba(255, 127, 160, 0.22) !important;
+  background:
+    linear-gradient(90deg, rgba(255, 63, 110, 0.2), rgba(255, 255, 255, 0.07) 52%, rgba(255, 255, 255, 0.035)),
+    rgba(64, 14, 72, 0.6) !important;
+  color: #fff !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 12px 24px rgba(255, 63, 110, 0.08) !important;
+}
+
+.studio-shell .side-primary.active::before {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+.studio-shell .side-primary > svg {
+  width: 22px !important;
+  height: 22px !important;
+  flex: 0 0 38px !important;
+  padding: 8px !important;
+  border-radius: 13px !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: rgba(255, 255, 255, 0.78) !important;
+}
+
+.studio-shell .side-primary.active > svg {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #fff !important;
+  filter: drop-shadow(0 0 12px rgba(255, 63, 110, 0.22));
+}
+
+.studio-shell .studio-nav-button {
+  padding-left: 14px !important;
+}
+
+.studio-shell .studio-nav-button .studio-nav-mark {
+  width: 38px !important;
+  height: 38px !important;
+  flex: 0 0 38px !important;
+  border-radius: 14px !important;
+  border-color: rgba(255, 255, 255, 0.11) !important;
+  background:
+    radial-gradient(circle at 72% 26%, rgba(255, 204, 76, 0.46), transparent 17%),
+    linear-gradient(145deg, rgba(255, 63, 110, 0.28), rgba(109, 76, 255, 0.2)),
+    rgba(255, 255, 255, 0.055) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+}
+
+.studio-shell .studio-nav-button.active .studio-nav-mark {
+  border-color: rgba(255, 127, 160, 0.36) !important;
+  background:
+    radial-gradient(circle at 72% 26%, rgba(255, 204, 76, 0.7), transparent 18%),
+    linear-gradient(145deg, rgba(255, 63, 110, 0.5), rgba(109, 76, 255, 0.28)),
+    rgba(255, 255, 255, 0.08) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 10px 22px rgba(255, 63, 110, 0.16) !important;
+}
+
 .studio-shell .sidebar-account-panel,
 .studio-shell .sidebar-subscription-card {
   border-radius: 16px !important;
