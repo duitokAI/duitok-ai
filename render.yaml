@@ -71,6 +71,10 @@ services:
         sync: false
       - key: GRSAI_BASE_URL
         value: https://grsaiapi.com
+      - key: GRSAI_CHAT_PATH
+        value: /v1/chat/completions
+      - key: GRSAI_VISION_MODEL
+        value: gemini-2.5-flash
       - key: GRSAI_DRAW_PATH
         value: /v1/draw/nano-banana
       - key: GRSAI_RESULT_PATH
