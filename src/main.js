@@ -140,6 +140,7 @@ const state = {
   attachmentPickerFilter: "avatar",
   ugcPromptBuilder: defaultUgcPromptBuilder(),
   activeResultId: null,
+  imageCanvasSelectedResultId: null,
   editImageBusy: false,
   assetSearch: "",
   assetTypeFilter: "all",
@@ -320,14 +321,14 @@ const copy = {
     faqTitle: "Soalan biasa",
     changeLanguage: "Tukar bahasa",
     languageMenuLabel: "Language",
-    workspace: "Workspace",
+    workspace: "Studio",
     business: "Business",
     startHere: "Start Here",
     pokayaAgent: "Pokaya Agent",
     dashboard: "Dashboard",
     newProject: "New project",
     search: "Cari",
-    projects: "Projects",
+    projects: "Studio",
     publicTools: "Public Tools",
     contentLibrary: "Content Library",
     logout: "Sign out",
@@ -610,14 +611,14 @@ const copy = {
     faqTitle: "开始前<br>您可能会问",
     changeLanguage: "切换语言",
     languageMenuLabel: "Language",
-    workspace: "工作区",
+    workspace: "创作中心",
     business: "业务",
     startHere: "新手开始",
     pokayaAgent: "Pokaya Agent",
     dashboard: "总控",
     newProject: "新项目",
     search: "搜索",
-    projects: "项目",
+    projects: "创作中心",
     publicTools: "公开工具",
     contentLibrary: "内容库",
     logout: "退出登录",
@@ -899,14 +900,14 @@ const copy = {
     faqTitle: "Common questions",
     changeLanguage: "Change language",
     languageMenuLabel: "Language",
-    workspace: "Workspace",
+    workspace: "Studio",
     business: "Business",
     startHere: "Start Here",
     pokayaAgent: "Pokaya Agent",
     dashboard: "Dashboard",
     newProject: "New project",
     search: "Search",
-    projects: "Projects",
+    projects: "Studio",
     publicTools: "Public Tools",
     contentLibrary: "Content Library",
     logout: "Sign out",
@@ -3945,14 +3946,137 @@ function imagePanel(p) {
   const selectedModel = imageModelValues.includes(p.image.model) ? p.image.model : String(p.image.model || "").toLowerCase().includes("pro") ? "Nano Banana Pro" : "GPT Image 2";
   const modeOptions = ["Create Image", "Virtualize (Poster/Ad)"];
   const selectedMode = modeOptions.includes(p.image.mode) ? p.image.mode : "Create Image";
-  return `
-    <div class="generator-box image-generator-box"><h2>🖼️ ${t("imageGenerator")}</h2><div class="form-grid two">${select("image.model", t("model"), imageModels, selectedModel)}${select("image.mode", t("mode"), modeOptions, selectedMode)}</div></div>
-    ${selectedMode === "Virtualize (Poster/Ad)" ? virtualizePanel() : `
-      ${upload(t("avatarRef"), t("dropAvatar"), "Face / person - used for all variations", "circle-user-round", "avatar")}
-      ${upload(t("productRef"), t("dropProduct"), "Product - used for all images and videos", "package", "product")}
-      ${imagePromptSettings(p)}
+  const imageTypes = ["image", "video", "visual_card"];
+  const history = p.results.filter((item) => imageTypes.includes(item.type)).slice(-18).reverse();
+  const pending = pendingResultJobs(p, imageTypes);
+  const selectedResult = history.find((item) => item.id === state.imageCanvasSelectedResultId) || history[0] || null;
+  return `<section class="image-canvas-studio">
+    <header class="image-studio-topbar">
+      <div>
+        <h2>${icon("image", 21)} ${t("imageGenerator")}</h2>
+        <span>${history.length ? `${history.length} history items` : "Creative canvas"}</span>
+      </div>
+      <div class="image-studio-tabs" aria-label="Image workspace views">
+        <button class="active" type="button">${icon("folder-open", 16)} History</button>
+        <button type="button" data-action="open-attachment-picker" data-attachment-kind="product">${icon("image-plus", 16)} References</button>
+      </div>
+      <div class="image-studio-models">
+        ${select("image.model", "", imageModels, selectedModel)}
+        ${select("image.mode", "", modeOptions, selectedMode)}
+      </div>
+    </header>
+    ${selectedMode === "Virtualize (Poster/Ad)" ? `<div class="image-studio-legacy">${virtualizePanel()}</div>` : `
+      ${imageCanvasStage(p, selectedResult, history, pending)}
+      ${imageGenerateConsole(p, selectedModel)}
     `}
-    ${results(p, ["image", "video", "visual_card"])}`;
+  </section>`;
+}
+
+function imageCanvasStage(p, selectedResult, history = [], pending = []) {
+  return `<section class="image-canvas-stage">
+    ${selectedResult ? imageCanvasPreview(selectedResult) : imageCanvasEmpty(p)}
+    <aside class="image-history-rail">
+      <header><b>${icon("history", 16)} History</b><span>${pending.length + history.length}</span></header>
+      <div>
+        ${pending.map(imagePendingThumb).join("")}
+        ${history.length ? history.map((item) => imageHistoryThumb(item, selectedResult?.id)).join("") : ""}
+      </div>
+    </aside>
+  </section>`;
+}
+
+function imageCanvasPreview(item) {
+  const promptText = resultPromptText(item).replaceAll("\n", " ").trim();
+  return `<article class="image-main-preview">
+    <div class="image-preview-frame">${resultPreview(item)}</div>
+    <footer>
+      <div><b>${esc(item.title || resultModelLabel(item))}</b><span>${esc(promptText ? promptText.slice(0, 150) : "Generated Pokaya image")}</span></div>
+      <div class="image-preview-actions">
+        <button type="button" data-result-action="download" data-result-id="${esc(item.id)}" data-result-kind="${item.videoUrl ? "video" : item.imageUrl ? "image" : "text"}">${icon("download", 16)} Download</button>
+        <button type="button" data-result-action="save" data-result-id="${esc(item.id)}">${icon("image-plus", 16)} Save ref</button>
+        <button type="button" data-image-preset="${esc(`Create a fresh variation of this image. Keep the product logic and improve the composition for TikTok Shop conversion.\n\nReference: ${promptText || item.title || ""}`)}">${icon("wand-sparkles", 16)} Variation</button>
+      </div>
+    </footer>
+  </article>`;
+}
+
+function imageCanvasEmpty(p) {
+  const presets = [
+    ["TikTok product image", "Create a high-converting TikTok Shop product image. Show the product clearly, with a Malaysian lifestyle scene, warm daylight, clean commercial composition, and room for short promo text."],
+    ["Creator holding product", "A friendly Malaysian creator holding the product naturally, smiling at camera, bright clean home setting, realistic TikTok affiliate product photography."],
+    ["Poster / ad image", "Create a clean vertical product poster for TikTok Shop with strong headline space, product hero in foreground, promo badge area, and warm lifestyle background."]
+  ];
+  return `<article class="image-main-preview image-empty-canvas">
+    <div>
+      <b>${icon("sparkles", 28)} Start with a prompt below</b>
+      <p>Generate product visuals, creator shots, posters, and TikTok Shop images from one console.</p>
+      <div>${presets.map(([label, text]) => `<button type="button" data-image-preset="${esc(text)}">${esc(label)}</button>`).join("")}</div>
+    </div>
+  </article>`;
+}
+
+function imagePendingThumb(job) {
+  return `<article class="image-history-thumb pending">
+    <span>${icon("loader-circle", 22)}</span>
+    <b>${esc(job.title || "Generating")}</b>
+  </article>`;
+}
+
+function imageHistoryThumb(item, selectedId = "") {
+  const active = item.id === selectedId;
+  const token = encodeURIComponent(state.token || "");
+  const imageSrc = item.imageUrl ? `/api/media/result/${encodeURIComponent(item.id)}/image?token=${token}` : "";
+  const videoSrc = item.videoUrl ? `/api/media/result/${encodeURIComponent(item.id)}/video?token=${token}` : "";
+  const media = item.imageUrl
+    ? `<img src="${esc(imageSrc)}" alt="">`
+    : item.videoUrl
+      ? `<video src="${esc(videoSrc)}" muted playsinline></video>`
+      : `<span>${icon("file-text", 22)}</span>`;
+  return `<button class="image-history-thumb ${active ? "active" : ""}" type="button" data-image-canvas-result="${esc(item.id)}">
+    ${media}
+    <small>${esc(item.title || resultModelLabel(item))}</small>
+  </button>`;
+}
+
+function imageGenerateConsole(p, selectedModel) {
+  const avatar = selectedImageReference("avatar");
+  const product = selectedImageReference("product");
+  const credit = selectedModel === "Nano Banana Pro" ? "0.20" : "0.15";
+  return `<section class="image-generate-console">
+    <button class="image-console-add" type="button" data-action="open-attachment-picker" data-attachment-kind="product" title="Add reference">${icon("plus", 20)}</button>
+    <label class="image-console-prompt">
+      <textarea data-field="image.prompt" data-image-console-prompt rows="3" placeholder="Create a high-converting TikTok Shop product image...">${esc(p.image.prompt || "")}</textarea>
+    </label>
+    <div class="image-console-tools">
+      <label>${icon("sparkles", 15)}${select("image.model", "", [["GPT Image 2", "GPT Image 2"], ["Nano Banana Pro", "Nano Banana Pro"]], selectedModel)}</label>
+      <span>${icon("smartphone", 15)} 9:16</span>
+      <span>${icon("gem", 15)} 2k</span>
+      <span>${icon("coins", 15)} ~${credit} credit</span>
+    </div>
+    <div class="image-console-references">
+      ${imageReferenceThumb("avatar", avatar, "Avatar optional")}
+      ${imageReferenceThumb("product", product, "Product optional")}
+    </div>
+    <button class="image-console-generate" type="button" data-action="generate-image" ${state.generating ? "disabled" : ""}>
+      ${icon(state.generating ? "loader-circle" : "send", 20)}
+      <b>${state.generating ? t("generating") : t("generateImage")}</b>
+      <small>${credit} credit</small>
+    </button>
+  </section>`;
+}
+
+function selectedImageReference(kind) {
+  const selectedId = kind === "avatar" ? project().image?.avatarAttachmentId : project().image?.productAttachmentId;
+  return selectedId ? (state.db.attachments || []).find((item) => item.id === selectedId) : null;
+}
+
+function imageReferenceThumb(kind, item, emptyLabel) {
+  const label = kind === "avatar" ? t("avatarRef") : t("productRef");
+  const preview = item ? attachmentPreview(item) : `<span>${icon(kind === "avatar" ? "circle-user-round" : "package", 20)}</span>`;
+  return `<button class="image-reference-thumb ${item ? "has-ref" : ""}" type="button" data-action="open-attachment-picker" data-attachment-kind="${esc(kind)}">
+    ${preview}
+    <div><b>${esc(item?.name || label)}</b><small>${esc(item ? "Change" : emptyLabel)}</small></div>
+  </button>`;
 }
 
 function virtualizePanel() {
@@ -7594,6 +7718,8 @@ function bind() {
   document.querySelectorAll("[data-result]").forEach((el) => el.addEventListener("click", () => download(`/api/export/result/${el.dataset.result}`, `pokaya-result.txt`)));
   document.querySelectorAll("[data-video-play]").forEach((el) => el.addEventListener("click", () => playResultVideo(el)));
   document.querySelectorAll("[data-result-action]").forEach((el) => el.addEventListener("click", () => resultAction(el)));
+  document.querySelectorAll("[data-image-canvas-result]").forEach((el) => el.addEventListener("click", () => set({ imageCanvasSelectedResultId: el.dataset.imageCanvasResult })));
+  document.querySelectorAll("[data-image-console-prompt]").forEach((el) => el.addEventListener("input", () => updateImagePromptLocal(el.value)));
   document.querySelectorAll("[data-result-title]").forEach((el) => {
     el.addEventListener("change", () => renameResultInline(el));
     el.addEventListener("keydown", (event) => {
@@ -7664,6 +7790,11 @@ function fillAgentInput(value = "") {
   if (!input) return;
   input.value = value;
   autoResizeAgentInput(input);
+}
+
+function updateImagePromptLocal(value = "") {
+  if (!state.projectId || !state.db) return;
+  state.db = dbWithProjectField(state.db, state.projectId, "image.prompt", value);
 }
 
 function closeLangMenu(event) {
@@ -8220,6 +8351,7 @@ async function generate(name) {
   if (state.generating) return;
   try {
     set({ generating: true });
+    await syncImageConsoleBeforeGenerate(name);
     const db = await api(`/projects/${state.projectId}/generate`, { method: "POST", body: JSON.stringify({ action: name, step: state.step }) });
     set({ db, generating: false });
     pollGenerationQueue();
@@ -8227,6 +8359,18 @@ async function generate(name) {
     set({ generating: false });
     notify(error.message);
   }
+}
+
+async function syncImageConsoleBeforeGenerate(name) {
+  if (name !== "generate-image") return;
+  const promptInput = document.querySelector("[data-image-console-prompt]");
+  if (!promptInput) return;
+  const value = promptInput.value || "";
+  updateImagePromptLocal(value);
+  await api(`/projects/${state.projectId}/field`, {
+    method: "PATCH",
+    body: JSON.stringify({ field: "image.prompt", value })
+  });
 }
 
 async function pollGenerationQueue(attempt = 0) {
