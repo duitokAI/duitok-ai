@@ -21481,13 +21481,65 @@ label {
 }
 
 .studio-shell .result-card {
+  position: relative !important;
   overflow: hidden !important;
   padding: 0 !important;
 }
 
+.studio-shell .result-card .result-card-head {
+  position: absolute !important;
+  z-index: 2;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  min-height: 34px !important;
+  border-radius: 999px;
+  padding: 0 12px !important;
+  background: rgba(255, 255, 255, 0.84);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 8px 22px rgba(35, 8, 42, 0.08);
+}
+
+.studio-shell .result-card .result-card-head b {
+  color: #ff3f6e !important;
+}
+
+.studio-shell .result-card .result-card-head span {
+  flex: 0 0 auto;
+}
+
+.studio-shell .result-card .result-image,
+.studio-shell .result-card .result-video,
+.studio-shell .result-card .result-video-shell,
+.studio-shell .result-card .result-text-preview,
+.studio-shell .result-card .result-media-error,
+.studio-shell .result-card .visual-card-preview {
+  border-radius: 18px 18px 0 0 !important;
+  max-height: none !important;
+}
+
+.studio-shell .result-card .result-image,
+.studio-shell .result-card .result-video,
+.studio-shell .result-card .visual-card-preview {
+  display: block;
+  width: 100% !important;
+  min-height: 430px;
+  object-fit: cover;
+}
+
+.studio-shell .result-card .result-meta {
+  grid-template-columns: minmax(0, 1fr);
+  padding-top: 12px !important;
+}
+
+.studio-shell .result-card .result-meta code {
+  max-height: 38px;
+  overflow: hidden;
+}
+
 .studio-shell .visual-card-preview {
   border-radius: 12px 12px 0 0 !important;
-  max-height: 380px !important;
+  max-height: none !important;
 }
 
 .studio-shell .visual-card-preview .visual-card-canvas {
