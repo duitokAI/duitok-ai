@@ -25,6 +25,9 @@ const apimartTaskPathPrefix = process.env.APIMART_TASK_PATH_PREFIX || "/v1/tasks
 const apimartTextModel = process.env.APIMART_TEXT_MODEL || "gpt-5-mini";
 const agentVisionModel = process.env.AGENT_VISION_MODEL || process.env.APIMART_VISION_MODEL || "gpt-4o-mini";
 const apimartImageModel = process.env.APIMART_IMAGE_MODEL || "gpt-image-2";
+const geminiBaseUrl = (process.env.GEMINI_BASE_URL || "https://generativelanguage.googleapis.com").replace(/\/$/, "");
+const geminiGeneratePathPrefix = process.env.GEMINI_GENERATE_PATH_PREFIX || "/v1beta/models";
+const geminiVisionModel = process.env.GEMINI_VISION_MODEL || process.env.GEMINI_MODEL || "gemini-2.5-flash";
 const openaiBaseUrl = (process.env.OPENAI_BASE_URL || "https://api.openai.com").replace(/\/$/, "");
 const openaiChatPath = process.env.OPENAI_CHAT_PATH || "/v1/chat/completions";
 const openaiVisionModel = process.env.OPENAI_VISION_MODEL || "gpt-4o-mini";
@@ -1217,6 +1220,15 @@ function hasApimartConfig() {
   return Boolean(process.env.APIMART_API_KEY && !process.env.APIMART_API_KEY.includes("replace_with"));
 }
 
+function geminiApiKey() {
+  const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "";
+  return key && !key.includes("replace_with") ? key : "";
+}
+
+function hasGeminiConfig() {
+  return Boolean(geminiApiKey());
+}
+
 function hasOpenAiConfig() {
   return Boolean(process.env.OPENAI_API_KEY && !process.env.OPENAI_API_KEY.includes("replace_with"));
 }
@@ -1358,6 +1370,29 @@ async function deepseekRequest(body) {
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
     const error = new Error(sanitizeAgentText(payload.error?.message || payload.message || `Agent model request failed (${response.status})`));
+    error.status = response.status || 502;
+    throw error;
+  }
+  return payload;
+}
+
+async function geminiGenerateContent(model, body) {
+  const apiKey = geminiApiKey();
+  if (!apiKey) {
+    const error = new Error("Gemini vision is not configured.");
+    error.status = 503;
+    throw error;
+  }
+  const pathname = `${geminiGeneratePathPrefix}/${encodeURIComponent(model)}:generateContent`;
+  const response = await fetch(`${geminiBaseUrl}${pathname}?key=${encodeURIComponent(apiKey)}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(Number(process.env.GEMINI_TIMEOUT_MS || 120000))
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(sanitizeAgentText(payload.error?.message || payload.message || `Gemini request failed (${response.status})`));
     error.status = response.status || 502;
     throw error;
   }
@@ -2439,6 +2474,24 @@ function agentVisualInputs(attachments = []) {
   return inputs.slice(0, 12);
 }
 
+function dataUrlToGeminiInlinePart(dataUrl = "") {
+  const match = String(dataUrl).match(/^data:([^;,]+);base64,(.+)$/i);
+  if (!match) return null;
+  return {
+    inline_data: {
+      mime_type: match[1],
+      data: match[2]
+    }
+  };
+}
+
+function geminiVisualParts(textBlock = "", inputs = []) {
+  return [
+    { text: textBlock },
+    ...inputs.map((item) => dataUrlToGeminiInlinePart(item.dataUrl)).filter(Boolean)
+  ];
+}
+
 async function summarizeAgentVisualAttachments(attachments = [], latestUserMessage = "") {
   const inputs = agentVisualInputs(attachments);
   if (!inputs.length) return "";
@@ -2462,6 +2515,14 @@ async function summarizeAgentVisualAttachments(attachments = [], latestUserMessa
   const systemMessage = "You analyze user-uploaded images and video keyframes for Pokaya Agent. Describe only visible facts, likely product/content purpose, strengths, issues, and practical next actions. If unsure, say unsure.";
   const apimartModels = [...new Set([agentVisionModel, "gpt-4o", "gpt-4o-mini", apimartTextModel].filter(Boolean))];
   const providers = [
+    ...(hasGeminiConfig() ? [{
+      label: `gemini:${geminiVisionModel}`,
+      request: () => geminiGenerateContent(geminiVisionModel, {
+        system_instruction: { parts: [{ text: systemMessage }] },
+        contents: [{ role: "user", parts: geminiVisualParts(textBlock, inputs) }]
+      }),
+      extract: (data) => data.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("").trim() || data.text || ""
+    }] : []),
     ...(hasApimartConfig() ? apimartModels.map((model) => ({
       label: `apimart:${model}`,
       request: (content) => apimartRequest(apimartChatPath, {
@@ -2492,7 +2553,8 @@ async function summarizeAgentVisualAttachments(attachments = [], latestUserMessa
   let lastError = null;
   try {
     for (const provider of providers) {
-      for (const content of contentVariants) {
+      const variants = provider.label.startsWith("gemini:") ? [null] : contentVariants;
+      for (const content of variants) {
         let data;
         try {
           data = await provider.request(content);
@@ -2500,7 +2562,10 @@ async function summarizeAgentVisualAttachments(attachments = [], latestUserMessa
           lastError = error;
           continue;
         }
-        const summary = sanitizeAgentText(data.choices?.[0]?.message?.content || data.output_text || data.text || "").slice(0, 1800);
+        const rawSummary = provider.extract
+          ? provider.extract(data)
+          : data.choices?.[0]?.message?.content || data.output_text || data.text || "";
+        const summary = sanitizeAgentText(rawSummary).slice(0, 1800);
         if (summary) return summary;
       }
     }
