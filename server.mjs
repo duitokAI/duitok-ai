@@ -23,6 +23,7 @@ const apimartChatPath = process.env.APIMART_CHAT_PATH || "/v1/chat/completions";
 const apimartImagePath = process.env.APIMART_IMAGE_PATH || "/v1/images/generations";
 const apimartTaskPathPrefix = process.env.APIMART_TASK_PATH_PREFIX || "/v1/tasks";
 const apimartTextModel = process.env.APIMART_TEXT_MODEL || "gpt-5-mini";
+const agentVisionModel = process.env.AGENT_VISION_MODEL || process.env.APIMART_VISION_MODEL || apimartTextModel;
 const apimartImageModel = process.env.APIMART_IMAGE_MODEL || "gpt-image-2";
 const deepseekBaseUrl = (process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com").replace(/\/$/, "");
 const deepseekChatPath = process.env.DEEPSEEK_CHAT_PATH || "/chat/completions";
@@ -1209,6 +1210,10 @@ function requireApimartConfig() {
   return apiKey;
 }
 
+function hasApimartConfig() {
+  return Boolean(process.env.APIMART_API_KEY && !process.env.APIMART_API_KEY.includes("replace_with"));
+}
+
 function providerForMediaModel(model) {
   model = internalMediaModel(model);
   if (model === "GPT Image 2") return process.env.APIMART_API_KEY ? "apimart" : "mock";
@@ -2365,29 +2370,95 @@ function sanitizeAgentAttachments(attachments = []) {
       const dataUrl = kind === "image" && /^data:image\/(?:png|jpe?g|webp);base64,/i.test(item?.dataUrl || "")
         ? String(item.dataUrl).slice(0, 1400000)
         : "";
+      const keyframes = kind === "video"
+        ? (Array.isArray(item?.keyframes) ? item.keyframes : [])
+          .slice(0, 8)
+          .map((frame) => ({
+            time: Number(frame?.time || 0),
+            dataUrl: /^data:image\/(?:png|jpe?g|webp);base64,/i.test(frame?.dataUrl || "") ? String(frame.dataUrl).slice(0, 700000) : ""
+          }))
+          .filter((frame) => frame.dataUrl)
+        : [];
       return {
         id: sanitizeAgentText(item?.id || crypto.randomUUID()).slice(0, 80),
         name: sanitizeAgentText(item?.name || "attachment").slice(0, 160),
         type,
         kind,
         size: Number(item?.size || 0),
-        dataUrl
+        dataUrl,
+        keyframes
       };
     })
     .filter((item) => item.kind === "video" || item.dataUrl);
 }
 
-function agentAttachmentPrompt(attachments = []) {
+function agentVisualInputs(attachments = []) {
+  const inputs = [];
+  for (const item of attachments) {
+    if (item.kind === "image" && item.dataUrl) {
+      inputs.push({ label: `Image "${item.name}"`, dataUrl: item.dataUrl });
+    }
+    if (item.kind === "video" && Array.isArray(item.keyframes)) {
+      for (const frame of item.keyframes) {
+        inputs.push({ label: `Video "${item.name}" frame at ${frame.time}s`, dataUrl: frame.dataUrl });
+      }
+    }
+  }
+  return inputs.slice(0, 12);
+}
+
+async function summarizeAgentVisualAttachments(attachments = [], latestUserMessage = "") {
+  const inputs = agentVisualInputs(attachments);
+  if (!inputs.length || !hasApimartConfig()) return "";
+  try {
+    const data = await apimartRequest(apimartChatPath, {
+      method: "POST",
+      body: JSON.stringify({
+        model: agentVisionModel,
+        stream: false,
+        messages: [
+          {
+            role: "system",
+            content: "You analyze user-uploaded images and video keyframes for Pokaya Agent. Describe only visible facts, likely product/content purpose, strengths, issues, and practical next actions. If unsure, say unsure."
+          },
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: [
+                  "User message:",
+                  sanitizeAgentText(latestUserMessage).slice(0, 800) || "(no text)",
+                  "",
+                  "Analyze these visual inputs. For video frames, infer broad scene flow only; do not pretend to know audio or motion between frames.",
+                  inputs.map((item, index) => `${index + 1}. ${item.label}`).join("\n")
+                ].join("\n")
+              },
+              ...inputs.map((item) => ({ type: "image_url", image_url: { url: item.dataUrl } }))
+            ]
+          }
+        ]
+      })
+    });
+    return sanitizeAgentText(data.choices?.[0]?.message?.content || data.output_text || data.text || "").slice(0, 1800);
+  } catch (error) {
+    console.warn("Agent visual analysis skipped:", error.message);
+    return "";
+  }
+}
+
+function agentAttachmentPrompt(attachments = [], visualSummary = "") {
   if (!attachments.length) return "";
   const lines = attachments.map((item, index) => {
     const base = `${index + 1}. ${item.kind.toUpperCase()} "${item.name}" (${item.type || item.kind}, ${Math.round((item.size || 0) / 1024)} KB)`;
     return item.kind === "image" && item.dataUrl
-      ? `${base}. Image preview is available in the chat UI; use it as uploaded context and ask for one detail if exact visual facts are needed.`
-      : `${base}. Video file content is not uploaded to the model; use filename/type/size as context and ask for details if visual specifics are needed.`;
+      ? `${base}. Image content was provided for visual analysis.`
+      : `${base}. ${item.keyframes?.length ? `${item.keyframes.length} sampled video keyframes were provided for visual analysis.` : "Video file content is not uploaded to the model; use filename/type/size as context and ask for details if visual specifics are needed."}`;
   });
   return [
     "The user attached media to this Agent message:",
     ...lines,
+    visualSummary ? `Visual analysis summary:\n${visualSummary}` : "Visual analysis summary: unavailable. Ask one short clarifying question if exact visual details matter.",
     "Do not automatically navigate or switch pages just because media was attached.",
     "First infer what the user likely wants from the message plus attachments. If enough information is available, decide the next useful Pokaya action yourself. If visual details are uncertain, ask one short clarifying question instead of pretending."
   ].join("\n");
@@ -5287,6 +5358,7 @@ app.post("/api/agent", async (req, res, next) => {
       });
     }
 
+    const visualSummary = attachments.length ? await summarizeAgentVisualAttachments(attachments, latestUserMessage) : "";
     const messages = [
       {
         role: "system",
@@ -5328,7 +5400,7 @@ app.post("/api/agent", async (req, res, next) => {
         role: "system",
         content: compactPreferenceSummaryForPrompt(preferenceSummary)
       },
-      ...(attachments.length ? [{ role: "system", content: agentAttachmentPrompt(attachments) }] : []),
+      ...(attachments.length ? [{ role: "system", content: agentAttachmentPrompt(attachments, visualSummary) }] : []),
       ...history
         .map((item) => ({ role: item.role, content: item.content.slice(0, agentMessageCharLimit) }))
     ];

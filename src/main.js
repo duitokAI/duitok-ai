@@ -6904,7 +6904,8 @@ function agentQueuedMessages() {
 
 function agentAttachmentLabel(item = {}) {
   const type = item.type || (item.kind === "video" ? "video" : "image");
-  return `${type}${item.size ? ` · ${formatBytes(item.size)}` : ""}`;
+  const frameCount = Array.isArray(item.keyframes) ? item.keyframes.length : 0;
+  return `${type}${item.size ? ` · ${formatBytes(item.size)}` : ""}${frameCount ? ` · ${frameCount} frames` : ""}`;
 }
 
 function agentChatToolbar() {
@@ -8276,13 +8277,22 @@ function agentMessagesForStorage(messages = []) {
 }
 
 function agentAttachmentForStorage(item = {}) {
+  const videoPreview = item.kind === "video" && item.previewUrl && !String(item.previewUrl).startsWith("blob:") ? item.previewUrl : "";
   return {
     id: item.id,
     name: item.name,
     type: item.type,
     size: item.size,
     kind: item.kind,
-    previewUrl: item.kind === "image" ? item.previewUrl || item.dataUrl || "" : ""
+    previewUrl: item.kind === "image" ? item.previewUrl || item.dataUrl || "" : videoPreview,
+    ...(Array.isArray(item.keyframes) && item.keyframes.length ? { keyframes: item.keyframes.map(agentKeyframeForStorage) } : {})
+  };
+}
+
+function agentKeyframeForStorage(frame = {}) {
+  return {
+    time: Number(frame.time || 0),
+    dataUrl: frame.dataUrl || ""
   };
 }
 
@@ -8453,7 +8463,11 @@ async function prepareAgentAttachment(file) {
     size: file.size,
     kind
   };
-  if (kind === "video") return { ...base, previewUrl: URL.createObjectURL(file) };
+  if (kind === "video") {
+    const previewUrl = URL.createObjectURL(file);
+    const keyframes = await videoFileToKeyframes(file, previewUrl);
+    return { ...base, previewUrl: keyframes[0]?.dataUrl || previewUrl, objectUrl: previewUrl, keyframes };
+  }
   const dataUrl = await imageFileToDataUrl(file);
   return { ...base, dataUrl, previewUrl: dataUrl };
 }
@@ -8461,8 +8475,71 @@ async function prepareAgentAttachment(file) {
 function removeAgentAttachment(id) {
   const current = state.agentAttachments || [];
   const removed = current.find((item) => item.id === id);
+  if (removed?.objectUrl?.startsWith("blob:")) URL.revokeObjectURL(removed.objectUrl);
   if (removed?.previewUrl?.startsWith("blob:")) URL.revokeObjectURL(removed.previewUrl);
   set({ agentAttachments: current.filter((item) => item.id !== id) });
+}
+
+function videoFileToKeyframes(file, objectUrl) {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement("video");
+    const cleanup = () => {
+      video.removeAttribute("src");
+      video.load();
+    };
+    const fail = () => {
+      cleanup();
+      reject(new Error("Could not read video frames."));
+    };
+    video.preload = "metadata";
+    video.muted = true;
+    video.playsInline = true;
+    video.onerror = fail;
+    video.onloadedmetadata = async () => {
+      try {
+        const duration = Number.isFinite(video.duration) ? video.duration : 0;
+        const count = duration >= 20 ? 8 : duration >= 8 ? 6 : 5;
+        const times = Array.from({ length: count }, (_, index) => {
+          const ratio = count === 1 ? 0.5 : (index + 0.5) / count;
+          return Math.max(0, Math.min(Math.max(0, duration - 0.12), duration * ratio));
+        });
+        const frames = [];
+        for (const time of times) {
+          const dataUrl = await captureVideoFrame(video, time);
+          frames.push({ time: Number(time.toFixed(2)), dataUrl });
+        }
+        cleanup();
+        resolve(frames);
+      } catch (error) {
+        cleanup();
+        reject(error);
+      }
+    };
+    video.src = objectUrl || URL.createObjectURL(file);
+  });
+}
+
+function captureVideoFrame(video, time) {
+  return new Promise((resolve, reject) => {
+    const done = () => {
+      try {
+        const maxSide = 640;
+        const width = video.videoWidth || 640;
+        const height = video.videoHeight || 360;
+        const scale = Math.min(1, maxSide / Math.max(width, height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(width * scale));
+        canvas.height = Math.max(1, Math.round(height * scale));
+        canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.68));
+      } catch (error) {
+        reject(error);
+      }
+    };
+    video.onseeked = done;
+    video.onerror = () => reject(new Error("Could not seek video."));
+    video.currentTime = time;
+  });
 }
 
 function imageFileToDataUrl(file) {
@@ -8573,7 +8650,8 @@ function agentAttachmentForApi(item = {}) {
     type: item.type,
     size: item.size,
     kind: item.kind,
-    dataUrl: item.kind === "image" ? item.dataUrl || "" : ""
+    dataUrl: item.kind === "image" ? item.dataUrl || "" : "",
+    keyframes: item.kind === "video" && Array.isArray(item.keyframes) ? item.keyframes.map(agentKeyframeForStorage) : []
   };
 }
 
