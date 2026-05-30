@@ -502,10 +502,14 @@
   min-width: 0;
   min-height: 88px;
   padding: 0 12px;
-  border: 0;
-  background: linear-gradient(135deg, var(--hot), var(--studio-coral, #ff7a5c));
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  background: linear-gradient(135deg, #ff2f6d 0%, #ff5a57 100%);
   color: #fff;
-  box-shadow: 0 16px 34px rgba(255, 63, 110, 0.22);
+  box-shadow: 0 16px 34px rgba(255, 63, 110, 0.28);
+}
+
+.image-console-generate:disabled {
+  opacity: 1;
 }
 
 .image-console-generate b {
@@ -513,14 +517,22 @@
   overflow-wrap: anywhere;
   text-align: center;
   color: #fff;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 950;
+  text-shadow: 0 1px 12px rgba(82, 0, 54, 0.28);
 }
 
 .image-console-generate small {
-  color: rgba(255, 255, 255, 0.78);
-  font-size: 11px;
-  font-weight: 850;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 950;
+  text-transform: capitalize;
+  text-shadow: 0 1px 10px rgba(82, 0, 54, 0.24);
+}
+
+.image-console-generate svg {
+  filter: drop-shadow(0 1px 8px rgba(82, 0, 54, 0.24));
+  stroke-width: 2.4;
 }
 
 .image-studio-legacy {
