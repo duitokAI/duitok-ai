@@ -23,7 +23,7 @@ const apimartChatPath = process.env.APIMART_CHAT_PATH || "/v1/chat/completions";
 const apimartImagePath = process.env.APIMART_IMAGE_PATH || "/v1/images/generations";
 const apimartTaskPathPrefix = process.env.APIMART_TASK_PATH_PREFIX || "/v1/tasks";
 const apimartTextModel = process.env.APIMART_TEXT_MODEL || "gpt-5-mini";
-const agentVisionModel = process.env.AGENT_VISION_MODEL || process.env.APIMART_VISION_MODEL || apimartTextModel;
+const agentVisionModel = process.env.AGENT_VISION_MODEL || process.env.APIMART_VISION_MODEL || "gpt-4o-mini";
 const apimartImageModel = process.env.APIMART_IMAGE_MODEL || "gpt-image-2";
 const deepseekBaseUrl = (process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com").replace(/\/$/, "");
 const deepseekChatPath = process.env.DEEPSEEK_CHAT_PATH || "/chat/completions";
@@ -2410,37 +2410,47 @@ function agentVisualInputs(attachments = []) {
 async function summarizeAgentVisualAttachments(attachments = [], latestUserMessage = "") {
   const inputs = agentVisualInputs(attachments);
   if (!inputs.length || !hasApimartConfig()) return "";
+  const textBlock = [
+    "User message:",
+    sanitizeAgentText(latestUserMessage).slice(0, 800) || "(no text)",
+    "",
+    "Analyze these visual inputs. For video frames, infer broad scene flow only; do not pretend to know audio or motion between frames.",
+    inputs.map((item, index) => `${index + 1}. ${item.label}`).join("\n")
+  ].join("\n");
+  const contentVariants = [
+    [
+      { type: "text", text: textBlock },
+      ...inputs.map((item) => ({ type: "image_url", image_url: { url: item.dataUrl } }))
+    ],
+    [
+      { type: "text", text: textBlock },
+      ...inputs.map((item) => ({ type: "image_url", image_url: item.dataUrl }))
+    ]
+  ];
   try {
-    const data = await apimartRequest(apimartChatPath, {
-      method: "POST",
-      body: JSON.stringify({
-        model: agentVisionModel,
-        stream: false,
-        messages: [
-          {
-            role: "system",
-            content: "You analyze user-uploaded images and video keyframes for Pokaya Agent. Describe only visible facts, likely product/content purpose, strengths, issues, and practical next actions. If unsure, say unsure."
-          },
-          {
-            role: "user",
-            content: [
+    for (const content of contentVariants) {
+      try {
+        const data = await apimartRequest(apimartChatPath, {
+          method: "POST",
+          body: JSON.stringify({
+            model: agentVisionModel,
+            stream: false,
+            messages: [
               {
-                type: "text",
-                text: [
-                  "User message:",
-                  sanitizeAgentText(latestUserMessage).slice(0, 800) || "(no text)",
-                  "",
-                  "Analyze these visual inputs. For video frames, infer broad scene flow only; do not pretend to know audio or motion between frames.",
-                  inputs.map((item, index) => `${index + 1}. ${item.label}`).join("\n")
-                ].join("\n")
+                role: "system",
+                content: "You analyze user-uploaded images and video keyframes for Pokaya Agent. Describe only visible facts, likely product/content purpose, strengths, issues, and practical next actions. If unsure, say unsure."
               },
-              ...inputs.map((item) => ({ type: "image_url", image_url: { url: item.dataUrl } }))
+              { role: "user", content }
             ]
-          }
-        ]
-      })
-    });
-    return sanitizeAgentText(data.choices?.[0]?.message?.content || data.output_text || data.text || "").slice(0, 1800);
+          })
+        });
+        const summary = sanitizeAgentText(data.choices?.[0]?.message?.content || data.output_text || data.text || "").slice(0, 1800);
+        if (summary) return summary;
+      } catch (error) {
+        if (content === contentVariants.at(-1)) throw error;
+      }
+    }
+    return "";
   } catch (error) {
     console.warn("Agent visual analysis skipped:", error.message);
     return "";
