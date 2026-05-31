@@ -42,6 +42,7 @@ let imageConsoleScrollCleanup = null;
 let sidebarTooltipCleanup = null;
 let imageCountSaveTimer = null;
 let imageCountSaveSeq = 0;
+let resultTitleSaveTimer = null;
 const quickFieldSaveTimers = new Map();
 let quickFieldSaveSeq = 0;
 
@@ -150,6 +151,7 @@ const state = {
   attachmentPickerFilter: "avatar",
   ugcPromptBuilder: defaultUgcPromptBuilder(),
   activeResultId: null,
+  resultTitleSavedId: null,
   imageCanvasSelectedResultId: null,
   editImageBusy: false,
   assetSearch: "",
@@ -5935,7 +5937,12 @@ function resultPreviewModal() {
           <span class="result-detail-avatar">${icon(item?.videoUrl ? "video" : "image", 22)}</span>
           <label>
             <span>Image name</span>
-            <input data-result-title="${esc(item?.id || "")}" value="${safeTitle}" aria-label="Image name">
+            <div class="result-title-editor ${state.resultTitleSavedId === item?.id ? "is-saved" : ""}">
+              <input data-result-title="${esc(item?.id || "")}" value="${safeTitle}" aria-label="Image name">
+              <button type="button" data-result-title-save="${esc(item?.id || "")}" aria-label="Save image name" title="Save image name">
+                ${icon(state.resultTitleSavedId === item?.id ? "check-circle-2" : "check", 20)}
+              </button>
+            </div>
           </label>
         </header>
         <section class="result-detail-card result-detail-prompt-card">
@@ -8391,12 +8398,18 @@ function bind() {
   document.querySelectorAll("[data-image-console-prompt]").forEach((el) => el.addEventListener("input", () => updateImagePromptLocal(el.value)));
   document.querySelectorAll("[data-image-model-option]").forEach((el) => el.addEventListener("click", () => saveProjectField("image.model", el.dataset.imageModelOption)));
   document.querySelectorAll("[data-result-title]").forEach((el) => {
+    el.addEventListener("input", () => {
+      if (state.resultTitleSavedId === el.dataset.resultTitle) set({ resultTitleSavedId: null });
+    });
     el.addEventListener("change", () => renameResultInline(el));
     el.addEventListener("keydown", (event) => {
       if (event.key !== "Enter") return;
       event.preventDefault();
-      el.blur();
+      renameResultInline(el);
     });
+  });
+  document.querySelectorAll("[data-result-title-save]").forEach((el) => {
+    el.addEventListener("click", () => renameResultInline(el.closest(".result-title-editor")?.querySelector("[data-result-title]")));
   });
   document.querySelectorAll("[data-asset-type]").forEach((el) => el.addEventListener("click", () => set({ assetTypeFilter: el.dataset.assetType })));
   document.querySelectorAll("[data-asset-project]").forEach((el) => el.addEventListener("click", () => set({ assetProjectFilter: el.dataset.assetProject })));
@@ -10189,19 +10202,31 @@ async function renameResultInline(input) {
   const id = input?.dataset.resultTitle;
   const item = findAssetResult(id);
   const title = String(input?.value || "").trim();
-  if (!id || !item || title === item.title) return;
+  if (!id || !item) return;
   if (!title) {
     input.value = item.title || "";
     return notify("资产名称不能为空。");
   }
+  if (title === item.title) {
+    flashResultTitleSaved(id);
+    return notify("资产名称已保存。");
+  }
   try {
     const db = await api(`/results/${id}`, { method: "PATCH", body: JSON.stringify({ title }) });
-    set({ db });
+    flashResultTitleSaved(id, db);
     notify("资产名称已保存。");
   } catch (error) {
     input.value = item.title || "";
     notify(error.message);
   }
+}
+
+function flashResultTitleSaved(id, db) {
+  clearTimeout(resultTitleSaveTimer);
+  set(db ? { db, resultTitleSavedId: id } : { resultTitleSavedId: id });
+  resultTitleSaveTimer = setTimeout(() => {
+    if (state.resultTitleSavedId === id) set({ resultTitleSavedId: null });
+  }, 1400);
 }
 
 async function editResultImage(data) {
