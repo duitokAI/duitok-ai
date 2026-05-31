@@ -21830,25 +21830,50 @@ label {
 }
 
 .studio-shell .workspace:has(.step-tabs) .step-tabs {
-  display: grid !important;
-  grid-template-columns: repeat(6, minmax(132px, 1fr)) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
   gap: 8px !important;
   margin-bottom: 0 !important;
   padding-bottom: 0 !important;
-  overflow: visible !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: none;
+}
+
+.studio-shell .workspace:has(.step-tabs) .step-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.studio-shell .workspace:has(.step-tabs) .project-step-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 14;
+  margin: calc(var(--project-page-pad-y) * -1) calc(var(--project-page-pad-x) * -1) 10px !important;
+  padding: 8px var(--project-page-pad-x) 9px !important;
+  background:
+    linear-gradient(180deg, rgba(255, 246, 252, 0.98) 0%, rgba(255, 246, 252, 0.96) 74%, rgba(255, 246, 252, 0) 100%);
+  backdrop-filter: blur(18px);
+}
+
+.studio-shell .workspace:has(.step-tabs) .studio-top-step-tabs {
+  width: 100%;
+  max-width: min(1480px, 100%);
+  margin: 0 auto !important;
 }
 
 .studio-shell .workspace:has(.step-tabs) .step-tabs button {
-  display: grid !important;
-  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  flex: 0 0 auto !important;
+  display: inline-flex !important;
   align-items: center !important;
-  justify-items: start !important;
+  justify-content: flex-start !important;
   min-width: 0 !important;
   max-width: none !important;
-  min-height: var(--project-tab-height) !important;
+  width: auto !important;
+  min-height: 52px !important;
   border-radius: 11px !important;
   gap: 8px !important;
-  padding: 0 12px !important;
+  padding: 0 18px !important;
   font-size: 13.5px !important;
   line-height: 1 !important;
 }
@@ -21867,7 +21892,7 @@ label {
 }
 
 .studio-shell .workspace:has(.step-tabs) .step-tabs b {
-  justify-self: end !important;
+  margin-left: 6px !important;
   font-size: 10px !important;
 }
 
