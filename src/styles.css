@@ -1561,7 +1561,7 @@
 .studio-shell .image-console-add svg,
 .studio-shell .image-reference-thumb svg,
 .studio-shell .image-console-step-menu summary svg {
-  color: #ffd21a;
+  color: #b78ad8;
   stroke: currentColor;
 }
 
@@ -25410,7 +25410,7 @@ label {
 .studio-shell .image-console-tools .image-aspect-ratio-select svg,
 .studio-shell .image-console-tools .image-resolution-select svg,
 .studio-shell .image-console-tools span svg {
-  color: #ffd21a !important;
+  color: #b78ad8 !important;
 }
 
 .studio-shell .image-reference-thumb {
@@ -26163,7 +26163,7 @@ label {
 }
 
 .studio-shell .image-count-stepper button:hover:not(:disabled) {
-  color: #ffd21a;
+  color: #b78ad8;
   background: rgba(255, 250, 252, 0.09);
 }
 
@@ -29654,7 +29654,7 @@ label {
   place-items: center !important;
   border-radius: 0 !important;
   background: transparent !important;
-  color: #ffc400 !important;
+  color: #b78ad8 !important;
   transform: translateX(-50%) !important;
 }
 
@@ -29867,6 +29867,11 @@ label {
 }
 
 /* Image console symbols should read as soft purple, not yellow. */
+.studio-shell .image-generate-console .image-console-tools svg,
+.studio-shell .image-generate-console .image-console-tools svg *,
+.studio-shell .image-generate-console .image-reference-thumb:not(.has-ref) svg,
+.studio-shell .image-generate-console .image-reference-thumb:not(.has-ref) svg *,
+.studio-shell .image-generate-console .image-reference-thumb:not(.has-ref) > span:not(.image-reference-clear),
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools span svg,
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools label svg,
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools .image-aspect-ratio-select svg,
@@ -29875,4 +29880,9 @@ label {
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb:not(.has-ref) > span:not(.image-reference-clear) svg {
   color: #b78ad8 !important;
   stroke: currentColor !important;
+}
+
+.studio-shell .image-generate-console .image-reference-thumb:not(.has-ref) svg [fill]:not([fill="none"]),
+.studio-shell .image-generate-console .image-console-tools svg [fill]:not([fill="none"]) {
+  fill: #b78ad8 !important;
 }
