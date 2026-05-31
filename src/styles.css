@@ -22616,19 +22616,13 @@ label {
 }
 
 @media (max-width: 680px) {
-  .result-lightbox {
-    width: 100%;
-    height: 94vh;
-    border-radius: 18px;
-  }
-
-  .result-lightbox header {
-    min-height: 58px;
-    padding: 11px 12px;
-  }
-
-  .result-lightbox header b {
-    font-size: 15px;
+  .result-lightbox-close {
+    top: 14px;
+    right: 14px;
+    width: 56px !important;
+    min-width: 56px !important;
+    height: 56px !important;
+    min-height: 56px !important;
   }
 }
 
@@ -24712,6 +24706,7 @@ label {
 .studio-shell.sidebar-collapsed .side-primary,
 .studio-shell.sidebar-collapsed .side-link,
 .studio-shell.sidebar-collapsed .side-support-button {
+  position: relative !important;
   width: 52px !important;
   min-width: 52px !important;
   min-height: 52px !important;
@@ -24723,6 +24718,48 @@ label {
   border-radius: 16px !important;
   padding: 0 !important;
   text-align: center !important;
+}
+
+.studio-shell.sidebar-collapsed .agent-primary-card::after,
+.studio-shell.sidebar-collapsed .side-primary::after,
+.studio-shell.sidebar-collapsed .side-link::after,
+.studio-shell.sidebar-collapsed .side-support-button::after {
+  content: attr(aria-label);
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%;
+  z-index: 30;
+  max-width: 220px;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 11px;
+  padding: 0 13px;
+  background: rgba(28, 28, 28, 0.96);
+  color: #fff;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.36);
+  font-size: 14px;
+  font-weight: 760;
+  letter-spacing: 0;
+  line-height: 1;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(4px, -50%) scale(0.98);
+  transition: opacity 0.14s ease, transform 0.14s ease;
+  white-space: nowrap;
+}
+
+.studio-shell.sidebar-collapsed .agent-primary-card:hover::after,
+.studio-shell.sidebar-collapsed .side-primary:hover::after,
+.studio-shell.sidebar-collapsed .side-link:hover::after,
+.studio-shell.sidebar-collapsed .side-support-button:hover::after,
+.studio-shell.sidebar-collapsed .agent-primary-card:focus-visible::after,
+.studio-shell.sidebar-collapsed .side-primary:focus-visible::after,
+.studio-shell.sidebar-collapsed .side-link:focus-visible::after,
+.studio-shell.sidebar-collapsed .side-support-button:focus-visible::after {
+  opacity: 1;
+  transform: translate(0, -50%) scale(1);
 }
 
 .studio-shell.sidebar-collapsed .agent-primary-copy,
