@@ -37,6 +37,7 @@ let sopSearchTimer = null;
 let imagePresetSaveTimer = null;
 let autoFrameworkSaveTimer = null;
 let autoFrameworkSaveSeq = 0;
+let imageConsoleScrollCleanup = null;
 const quickFieldSaveTimers = new Map();
 let quickFieldSaveSeq = 0;
 
@@ -1421,6 +1422,31 @@ function restoreSidebarScroll() {
   sidebar.scrollTop = Math.min(sidebarScrollTop, maxScroll);
 }
 
+function bindImageConsoleCompact() {
+  imageConsoleScrollCleanup?.();
+  imageConsoleScrollCleanup = null;
+  const consoleEl = document.querySelector(".image-higgsfield-mode .image-generate-console");
+  if (!consoleEl) return;
+  let ticking = false;
+  const sync = () => {
+    ticking = false;
+    const compact = window.scrollY > 120;
+    consoleEl.classList.toggle("is-compact", compact);
+  };
+  const requestSync = () => {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(sync);
+  };
+  window.addEventListener("scroll", requestSync, { passive: true });
+  window.addEventListener("resize", requestSync);
+  sync();
+  imageConsoleScrollCleanup = () => {
+    window.removeEventListener("scroll", requestSync);
+    window.removeEventListener("resize", requestSync);
+  };
+}
+
 function project() {
   return state.db.projects.find((item) => item.id === state.projectId) || state.db.projects[0];
 }
@@ -1471,6 +1497,7 @@ function render() {
   window.lucide?.createIcons();
   updatePromoCountdown();
   restoreSidebarScroll();
+  bindImageConsoleCompact();
   scrollToSopAnchor();
 }
 
