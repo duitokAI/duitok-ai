@@ -3881,10 +3881,6 @@ function adminPage() {
 function projectPage() {
   const p = project();
   return `
-    <header class="project-head">
-      <div><p class="folder-label">${icon("sparkles", 18)} Pokaya AI</p><h1>${t("projects")}</h1></div>
-      <button class="sop-button" data-sop-target="${esc(state.step)}">${icon("book-open", 25)} ${sopButtonLabel()}</button>
-    </header>
     <section class="canvas-card studio-workbench-card">
       <div class="studio-step-panel">${stepPanel(p)}</div>
     </section>`;
