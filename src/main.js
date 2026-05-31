@@ -15,6 +15,7 @@ const storageKeys = {
   token: "pokaya-auth",
   adminKey: "pokaya-admin-key",
   lang: "pokaya-lang",
+  sidebarCollapsed: "pokaya-sidebar-collapsed",
   agentMessages: "pokaya-agent-messages",
   agentContextSummary: "pokaya-agent-context-summary",
   agentHistory: "pokaya-agent-history"
@@ -114,6 +115,7 @@ const state = {
   agentInput: "",
   agentBusy: false,
   agentTyping: false,
+  sidebarCollapsed: localStorage.getItem(storageKeys.sidebarCollapsed) === "true",
   agentBusyStartedAt: 0,
   agentWorkingTick: 0,
   agentDebugOpen: false,
@@ -2900,32 +2902,37 @@ function login() {
 }
 
 function studio() {
+  const collapsed = state.sidebarCollapsed;
+  const collapseLabel = collapsed ? "Expand sidebar" : "Collapse sidebar";
   return `
-    <div class="studio-shell">
+    <div class="studio-shell ${collapsed ? "sidebar-collapsed" : ""}">
       <aside class="sidebar">
+        <button class="sidebar-collapse-toggle" data-action="toggle-sidebar" type="button" title="${esc(collapseLabel)}" aria-label="${esc(collapseLabel)}" aria-expanded="${collapsed ? "false" : "true"}">
+          ${icon(collapsed ? "panel-left-open" : "panel-left-close", 18)}
+        </button>
         ${brand()}
         <div class="sidebar-language">${languageSwitch()}</div>
-        <button class="agent-primary-card ${state.page === "agent" ? "active" : ""}" data-page="agent">
+        <button class="agent-primary-card ${state.page === "agent" ? "active" : ""}" data-page="agent" title="${esc(t("pokayaAgent"))}" aria-label="${esc(t("pokayaAgent"))}">
           <span class="agent-primary-icon">${icon("bot", 21)}</span>
           <span class="agent-primary-copy"><b>${t("pokayaAgent")}</b><small>Your AI operator</small></span>
           <span class="agent-primary-status"><i></i>READY</span>
         </button>
         <div class="side-section">${icon("layout-dashboard", 18)} ${t("workspace")}</div>
-        <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard">${icon("layout-dashboard", 22)} ${t("dashboard")}</button>
-        <button class="side-primary studio-nav-button ${state.page === "project" ? "active" : ""}" data-page="project">${studioMark()} ${t("projects")}</button>
-        ${isOwnerAdminAccount() ? `<button class="side-link ${state.page === "admin" ? "active" : ""}" data-page="admin">${icon("shield-check")} Admin CRM</button>` : ""}
-        <button class="side-link ${state.page === "library" ? "active" : ""}" data-page="library">${icon("folder")} ${t("contentLibrary")}</button>
+        <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard" title="${esc(t("dashboard"))}" aria-label="${esc(t("dashboard"))}">${icon("layout-dashboard", 22)} <span>${t("dashboard")}</span></button>
+        <button class="side-primary studio-nav-button ${state.page === "project" ? "active" : ""}" data-page="project" title="${esc(t("projects"))}" aria-label="${esc(t("projects"))}">${studioMark()} <span>${t("projects")}</span></button>
+        ${isOwnerAdminAccount() ? `<button class="side-link ${state.page === "admin" ? "active" : ""}" data-page="admin" title="Admin CRM" aria-label="Admin CRM">${icon("shield-check")} <span>Admin CRM</span></button>` : ""}
+        <button class="side-link ${state.page === "library" ? "active" : ""}" data-page="library" title="${esc(t("contentLibrary"))}" aria-label="${esc(t("contentLibrary"))}">${icon("folder")} <span>${t("contentLibrary")}</span></button>
         <div class="side-section account">${icon("wallet-cards", 18)} ${t("business")}</div>
         ${[
           ["billing", "credit-card", "billing"],
           ["topup", "wallet-cards", "topup"],
           ["usage", "activity", "usage"],
           ["affiliate", "users", "affiliate"]
-        ].map(([id, ic, key]) => `<button class="side-link ${state.page === id ? "active" : ""}" data-page="${id}">${icon(ic)} ${t(key)}</button>`).join("")}
-        <button class="side-link ${state.page === "sop" ? "active" : ""}" data-sop-target="dashboard">${icon("book-open")} SOP</button>
-        <button class="side-link ${state.page === "autopost" ? "active" : ""}" data-page="autopost">${icon("send")} ${t("autopost")}</button>
-        <button class="side-link" data-action="open-whatsapp">${icon("message-circle")} ${t("whatsapp")}${icon("arrow-up-right", 14)}</button>
-        <button class="side-support-button" data-action="support">
+        ].map(([id, ic, key]) => `<button class="side-link ${state.page === id ? "active" : ""}" data-page="${id}" title="${esc(t(key))}" aria-label="${esc(t(key))}">${icon(ic)} <span>${t(key)}</span></button>`).join("")}
+        <button class="side-link ${state.page === "sop" ? "active" : ""}" data-sop-target="dashboard" title="SOP" aria-label="SOP">${icon("book-open")} <span>SOP</span></button>
+        <button class="side-link ${state.page === "autopost" ? "active" : ""}" data-page="autopost" title="${esc(t("autopost"))}" aria-label="${esc(t("autopost"))}">${icon("send")} <span>${t("autopost")}</span></button>
+        <button class="side-link" data-action="open-whatsapp" title="${esc(t("whatsapp"))}" aria-label="${esc(t("whatsapp"))}">${icon("message-circle")} <span>${t("whatsapp")}</span>${icon("arrow-up-right", 14)}</button>
+        <button class="side-support-button" data-action="support" title="${esc(t("humanSupport"))}" aria-label="${esc(t("humanSupport"))}">
           <span class="support-bubble-icon">${icon("message-circle", 24)}</span>
           <span class="support-bubble-copy"><b>${t("humanSupport")}</b><small>${t("whatsappSupport")}</small></span>
         </button>
@@ -8130,6 +8137,11 @@ async function action(event, name) {
     await ensureStudioData();
     window.history.pushState({}, "", "/studio");
     return render();
+  }
+  if (name === "toggle-sidebar") {
+    const sidebarCollapsed = !state.sidebarCollapsed;
+    localStorage.setItem(storageKeys.sidebarCollapsed, sidebarCollapsed ? "true" : "false");
+    return set({ sidebarCollapsed });
   }
   if (name === "apply-date") return notify(t("toastDashboardDate"));
   if (name === "reset-date") return set({ dateFrom: "2026-05-01", dateTo: "2026-05-26" });
