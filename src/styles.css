@@ -13346,6 +13346,69 @@ label {
   color: #ef4444;
 }
 
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-run-cards,
+.studio-shell .agent-page-panel .agent-generation-run-cards {
+  width: min(760px, 100%) !important;
+  max-width: 100% !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  justify-items: stretch !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-card,
+.studio-shell .agent-page-panel .agent-generation-card {
+  width: min(720px, 100%) !important;
+  min-width: min(420px, 100%) !important;
+  max-width: 100% !important;
+  justify-self: start !important;
+  align-items: start !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-card header,
+.studio-shell .agent-page-panel .agent-generation-card header {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  justify-items: start !important;
+  text-align: left !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-card header strong,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-card header span,
+.studio-shell .agent-page-panel .agent-generation-card header strong,
+.studio-shell .agent-page-panel .agent-generation-card header span {
+  width: 100% !important;
+  max-width: 100% !important;
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: anywhere !important;
+  text-align: left !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-preview,
+.studio-shell .agent-page-panel .agent-generation-preview {
+  width: min(360px, 100%) !important;
+  min-width: min(260px, 100%) !important;
+  max-width: 100% !important;
+  justify-self: start !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-preview .result-preview-trigger,
+.studio-shell .agent-page-panel .agent-generation-preview .result-preview-trigger {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-preview .result-image,
+.studio-shell .agent-page-panel .agent-generation-preview .result-image {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: block !important;
+}
+
 @keyframes agentProcessingSpin {
   to {
     transform: rotate(360deg);
