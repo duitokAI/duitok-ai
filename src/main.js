@@ -7384,9 +7384,7 @@ function agentAttachmentLabel(item = {}) {
 
 function agentChatToolbar() {
   const c = agentUiCopy();
-  const status = agentStatusInfo();
   return `<div class="agent-chat-toolbar">
-    <span class="agent-status-pill" data-agent-status="${status.key}">${icon(status.iconName, 15)} ${esc(status.label)}</span>
     <div>
       <button class="icon-only" data-action="new-agent-chat" title="${esc(c.newChat)}" aria-label="${esc(c.newChat)}">${icon("message-square-plus", 17)}</button>
       <button class="icon-only" data-action="toggle-agent-history" title="${esc(c.history)}" aria-label="${esc(c.history)}">${icon("history", 17)}${state.agentHistorySessions.length ? `<b>${state.agentHistorySessions.length}</b>` : ""}</button>

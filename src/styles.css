@@ -26737,3 +26737,12 @@ label {
   font-weight: 950 !important;
   line-height: 1 !important;
 }
+
+/* Agent toolbar without status pill: keep action buttons tucked to the right. */
+.studio-shell .agent-chat-toolbar {
+  justify-content: flex-end !important;
+}
+
+.studio-shell .agent-chat-toolbar .agent-status-pill {
+  display: none !important;
+}
