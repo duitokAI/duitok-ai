@@ -25968,3 +25968,111 @@ label {
 .studio-shell.sidebar-collapsed .sidebar-collapse-toggle:focus-visible {
   transform: none !important;
 }
+
+/* Agent page light brand theme: white first, Pokaya purple/coral as accents. */
+.studio-shell .workspace:has(.agent-page) {
+  background:
+    radial-gradient(circle at 16% 0%, rgba(255, 78, 122, 0.16), transparent 32%),
+    radial-gradient(circle at 88% 10%, rgba(111, 28, 132, 0.13), transparent 30%),
+    linear-gradient(180deg, #fff8fb 0%, #ffffff 42%, #fbf7ff 100%) !important;
+}
+
+.studio-shell .agent-page,
+.studio-shell .agent-workspace-shell,
+.studio-shell .agent-chat-shell.agent-page-panel,
+.studio-shell .agent-page-panel {
+  background: transparent !important;
+  color: #2a0633 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread {
+  width: min(920px, 100%) !important;
+  padding: clamp(36px, 7vh, 86px) 20px 32px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-empty-state {
+  max-width: min(960px, 100%) !important;
+  margin: 0 auto !important;
+  padding: clamp(24px, 4vw, 46px) 0 !important;
+  text-align: center !important;
+  background: transparent !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-empty-state strong {
+  display: block !important;
+  max-width: 900px !important;
+  margin: 0 auto !important;
+  color: #33023f !important;
+  font-size: clamp(42px, 6.1vw, 84px) !important;
+  font-weight: 950 !important;
+  line-height: 1.04 !important;
+  letter-spacing: 0 !important;
+  text-wrap: balance;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-empty-state p {
+  max-width: 760px !important;
+  margin: 26px auto 0 !important;
+  color: rgba(62, 22, 74, 0.72) !important;
+  font-size: clamp(17px, 1.7vw, 24px) !important;
+  font-weight: 760 !important;
+  line-height: 1.48 !important;
+  letter-spacing: 0 !important;
+  text-wrap: balance;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-form {
+  border: 1px solid rgba(111, 28, 132, 0.14) !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  box-shadow:
+    0 22px 60px rgba(68, 14, 82, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-attach-button {
+  color: rgba(58, 10, 70, 0.62) !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-attach-button:hover {
+  background: rgba(111, 28, 132, 0.08) !important;
+  color: #5f176f !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-form textarea {
+  color: #2a0633 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-form textarea::placeholder {
+  color: rgba(62, 22, 74, 0.46) !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article > span {
+  color: rgba(62, 22, 74, 0.56) !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.user {
+  border-color: rgba(111, 28, 132, 0.12) !important;
+  background: linear-gradient(135deg, #5f176f 0%, #33023f 100%) !important;
+  box-shadow: 0 14px 34px rgba(68, 14, 82, 0.16) !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-message,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-message p,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-message li,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant .agent-message,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant .agent-message p,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant .agent-message li {
+  color: rgba(42, 6, 51, 0.88) !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-message strong,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-message b {
+  color: #2a0633 !important;
+}
+
+@media (max-width: 760px) {
+  .studio-shell .agent-chat-shell.agent-page-panel .agent-thread {
+    padding: 28px 16px 20px !important;
+  }
+
+  .studio-shell .agent-chat-shell.agent-page-panel .agent-empty-state strong {
