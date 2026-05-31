@@ -4011,21 +4011,6 @@ function studioTopStepTabs() {
   </nav>`;
 }
 
-function studioStepMenu(extraClass = "") {
-  const current = steps.find(([id]) => id === state.step) || steps[0];
-  const [, currentIcon, currentKey] = current;
-  return `<div class="studio-step-menu ${esc(extraClass)}" aria-label="${esc(t(currentKey))}">
-    <div class="studio-step-menu-current">
-      ${icon(currentIcon, 19)}
-      <span><b>${t(currentKey)}</b></span>
-    </div>
-  </div>`;
-}
-
-function studioBottomStepSwitcher() {
-  return `<section class="studio-bottom-step-switcher">${studioStepMenu("studio-bottom-step-menu")}</section>`;
-}
-
 function sopButtonLabel() {
   const labels = {
     ms: {
@@ -4139,7 +4124,6 @@ function studioGenerateDock(p, meta = {}) {
     <div class="studio-dock-main">
       <div class="studio-dock-prompt">${input}</div>
       <div class="studio-dock-tools">
-        ${studioStepMenu("studio-dock-step-menu")}
         ${studioDockChips(p, meta)}
       </div>
     </div>

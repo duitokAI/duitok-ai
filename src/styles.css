@@ -381,57 +381,10 @@
 
 .image-console-add,
 .image-console-generate,
-.studio-step-menu-current,
 .image-reference-thumb,
 .image-console-tools span {
   border: 1px solid rgba(57, 22, 67, 0.1);
   border-radius: 14px;
-}
-
-.studio-step-menu {
-  position: relative;
-  min-width: 0;
-  z-index: 20;
-}
-
-.studio-step-menu-current {
-  height: 100%;
-  min-height: 88px;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  gap: 9px;
-  padding: 0 12px;
-  background: rgba(95, 0, 103, 0.06);
-  color: var(--studio-purple-900, #260033);
-  user-select: none;
-}
-
-.studio-step-menu-current b {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.studio-step-menu-current b {
-  font-size: 13px;
-  font-weight: 950;
-}
-
-.studio-bottom-step-switcher {
-  position: sticky;
-  bottom: 0;
-  z-index: 12;
-  margin-top: 18px;
-  border-top: 1px solid rgba(57, 22, 67, 0.1);
-  border-radius: 22px 22px 0 0;
-  padding: 12px;
-  background:
-    radial-gradient(circle at 92% 0, rgba(255, 63, 110, 0.12), transparent 34%),
-    rgba(255, 255, 255, 0.96);
-  box-shadow: 0 -18px 48px rgba(35, 8, 42, 0.1);
-  backdrop-filter: blur(16px);
 }
 
 .studio-bottom-step-menu {
@@ -587,8 +540,7 @@
 
 .studio-dock-add,
 .studio-dock-generate,
-.studio-dock-tools span,
-.studio-dock-step-menu summary {
+.studio-dock-tools span {
   border-radius: 14px;
 }
 
@@ -629,8 +581,7 @@
   gap: 8px;
 }
 
-.studio-dock-tools span,
-.studio-dock-step-menu summary {
+.studio-dock-tools span {
   min-height: 42px;
   display: inline-flex;
   align-items: center;
@@ -641,22 +592,6 @@
   color: rgba(255, 255, 255, 0.78);
   font-size: 13px;
   font-weight: 850;
-}
-
-.studio-dock-step-menu {
-  width: auto;
-}
-
-.studio-dock-step-menu summary {
-  min-height: 42px;
-}
-
-.studio-dock-step-menu summary small {
-  display: none;
-}
-
-.studio-dock-step-menu .studio-step-menu-list {
-  bottom: calc(100% + 18px);
 }
 
 .studio-dock-generate {
