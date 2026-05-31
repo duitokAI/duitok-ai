@@ -1289,16 +1289,18 @@ async function refreshState() {
 }
 
 function set(patch) {
-  const modalOnly = shouldPatchModalOnly(patch);
+  const statePatch = { ...patch };
+  delete statePatch.suppressAgentAutoScroll;
+  const modalOnly = shouldPatchModalOnly(statePatch);
   const agentScroll = captureAgentThreadScroll();
-  const agentInputFocus = captureAgentInputFocus(patch);
+  const agentInputFocus = captureAgentInputFocus(statePatch);
   const shouldScrollAgentThread = shouldAutoScrollAgentThread(patch, agentScroll);
   rememberSidebarScroll();
-  if (agentInputFocus && !Object.prototype.hasOwnProperty.call(patch, "agentInput")) state.agentInput = agentInputFocus.value;
-  Object.assign(state, patch);
+  if (agentInputFocus && !Object.prototype.hasOwnProperty.call(statePatch, "agentInput")) state.agentInput = agentInputFocus.value;
+  Object.assign(state, statePatch);
   if (modalOnly) {
     updateModalRoot();
-    if (Object.prototype.hasOwnProperty.call(patch, "projectMenuId") && !patch.projectMenuId) closeProjectMenusInDom();
+    if (Object.prototype.hasOwnProperty.call(statePatch, "projectMenuId") && !statePatch.projectMenuId) closeProjectMenusInDom();
     return;
   }
   render();
@@ -1335,6 +1337,7 @@ function restoreAgentInputFocus(snapshot = null) {
 
 function shouldAutoScrollAgentThread(patch = {}, scroll = null) {
   if (state.page !== "agent") return false;
+  if (patch.suppressAgentAutoScroll) return false;
   const affectsThread = Object.prototype.hasOwnProperty.call(patch, "agentMessages")
     || Object.prototype.hasOwnProperty.call(patch, "agentBusy")
     || Object.prototype.hasOwnProperty.call(patch, "agentQueue");
@@ -8897,7 +8900,8 @@ function typeAgentReply({ baseMessages, assistantMessage, fullContent, finalPatc
         ...baseMessages,
         { ...assistantMessage, content: chars.slice(0, index).join(""), isTyping: true }
       ],
-      agentTyping: true
+      agentTyping: true,
+      suppressAgentAutoScroll: true
     });
     agentTypingTimer = setTimeout(tick, delay);
   };
