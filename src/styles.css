@@ -25519,3 +25519,22 @@ label {
   background: rgba(255, 63, 110, 0.12) !important;
   color: #fff !important;
 }
+
+/* Sidebar top rhythm: reduce the loose gap above the language control. */
+.studio-shell:not(.sidebar-collapsed) .sidebar {
+  padding-top: 18px !important;
+}
+
+.studio-shell:not(.sidebar-collapsed) .sidebar .sidebar-topbar {
+  min-height: 50px !important;
+  padding-bottom: 8px !important;
+}
+
+.studio-shell:not(.sidebar-collapsed) .sidebar .brand-lockup {
+  padding-bottom: 12px !important;
+}
+
+.studio-shell:not(.sidebar-collapsed) .sidebar-language {
+  margin-top: 8px !important;
+  margin-bottom: 16px !important;
+}
