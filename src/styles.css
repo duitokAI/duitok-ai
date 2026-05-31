@@ -733,7 +733,7 @@
 
 .image-higgsfield-mode .studio-result-wall {
   width: 100%;
-  min-height: min(70vh, 780px);
+  min-height: 0;
   margin: 0 !important;
   overflow: visible;
   border: 0;
@@ -745,27 +745,26 @@
 .image-higgsfield-mode .studio-wall-grid {
   width: 100%;
   height: auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
-  grid-auto-rows: clamp(220px, 27vw, 420px);
-  gap: 0;
-  align-content: start;
-  justify-content: start;
+  display: block;
+  column-width: clamp(220px, 18vw, 360px);
+  column-gap: 8px;
   margin: 0 !important;
   padding: 0 !important;
 }
 
 .image-higgsfield-mode .studio-wall-card {
-  display: block;
+  display: inline-block;
   width: 100%;
-  margin: 0;
+  margin: 0 0 8px;
   padding: 0;
   overflow: hidden;
   border: 0;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
+  break-inside: avoid;
   line-height: 0;
+  vertical-align: top;
 }
 
 .image-higgsfield-mode .studio-wall-card:nth-child(2),
@@ -778,8 +777,8 @@
 
 .image-higgsfield-mode .studio-wall-card .result-preview-trigger {
   width: 100% !important;
-  height: 100% !important;
-  min-height: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
   display: block;
   border: 0;
   padding: 0;
@@ -792,12 +791,21 @@
 .image-higgsfield-mode .studio-wall-card .result-video,
 .image-higgsfield-mode .studio-wall-card .result-video-shell {
   width: 100% !important;
-  height: 100% !important;
-  min-height: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  aspect-ratio: auto !important;
   display: block;
   border-radius: 0 !important;
-  object-fit: cover !important;
+  object-fit: contain !important;
   vertical-align: top;
+}
+
+.image-higgsfield-mode .studio-wall-card .result-video-shell .result-video {
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  aspect-ratio: auto !important;
+  object-fit: contain !important;
 }
 
 .image-higgsfield-mode .studio-wall-card .visual-card-preview,
