@@ -21934,11 +21934,18 @@ label {
 
 .studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .project-step-topbar {
   margin: 0 !important;
+  border-bottom: 0 !important;
+  background: transparent !important;
 }
 
 .studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .canvas-card {
   border-radius: 0 !important;
   padding: 0 !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .studio-step-tabs {
+  border-bottom: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 .studio-shell .workspace:has(.step-tabs) .studio-workbench-card {
