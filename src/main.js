@@ -113,6 +113,7 @@ const state = {
   sopProgress: JSON.parse(localStorage.getItem("pokaya-sop-progress") || "{}"),
   agentInput: "",
   agentBusy: false,
+  agentTyping: false,
   agentBusyStartedAt: 0,
   agentWorkingTick: 0,
   agentDebugOpen: false,
@@ -157,6 +158,8 @@ const state = {
 
 let agentVisualTimer = null;
 let agentWorkingTimer = null;
+let agentTypingTimer = null;
+let agentTypingRunId = 0;
 
 const languages = [
   ["ms", "BM"],
@@ -7197,7 +7200,7 @@ function chatPanel() {
         ${intro}
         ${agentCollapsedHistoryBar()}
         ${visibleMessages.map(({ item, index }) => agentMessageArticle(item, index)).join("")}
-        ${state.agentBusy ? agentThinkingCard() : ""}
+        ${state.agentBusy && !state.agentTyping ? agentThinkingCard() : ""}
         ${agentQueuedMessages()}
       </div>
       <form class="agent-form" data-form="agent">
@@ -7334,7 +7337,8 @@ function agentCollapsedHistoryBar() {
 
 function agentMessageArticle(item, index = 0) {
   const c = agentUiCopy();
-  const body = item.role === "assistant" ? agentMessageMarkdown(item.content) : `<p>${esc(item.content).replaceAll("\n", "<br>")}</p>`;
+  const displayContent = item.isTyping ? `${item.content || ""}▍` : item.content;
+  const body = item.role === "assistant" ? agentMessageMarkdown(displayContent) : `<p>${esc(item.content).replaceAll("\n", "<br>")}</p>`;
   const chips = "";
   const runId = item.agentRun?.id || "";
   const feedback = item.role === "assistant" && runId ? `<div class="agent-feedback-row">
@@ -8125,14 +8129,16 @@ async function action(event, name) {
   if (name === "toggle-agent-history") return set({ agentHistoryOpen: !state.agentHistoryOpen });
   if (name === "toggle-agent-debug" && isOwnerAdminAccount()) return set({ agentDebugOpen: !state.agentDebugOpen, agentHistoryOpen: false });
   if (name === "new-agent-chat") {
+    clearAgentTypingTimer();
     saveCurrentAgentHistory();
     localStorage.removeItem(storageKeys.agentMessages);
-    return set({ agentMessages: [], agentInput: "", agentAttachments: [], agentQueue: [], agentExpandedMessages: {}, agentHistoryOpen: false, agentDebugOpen: false });
+    return set({ agentMessages: [], agentInput: "", agentAttachments: [], agentQueue: [], agentTyping: false, agentExpandedMessages: {}, agentHistoryOpen: false, agentDebugOpen: false });
   }
   if (name === "clear-agent-context" || name === "clear-agent") {
+    clearAgentTypingTimer();
     localStorage.removeItem(storageKeys.agentMessages);
     localStorage.removeItem(storageKeys.agentContextSummary);
-    return set({ agentMessages: [], agentInput: "", agentAttachments: [], agentQueue: [], agentContextSummary: "", agentExpandedMessages: {} });
+    return set({ agentMessages: [], agentInput: "", agentAttachments: [], agentQueue: [], agentTyping: false, agentContextSummary: "", agentExpandedMessages: {} });
   }
   if (name === "clear-agent-preferences") return clearAgentPreferences();
   if (name === "clear-agent-confirm") {
@@ -8842,6 +8848,57 @@ function stopAgentWorkingTimer() {
   set({ agentBusyStartedAt: 0, agentWorkingTick: 0 });
 }
 
+function clearAgentTypingTimer() {
+  clearTimeout(agentTypingTimer);
+  agentTypingTimer = null;
+  agentTypingRunId += 1;
+}
+
+function agentTypingChunkSize(length = 0) {
+  if (length > 1600) return 8;
+  if (length > 900) return 5;
+  if (length > 420) return 3;
+  return 2;
+}
+
+function typeAgentReply({ baseMessages, assistantMessage, fullContent, finalPatch = {}, onDone = () => {} }) {
+  clearAgentTypingTimer();
+  const runId = agentTypingRunId;
+  const chars = [...String(fullContent || "Done.")];
+  const chunkSize = agentTypingChunkSize(chars.length);
+  const delay = chars.length > 900 ? 14 : 20;
+  let index = 0;
+
+  const finalAssistantMessage = { ...assistantMessage, content: chars.join(""), isTyping: false };
+  const initialAssistantMessage = { ...assistantMessage, content: "", isTyping: true };
+  set({ ...finalPatch, agentMessages: [...baseMessages, initialAssistantMessage], agentTyping: true });
+
+  const finish = () => {
+    if (runId !== agentTypingRunId) return;
+    const messages = [...baseMessages, finalAssistantMessage];
+    rememberAgentMessages(messages);
+    set({ ...finalPatch, agentMessages: messages, agentBusy: false, agentTyping: false });
+    agentTypingTimer = null;
+    onDone(messages);
+  };
+
+  const tick = () => {
+    if (runId !== agentTypingRunId) return;
+    index = Math.min(chars.length, index + chunkSize);
+    if (index >= chars.length) return finish();
+    set({
+      agentMessages: [
+        ...baseMessages,
+        { ...assistantMessage, content: chars.slice(0, index).join(""), isTyping: true }
+      ],
+      agentTyping: true
+    });
+    agentTypingTimer = setTimeout(tick, delay);
+  };
+
+  agentTypingTimer = setTimeout(tick, 80);
+}
+
 function startAgentVisual(content) {
   const taskMode = agentWorkMode(content);
   const isChatOnly = taskMode === "command";
@@ -9064,12 +9121,13 @@ function processAgentQueue() {
 async function runAgentMessage(message, attachments = [], queuedApiAttachments = null) {
   const content = String(message || "").trim();
   if (!content && !attachments.length) return;
+  clearAgentTypingTimer();
   const userContent = content || "请先看我上传的附件，然后判断下一步应该怎么做。";
   const messageAttachments = attachments.map(agentAttachmentForStorage);
   const apiAttachments = Array.isArray(queuedApiAttachments) ? queuedApiAttachments : attachments.map(agentAttachmentForApi);
   const nextMessages = [...state.agentMessages, { role: "user", content: userContent, attachments: messageAttachments }];
   rememberAgentMessages(nextMessages);
-  set({ agentMessages: nextMessages, agentInput: "", agentAttachments: [], agentBusy: true });
+  set({ agentMessages: nextMessages, agentInput: "", agentAttachments: [], agentBusy: true, agentTyping: false });
   startAgentWorkingTimer();
   startAgentVisual(userContent);
   try {
@@ -9084,27 +9142,35 @@ async function runAgentMessage(message, attachments = [], queuedApiAttachments =
         step: state.step
       })
     });
-    const messages = [...nextMessages, { role: "assistant", content: res.reply || "Done.", agentRun: res.agentRun || null }];
-    rememberAgentMessages(messages);
     const db = res.db || state.db;
-    set({
-      db,
-      agentMessages: messages,
-      agentBusy: false,
-      ...applyAgentUiActions(res.uiActions, db)
+    typeAgentReply({
+      baseMessages: nextMessages,
+      assistantMessage: { role: "assistant", content: "", agentRun: res.agentRun || null },
+      fullContent: res.reply || "Done.",
+      finalPatch: {
+        db,
+        agentAttachments: [],
+        ...applyAgentUiActions(res.uiActions, db)
+      },
+      onDone: () => {
+        completeAgentVisual();
+        if (res.toolResults?.length) notify(t("toastAgentWorkspaceUpdated"));
+        if ((db.generationJobs || []).some((job) => ["queued", "processing"].includes(job.status))) pollGenerationQueue();
+        window.setTimeout(processAgentQueue, 0);
+      }
     });
-    completeAgentVisual();
-    if (res.toolResults?.length) notify(t("toastAgentWorkspaceUpdated"));
-    if ((db.generationJobs || []).some((job) => ["queued", "processing"].includes(job.status))) pollGenerationQueue();
-    window.setTimeout(processAgentQueue, 0);
   } catch (error) {
     const safeError = agentUserSafeError(error);
-    const messages = [...nextMessages, { role: "assistant", content: safeError }];
-    rememberAgentMessages(messages);
-    set({ agentMessages: messages, agentBusy: false });
-    completeAgentVisual();
-    notify(safeError);
-    window.setTimeout(processAgentQueue, 0);
+    typeAgentReply({
+      baseMessages: nextMessages,
+      assistantMessage: { role: "assistant", content: "" },
+      fullContent: safeError,
+      onDone: () => {
+        completeAgentVisual();
+        notify(safeError);
+        window.setTimeout(processAgentQueue, 0);
+      }
+    });
   }
 }
 
