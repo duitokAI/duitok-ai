@@ -8703,7 +8703,7 @@ async function action(event, name) {
   if (name === "clear-image-prompt-media") return clearImagePromptMedia();
   if (name === "stop-agent-response") return stopAgentResponse();
   if (name === "clear-clone-reference") return clearCloneReferenceVideo();
-  if (name?.startsWith("generate") || ["analyze-original", "clone-prompt", "write-story", "decode-viral"].includes(name)) return generate(name);
+  if (name?.startsWith("generate") || ["analyze-original", "clone-prompt", "write-story", "decode-viral"].includes(name)) return generate(name, event);
 }
 
 async function copyActiveResultPrompt() {
@@ -9383,14 +9383,48 @@ async function deleteProject() {
   }
 }
 
-async function generate(name) {
-  if (state.generating) return;
+function generationFeedbackCopy(key, count = 1) {
+  const copies = {
+    zh: {
+      busy: "上一条生成正在提交，请等几秒。",
+      submitting: "已收到，正在提交生成任务...",
+      queued: count > 1 ? `已提交 ${count} 个生成任务，正在排队。` : "已提交生成任务，正在排队。"
+    },
+    ms: {
+      busy: "Generation sebelumnya sedang dihantar. Tunggu sebentar.",
+      submitting: "Diterima. Sedang hantar generation...",
+      queued: count > 1 ? `${count} generation sudah masuk queue.` : "Generation sudah masuk queue."
+    },
+    en: {
+      busy: "The previous generation is still being submitted. Please wait a moment.",
+      submitting: "Got it. Submitting the generation...",
+      queued: count > 1 ? `${count} generations queued.` : "Generation queued."
+    }
+  };
+  return (copies[state.lang] || copies.en)[key] || "";
+}
+
+function markGenerateTriggerSubmitting(trigger) {
+  if (!trigger || trigger.disabled) return;
+  trigger.disabled = true;
+  trigger.setAttribute("aria-busy", "true");
+  trigger.classList.add("is-submitting");
+}
+
+async function generate(name, event = null) {
+  if (state.generating) {
+    notify(generationFeedbackCopy("busy"));
+    return;
+  }
   try {
+    markGenerateTriggerSubmitting(event?.currentTarget);
     set({ generating: true });
+    notify(generationFeedbackCopy("submitting"));
     await syncImageConsoleBeforeGenerate(name);
     const count = name === "generate-image" ? imageBatchCount(project()) : 1;
     const db = await api(`/projects/${state.projectId}/generate`, { method: "POST", body: JSON.stringify({ action: name, step: state.step, count }) });
     set({ db, generating: false });
+    notify(generationFeedbackCopy("queued", count));
     pollGenerationQueue();
   } catch (error) {
     set({ generating: false });
