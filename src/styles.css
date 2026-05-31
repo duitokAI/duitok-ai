@@ -29483,8 +29483,8 @@ label {
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate:disabled {
-  grid-template-rows: auto auto !important;
-  gap: 8px !important;
+  grid-template-rows: auto auto auto !important;
+  gap: 5px !important;
   overflow: hidden !important;
 }
 

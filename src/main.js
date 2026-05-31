@@ -4154,7 +4154,8 @@ function studioResultWall(p, meta = {}) {
 function studioPendingWallCard(job) {
   const aspectRatio = String(job.aspectRatio || project().image?.aspectRatio || "").includes("16:9") ? "16:9" : "9:16";
   const aspectClass = aspectRatio === "16:9" ? "landscape" : "portrait";
-  return `<article class="studio-wall-card studio-wall-pending ${aspectClass}" style="aspect-ratio:${esc(aspectRatio.replace(":", " / "))}">
+  const mediaRatio = aspectRatio === "16:9" ? "1.7778" : "0.5625";
+  return `<article class="studio-wall-card studio-wall-pending ${aspectClass}" style="--media-ratio:${mediaRatio};aspect-ratio:${esc(aspectRatio.replace(":", " / "))}">
     <div><b>${job.status === "processing" ? "Processing" : "Queued"}</b><button type="button" data-generation-cancel="${esc(job.id)}">Cancel</button></div>
   </article>`;
 }
@@ -4354,7 +4355,7 @@ function imageGenerateConsole(p, selectedModel) {
     <button class="image-console-generate" type="button" data-action="generate-image" ${state.generating ? "disabled" : ""}>
       ${icon(state.generating ? "loader-circle" : "send", 20)}
       <b>${state.generating ? "Generating" : t("generateImage")}</b>
-      ${state.generating ? "" : `<small>${credit} Credit</small>`}
+      <small>${state.generating ? "Submitting..." : `${credit} Credit`}</small>
     </button>
   </section>`;
 }
