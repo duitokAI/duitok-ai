@@ -30011,6 +30011,71 @@ label {
   min-height: calc(100dvh - var(--project-fixed-tabs-height, 58px)) !important;
 }
 
+/* Clone Prompt media wall follows the same packed media logic as Image Page. */
+.studio-shell .video-prompt-extractor-page .studio-result-wall {
+  grid-row: 2 !important;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.96), transparent 32%),
+    linear-gradient(135deg, #fff8fc 0%, #f5edf8 54%, #eee2f4 100%) !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .video-prompt-extractor-page .studio-wall-grid {
+  --studio-wall-row-height: clamp(150px, calc(var(--studio-wall-column, 260px) * 0.92), 520px);
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: flex-start !important;
+  align-content: flex-start !important;
+  justify-content: flex-start !important;
+  gap: 4px !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #efe2f5 !important;
+}
+
+.studio-shell .video-prompt-extractor-page .studio-wall-card {
+  display: block !important;
+  flex: var(--media-ratio, 1) 1 calc(var(--studio-wall-row-height) * var(--media-ratio, 1)) !important;
+  aspect-ratio: var(--media-ratio, 1) / 1 !important;
+  width: auto !important;
+  min-width: min(calc(var(--studio-wall-row-height) * var(--media-ratio, 1) * 0.74), 100%) !important;
+  height: auto !important;
+  max-width: none !important;
+  margin: 0 0 4px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #efe2f5 !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .video-prompt-extractor-page .studio-wall-card .result-preview-trigger,
+.studio-shell .video-prompt-extractor-page .studio-wall-card .result-image,
+.studio-shell .video-prompt-extractor-page .studio-wall-card .result-video,
+.studio-shell .video-prompt-extractor-page .studio-wall-card .result-video-shell,
+.studio-shell .video-prompt-extractor-page .studio-wall-card .visual-card-preview,
+.studio-shell .video-prompt-extractor-page .studio-wall-card .result-text-preview,
+.studio-shell .video-prompt-extractor-page .studio-wall-card .result-media-error {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  display: block !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .video-prompt-extractor-page .studio-wall-card .result-image,
+.studio-shell .video-prompt-extractor-page .studio-wall-card .result-video,
+.studio-shell .video-prompt-extractor-page .studio-wall-card .result-video-shell {
+  object-fit: cover !important;
+  vertical-align: top !important;
+}
+
 /* Prompt Advanced lives beside the model picker as a compact symbol button. */
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools {
   grid-template-columns:
