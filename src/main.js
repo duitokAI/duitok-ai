@@ -4159,6 +4159,8 @@ function imageGenerateConsole(p, selectedModel) {
   const product = selectedImageReference("product");
   const credit = selectedModel === "Nano Banana Pro" ? "0.20" : "0.15";
   const modelOptions = [["GPT Image 2", "GPT Image 2"], ["Nano Banana Pro", "Nano Pro"]];
+  const aspectRatioOptions = ["9:16", "16:9"];
+  const selectedAspectRatio = aspectRatioOptions.includes(p.image.aspectRatio) ? p.image.aspectRatio : "9:16";
   const resolutionOptions = [["1K", "1k"], ["2K", "2k"], ["4K", "4k"]];
   const selectedResolution = ["1K", "2K", "4K"].includes(String(p.image.resolution || "").toUpperCase())
     ? String(p.image.resolution).toUpperCase()
@@ -4171,7 +4173,7 @@ function imageGenerateConsole(p, selectedModel) {
     </label>
     <div class="image-console-tools">
       <label>${select("image.model", "", modelOptions, selectedModel)}</label>
-      <span>${icon("smartphone", 15)} 9:16</span>
+      <label class="image-aspect-ratio-select">${icon("smartphone", 15)}<select data-field="image.aspectRatio">${aspectRatioOptions.map((value) => `<option value="${esc(value)}" ${value === selectedAspectRatio ? "selected" : ""}>${esc(value)}</option>`).join("")}</select></label>
       <label class="image-resolution-select">${icon("gem", 15)}<select data-field="image.resolution">${resolutionOptions.map(([value, label]) => `<option value="${esc(value)}" ${value === selectedResolution ? "selected" : ""}>${esc(label)}</option>`).join("")}</select></label>
       <span>${icon("coins", 15)} ~${credit} credit</span>
     </div>

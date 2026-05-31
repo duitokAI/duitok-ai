@@ -466,7 +466,7 @@ function blankProject(id, name, userId = adminUserId) {
     userId,
     name,
     createdAt: new Date().toISOString(),
-    image: { model: "GPT Image 2", mode: "Create Image", duration: "8", resolution: "2K", prompt: "" },
+    image: { model: "GPT Image 2", mode: "Create Image", duration: "8", aspectRatio: "9:16", resolution: "2K", prompt: "" },
     ugc: { avatar: "Malay female", voice: "BM Casual", length: "30 seconds", script: "Hook, product proof, objection, offer, CTA." },
     auto: { platform: "TikTok", batch: "7 posts", tone: "Viral hook", productUrl: "" },
     original: { brief: "Rewrite this into Pokaya AI style while keeping the product claim safe." },
@@ -1922,6 +1922,7 @@ function flattenUrlValues(value) {
 }
 
 async function generateImageWithApimart(project) {
+  const aspectRatio = imageAspectRatioFromProject(project);
   const resolution = imageResolutionFromProject(project);
   const prompt = [
     project.image?.prompt || "Create a high-converting TikTok Shop product image.",
@@ -1934,7 +1935,7 @@ async function generateImageWithApimart(project) {
       model: imageModelFromProject(project),
       prompt,
       n: 1,
-      size: process.env.APIMART_IMAGE_SIZE || "1:1",
+      size: aspectRatio,
       resolution
     })
   });
@@ -1960,11 +1961,17 @@ function imageResolutionFromProject(project) {
   return ["1K", "2K", "4K"].includes(value) ? value : ["1K", "2K", "4K"].includes(fallback) ? fallback : "2K";
 }
 
+function imageAspectRatioFromProject(project) {
+  const value = String(project?.image?.aspectRatio || "").trim();
+  const fallback = String(process.env.APIMART_IMAGE_SIZE || process.env.GRSAI_NANO_ASPECT_RATIO || "9:16").trim();
+  return ["9:16", "16:9"].includes(value) ? value : ["9:16", "16:9"].includes(fallback) ? fallback : "9:16";
+}
+
 function grsaiImageBody(project, prompt) {
   return {
     model: grsaiNanoModel,
     prompt,
-    aspectRatio: process.env.GRSAI_NANO_ASPECT_RATIO || process.env.WUYIN_IMAGE_ASPECT_RATIO || "1:1",
+    aspectRatio: imageAspectRatioFromProject(project),
     imageSize: imageResolutionFromProject(project),
     shutProgress: true
   };
@@ -4506,6 +4513,7 @@ const agentAllowedFieldPaths = new Set([
   "image.model",
   "image.mode",
   "image.duration",
+  "image.aspectRatio",
   "image.resolution",
   "image.prompt",
   "ugc.avatar",

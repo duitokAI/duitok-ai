@@ -938,6 +938,7 @@
 
 .studio-shell .image-console-add,
 .studio-shell .image-console-tools span,
+.studio-shell .image-console-tools .image-aspect-ratio-select,
 .studio-shell .image-console-tools .image-resolution-select,
 .studio-shell .image-reference-thumb,
 .studio-shell .image-console-prompt textarea,
@@ -1061,12 +1062,14 @@
   display: none;
 }
 
+.image-console-tools .image-aspect-ratio-select,
 .image-console-tools .image-resolution-select {
   border: 1px solid rgba(57, 22, 67, 0.1);
   border-radius: 14px;
   padding: 0 8px 0 10px;
 }
 
+.image-console-tools .image-aspect-ratio-select svg,
 .image-console-tools .image-resolution-select svg {
   display: block;
   flex: 0 0 auto;
@@ -1078,6 +1081,7 @@
   font-size: 12px;
 }
 
+.image-console-tools .image-aspect-ratio-select select,
 .image-console-tools .image-resolution-select select {
   min-width: 62px;
   border: 0;
@@ -1201,6 +1205,7 @@
 
 .studio-shell .image-console-add,
 .studio-shell .image-console-tools span,
+.studio-shell .image-console-tools .image-aspect-ratio-select,
 .studio-shell .image-console-tools .image-resolution-select,
 .studio-shell .image-reference-thumb,
 .studio-shell .image-console-tools select,
@@ -1254,6 +1259,7 @@
 }
 
 .studio-shell .image-console-tools span svg,
+.studio-shell .image-console-tools .image-aspect-ratio-select svg,
 .studio-shell .image-console-tools .image-resolution-select svg,
 .studio-shell .image-console-add svg,
 .studio-shell .image-reference-thumb svg,
