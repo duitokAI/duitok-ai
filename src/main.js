@@ -119,6 +119,8 @@ const state = {
   sopStepAnchor: "",
   sopProgress: JSON.parse(localStorage.getItem("pokaya-sop-progress") || "{}"),
   agentInput: "",
+  agentInputComposing: false,
+  agentRenderAfterComposition: false,
   agentBusy: false,
   agentTyping: false,
   sidebarCollapsed: localStorage.getItem(storageKeys.sidebarCollapsed) === "true",
@@ -1305,10 +1307,15 @@ function set(patch) {
   const modalOnly = shouldPatchModalOnly(statePatch);
   const agentScroll = captureAgentThreadScroll();
   const agentInputFocus = captureAgentInputFocus(statePatch);
+  const deferForAgentComposition = agentInputFocus?.composing && !Object.prototype.hasOwnProperty.call(statePatch, "agentInput") && state.page === "agent";
   const shouldScrollAgentThread = shouldAutoScrollAgentThread(patch, agentScroll);
   rememberSidebarScroll();
   if (agentInputFocus && !Object.prototype.hasOwnProperty.call(statePatch, "agentInput")) state.agentInput = agentInputFocus.value;
   Object.assign(state, statePatch);
+  if (deferForAgentComposition) {
+    state.agentRenderAfterComposition = true;
+    return;
+  }
   if (modalOnly) {
     updateModalRoot();
     if (Object.prototype.hasOwnProperty.call(statePatch, "projectMenuId") && !statePatch.projectMenuId) closeProjectMenusInDom();
@@ -1328,7 +1335,8 @@ function captureAgentInputFocus(patch = {}) {
   return {
     value: input.value,
     start: input.selectionStart,
-    end: input.selectionEnd
+    end: input.selectionEnd,
+    composing: state.agentInputComposing || input.dataset.composing === "true"
   };
 }
 
@@ -1340,6 +1348,10 @@ function restoreAgentInputFocus(snapshot = null) {
     input.focus({ preventScroll: true });
     input.value = snapshot.value;
     state.agentInput = snapshot.value;
+    if (snapshot.composing) {
+      autoResizeAgentInput(input);
+      return;
+    }
     const end = Math.min(snapshot.end ?? snapshot.value.length, snapshot.value.length);
     input.setSelectionRange(Math.min(snapshot.start ?? end, end), end);
     autoResizeAgentInput(input);
@@ -8367,13 +8379,33 @@ function bind() {
   document.querySelectorAll("[data-upload]").forEach((el) => el.addEventListener("change", uploadChange));
   const agentInput = document.querySelector("[data-agent-input]");
   autoResizeAgentInput(agentInput);
+  agentInput?.addEventListener("compositionstart", (event) => {
+    state.agentInputComposing = true;
+    event.currentTarget.dataset.composing = "true";
+  });
+  agentInput?.addEventListener("compositionend", (event) => {
+    state.agentInputComposing = false;
+    delete event.currentTarget.dataset.composing;
+    state.agentInput = event.currentTarget.value;
+    autoResizeAgentInput(event.currentTarget);
+    if (state.agentRenderAfterComposition) {
+      state.agentRenderAfterComposition = false;
+      render();
+      restoreAgentInputFocus({
+        value: state.agentInput,
+        start: event.currentTarget.selectionStart,
+        end: event.currentTarget.selectionEnd,
+        composing: false
+      });
+    }
+  });
   agentInput?.addEventListener("input", (e) => {
     state.agentInput = e.target.value;
     autoResizeAgentInput(e.target);
   });
   agentInput?.addEventListener("paste", handleAgentInputPaste);
   agentInput?.addEventListener("keydown", (event) => {
-    if (event.key !== "Enter" || event.shiftKey || event.metaKey || event.ctrlKey || event.altKey || event.isComposing) return;
+    if (event.key !== "Enter" || event.shiftKey || event.metaKey || event.ctrlKey || event.altKey || event.isComposing || state.agentInputComposing || event.keyCode === 229) return;
     event.preventDefault();
     event.currentTarget.form?.requestSubmit();
   });
@@ -8662,6 +8694,7 @@ async function copyActiveResultPrompt() {
 
 async function submit(event) {
   event.preventDefault();
+  if (event.currentTarget.dataset.form === "agent" && state.agentInputComposing) return;
   const data = Object.fromEntries(new FormData(event.currentTarget));
   if (event.currentTarget.dataset.form === "login") {
     try {
