@@ -6089,12 +6089,13 @@ button:disabled [data-lucide="loader-circle"] {
 }
 
 .attachment-add-button-product {
-  color: #f7b84d;
-  text-shadow: 0 0 22px rgba(247, 184, 77, 0.28);
+  color: #fff;
+  text-shadow: 0 0 22px rgba(255, 255, 255, 0.22);
 }
 
 .attachment-add-button-avatar {
-  color: #ff7aa8;
+  color: #fff;
+  text-shadow: 0 0 22px rgba(255, 255, 255, 0.22);
 }
 
 .attachment-add-button:hover {
@@ -6102,7 +6103,7 @@ button:disabled [data-lucide="loader-circle"] {
 }
 
 .attachment-add-button-product:hover {
-  color: #ffd084;
+  color: #fff;
 }
 
 .attachment-picker-close {
