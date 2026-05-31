@@ -29314,9 +29314,9 @@ label {
   background:
     radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.96), transparent 32%),
     linear-gradient(135deg, #fff8fc 0%, #f5edf8 54%, #eee2f4 100%) !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  overscroll-behavior: contain !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
 }
 
 .studio-shell .image-higgsfield-mode .studio-wall-grid {
@@ -29384,7 +29384,8 @@ label {
 }
 
 .studio-shell .image-higgsfield-mode {
-  grid-template-rows: 46px minmax(520px, 1fr) auto !important;
+  grid-template-rows: 46px auto auto !important;
+  align-content: start !important;
 }
 
 .studio-shell .image-higgsfield-mode > .studio-wall-zoom-control {
@@ -30099,6 +30100,8 @@ label {
 
 .studio-shell .video-prompt-extractor-page {
   min-height: calc(100dvh - var(--project-fixed-tabs-height, 58px)) !important;
+  grid-template-rows: 46px auto auto !important;
+  align-content: start !important;
 }
 
 /* Clone Prompt media wall follows the same packed media logic as Image Page. */
@@ -30107,9 +30110,9 @@ label {
   background:
     radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.96), transparent 32%),
     linear-gradient(135deg, #fff8fc 0%, #f5edf8 54%, #eee2f4 100%) !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  overscroll-behavior: contain !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
 }
 
 .studio-shell .video-prompt-extractor-page .studio-wall-grid {
