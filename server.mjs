@@ -143,7 +143,7 @@ const authSecret = process.env.AUTH_SECRET || process.env.CHIP_API_TOKEN || "pok
 const allowPublicSignup = process.env.ALLOW_PUBLIC_SIGNUP === "true" || process.env.NODE_ENV !== "production";
 const defaultUserCredits = Number(process.env.DEFAULT_USER_CREDITS ?? (process.env.NODE_ENV === "production" ? 0 : 83));
 const assetStorageProvider = process.env.ASSET_STORAGE_PROVIDER || "external";
-const requireDurableAssets = process.env.REQUIRE_DURABLE_ASSETS === "true" || (process.env.NODE_ENV === "production" && process.env.REQUIRE_DURABLE_ASSETS !== "false");
+const requireDurableAssets = process.env.REQUIRE_DURABLE_ASSETS !== "false";
 const r2Endpoint = process.env.R2_ENDPOINT || (process.env.R2_ACCOUNT_ID ? `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com` : "");
 const postgresPool = databaseUrl
   ? new Pool({
@@ -483,12 +483,9 @@ async function mirrorAssetToStorage(sourceUrl, { userId, projectId, resultId, ty
   const status = storageStatus();
   if (!sourceUrl) return { url: sourceUrl, originalUrl: sourceUrl, storage: "none" };
   if (!status.durableAssets) {
-    if (requireDurableAssets) {
-      const error = new Error("Pokaya media storage is required before generated assets can be delivered.");
-      error.status = 503;
-      throw error;
-    }
-    return { url: sourceUrl, originalUrl: sourceUrl, storage: "external" };
+    const error = new Error("Pokaya media storage is not configured. Generated media must be mirrored before it can be saved.");
+    error.status = 503;
+    throw error;
   }
   try {
     const response = await fetch(sourceUrl);
@@ -7032,6 +7029,13 @@ app.get("/api/media/result/:id/:kind", async (req, res, next) => {
       throw error;
     }
     const isVideo = req.params.kind === "video";
+    if (result.assetStorageKey) {
+      const r2Response = await getR2Object(result.assetStorageKey);
+      const contentType = r2Response.headers.get("content-type") || (isVideo ? "video/mp4" : "image/png");
+      res.setHeader("Content-Type", contentType);
+      res.setHeader("Cache-Control", "private, max-age=86400");
+      return res.send(Buffer.from(await r2Response.arrayBuffer()));
+    }
     const sourceUrl = isVideo
       ? (result.videoUrl || result.originalVideoUrl)
       : (result.imageUrl || result.originalImageUrl);
