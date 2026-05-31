@@ -8073,6 +8073,7 @@ function bind() {
   document.querySelectorAll("[data-date-field]").forEach((el) => el.addEventListener("change", () => set({ [el.dataset.dateField]: el.value })));
   document.querySelectorAll("[data-action]").forEach((el) => el.addEventListener("click", (e) => action(e, el.dataset.action)));
   document.querySelectorAll("[data-field-set]").forEach((el) => el.addEventListener("click", () => saveProjectFieldQuick(el.dataset.fieldSet, el.dataset.value, el)));
+  document.querySelectorAll('[data-field="image.aspectRatio"]').forEach((el) => el.addEventListener("input", () => syncImageAspectRatioIcon(el)));
   document.querySelectorAll("[data-field]").forEach((el) => el.addEventListener("change", fieldChange));
   document.querySelectorAll("[data-ugc-builder-option]").forEach((el) => el.addEventListener("click", () => updateUgcBuilderOption(el)));
   document.querySelectorAll("[data-ugc-builder-field]").forEach((el) => el.addEventListener("click", () => updateUgcBuilderField(el.dataset.ugcBuilderField, el.dataset.ugcBuilderValue, true)));
@@ -8196,6 +8197,12 @@ function fillAgentInput(value = "") {
 function updateImagePromptLocal(value = "") {
   if (!state.projectId || !state.db) return;
   state.db = dbWithProjectField(state.db, state.projectId, "image.prompt", value);
+}
+
+function syncImageAspectRatioIcon(selectEl) {
+  const iconEl = selectEl?.closest(".image-aspect-ratio-select")?.querySelector("svg, i");
+  if (!iconEl) return;
+  iconEl.style.transform = selectEl.value === "16:9" ? "rotate(90deg)" : "";
 }
 
 function closeLangMenu(event) {
@@ -8434,6 +8441,11 @@ async function submit(event) {
 }
 
 async function fieldChange(event) {
+  if (event.target.dataset.field === "image.aspectRatio") {
+    syncImageAspectRatioIcon(event.target);
+    saveProjectFieldQuick(event.target.dataset.field, event.target.value);
+    return;
+  }
   return saveProjectField(event.target.dataset.field, event.target.value);
 }
 
