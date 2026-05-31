@@ -1461,46 +1461,58 @@ function bindCollapsedSidebarTooltips() {
   sidebarTooltipCleanup?.();
   sidebarTooltipCleanup = null;
   document.querySelectorAll(".sidebar-hover-tooltip").forEach((el) => el.remove());
-  const shell = document.querySelector(".studio-shell.sidebar-collapsed");
-  if (!shell) return;
-  const targets = shell.querySelectorAll(".agent-primary-card[aria-label], .side-primary[aria-label], .side-link[aria-label], .side-support-button[aria-label], .sidebar-collapse-toggle[aria-label]");
-  if (!targets.length) return;
+  const targetSelector = ".agent-primary-card[aria-label], .side-primary[aria-label], .side-link[aria-label], .side-support-button[aria-label], .sidebar-collapse-toggle[aria-label]";
   const tooltip = document.createElement("div");
   tooltip.className = "sidebar-hover-tooltip";
   tooltip.setAttribute("role", "tooltip");
   document.body.appendChild(tooltip);
+  let activeTarget = null;
+  const resolveTarget = (event) => {
+    const target = event.target.closest?.(targetSelector);
+    if (!target || !target.closest(".studio-shell.sidebar-collapsed")) return null;
+    return target;
+  };
   const hide = () => {
+    activeTarget = null;
     tooltip.classList.remove("is-visible");
     tooltip.textContent = "";
   };
   const show = (target) => {
-    const label = target.getAttribute("aria-label") || target.textContent.trim();
+    const label = target.getAttribute("aria-label") || target.getAttribute("title") || target.textContent.trim();
     if (!label) return hide();
+    activeTarget = target;
+    target.setAttribute("title", label);
     const rect = target.getBoundingClientRect();
     tooltip.textContent = label;
-    tooltip.style.left = `${Math.round(rect.right + 12)}px`;
+    const tooltipWidth = Math.max(tooltip.offsetWidth, 120);
+    const left = Math.min(rect.right + 12, window.innerWidth - tooltipWidth - 12);
+    tooltip.style.left = `${Math.max(88, Math.round(left))}px`;
     tooltip.style.top = `${Math.round(rect.top + rect.height / 2)}px`;
     tooltip.classList.add("is-visible");
   };
-  const listeners = [];
-  targets.forEach((target) => {
-    const enter = () => show(target);
-    const leave = hide;
-    const focus = () => show(target);
-    const blur = hide;
-    target.addEventListener("mouseenter", enter);
-    target.addEventListener("mouseleave", leave);
-    target.addEventListener("focus", focus);
-    target.addEventListener("blur", blur);
-    listeners.push([target, enter, leave, focus, blur]);
-  });
+  const handlePointerOver = (event) => {
+    const target = resolveTarget(event);
+    if (target && target !== activeTarget) show(target);
+  };
+  const handlePointerOut = (event) => {
+    if (!activeTarget) return;
+    const related = event.relatedTarget;
+    if (related && activeTarget.contains(related)) return;
+    hide();
+  };
+  const handleFocusIn = (event) => {
+    const target = resolveTarget(event);
+    if (target) show(target);
+  };
+  document.addEventListener("pointerover", handlePointerOver);
+  document.addEventListener("pointerout", handlePointerOut);
+  document.addEventListener("focusin", handleFocusIn);
+  document.addEventListener("focusout", hide);
   sidebarTooltipCleanup = () => {
-    listeners.forEach(([target, enter, leave, focus, blur]) => {
-      target.removeEventListener("mouseenter", enter);
-      target.removeEventListener("mouseleave", leave);
-      target.removeEventListener("focus", focus);
-      target.removeEventListener("blur", blur);
-    });
+    document.removeEventListener("pointerover", handlePointerOver);
+    document.removeEventListener("pointerout", handlePointerOut);
+    document.removeEventListener("focusin", handleFocusIn);
+    document.removeEventListener("focusout", hide);
     tooltip.remove();
   };
 }
