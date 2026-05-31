@@ -4074,15 +4074,11 @@ function fieldValue(p, path = "") {
   return path.split(".").reduce((obj, key) => obj?.[key], p) || "";
 }
 
-function studioImmersiveShell(p, step, advancedHtml = "") {
+function studioImmersiveShell(p, step) {
   const meta = studioStepMeta(step);
   return `<section class="studio-immersive-page studio-wall-zoomable" data-studio-mode="${esc(step)}" ${studioWallZoomStyleAttr()}>
     ${studioWallZoomControl()}
     ${studioResultWall(p, meta)}
-    <details class="studio-advanced-drawer">
-      <summary>${icon("sliders-horizontal", 18)} Advanced settings</summary>
-      <div>${advancedHtml}</div>
-    </details>
     ${studioGenerateDock(p, meta)}
   </section>`;
 }
