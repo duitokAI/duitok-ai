@@ -21794,6 +21794,7 @@ label {
   --project-inner-pad: clamp(16px, 1.45vw, 22px);
   --project-control-height: 44px;
   --project-tab-height: 46px;
+  background: #fff !important;
   padding: var(--project-page-pad-y) var(--project-page-pad-x) 56px !important;
 }
 
@@ -21855,6 +21856,8 @@ label {
   position: sticky;
   top: 0;
   z-index: 14;
+  width: auto !important;
+  max-width: none !important;
   margin: calc(var(--project-page-pad-y) * -1) calc(var(--project-page-pad-x) * -1) 10px !important;
   padding: 8px 14px 9px 0 !important;
   border-bottom: 1px solid rgba(93, 54, 104, 0.12);
