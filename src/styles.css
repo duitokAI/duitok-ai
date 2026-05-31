@@ -25329,3 +25329,27 @@ label {
   height: 24px !important;
   stroke-width: 2.7 !important;
 }
+
+/* Agent assistant message layout: avatar sits beside the reply text. */
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant,
+.studio-shell .agent-page-panel .agent-thread article.assistant {
+  display: grid !important;
+  grid-template-columns: 50px minmax(0, 1fr) !important;
+  align-items: start !important;
+  column-gap: 18px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant > .agent-avatar-badge,
+.studio-shell .agent-page-panel .agent-thread article.assistant > .agent-avatar-badge {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant > .agent-message,
+.studio-shell .agent-page-panel .agent-thread article.assistant > .agent-message,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant > .agent-run-card,
+.studio-shell .agent-page-panel .agent-thread article.assistant > .agent-run-card,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant > .agent-feedback-row,
+.studio-shell .agent-page-panel .agent-thread article.assistant > .agent-feedback-row {
+  grid-column: 2 !important;
+}
