@@ -29654,3 +29654,46 @@ label {
 .studio-shell:has(.image-higgsfield-mode) .studio-step-panel {
   background-color: #ffffff !important;
 }
+
+/* Image count control: keep the - / number / + cells inside the pill at every width. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools {
+  grid-template-columns:
+    minmax(190px, 1.55fr)
+    minmax(92px, 0.7fr)
+    minmax(92px, 0.68fr)
+    minmax(132px, 0.76fr)
+    minmax(112px, 0.7fr) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper {
+  display: grid !important;
+  grid-template-columns: minmax(28px, 0.72fr) minmax(46px, 1fr) minmax(28px, 0.72fr) !important;
+  gap: 5px !important;
+  padding: 0 5px !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper button {
+  width: 100% !important;
+  max-width: 34px !important;
+  min-width: 0 !important;
+  justify-self: center !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper span {
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 1500px) {
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools {
+    grid-template-columns:
+      minmax(164px, 1.55fr)
+      minmax(82px, 0.68fr)
+      minmax(82px, 0.64fr)
+      minmax(124px, 0.78fr) !important;
+  }
+}
