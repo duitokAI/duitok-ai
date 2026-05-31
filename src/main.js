@@ -3896,9 +3896,18 @@ function adminPage() {
 function projectPage() {
   const p = project();
   return `
+    <section class="project-step-topbar">
+      ${studioTopStepTabs()}
+    </section>
     <section class="canvas-card studio-workbench-card">
       <div class="studio-step-panel">${stepPanel(p)}</div>
     </section>`;
+}
+
+function studioTopStepTabs() {
+  return `<nav class="step-tabs studio-top-step-tabs" aria-label="Creation tools">
+    ${steps.map(([id, ic, key, no]) => `<button class="${state.step === id ? "active" : ""}" data-step="${id}" type="button">${icon(ic)} <span>${t(key)}</span><b>${no}</b></button>`).join("")}
+  </nav>`;
 }
 
 function studioStepMenu(extraClass = "") {
@@ -4164,7 +4173,6 @@ function imageGenerateConsole(p, selectedModel) {
     ? String(p.image.resolution).toUpperCase()
     : "2K";
   return `<section class="image-generate-console">
-    ${studioStepMenu("image-console-step-menu")}
     <label class="image-console-prompt">
       <textarea data-field="image.prompt" data-image-console-prompt rows="3" placeholder="Create a high-converting TikTok Shop product image...">${esc(p.image.prompt || "")}</textarea>
     </label>

@@ -24500,10 +24500,9 @@ label {
     inset 0 1px 0 rgba(255, 250, 252, 0.1) !important;
   backdrop-filter: blur(18px);
   grid-template-areas:
-    "mode prompt prompt refs generate"
-    "mode tools tools refs generate" !important;
+    "prompt prompt refs generate"
+    "tools tools refs generate" !important;
   grid-template-columns:
-    minmax(108px, 0.2fr)
     minmax(260px, 1fr)
     minmax(190px, 0.48fr)
     minmax(230px, 0.46fr)
@@ -24576,10 +24575,10 @@ label {
 @media (max-width: 1560px) {
   .studio-shell .image-generate-console {
     grid-template-areas:
-      "mode prompt generate"
-      "mode tools generate"
-      "refs refs generate" !important;
-    grid-template-columns: minmax(100px, 0.16fr) minmax(0, 1fr) clamp(140px, 12vw, 176px) !important;
+      "prompt generate"
+      "tools generate"
+      "refs generate" !important;
+    grid-template-columns: minmax(0, 1fr) clamp(140px, 12vw, 176px) !important;
   }
 
   .studio-shell .image-console-step-menu summary,
@@ -24598,8 +24597,7 @@ label {
     grid-template-areas:
       "prompt prompt"
       "tools generate"
-      "refs generate"
-      "mode mode" !important;
+      "refs generate" !important;
     grid-template-columns: minmax(0, 1fr) minmax(132px, 0.34fr) !important;
   }
 
