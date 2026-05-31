@@ -4336,8 +4336,10 @@ function imageReferenceThumb(kind, item, emptyLabel) {
   const label = kind === "avatar" ? (zh ? "人物" : "Avatar") : (zh ? "产品" : "Product");
   const helper = item ? (zh ? "更换" : "Change") : (zh ? "可选" : emptyLabel.replace(/\s*optional$/i, ""));
   const preview = item ? attachmentPreview(item) : `<span>${icon(kind === "avatar" ? "circle-user-round" : "package", 20)}</span>`;
+  const clearButton = item ? `<span class="image-reference-clear" role="button" tabindex="0" data-action="clear-image-reference" data-attachment-kind="${esc(kind)}" aria-label="${esc(`Remove ${label}`)}">${icon("x", 13)}</span>` : "";
   return `<button class="image-reference-thumb ${item ? "has-ref" : ""}" type="button" data-action="open-attachment-picker" data-attachment-kind="${esc(kind)}">
     ${preview}
+    ${clearButton}
     <div><b>${esc(item?.name || label)}</b><small>${esc(helper)}</small></div>
   </button>`;
 }
@@ -8413,6 +8415,11 @@ async function action(event, name) {
   if (name === "sop") return set({ page: "sop", sopTopic: state.page === "project" ? state.step : "dashboard", modal: null });
   if (name === "register") return set({ modal: "register" });
   if (name === "support") return window.open(supportWhatsappUrl, "_blank", "noopener,noreferrer");
+  if (name === "clear-image-reference") {
+    event.preventDefault();
+    event.stopPropagation();
+    return clearImageReference(event.currentTarget.dataset.attachmentKind || "avatar");
+  }
   if (name === "open-attachment-picker") {
     const kind = event.currentTarget.dataset.attachmentKind || "avatar";
     return set({ modal: "attachmentPicker", attachmentPickerKind: kind, attachmentPickerFilter: kind });
@@ -8984,6 +8991,24 @@ async function pickAttachment(id, targetKind = state.attachmentPickerKind) {
     const db = await api(`/projects/${projectId}/field`, {
       method: "PATCH",
       body: JSON.stringify({ field, value: id })
+    });
+    if (state.projectId === projectId) set({ db });
+  } catch (error) {
+    set({ db: previousDb });
+    notify(error.message || t("toastSaveFailed"));
+  }
+}
+
+async function clearImageReference(kind = "avatar") {
+  const targetKind = kind === "product" ? "product" : "avatar";
+  const field = targetKind === "product" ? "image.productAttachmentId" : "image.avatarAttachmentId";
+  const projectId = state.projectId;
+  const previousDb = state.db;
+  set({ db: dbWithProjectField(previousDb, projectId, field, "") });
+  try {
+    const db = await api(`/projects/${projectId}/field`, {
+      method: "PATCH",
+      body: JSON.stringify({ field, value: "" })
     });
     if (state.projectId === projectId) set({ db });
   } catch (error) {

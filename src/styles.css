@@ -28445,6 +28445,38 @@ label {
   line-height: 1 !important;
 }
 
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-clear {
+  position: absolute !important;
+  z-index: 3 !important;
+  top: 8px !important;
+  right: 8px !important;
+  width: 22px !important;
+  height: 22px !important;
+  min-height: 22px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border: 1px solid rgba(255, 255, 255, 0.68) !important;
+  border-radius: 999px !important;
+  background: rgba(42, 6, 51, 0.72) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 18px rgba(42, 6, 51, 0.18) !important;
+  backdrop-filter: blur(10px) !important;
+  opacity: 0.92 !important;
+  transition: transform 0.16s ease, opacity 0.16s ease, background 0.16s ease !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-clear:hover {
+  transform: scale(1.06) !important;
+  opacity: 1 !important;
+  background: rgba(95, 23, 112, 0.88) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-clear svg {
+  width: 13px !important;
+  height: 13px !important;
+  stroke-width: 3 !important;
+}
+
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate {
   grid-area: generate !important;
   width: 220px !important;
