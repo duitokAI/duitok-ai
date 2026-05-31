@@ -24828,8 +24828,9 @@ label {
 
 .studio-shell:not(.sidebar-collapsed) .side-support-button .support-bubble-copy {
   min-width: 0 !important;
-  display: grid !important;
-  gap: 3px !important;
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 10px !important;
   opacity: 1 !important;
   visibility: visible !important;
 }
@@ -24850,6 +24851,7 @@ label {
 .studio-shell:not(.sidebar-collapsed) .side-support-button .support-bubble-copy small {
   color: rgba(255, 255, 255, 0.86) !important;
   font-size: 13px !important;
+  letter-spacing: 0.08em !important;
 }
 
 .studio-shell.sidebar-collapsed .agent-primary-card {
