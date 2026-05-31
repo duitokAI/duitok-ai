@@ -6153,6 +6153,10 @@ function attachmentPickerCard(item, targetKind) {
 
 function attachmentPreview(item) {
   const token = encodeURIComponent(state.token || "");
+  const inlinePreview = item.dataUrl || item.previewUrl || "";
+  if (inlinePreview && /^data:image\//i.test(inlinePreview)) {
+    return `<img src="${esc(inlinePreview)}" alt="${esc(item.name || "Attachment")}" loading="lazy">`;
+  }
   if (item.sourceResultId && item.mediaKind !== "video") {
     return `<img src="/api/media/result/${encodeURIComponent(item.sourceResultId)}/image?token=${token}" alt="${esc(item.name || "Attachment")}" loading="lazy">`;
   }
@@ -9282,7 +9286,21 @@ async function clearCloneReferenceVideo() {
 }
 
 async function uploadAttachmentFile(file, kind = state.attachmentPickerKind || "product", selectTarget = "") {
-  const db = await api("/attachments", { method: "POST", body: JSON.stringify({ projectId: state.projectId, kind, name: file.name, size: file.size, type: file.type }) });
+  const isImage = /^image\//i.test(file.type || "");
+  if (isImage && file.size > 18 * 1024 * 1024) return notify("Image is too large. Please upload an image under 18 MB.");
+  const preview = isImage ? await imageFileToDataUrl(file) : "";
+  const db = await api("/attachments", {
+    method: "POST",
+    body: JSON.stringify({
+      projectId: state.projectId,
+      kind,
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      mediaKind: isImage ? "image" : /^video\//i.test(file.type || "") ? "video" : "",
+      ...(preview ? { dataUrl: preview, previewUrl: preview } : {})
+    })
+  });
   let nextDb = db;
   if (selectTarget === "product" || selectTarget === "avatar") {
     const uploaded = (db.attachments || []).find((item) => item.projectId === state.projectId && item.kind === kind && item.name === file.name);
