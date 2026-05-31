@@ -208,41 +208,57 @@ app.get("/api/admin/diagnostics/deepseek", async (req, res, next) => {
         tools: agentTools,
         tool_choice: "auto"
       });
-      result.tests.toolResultFlow = await deepseekDiagnosticRequest({
+      const diagnosticTools = [{
+        type: "function",
+        function: {
+          name: "diagnostic_ping",
+          description: "Use this diagnostic no-op tool whenever the user asks to ping.",
+          parameters: {
+            type: "object",
+            properties: {
+              value: { type: "string" }
+            },
+            required: ["value"]
+          }
+        }
+      }];
+      const firstToolTurn = await deepseekRequest({
+        model: deepseekModel,
+        stream: false,
         messages: [
-          { role: "user", content: "Call the diagnostic tool, then answer pong." },
-          {
-            role: "assistant",
-            content: "",
-            tool_calls: [{
-              id: "call_diagnostic_ping",
-              type: "function",
-              function: {
-                name: "diagnostic_ping",
-                arguments: "{\"value\":\"pong\"}"
-              }
-            }]
-          },
-          {
-            role: "tool",
-            tool_call_id: "call_diagnostic_ping",
-            content: "{\"ok\":true,\"message\":\"pong\"}"
-          }
+          { role: "system", content: "You must call diagnostic_ping before answering." },
+          { role: "user", content: "ping now" }
         ],
-        tools: [{
-          type: "function",
-          function: {
-            name: "diagnostic_ping",
-            description: "Diagnostic no-op tool.",
-            parameters: {
-              type: "object",
-              properties: {
-                value: { type: "string" }
-              }
-            }
+        tools: diagnosticTools,
+        tool_choice: "auto"
+      }).catch((error) => ({ diagnosticError: error }));
+      const firstMessage = firstToolTurn.choices?.[0]?.message;
+      result.tests.toolResultFlow = firstToolTurn.diagnosticError
+        ? {
+            ok: false,
+            status: firstToolTurn.diagnosticError.status || 500,
+            error: sanitizeAgentText(firstToolTurn.diagnosticError.message || "Tool first turn failed").slice(0, 240)
           }
-        }]
-      });
+        : !firstMessage?.tool_calls?.[0]?.id
+        ? {
+            ok: true,
+            skipped: true,
+            response: sanitizeAgentText(firstMessage?.content || "No tool call returned").slice(0, 120)
+          }
+        : await deepseekDiagnosticRequest({
+            messages: [
+              { role: "system", content: "You must call diagnostic_ping before answering." },
+              { role: "user", content: "ping now" },
+              firstMessage,
+              {
+                role: "tool",
+                tool_call_id: firstMessage.tool_calls[0].id,
+                content: "{\"ok\":true,\"message\":\"pong\"}"
+              },
+              { role: "system", content: "Tool execution is finished. Answer now." }
+            ],
+            tools: diagnosticTools
+          });
     }
     res.json(result);
   } catch (error) {
