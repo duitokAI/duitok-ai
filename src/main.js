@@ -4639,7 +4639,7 @@ function autoPanel(p) {
       <div class="auto-provider-grid">
         ${autoButton("auto.provider", "Veo 3.1", "🎬 Veo 3.1", provider)}
         ${autoButton("auto.provider", "Sora 2", "⚡ Sora 2", provider)}
-        ${autoButton("auto.provider", "GeminiOmni", "🔷 GeminiOmni", provider)}
+        ${autoButton("auto.provider", "GeminiOmni", "🔷 Pokaya AI", provider)}
       </div>
       <div class="auto-duration-row">
         ${autoButton("auto.duration", "8s", "8s (1 shot)", duration)}
@@ -4743,7 +4743,7 @@ function originalProviderLabel(provider) {
     "Veo 3.1": "Veo",
     "Grok Imagine Video": "Grok",
     "Sora 2": "Sora",
-    "Gemini Omni": "Gemini"
+    "Gemini Omni": "Pokaya AI"
   };
   return labels[provider] || String(provider || "Video").split(" ")[0];
 }
@@ -4775,7 +4775,7 @@ function originalPanel(p) {
         ${originalChoiceButton("original.provider", "Veo 3.1", "🎬 Veo 3.1", provider)}
         ${originalChoiceButton("original.provider", "Grok Imagine Video", "⚡ Grok", provider)}
         ${originalChoiceButton("original.provider", "Sora 2", "✨ Sora 2", provider)}
-        ${originalChoiceButton("original.provider", "Gemini Omni", "🔷 Gemini Omni", provider)}
+        ${originalChoiceButton("original.provider", "Gemini Omni", "🔷 Pokaya AI", provider)}
       </div>
       <p class="original-field-label">Image Mode</p>
       <div class="original-mode-grid">
@@ -4826,7 +4826,7 @@ function videoPromptExtractorEmpty() {
     <div>
       ${icon("video", 34)}
       <b>Drop a reference video</b>
-      <span>Gemini will extract a reusable, timestamped video prompt.</span>
+      <span>Pokaya AI will extract a reusable, timestamped video prompt.</span>
     </div>
   </section>`;
 }
@@ -5124,7 +5124,7 @@ function resultMediaLabel(item) {
 
 function resultModelLabel(item) {
   const model = item.model || item.providerTitle || item.title || "";
-  if (/gemini|video prompt|extract/i.test(model)) return "GEMINI VIDEO ANALYSIS";
+  if (/gemini|video prompt|extract/i.test(model)) return "POKAYA AI";
   if (/nano|banana/i.test(model)) return "NANO BANANA PRO";
   if (/gpt|apimart/i.test(model)) return "GPT IMAGE 2";
   return item.videoUrl ? "VIDEO MODEL" : "GPT IMAGE 2";
