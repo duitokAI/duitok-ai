@@ -6856,17 +6856,44 @@ function agentDisplayLang() {
 
 function agentUserSafeError(error) {
   const raw = String(error?.message || error || "");
-  if (/failed to fetch|networkerror|load failed/i.test(raw)) {
-    return state.lang === "zh"
-      ? "生成请求连接中断了，通常是生成任务太久或网络断开。请刷新后再试一次；如果已经扣 credit，请先不要重复生成，联系我查记录。"
-      : state.lang === "ms"
-        ? "Permintaan generate terputus. Biasanya kerana task terlalu lama atau network putus. Refresh dan cuba lagi; kalau credit sudah ditolak, jangan generate semula dulu."
-        : "The generation request was interrupted, usually because the task took too long or the network dropped. Refresh and try again; if credits were deducted, do not regenerate yet.";
+  const lang = agentDisplayLang();
+  const errorCopy = {
+    zh: {
+      network: "Agent 请求连接中断了，可能是网络不稳、域名配置异常，或后端响应太久。请刷新后再试一次；如果持续出现，请联系管理员检查 API 状态。",
+      login: "登录状态已失效，请重新登录后再试。",
+      unavailable: "Agent 暂时不可用，可能是 AI 服务配置或上游接口异常。请稍后重试，或联系管理员检查 API 状态。",
+      generic: "Agent 这次请求失败了。请刷新后再发一次；如果持续出现，请联系管理员检查后端日志和 API 配置。"
+    },
+    ms: {
+      network: "Permintaan Agent terputus. Ini mungkin kerana network tidak stabil, domain/API bermasalah, atau server lambat respon. Refresh dan cuba lagi; jika masih berlaku, minta admin semak status API.",
+      login: "Sesi login sudah tamat. Sila login semula dan cuba lagi.",
+      unavailable: "Agent belum tersedia buat masa ini. Mungkin konfigurasi AI service atau upstream API bermasalah. Cuba lagi sebentar lagi, atau minta admin semak status API.",
+      generic: "Permintaan Agent gagal. Refresh dan hantar semula; jika masih berlaku, minta admin semak log backend dan konfigurasi API."
+    },
+    en: {
+      network: "The Agent request was interrupted. This may be a network issue, a domain/API routing problem, or a slow backend response. Refresh and try again; if it keeps happening, ask an admin to check API status.",
+      login: "Your login session has expired. Please sign in again and retry.",
+      unavailable: "Agent is temporarily unavailable. The AI service configuration or upstream API may be failing. Try again shortly, or ask an admin to check API status.",
+      generic: "The Agent request failed. Refresh and send it again; if it keeps happening, ask an admin to check backend logs and API configuration."
+    }
+  };
+  const copy = errorCopy[lang] || errorCopy.en;
+  if (/failed to fetch|networkerror|load failed|network|timeout|aborted|dns|cloudflare/i.test(raw)) {
+    return copy.network;
   }
-  if (/DEE?PSEEK|API[_ -]?KEY|Environment Variables|configure|configured|401|403/i.test(raw)) {
-    return agentUiCopy().errorUnavailable;
+  if (/login required|unauthorized|session|401/i.test(raw)) {
+    return copy.login;
   }
-  return raw || agentUiCopy().errorUnavailable;
+  if (/DEE?PSEEK|API[_ -]?KEY|Environment Variables|configure|configured|403|503|502|500|service unavailable|bad gateway/i.test(raw)) {
+    return copy.unavailable;
+  }
+  if (!raw || /^request failed$/i.test(raw)) {
+    return copy.generic;
+  }
+  if (/request failed|failed/i.test(raw)) {
+    return copy.generic;
+  }
+  return raw;
 }
 
 function agentHasPendingConfirmation() {
