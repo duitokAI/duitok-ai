@@ -26522,3 +26522,29 @@ label {
 .studio-shell.sidebar-collapsed .sidebar-scroll-area > .side-link > svg:last-child:not(:first-child) {
   display: none !important;
 }
+
+/* Sidebar collapse button hard lock: pin to viewport/sidebar corner in expanded mode. */
+.studio-shell:not(.sidebar-collapsed) .sidebar .sidebar-collapse-toggle {
+  position: fixed !important;
+  top: 30px !important;
+  left: calc(var(--studio-sidebar-width) - 54px) !important;
+  right: auto !important;
+  width: 34px !important;
+  min-width: 34px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  margin: 0 !important;
+  transform: none !important;
+  z-index: 100 !important;
+}
+
+.studio-shell:not(.sidebar-collapsed) .sidebar .sidebar-collapse-toggle:hover,
+.studio-shell:not(.sidebar-collapsed) .sidebar .sidebar-collapse-toggle:focus-visible {
+  transform: none !important;
+}
+
+@media (max-width: 1180px) {
+  .studio-shell:not(.sidebar-collapsed) .sidebar .sidebar-collapse-toggle {
+    left: calc(var(--studio-sidebar-width) - 54px) !important;
+  }
+}
