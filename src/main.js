@@ -4315,7 +4315,7 @@ function imageGenerateConsole(p, selectedModel) {
           ${icon("plus", 24)}
           <input type="file" data-upload="product" data-upload-select="product" accept="image/*" hidden>
         </label>
-        <textarea data-field="image.prompt" data-image-console-prompt rows="2" placeholder="Create a high-converting TikTok Shop product image...">${esc(p.image.prompt || "")}</textarea>
+        <textarea data-field="image.prompt" data-image-console-prompt rows="2" placeholder="Tell us what you want to generate">${esc(p.image.prompt || "")}</textarea>
       </div>
       <div class="image-console-tools">
         ${imageModelPicker(selectedModel)}
