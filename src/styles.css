@@ -26030,6 +26030,47 @@ label {
   transform: none !important;
 }
 
+/* Collapsed sidebar tooltips: show instantly and avoid clipping inside the scroll rail. */
+.studio-shell.sidebar-collapsed .sidebar-scroll-area {
+  overflow: visible !important;
+  padding-right: 0 !important;
+}
+
+.studio-shell.sidebar-collapsed .agent-primary-card,
+.studio-shell.sidebar-collapsed .side-primary,
+.studio-shell.sidebar-collapsed .side-link,
+.studio-shell.sidebar-collapsed .side-support-button {
+  overflow: visible !important;
+}
+
+.studio-shell.sidebar-collapsed .sidebar-collapse-toggle::after,
+.studio-shell.sidebar-collapsed .sidebar .brand-core::after,
+.studio-shell.sidebar-collapsed .side-primary::after,
+.studio-shell.sidebar-collapsed .side-link::after,
+.studio-shell.sidebar-collapsed .side-support-button::after,
+.studio-shell.sidebar-collapsed .agent-primary-card::before {
+  left: calc(100% + 8px) !important;
+  z-index: 9999 !important;
+  opacity: 0 !important;
+  transform: translate(0, -50%) !important;
+  transition: none !important;
+}
+
+.studio-shell.sidebar-collapsed .sidebar-collapse-toggle:hover::after,
+.studio-shell.sidebar-collapsed .sidebar .brand-core:hover::after,
+.studio-shell.sidebar-collapsed .side-primary:hover::after,
+.studio-shell.sidebar-collapsed .side-link:hover::after,
+.studio-shell.sidebar-collapsed .side-support-button:hover::after,
+.studio-shell.sidebar-collapsed .sidebar-collapse-toggle:focus-visible::after,
+.studio-shell.sidebar-collapsed .side-primary:focus-visible::after,
+.studio-shell.sidebar-collapsed .side-link:focus-visible::after,
+.studio-shell.sidebar-collapsed .side-support-button:focus-visible::after,
+.studio-shell.sidebar-collapsed .agent-primary-card:hover::before,
+.studio-shell.sidebar-collapsed .agent-primary-card:focus-visible::before {
+  opacity: 1 !important;
+  transform: translate(0, -50%) !important;
+}
+
 /* Agent light theme readability pass: keep small labels and feedback controls legible. */
 .studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.user > span {
   color: rgba(255, 246, 252, 0.8) !important;
