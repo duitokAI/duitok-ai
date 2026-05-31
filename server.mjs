@@ -4068,7 +4068,7 @@ function inferAgentAction(content) {
     wantsGenerate: /generate|生成|hasilkan|buat|run|create|做|产出/.test(text),
     wantsSchedule: /schedule|排期|发布|posting|post|draft|草稿|日历|calendar/.test(text),
     wantsAutoBatch: /7\s*天|七天|week|weekly|batch|content plan|内容计划|內容計劃|auto content/.test(text),
-    wantsTrendResearch: /trend|趋势|趨勢|aesthetic|风格|風格|适合卖|可以卖|卖什么|帶貨|带货|选题|對標|对标|爆款|流行|loft girl|clean girl|dopamine|downtown girl/i.test(text)
+    wantsTrendResearch: /trend|趋势|趨勢|aesthetic|风格|風格|适合卖|可以卖|卖什么|帶貨|带货|选题|對標|对标|爆款|流行|短剧|水果人|fruit drama|fruit character|loft girl|clean girl|dopamine|downtown girl/i.test(text)
   };
 }
 
@@ -4076,6 +4076,16 @@ function agentProjectName(content) {
   const compact = String(content || "").replace(/\s+/g, " ").trim();
   if (!compact) return `Agent Project ${new Date().toISOString().slice(0, 10)}`;
   return compact.length > 42 ? `${compact.slice(0, 42)}...` : compact;
+}
+
+function agentTrendQuery(content = "") {
+  const source = sanitizeAgentText(content);
+  const text = source
+    .replace(/^(我想|我要|帮我|請問|请问)?\s*(怎么做|如何做|怎么拍|怎么写|怎么规划|how\s+to|make|create)\s*/i, "")
+    .replace(/^(我想|我要|帮我)\s*/i, "")
+    .trim();
+  if (/水果人|fruit\s*drama|fruit\s*character/i.test(text || source)) return "水果人短剧 AI fruit drama short video";
+  return text || source.slice(0, 120) || "TikTok content trend";
 }
 
 function agentIntentFromContent(content = "") {
@@ -4209,7 +4219,7 @@ function agentPublishArgsFromMessage(content = "") {
 
 function agentShortcutToolFromMessage(content = "", projectId = "") {
   const intent = inferAgentAction(content);
-  if (intent.wantsTrendResearch) return { name: "trend_research", args: { query: content, market: "Malaysia TikTok Shop", depth: "standard" } };
+  if (intent.wantsTrendResearch) return { name: "trend_research", args: { query: agentTrendQuery(content), market: "Malaysia TikTok Shop", depth: "standard" } };
   if (!projectId) return null;
   if (intent.wantsProject) return { name: "create_project", args: { name: agentProjectName(content) } };
   if (intent.wantsSeedancePrompt) {
@@ -4702,6 +4712,10 @@ async function runDeterministicAgent(content, { projectId, user, workspace = nul
     await run("inspect_workspace_state", { projectId: activeProjectId, focus: /今天|today/i.test(content) ? "today" : "workspace" });
   }
 
+  if (intent.wantsTrendResearch) {
+    await run("trend_research", { query: agentTrendQuery(content), market: "Malaysia TikTok Shop", depth: "standard" });
+  }
+
   if (intent.wantsMemory && activeProjectId) {
     await run("remember_agent_context", {
       projectId: activeProjectId,
@@ -4780,9 +4794,12 @@ async function runDeterministicAgent(content, { projectId, user, workspace = nul
   }
 
   const actionNames = toolResults.map((item) => item.name).join(", ");
+  const researchedReply = buildTrendResearchAgentReply(content, toolResults) || buildWebSearchAgentReply(content, toolResults);
   return {
     reply: pendingTool
       ? confirmation.message
+      : researchedReply
+      ? researchedReply
       : toolResults.length
       ? `已完成：${actionNames || "工作区更新"}。Agent 大脑暂时不可用，所以我用 Pokaya 内置执行器先处理了可确定的动作。`
       : "Agent 大脑暂时不可用。我还能帮您创建草稿、更新工作台、创建排期草稿；复杂规划恢复后会自动回到完整 Agent 模式。",
@@ -5700,13 +5717,45 @@ app.post("/api/agent", async (req, res, next) => {
     for (let round = 0; round < 3; round += 1) {
       agentRun.status = "running";
       agentRun.plan = planWithTool(agentRun.plan, "", "running", round === 0 ? "等待模型决策" : "继续执行工具链");
-      const completion = await deepseekRequest({
-        model: deepseekModel,
-        messages,
-        tools: agentTools,
-        tool_choice: "auto",
-        stream: false
-      });
+      let completion;
+      try {
+        completion = await deepseekRequest({
+          model: deepseekModel,
+          messages,
+          tools: agentTools,
+          tool_choice: "auto",
+          stream: false
+        });
+      } catch (error) {
+        console.warn("Agent model request failed, using deterministic fallback:", sanitizeAgentText(error.message || ""));
+        const fallback = await runDeterministicAgent(latestUserMessage, { projectId, user, workspace: latestDb });
+        const fallbackDiffs = fallback.diffs || [];
+        const fallbackCards = fallback.cards || (fallback.toolResults || []).map((item) => item.card).filter(Boolean);
+        agentRun = {
+          ...agentRun,
+          status: fallback.pendingTool ? "waiting_confirmation" : fallback.toolResults?.length ? "completed" : "failed",
+          plan: fallback.pendingTool
+            ? planWithTool(agentRun.plan, fallback.pendingTool.name, "waiting_confirmation", `${agentToolLabel(fallback.pendingTool.name)}需要确认`)
+            : fallback.toolResults?.length
+            ? completeAgentPlan(agentRun.plan)
+            : failAgentPlan(agentRun.plan, "Agent 模型暂时不可用"),
+          toolResults: fallback.toolResults || [],
+          uiActions: fallback.uiActions || [],
+          diffs: fallbackDiffs,
+          cards: fallbackCards,
+          confirmation: fallback.confirmation || null,
+          pendingTool: fallback.pendingTool || null,
+          durationMs: Date.now() - startedAt
+        };
+        await saveAgentRun(agentRun);
+        return res.json({
+          reply: sanitizeAgentReply(fallback.reply, latestUserMessage),
+          db: fallback.db || latestDb,
+          toolResults: fallback.toolResults || [],
+          uiActions: fallback.uiActions || [],
+          agentRun: publicAgentRun(agentRun)
+        });
+      }
       const message = completion.choices?.[0]?.message;
       if (!message) throw Object.assign(new Error("Agent model returned an empty response"), { status: 502 });
 
