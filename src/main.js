@@ -4269,25 +4269,30 @@ function imageGenerateConsole(p, selectedModel) {
     <label class="image-console-prompt">
       <textarea data-field="image.prompt" data-image-console-prompt rows="3" placeholder="Create a high-converting TikTok Shop product image...">${esc(p.image.prompt || "")}</textarea>
     </label>
-    <div class="image-console-tools">
-      <label>${select("image.model", "", modelOptions, selectedModel)}</label>
-      <label class="image-aspect-ratio-select">${aspectRatioIcon}<select data-field="image.aspectRatio">${aspectRatioOptions.map((value) => `<option value="${esc(value)}" ${value === selectedAspectRatio ? "selected" : ""}>${esc(value)}</option>`).join("")}</select></label>
-      <label class="image-resolution-select">${icon("gem", 15)}<select data-field="image.resolution">${resolutionOptions.map(([value, label]) => `<option value="${esc(value)}" ${value === selectedResolution ? "selected" : ""}>${esc(label)}</option>`).join("")}</select></label>
-      <div class="image-count-stepper" aria-label="Images to generate">
-        <button type="button" data-action="image-count-down" aria-label="Generate fewer images" ${selectedCount <= 1 ? "disabled" : ""}>${icon("minus", 15)}</button>
-        <span><b>${selectedCount}</b><small>/4</small></span>
-        <button type="button" data-action="image-count-up" aria-label="Generate more images" ${selectedCount >= 4 ? "disabled" : ""}>${icon("plus", 15)}</button>
+    <div class="image-console-side">
+      <div class="image-console-primary-row">
+        <div class="image-console-references">
+          ${imageReferenceThumb("avatar", avatar, "Avatar optional")}
+          ${imageReferenceThumb("product", product, "Product optional")}
+        </div>
+        <button class="image-console-generate" type="button" data-action="generate-image" ${state.generating ? "disabled" : ""}>
+          ${icon(state.generating ? "loader-circle" : "send", 20)}
+          <b>${state.generating ? t("generating") : t("generateImage")}</b>
+          <small>${credit} Credit</small>
+        </button>
+      </div>
+      <div class="image-console-tools">
+        <label>${select("image.model", "", modelOptions, selectedModel)}</label>
+        <label class="image-aspect-ratio-select">${aspectRatioIcon}<select data-field="image.aspectRatio">${aspectRatioOptions.map((value) => `<option value="${esc(value)}" ${value === selectedAspectRatio ? "selected" : ""}>${esc(value)}</option>`).join("")}</select></label>
+        <label class="image-resolution-select">${icon("gem", 15)}<select data-field="image.resolution">${resolutionOptions.map(([value, label]) => `<option value="${esc(value)}" ${value === selectedResolution ? "selected" : ""}>${esc(label)}</option>`).join("")}</select></label>
+        <div class="image-count-stepper" aria-label="Images to generate">
+          <button type="button" data-action="image-count-down" aria-label="Generate fewer images" ${selectedCount <= 1 ? "disabled" : ""}>${icon("minus", 15)}</button>
+          <span><b>${selectedCount}</b><small>/4</small></span>
+          <button type="button" data-action="image-count-up" aria-label="Generate more images" ${selectedCount >= 4 ? "disabled" : ""}>${icon("plus", 15)}</button>
+        </div>
+        <button class="image-prompt-optimize" type="button" data-action="optimize-image-prompt">${icon("wand-sparkles", 15)} <span>Prompt</span></button>
       </div>
     </div>
-    <div class="image-console-references">
-      ${imageReferenceThumb("avatar", avatar, "Avatar optional")}
-      ${imageReferenceThumb("product", product, "Product optional")}
-    </div>
-    <button class="image-console-generate" type="button" data-action="generate-image" ${state.generating ? "disabled" : ""}>
-      ${icon(state.generating ? "loader-circle" : "send", 20)}
-      <b>${state.generating ? t("generating") : t("generateImage")}</b>
-      <small>${credit} Credit</small>
-    </button>
   </section>`;
 }
 
@@ -8180,6 +8185,32 @@ function updateImagePromptLocal(value = "") {
   state.db = dbWithProjectField(state.db, state.projectId, "image.prompt", value);
 }
 
+function optimizedImagePromptText(value = "") {
+  const base = String(value || "").replace(/\s+/g, " ").trim() || "Create a high-converting TikTok Shop product image featuring the product clearly";
+  const additions = [
+    "clear hero product visibility",
+    "realistic social commerce lighting",
+    "clean composition with space for ad copy",
+    "sharp product details",
+    `${project().image?.aspectRatio || "9:16"} aspect ratio`
+  ];
+  const lower = base.toLowerCase();
+  const missing = additions.filter((item) => !lower.includes(item.toLowerCase()));
+  return [base, ...missing].join(", ");
+}
+
+function optimizeImagePrompt() {
+  const input = document.querySelector("[data-image-console-prompt]");
+  const nextPrompt = optimizedImagePromptText(input?.value || project().image?.prompt || "");
+  if (input) {
+    input.value = nextPrompt;
+    input.focus({ preventScroll: true });
+  }
+  updateImagePromptLocal(nextPrompt);
+  saveProjectFieldQuick("image.prompt", nextPrompt);
+  notify("Prompt optimized.");
+}
+
 function syncImageAspectRatioIcon(selectEl) {
   const iconEl = selectEl?.closest(".image-aspect-ratio-select")?.querySelector("svg, i");
   if (!iconEl) return;
@@ -8303,6 +8334,7 @@ async function action(event, name) {
   if (name === "export-project") return download(`/api/export/project/${state.projectId}`, `${project().name}.json`);
   if (name === "image-count-down") return updateImageBatchCount(-1);
   if (name === "image-count-up") return updateImageBatchCount(1);
+  if (name === "optimize-image-prompt") return optimizeImagePrompt();
   if (name?.startsWith("generate") || ["analyze-original", "clone-prompt", "write-story", "decode-viral"].includes(name)) return generate(name);
 }
 
