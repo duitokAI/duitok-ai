@@ -9656,20 +9656,30 @@ function scheduleAgentVisual(patch, delay) {
 }
 
 function startAgentWorkingTimer() {
-  clearInterval(agentWorkingTimer);
+  clearTimeout(agentWorkingTimer);
   set({ agentBusyStartedAt: Date.now(), agentWorkingTick: 0 });
-  agentWorkingTimer = setInterval(() => {
+  scheduleNextAgentWorkingTick();
+}
+
+function scheduleNextAgentWorkingTick() {
+  const elapsed = state.agentBusyStartedAt ? Date.now() - state.agentBusyStartedAt : 0;
+  const nextPhaseAt = [1100, 2600, 4600, 8100].find((ms) => ms > elapsed);
+  if (!nextPhaseAt) {
+    agentWorkingTimer = null;
+    return;
+  }
+  agentWorkingTimer = setTimeout(() => {
     if (!state.agentBusy) {
-      clearInterval(agentWorkingTimer);
       agentWorkingTimer = null;
       return;
     }
     set({ agentWorkingTick: state.agentWorkingTick + 1 });
-  }, 1000);
+    scheduleNextAgentWorkingTick();
+  }, Math.max(250, nextPhaseAt - elapsed));
 }
 
 function stopAgentWorkingTimer() {
-  clearInterval(agentWorkingTimer);
+  clearTimeout(agentWorkingTimer);
   agentWorkingTimer = null;
   set({ agentBusyStartedAt: 0, agentWorkingTick: 0 });
 }
@@ -9687,7 +9697,7 @@ function stopAgentResponse() {
   clearAgentTypingTimer();
   clearTimeout(agentVisualTimer);
   agentVisualTimer = null;
-  clearInterval(agentWorkingTimer);
+  clearTimeout(agentWorkingTimer);
   agentWorkingTimer = null;
   const messages = (state.agentMessages || []).filter((item) => !item.isTyping);
   rememberAgentMessages(messages);
@@ -9764,7 +9774,7 @@ function startAgentVisual(content) {
 
 function completeAgentVisual() {
   clearTimeout(agentVisualTimer);
-  clearInterval(agentWorkingTimer);
+  clearTimeout(agentWorkingTimer);
   agentWorkingTimer = null;
   set({ agentVisualPhase: "done" });
   setTimeout(() => set({ agentVisualPhase: "returning" }), 1100);

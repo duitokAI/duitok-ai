@@ -29856,6 +29856,9 @@ label {
   overflow-y: auto !important;
   overscroll-behavior: contain !important;
   scrollbar-gutter: stable !important;
+  contain: layout paint style !important;
+  transform: translateZ(0);
+  will-change: scroll-position;
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-form {
@@ -29864,6 +29867,37 @@ label {
   inset: auto !important;
   flex: 0 0 auto !important;
   transform: none !important;
+}
+
+/* Agent performance: keep scrolling smooth while the backend task is running. */
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article {
+  content-visibility: auto;
+  contain-intrinsic-size: 160px;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.agent-thinking,
+.studio-shell .agent-page-panel .agent-thread article.agent-thinking {
+  contain: layout paint style !important;
+  content-visibility: visible;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thinking-row b svg,
+.studio-shell .agent-page-panel .agent-thinking-row b svg {
+  animation-duration: 1.8s !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thinking-track i,
+.studio-shell .agent-page-panel .agent-thinking-track i,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thinking-steps span.active,
+.studio-shell .agent-page-panel .agent-thinking-steps span.active {
+  animation: none !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thinking-track i,
+.studio-shell .agent-page-panel .agent-thinking-track i {
+  width: 100%;
+  transform: none !important;
+  opacity: 0.62;
 }
 
 /* Image console symbols should read as soft purple, not yellow. */
