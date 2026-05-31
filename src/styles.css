@@ -29229,3 +29229,106 @@ label {
     max-height: 98px !important;
   }
 }
+
+/* Final guardrail: keep the Image composer from allowing fixed tool widths to
+   overflow into the reference cards when the viewport or text scale changes. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) {
+  grid-template-columns: minmax(0, 1fr) clamp(196px, 16vw, 240px) clamp(188px, 14vw, 220px) !important;
+  align-items: stretch !important;
+  overflow: visible !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-main {
+  min-width: 0 !important;
+  width: 100% !important;
+  overflow: visible !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools {
+  min-width: 0 !important;
+  width: 100% !important;
+  grid-template-columns:
+    minmax(190px, 1.65fr)
+    minmax(92px, 0.72fr)
+    minmax(92px, 0.68fr)
+    minmax(126px, 0.86fr)
+    minmax(104px, 0.74fr) !important;
+  gap: clamp(6px, 0.52vw, 10px) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools label,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-optimize {
+  min-width: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools select {
+  min-width: 0 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references {
+  min-width: 0 !important;
+  width: 100% !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  justify-content: stretch !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+@media (max-width: 1500px) {
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) {
+    grid-template-columns: minmax(0, 1fr) clamp(176px, 15vw, 208px) clamp(168px, 13vw, 188px) !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools {
+    grid-template-columns:
+      minmax(168px, 1.7fr)
+      minmax(84px, 0.7fr)
+      minmax(84px, 0.66fr)
+      minmax(118px, 0.86fr) !important;
+  }
+}
+
+@media (max-width: 1120px) {
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) {
+    grid-template-areas:
+      "main generate"
+      "refs refs" !important;
+    grid-template-columns: minmax(0, 1fr) minmax(160px, 188px) !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) {
+    grid-template-areas:
+      "main"
+      "refs"
+      "generate" !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-main {
+    height: auto !important;
+    max-height: none !important;
+    grid-template-rows: 58px auto !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
