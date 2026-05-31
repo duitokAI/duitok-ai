@@ -29519,3 +29519,51 @@ label {
   background: #ffffff !important;
   color: #111111 !important;
 }
+
+/* Reference cards: center empty-state icons and caption blocks optically. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb:not(.has-ref) {
+  display: grid !important;
+  place-items: center !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb:not(.has-ref) > span:not(.image-reference-clear) {
+  position: absolute !important;
+  top: 34px !important;
+  left: 50% !important;
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  min-height: 34px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #ffc400 !important;
+  transform: translateX(-50%) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb:not(.has-ref) > span:not(.image-reference-clear) svg {
+  width: 30px !important;
+  height: 30px !important;
+  stroke-width: 2.35 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb > div {
+  left: 50% !important;
+  right: auto !important;
+  bottom: 12px !important;
+  width: calc(100% - 28px) !important;
+  max-width: 118px !important;
+  min-height: 42px !important;
+  align-content: center !important;
+  justify-items: center !important;
+  padding: 7px 8px !important;
+  text-align: center !important;
+  transform: translateX(-50%) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb b,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb small {
+  width: 100% !important;
+  text-align: center !important;
+}
