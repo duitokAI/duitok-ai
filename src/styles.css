@@ -768,16 +768,16 @@
 
 .image-higgsfield-mode .studio-wall-actions {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 7px;
+  right: 7px;
   z-index: 4;
   display: inline-flex;
-  gap: 6px;
-  padding: 4px;
-  border: 1px solid rgba(245, 238, 248, 0.58);
-  border-radius: 16px;
-  background: rgba(44, 13, 51, 0.34);
-  box-shadow: 0 12px 28px rgba(28, 0, 36, 0.22);
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid rgba(245, 238, 248, 0.34);
+  border-radius: 12px;
+  background: rgba(44, 13, 51, 0.18);
+  box-shadow: 0 8px 18px rgba(28, 0, 36, 0.14);
   opacity: 0;
   transform: translateY(-4px);
   transition: opacity 120ms ease, transform 120ms ease;
@@ -791,16 +791,22 @@
 }
 
 .image-higgsfield-mode .studio-wall-actions button {
-  width: 34px;
-  height: 34px;
-  min-width: 34px;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
   display: grid;
   place-items: center;
   border: 0;
-  border-radius: 12px;
+  border-radius: 9px;
   padding: 0;
   color: #fff;
-  box-shadow: 0 8px 18px rgba(26, 4, 32, 0.18);
+  box-shadow: 0 5px 12px rgba(26, 4, 32, 0.13);
+}
+
+.image-higgsfield-mode .studio-wall-actions button svg {
+  width: 15px !important;
+  height: 15px !important;
+  stroke-width: 2.15;
 }
 
 .image-higgsfield-mode .studio-wall-actions button:nth-child(1) {
