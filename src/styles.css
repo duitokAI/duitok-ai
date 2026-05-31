@@ -23743,3 +23743,60 @@ label {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* Result gallery model label belongs in the info area, not over the image. */
+.studio-shell .result-card {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.studio-shell .result-card .result-preview-trigger,
+.studio-shell .result-card > .result-image,
+.studio-shell .result-card > .result-video-shell,
+.studio-shell .result-card > .result-text-preview,
+.studio-shell .result-card > .result-media-error,
+.studio-shell .result-card > .visual-card-preview {
+  order: 1;
+}
+
+.studio-shell .result-card .result-card-head {
+  position: static !important;
+  order: 2;
+  min-height: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  padding: 16px 18px 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.studio-shell .result-card .result-card-head b {
+  color: #ff3f6e !important;
+  font-size: 13px !important;
+  letter-spacing: 0.14em !important;
+}
+
+.studio-shell .result-card .result-meta {
+  order: 3;
+}
+
+.studio-shell .result-card .result-name {
+  order: 4;
+}
+
+.studio-shell .result-card .result-model-row {
+  display: none !important;
+}
+
+.studio-shell .result-card .result-prompt {
+  order: 5;
+}
+
+.studio-shell .result-card .result-actions {
+  order: 6;
+}
