@@ -768,18 +768,20 @@
 
 .image-higgsfield-mode .studio-wall-actions {
   position: absolute;
-  top: 7px;
-  right: 7px;
+  top: 8px;
+  right: 0;
   z-index: 4;
   display: inline-flex;
+  flex-direction: column;
   gap: 4px;
-  padding: 3px;
+  padding: 3px 3px 3px 4px;
   border: 1px solid rgba(245, 238, 248, 0.34);
-  border-radius: 12px;
+  border-right: 0;
+  border-radius: 12px 0 0 12px;
   background: rgba(44, 13, 51, 0.18);
   box-shadow: 0 8px 18px rgba(28, 0, 36, 0.14);
   opacity: 0;
-  transform: translateY(-4px);
+  transform: translateX(4px);
   transition: opacity 120ms ease, transform 120ms ease;
   backdrop-filter: blur(12px);
 }
@@ -787,7 +789,7 @@
 .image-higgsfield-mode .studio-wall-card:hover .studio-wall-actions,
 .image-higgsfield-mode .studio-wall-card:focus-within .studio-wall-actions {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateX(0);
 }
 
 .image-higgsfield-mode .studio-wall-actions button {
@@ -830,7 +832,7 @@
 }
 
 .image-higgsfield-mode .studio-wall-actions button:hover:not(:disabled) {
-  transform: translateY(-1px);
+  transform: translateX(-1px);
   filter: brightness(1.04);
 }
 
