@@ -4374,7 +4374,7 @@ function imageModelPicker(selectedModel) {
         return `<button class="image-model-option ${active ? "active" : ""}" type="button" data-image-model-option="${esc(item.value)}" aria-pressed="${active ? "true" : "false"}">
           <span class="image-model-option-icon">${providerLogo(item.provider)}</span>
           <span class="image-model-option-copy">
-            <b>${esc(item.title)}${item.badge ? ` <em>${esc(item.badge)}</em>` : ""}</b>
+            <b><span>${esc(item.title)}</span>${item.badge ? ` <em>${esc(item.badge)}</em>` : ""}</b>
             <small>${esc(item.description)}</small>
           </span>
           ${active ? `<span class="image-model-option-check">${icon("check", 18)}</span>` : ""}
