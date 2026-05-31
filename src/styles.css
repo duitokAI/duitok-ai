@@ -27046,3 +27046,14 @@ label {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 }
+
+/* Image studio tabs: remove the fixed topbar divider line above the canvas. */
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .project-step-topbar {
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .studio-top-step-tabs {
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+}
