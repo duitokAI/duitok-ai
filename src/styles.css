@@ -29567,3 +29567,31 @@ label {
   width: 100% !important;
   text-align: center !important;
 }
+
+/* Final background cover: prevent the older studio lavender base from showing
+   behind the image wall or below the composer. */
+.studio-shell:has(.image-higgsfield-mode),
+.studio-shell:has(.image-higgsfield-mode) .workspace,
+.studio-shell:has(.step-tabs):has(.image-higgsfield-mode) .workspace,
+.studio-shell .workspace:has(.image-higgsfield-mode),
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode),
+.studio-shell .canvas-card:has(.image-higgsfield-mode),
+.studio-shell .studio-workbench-card:has(.image-higgsfield-mode),
+.studio-shell .studio-step-panel:has(.image-higgsfield-mode),
+.studio-shell .image-canvas-studio.image-higgsfield-mode,
+.studio-shell .image-higgsfield-mode,
+.studio-shell .image-higgsfield-mode .studio-result-wall {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+}
+
+.studio-shell:has(.image-higgsfield-mode) .workspace {
+  min-height: 100vh !important;
+  background-clip: border-box !important;
+}
+
+.studio-shell:has(.image-higgsfield-mode) .canvas-card,
+.studio-shell:has(.image-higgsfield-mode) .studio-workbench-card,
+.studio-shell:has(.image-higgsfield-mode) .studio-step-panel {
+  background-color: #ffffff !important;
+}
