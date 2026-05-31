@@ -5962,6 +5962,16 @@ function resultPreviewModal() {
             ${resultReferenceButton(item, "avatar")}
             ${resultReferenceButton(item, "product")}
           </div>
+          <div class="result-detail-file-actions">
+            <button type="button" class="result-detail-file-button download" data-result-action="download" data-result-id="${esc(item?.id || "")}" data-result-kind="${item?.videoUrl ? "video" : item?.imageUrl ? "image" : "text"}">
+              ${icon("download", 20)}
+              <span>Download</span>
+            </button>
+            <button type="button" class="result-detail-file-button delete" data-result-action="delete" data-result-id="${esc(item?.id || "")}">
+              ${icon("trash-2", 20)}
+              <span>Delete</span>
+            </button>
+          </div>
         </section>
       </aside>
     </section>
