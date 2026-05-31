@@ -3036,7 +3036,7 @@ function studio() {
           <button class="side-link" data-action="open-whatsapp" aria-label="${esc(t("whatsapp"))}">${icon("message-circle")} <span>${t("whatsapp")}</span>${icon("arrow-up-right", 14)}</button>
           <button class="side-support-button" data-action="support" aria-label="${esc(t("humanSupport"))}">
           <span class="support-bubble-icon">${icon("message-circle", 24)}</span>
-          <span class="support-bubble-copy"><b>${t("humanSupport")}</b><small>${t("whatsappSupport")}</small></span>
+          <span class="support-bubble-copy"><b>${t("humanSupport")}</b></span>
         </button>
           ${sidebarAccountPanel()}
         </div>
