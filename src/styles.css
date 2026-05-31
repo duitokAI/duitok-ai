@@ -24869,6 +24869,40 @@ label {
     0 12px 24px rgba(255, 63, 110, 0.12) !important;
 }
 
+.studio-shell .sidebar .sidebar-topbar {
+  min-height: 62px !important;
+  overflow: visible !important;
+}
+
+.studio-shell .sidebar .sidebar-topbar .brand-lockup,
+.studio-shell .sidebar .sidebar-topbar .brand-core {
+  overflow: visible !important;
+}
+
+.studio-shell .sidebar .sidebar-topbar .brand-core {
+  height: 54px !important;
+  transform: none !important;
+}
+
+.studio-shell .sidebar .sidebar-topbar .brand-logo-mascot {
+  width: 48px !important;
+  height: 48px !important;
+}
+
+.studio-shell.sidebar-collapsed .sidebar-topbar {
+  min-height: 68px !important;
+  padding-top: 4px !important;
+}
+
+.studio-shell.sidebar-collapsed .sidebar .brand-core {
+  height: 56px !important;
+}
+
+.studio-shell.sidebar-collapsed .sidebar .brand-logo-mascot {
+  width: 52px !important;
+  height: 52px !important;
+}
+
 @media (max-width: 1000px) {
   .studio-shell.sidebar-collapsed {
     --studio-sidebar-width: 100%;
