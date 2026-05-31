@@ -24602,11 +24602,12 @@ label {
 }
 
 .sidebar-topbar {
-  display: flex;
+  min-height: 44px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 32px;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 0 4px 18px;
+  gap: 8px;
+  padding: 0 0 18px;
 }
 
 .studio-shell .sidebar .sidebar-topbar .brand-lockup {
@@ -24619,6 +24620,7 @@ label {
 
 .studio-shell .sidebar .sidebar-topbar .brand-core {
   min-width: 0 !important;
+  height: 40px !important;
   gap: 8px !important;
 }
 
@@ -24640,6 +24642,7 @@ label {
   height: 32px;
   min-height: 32px;
   flex: 0 0 32px;
+  align-self: center;
   display: grid;
   place-items: center;
   margin: 0;
