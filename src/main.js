@@ -4829,6 +4829,7 @@ function resultCard(item) {
   const title = item.title || "Generated asset";
   const promptText = resultPromptText(item);
   const promptPreview = promptText.replaceAll("\n", " ").trim();
+  const hasPrompt = Boolean(promptPreview);
   const canSaveReference = Boolean(item.imageUrl || item.videoUrl);
   const isLegacyVisual = Boolean(item.visualCard);
   const modelLabel = resultModelLabel(item);
@@ -4855,10 +4856,10 @@ function resultCard(item) {
         <span>${esc(modelLabel)}</span>
         <small>${item.provider ? esc(String(item.provider).toUpperCase()) : "POKAYA"}</small>
       </div>
-      <div class="result-prompt">
+      <button type="button" class="result-prompt result-prompt-trigger" data-result-prompt="${esc(item.id)}" ${hasPrompt ? "" : "disabled"} aria-label="Open full prompt">
         ${icon("pencil", 18)}
-        <div><b>Prompt</b><p>${promptPreview ? `${esc(promptPreview.slice(0, 260))}${promptPreview.length > 260 ? "..." : ""}` : "No prompt saved for this result."}</p></div>
-      </div>
+        <div><b>Prompt</b><p>${hasPrompt ? esc(promptPreview) : "No prompt saved for this result."}</p></div>
+      </button>
       <div class="result-actions" aria-label="Result actions">
         <button type="button" data-result-action="save" data-result-id="${esc(item.id)}" title="保存到附件" ${canSaveReference ? "" : "disabled"}>${icon("cloud-upload", 19)}<span>保存</span></button>
         <button type="button" data-result-action="edit-image" data-result-id="${esc(item.id)}" title="Edit Image" ${canSaveReference ? "" : "disabled"}>${icon("palette", 19)}<span>编辑</span></button>
@@ -5472,6 +5473,7 @@ function modal() {
   if (state.modal === "attachmentPicker") return attachmentPickerModal();
   if (state.modal === "ugcPromptBuilder") return ugcPromptBuilderModal();
   if (state.modal === "previewResult") return resultPreviewModal();
+  if (state.modal === "resultPrompt") return resultPromptModal();
   if (state.modal === "saveResultReference") return saveResultReferenceModal();
   if (state.modal === "editResultImage") return editResultImageModal();
   if (state.modal === "deleteResult") return deleteResultModal();
@@ -5611,6 +5613,23 @@ function resultPreviewModal() {
     <section class="result-lightbox" role="dialog" aria-modal="true" aria-label="Result preview">
       <button class="result-lightbox-close" data-action="close-modal" type="button" aria-label="Close">${icon("x", 34)}</button>
       <div class="result-lightbox-media">${item ? resultPreview(item, { full: true }) : ""}</div>
+    </section>
+  </div>`;
+}
+
+function resultPromptModal() {
+  const item = activeResult();
+  const promptText = item ? resultPromptText(item) : "";
+  return `<div class="modal-backdrop result-prompt-backdrop" data-action="close-modal">
+    <section class="result-prompt-modal" role="dialog" aria-modal="true" aria-label="Full Prompt">
+      <header>
+        <h2>Full Prompt</h2>
+        <button type="button" class="result-prompt-close" data-action="close-modal" aria-label="Close">X</button>
+      </header>
+      <div class="result-prompt-modal-body">
+        <pre>${esc(promptText || "No prompt saved for this result.")}</pre>
+        <button type="button" class="result-prompt-copy" data-action="copy-result-prompt">${icon("copy", 22)} Copy Prompt</button>
+      </div>
     </section>
   </div>`;
 }
@@ -7968,6 +7987,7 @@ function bind() {
   document.querySelectorAll("[data-video-play]").forEach((el) => el.addEventListener("click", () => playResultVideo(el)));
   document.querySelectorAll("[data-result-action]").forEach((el) => el.addEventListener("click", () => resultAction(el)));
   document.querySelectorAll("[data-result-preview]").forEach((el) => el.addEventListener("click", () => set({ modal: "previewResult", activeResultId: el.dataset.resultPreview })));
+  document.querySelectorAll("[data-result-prompt]").forEach((el) => el.addEventListener("click", () => set({ modal: "resultPrompt", activeResultId: el.dataset.resultPrompt })));
   document.querySelectorAll("[data-image-canvas-result]").forEach((el) => el.addEventListener("click", () => set({ imageCanvasSelectedResultId: el.dataset.imageCanvasResult })));
   document.querySelectorAll("[data-image-console-prompt]").forEach((el) => el.addEventListener("input", () => updateImagePromptLocal(el.value)));
   document.querySelectorAll("[data-result-title]").forEach((el) => {
@@ -8072,6 +8092,7 @@ async function action(event, name) {
   }
   if (name === "open-ugc-prompt-builder") return set({ modal: "ugcPromptBuilder" });
   if (name === "build-ugc-prompt") return buildAndStoreUgcPrompt();
+  if (name === "copy-result-prompt") return copyActiveResultPrompt();
   if (name === "copy-ugc-prompt") {
     const promptText = currentUgcBuiltPrompt();
     await navigator.clipboard?.writeText(promptText);
@@ -8155,6 +8176,14 @@ async function action(event, name) {
   if (name === "export-all") return download("/api/export/all", "pokaya-data.json");
   if (name === "export-project") return download(`/api/export/project/${state.projectId}`, `${project().name}.json`);
   if (name?.startsWith("generate") || ["analyze-original", "clone-prompt", "write-story", "decode-viral"].includes(name)) return generate(name);
+}
+
+async function copyActiveResultPrompt() {
+  const item = activeResult();
+  const promptText = item ? resultPromptText(item) : "";
+  if (!promptText) return notify("No prompt saved.");
+  await navigator.clipboard?.writeText(promptText);
+  return notify("Prompt copied.");
 }
 
 async function submit(event) {
