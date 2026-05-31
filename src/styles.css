@@ -24951,6 +24951,58 @@ label {
   height: 52px !important;
 }
 
+.studio-shell.sidebar-collapsed .sidebar {
+  padding-top: 10px !important;
+}
+
+.studio-shell.sidebar-collapsed .sidebar-topbar {
+  min-height: 64px !important;
+  padding: 0 0 8px !important;
+  overflow: visible !important;
+}
+
+.studio-shell.sidebar-collapsed .sidebar .brand-lockup {
+  width: 64px !important;
+  min-width: 64px !important;
+  height: 60px !important;
+  display: grid !important;
+  place-items: center !important;
+  margin: 0 auto !important;
+  overflow: visible !important;
+}
+
+.studio-shell.sidebar-collapsed .sidebar .brand-core {
+  width: 60px !important;
+  height: 58px !important;
+  display: grid !important;
+  place-items: center !important;
+  justify-content: center !important;
+  overflow: visible !important;
+  transform: none !important;
+}
+
+.studio-shell.sidebar-collapsed .sidebar .brand-logo-mascot {
+  width: 56px !important;
+  height: 56px !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  transform: none !important;
+}
+
+.studio-shell.sidebar-collapsed .agent-primary-card {
+  margin: 2px auto 10px !important;
+}
+
+.studio-shell.sidebar-collapsed .side-section {
+  margin: 8px 0 6px !important;
+}
+
+.studio-shell.sidebar-collapsed .side-primary,
+.studio-shell.sidebar-collapsed .side-link {
+  margin-top: 3px !important;
+  margin-bottom: 3px !important;
+}
+
 @media (max-width: 1000px) {
   .studio-shell.sidebar-collapsed {
     --studio-sidebar-width: 100%;
