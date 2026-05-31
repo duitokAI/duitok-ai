@@ -4427,42 +4427,48 @@ function imageModelPicker(selectedModel) {
     {
       value: "GPT Image 2",
       provider: "openai",
-      title: "GPT Image 2 (0.15 Credit)",
+      title: "GPT Image 2",
+      credit: "0.15 Credit",
       description: "4K images with strong text rendering",
       badge: "NEW"
     },
     {
       value: "Seedream 5.0 Lite",
       provider: "seedream",
-      title: "Seedream 5.0 Lite (0.15 Credit)",
+      title: "Seedream 5.0 Lite",
+      credit: "0.15 Credit",
       description: "APIMart image model for fast product visuals",
       badge: ""
     },
     {
       value: "Seedream 4.5",
       provider: "seedream",
-      title: "Seedream 4.5 (0.15 Credit)",
+      title: "Seedream 4.5",
+      credit: "0.15 Credit",
       description: "APIMart image model for polished commercial shots",
       badge: ""
     },
     {
       value: "Nano Banana Pro",
       provider: "google",
-      title: "Nano Banana Pro (0.20 Credit)",
+      title: "Nano Banana Pro",
+      credit: "0.20 Credit",
       description: "Google flagship generation model",
       badge: ""
     },
     {
       value: "Nano Banana 2",
       provider: "google",
-      title: "Nano Banana 2 (0.15 Credit)",
+      title: "Nano Banana 2",
+      credit: "0.15 Credit",
       description: "GRS AI image model for flexible visuals",
       badge: ""
     },
     {
       value: "Grok Imagine",
       provider: "xai",
-      title: "Grok Imagine (0.15 Credit)",
+      title: "Grok Imagine",
+      credit: "0.15 Credit",
       description: "速创API image model for punchy concepts",
       badge: ""
     }
@@ -4481,10 +4487,14 @@ function imageModelPicker(selectedModel) {
         return `<button class="image-model-option ${active ? "active" : ""}" type="button" data-image-model-option="${esc(item.value)}" aria-pressed="${active ? "true" : "false"}">
           <span class="image-model-option-icon">${providerLogo(item.provider)}</span>
           <span class="image-model-option-copy">
-            <b><span>${esc(item.title)}</span>${item.badge ? ` <em>${esc(item.badge)}</em>` : ""}</b>
+            <b>
+              <span>${esc(item.title)}</span>
+              ${item.badge ? ` <em>${esc(item.badge)}</em>` : ""}
+              <i>${esc(item.credit)}</i>
+            </b>
             <small>${esc(item.description)}</small>
           </span>
-          ${active ? `<span class="image-model-option-check">${icon("check", 18)}</span>` : ""}
+          <span class="image-model-option-check" aria-hidden="true">${active ? icon("check", 18) : ""}</span>
         </button>`;
       }).join("")}
     </div>

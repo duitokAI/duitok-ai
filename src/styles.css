@@ -28839,7 +28839,8 @@ label {
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker span,
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker b,
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker small,
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker em {
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker em,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker i {
   height: auto !important;
   min-height: 0 !important;
   max-height: none !important;
@@ -28890,43 +28891,45 @@ label {
   position: absolute !important;
   left: 0 !important;
   bottom: calc(100% + 10px) !important;
-  width: min(420px, calc(100vw - 34px)) !important;
+  width: min(640px, calc(100vw - 34px)) !important;
   min-width: 0 !important;
   max-width: calc(100vw - 34px) !important;
   display: grid !important;
-  gap: 6px !important;
+  gap: 10px !important;
   border: 1px solid rgba(111, 28, 132, 0.12) !important;
-  border-radius: 18px !important;
-  padding: 10px !important;
+  border-radius: 22px !important;
+  padding: 14px !important;
   background:
     radial-gradient(circle at 18% 0%, rgba(255, 255, 255, 0.96), transparent 36%),
     radial-gradient(circle at 92% 0%, rgba(255, 90, 145, 0.1), transparent 34%),
     linear-gradient(145deg, rgba(255, 252, 255, 0.98), rgba(246, 235, 251, 0.98)) !important;
   box-shadow: 0 18px 46px rgba(70, 16, 84, 0.16) !important;
   backdrop-filter: blur(18px) !important;
+  max-height: min(70vh, 620px) !important;
+  overflow-y: auto !important;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-menu-title {
   display: inline-flex !important;
   align-items: center !important;
   gap: 6px !important;
-  padding: 0 4px 4px !important;
+  padding: 0 5px 8px !important;
   color: #2a0633 !important;
-  font-size: 12px !important;
+  font-size: 15px !important;
   font-weight: 850 !important;
   letter-spacing: 0 !important;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-option {
   width: 100% !important;
-  min-height: 82px !important;
+  min-height: 86px !important;
   display: grid !important;
-  grid-template-columns: 42px minmax(0, 1fr) 22px !important;
+  grid-template-columns: 54px minmax(0, 1fr) 28px !important;
   align-items: center !important;
-  gap: 11px !important;
+  gap: 18px !important;
   border: 0 !important;
-  border-radius: 14px !important;
-  padding: 8px 10px !important;
+  border-radius: 22px !important;
+  padding: 14px 18px !important;
   background: transparent !important;
   color: #2a0633 !important;
   text-align: left !important;
@@ -28935,18 +28938,18 @@ label {
 
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-option:hover,
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-option.active {
-  background: rgba(255, 255, 255, 0.72) !important;
-  box-shadow: inset 0 0 0 1px rgba(111, 28, 132, 0.08) !important;
+  background: rgba(255, 255, 255, 0.78) !important;
+  box-shadow: inset 0 0 0 1px rgba(111, 28, 132, 0.1), 0 12px 26px rgba(70, 16, 84, 0.06) !important;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-option-icon {
-  width: 38px !important;
-  height: 38px !important;
+  width: 42px !important;
+  height: 42px !important;
   display: inline-grid !important;
   place-items: center !important;
-  border-radius: 11px !important;
-  background: rgba(63, 59, 66, 0.08) !important;
-  color: rgba(92, 88, 96, 0.82) !important;
+  border-radius: 14px !important;
+  background: transparent !important;
+  color: rgba(111, 28, 132, 0.72) !important;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-option.active .image-model-option-icon {
@@ -28965,7 +28968,7 @@ label {
   gap: 8px !important;
   overflow: hidden !important;
   color: #2a0633 !important;
-  font-size: 15px !important;
+  font-size: 18px !important;
   font-weight: 850 !important;
   line-height: 1.12 !important;
   white-space: nowrap !important;
@@ -28996,11 +28999,26 @@ label {
   line-height: 1 !important;
 }
 
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-option-copy i {
+  flex: 0 0 auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  border-radius: 999px !important;
+  padding: 3px 8px !important;
+  background: rgba(111, 28, 132, 0.08) !important;
+  color: rgba(42, 6, 51, 0.64) !important;
+  font-size: 11px !important;
+  font-style: normal !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-option-copy small {
   display: -webkit-box !important;
   overflow: hidden !important;
   color: rgba(42, 6, 51, 0.58) !important;
-  font-size: 12px !important;
+  font-size: 14px !important;
   font-weight: 650 !important;
   line-height: 1.3 !important;
   text-overflow: clip !important;
@@ -29013,7 +29031,8 @@ label {
   justify-self: end !important;
   display: inline-grid !important;
   place-items: center !important;
-  color: #6f1d82 !important;
+  min-width: 24px !important;
+  color: #a574d9 !important;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .provider-logo {
