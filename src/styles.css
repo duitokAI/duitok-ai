@@ -29031,7 +29031,9 @@ label {
 
 /* Higgsfield-style wall: edge-to-edge packed media with no unused right rail. */
 .studio-shell .image-higgsfield-mode .studio-result-wall {
-  background: #08070a !important;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.96), transparent 32%),
+    linear-gradient(135deg, #fff8fc 0%, #f5edf8 54%, #eee2f4 100%) !important;
   overflow: hidden !important;
 }
 
@@ -29046,7 +29048,7 @@ label {
   width: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
-  background: #08070a !important;
+  background: #efe2f5 !important;
 }
 
 .studio-shell .image-higgsfield-mode .studio-wall-card {
@@ -29060,7 +29062,7 @@ label {
   padding: 0 !important;
   border: 0 !important;
   border-radius: 0 !important;
-  background: #08070a !important;
+  background: #efe2f5 !important;
   box-shadow: none !important;
   overflow: hidden !important;
 }
@@ -29087,7 +29089,7 @@ label {
   aspect-ratio: auto !important;
   display: block !important;
   border-radius: 0 !important;
-  background: #08070a !important;
+  background: #efe2f5 !important;
   object-fit: contain !important;
   vertical-align: top !important;
 }
@@ -29103,7 +29105,7 @@ label {
 .studio-shell .image-higgsfield-mode .studio-wall-pending {
   min-height: clamp(190px, calc(var(--studio-wall-column, 260px) * 1.15), 420px) !important;
   border-radius: 0 !important;
-  background: #141018 !important;
+  background: rgba(255, 255, 255, 0.72) !important;
 }
 
 @media (max-width: 1500px) {
