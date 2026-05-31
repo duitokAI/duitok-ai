@@ -25697,6 +25697,23 @@ label {
   opacity: 0.44;
 }
 
+.studio-shell .agent-stop-button {
+  background: linear-gradient(135deg, #2b1f30 0%, #4b284d 100%) !important;
+  color: #fff !important;
+  box-shadow: 0 10px 24px rgba(43, 31, 48, 0.24) !important;
+}
+
+.studio-shell .agent-stop-button i,
+.studio-shell .agent-stop-button svg {
+  fill: currentColor !important;
+  stroke-width: 2.5 !important;
+}
+
+.studio-shell .agent-stop-button:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(135deg, #1d151f 0%, #5f176f 100%) !important;
+}
+
 .studio-shell .agent-chat-shell.agent-page-panel {
   height: 100dvh !important;
   max-height: 100dvh !important;

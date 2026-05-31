@@ -172,6 +172,7 @@ let agentVisualTimer = null;
 let agentWorkingTimer = null;
 let agentTypingTimer = null;
 let agentTypingRunId = 0;
+let agentAbortController = null;
 
 const languages = [
   ["ms", "BM"],
@@ -7616,6 +7617,7 @@ function chatPanel() {
     : pendingConfirmation
       ? c.inputConfirm
       : c.inputReady;
+  const canStopAgent = state.agentBusy && (state.agentTyping || agentAbortController);
   return `
     <section class="agent-panel agent-page-panel agent-chat-shell">
       ${agentChatToolbar()}
@@ -7635,7 +7637,9 @@ function chatPanel() {
           <input type="file" data-agent-file accept="image/*,video/*" multiple hidden>
         </label>
         <textarea name="message" rows="1" data-agent-input placeholder="${esc(inputPlaceholder)}" ${pendingConfirmation ? "disabled" : ""}>${esc(state.agentInput)}</textarea>
-        <button class="gold-button agent-send-button" type="submit" title="${esc(c.send)}" aria-label="${esc(c.send)}" ${pendingConfirmation ? "disabled" : ""}>${icon("send", 19)}<span>${c.send}</span></button>
+        ${canStopAgent
+          ? `<button class="gold-button agent-send-button agent-stop-button" type="button" data-action="stop-agent-response" title="Stop Agent" aria-label="Stop Agent">${icon("square", 17)}<span>Stop</span></button>`
+          : `<button class="gold-button agent-send-button" type="submit" title="${esc(c.send)}" aria-label="${esc(c.send)}" ${pendingConfirmation || state.agentBusy ? "disabled" : ""}>${icon(state.agentBusy ? "loader-circle" : "send", 19)}<span>${c.send}</span></button>`}
       </form>
     </section>`;
 }
@@ -8695,6 +8699,7 @@ async function action(event, name) {
   if (name === "image-count-up") return updateImageBatchCount(1);
   if (name === "optimize-image-prompt") return optimizeImagePrompt();
   if (name === "clear-image-prompt-media") return clearImagePromptMedia();
+  if (name === "stop-agent-response") return stopAgentResponse();
   if (name === "clear-clone-reference") return clearCloneReferenceVideo();
   if (name?.startsWith("generate") || ["analyze-original", "clone-prompt", "write-story", "decode-viral"].includes(name)) return generate(name);
 }
@@ -9617,6 +9622,31 @@ function clearAgentTypingTimer() {
   agentTypingRunId += 1;
 }
 
+function stopAgentResponse() {
+  if (!state.agentBusy && !state.agentTyping) return;
+  agentAbortController?.abort();
+  agentAbortController = null;
+  clearAgentTypingTimer();
+  clearTimeout(agentVisualTimer);
+  agentVisualTimer = null;
+  clearInterval(agentWorkingTimer);
+  agentWorkingTimer = null;
+  const messages = (state.agentMessages || []).filter((item) => !item.isTyping);
+  rememberAgentMessages(messages);
+  set({
+    agentMessages: messages,
+    agentBusy: false,
+    agentTyping: false,
+    agentQueue: [],
+    agentBusyStartedAt: 0,
+    agentWorkingTick: 0,
+    agentTaskMode: "idle",
+    agentVisualPhase: "idle",
+    agentIdleActivity: "sleep"
+  });
+  notify("Agent stopped.");
+}
+
 function agentTypingChunkSize(length = 0) {
   if (length > 1600) return 8;
   if (length > 900) return 5;
@@ -9886,6 +9916,8 @@ async function runAgentMessage(message, attachments = [], queuedApiAttachments =
   const content = String(message || "").trim();
   if (!content && !attachments.length) return;
   clearAgentTypingTimer();
+  agentAbortController?.abort();
+  agentAbortController = new AbortController();
   const userContent = content || "请先看我上传的附件，然后判断下一步应该怎么做。";
   const messageAttachments = attachments.map(agentAttachmentForStorage);
   const apiAttachments = Array.isArray(queuedApiAttachments) ? queuedApiAttachments : attachments.map(agentAttachmentForApi);
@@ -9897,6 +9929,7 @@ async function runAgentMessage(message, attachments = [], queuedApiAttachments =
   try {
     const res = await api("/agent", {
       method: "POST",
+      signal: agentAbortController.signal,
       body: JSON.stringify({
         messages: nextMessages,
         attachments: apiAttachments,
@@ -9906,6 +9939,7 @@ async function runAgentMessage(message, attachments = [], queuedApiAttachments =
         step: state.step
       })
     });
+    agentAbortController = null;
     const db = res.db || state.db;
     typeAgentReply({
       baseMessages: nextMessages,
@@ -9924,6 +9958,8 @@ async function runAgentMessage(message, attachments = [], queuedApiAttachments =
       }
     });
   } catch (error) {
+    if (error?.name === "AbortError") return;
+    agentAbortController = null;
     const safeError = agentUserSafeError(error);
     typeAgentReply({
       baseMessages: nextMessages,
