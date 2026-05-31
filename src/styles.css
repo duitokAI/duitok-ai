@@ -24484,9 +24484,23 @@ label {
 
 /* Image console responsive fit pass: keep every action visible at each workspace width. */
 .studio-shell .image-generate-console {
-  width: 100% !important;
-  max-width: 100% !important;
+  box-sizing: border-box;
+  width: calc(100% - clamp(20px, 3.8vw, 64px)) !important;
+  max-width: min(1760px, calc(100% - clamp(20px, 3.8vw, 64px))) !important;
+  margin: 18px auto 22px !important;
+  bottom: 18px !important;
   overflow: visible !important;
+  border: 1px solid rgba(255, 250, 252, 0.13) !important;
+  border-radius: 26px !important;
+  padding: 14px !important;
+  background:
+    radial-gradient(circle at 92% 12%, rgba(255, 49, 95, 0.16), transparent 32%),
+    linear-gradient(135deg, rgba(40, 0, 52, 0.98) 0%, rgba(56, 0, 67, 0.98) 52%, rgba(34, 0, 45, 0.98) 100%) !important;
+  box-shadow:
+    0 26px 80px rgba(34, 0, 45, 0.28),
+    0 10px 32px rgba(255, 49, 95, 0.13),
+    inset 0 1px 0 rgba(255, 250, 252, 0.1) !important;
+  backdrop-filter: blur(18px);
   grid-template-areas:
     "mode prompt prompt refs generate"
     "mode tools tools refs generate" !important;
