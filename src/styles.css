@@ -24616,7 +24616,6 @@ label {
 }
 
 .sidebar-topbar {
-  position: relative;
   min-height: 44px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 32px;
