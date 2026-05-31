@@ -5914,6 +5914,15 @@ button:disabled [data-lucide="loader-circle"] {
   cursor: pointer;
 }
 
+.attachment-add-button {
+  color: #ff5f8f;
+  text-shadow: 0 0 22px rgba(255, 95, 143, 0.32);
+}
+
+.attachment-add-button:hover {
+  color: #ff8fb0;
+}
+
 .attachment-picker-close {
   width: 36px;
   color: #f8f8f8;
