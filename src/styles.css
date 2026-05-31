@@ -25742,3 +25742,9 @@ label {
   height: 34px !important;
   min-height: 34px !important;
 }
+
+/* Sidebar collapse button: center it against the logo row instead of pinning to the top. */
+.studio-shell:not(.sidebar-collapsed) .sidebar-collapse-toggle {
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
