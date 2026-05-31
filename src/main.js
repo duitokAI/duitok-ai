@@ -7290,7 +7290,6 @@ function agentChatToolbar() {
     <div>
       <button class="icon-only" data-action="new-agent-chat" title="${esc(c.newChat)}" aria-label="${esc(c.newChat)}">${icon("message-square-plus", 17)}</button>
       <button class="icon-only" data-action="toggle-agent-history" title="${esc(c.history)}" aria-label="${esc(c.history)}">${icon("history", 17)}${state.agentHistorySessions.length ? `<b>${state.agentHistorySessions.length}</b>` : ""}</button>
-      ${isOwnerAdminAccount() ? `<button class="icon-only" data-action="toggle-agent-debug" title="${esc(c.debug)}" aria-label="${esc(c.debug)}">${icon("bug", 17)}</button>` : ""}
     </div>
   </div>`;
 }
