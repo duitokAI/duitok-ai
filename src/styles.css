@@ -29729,3 +29729,52 @@ label {
       minmax(124px, 0.78fr) !important;
   }
 }
+
+/* Reference cards final cleanup: no cramped pill, no ellipsis. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb:not(.has-ref) {
+  grid-template-rows: 1fr auto !important;
+  align-content: center !important;
+  justify-items: center !important;
+  padding: 20px 12px 18px !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb:not(.has-ref) > span:not(.image-reference-clear) {
+  position: static !important;
+  transform: none !important;
+  width: 46px !important;
+  height: 46px !important;
+  min-width: 46px !important;
+  min-height: 46px !important;
+  margin: 0 auto 12px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb:not(.has-ref) > span:not(.image-reference-clear) svg {
+  width: 40px !important;
+  height: 40px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb:not(.has-ref) > div {
+  position: static !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+  backdrop-filter: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb:not(.has-ref) b {
+  display: block !important;
+  width: 100% !important;
+  overflow: visible !important;
+  color: #2a0633 !important;
+  font-size: 16px !important;
+  font-weight: 950 !important;
+  line-height: 1.05 !important;
+  text-align: center !important;
+  text-overflow: clip !important;
+  white-space: nowrap !important;
+}
