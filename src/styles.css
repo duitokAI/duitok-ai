@@ -29447,6 +29447,20 @@ label {
   min-width: 0 !important;
 }
 
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate:disabled {
+  grid-template-rows: auto auto !important;
+  gap: 8px !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate:disabled b {
+  max-width: 100% !important;
+  overflow: hidden !important;
+  font-size: clamp(16px, 1.25vw, 20px) !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
 @media (max-width: 1500px) {
   .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) {
     grid-template-columns: minmax(0, 1fr) clamp(176px, 15vw, 208px) clamp(168px, 13vw, 188px) !important;

@@ -4351,8 +4351,8 @@ function imageGenerateConsole(p, selectedModel) {
     </div>
     <button class="image-console-generate" type="button" data-action="generate-image" ${state.generating ? "disabled" : ""}>
       ${icon(state.generating ? "loader-circle" : "send", 20)}
-      <b>${state.generating ? t("generating") : t("generateImage")}</b>
-      <small>${credit} Credit</small>
+      <b>${state.generating ? "Generating" : t("generateImage")}</b>
+      ${state.generating ? "" : `<small>${credit} Credit</small>`}
     </button>
   </section>`;
 }
