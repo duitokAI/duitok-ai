@@ -4014,15 +4014,12 @@ function studioTopStepTabs() {
 function studioStepMenu(extraClass = "") {
   const current = steps.find(([id]) => id === state.step) || steps[0];
   const [, currentIcon, currentKey] = current;
-  return `<details class="studio-step-menu ${esc(extraClass)}">
-    <summary>
+  return `<div class="studio-step-menu ${esc(extraClass)}" aria-label="${esc(t(currentKey))}">
+    <div class="studio-step-menu-current">
       ${icon(currentIcon, 19)}
       <span><b>${t(currentKey)}</b></span>
-    </summary>
-    <div class="step-tabs studio-step-menu-list">
-      ${steps.map(([id, ic, key]) => `<button class="${state.step === id ? "active" : ""}" data-step="${id}" type="button">${icon(ic)} <span>${t(key)}</span></button>`).join("")}
     </div>
-  </details>`;
+  </div>`;
 }
 
 function studioBottomStepSwitcher() {
