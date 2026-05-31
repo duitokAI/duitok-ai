@@ -29914,3 +29914,104 @@ label {
 .studio-shell .video-prompt-extractor-page {
   min-height: calc(100dvh - var(--project-fixed-tabs-height, 58px)) !important;
 }
+
+/* Prompt Advanced lives beside the model picker as a compact symbol button. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools {
+  grid-template-columns:
+    minmax(224px, 1.28fr)
+    minmax(92px, 0.46fr)
+    minmax(92px, 0.44fr)
+    minmax(132px, 0.56fr) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-enhance-group {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 52px !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-enhance-group .image-model-picker {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance {
+  position: relative !important;
+  width: 52px !important;
+  min-width: 52px !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  max-height: 48px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border: 1px solid rgba(111, 28, 132, 0.12) !important;
+  border-radius: 16px !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  color: #6f1d82 !important;
+  box-shadow: 0 10px 24px rgba(42, 6, 51, 0.08) !important;
+  cursor: pointer !important;
+  transition: transform 0.16s ease, background 0.16s ease, color 0.16s ease, box-shadow 0.16s ease !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance:hover:not(:disabled) {
+  transform: translateY(-1px) !important;
+  background: #2a0633 !important;
+  color: #ffffff !important;
+  box-shadow: 0 14px 28px rgba(42, 6, 51, 0.2) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance:disabled {
+  cursor: wait !important;
+  opacity: 0.72 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance::after {
+  position: absolute !important;
+  left: 50% !important;
+  bottom: calc(100% + 10px) !important;
+  z-index: 200 !important;
+  content: "Prompt enhance" !important;
+  padding: 8px 11px !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 9px !important;
+  background: rgba(20, 22, 24, 0.96) !important;
+  color: #ffffff !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.26) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateX(-50%) translateY(4px) !important;
+  transition: opacity 0.1s ease, transform 0.1s ease !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance:hover::after,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance:focus-visible::after {
+  opacity: 1 !important;
+  transform: translateX(-50%) translateY(0) !important;
+}
+
+@media (max-width: 1500px) {
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools {
+    grid-template-columns:
+      minmax(172px, 1.25fr)
+      minmax(82px, 0.52fr)
+      minmax(82px, 0.5fr)
+      minmax(124px, 0.68fr) !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-enhance-group {
+    grid-template-columns: minmax(0, 1fr) 48px !important;
+    gap: 6px !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance {
+    width: 48px !important;
+    min-width: 48px !important;
+  }
+}

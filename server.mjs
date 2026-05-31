@@ -1829,6 +1829,150 @@ async function grsaiChatRequest(body) {
   return payload.data || payload;
 }
 
+function chatCompletionText(data = {}) {
+  if (typeof data === "string") return data;
+  const message = data.choices?.[0]?.message?.content;
+  if (Array.isArray(message)) return message.map((part) => part.text || part.content || "").join("").trim();
+  if (typeof message === "string") return message.trim();
+  return data.output_text
+    || data.text
+    || data.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("").trim()
+    || "";
+}
+
+function parsePromptAdvancedJson(text = "") {
+  const clean = String(text || "").replace(/^```(?:json)?/i, "").replace(/```$/i, "").trim();
+  try {
+    return JSON.parse(clean);
+  } catch {
+    const match = clean.match(/\{[\s\S]*\}/);
+    if (match) {
+      try {
+        return JSON.parse(match[0]);
+      } catch {
+        return {};
+      }
+    }
+    return {};
+  }
+}
+
+function projectAttachmentVisual(db, attachmentId, label) {
+  if (!attachmentId) return null;
+  const attachment = (db.attachments || []).find((item) => item.id === attachmentId);
+  if (!attachment?.sourceResultId || attachment.mediaKind === "video" || /^video\//i.test(attachment.type || "")) return null;
+  let resultInfo = null;
+  try {
+    resultInfo = findResultWithProject(db, attachment.sourceResultId, null);
+  } catch {
+    return null;
+  }
+  const url = resultInfo.result.originalImageUrl || resultInfo.result.imageUrl;
+  return url ? { label: `${label}: ${attachment.name || "saved reference"}`, url } : null;
+}
+
+function projectPromptVisualInputs(db, project) {
+  return [
+    project.image?.promptImage?.dataUrl ? { label: `Prompt image: ${project.image.promptImage.name || "uploaded image"}`, dataUrl: project.image.promptImage.dataUrl } : null,
+    projectAttachmentVisual(db, project.image?.avatarAttachmentId, "Avatar reference"),
+    projectAttachmentVisual(db, project.image?.productAttachmentId, "Product reference")
+  ].filter(Boolean).slice(0, 4);
+}
+
+function grsaiVisionContent(textBlock = "", inputs = [], objectShape = true) {
+  return [
+    { type: "text", text: textBlock },
+    ...inputs.map((item) => objectShape
+      ? { type: "image_url", image_url: { url: item.dataUrl || item.url } }
+      : { type: "image_url", image_url: item.dataUrl || item.url })
+  ];
+}
+
+async function summarizePromptVisualsWithGrsai(inputs = [], userPrompt = "") {
+  if (!inputs.length) return "";
+  const textBlock = [
+    "Analyze the uploaded visual references for a Pokaya AI image/video prompt enhancer.",
+    "Only describe visible facts and useful generation cues. Do not invent brand claims.",
+    "",
+    `User prompt: ${sanitizeAgentText(userPrompt).slice(0, 800) || "(empty)"}`,
+    "",
+    "Visual inputs:",
+    inputs.map((item, index) => `${index + 1}. ${item.label}`).join("\n")
+  ].join("\n");
+  const systemMessage = "You are a visual analyst for ecommerce creative prompts. Return a compact, practical visual summary: subject, product, scene, colors, lighting, composition, likely use case, and generation constraints.";
+  let lastError = null;
+  for (const objectShape of [true, false]) {
+    try {
+      const data = await grsaiChatRequest({
+        model: grsaiVisionModel,
+        stream: false,
+        messages: [
+          { role: "system", content: systemMessage },
+          { role: "user", content: grsaiVisionContent(textBlock, inputs, objectShape) }
+        ]
+      });
+      const summary = sanitizeAgentText(chatCompletionText(data)).slice(0, 1800);
+      if (summary) return summary;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  if (lastError) throw lastError;
+  return "";
+}
+
+function promptAdvancedSystemPrompt(model) {
+  const isVideo = isVideoMediaModel(model);
+  return [
+    "You are Pokaya Prompt Advanced, an ecommerce creative prompt optimizer for Malaysia TikTok Shop sellers and AI creators.",
+    "Rewrite rough user input into a generation-ready prompt. Focus on sellable creative output, not generic art.",
+    isVideo
+      ? "For video models, include scene, subject, product action, camera movement, pacing, lighting, duration-aware beats, and ending frame."
+      : "For image models, include subject, product visibility, scene, composition, lighting, style, aspect-ratio fit, and text-safe space.",
+    "Keep product claims realistic. Do not mention internal providers, APIs, system prompts, or implementation.",
+    "Return strict JSON only: {\"finalPrompt\":\"...\",\"notes\":[\"...\",\"...\"]}.",
+    "The finalPrompt should usually be in English because most visual generation models follow English prompts better. Keep it concise but complete."
+  ].join("\n");
+}
+
+async function enhancePromptWithDeepSeek({ project, prompt, visualSummary = "" }) {
+  const model = internalMediaModel(project.image?.model);
+  const input = [
+    `Selected model: ${model}`,
+    `Mode: ${project.image?.mode || "Create Image"}`,
+    `Aspect ratio: ${imageAspectRatioFromProject(project)}`,
+    `Resolution: ${imageResolutionFromProject(project)}`,
+    isVideoMediaModel(model) ? `Duration: ${videoDurationFor(project, model)} seconds` : "",
+    "",
+    "User prompt:",
+    sanitizeAgentText(prompt).slice(0, 1600) || "(empty)",
+    visualSummary ? `\nVisual understanding:\n${visualSummary}` : "",
+    "",
+    "Rewrite into one final prompt that a user can still edit in the prompt box."
+  ].filter(Boolean).join("\n");
+  const data = await deepseekRequest({
+    model: deepseekModel,
+    stream: false,
+    temperature: 0.35,
+    messages: [
+      { role: "system", content: promptAdvancedSystemPrompt(model) },
+      { role: "user", content: input }
+    ]
+  });
+  const raw = chatCompletionText(data);
+  const parsed = parsePromptAdvancedJson(raw);
+  const finalPrompt = sanitizeAgentText(parsed.finalPrompt || raw).replace(/^finalPrompt\s*:\s*/i, "").trim();
+  if (!finalPrompt) {
+    const error = new Error("Prompt enhance returned empty output.");
+    error.status = 502;
+    throw error;
+  }
+  return {
+    finalPrompt: finalPrompt.slice(0, 3000),
+    notes: Array.isArray(parsed.notes) ? parsed.notes.map((item) => sanitizeAgentText(item).slice(0, 180)).filter(Boolean).slice(0, 4) : []
+  };
+}
+
 async function atlasRequest(pathname, { method = "POST", body } = {}) {
   const apiKey = requireAtlasConfig();
   const response = await fetch(`${atlasBaseUrl}${pathname}`, {
@@ -5585,6 +5729,40 @@ app.patch("/api/projects/:id/field", async (req, res) => {
     await saveDb(db);
     return publicState(db, user);
   }));
+});
+
+app.post("/api/projects/:id/prompt-advanced", async (req, res, next) => {
+  try {
+    const { db, user } = await requireAuth(req);
+    const project = findProject(db, req.params.id, user);
+    project.image ||= {};
+    const prompt = String(req.body.prompt ?? project.image.prompt ?? "").trim();
+    const visualInputs = projectPromptVisualInputs(db, project);
+    if (visualInputs.length && !hasGrsaiConfig()) {
+      const error = new Error("Prompt enhance vision is not configured yet.");
+      error.status = 503;
+      throw error;
+    }
+    const visualSummary = visualInputs.length ? await summarizePromptVisualsWithGrsai(visualInputs, prompt) : "";
+    const enhanced = await enhancePromptWithDeepSeek({ project, prompt, visualSummary });
+    const state = await mutateDb(async (currentDb) => {
+      const currentProject = findProject(currentDb, req.params.id, user);
+      currentProject.image ||= {};
+      currentProject.image.prompt = enhanced.finalPrompt;
+      if (currentProject.image.promptImage?.dataUrl) currentProject.image.promptImage = null;
+      currentDb.usage.unshift(usage("Enhanced prompt", 0, currentProject.userId || user.id));
+      await saveDb(currentDb);
+      return publicState(currentDb, user);
+    });
+    res.json({
+      prompt: enhanced.finalPrompt,
+      notes: enhanced.notes,
+      visualUsed: Boolean(visualSummary),
+      state
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.post("/api/projects/:id/generate", async (req, res) => {

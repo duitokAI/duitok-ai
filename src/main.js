@@ -143,6 +143,7 @@ const state = {
   langOpen: false,
   imagePromptGroup: "avatar",
   generating: false,
+  promptAdvancedBusy: false,
   projectMenuId: null,
   editingProjectId: null,
   paymentReturn: null,
@@ -4335,7 +4336,10 @@ function imageGenerateConsole(p, selectedModel) {
         ${promptImage ? imagePromptMediaPreview(promptImage) : `<textarea data-field="image.prompt" data-image-console-prompt rows="2" placeholder="Tell us what you want to generate">${esc(p.image.prompt || "")}</textarea>`}
       </div>
       <div class="image-console-tools">
-        ${imageModelPicker(selectedModel)}
+        <div class="image-model-enhance-group">
+          ${imageModelPicker(selectedModel)}
+          <button class="image-prompt-enhance" type="button" data-action="optimize-image-prompt" aria-label="Prompt enhance" title="Prompt enhance" ${state.promptAdvancedBusy ? "disabled" : ""}>${icon(state.promptAdvancedBusy ? "loader-circle" : "wand-sparkles", 18)}</button>
+        </div>
         <label class="image-aspect-ratio-select">${aspectRatioIcon}<select data-field="image.aspectRatio">${aspectRatioOptions.map((value) => `<option value="${esc(value)}" ${value === selectedAspectRatio ? "selected" : ""}>${esc(value)}</option>`).join("")}</select></label>
         <label class="image-resolution-select">${icon("gem", 15)}<select data-field="image.resolution">${resolutionOptions.map(([value, label]) => `<option value="${esc(value)}" ${value === selectedResolution ? "selected" : ""}>${esc(label)}</option>`).join("")}</select></label>
         <div class="image-count-stepper" aria-label="Images to generate">
@@ -4343,7 +4347,6 @@ function imageGenerateConsole(p, selectedModel) {
           <span><b>${selectedCount}</b><small>/4</small></span>
           <button type="button" data-action="image-count-up" aria-label="Generate more images" ${selectedCount >= 4 ? "disabled" : ""}>${icon("plus", 15)}</button>
         </div>
-        <button class="image-prompt-optimize" type="button" data-action="optimize-image-prompt">${icon("wand-sparkles", 15)} <span>Prompt</span></button>
       </div>
     </div>
     <div class="image-console-references">
@@ -8536,30 +8539,32 @@ function updateImagePromptLocal(value = "") {
   state.db = dbWithProjectField(state.db, state.projectId, "image.prompt", value);
 }
 
-function optimizedImagePromptText(value = "") {
-  const base = String(value || "").replace(/\s+/g, " ").trim() || "Create a high-converting TikTok Shop product image featuring the product clearly";
-  const additions = [
-    "clear hero product visibility",
-    "realistic social commerce lighting",
-    "clean composition with space for ad copy",
-    "sharp product details",
-    `${project().image?.aspectRatio || "9:16"} aspect ratio`
-  ];
-  const lower = base.toLowerCase();
-  const missing = additions.filter((item) => !lower.includes(item.toLowerCase()));
-  return [base, ...missing].join(", ");
-}
-
-function optimizeImagePrompt() {
+async function optimizeImagePrompt() {
+  if (state.promptAdvancedBusy) return;
   const input = document.querySelector("[data-image-console-prompt]");
-  const nextPrompt = optimizedImagePromptText(input?.value || project().image?.prompt || "");
-  if (input) {
-    input.value = nextPrompt;
-    input.focus({ preventScroll: true });
+  const promptText = input?.value || project().image?.prompt || "";
+  const projectId = state.projectId;
+  const previousDb = state.db;
+  try {
+    set({ promptAdvancedBusy: true });
+    notify(project().image?.promptImage ? "Reading image and enhancing prompt..." : "Enhancing prompt...");
+    const res = await api(`/projects/${projectId}/prompt-advanced`, {
+      method: "POST",
+      body: JSON.stringify({ prompt: promptText, step: state.step || "image" })
+    });
+    if (state.projectId !== projectId) return;
+    set({ db: res.state, promptAdvancedBusy: false });
+    requestAnimationFrame(() => {
+      const nextInput = document.querySelector("[data-image-console-prompt]");
+      if (!nextInput) return;
+      nextInput.focus({ preventScroll: true });
+      nextInput.setSelectionRange(nextInput.value.length, nextInput.value.length);
+    });
+    notify(res.visualUsed ? "Image understood. Prompt enhanced." : "Prompt enhanced.");
+  } catch (error) {
+    set({ db: previousDb, promptAdvancedBusy: false });
+    notify(error.message || "Prompt enhance failed.");
   }
-  updateImagePromptLocal(nextPrompt);
-  saveProjectFieldQuick("image.prompt", nextPrompt);
-  notify("Prompt optimized.");
 }
 
 function syncImageAspectRatioIcon(selectEl) {
