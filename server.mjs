@@ -208,6 +208,41 @@ app.get("/api/admin/diagnostics/deepseek", async (req, res, next) => {
         tools: agentTools,
         tool_choice: "auto"
       });
+      result.tests.toolResultFlow = await deepseekDiagnosticRequest({
+        messages: [
+          { role: "user", content: "Call the diagnostic tool, then answer pong." },
+          {
+            role: "assistant",
+            content: "",
+            tool_calls: [{
+              id: "call_diagnostic_ping",
+              type: "function",
+              function: {
+                name: "diagnostic_ping",
+                arguments: "{\"value\":\"pong\"}"
+              }
+            }]
+          },
+          {
+            role: "tool",
+            tool_call_id: "call_diagnostic_ping",
+            content: "{\"ok\":true,\"message\":\"pong\"}"
+          }
+        ],
+        tools: [{
+          type: "function",
+          function: {
+            name: "diagnostic_ping",
+            description: "Diagnostic no-op tool.",
+            parameters: {
+              type: "object",
+              properties: {
+                value: { type: "string" }
+              }
+            }
+          }
+        }]
+      });
     }
     res.json(result);
   } catch (error) {
