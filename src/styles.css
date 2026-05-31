@@ -962,53 +962,60 @@
   aspect-ratio: 9 / 16;
 }
 
-.image-higgsfield-mode .studio-wall-pending div {
+.image-higgsfield-mode .studio-wall-pending .studio-wall-pending-controls {
   width: 100%;
   height: 100%;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  padding: 20px;
+  padding: 18px;
   background:
-    radial-gradient(circle at 26% 18%, rgba(255, 78, 120, 0.28), transparent 28%),
-    linear-gradient(135deg, rgba(94, 11, 108, 0.9), rgba(38, 0, 51, 0.96));
+    radial-gradient(circle at 48% 0%, rgba(255, 255, 255, 0.08), transparent 30%),
+    linear-gradient(180deg, rgba(42, 43, 43, 0.98), rgba(30, 31, 31, 0.99));
   color: #fff;
 }
 
-.image-higgsfield-mode .studio-wall-pending b {
-  display: inline-flex;
+.image-higgsfield-mode .studio-wall-pending-spinner,
+.image-higgsfield-mode .studio-wall-pending button {
+  width: 54px;
+  height: 54px;
+  min-width: 54px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.06);
   align-items: center;
-  gap: 7px;
   border-radius: 999px;
-  padding: 9px 13px;
-  background: rgba(255, 255, 255, 0.06);
-  font-size: 13px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.045);
+  color: rgba(255, 255, 255, 0.92);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 10px 22px rgba(0, 0, 0, 0.14);
+  backdrop-filter: blur(10px);
 }
 
-.image-higgsfield-mode .studio-wall-pending b::before {
-  content: "";
-  width: 10px;
-  height: 10px;
-  border: 2px solid rgba(255, 255, 255, 0.35);
-  border-top-color: #fff;
-  border-radius: 50%;
+.image-higgsfield-mode .studio-wall-pending-spinner svg {
+  width: 22px !important;
+  height: 22px !important;
+  stroke-width: 2.7;
   animation: studio-pending-spin 0.82s linear infinite;
 }
 
 .image-higgsfield-mode .studio-wall-pending button {
-  border-radius: 999px;
-  padding: 9px 13px;
-  border: 0;
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 13px;
-  font-weight: 950;
   cursor: pointer;
 }
 
+.image-higgsfield-mode .studio-wall-pending button svg {
+  width: 24px !important;
+  height: 24px !important;
+  stroke-width: 2.35;
+}
+
 .image-higgsfield-mode .studio-wall-pending button:hover {
-  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.1);
   color: #fff;
+  transform: translateY(-1px);
 }
 
 @keyframes studio-pending-spin {

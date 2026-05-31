@@ -4197,7 +4197,10 @@ function studioPendingWallCard(job) {
   const aspectClass = aspectRatio === "16:9" ? "landscape" : "portrait";
   const mediaRatio = aspectRatio === "16:9" ? "1.7778" : "0.5625";
   return `<article class="studio-wall-card studio-wall-pending ${aspectClass}" data-generation-job-id="${esc(job.id)}" data-generation-job-status="${esc(job.status || "queued")}" style="--media-ratio:${mediaRatio};aspect-ratio:${esc(aspectRatio.replace(":", " / "))}">
-    <div><b>${job.status === "processing" ? "Processing" : "Queued"}</b><button type="button" data-generation-cancel="${esc(job.id)}">Cancel</button></div>
+    <div class="studio-wall-pending-controls" aria-label="${esc(job.status === "processing" ? "Processing" : "Queued")}">
+      <span class="studio-wall-pending-spinner" role="status" aria-label="${esc(job.status === "processing" ? "Processing" : "Queued")}" title="${esc(job.status === "processing" ? "Processing" : "Queued")}">${icon("loader-circle", 22)}</span>
+      <button type="button" data-generation-cancel="${esc(job.id)}" aria-label="Cancel generation" title="Cancel generation">${icon("ban", 22)}</button>
+    </div>
   </article>`;
 }
 
