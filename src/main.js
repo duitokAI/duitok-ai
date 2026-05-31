@@ -4870,10 +4870,6 @@ function billingPage() {
             <span>${t("status")}</span>
             <strong><i></i>${esc(status)}</strong>
           </article>
-          <article class="wide">
-            <span>${t("rates")}</span>
-            <strong>RM 0.20 <em>image</em><b>·</b> RM 0.40 <em>video 8s</em></strong>
-          </article>
         </div>
       </div>
       <section class="billing-history-section">
