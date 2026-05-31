@@ -26076,3 +26076,45 @@ label {
   }
 
   .studio-shell .agent-chat-shell.agent-page-panel .agent-empty-state strong {
+    font-size: clamp(34px, 11vw, 52px) !important;
+  }
+
+  .studio-shell .agent-chat-shell.agent-page-panel .agent-empty-state p {
+    margin-top: 18px !important;
+    font-size: 16px !important;
+  }
+}
+
+/* Agent light theme readability pass: keep small labels and feedback controls legible. */
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.user > span {
+  color: rgba(255, 246, 252, 0.8) !important;
+  font-weight: 850 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.user .agent-message,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.user .agent-message p {
+  color: rgba(255, 255, 255, 0.96) !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-feedback-row button,
+.studio-shell .agent-page-panel .agent-feedback-row button {
+  border: 1px solid rgba(111, 28, 132, 0.24) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  color: #5f176f !important;
+  box-shadow: 0 8px 20px rgba(68, 14, 82, 0.08) !important;
+  opacity: 1 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-feedback-row button svg,
+.studio-shell .agent-page-panel .agent-feedback-row button svg {
+  color: currentColor !important;
+  stroke: currentColor !important;
+  opacity: 1 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-feedback-row button:hover,
+.studio-shell .agent-page-panel .agent-feedback-row button:hover {
+  border-color: rgba(255, 63, 110, 0.42) !important;
+  background: #fff4f8 !important;
+  color: #33023f !important;
+}
