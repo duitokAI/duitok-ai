@@ -29332,6 +29332,28 @@ label {
   min-height: clamp(130px, calc(var(--studio-wall-column, 260px) * 0.56), 260px) !important;
 }
 
+.studio-shell .image-higgsfield-mode .studio-wall-card:has(.studio-wall-actions button:hover),
+.studio-shell .image-higgsfield-mode .studio-wall-card:has(.studio-wall-actions button:focus-visible) {
+  z-index: 30 !important;
+  overflow: visible !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-actions {
+  z-index: 40 !important;
+  overflow: visible !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-actions button {
+  z-index: 41 !important;
+  overflow: visible !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-actions button::after {
+  z-index: 999 !important;
+  right: calc(100% + 10px) !important;
+  box-shadow: 0 12px 28px rgba(14, 0, 20, 0.32) !important;
+}
+
 @media (max-width: 1500px) {
   .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) {
     grid-template-columns: minmax(520px, 1fr) 208px 188px !important;
