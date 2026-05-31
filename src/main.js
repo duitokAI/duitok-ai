@@ -4291,9 +4291,13 @@ function imageGenerateConsole(p, selectedModel) {
     ? `<i data-lucide="smartphone" style="width:15px;height:15px;transform:rotate(90deg)"></i>`
     : icon("smartphone", 15);
   return `<section class="image-generate-console">
-    <label class="image-console-prompt">
+    <div class="image-console-prompt">
+      <label class="image-prompt-insert" title="Insert product image">
+        ${icon("plus", 24)}
+        <input type="file" data-upload="product" data-upload-select="product" accept="image/*" hidden>
+      </label>
       <textarea data-field="image.prompt" data-image-console-prompt rows="3" placeholder="Create a high-converting TikTok Shop product image...">${esc(p.image.prompt || "")}</textarea>
-    </label>
+    </div>
     <div class="image-console-side">
       <div class="image-console-primary-row">
         <div class="image-console-references">
@@ -8794,7 +8798,7 @@ async function startFirstGenerationWizard() {
 async function uploadChange(event) {
   const file = event.target.files?.[0];
   if (!file) return;
-  await uploadAttachmentFile(file, event.target.dataset.upload);
+  await uploadAttachmentFile(file, event.target.dataset.upload, event.target.dataset.uploadSelect);
   event.target.value = "";
 }
 
@@ -8818,13 +8822,25 @@ function bindAttachmentDropZone(el) {
     clear();
     const file = [...(event.dataTransfer?.files || [])].find((item) => /^(image|video)\//i.test(item.type || ""));
     if (!file) return notify("Please drop an image or video file.");
-    await uploadAttachmentFile(file, kind);
+    await uploadAttachmentFile(file, kind, kind);
   });
 }
 
-async function uploadAttachmentFile(file, kind = state.attachmentPickerKind || "product") {
+async function uploadAttachmentFile(file, kind = state.attachmentPickerKind || "product", selectTarget = "") {
   const db = await api("/attachments", { method: "POST", body: JSON.stringify({ projectId: state.projectId, kind, name: file.name, size: file.size, type: file.type }) });
-  set({ db });
+  let nextDb = db;
+  if (selectTarget === "product" || selectTarget === "avatar") {
+    const uploaded = (db.attachments || []).find((item) => item.projectId === state.projectId && item.kind === kind && item.name === file.name);
+    const field = selectTarget === "product" ? "image.productAttachmentId" : "image.avatarAttachmentId";
+    if (uploaded?.id) {
+      nextDb = dbWithProjectField(db, state.projectId, field, uploaded.id);
+      api(`/projects/${state.projectId}/field`, {
+        method: "PATCH",
+        body: JSON.stringify({ field, value: uploaded.id })
+      }).catch((error) => notify(error.message));
+    }
+  }
+  set({ db: nextDb });
   notify(tf("toastFileSaved", { name: file.name }));
 }
 
