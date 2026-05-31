@@ -21833,11 +21833,11 @@ label {
   display: flex !important;
   align-items: center !important;
   justify-content: flex-start !important;
-  gap: 8px !important;
+  flex-wrap: wrap !important;
+  gap: 0 !important;
   margin-bottom: 0 !important;
   padding-bottom: 0 !important;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
+  overflow: visible !important;
   scrollbar-width: none;
 }
 
@@ -21850,7 +21850,7 @@ label {
   top: 0;
   z-index: 14;
   margin: calc(var(--project-page-pad-y) * -1) calc(var(--project-page-pad-x) * -1) 10px !important;
-  padding: 8px var(--project-page-pad-x) 9px !important;
+  padding: 8px 14px 9px 0 !important;
   background:
     linear-gradient(180deg, rgba(255, 246, 252, 0.98) 0%, rgba(255, 246, 252, 0.96) 74%, rgba(255, 246, 252, 0) 100%);
   backdrop-filter: blur(18px);
@@ -21858,8 +21858,8 @@ label {
 
 .studio-shell .workspace:has(.step-tabs) .studio-top-step-tabs {
   width: 100%;
-  max-width: min(1480px, 100%);
-  margin: 0 auto !important;
+  max-width: none !important;
+  margin: 0 !important;
 }
 
 .studio-shell .workspace:has(.step-tabs) .step-tabs button {
@@ -21870,12 +21870,27 @@ label {
   min-width: 0 !important;
   max-width: none !important;
   width: auto !important;
-  min-height: 52px !important;
-  border-radius: 11px !important;
+  min-height: 44px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
   gap: 8px !important;
   padding: 0 18px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: rgba(70, 39, 78, 0.62) !important;
   font-size: 13.5px !important;
   line-height: 1 !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .step-tabs button:not(:first-child) {
+  border-left: 1px solid rgba(93, 54, 104, 0.22) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .step-tabs button.active,
+.studio-shell .workspace:has(.step-tabs) .step-tabs button:hover {
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #4b0759 !important;
 }
 
 .studio-shell .workspace:has(.step-tabs) .step-tabs button svg {
