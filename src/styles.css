@@ -24482,6 +24482,99 @@ label {
   transition: width 0.22s ease, padding 0.22s ease;
 }
 
+/* Image console responsive fit pass: keep every action visible at each workspace width. */
+.studio-shell .image-generate-console {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+  grid-template-areas: "mode add prompt tools refs generate" !important;
+  grid-template-columns:
+    minmax(92px, 0.22fr)
+    52px
+    minmax(260px, 1fr)
+    minmax(168px, 0.38fr)
+    minmax(150px, 0.34fr)
+    clamp(126px, 9vw, 158px) !important;
+  gap: 8px !important;
+}
+
+.studio-shell .image-console-step-menu {
+  grid-area: mode;
+  min-width: 0;
+}
+
+.studio-shell .image-console-add {
+  grid-area: add;
+}
+
+.studio-shell .image-console-prompt {
+  grid-area: prompt;
+  min-width: 0;
+}
+
+.studio-shell .image-console-tools {
+  grid-area: tools;
+  min-width: 0;
+}
+
+.studio-shell .image-console-references {
+  grid-area: refs;
+  min-width: 0;
+}
+
+.studio-shell .image-console-generate {
+  grid-area: generate;
+  min-width: 126px !important;
+}
+
+.studio-shell .image-console-tools,
+.studio-shell .image-console-references {
+  align-self: stretch;
+}
+
+.studio-shell .image-console-tools span,
+.studio-shell .image-console-tools label,
+.studio-shell .image-reference-thumb,
+.studio-shell .image-console-step-menu summary {
+  min-width: 0 !important;
+}
+
+@media (max-width: 1560px) {
+  .studio-shell .image-generate-console {
+    grid-template-areas:
+      "mode add prompt prompt generate"
+      "tools tools refs refs generate" !important;
+    grid-template-columns: minmax(96px, 0.18fr) 52px minmax(220px, 1fr) minmax(210px, 0.72fr) clamp(132px, 12vw, 164px) !important;
+  }
+
+  .studio-shell .image-console-step-menu summary,
+  .studio-shell .image-console-add,
+  .studio-shell .image-console-generate {
+    min-height: 64px !important;
+  }
+
+  .studio-shell .image-console-prompt textarea {
+    min-height: 64px !important;
+    max-height: 92px !important;
+  }
+}
+
+@media (max-width: 1180px) {
+  .studio-shell .image-generate-console {
+    grid-template-areas:
+      "prompt prompt"
+      "tools generate"
+      "refs generate"
+      "mode add" !important;
+    grid-template-columns: minmax(0, 1fr) minmax(132px, 0.34fr) !important;
+  }
+
+  .studio-shell .image-console-references,
+  .studio-shell .image-console-tools {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
 .studio-shell .workspace {
   transition: padding 0.22s ease;
 }
