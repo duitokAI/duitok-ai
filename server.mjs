@@ -58,6 +58,7 @@ const grsaiDrawPath = process.env.GRSAI_DRAW_PATH || "/v1/draw/nano-banana";
 const grsaiResultPath = process.env.GRSAI_RESULT_PATH || "/v1/draw/result";
 const grsaiNanoModel = process.env.GRSAI_NANO_MODEL || "nano-banana-pro";
 const grsaiVisionModel = process.env.GRSAI_VISION_MODEL || "gemini-2.5-flash";
+const grsaiCloneModel = process.env.GRSAI_CLONE_MODEL || "gemini-3-pro";
 const atlasBaseUrl = (process.env.ATLASCLOUD_BASE_URL || "https://api.atlascloud.ai").replace(/\/$/, "");
 const atlasGenerateVideoPath = process.env.ATLASCLOUD_GENERATE_VIDEO_PATH || "/api/v1/model/generateVideo";
 const atlasPredictionPathPrefix = process.env.ATLASCLOUD_PREDICTION_PATH_PREFIX || "/api/v1/model/prediction";
@@ -1454,7 +1455,7 @@ function providerForMediaModel(model) {
 function generationCostFor(db, project, action, generated) {
   const model = internalMediaModel(project.image?.model);
   const provider = generated.provider || providerForMediaModel(model);
-  if (action === "clone-prompt") return { costRm: 0.01, costRmb: 0, costUsd: 0, model: generated.model || geminiVisionModel, provider: "gemini", unit: "vision" };
+  if (action === "clone-prompt") return { costRm: 0.01, costRmb: 0, costUsd: 0, model: generated.model || grsaiCloneModel, provider: "grsai", unit: "vision" };
   if (action !== "generate-image") return { costRm: 0.01, costRmb: 0, costUsd: 0, model: "APIMart Text", provider: "apimart", unit: "text" };
   const costs = { ...defaultModelCosts(), ...(db.modelCosts || {}) };
   return { model, provider, ...(costs[model] || { costRm: 0, costRmb: 0, unit: "unknown" }) };
@@ -1908,8 +1909,12 @@ function buildTextPrompt(project, action, step) {
   ].join("\n");
 }
 
-function geminiResponseText(data = {}) {
-  return data.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("").trim() || data.text || "";
+function modelResponseText(data = {}) {
+  return data.choices?.[0]?.message?.content?.trim?.()
+    || data.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("").trim()
+    || data.output_text
+    || data.text
+    || "";
 }
 
 function cloneReferenceVideo(project = {}) {
@@ -1925,42 +1930,36 @@ function cloneReferenceVideo(project = {}) {
   };
 }
 
-async function generateVideoPromptWithGemini(project) {
+async function generateVideoPromptWithGrsai(project) {
   const referenceVideo = cloneReferenceVideo(project);
   if (!referenceVideo) {
     const error = new Error("Please upload a reference video before extracting a prompt.");
     error.status = 400;
     throw error;
   }
-  const videoPart = dataUrlToGeminiInlinePart(referenceVideo.dataUrl);
-  if (!videoPart) {
-    const error = new Error("Reference video could not be read. Please upload MP4, MOV, or WebM.");
-    error.status = 400;
-    throw error;
-  }
-  const data = await geminiGenerateContent(geminiVisionModel, {
-    system_instruction: { parts: [{ text: videoPromptExtractorSystemPrompt }] },
-    contents: [{
-      role: "user",
-      parts: [
-        {
-          text: [
-            `Reference video filename: ${referenceVideo.name}`,
-            "Analyze the uploaded video from first frame to final frame using the required timestamped format.",
-            "After the breakdown, include a final section titled REUSABLE VIDEO GENERATION PROMPT that condenses the observed scene logic into one practical prompt."
-          ].join("\n")
-        },
-        videoPart
-      ]
-    }],
-    generationConfig: {
-      temperature: 0.2,
-      topP: 0.9
-    }
+  const userInstruction = [
+    `Reference video filename: ${referenceVideo.name}`,
+    "Analyze the uploaded video from first frame to final frame using the required timestamped format.",
+    "After the breakdown, include a final section titled REUSABLE VIDEO GENERATION PROMPT that condenses the observed scene logic into one practical prompt."
+  ].join("\n");
+  const data = await grsaiChatRequest({
+    model: grsaiCloneModel,
+    messages: [
+      { role: "system", content: videoPromptExtractorSystemPrompt },
+      {
+        role: "user",
+        content: [
+          { type: "text", text: userInstruction },
+          { type: "video_url", video_url: { url: referenceVideo.dataUrl } }
+        ]
+      }
+    ],
+    temperature: 0.2,
+    top_p: 0.9
   });
-  const body = geminiResponseText(data);
+  const body = modelResponseText(data);
   if (!body) {
-    const error = new Error("Gemini returned an empty analysis. Please try another video.");
+    const error = new Error("GRS AI Gemini returned an empty analysis. Please try another video.");
     error.status = 502;
     throw error;
   }
@@ -1970,8 +1969,8 @@ async function generateVideoPromptWithGemini(project) {
     body,
     prompt: body,
     videoUrl: referenceVideo.dataUrl,
-    provider: "gemini",
-    model: geminiVisionModel
+    provider: "grsai",
+    model: grsaiCloneModel
   };
 }
 
@@ -2103,6 +2102,7 @@ function imageAspectRatioFromProject(project) {
 
 function generationEndpointFor(provider, project) {
   if (provider === "gemini") return `${geminiGeneratePathPrefix}/${geminiVisionModel}:generateContent`;
+  if (provider === "grsai" && project?.clone?.referenceVideo) return grsaiChatPath;
   if (provider === "atlascloud") return atlasGenerateVideoPath;
   if (provider === "grsai") return grsaiDrawPath;
   if (provider === "wuyin") return wuyinPathFromProject(project);
@@ -2341,7 +2341,7 @@ async function generateWithApimart(project, action, step) {
 }
 
 async function generateWithProvider(project, action, step) {
-  if (action === "clone-prompt") return generateVideoPromptWithGemini(project);
+  if (action === "clone-prompt") return generateVideoPromptWithGrsai(project);
   if (action === "generate-image") {
     const model = internalMediaModel(project.image?.model);
     if (!allowedMediaModels.has(model)) {
