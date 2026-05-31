@@ -3995,7 +3995,7 @@ function studioResultWall(p, meta = {}) {
 
 function studioPendingWallCard(job) {
   return `<article class="studio-wall-card studio-wall-pending">
-    <div><b>${job.status === "processing" ? "Processing" : "Queued"}</b><span>Cancel</span></div>
+    <div>${icon("loader-circle", 34)}<b>${esc(job.title || "Generating")}</b><span>${job.status === "processing" ? "模型正在生成" : "任务已加入队列"}</span></div>
   </article>`;
 }
 
@@ -4076,14 +4076,12 @@ function imagePanel(p) {
   const modeOptions = ["Create Image", "Virtualize (Poster/Ad)"];
   const selectedMode = modeOptions.includes(p.image.mode) ? p.image.mode : "Create Image";
   const imageTypes = ["image", "video", "visual_card"];
-  const meta = studioStepMeta("image");
-  return `<section class="image-canvas-studio image-higgsfield-mode">
+  const history = p.results.filter((item) => imageTypes.includes(item.type)).slice(-18).reverse();
+  const pending = pendingResultJobs(p, imageTypes);
+  const selectedResult = history.find((item) => item.id === state.imageCanvasSelectedResultId) || history[0] || null;
+  return `<section class="image-canvas-studio">
     ${selectedMode === "Virtualize (Poster/Ad)" ? `<div class="image-studio-legacy">${virtualizePanel()}</div>` : `
-      <div class="studio-higgsfield-tabs">
-        <button class="active" type="button">${icon("folder-open", 16)} History</button>
-        <button type="button">${icon("globe-2", 16)} Community</button>
-      </div>
-      ${studioResultWall(p, meta)}
+      ${imageCanvasStage(p, selectedResult, history, pending)}
       ${imageGenerateConsole(p, selectedModel)}
     `}
   </section>`;
