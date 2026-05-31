@@ -5575,68 +5575,19 @@ app.post("/api/agent", async (req, res, next) => {
     }
 
     if (!hasDeepSeekConfig()) {
-      const clarification = agentClarificationForUncertainAction(latestUserMessage, { intent, projectId });
-      if (clarification) {
-        agentRun = {
-          ...agentRun,
-          status: "completed",
-          plan: [
-            agentPlanStep("understand", "理解需求", "completed"),
-            agentPlanStep("clarify", "需要补充信息", "completed", "本地 fallback 模式先询问用户，不执行工具")
-          ],
-          confidence: agentConfidence(intent, { projectId, executionReady: false }),
-          durationMs: Date.now() - startedAt
-        };
-        await saveAgentRun(agentRun);
-        return res.json({
-          reply: clarification,
-          db: stateForUser,
-          toolResults: [],
-          uiActions: [],
-          agentRun: publicAgentRun(agentRun)
-        });
-      }
-      const fallback = await runDeterministicAgent(latestUserMessage, { projectId, user, workspace: stateForUser });
-      const fallbackDiffs = fallback.diffs || [];
-      const fallbackCards = fallback.cards || (fallback.toolResults || []).map((item) => item.card).filter(Boolean);
-      if (fallback.pendingTool && fallback.confirmation) {
-        agentRun = {
-          ...agentRun,
-          status: "waiting_confirmation",
-          plan: planWithTool(agentRun.plan, fallback.pendingTool.name, "waiting_confirmation", `${agentToolLabel(fallback.pendingTool.name)}需要确认`),
-          toolResults: fallback.toolResults || [],
-          uiActions: fallback.uiActions || [],
-          diffs: fallbackDiffs,
-          cards: fallbackCards,
-          confirmation: fallback.confirmation,
-          pendingTool: fallback.pendingTool,
-          durationMs: Date.now() - startedAt
-        };
-        await saveAgentRun(agentRun);
-        return res.json({
-          reply: fallback.confirmation.message,
-          db: fallback.db || stateForUser,
-          toolResults: fallback.toolResults,
-          uiActions: fallback.uiActions,
-          agentRun: publicAgentRun(agentRun)
-        });
-      }
       agentRun = {
         ...agentRun,
-        status: fallback.toolResults?.length ? "completed" : "failed",
-        plan: fallback.toolResults?.length ? completeAgentPlan(agentRun.plan) : failAgentPlan(agentRun.plan, "Agent 大脑暂时不可用"),
-        toolResults: fallback.toolResults || [],
-        uiActions: fallback.uiActions || [],
-        diffs: fallbackDiffs,
-        cards: fallbackCards,
+        status: "failed",
+        plan: failAgentPlan(agentRun.plan, "Agent 上游模型未配置"),
         durationMs: Date.now() - startedAt
       };
       await saveAgentRun(agentRun);
-      return res.json({
-        reply: sanitizeAgentReply(fallback.reply, latestUserMessage),
-        db: fallback.db || stateForUser,
-        toolResults: fallback.toolResults,
-        uiActions: fallback.uiActions,
+      return res.status(503).json({
+        error: "Agent brain is not configured yet.",
+        reply: "Agent 上游模型还没配置好，请管理员检查 DEEPSEEK_API_KEY 和 DEEPSEEK_MODEL。",
+        db: stateForUser,
+        toolResults: [],
+        uiActions: [],
         agentRun: publicAgentRun(agentRun)
       });
     }
@@ -5717,45 +5668,13 @@ app.post("/api/agent", async (req, res, next) => {
     for (let round = 0; round < 3; round += 1) {
       agentRun.status = "running";
       agentRun.plan = planWithTool(agentRun.plan, "", "running", round === 0 ? "等待模型决策" : "继续执行工具链");
-      let completion;
-      try {
-        completion = await deepseekRequest({
-          model: deepseekModel,
-          messages,
-          tools: agentTools,
-          tool_choice: "auto",
-          stream: false
-        });
-      } catch (error) {
-        console.warn("Agent model request failed, using deterministic fallback:", sanitizeAgentText(error.message || ""));
-        const fallback = await runDeterministicAgent(latestUserMessage, { projectId, user, workspace: latestDb });
-        const fallbackDiffs = fallback.diffs || [];
-        const fallbackCards = fallback.cards || (fallback.toolResults || []).map((item) => item.card).filter(Boolean);
-        agentRun = {
-          ...agentRun,
-          status: fallback.pendingTool ? "waiting_confirmation" : fallback.toolResults?.length ? "completed" : "failed",
-          plan: fallback.pendingTool
-            ? planWithTool(agentRun.plan, fallback.pendingTool.name, "waiting_confirmation", `${agentToolLabel(fallback.pendingTool.name)}需要确认`)
-            : fallback.toolResults?.length
-            ? completeAgentPlan(agentRun.plan)
-            : failAgentPlan(agentRun.plan, "Agent 模型暂时不可用"),
-          toolResults: fallback.toolResults || [],
-          uiActions: fallback.uiActions || [],
-          diffs: fallbackDiffs,
-          cards: fallbackCards,
-          confirmation: fallback.confirmation || null,
-          pendingTool: fallback.pendingTool || null,
-          durationMs: Date.now() - startedAt
-        };
-        await saveAgentRun(agentRun);
-        return res.json({
-          reply: sanitizeAgentReply(fallback.reply, latestUserMessage),
-          db: fallback.db || latestDb,
-          toolResults: fallback.toolResults || [],
-          uiActions: fallback.uiActions || [],
-          agentRun: publicAgentRun(agentRun)
-        });
-      }
+      const completion = await deepseekRequest({
+        model: deepseekModel,
+        messages,
+        tools: agentTools,
+        tool_choice: "auto",
+        stream: false
+      });
       const message = completion.choices?.[0]?.message;
       if (!message) throw Object.assign(new Error("Agent model returned an empty response"), { status: 502 });
 
