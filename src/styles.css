@@ -26862,3 +26862,50 @@ label {
     max-height: 142px !important;
   }
 }
+
+/* Project creation tabs: lock the tool switcher to the top of the studio viewport. */
+.studio-shell {
+  --project-fixed-tabs-height: 58px;
+}
+
+.studio-shell .workspace:has(.step-tabs) {
+  padding-top: calc(var(--project-page-pad-y) + var(--project-fixed-tabs-height)) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) {
+  padding: var(--project-fixed-tabs-height) 0 56px !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .project-step-topbar {
+  position: fixed !important;
+  top: 0 !important;
+  left: var(--studio-sidebar-width) !important;
+  right: 0 !important;
+  z-index: 1200 !important;
+  width: auto !important;
+  max-width: none !important;
+  height: var(--project-fixed-tabs-height) !important;
+  margin: 0 !important;
+  padding: 6px 12px !important;
+  border-bottom: 1px solid rgba(93, 54, 104, 0.12) !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  box-shadow: 0 12px 30px rgba(55, 12, 70, 0.08) !important;
+  backdrop-filter: blur(14px);
+}
+
+.studio-shell .workspace:has(.step-tabs) .studio-top-step-tabs {
+  height: 100% !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .step-tabs button {
+  min-height: 46px !important;
+}
+
+@media (max-width: 1000px) {
+  .studio-shell .workspace:has(.step-tabs) .project-step-topbar {
+    left: 0 !important;
+  }
+}
