@@ -4219,6 +4219,7 @@ async function executeAgentTool(name, args, user) {
 
 function inferAgentAction(content) {
   const text = String(content || "").toLowerCase();
+  const abilityQuestion = isAgentAbilityQuestion(content);
   return {
     wantsProject: /create|project|项目|專案|新建|创建|建立|buat project|projek/.test(text),
     wantsSeedance: /seedance|视频|影片|video|t2v|text.?to.?video/.test(text),
@@ -4227,7 +4228,7 @@ function inferAgentAction(content) {
     wantsInspect: /缺什么|还缺|today|今天|状态|检查|inspect|diagnose|看一下/.test(text),
     wantsMemory: /记住|remember|保存.*语气|品牌语气|目标人群|audience|language/.test(text),
     wantsVisualCard: /visual card|视觉卡|視覺卡|图文卡|圖文卡|小红书|小紅書|封面|cover|poster|海报|海報|素材卡|卖点卡|賣點卡|教程卡|金句卡|data card|carousel/.test(text),
-    wantsGenerate: /generate|生成|hasilkan|buat|run|create|做|产出/.test(text),
+    wantsGenerate: !abilityQuestion && /generate|生成|hasilkan|buat|run|create|做|产出/.test(text),
     wantsSchedule: /schedule|排期|发布|posting|post|draft|草稿|日历|calendar/.test(text),
     wantsAutoBatch: /7\s*天|七天|week|weekly|batch|content plan|内容计划|內容計劃|auto content/.test(text),
     wantsTrendResearch: /trend|趋势|趨勢|aesthetic|风格|風格|适合卖|可以卖|卖什么|帶貨|带货|选题|對標|对标|爆款|流行|短剧|水果人|fruit drama|fruit character|loft girl|clean girl|dopamine|downtown girl/i.test(text)
@@ -4252,6 +4253,7 @@ function agentTrendQuery(content = "") {
 
 function agentIntentFromContent(content = "") {
   const text = String(content || "").toLowerCase();
+  if (isAgentAbilityQuestion(content)) return "chat";
   if (/publish|direct post|发\s*tiktok|发布|post ke tiktok|直接发|直接发布/.test(text)) return "publish";
   if (/schedule|排期|草稿|draft|calendar|今晚|today|tomorrow|明天/.test(text)) return "schedule";
   if (/support|客服|human|人工|help|problem|bug/.test(text)) return "support";
@@ -4260,6 +4262,20 @@ function agentIntentFromContent(content = "") {
   if (/create|project|项目|projek|campaign|新建|创建|建立/.test(text)) return "create_project";
   if (/open|go to|打开|跳转|进入/.test(text)) return "navigate";
   return "chat";
+}
+
+function isAgentAbilityQuestion(content = "") {
+  const text = String(content || "").trim().toLowerCase();
+  return /^(你|妳|你们|你們|agent|pokaya\s*agent)?\s*(能|可以|会|會)?\s*(做什么|做些?什么|帮我做什么|能干嘛|可以干嘛|会什么|有什么功能|功能是什么|怎么用|如何使用)[？?。!！\s]*$/.test(text)
+    || /^(what can you do|what do you do|how can you help|help|capabilities|features)\??$/i.test(text);
+}
+
+function agentAbilityReply(content = "") {
+  const isChinese = /[\u3400-\u9fff]/.test(String(content || ""));
+  if (isChinese) {
+    return "我可以帮你做这些：整理项目和素材、写图片/视频 prompt、生成图片或视频、做 Product Scanner 内容计划、写 Storytelling/Clone Prompt、管理排期草稿、检查 workspace 状态。只要涉及扣 credits、发布 TikTok 或高影响操作，我都会先让你确认。";
+  }
+  return "I can help organize projects and references, write image/video prompts, generate images or videos, build Product Scanner content plans, create Storytelling/Clone prompts, manage schedule drafts, and inspect workspace status. Anything that spends credits, publishes, or changes important workspace state will ask for confirmation first.";
 }
 
 function agentToolLabel(name = "") {
@@ -5732,6 +5748,24 @@ app.post("/api/agent", async (req, res, next) => {
       await saveAgentRun(agentRun);
       return res.json({
         reply: agentSecurityRefusal(latestUserMessage),
+        db: stateForUser,
+        toolResults: [],
+        uiActions: [],
+        agentRun: publicAgentRun(agentRun)
+      });
+    }
+
+    if (isAgentAbilityQuestion(latestUserMessage)) {
+      agentRun = {
+        ...agentRun,
+        status: "completed",
+        plan: completeAgentPlan(agentRun.plan),
+        confidence: agentConfidence("chat", { projectId, executionReady: false }),
+        durationMs: Date.now() - startedAt
+      };
+      await saveAgentRun(agentRun);
+      return res.json({
+        reply: agentAbilityReply(latestUserMessage),
         db: stateForUser,
         toolResults: [],
         uiActions: [],
