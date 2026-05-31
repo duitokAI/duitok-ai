@@ -4428,15 +4428,13 @@ function selectedImageReference(kind) {
 }
 
 function imageReferenceThumb(kind, item, emptyLabel) {
-  const zh = state.lang === "zh";
-  const label = kind === "avatar" ? (zh ? "人物" : "Avatar") : (zh ? "产品" : "Product");
-  const helper = item ? (zh ? "更换" : "Change") : (zh ? "可选" : emptyLabel.replace(/\s*optional$/i, ""));
+  const label = kind === "avatar" ? "Avatar" : "Product";
   const preview = item ? attachmentPreview(item) : `<span>${icon(kind === "avatar" ? "circle-user-round" : "package", 20)}</span>`;
   const clearButton = item ? `<span class="image-reference-clear" role="button" tabindex="0" data-action="clear-image-reference" data-attachment-kind="${esc(kind)}" aria-label="${esc(`Remove ${label}`)}">${icon("x", 13)}</span>` : "";
   return `<button class="image-reference-thumb ${item ? "has-ref" : ""}" type="button" data-action="open-attachment-picker" data-attachment-kind="${esc(kind)}">
     ${preview}
     ${clearButton}
-    <div><b>${esc(item?.name || label)}</b><small>${esc(helper)}</small></div>
+    <div><b>${esc(label)}</b></div>
   </button>`;
 }
 
