@@ -4187,8 +4187,8 @@ function studioDockCredit(meta = {}) {
 
 function imagePanel(p) {
   const imageModels = [
-    ["GPT Image 2", "GPT Image 2 (0.15 Credit)"],
-    ["Nano Banana Pro", "Nano Banana Pro (0.20 Credit)"]
+    ["GPT Image 2", "GPT Image 2"],
+    ["Nano Banana Pro", "Nano Banana Pro"]
   ];
   const imageModelValues = imageModels.map(([value]) => value);
   const selectedModel = imageModelValues.includes(p.image.model) ? p.image.model : String(p.image.model || "").toLowerCase().includes("pro") ? "Nano Banana Pro" : "GPT Image 2";
@@ -4283,7 +4283,7 @@ function imageGenerateConsole(p, selectedModel) {
   const unitCredit = selectedModel === "Nano Banana Pro" ? 0.2 : 0.15;
   const selectedCount = imageBatchCount(p);
   const credit = (unitCredit * selectedCount).toFixed(2);
-  const modelOptions = [["GPT Image 2", "GPT Image 2 (0.15 Credit)"], ["Nano Banana Pro", "Nano Banana Pro (0.20 Credit)"]];
+  const modelOptions = [["GPT Image 2", "GPT Image 2"], ["Nano Banana Pro", "Nano Banana Pro"]];
   const aspectRatioOptions = ["9:16", "16:9"];
   const selectedAspectRatio = aspectRatioOptions.includes(p.image.aspectRatio) ? p.image.aspectRatio : "9:16";
   const resolutionOptions = [["1K", "1k"], ["2K", "2k"], ["4K", "4k"]];
