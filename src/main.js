@@ -4298,24 +4298,13 @@ function imageGenerateConsole(p, selectedModel) {
     ? `<i data-lucide="smartphone" style="width:15px;height:15px;transform:rotate(90deg)"></i>`
     : icon("smartphone", 15);
   return `<section class="image-generate-console">
-    <div class="image-console-prompt">
-      <label class="image-prompt-insert" title="Insert product image">
-        ${icon("plus", 24)}
-        <input type="file" data-upload="product" data-upload-select="product" accept="image/*" hidden>
-      </label>
-      <textarea data-field="image.prompt" data-image-console-prompt rows="3" placeholder="Create a high-converting TikTok Shop product image...">${esc(p.image.prompt || "")}</textarea>
-    </div>
-    <div class="image-console-side">
-      <div class="image-console-primary-row">
-        <div class="image-console-references">
-          ${imageReferenceThumb("avatar", avatar, "Avatar optional")}
-          ${imageReferenceThumb("product", product, "Product optional")}
-        </div>
-        <button class="image-console-generate" type="button" data-action="generate-image" ${state.generating ? "disabled" : ""}>
-          ${icon(state.generating ? "loader-circle" : "send", 20)}
-          <b>${state.generating ? t("generating") : t("generateImage")}</b>
-          <small>${credit} Credit</small>
-        </button>
+    <div class="image-console-main">
+      <div class="image-console-prompt">
+        <label class="image-prompt-insert" title="Insert product image">
+          ${icon("plus", 24)}
+          <input type="file" data-upload="product" data-upload-select="product" accept="image/*" hidden>
+        </label>
+        <textarea data-field="image.prompt" data-image-console-prompt rows="2" placeholder="Create a high-converting TikTok Shop product image...">${esc(p.image.prompt || "")}</textarea>
       </div>
       <div class="image-console-tools">
         <label>${select("image.model", "", modelOptions, selectedModel)}</label>
@@ -4329,6 +4318,15 @@ function imageGenerateConsole(p, selectedModel) {
         <button class="image-prompt-optimize" type="button" data-action="optimize-image-prompt">${icon("wand-sparkles", 15)} <span>Prompt</span></button>
       </div>
     </div>
+    <div class="image-console-references">
+      ${imageReferenceThumb("avatar", avatar, "Avatar optional")}
+      ${imageReferenceThumb("product", product, "Product optional")}
+    </div>
+    <button class="image-console-generate" type="button" data-action="generate-image" ${state.generating ? "disabled" : ""}>
+      ${icon(state.generating ? "loader-circle" : "send", 20)}
+      <b>${state.generating ? t("generating") : t("generateImage")}</b>
+      <small>${credit} Credit</small>
+    </button>
   </section>`;
 }
 
