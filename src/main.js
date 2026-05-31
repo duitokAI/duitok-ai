@@ -4428,7 +4428,6 @@ function imageModelPicker(selectedModel) {
       value: "GPT Image 2",
       provider: "openai",
       title: "GPT Image 2",
-      credit: "0.15 Credit",
       description: "4K images with strong text rendering",
       badge: "NEW"
     },
@@ -4436,40 +4435,35 @@ function imageModelPicker(selectedModel) {
       value: "Seedream 5.0 Lite",
       provider: "seedream",
       title: "Seedream 5.0 Lite",
-      credit: "0.15 Credit",
-      description: "APIMart image model for fast product visuals",
+      description: "Fast image generation for high-quality creative visuals",
       badge: ""
     },
     {
       value: "Seedream 4.5",
       provider: "seedream",
       title: "Seedream 4.5",
-      credit: "0.15 Credit",
-      description: "APIMart image model for polished commercial shots",
+      description: "Advanced image generation for polished commercial shots",
       badge: ""
     },
     {
       value: "Nano Banana Pro",
       provider: "google",
       title: "Nano Banana Pro",
-      credit: "0.20 Credit",
-      description: "Google flagship generation model",
+      description: "Flagship image generation model for premium visuals",
       badge: ""
     },
     {
       value: "Nano Banana 2",
       provider: "google",
       title: "Nano Banana 2",
-      credit: "0.15 Credit",
-      description: "GRS AI image model for flexible visuals",
+      description: "Next-generation image model for flexible visual creation",
       badge: ""
     },
     {
       value: "Grok Imagine",
       provider: "xai",
       title: "Grok Imagine",
-      credit: "0.15 Credit",
-      description: "速创API image model for punchy concepts",
+      description: "Expressive image generation for creative concepts",
       badge: ""
     }
   ];
@@ -4490,7 +4484,6 @@ function imageModelPicker(selectedModel) {
             <b>
               <span>${esc(item.title)}</span>
               ${item.badge ? ` <em>${esc(item.badge)}</em>` : ""}
-              <i>${esc(item.credit)}</i>
             </b>
             <small>${esc(item.description)}</small>
           </span>

@@ -28840,8 +28840,7 @@ label {
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker span,
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker b,
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker small,
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker em,
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker i {
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker em {
   height: auto !important;
   min-height: 0 !important;
   max-height: none !important;
@@ -28998,21 +28997,6 @@ label {
   font-style: italic !important;
   font-weight: 950 !important;
   line-height: 1 !important;
-}
-
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-option-copy i {
-  flex: 0 0 auto !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  border-radius: 999px !important;
-  padding: 3px 8px !important;
-  background: rgba(111, 28, 132, 0.08) !important;
-  color: rgba(42, 6, 51, 0.64) !important;
-  font-size: 11px !important;
-  font-style: normal !important;
-  font-weight: 850 !important;
-  line-height: 1 !important;
-  white-space: nowrap !important;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-option-copy small {
