@@ -24672,7 +24672,7 @@ label {
 
 .studio-shell:not(.sidebar-collapsed) .sidebar-collapse-toggle {
   position: absolute;
-  top: 4px;
+  top: 8px;
   right: 0;
 }
 
