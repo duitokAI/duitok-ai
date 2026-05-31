@@ -24698,7 +24698,7 @@ label {
 
 .studio-shell.sidebar-collapsed .agent-primary-copy,
 .studio-shell.sidebar-collapsed .agent-primary-status,
-.studio-shell.sidebar-collapsed .side-primary span,
+.studio-shell.sidebar-collapsed .side-primary > span:not(.studio-nav-mark),
 .studio-shell.sidebar-collapsed .side-link span,
 .studio-shell.sidebar-collapsed .side-link svg:last-child,
 .studio-shell.sidebar-collapsed .side-support-button .support-bubble-copy {
