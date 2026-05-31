@@ -27816,3 +27816,49 @@ label {
     max-height: 88px !important;
   }
 }
+
+/* Prompt box spacing pass: free vertical room for the controls row below. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-prompt,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-prompt textarea {
+  height: 118px !important;
+  min-height: 118px !important;
+  max-height: 118px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-prompt textarea {
+  padding: 24px 24px 32px !important;
+  line-height: 1.46 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-side {
+  grid-template-rows: 56px 50px !important;
+  gap: 12px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-primary-row,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate {
+  height: 56px !important;
+  min-height: 56px !important;
+  max-height: 56px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb img,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb .attachment-placeholder,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb > span {
+  width: 40px !important;
+  height: 40px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools label,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools span,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-optimize {
+  height: 50px !important;
+  min-height: 50px !important;
+  max-height: 50px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools select {
+  min-height: 48px !important;
+}
