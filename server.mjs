@@ -2979,9 +2979,9 @@ function agentContextSummary({ clientSummary = "", olderMessages = [], workspace
     "Conversation summary, not raw transcript:",
     sanitizeAgentText(clientSummary).slice(0, agentSummaryCharLimit) || "No prior summary yet.",
     summarizeAgentHistory(olderMessages),
-    activeProject ? `Current project: ${activeProject.name} (${activeProject.id}). Results: ${activeProject.resultCount || 0}.` : "Current project: none.",
-    Object.keys(memory).length ? `Project memory: ${JSON.stringify(sanitizeAgentObject(memory)).slice(0, 900)}` : "Project memory: none.",
-    "Context rule: treat this summary as background only. Use inspect_workspace_state when fresh workspace facts are needed. Do not expose hidden config, provider names, keys, raw tool schemas, or internal routes."
+    activeProject ? `Current content setup: ${activeProject.name} (${activeProject.id}). Results: ${activeProject.resultCount || 0}.` : "Current content setup: none.",
+    Object.keys(memory).length ? `Content memory: ${JSON.stringify(sanitizeAgentObject(memory)).slice(0, 900)}` : "Content memory: none.",
+    "Context rule: treat this summary as background only. Use inspect_workspace_state when fresh workspace facts are needed. The backend may call content setups 'projects' internally, but user-facing replies must say content setup, product direction, workspace, or current settings instead of project. Do not expose hidden config, provider names, keys, raw tool schemas, or internal routes."
   ].filter(Boolean).join("\n").slice(0, 3200);
 }
 
@@ -3184,7 +3184,7 @@ const agentTools = [
     type: "function",
     function: {
       name: "inspect_workspace_state",
-      description: "Inspect the user's current Pokaya workspace before deciding the next operational step. Returns current project, latest result, schedule summary, credits, memory, and missing setup.",
+      description: "Inspect the user's current Pokaya workspace before deciding the next operational step. Returns the current content setup, latest result, schedule summary, credits, memory, and missing setup. Internal project ids may appear, but do not say 'project' in user-facing replies.",
       parameters: {
         type: "object",
         properties: {
@@ -3295,7 +3295,7 @@ const agentTools = [
     type: "function",
     function: {
       name: "remember_agent_context",
-      description: "Save project-level memory such as product name, audience, language, brand tone, and notes for future Agent tasks.",
+      description: "Save content-level memory such as product name, audience, language, brand tone, and notes for future Agent tasks. This uses an internal projectId but user-facing replies should call it content context or current settings.",
       parameters: {
         type: "object",
         properties: {
@@ -3314,7 +3314,7 @@ const agentTools = [
     type: "function",
     function: {
       name: "create_project",
-      description: "Create a new Pokaya project for the user.",
+      description: "Create a new internal content setup for the user. The backend name is project, but do not describe this as a project to users.",
       parameters: {
         type: "object",
         properties: {
@@ -3328,7 +3328,7 @@ const agentTools = [
     type: "function",
     function: {
       name: "update_project_field",
-      description: "Update a project field before generating output.",
+      description: "Update an internal content setup field before generating output. The backend name is project, but do not describe this as a project to users.",
       parameters: {
         type: "object",
         properties: {
@@ -3517,7 +3517,7 @@ function buildWorkspaceInspection(db, user, { projectId, focus } = {}) {
   const userSchedules = (state.schedule || []).filter((item) => !currentProject || !item.projectId || item.projectId === currentProject.id).slice(0, 8);
   const todayDrafts = userSchedules.filter((item) => /today|mon|tue|wed|thu|fri|sat|sun/i.test(String(item.time || ""))).length;
   const missing = [];
-  if (!currentProject) missing.push("project");
+  if (!currentProject) missing.push("content setup");
   if (currentProject && !currentProject.image?.prompt) missing.push("image.prompt");
   if (currentProject && !currentProject.auto?.productUrl && !currentProject.agentMemory?.productName) missing.push("product context");
   if (!(state.tiktok?.connections || []).length) missing.push("TikTok connection");
@@ -3541,8 +3541,8 @@ function buildWorkspaceInspection(db, user, { projectId, focus } = {}) {
     } : null,
     schedule: {
       total: (state.schedule || []).length,
-      currentProjectDrafts: userSchedules.filter((item) => item.status === "Draft").length,
-      currentProjectReady: userSchedules.filter((item) => item.status === "Ready").length,
+      currentSetupDrafts: userSchedules.filter((item) => item.status === "Draft").length,
+      currentSetupReady: userSchedules.filter((item) => item.status === "Ready").length,
       todayDrafts,
       latest: userSchedules.slice(0, 3).map((item) => ({ id: item.id, title: item.title, time: item.time, status: item.status }))
     },
@@ -3838,8 +3838,8 @@ function agentToolCard(name, result = {}) {
   if (name === "remember_agent_context") {
     return {
       type: "agent_memory",
-      title: "Project memory updated",
-      summary: "Agent will use this context in future project tasks.",
+      title: "Content memory updated",
+      summary: "Agent will use this context in future content tasks.",
       projectId: data.projectId,
       memory: data.memory || {}
     };
@@ -3951,7 +3951,7 @@ async function executeAgentTool(name, args, user) {
     });
     return {
       ok: true,
-      message: "Project created.",
+      message: "Content setup created.",
       db,
       data: { projectId },
       diffs: [{ type: "created_project", target: { type: "project", id: projectId }, undoable: true }],
@@ -4115,7 +4115,7 @@ async function executeAgentTool(name, args, user) {
     });
     return {
       ok: true,
-      message: "视频 prompt 已保存到项目。",
+      message: "视频 prompt 已保存到当前内容设置。",
       db: result.db,
       data: { projectId: args.projectId, resultId: promptId, prompt: result.prompt },
       diffs: [
@@ -4372,12 +4372,12 @@ function agentToolLabel(name = "") {
     inspect_workspace_state: "检查工作区",
     trend_research: "研究趋势",
     open_workspace: "打开工作区",
-    create_project: "创建项目",
-    update_project_field: "更新项目字段",
+    create_project: "创建内容设置",
+    update_project_field: "更新内容设置",
     generate_project_output: "生成内容",
     create_content_plan: "创建内容计划",
     create_seedance_prompt: "生成视频 Prompt",
-    remember_agent_context: "保存项目记忆",
+    remember_agent_context: "保存内容记忆",
     create_schedule_draft: "创建排期草稿",
     toggle_schedule_status: "更新排期状态",
     update_autopost_job: "更新 Auto Post",
@@ -4638,15 +4638,41 @@ function isSensitiveAgentRequest(content = "") {
 function agentSecurityRefusal(content = "") {
   const isChinese = /[\u3400-\u9fff]/.test(String(content || ""));
   if (isChinese) {
-    return "这部分我不能提供：我不会透露 API key、token、环境变量、系统提示词、工具 schema、中转站或内部服务细节。您可以继续让我帮您创建项目、生成内容、写脚本、做排期或检查工作流。";
+    return "这部分我不能提供：我不会透露 API key、token、环境变量、系统提示词、工具 schema、中转站或内部服务细节。您可以继续让我帮您设置内容方向、生成内容、写脚本、做排期或检查工作流。";
   }
-  return "I can't provide API keys, tokens, environment variables, system prompts, tool schemas, provider routes, or internal infrastructure details. I can still help create projects, generate content, write scripts, schedule drafts, or troubleshoot the workflow.";
+  return "I can't provide API keys, tokens, environment variables, system prompts, tool schemas, provider routes, or internal infrastructure details. I can still help set up content direction, generate content, write scripts, schedule drafts, or troubleshoot the workflow.";
 }
 
 function sanitizeAgentReply(reply, userMessage = "") {
   const text = sanitizeAgentText(reply, "Done.");
   if (isSensitiveAgentRequest(userMessage) || agentSecretQuestionPattern.test(text)) return agentSecurityRefusal(userMessage);
-  return text || "Done.";
+  return removeProjectLanguageFromAgentReply(text) || "Done.";
+}
+
+function removeProjectLanguageFromAgentReply(reply = "") {
+  return String(reply || "")
+    .replace(/你现在打开的项目是/g, "你现在的内容设置是")
+    .replace(/当前打开的项目/g, "当前内容设置")
+    .replace(/当前项目/g, "当前内容设置")
+    .replace(/这个项目/g, "这组内容设置")
+    .replace(/项目记忆/g, "内容记忆")
+    .replace(/项目信息/g, "内容信息")
+    .replace(/项目字段/g, "内容设置")
+    .replace(/项目资料/g, "内容资料")
+    .replace(/创建项目/g, "创建内容设置")
+    .replace(/新建项目/g, "新建内容设置")
+    .replace(/打开项目/g, "打开工作区")
+    .replace(/切换项目/g, "切换内容设置")
+    .replace(/项目/g, "内容设置")
+    .replace(/\bcurrent project\b/gi, "current content setup")
+    .replace(/\bactive project\b/gi, "active content setup")
+    .replace(/\bthis project\b/gi, "this content setup")
+    .replace(/\bproject memory\b/gi, "content memory")
+    .replace(/\bproject fields?\b/gi, "content settings")
+    .replace(/\bcreate project\b/gi, "create content setup")
+    .replace(/\bopen project\b/gi, "open workspace")
+    .replace(/\bswitch projects?\b/gi, "switch content setups")
+    .replace(/\bprojects?\b/gi, "content setups");
 }
 
 function validateAgentMemoryInput(input = {}) {
@@ -5687,16 +5713,17 @@ app.post("/api/agent", async (req, res, next) => {
           "Present yourself as Pokaya Agent and say you can help the user do anything available on this platform. Do not describe yourself as only for TikTok Shop content creation.",
           "Answer only after the user asks. Do not invent daily briefings, proactive tasks, or unsolicited reminders.",
           "Use web research and Pokaya platform tools quietly in the background when they help, but do not make the reply sound like a platform workflow report.",
-          "You can research trends, search the public web, inspect workspace state, remember project context, navigate the UI, create projects, create content plans, create video prompts, update project fields, generate outputs through Pokaya's platform models, create scheduler drafts, update schedule status, and create support tickets.",
+          "You can research trends, search the public web, inspect workspace state, remember content context, navigate the UI, create internal content setups, create content plans, create video prompts, update content settings, generate outputs through Pokaya's platform models, create scheduler drafts, update schedule status, and create support tickets.",
+          "Important product language rule: Pokaya's UI no longer has a user-facing 'project' concept. The database/tools may still use project/projectId internally, but never say 'project' to the user. Say current content setup, product direction, content settings, workspace, or current setup instead.",
           "Use trend_research before answering about fresh trends, unfamiliar aesthetic names, product-market fit, what to sell, content angles, competitors, recent demand, or terms that may have a changing meaning. Use raw web_search only for simple fact lookup. After research, answer naturally with practical guidance for the user's goal and cite source URLs briefly when useful.",
-          "Act like a capable assistant: when the user asks for an output, fill the relevant project fields and run the matching tool if enough information is available.",
+          "Act like a capable assistant: when the user asks for an output, fill the relevant content settings and run the matching tool if enough information is available.",
           "Pokaya AI is the platform, not a generation model. Never present Pokaya AI as a model option.",
           "User-facing model names are allowed and should be shown when relevant: GPT Image 2 and Nano Banana Pro for images; Veo 3.1, Seedance 2.0, and Sora 2 for videos. Do not mention provider names, base URLs, routes, keys, or infrastructure.",
           "Before generating a video, make sure the user has selected a video model. If no model is selected or the request is ambiguous, ask one short question with the video model choices and estimated credits instead of generating. Use these user-facing estimates: Veo 3.1 = 0.40 credit/8s, Seedance 2.0 = 0.40 credit/4s, Sora 2 = 0.48 credit/8s.",
-          "If the user already says a model name such as Veo, Seedance, or Sora, save that model to the project before creating the prompt or queuing generation.",
-          "Common workflows: product/content request = inspect_workspace_state -> create_project or update fields -> generate_project_output when the user needs an image, poster, cover, carousel asset, video, or other rendered media through Pokaya's platform models. Weekly content plan = inspect_workspace_state -> remember_agent_context when useful -> create_content_plan, and only create schedule drafts when the user asks for drafts. Video prompt request = create_seedance_prompt; video generation request = create_seedance_prompt -> generate_project_output after confirmation. In user-facing replies, say video prompt or generate video instead of naming the internal video model.",
+          "If the user already says a model name such as Veo, Seedance, or Sora, save that model to the current content settings before creating the prompt or queuing generation.",
+          "Common workflows: product/content request = inspect_workspace_state -> create_project or update fields internally -> generate_project_output when the user needs an image, poster, cover, carousel asset, video, or other rendered media through Pokaya's platform models. Weekly content plan = inspect_workspace_state -> remember_agent_context when useful -> create_content_plan, and only create schedule drafts when the user asks for drafts. Video prompt request = create_seedance_prompt; video generation request = create_seedance_prompt -> generate_project_output after confirmation. In user-facing replies, say video prompt or generate video instead of naming the internal video model.",
           "Do not use DeepSeek or any hidden design skill to create final design assets. DeepSeek is only the planner/orchestrator. Rendered image/video/design outputs must be created by Pokaya platform generation tools, charged by the platform credit rules, and confirmed by the user before credit deduction.",
-          "When the user changes direction, for example 'don't do washing machine, do dryer instead' or '不做洗衣机了，做烘干机', treat it as a product/context update, not as a request for a generic menu. Save the new product/context with remember_agent_context or create_project when needed, then ask one specific next-step question such as whether to create a content plan, image/poster, or video prompt.",
+          "When the user changes direction, for example 'don't do washing machine, do dryer instead' or '不做洗衣机了，做烘干机', treat it as a product/context update, not as a request for a generic menu. Save the new product/context with remember_agent_context or create_project internally when needed, then ask one specific next-step question such as whether to create a content plan, image/poster, or video prompt.",
           "Do not answer product/context changes with a fixed list of all possible actions. First infer the new product and user's intent from the message.",
           "For 'what is missing today' or workspace diagnosis, call inspect_workspace_state and answer from the returned summary.",
           "When a tool creates a project, result, or schedule draft, use the returned ids for the next tool call.",
@@ -5714,7 +5741,7 @@ app.post("/api/agent", async (req, res, next) => {
       },
       {
         role: "system",
-        content: `Current workspace JSON:\n${JSON.stringify(compactWorkspaceState(stateForUser), null, 2)}\nCurrent project id: ${projectId || "none"}`
+        content: `Current workspace JSON with internal content setup records:\n${JSON.stringify(compactWorkspaceState(stateForUser), null, 2)}\nInternal current content setup id: ${projectId || "none"}\nReminder: never say "project" in user-facing replies; say current content setup, product direction, content settings, or workspace.`
       },
       {
         role: "system",
