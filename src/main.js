@@ -3951,6 +3951,121 @@ function stepPanel(p) {
   return panels[state.step](p);
 }
 
+function studioStepMeta(step = state.step) {
+  return {
+    image: { title: "图片", icon: "image", action: "generate-image", promptField: "image.prompt", prompt: "Create a high-converting TikTok Shop product image...", types: ["image", "video", "visual_card"], primary: "Generate" },
+    ugc: { title: "UGC", icon: "video", action: "generate-ugc", promptField: "ugc.script", prompt: "Describe the UGC scene, product action, and spoken line...", types: ["ugc"], primary: "Generate Video" },
+    auto: { title: "商品扫描器", icon: "layout-template", action: "generate-auto", promptField: "auto.productUrl", prompt: "Paste product link or describe the product...", types: ["auto"], primary: "Generate Batch", input: true },
+    original: { title: "原创视频", icon: "film", action: "analyze-original", promptField: "original.brief", prompt: "Describe the video scene, camera, action, mood, and dialogue...", types: ["original"], primary: "Generate Video" },
+    clone: { title: "复刻提示词", icon: "layers-3", action: "clone-prompt", promptField: "clone.notes", prompt: "Upload a reference video, then describe what style you want to extract...", types: ["clone"], primary: "Generate Prompt" },
+    story: { title: "故事脚本", icon: "book-open", action: "write-story", promptField: "story.notes", prompt: "Describe the story topic, emotion, product, or lesson...", types: ["story"], primary: "Preview" }
+  }[step] || {};
+}
+
+function fieldValue(p, path = "") {
+  return path.split(".").reduce((obj, key) => obj?.[key], p) || "";
+}
+
+function studioImmersiveShell(p, step, advancedHtml = "") {
+  const meta = studioStepMeta(step);
+  return `<section class="studio-immersive-page" data-studio-mode="${esc(step)}">
+    ${studioResultWall(p, meta)}
+    <details class="studio-advanced-drawer">
+      <summary>${icon("sliders-horizontal", 18)} Advanced settings</summary>
+      <div>${advancedHtml}</div>
+    </details>
+    ${studioGenerateDock(p, meta)}
+  </section>`;
+}
+
+function studioResultWall(p, meta = {}) {
+  const types = Array.isArray(meta.types) ? meta.types : [state.step];
+  const pending = pendingResultJobs(p, types);
+  const items = p.results.filter((item) => types.includes(item.type)).slice(-12).reverse();
+  const cards = [
+    ...pending.map(studioPendingWallCard),
+    ...items.map(studioWallCard)
+  ];
+  return `<section class="studio-result-wall">
+    <div class="studio-wall-grid">
+      ${cards.length ? cards.join("") : studioEmptyWall(meta)}
+    </div>
+  </section>`;
+}
+
+function studioPendingWallCard(job) {
+  return `<article class="studio-wall-card studio-wall-pending">
+    <div>${icon("loader-circle", 34)}<b>${esc(job.title || "Generating")}</b><span>${job.status === "processing" ? "模型正在生成" : "任务已加入队列"}</span></div>
+  </article>`;
+}
+
+function studioWallCard(item) {
+  const promptText = resultPromptText(item).replaceAll("\n", " ").trim();
+  return `<article class="studio-wall-card">
+    ${resultPreview(item, { clickable: true })}
+    <footer><b>${esc(item.title || resultModelLabel(item))}</b><span>${esc(promptText ? promptText.slice(0, 92) : resultMediaLabel(item))}</span></footer>
+  </article>`;
+}
+
+function studioEmptyWall(meta = {}) {
+  const samples = [
+    "Product hero",
+    "Creator shot",
+    "Promo poster",
+    "UGC scene",
+    "Hook angle",
+    "Story asset"
+  ];
+  return samples.map((label, index) => `<article class="studio-wall-card studio-wall-empty" style="--empty-index:${index}">
+    <div><b>${esc(label)}</b><span>${icon(meta.icon || "sparkles", 24)}</span></div>
+  </article>`).join("");
+}
+
+function studioGenerateDock(p, meta = {}) {
+  const value = fieldValue(p, meta.promptField);
+  const input = meta.input
+    ? `<input data-field="${esc(meta.promptField)}" value="${esc(value)}" placeholder="${esc(meta.prompt || "")}">`
+    : `<textarea data-field="${esc(meta.promptField)}" rows="2" placeholder="${esc(meta.prompt || "")}">${esc(value)}</textarea>`;
+  return `<section class="studio-generate-dock">
+    <button class="studio-dock-add" type="button" data-action="open-attachment-picker" data-attachment-kind="product" title="Add reference">${icon("plus", 20)}</button>
+    <div class="studio-dock-main">
+      <div class="studio-dock-prompt">${input}</div>
+      <div class="studio-dock-tools">
+        ${studioStepMenu("studio-dock-step-menu")}
+        ${studioDockChips(p, meta)}
+      </div>
+    </div>
+    <button class="studio-dock-generate" type="button" data-action="${esc(meta.action || "generate-image")}" ${state.generating ? "disabled" : ""}>
+      <b>${esc(state.generating ? t("generating") : meta.primary || "Generate")}</b>
+      <span>${esc(studioDockCredit(meta))}</span>
+    </button>
+  </section>`;
+}
+
+function studioDockChips(p, meta = {}) {
+  const step = state.step;
+  const chips = {
+    image: ["9:16", p.image?.model || "GPT Image 2", "~0.15 credit"],
+    ugc: [p.ugc?.provider || "Veo 3.1", p.ugc?.imageMode || "Reference", "8s"],
+    auto: [p.auto?.provider || "Veo 3.1", `${p.auto?.quantity || 5} videos`, p.auto?.ctaMode || "Shop CTA"],
+    original: [originalProviderValue(p.original?.provider), p.original?.imageMode || "Text only", p.original?.aspectRatio || "9:16"],
+    clone: ["Reference video", "Prompt", "Frame analysis"],
+    story: [p.story?.language || "MY Bahasa Melayu", p.story?.visualStyle || "Cinematic", p.story?.voice || "Jamal"]
+  }[step] || [];
+  return chips.map((item) => `<span>${esc(item)}</span>`).join("");
+}
+
+function studioDockCredit(meta = {}) {
+  return {
+    image: "credit preview",
+    ugc: "video credits",
+    auto: "batch credits",
+    original: "video credits",
+    clone: "prompt credits",
+    story: "story credits"
+  }[state.step] || "credits";
+}
+
 function imagePanel(p) {
   const imageModels = [
     ["GPT Image 2", "GPT Image 2 (0.15 Credit)"],
@@ -4192,7 +4307,7 @@ function ugcPanel(p) {
   const imageMode = p.ugc.imageMode || "Product Reference (AI creates scene)";
   const firstFrameMode = imageMode === "First Frame (animate from image)";
   const textOnlyMode = imageMode === "Text to Video (no image needed)";
-  return `
+  return studioImmersiveShell(p, "ugc", `
     <div class="generator-box video-generator-box">
       <h2>🎬 Video Generator</h2>
       <p class="field-label">Provider</p>
@@ -4218,8 +4333,7 @@ function ugcPanel(p) {
         <button class="gold-button" data-action="generate-ugc">${icon("video")} Generate Video</button>
       </div>
     </section>
-    ${results(p, "ugc")}
-    ${studioBottomStepSwitcher()}`;
+  `);
 }
 
 function ugcProductReferences(provider) {
@@ -4302,7 +4416,7 @@ function autoPanel(p) {
   const quantity = String(p.auto.quantity || "5");
   const selectedFrameworks = Array.isArray(p.auto.frameworks) ? p.auto.frameworks : [];
   const frameworks = autoFrameworks();
-  return `
+  return studioImmersiveShell(p, "auto", `
     <section class="auto-content-card auto-command-card">
       <div class="auto-content-head">
         <h2>${icon("wand-sparkles", 26)} Product Scanner</h2>
@@ -4357,7 +4471,7 @@ function autoPanel(p) {
     </section>
     ${autoProcessLog(p)}
     ${autoHistoryPanel(p)}
-    ${studioBottomStepSwitcher()}`;
+  `);
 }
 
 function autoButton(field, value, label, active) {
@@ -4450,7 +4564,7 @@ function originalPanel(p) {
   const provider = originalProviderValue(p.original.provider);
   const imageMode = p.original.imageMode || "Text only";
   const aspectRatio = p.original.aspectRatio || "9:16 (Vertical)";
-  return `
+  return studioImmersiveShell(p, "original", `
     <section class="original-video-card">
       <div class="original-video-head">
         <h2>🎞️ Original Video</h2>
@@ -4488,8 +4602,7 @@ function originalPanel(p) {
       </div>
       <button class="original-generate-button" data-action="analyze-original">🎬 Generate ${esc(originalProviderLabel(provider))} Video · ~${esc(originalProviderCredits(provider))} credits</button>
     </section>
-    ${results(p, "original")}
-    ${studioBottomStepSwitcher()}`;
+  `);
 }
 
 function originalChoiceButton(field, value, label, active) {
@@ -4497,7 +4610,7 @@ function originalChoiceButton(field, value, label, active) {
 }
 
 function clonePanel(p) {
-  return `
+  return studioImmersiveShell(p, "clone", `
     <section class="clone-prompt-shell">
       <div class="clone-prompt-card">
         <div class="clone-prompt-head">
@@ -4512,8 +4625,7 @@ function clonePanel(p) {
         <button class="clone-generate-button" data-action="clone-prompt">📋 Generate Prompt</button>
       </div>
     </section>
-    ${results(p, "clone")}
-    ${studioBottomStepSwitcher()}`;
+  `);
 }
 
 function storyPanel(p) {
@@ -4521,7 +4633,7 @@ function storyPanel(p) {
   const voice = p.story.voice || "Jamal";
   const cta = p.story.cta || "Engagement";
   const styleCards = ["Cinematic", "3D Pixar", "Anime Ghibli", "Fantasy Epic", "Watercolor", "Cinematic Noir", "Vintage Film", "Editorial"];
-  return `
+  return studioImmersiveShell(p, "story", `
     <section class="storytelling-card">
       <header class="storytelling-head">
         <h2>Storytelling</h2>
@@ -4567,8 +4679,7 @@ function storyPanel(p) {
       </div>
       <button class="story-preview-button" data-action="write-story">Preview & Continue</button>
     </section>
-    ${results(p, "story")}
-    ${studioBottomStepSwitcher()}`;
+  `);
 }
 
 function storyStyleButton(value, active, index) {

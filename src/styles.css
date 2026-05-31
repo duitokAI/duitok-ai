@@ -478,12 +478,346 @@
   padding: 0 18px;
 }
 
+.studio-immersive-page {
+  min-height: calc(100vh - 72px);
+  display: grid;
+  grid-template-rows: minmax(420px, 1fr) auto auto;
+  gap: 16px;
+  padding-bottom: 0;
+}
+
+.studio-result-wall {
+  min-height: min(62vh, 720px);
+  overflow: hidden;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255, 47, 109, 0.16), transparent 30%),
+    radial-gradient(circle at 82% 4%, rgba(215, 255, 64, 0.16), transparent 28%),
+    rgba(255, 255, 255, 0.62);
+  box-shadow: 0 24px 80px rgba(35, 8, 42, 0.12);
+}
+
+.studio-wall-grid {
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  grid-auto-rows: 230px;
+  gap: 8px;
+  padding: 8px;
+}
+
+.studio-wall-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+  background: rgba(31, 6, 38, 0.08);
+  color: #fff;
+}
+
+.studio-wall-card:nth-child(2),
+.studio-wall-card:nth-child(7) {
+  grid-row: span 2;
+}
+
+.studio-wall-card:nth-child(3),
+.studio-wall-card:nth-child(8) {
+  grid-column: span 2;
+}
+
+.studio-wall-card .result-preview-trigger,
+.studio-wall-card .result-image,
+.studio-wall-card .result-video,
+.studio-wall-card .result-video-shell,
+.studio-wall-card .visual-card-preview,
+.studio-wall-card .result-text-preview,
+.studio-wall-card .result-media-error {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  border-radius: 0 !important;
+  object-fit: cover !important;
+}
+
+.studio-wall-card footer {
+  position: absolute;
+  inset: auto 10px 10px;
+  display: grid;
+  gap: 3px;
+  border-radius: 12px;
+  padding: 9px 10px;
+  background: rgba(15, 15, 15, 0.72);
+  color: #fff;
+  backdrop-filter: blur(12px);
+}
+
+.studio-wall-card footer b,
+.studio-wall-card footer span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.studio-wall-card footer b {
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.studio-wall-card footer span {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.studio-wall-empty {
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(135deg, rgba(31, 6, 38, 0.16), rgba(255, 47, 109, 0.1)),
+    rgba(255, 255, 255, 0.28);
+}
+
+.studio-wall-empty div,
+.studio-wall-pending div {
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  color: rgba(31, 6, 38, 0.72);
+  font-weight: 950;
+}
+
+.studio-wall-pending {
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.studio-advanced-drawer {
+  border: 1px solid rgba(57, 22, 67, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--studio-purple-900, #260033);
+}
+
+.studio-advanced-drawer summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  color: rgba(57, 22, 67, 0.72);
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.studio-advanced-drawer > div {
+  padding: 0 16px 16px;
+}
+
+.studio-generate-dock {
+  position: sticky;
+  bottom: 0;
+  z-index: 18;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) minmax(150px, 0.22fr);
+  gap: 12px;
+  align-items: stretch;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px 24px 0 0;
+  padding: 14px;
+  background: rgba(18, 20, 20, 0.94);
+  box-shadow: 0 -22px 70px rgba(10, 5, 13, 0.22);
+  backdrop-filter: blur(18px);
+}
+
+.studio-dock-add,
+.studio-dock-generate,
+.studio-dock-tools span,
+.studio-dock-step-menu summary {
+  border-radius: 14px;
+}
+
+.studio-dock-add {
+  min-height: 48px;
+  border: 1px solid rgba(215, 255, 64, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+}
+
+.studio-dock-main {
+  display: grid;
+  gap: 10px;
+}
+
+.studio-dock-prompt textarea,
+.studio-dock-prompt input {
+  width: 100%;
+  min-height: 52px;
+  border: 0;
+  outline: 0;
+  resize: none;
+  padding: 14px 2px;
+  background: transparent;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 760;
+}
+
+.studio-dock-prompt textarea::placeholder,
+.studio-dock-prompt input::placeholder {
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.studio-dock-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.studio-dock-tools span,
+.studio-dock-step-menu summary {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0 14px;
+  background: rgba(255, 255, 255, 0.045);
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.studio-dock-step-menu {
+  width: auto;
+}
+
+.studio-dock-step-menu summary {
+  min-height: 42px;
+}
+
+.studio-dock-step-menu summary small {
+  display: none;
+}
+
+.studio-dock-step-menu .studio-step-menu-list {
+  bottom: calc(100% + 18px);
+}
+
+.studio-dock-generate {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 3px;
+  min-height: 94px;
+  border: 0;
+  background: #d9ff3f;
+  color: #111;
+}
+
+.studio-dock-generate b {
+  font-size: 19px;
+  font-weight: 950;
+}
+
+.studio-dock-generate span {
+  color: rgba(17, 17, 17, 0.64);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.studio-immersive-page .result-grid,
+.studio-immersive-page .empty-result {
+  display: none;
+}
+
 .image-console-add {
   display: grid;
   place-items: center;
   min-height: 88px;
   background: rgba(95, 0, 103, 0.045);
   color: var(--studio-purple-900, #260033);
+}
+
+.studio-shell .image-generate-console {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(18, 20, 20, 0.94);
+  box-shadow: 0 -22px 70px rgba(10, 5, 13, 0.22);
+}
+
+.studio-shell .image-console-add,
+.studio-shell .image-console-tools span,
+.studio-shell .image-reference-thumb,
+.studio-shell .image-console-prompt textarea,
+.studio-shell .image-console-tools select,
+.studio-shell .image-console-step-menu summary {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.045);
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.studio-shell .image-console-prompt textarea {
+  color: #fff;
+}
+
+.studio-shell .image-console-prompt textarea::placeholder {
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.studio-shell .image-reference-thumb b,
+.studio-shell .image-console-step-menu summary b {
+  color: #fff;
+}
+
+.studio-shell .image-reference-thumb small,
+.studio-shell .image-console-step-menu summary small {
+  color: rgba(255, 255, 255, 0.52);
+}
+
+@media (max-width: 1180px) {
+  .studio-wall-grid {
+    grid-template-columns: repeat(3, minmax(150px, 1fr));
+  }
+
+  .studio-generate-dock {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .studio-dock-generate {
+    grid-column: 1 / -1;
+    min-height: 64px;
+  }
+}
+
+@media (max-width: 680px) {
+  .studio-immersive-page {
+    min-height: auto;
+    gap: 12px;
+  }
+
+  .studio-result-wall {
+    min-height: 420px;
+    border-radius: 18px;
+  }
+
+  .studio-wall-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: 172px;
+  }
+
+  .studio-wall-card:nth-child(3),
+  .studio-wall-card:nth-child(8) {
+    grid-column: span 1;
+  }
+
+  .studio-generate-dock {
+    border-radius: 18px 18px 0 0;
+    padding: 10px;
+  }
+
+  .studio-dock-prompt textarea,
+  .studio-dock-prompt input {
+    font-size: 15px;
+  }
 }
 
 .image-console-prompt {
