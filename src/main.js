@@ -9548,9 +9548,9 @@ async function generate(name, event = null) {
     markGenerateTriggerSubmitting(event?.currentTarget);
     set({ generating: true });
     notify(generationFeedbackCopy("submitting"));
-    await syncImageConsoleBeforeGenerate(name);
+    const promptOverride = await syncImageConsoleBeforeGenerate(name);
     const count = name === "generate-image" ? imageBatchCount(project()) : 1;
-    const db = await api(`/projects/${state.projectId}/generate`, { method: "POST", body: JSON.stringify({ action: name, step: state.step, count }) });
+    const db = await api(`/projects/${state.projectId}/generate`, { method: "POST", body: JSON.stringify({ action: name, step: state.step, count, promptOverride }) });
     set({ db, generating: false });
     notify(generationFeedbackCopy("queued", count));
     pollGenerationQueue();
@@ -9598,10 +9598,10 @@ async function syncImageConsoleBeforeGenerate(name) {
   notify(project().image?.promptImage ? "Reading image and enhancing prompt..." : "Enhancing prompt...");
   const res = await api(`/projects/${projectId}/prompt-advanced`, {
     method: "POST",
-    body: JSON.stringify({ prompt: value, step: state.step || "image" })
+    body: JSON.stringify({ prompt: value, step: state.step || "image", persist: false })
   });
-  if (state.projectId === projectId) set({ db: res.state, promptAdvancedBusy: false });
-  else set({ promptAdvancedBusy: false });
+  set({ promptAdvancedBusy: false });
+  return state.projectId === projectId ? res.prompt : "";
 }
 
 async function pollGenerationQueue(attempt = 0) {

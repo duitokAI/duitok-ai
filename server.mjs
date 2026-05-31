@@ -1217,6 +1217,8 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
       model: _model,
       providerTitle: _providerTitle,
       providerBody: _providerBody,
+      internalPromptOverride: _internalPromptOverride,
+      promptOverride: _promptOverride,
       ...safe
     } = result;
     const publicType = safe.videoUrl ? "video" : safe.imageUrl ? "image" : safe.type;
@@ -1252,6 +1254,8 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
       providerTaskId: _providerTaskId,
       providerTextOutput: _providerTextOutput,
       providerErrorMessage: _providerErrorMessage,
+      internalPromptOverride: _internalPromptOverride,
+      promptOverride: _promptOverride,
       originalImageUrl: _originalImageUrl,
       originalVideoUrl: _originalVideoUrl,
       assetStorage: _assetStorage,
@@ -2700,6 +2704,7 @@ async function saveFailedGeneration(projectId, action, step, error, user) {
 
 async function enqueueGeneration(projectId, action, step, user, options = {}) {
   const batchCount = action === "generate-image" ? imageBatchCount(options.count) : 1;
+  const promptOverride = action === "generate-image" ? sanitizeAgentText(options.promptOverride || "").slice(0, 3000) : "";
   const jobIds = Array.from({ length: batchCount }, () => crypto.randomUUID());
   const state = await mutateDb(async (currentDb) => {
     const project = findProject(currentDb, projectId, user);
@@ -2725,6 +2730,7 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
       model: cost.model,
       provider: cost.provider,
       unit: cost.unit,
+      internalPromptOverride: promptOverride || undefined,
       batchIndex: batchCount > 1 ? index + 1 : undefined,
       batchCount: batchCount > 1 ? batchCount : undefined
     }));
@@ -2751,6 +2757,9 @@ async function processGenerationJob(jobId) {
     return { job: structuredClone(job), project: structuredClone(project) };
   });
   if (!snapshot) return;
+  if (snapshot.job.internalPromptOverride && snapshot.project?.image) {
+    snapshot.project.image.prompt = snapshot.job.internalPromptOverride;
+  }
 
   try {
     const generated = await generateWithProvider(snapshot.project, snapshot.job.action, snapshot.job.step);
@@ -5788,15 +5797,15 @@ app.post("/api/projects/:id/prompt-advanced", async (req, res, next) => {
     }
     const visualSummary = visualInputs.length ? await summarizePromptVisualsWithGrsai(visualInputs, prompt) : "";
     const enhanced = await enhancePromptWithDeepSeek({ project, prompt, visualSummary });
-    const state = await mutateDb(async (currentDb) => {
+    const shouldPersist = req.body.persist === true;
+    const state = shouldPersist ? await mutateDb(async (currentDb) => {
       const currentProject = findProject(currentDb, req.params.id, user);
       currentProject.image ||= {};
       currentProject.image.prompt = enhanced.finalPrompt;
-      if (currentProject.image.promptImage?.dataUrl) currentProject.image.promptImage = null;
       currentDb.usage.unshift(usage("Enhanced prompt", 0, currentProject.userId || user.id));
       await saveDb(currentDb);
       return publicState(currentDb, user);
-    });
+    }) : publicState(db, user);
     res.json({
       prompt: enhanced.finalPrompt,
       notes: enhanced.notes,
@@ -5811,7 +5820,7 @@ app.post("/api/projects/:id/prompt-advanced", async (req, res, next) => {
 app.post("/api/projects/:id/generate", async (req, res) => {
   try {
     const { user } = await requireAuth(req);
-    const result = await enqueueGeneration(req.params.id, req.body.action, req.body.step, user, { count: req.body.count });
+    const result = await enqueueGeneration(req.params.id, req.body.action, req.body.step, user, { count: req.body.count, promptOverride: req.body.promptOverride });
     res.json(result.state);
   } catch (error) {
     const { user } = await requireAuth(req).catch(() => ({ user: null }));
