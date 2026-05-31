@@ -176,6 +176,7 @@ const languages = [
 const brandAssets = {
   horizontal: "/brand/pokaya/final/pokaya-logo-horizontal-transparent.png",
   mascot: "/brand/pokaya/final/pokaya-mascot-transparent.png",
+  mascotUi: "/brand/pokaya/final/pokaya-mascot-ui-192.png",
   appIcon: "/brand/pokaya/final/pokaya-app-icon-master.png",
   banner: "/brand/pokaya/final/pokaya-logo-horizontal-light.png",
   stacked: "/brand/pokaya/final/pokaya-logo-horizontal-transparent.png",
@@ -183,7 +184,7 @@ const brandAssets = {
   agentModel: "/models/agent/pokaya-agent.glb"
 };
 
-const mascotIcon = (className = "mascot-icon") => `<img class="${className}" src="${brandAssets.mascot}" alt="" aria-hidden="true">`;
+const mascotIcon = (className = "mascot-icon") => `<img class="${className}" src="${brandAssets.mascotUi}" width="192" height="192" alt="" aria-hidden="true" loading="eager" decoding="sync" fetchpriority="high">`;
 const studioMark = () => `<span class="studio-nav-mark" aria-hidden="true"><span></span><i></i><b></b></span>`;
 
 const imagePromptPresets = {
@@ -1151,7 +1152,7 @@ function heroTitleMarkup() {
 
 const icon = (name, size = 20) => {
   if (["sparkles", "wand-sparkles"].includes(name)) {
-    return `<img class="mascot-icon mascot-icon-inline" src="${brandAssets.mascot}" alt="" aria-hidden="true" style="width:${size}px;height:${size}px">`;
+    return `<img class="mascot-icon mascot-icon-inline" src="${brandAssets.mascotUi}" width="192" height="192" alt="" aria-hidden="true" loading="eager" decoding="sync" fetchpriority="high" style="width:${size}px;height:${size}px">`;
   }
   return `<i data-lucide="${name}" style="width:${size}px;height:${size}px"></i>`;
 };
@@ -3047,7 +3048,7 @@ function studio() {
 
 function brand(label = "") {
   const labelMarkup = label ? `<strong class="brand-context">${label}</strong>` : "";
-  return `<div class="brand-lockup"><span class="brand-core" aria-label="Pokaya AI"><img class="brand-logo-mascot" src="${brandAssets.mascot}" alt="" aria-hidden="true"><span class="brand-wordmark"><span>Pokaya</span><span>AI</span></span></span>${labelMarkup}</div>`;
+  return `<div class="brand-lockup"><span class="brand-core" aria-label="Pokaya AI"><img class="brand-logo-mascot" src="${brandAssets.mascotUi}" width="192" height="192" alt="" aria-hidden="true" loading="eager" decoding="sync" fetchpriority="high"><span class="brand-wordmark"><span>Pokaya</span><span>AI</span></span></span>${labelMarkup}</div>`;
 }
 
 function footerBrand(label = "Pokaya AI") {
@@ -3055,7 +3056,7 @@ function footerBrand(label = "Pokaya AI") {
   return `
     <footer class="public-footer">
       <div class="footer-left">
-        <span class="footer-brand"><span class="brand-core footer-brand-core" aria-label="Pokaya AI"><img class="brand-logo-mascot" src="${brandAssets.mascot}" alt="" aria-hidden="true"><span class="brand-wordmark"><span>Pokaya</span><span>AI</span></span></span>${labelMarkup}</span>
+        <span class="footer-brand"><span class="brand-core footer-brand-core" aria-label="Pokaya AI"><img class="brand-logo-mascot" src="${brandAssets.mascotUi}" width="192" height="192" alt="" aria-hidden="true" loading="lazy" decoding="async"><span class="brand-wordmark"><span>Pokaya</span><span>AI</span></span></span>${labelMarkup}</span>
         <span class="footer-year">© 2026</span>
       </div>
       <nav class="footer-links" aria-label="Footer">
