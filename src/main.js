@@ -1435,11 +1435,27 @@ function bindImageConsoleCompact() {
   if (!consoleEl) return;
   let ticking = false;
   let compact = consoleEl.classList.contains("is-compact");
-  const compactAt = 220;
-  const expandAt = 80;
+  const compactAt = 120;
+  const expandAt = 36;
+  const scrollTargets = [
+    window,
+    document.querySelector(".workspace"),
+    document.querySelector(".studio-shell"),
+    document.scrollingElement,
+    document.documentElement
+  ].filter(Boolean);
+  const uniqueScrollTargets = [...new Set(scrollTargets)];
+  const scrollOffset = () => Math.max(
+    window.scrollY || 0,
+    document.documentElement.scrollTop || 0,
+    document.body?.scrollTop || 0,
+    ...uniqueScrollTargets
+      .filter((target) => target !== window)
+      .map((target) => target.scrollTop || 0)
+  );
   const sync = () => {
     ticking = false;
-    const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    const scrollY = scrollOffset();
     const nextCompact = compact ? scrollY > expandAt : scrollY > compactAt;
     if (nextCompact === compact) return;
     compact = nextCompact;
@@ -1450,11 +1466,11 @@ function bindImageConsoleCompact() {
     ticking = true;
     window.requestAnimationFrame(sync);
   };
-  window.addEventListener("scroll", requestSync, { passive: true });
+  uniqueScrollTargets.forEach((target) => target.addEventListener("scroll", requestSync, { passive: true }));
   window.addEventListener("resize", requestSync);
   sync();
   imageConsoleScrollCleanup = () => {
-    window.removeEventListener("scroll", requestSync);
+    uniqueScrollTargets.forEach((target) => target.removeEventListener("scroll", requestSync));
     window.removeEventListener("resize", requestSync);
   };
 }
