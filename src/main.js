@@ -1322,7 +1322,7 @@ function captureAgentInputFocus(patch = {}) {
   if (state.page !== "agent") return null;
   const input = document.querySelector("[data-agent-input]");
   if (!input || document.activeElement !== input) return null;
-  if (Object.prototype.hasOwnProperty.call(patch, "agentMessages") || Object.prototype.hasOwnProperty.call(patch, "agentBusy")) return null;
+  if (Object.prototype.hasOwnProperty.call(patch, "agentInput")) return null;
   return {
     value: input.value,
     start: input.selectionStart,
