@@ -963,6 +963,158 @@
   font-size: 13px;
 }
 
+.video-prompt-extractor-page {
+  grid-template-rows: minmax(420px, 1fr) auto;
+}
+
+.video-prompt-empty-wall {
+  display: grid;
+  place-items: center;
+}
+
+.video-prompt-empty-wall > div {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  color: rgba(57, 22, 67, 0.74);
+  text-align: center;
+}
+
+.video-prompt-empty-wall b {
+  color: var(--studio-purple-900, #260033);
+  font-size: 20px;
+  font-weight: 950;
+}
+
+.video-prompt-empty-wall span {
+  color: rgba(83, 62, 90, 0.68);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.video-prompt-dock {
+  position: sticky;
+  bottom: 0;
+  z-index: 18;
+  width: calc(100% - clamp(28px, 3.4vw, 72px));
+  max-width: 1280px;
+  justify-self: center;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(180px, 220px);
+  align-items: stretch;
+  gap: 10px;
+  border: 1px solid rgba(255, 250, 252, 0.13);
+  border-radius: 22px 22px 0 0;
+  padding: 12px;
+  background: rgba(18, 20, 20, 0.94);
+  box-shadow: 0 -22px 70px rgba(10, 5, 13, 0.22);
+  backdrop-filter: blur(18px);
+}
+
+.video-prompt-upload {
+  min-width: 0;
+  min-height: 72px;
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  border: 1px dashed rgba(255, 214, 43, 0.28);
+  border-radius: 16px;
+  padding: 8px 14px 8px 8px;
+  background: rgba(255, 250, 252, 0.06);
+  color: #fff;
+  cursor: copy;
+}
+
+.video-prompt-dock.is-dragging,
+.video-prompt-dock:focus-within .video-prompt-upload,
+.video-prompt-upload:hover {
+  border-color: rgba(255, 95, 143, 0.72);
+  background: rgba(255, 95, 143, 0.12);
+}
+
+.video-prompt-upload video,
+.video-prompt-upload > span {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 14px;
+  background: rgba(255, 250, 252, 0.1);
+  color: #ffd62b;
+  object-fit: cover;
+}
+
+.video-prompt-upload b,
+.video-prompt-upload small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.video-prompt-upload b {
+  color: rgba(255, 250, 252, 0.96);
+  font-size: 15px;
+  font-weight: 950;
+}
+
+.video-prompt-upload small {
+  margin-top: 4px;
+  color: rgba(255, 250, 252, 0.56);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.video-prompt-clear,
+.video-prompt-extract {
+  border: 0;
+  border-radius: 16px;
+}
+
+.video-prompt-clear {
+  width: 54px;
+  color: rgba(255, 250, 252, 0.78);
+  background: rgba(255, 250, 252, 0.08);
+}
+
+.video-prompt-extract {
+  display: inline-grid;
+  grid-template-columns: auto minmax(0, auto);
+  place-content: center;
+  align-items: center;
+  gap: 9px;
+  min-height: 72px;
+  padding: 0 20px;
+  color: #fff;
+  background: linear-gradient(135deg, #ff315f, #ff765d);
+  box-shadow: 0 18px 38px rgba(255, 49, 95, 0.24);
+}
+
+.video-prompt-extract:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.video-prompt-extract b {
+  font-size: 15px;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .video-prompt-dock {
+    width: calc(100% - 20px);
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .video-prompt-extract {
+    grid-column: 1 / -1;
+  }
+}
+
 .image-console-add {
   display: grid;
   place-items: center;

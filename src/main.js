@@ -4065,7 +4065,7 @@ function studioStepMeta(step = state.step) {
     ugc: { title: "UGC", icon: "video", action: "generate-ugc", promptField: "ugc.script", prompt: "Describe the UGC scene, product action, and spoken line...", types: ["ugc"], primary: "Generate Video" },
     auto: { title: "商品扫描器", icon: "layout-template", action: "generate-auto", promptField: "auto.productUrl", prompt: "Paste product link or describe the product...", types: ["auto"], primary: "Generate Batch", input: true },
     original: { title: "原创视频", icon: "film", action: "analyze-original", promptField: "original.brief", prompt: "Describe the video scene, camera, action, mood, and dialogue...", types: ["original"], primary: "Generate Video" },
-    clone: { title: "复刻提示词", icon: "layers-3", action: "clone-prompt", promptField: "clone.notes", prompt: "Upload a reference video, then describe what style you want to extract...", types: ["clone"], primary: "Generate Prompt" },
+    clone: { title: "影片 Prompt 提取", icon: "layers-3", action: "clone-prompt", promptField: "clone.notes", prompt: "Drop a reference video to extract its reusable prompt.", types: ["clone"], primary: "Extract Prompt" },
     story: { title: "故事脚本", icon: "book-open", action: "write-story", promptField: "story.notes", prompt: "Describe the story topic, emotion, product, or lesson...", types: ["story"], primary: "Preview" }
   }[step] || {};
 }
@@ -4742,22 +4742,56 @@ function originalChoiceButton(field, value, label, active) {
 }
 
 function clonePanel(p) {
-  return studioImmersiveShell(p, "clone", `
-    <section class="clone-prompt-shell">
-      <div class="clone-prompt-card">
-        <div class="clone-prompt-head">
-          <h2>📌 Clone Prompt</h2>
-          <span>Frames → AI → Prompt(s)</span>
-        </div>
-        <p>Upload Reference Video</p>
-        <label class="clone-video-drop">
-          <input type="file" data-upload="clone-reference" accept="video/*" hidden>
-          <span>🎬 Click or drop video</span>
-        </label>
-        <button class="clone-generate-button" data-action="clone-prompt">📋 Generate Prompt</button>
-      </div>
-    </section>
-  `);
+  const meta = studioStepMeta("clone");
+  return `<section class="studio-immersive-page studio-wall-zoomable video-prompt-extractor-page" data-studio-mode="clone" ${studioWallZoomStyleAttr()}>
+    ${studioWallZoomControl()}
+    ${studioResultWall(p, meta) || videoPromptExtractorEmpty()}
+    ${videoPromptExtractorDock(p)}
+  </section>`;
+}
+
+function cloneReferenceVideo(p = project()) {
+  return p?.clone?.referenceVideo || null;
+}
+
+function videoPromptExtractorEmpty() {
+  return `<section class="studio-result-wall video-prompt-empty-wall">
+    <div>
+      ${icon("video", 34)}
+      <b>Drop a reference video</b>
+      <span>Gemini will extract a reusable, timestamped video prompt.</span>
+    </div>
+  </section>`;
+}
+
+function videoPromptExtractorDock(p) {
+  const video = cloneReferenceVideo(p);
+  const hasVideo = Boolean(video?.dataUrl);
+  const label = hasVideo ? video.name || "Reference video" : "Drop video here";
+  const helper = hasVideo ? `${formatFileSize(video.size)} · Change` : "MP4, MOV, or WebM";
+  const preview = hasVideo
+    ? `<video src="${esc(video.dataUrl)}" muted playsinline preload="metadata"></video>`
+    : `<span>${icon("video", 24)}</span>`;
+  return `<section class="video-prompt-dock" data-drop-upload="clone-reference">
+    <label class="video-prompt-upload ${hasVideo ? "has-video" : ""}">
+      <input type="file" data-upload="clone-reference" accept="video/*" hidden>
+      ${preview}
+      <div><b>${esc(label)}</b><small>${esc(helper)}</small></div>
+    </label>
+    ${hasVideo ? `<button class="video-prompt-clear" type="button" data-action="clear-clone-reference" title="Remove video">${icon("x", 18)}</button>` : ""}
+    <button class="video-prompt-extract" type="button" data-action="clone-prompt" ${hasVideo && !state.generating ? "" : "disabled"}>
+      ${icon(state.generating ? "loader-circle" : "wand-sparkles", 20)}
+      <b>${state.generating ? "Extracting..." : "Extract Prompt"}</b>
+    </button>
+  </section>`;
+}
+
+function formatFileSize(size = 0) {
+  const bytes = Number(size || 0);
+  if (!Number.isFinite(bytes) || bytes <= 0) return "Video";
+  if (bytes >= 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(bytes >= 10 * 1024 * 1024 ? 0 : 1)} MB`;
+  if (bytes >= 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${bytes} B`;
 }
 
 function storyPanel(p) {
@@ -5023,6 +5057,7 @@ function resultMediaLabel(item) {
 
 function resultModelLabel(item) {
   const model = item.model || item.providerTitle || item.title || "";
+  if (/gemini|video prompt|extract/i.test(model)) return "GEMINI VIDEO ANALYSIS";
   if (/nano|banana/i.test(model)) return "NANO BANANA PRO";
   if (/gpt|apimart/i.test(model)) return "GPT IMAGE 2";
   return item.videoUrl ? "VIDEO MODEL" : "GPT IMAGE 2";
@@ -5117,8 +5152,10 @@ function resultPreview(item, options = {}) {
   const imageError = "this.replaceWith(Object.assign(document.createElement('div'),{className:'result-media-error',textContent:'图片链接已过期，请重新生成或联系客服'}))";
   const image = imageSrc ? `<img class="result-image" src="${imageSrc}" alt="${esc(item.title)}" loading="${options.full ? "eager" : "lazy"}" onerror="${esc(imageError)}">` : "";
   const video = videoSrc ? `<div class="result-video-shell"><video class="result-video" src="${videoSrc}" preload="metadata" playsinline></video><button type="button" class="result-play-button" data-video-play="${esc(item.id)}">${icon("play", 26)}<span>点击播放</span></button></div>` : "";
+  const videoTrigger = videoSrc ? `<button type="button" class="result-preview-trigger result-video-trigger" data-result-preview="${esc(item.id)}" aria-label="Open full video preview"><div class="result-video-shell"><video class="result-video" src="${videoSrc}" preload="metadata" playsinline muted></video><span class="result-play-button">${icon("play", 26)}<span>点击查看</span></span></div></button>` : "";
   const text = !image && !video ? `<div class="result-text-preview">${icon("file-text", 30)}<span>Text result</span></div>` : "";
   if (options.clickable && imageSrc) return `<button type="button" class="result-preview-trigger" data-result-preview="${esc(item.id)}" aria-label="Open full image preview">${image}</button>`;
+  if (options.clickable && videoSrc) return videoTrigger;
   return `${image}${video}${text}`;
 }
 
@@ -8519,6 +8556,7 @@ async function action(event, name) {
   if (name === "image-count-down") return updateImageBatchCount(-1);
   if (name === "image-count-up") return updateImageBatchCount(1);
   if (name === "optimize-image-prompt") return optimizeImagePrompt();
+  if (name === "clear-clone-reference") return clearCloneReferenceVideo();
   if (name?.startsWith("generate") || ["analyze-original", "clone-prompt", "write-story", "decode-viral"].includes(name)) return generate(name);
 }
 
@@ -8935,6 +8973,11 @@ async function startFirstGenerationWizard() {
 async function uploadChange(event) {
   const file = event.target.files?.[0];
   if (!file) return;
+  if (event.target.dataset.upload === "clone-reference") {
+    await uploadCloneReferenceVideo(file);
+    event.target.value = "";
+    return;
+  }
   await uploadAttachmentFile(file, event.target.dataset.upload, event.target.dataset.uploadSelect);
   event.target.value = "";
 }
@@ -8959,8 +9002,63 @@ function bindAttachmentDropZone(el) {
     clear();
     const file = [...(event.dataTransfer?.files || [])].find((item) => /^(image|video)\//i.test(item.type || ""));
     if (!file) return notify("Please drop an image or video file.");
+    if (kind === "clone-reference") return uploadCloneReferenceVideo(file);
     await uploadAttachmentFile(file, kind, kind);
   });
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(reader.error || new Error("Could not read file."));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function uploadCloneReferenceVideo(file) {
+  if (!/^video\//i.test(file.type || "")) return notify("Please upload a video file.");
+  const maxBytes = 30 * 1024 * 1024;
+  if (file.size > maxBytes) return notify("Video is too large. Please upload a clip under 30 MB.");
+  try {
+    notify("Reading video...");
+    const dataUrl = await readFileAsDataUrl(file);
+    const value = {
+      name: file.name,
+      size: file.size,
+      type: file.type || "video/mp4",
+      dataUrl,
+      updatedAt: new Date().toISOString()
+    };
+    const projectId = state.projectId;
+    const previousDb = state.db;
+    const nextDb = dbWithProjectField(previousDb, projectId, "clone.referenceVideo", value);
+    set({ db: nextDb });
+    const db = await api(`/projects/${projectId}/field`, {
+      method: "PATCH",
+      body: JSON.stringify({ field: "clone.referenceVideo", value })
+    });
+    if (state.projectId === projectId) set({ db });
+    notify("Video ready for prompt extraction.");
+  } catch (error) {
+    notify(error.message || "Could not upload video.");
+  }
+}
+
+async function clearCloneReferenceVideo() {
+  const projectId = state.projectId;
+  const previousDb = state.db;
+  set({ db: dbWithProjectField(previousDb, projectId, "clone.referenceVideo", null) });
+  try {
+    const db = await api(`/projects/${projectId}/field`, {
+      method: "PATCH",
+      body: JSON.stringify({ field: "clone.referenceVideo", value: null })
+    });
+    if (state.projectId === projectId) set({ db });
+  } catch (error) {
+    set({ db: previousDb });
+    notify(error.message || t("toastSaveFailed"));
+  }
 }
 
 async function uploadAttachmentFile(file, kind = state.attachmentPickerKind || "product", selectTarget = "") {

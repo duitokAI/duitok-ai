@@ -78,6 +78,65 @@ const publicMediaModelMap = {
   Grok: "Grok Imagine Video"
 };
 const internalMediaModelMap = Object.fromEntries(Object.entries(publicMediaModelMap).map(([label, model]) => [model, label]));
+const videoPromptExtractorSystemPrompt = `SYSTEM PROMPT: HYPER-GRANULAR VIDEO ANALYSIS
+
+ROLE:
+You are an expert cinematographer, visual analyst, and motion-mechanics describer. Your job is to break down video clips into extremely detailed, hyper-granular, frame-by-frame written descriptions.
+
+OBJECTIVE:
+Translate the provided video or sequence into a vivid, kinetic text breakdown. You must capture the exact physical mechanics, pacing, micro-expressions, movement logic, physics of momentum, camera behavior, visual composition, and complete audio/dialogue details.
+
+STRICT RULES:
+
+1. Comprehensive Audio & Dialogue Transcription
+You MUST transcribe all audio cues. Write out exactly what characters are saying using quotation marks. If speech is muffled, overlapping, unclear, or partially inaudible, explicitly note that. Alongside dialogue, describe all sound effects, vocalizations, environmental noise, impacts, music, breathing, footsteps, gasps, laughter, screams, silence, or background ambience.
+
+2. Physical Mechanics
+Describe exactly how bodies, objects, clothing, hair, props, and environmental elements move. Include direction, speed, weight, impact, resistance, balance, acceleration, hesitation, recoil, and momentum.
+
+3. Camera Dynamics
+Describe exact camera movement, framing, zooms, focus shifts, shakes, blurs, tilts, pans, tracking behavior, handheld instability, lens feel, and any delayed or reactive movement from the camera operator.
+
+4. Visual Framing
+Describe the frame composition in detail: subject position, foreground, background, depth, lighting, shadows, color temperature, camera distance, vertical or horizontal format, and what enters or exits the frame.
+
+5. Micro-Expressions & Body Language
+Capture small facial changes, eye movement, mouth tension, posture shifts, hand gestures, shoulder movement, hesitation, confidence, panic, surprise, discomfort, or emotional transitions.
+
+6. Time-Based Breakdown
+Break the video into timestamped segments based on the actual length, rhythm, and scene changes of the provided video.
+
+Do NOT assume the video is 6 seconds long.
+Do NOT stop at 0:06 unless the video actually ends there.
+Continue the breakdown until the full video ends.
+
+For short videos, use tight segments such as:
+0:00-0:02
+0:02-0:04
+0:04-0:06
+
+For longer videos, continue the breakdown until the final frame, using appropriate time ranges such as:
+0:00-0:03
+0:03-0:07
+0:07-0:12
+0:12-0:18
+0:18-0:25
+...continue until the full video ends.
+
+Each segment must be based on actual visual, motion, camera, audio, pacing, or narrative changes.
+
+Each segment must include:
+- Visual Framing
+- The Subjects
+- The Action
+- Camera Dynamics
+- Audio/Pacing
+
+7. No Generic Summary
+Do not summarize broadly. Do not say "a person moves" or "the camera shakes" without explaining exactly how, where, why, and what physical effect it creates.
+
+FINAL INSTRUCTION:
+When analyzing the user's video, follow this level of detail. Do not skip physical mechanics, camera behavior, audio cues, pacing, micro-expressions, object movement, environmental changes, or exact scene transitions. Produce a timestamped, highly detailed breakdown of the entire video from the first frame to the final frame. The output should be detailed enough to recreate the video's style, motion, rhythm, camera behavior, and scene logic in a later video-generation prompt.`;
 const adminUserId = "u_1";
 const authSecret = process.env.AUTH_SECRET || process.env.CHIP_API_TOKEN || "pokaya-local-dev-secret";
 const allowPublicSignup = process.env.ALLOW_PUBLIC_SIGNUP === "true" || process.env.NODE_ENV !== "production";
@@ -113,7 +172,7 @@ app.use((req, res, next) => {
   next();
 });
 app.use(express.json({
-  limit: "8mb",
+  limit: process.env.JSON_BODY_LIMIT || "64mb",
   verify: (req, _res, buffer) => {
     req.rawBody = buffer;
   }
@@ -1395,6 +1454,7 @@ function providerForMediaModel(model) {
 function generationCostFor(db, project, action, generated) {
   const model = internalMediaModel(project.image?.model);
   const provider = generated.provider || providerForMediaModel(model);
+  if (action === "clone-prompt") return { costRm: 0.01, costRmb: 0, costUsd: 0, model: generated.model || geminiVisionModel, provider: "gemini", unit: "vision" };
   if (action !== "generate-image") return { costRm: 0.01, costRmb: 0, costUsd: 0, model: "APIMart Text", provider: "apimart", unit: "text" };
   const costs = { ...defaultModelCosts(), ...(db.modelCosts || {}) };
   return { model, provider, ...(costs[model] || { costRm: 0, costRmb: 0, unit: "unknown" }) };
@@ -1848,6 +1908,73 @@ function buildTextPrompt(project, action, step) {
   ].join("\n");
 }
 
+function geminiResponseText(data = {}) {
+  return data.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("").trim() || data.text || "";
+}
+
+function cloneReferenceVideo(project = {}) {
+  const video = project.clone?.referenceVideo || {};
+  const dataUrl = String(video.dataUrl || "");
+  const match = dataUrl.match(/^data:(video\/[^;,]+);base64,(.+)$/i);
+  if (!match) return null;
+  return {
+    name: String(video.name || "Reference video").slice(0, 180),
+    size: Number(video.size || 0),
+    type: String(video.type || match[1] || "video/mp4"),
+    dataUrl
+  };
+}
+
+async function generateVideoPromptWithGemini(project) {
+  const referenceVideo = cloneReferenceVideo(project);
+  if (!referenceVideo) {
+    const error = new Error("Please upload a reference video before extracting a prompt.");
+    error.status = 400;
+    throw error;
+  }
+  const videoPart = dataUrlToGeminiInlinePart(referenceVideo.dataUrl);
+  if (!videoPart) {
+    const error = new Error("Reference video could not be read. Please upload MP4, MOV, or WebM.");
+    error.status = 400;
+    throw error;
+  }
+  const data = await geminiGenerateContent(geminiVisionModel, {
+    system_instruction: { parts: [{ text: videoPromptExtractorSystemPrompt }] },
+    contents: [{
+      role: "user",
+      parts: [
+        {
+          text: [
+            `Reference video filename: ${referenceVideo.name}`,
+            "Analyze the uploaded video from first frame to final frame using the required timestamped format.",
+            "After the breakdown, include a final section titled REUSABLE VIDEO GENERATION PROMPT that condenses the observed scene logic into one practical prompt."
+          ].join("\n")
+        },
+        videoPart
+      ]
+    }],
+    generationConfig: {
+      temperature: 0.2,
+      topP: 0.9
+    }
+  });
+  const body = geminiResponseText(data);
+  if (!body) {
+    const error = new Error("Gemini returned an empty analysis. Please try another video.");
+    error.status = 502;
+    throw error;
+  }
+  return {
+    title: "Video Prompt Extractor",
+    publicTitle: "Extracted Video Prompt",
+    body,
+    prompt: body,
+    videoUrl: referenceVideo.dataUrl,
+    provider: "gemini",
+    model: geminiVisionModel
+  };
+}
+
 async function generateTextWithApimart(project, action, step) {
   const data = await apimartRequest(apimartChatPath, {
     method: "POST",
@@ -1972,6 +2099,14 @@ function imageAspectRatioFromProject(project) {
   const value = String(project?.image?.aspectRatio || "").trim();
   const fallback = String(process.env.APIMART_IMAGE_SIZE || process.env.GRSAI_NANO_ASPECT_RATIO || "9:16").trim();
   return ["9:16", "16:9"].includes(value) ? value : ["9:16", "16:9"].includes(fallback) ? fallback : "9:16";
+}
+
+function generationEndpointFor(provider, project) {
+  if (provider === "gemini") return `${geminiGeneratePathPrefix}/${geminiVisionModel}:generateContent`;
+  if (provider === "atlascloud") return atlasGenerateVideoPath;
+  if (provider === "grsai") return grsaiDrawPath;
+  if (provider === "wuyin") return wuyinPathFromProject(project);
+  return apimartImagePath;
 }
 
 function grsaiImageBody(project, prompt) {
@@ -2206,6 +2341,7 @@ async function generateWithApimart(project, action, step) {
 }
 
 async function generateWithProvider(project, action, step) {
+  if (action === "clone-prompt") return generateVideoPromptWithGemini(project);
   if (action === "generate-image") {
     const model = internalMediaModel(project.image?.model);
     if (!allowedMediaModels.has(model)) {
@@ -2246,7 +2382,7 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
     const resultId = crypto.randomUUID();
     const jobId = crypto.randomUUID();
     const assetType = generated.videoUrl ? "video" : generated.imageUrl ? "image" : "text";
-    const publicTitle = publicGenerationTitle(assetType);
+    const publicTitle = generated.publicTitle || publicGenerationTitle(assetType);
     const publicBody = publicGenerationBody(assetType);
     const mirrored = await mirrorAssetToStorage(generated.videoUrl || generated.imageUrl, {
       userId: project.userId,
@@ -2261,6 +2397,7 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
       body: publicBody,
       providerTitle: generated.title,
       providerBody: generated.body,
+      prompt: generated.prompt || generated.body,
       imageUrl: generated.imageUrl ? mirrored.url : undefined,
       videoUrl: generated.videoUrl ? mirrored.url : undefined,
       originalImageUrl: generated.imageUrl && mirrored.originalUrl !== mirrored.url ? mirrored.originalUrl : undefined,
@@ -2271,7 +2408,7 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
       taskId: generated.taskId,
       providerTaskId: generated.taskId,
       provider: generated.provider,
-      model: internalMediaModel(project.image?.model),
+      model: generated.model || internalMediaModel(project.image?.model),
       resolution: project.image?.resolution || imageResolutionFromProject(project),
       aspectRatio: project.image?.aspectRatio || imageAspectRatioFromProject(project),
       costRm: cost.costRm,
@@ -2292,7 +2429,7 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
       status: "succeeded",
       taskId: generated.taskId,
       providerTaskId: generated.taskId,
-      prompt: project.image?.prompt || "",
+      prompt: generated.prompt || project.image?.prompt || "",
       imageUrl: result.imageUrl,
       videoUrl: result.videoUrl,
       originalImageUrl: result.originalImageUrl,
@@ -2315,7 +2452,7 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
       generationJobId: job.id,
       provider: job.provider,
       model: job.model,
-      endpoint: job.provider === "atlascloud" ? atlasGenerateVideoPath : job.provider === "grsai" ? grsaiDrawPath : job.provider === "wuyin" ? wuyinPathFromProject(project) : apimartImagePath,
+      endpoint: generationEndpointFor(job.provider, project),
       status: "succeeded",
       taskId: generated.taskId,
       costRm: job.costRm,
@@ -2364,7 +2501,7 @@ async function saveFailedGeneration(projectId, action, step, error, user) {
       generationJobId: job.id,
       provider: job.provider,
       model: job.model,
-      endpoint: job.provider === "atlascloud" ? atlasGenerateVideoPath : job.provider === "grsai" ? grsaiDrawPath : job.provider === "wuyin" ? wuyinPathFromProject(project) : apimartImagePath,
+      endpoint: generationEndpointFor(job.provider, project),
       status: "failed",
       errorMessage: job.providerErrorMessage || job.errorMessage,
       costRm: 0,
@@ -2448,7 +2585,7 @@ async function completeQueuedGeneration(jobId, generated) {
     const completedAt = new Date().toISOString();
     const resultId = crypto.randomUUID();
     const assetType = generated.videoUrl ? "video" : generated.imageUrl ? "image" : "text";
-    const publicTitle = publicGenerationTitle(assetType);
+    const publicTitle = generated.publicTitle || publicGenerationTitle(assetType);
     const publicBody = publicGenerationBody(assetType);
     const mirrored = await mirrorAssetToStorage(generated.videoUrl || generated.imageUrl, {
       userId: project.userId,
@@ -2463,6 +2600,7 @@ async function completeQueuedGeneration(jobId, generated) {
       body: publicBody,
       providerTitle: generated.title,
       providerBody: generated.body,
+      prompt: generated.prompt || generated.body,
       imageUrl: generated.imageUrl ? mirrored.url : undefined,
       videoUrl: generated.videoUrl ? mirrored.url : undefined,
       originalImageUrl: generated.imageUrl && mirrored.originalUrl !== mirrored.url ? mirrored.originalUrl : undefined,
@@ -2473,7 +2611,7 @@ async function completeQueuedGeneration(jobId, generated) {
       taskId: generated.taskId,
       providerTaskId: generated.taskId,
       provider: generated.provider,
-      model: internalMediaModel(project.image?.model),
+      model: generated.model || internalMediaModel(project.image?.model),
       resolution: project.image?.resolution || imageResolutionFromProject(project),
       aspectRatio: project.image?.aspectRatio || imageAspectRatioFromProject(project),
       costRm: cost.costRm,
@@ -2498,6 +2636,7 @@ async function completeQueuedGeneration(jobId, generated) {
       assetStorageError: result.assetStorageError,
       textOutput: publicBody,
       providerTextOutput: generated.body,
+      prompt: generated.prompt || job.prompt || "",
       creditsCharged: creditsToCharge,
       creditsRequired: creditsToCharge,
       duration: videoDurationFor(project),
@@ -2511,7 +2650,7 @@ async function completeQueuedGeneration(jobId, generated) {
       generationJobId: job.id,
       provider: job.provider,
       model: job.model,
-      endpoint: job.provider === "atlascloud" ? atlasGenerateVideoPath : job.provider === "grsai" ? grsaiDrawPath : job.provider === "wuyin" ? wuyinPathFromProject(project) : apimartImagePath,
+      endpoint: generationEndpointFor(job.provider, project),
       status: "succeeded",
       taskId: generated.taskId,
       costRm: job.costRm,
@@ -2548,7 +2687,7 @@ async function failQueuedGeneration(jobId, error) {
       generationJobId: job.id,
       provider: job.provider,
       model: job.model,
-      endpoint: project ? (job.provider === "atlascloud" ? atlasGenerateVideoPath : job.provider === "grsai" ? grsaiDrawPath : job.provider === "wuyin" ? wuyinPathFromProject(project) : apimartImagePath) : "",
+      endpoint: project ? generationEndpointFor(job.provider, project) : "",
       status: "failed",
       errorMessage: job.providerErrorMessage || job.errorMessage,
       costRm: 0,
@@ -3482,7 +3621,7 @@ function uniqueStrings(items = [], limit = 8) {
 
 function extractTrendName(query = "") {
   const cleaned = String(query || "").replace(/[？?。,.，]/g, " ").replace(/\s+/g, " ").trim();
-  const quoted = cleaned.match(/["“']([^"”']+)["”']/)?.[1];
+  const quoted = cleaned.match(/["']([^"']+)["']/)?.[1];
   if (quoted) return quoted.trim();
   return cleaned
     .replace(/你知道|是什么|可以卖什么|适合卖什么|适合|怎么做|帮我|研究|卖什么|嗎|吗|呢|trend|aesthetic|meaning|style|TikTok|Shop|Malaysia/gi, " ")
@@ -4641,7 +4780,7 @@ function buildWebSearchAgentReply(userMessage = "", toolResults = []) {
   if (zh) {
     return [
       `我联网搜了一下：${query || "相关关键词"}。精确的 "loft girl" 结果不算多，更像是 TikTok/Pinterest 上把 loft apartment、downtown girl、clean/soft girl aesthetic 混在一起的一种内容人设。`,
-      "放到 TikTok Shop，可以理解成：住在 loft/公寓里的都市女生，画面重点是干净空间、松弛穿搭、香氛/咖啡/收纳/灯光/家居小物，卖点不是硬推产品，而是“这个东西让生活更有质感”。",
+      "放到 TikTok Shop，可以理解成：住在 loft/公寓里的都市女生，画面重点是干净空间、松弛穿搭、香氛/咖啡/收纳/灯光/家居小物，卖点不是硬推产品，而是\"这个东西让生活更有质感\"。",
       "适合卖的品类：香薰、落地灯、床品、收纳、杯子、穿搭配饰、护肤、化妆镜、小型家电、桌面布置。内容可以做 3 条线：1. loft girl morning routine；2. 租房/公寓变高级的 3 个小物；3. 下班回家 30 秒治愈场景。",
       results.length ? `参考来源：\n${sourceLines}` : "这次搜索结果不多，建议后续用更具体关键词搜，比如 downtown girl aesthetic、apartment aesthetic、loft apartment decor TikTok。"
     ].join("\n\n");
