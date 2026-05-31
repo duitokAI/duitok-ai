@@ -4001,9 +4001,10 @@ function studioResultWall(p, meta = {}) {
     ...pending.map(studioPendingWallCard),
     ...items.map(studioWallCard)
   ];
+  if (!cards.length) return "";
   return `<section class="studio-result-wall">
     <div class="studio-wall-grid">
-      ${cards.length ? cards.join("") : studioEmptyWall(meta)}
+      ${cards.join("")}
     </div>
   </section>`;
 }
