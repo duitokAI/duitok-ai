@@ -24579,26 +24579,51 @@ label {
   transition: padding 0.22s ease;
 }
 
+.sidebar-topbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 38px;
+  align-items: center;
+  gap: 12px;
+  padding: 0 2px 18px;
+}
+
+.studio-shell .sidebar .sidebar-topbar .brand-lockup {
+  padding: 0 !important;
+}
+
+.studio-shell .sidebar .sidebar-topbar .brand-core {
+  gap: 10px !important;
+}
+
+.studio-shell .sidebar .sidebar-topbar .brand-logo-mascot {
+  width: 46px !important;
+  height: 46px !important;
+  transform: none;
+}
+
+.studio-shell .sidebar .sidebar-topbar .brand-wordmark {
+  font-size: 31px !important;
+}
+
 .sidebar-collapse-toggle {
-  width: 38px;
-  min-width: 38px;
-  height: 38px;
-  min-height: 38px;
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  min-height: 34px;
   display: grid;
   place-items: center;
-  margin: 0 4px 10px auto;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
+  margin: 0;
+  border: 0;
+  border-radius: 10px;
   padding: 0;
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.84);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.68);
   cursor: pointer;
 }
 
 .sidebar-collapse-toggle:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.09);
   color: #fff;
-  transform: translateY(-1px);
 }
 
 .studio-shell.sidebar-collapsed {
@@ -24611,14 +24636,20 @@ label {
   padding: 16px 8px 14px !important;
 }
 
+.studio-shell.sidebar-collapsed .sidebar-topbar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 0 16px;
+}
+
 .studio-shell.sidebar-collapsed .sidebar-collapse-toggle {
   width: 34px;
   min-width: 34px;
   height: 34px;
   min-height: 34px;
-  margin: 0 auto 16px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.075);
+  border-radius: 10px;
+  background: transparent;
 }
 
 .studio-shell.sidebar-collapsed .sidebar .brand-lockup {
