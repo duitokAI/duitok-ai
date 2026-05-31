@@ -1143,6 +1143,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
       assetStorage: safe.imageUrl || safe.videoUrl ? "pokaya-media" : undefined,
       imageUrl: publicMediaMarker(safe.imageUrl),
       videoUrl: publicMediaMarker(safe.videoUrl),
+      model: publicMediaModel(_model),
       title: redactProviderText(safe.title, publicGenerationTitle(publicType)),
       body: redactProviderText(safe.body, publicGenerationBody(publicType))
     };
@@ -2271,6 +2272,8 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
       providerTaskId: generated.taskId,
       provider: generated.provider,
       model: internalMediaModel(project.image?.model),
+      resolution: project.image?.resolution || imageResolutionFromProject(project),
+      aspectRatio: project.image?.aspectRatio || imageAspectRatioFromProject(project),
       costRm: cost.costRm,
       createdAt: new Date().toISOString()
     };
@@ -2471,6 +2474,8 @@ async function completeQueuedGeneration(jobId, generated) {
       providerTaskId: generated.taskId,
       provider: generated.provider,
       model: internalMediaModel(project.image?.model),
+      resolution: project.image?.resolution || imageResolutionFromProject(project),
+      aspectRatio: project.image?.aspectRatio || imageAspectRatioFromProject(project),
       costRm: cost.costRm,
       createdAt: completedAt
     };

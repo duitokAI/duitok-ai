@@ -5026,6 +5026,68 @@ function resultModelLabel(item) {
   return item.videoUrl ? "VIDEO MODEL" : "GPT IMAGE 2";
 }
 
+function resultTitle(item) {
+  if (!item) return "Untitled image";
+  return item.title || item.providerTitle || (item.videoUrl ? "Untitled video" : "Untitled image");
+}
+
+function resultModelDisplay(item) {
+  const label = resultModelLabel(item || {});
+  if (label === "NANO BANANA PRO") return "Nano Banana Pro";
+  if (label === "GPT IMAGE 2") return "GPT Image 2";
+  return label === "VIDEO MODEL" ? "Video model" : label;
+}
+
+function resultProject(item) {
+  return item?.projectId ? state.db?.projects?.find((project) => project.id === item.projectId) : null;
+}
+
+function resultMediaSrc(item, kind = "image") {
+  if (!item) return "";
+  const token = encodeURIComponent(state.token || "");
+  if (kind === "video" && item.videoUrl) return `/api/media/result/${encodeURIComponent(item.id)}/video?token=${token}`;
+  if (item.imageUrl) return `/api/media/result/${encodeURIComponent(item.id)}/image?token=${token}`;
+  return "";
+}
+
+function resultResolutionLabel(item) {
+  if (!item) return "Unknown";
+  if (item.resolution?.width && item.resolution?.height) return `${item.resolution.width} x ${item.resolution.height}`;
+  if (typeof item.resolution === "string" && item.resolution.trim()) return item.resolution.trim();
+  if (item.width && item.height) return `${item.width} x ${item.height}`;
+  const projectResolution = resultProject(item)?.image?.resolution;
+  return projectResolution ? String(projectResolution).toUpperCase() : "Unknown";
+}
+
+function resultAspectRatioLabel(item) {
+  if (!item) return "Unknown";
+  if (item.aspectRatio) return String(item.aspectRatio);
+  const projectRatio = resultProject(item)?.image?.aspectRatio;
+  return projectRatio || "Unknown";
+}
+
+function resultCreatedLabel(item) {
+  if (!item?.createdAt) return "Unknown";
+  const date = new Date(item.createdAt);
+  if (Number.isNaN(date.getTime())) return "Unknown";
+  return date.toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+}
+
+function resultSavedAsReference(item, kind) {
+  if (!item?.id) return false;
+  return (state.db?.attachments || []).some((attachment) => attachment.sourceResultId === item.id && attachment.kind === kind);
+}
+
+function resultReferenceButton(item, kind) {
+  const saved = resultSavedAsReference(item, kind);
+  const isAvatar = kind === "avatar";
+  const label = saved ? `Saved as ${isAvatar ? "Avatar" : "Product"}` : `Save as ${isAvatar ? "Avatar" : "Product"}`;
+  return `<button type="button" class="result-detail-reference-button ${isAvatar ? "avatar" : "product"} ${saved ? "is-saved" : ""}" data-result-action="save-${esc(kind)}" data-result-id="${esc(item?.id || "")}" ${item?.imageUrl || item?.videoUrl ? "" : "disabled"} ${saved ? "disabled" : ""}>
+    ${icon(saved ? "check-circle-2" : isAvatar ? "circle-user-round" : "package", 20)}
+    <span>${esc(label)}</span>
+  </button>`;
+}
+
 function resultPromptText(item) {
   const job = (state.db?.generationJobs || []).find((entry) => entry.resultId === item.id || entry.taskId === item.taskId || entry.providerTaskId === item.providerTaskId);
   return job?.prompt || item.prompt || item.providerBody || item.body || "";
@@ -5753,10 +5815,47 @@ function activeResult() {
 
 function resultPreviewModal() {
   const item = activeResult();
-  return `<div class="modal-backdrop result-lightbox-backdrop" data-action="close-modal">
-    <section class="result-lightbox" role="dialog" aria-modal="true" aria-label="Result preview">
+  const bg = item ? resultMediaSrc(item, item.videoUrl ? "video" : "image") : "";
+  const promptText = item ? resultPromptText(item) : "";
+  const safeTitle = esc(resultTitle(item));
+  return `<div class="modal-backdrop result-lightbox-backdrop" data-action="close-modal" ${bg ? `style="--result-bg-image: url(${esc(bg)})"` : ""}>
+    <section class="result-lightbox" role="dialog" aria-modal="true" aria-label="Result details">
       <button class="result-lightbox-close" data-action="close-modal" type="button" aria-label="Close">${icon("x", 34)}</button>
       <div class="result-lightbox-media">${item ? resultPreview(item, { full: true }) : ""}</div>
+      <aside class="result-detail-panel">
+        <header class="result-detail-head">
+          <span class="result-detail-avatar">${icon(item?.videoUrl ? "video" : "image", 22)}</span>
+          <label>
+            <span>Image name</span>
+            <input data-result-title="${esc(item?.id || "")}" value="${safeTitle}" aria-label="Image name">
+          </label>
+        </header>
+        <section class="result-detail-card result-detail-prompt-card">
+          <div class="result-detail-section-title">
+            <span>${icon("list-plus", 18)} PROMPT</span>
+            <button type="button" class="result-detail-copy" data-action="copy-result-prompt">${icon("copy", 16)} Copy</button>
+          </div>
+          ${promptText
+            ? `<div class="result-detail-prompt"><pre>${esc(promptText)}</pre><small>Scroll to see all</small></div>`
+            : `<p class="result-detail-empty">No prompt saved for this image.</p>`}
+        </section>
+        <section class="result-detail-card">
+          <div class="result-detail-section-title"><span>${icon("info", 18)} INFORMATION</span></div>
+          <dl class="result-detail-info">
+            <div><dt>Model</dt><dd>${esc(resultModelDisplay(item))}</dd></div>
+            <div><dt>Resolution</dt><dd>${esc(resultResolutionLabel(item))}</dd></div>
+            <div><dt>Aspect Ratio</dt><dd>${esc(resultAspectRatioLabel(item))}</dd></div>
+            <div><dt>Created</dt><dd>${esc(resultCreatedLabel(item))}</dd></div>
+          </dl>
+        </section>
+        <section class="result-detail-card result-detail-reference-card">
+          <div class="result-detail-section-title"><span>${icon("bookmark-plus", 18)} SAVE AS REFERENCE</span></div>
+          <div class="result-detail-reference-actions">
+            ${resultReferenceButton(item, "avatar")}
+            ${resultReferenceButton(item, "product")}
+          </div>
+        </section>
+      </aside>
     </section>
   </div>`;
 }
@@ -9874,7 +9973,8 @@ async function resultAction(button) {
         method: "POST",
         body: JSON.stringify({ kind })
       });
-      set({ db, modal: null, activeResultId: null });
+      if (state.modal === "previewResult") set({ db, modal: "previewResult", activeResultId: id });
+      else set({ db, modal: null, activeResultId: null });
       return notify(kind === "avatar" ? "已保存为人物参考。" : "已保存为产品图参考。");
     }
   } catch (error) {
