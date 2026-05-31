@@ -25746,3 +25746,19 @@ label {
   top: 50% !important;
   transform: translateY(-50%) !important;
 }
+
+/* Final override: keep the collapse button inside the sidebar, not on the page divider. */
+.studio-shell .sidebar .sidebar-collapse-toggle,
+.studio-shell:not(.sidebar-collapsed) .sidebar-collapse-toggle,
+.studio-shell.sidebar-collapsed .sidebar-collapse-toggle {
+  position: absolute !important;
+  top: 12px !important;
+  right: 10px !important;
+  left: auto !important;
+  transform: none !important;
+}
+
+.studio-shell.sidebar-collapsed .sidebar-topbar:hover .sidebar-collapse-toggle,
+.studio-shell.sidebar-collapsed .sidebar-collapse-toggle:focus-visible {
+  transform: none !important;
+}
