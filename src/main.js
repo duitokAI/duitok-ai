@@ -4170,7 +4170,7 @@ function studioResultWall(p, meta = {}) {
   const types = Array.isArray(meta.types) ? meta.types : [state.step];
   const step = state.step || "image";
   const pending = pendingResultJobs(p, types);
-  const items = p.results.filter((item) => studioResultBelongsToStep(item, step, types)).slice(-12).reverse();
+  const items = p.results.filter((item) => studioResultBelongsToStep(item, step, types)).slice().reverse();
   const cards = [
     ...pending.map(studioPendingWallCard),
     ...items.map(studioWallCard)
