@@ -24481,6 +24481,50 @@ label {
   transition: width 0.22s ease, padding 0.22s ease;
 }
 
+.studio-shell .sidebar {
+  height: 100dvh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .sidebar-scroll-area {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-gutter: stable;
+  scrollbar-color: transparent transparent;
+  scrollbar-width: thin;
+}
+
+.studio-shell .sidebar-scroll-area:hover,
+.studio-shell .sidebar-scroll-area:focus-within {
+  scrollbar-color: rgba(255, 255, 255, 0.42) transparent;
+}
+
+.studio-shell .sidebar-scroll-area::-webkit-scrollbar {
+  width: 10px;
+}
+
+.studio-shell .sidebar-scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.studio-shell .sidebar-scroll-area::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  background-clip: padding-box;
+}
+
+.studio-shell .sidebar-scroll-area:hover::-webkit-scrollbar-thumb,
+.studio-shell .sidebar-scroll-area:focus-within::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.42);
+  background-clip: padding-box;
+}
+
 /* Image console responsive fit pass: keep every action visible at each workspace width. */
 .studio-shell .image-generate-console {
   box-sizing: border-box;
