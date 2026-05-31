@@ -25465,7 +25465,7 @@ label {
 @media (max-width: 1560px) {
   .studio-shell .image-generate-console:not(.is-compact) {
     grid-template-areas:
-      "prompt generate"
+      "prompt prompt"
       "tools generate"
       "refs generate" !important;
     grid-template-columns: minmax(0, 1fr) clamp(158px, 15vw, 216px) !important;
@@ -25476,7 +25476,7 @@ label {
   }
 
   .studio-shell .image-generate-console:not(.is-compact) .image-console-generate {
-    min-height: 238px !important;
+    min-height: 166px !important;
   }
 }
 
@@ -26259,7 +26259,7 @@ label {
   }
 }
 
-<<<<<<< HEAD
+
 /* Sidebar collapse button final lock: expanded state belongs inside the logo row. */
 .studio-shell:not(.sidebar-collapsed) .sidebar .sidebar-topbar {
   position: relative !important;
@@ -26272,7 +26272,22 @@ label {
   grid-column: 2 !important;
   justify-self: end !important;
   align-self: center !important;
-=======
+  width: 34px !important;
+  min-width: 34px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+.studio-shell.sidebar-collapsed .sidebar .sidebar-collapse-toggle {
+  position: absolute !important;
+  top: 12px !important;
+  right: 10px !important;
+  left: auto !important;
+  transform: none !important;
+}
+
 /* Collapsed sidebar icon rail: keep every symbol on the same centerline. */
 .studio-shell.sidebar-collapsed .agent-primary-card,
 .studio-shell.sidebar-collapsed .side-primary,
@@ -26357,78 +26372,3 @@ label {
   justify-self: end !important;
   margin-left: 10px !important;
 }
-
-/* Sidebar brand row alignment: keep mascot, wordmark, and collapse button on one optical line. */
-.studio-shell:not(.sidebar-collapsed) .sidebar .sidebar-topbar {
-  min-height: 58px !important;
-  grid-template-columns: minmax(0, 1fr) 34px !important;
-  align-items: center !important;
-  padding: 0 0 10px !important;
-}
-
-.studio-shell:not(.sidebar-collapsed) .sidebar .sidebar-topbar .brand-lockup {
-  height: 52px !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  align-items: center !important;
-  overflow: visible !important;
-}
-
-.studio-shell:not(.sidebar-collapsed) .sidebar .sidebar-topbar .brand-core {
-  height: 52px !important;
-  align-items: center !important;
-  transform: none !important;
-}
-
-.studio-shell:not(.sidebar-collapsed) .sidebar .sidebar-topbar .brand-logo-mascot {
-  width: 50px !important;
-  height: 50px !important;
-  transform: translateY(1px) !important;
-}
-
-.studio-shell:not(.sidebar-collapsed) .sidebar .sidebar-topbar .brand-wordmark {
-  transform: translateY(1px) !important;
-}
-
-.studio-shell:not(.sidebar-collapsed) .sidebar-collapse-toggle {
-  top: 10px !important;
-  right: 0 !important;
->>>>>>> a9556ac (Fix collapsed sidebar icon alignment)
-  width: 34px !important;
-  min-width: 34px !important;
-  height: 34px !important;
-  min-height: 34px !important;
-<<<<<<< HEAD
-  margin: 0 !important;
-  transform: none !important;
-}
-
-.studio-shell.sidebar-collapsed .sidebar .sidebar-collapse-toggle {
-=======
-}
-
-/* Sidebar collapse button optical alignment with the logo row. */
-.studio-shell:not(.sidebar-collapsed) .sidebar-collapse-toggle {
-  top: 50% !important;
-  transform: translateY(-50%) !important;
-}
-
-/* Final override: keep the collapse button inside the sidebar, not on the page divider. */
-.studio-shell .sidebar .sidebar-collapse-toggle,
-.studio-shell:not(.sidebar-collapsed) .sidebar-collapse-toggle,
-.studio-shell.sidebar-collapsed .sidebar-collapse-toggle {
->>>>>>> a9556ac (Fix collapsed sidebar icon alignment)
-  position: absolute !important;
-  top: 12px !important;
-  right: 10px !important;
-  left: auto !important;
-  transform: none !important;
-}
-<<<<<<< HEAD
-=======
-
-.studio-shell.sidebar-collapsed .sidebar-topbar:hover .sidebar-collapse-toggle,
-.studio-shell.sidebar-collapsed .sidebar-collapse-toggle:focus-visible {
-  transform: none !important;
-}
->>>>>>> a9556ac (Fix collapsed sidebar icon alignment)

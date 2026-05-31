@@ -38,6 +38,8 @@ let imagePresetSaveTimer = null;
 let autoFrameworkSaveTimer = null;
 let autoFrameworkSaveSeq = 0;
 let imageConsoleScrollCleanup = null;
+let imageCountSaveTimer = null;
+let imageCountSaveSeq = 0;
 const quickFieldSaveTimers = new Map();
 let quickFieldSaveSeq = 0;
 
@@ -8398,23 +8400,27 @@ async function useUgcBuiltPrompt() {
   set({ modal: null });
 }
 
-async function updateImageBatchCount(delta) {
+function updateImageBatchCount(delta) {
   const projectId = state.projectId;
   const previousDb = state.db;
   const nextCount = Math.min(4, Math.max(1, imageBatchCount(project()) + delta));
   if (nextCount === imageBatchCount(project())) return;
   set({ db: dbWithProjectField(previousDb, projectId, "image.count", nextCount) });
-  try {
-    const db = await api(`/projects/${projectId}/field`, {
-      method: "PATCH",
-      body: JSON.stringify({ field: "image.count", value: nextCount })
-    });
-    if (state.projectId !== projectId) return;
-    set({ db });
-  } catch (error) {
-    if (state.projectId === projectId) set({ db: previousDb });
-    notify(error.message || t("toastSaveFailed"));
-  }
+  const seq = ++imageCountSaveSeq;
+  clearTimeout(imageCountSaveTimer);
+  imageCountSaveTimer = setTimeout(async () => {
+    try {
+      const db = await api(`/projects/${projectId}/field`, {
+        method: "PATCH",
+        body: JSON.stringify({ field: "image.count", value: imageBatchCount(project()) })
+      });
+      if (state.projectId !== projectId || seq !== imageCountSaveSeq) return;
+      state.db = db;
+    } catch (error) {
+      if (state.projectId === projectId && seq === imageCountSaveSeq) set({ db: previousDb });
+      notify(error.message || t("toastSaveFailed"));
+    }
+  }, 140);
 }
 
 async function saveProjectField(field, value) {
