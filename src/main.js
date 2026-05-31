@@ -1395,9 +1395,7 @@ function scrollAgentThreadToBottom() {
   const scroll = () => {
     const thread = document.querySelector(".agent-chat-shell .agent-thread");
     if (!thread) return;
-    const lastItem = thread.lastElementChild;
     thread.scrollTo({ top: thread.scrollHeight, behavior: "auto" });
-    lastItem?.scrollIntoView({ block: "end", inline: "nearest", behavior: "auto" });
   };
   requestAnimationFrame(() => {
     scroll();

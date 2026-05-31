@@ -29778,3 +29778,55 @@ label {
   text-overflow: clip !important;
   white-space: nowrap !important;
 }
+
+/* Agent chat scroll lock: replies should move the thread only, never the composer. */
+.studio-shell:has(.agent-page),
+.studio-shell .workspace:has(.agent-page),
+.studio-shell .agent-page,
+.studio-shell .agent-workspace-shell,
+.studio-shell .agent-chat-shell.agent-page-panel {
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .workspace:has(.agent-page) {
+  height: 100dvh !important;
+  padding: 0 !important;
+}
+
+.studio-shell .agent-page,
+.studio-shell .agent-workspace-shell,
+.studio-shell .agent-chat-shell.agent-page-panel {
+  height: 100% !important;
+  max-height: 100% !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel {
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) auto !important;
+  align-content: stretch !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-chat-toolbar {
+  grid-row: 1 !important;
+  flex: 0 0 auto !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread {
+  grid-row: 2 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  scrollbar-gutter: stable !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-form {
+  grid-row: 3 !important;
+  position: relative !important;
+  inset: auto !important;
+  flex: 0 0 auto !important;
+  transform: none !important;
+}
