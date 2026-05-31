@@ -130,6 +130,77 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
+function requireAdminDiagnosticAccess(req) {
+  const requiredKey = adminAccessKey();
+  const candidate = req.get("x-admin-key") || req.query.adminKey || "";
+  if (!requiredKey || !safeEqualString(candidate, requiredKey)) {
+    const error = new Error("Admin diagnostics access required.");
+    error.status = 403;
+    throw error;
+  }
+}
+
+async function deepseekDiagnosticRequest(body = {}) {
+  const startedAt = Date.now();
+  try {
+    const data = await deepseekRequest({
+      model: deepseekModel,
+      stream: false,
+      ...body
+    });
+    return {
+      ok: true,
+      durationMs: Date.now() - startedAt,
+      response: sanitizeAgentText(data.choices?.[0]?.message?.content || "ok").slice(0, 120)
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      durationMs: Date.now() - startedAt,
+      status: error.status || 500,
+      error: sanitizeAgentText(error.message || "DeepSeek request failed").slice(0, 240)
+    };
+  }
+}
+
+app.get("/api/admin/diagnostics/deepseek", async (req, res, next) => {
+  try {
+    requireAdminDiagnosticAccess(req);
+    const configured = hasDeepSeekConfig();
+    const result = {
+      configured,
+      model: deepseekModel,
+      chatPath: deepseekChatPath,
+      tests: {}
+    };
+    if (configured) {
+      result.tests.basic = await deepseekDiagnosticRequest({
+        messages: [{ role: "user", content: "Reply with: pong" }]
+      });
+      result.tests.tools = await deepseekDiagnosticRequest({
+        messages: [{ role: "user", content: "Use the tool if needed, then answer pong." }],
+        tools: [{
+          type: "function",
+          function: {
+            name: "diagnostic_ping",
+            description: "Diagnostic no-op tool.",
+            parameters: {
+              type: "object",
+              properties: {
+                value: { type: "string" }
+              }
+            }
+          }
+        }],
+        tool_choice: "auto"
+      });
+    }
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
 function defaultBilling() {
   return {
     plan: "Pokaya AI Pro",
