@@ -39,7 +39,7 @@
 }
 
 .studio-shell .workspace:has(.image-higgsfield-mode) {
-  padding: 18px 0 64px !important;
+  padding: 0 0 64px !important;
   overflow-x: hidden;
 }
 
@@ -752,7 +752,7 @@
   min-height: calc(100vh - 72px);
   display: grid;
   grid-template-rows: minmax(520px, 1fr) auto;
-  gap: 14px;
+  gap: 0;
   align-content: start;
   margin-inline: 0;
 }
@@ -805,20 +805,21 @@
   height: auto;
   display: block;
   columns: 4 220px;
-  column-gap: 10px;
+  column-gap: 4px;
   padding: 0;
 }
 
 .image-higgsfield-mode .studio-wall-card {
   display: inline-block;
   width: 100%;
-  margin: 0 0 10px;
+  margin: 0 0 4px;
   overflow: hidden;
   break-inside: avoid;
   border: 0;
-  border-radius: 16px;
+  border-radius: 0;
   background: transparent;
   box-shadow: none;
+  line-height: 0;
 }
 
 .image-higgsfield-mode .studio-wall-card:nth-child(2),
@@ -838,6 +839,7 @@
   padding: 0;
   background: transparent;
   cursor: zoom-in;
+  line-height: 0;
 }
 
 .image-higgsfield-mode .studio-wall-card .result-image,
@@ -849,6 +851,7 @@
   display: block;
   border-radius: 0 !important;
   object-fit: contain !important;
+  vertical-align: top;
 }
 
 .image-higgsfield-mode .studio-wall-card .visual-card-preview,
