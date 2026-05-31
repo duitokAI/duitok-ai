@@ -26118,3 +26118,45 @@ label {
   background: #fff4f8 !important;
   color: #33023f !important;
 }
+
+/* Loading screen safety: keep translated boot text horizontal and readable. */
+.loading {
+  min-height: 100dvh !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  padding: 24px !important;
+  color: #5f176f !important;
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  line-height: 1.35 !important;
+  letter-spacing: 0 !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  overflow-wrap: normal !important;
+  word-break: keep-all !important;
+  background:
+    radial-gradient(circle at 18% 8%, rgba(255, 78, 122, 0.14), transparent 30%),
+    linear-gradient(180deg, #fff8fb 0%, #ffffff 54%, #fbf7ff 100%) !important;
+}
+
+.loading svg {
+  width: 28px !important;
+  height: 28px !important;
+  flex: 0 0 28px !important;
+  color: #5f176f !important;
+  stroke: currentColor !important;
+}
+
+@media (max-width: 420px) {
+  .loading {
+    font-size: 14px !important;
+    white-space: normal !important;
+    max-width: 100vw !important;
+  }
+}
