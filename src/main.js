@@ -4152,7 +4152,9 @@ function studioResultWall(p, meta = {}) {
 }
 
 function studioPendingWallCard(job) {
-  return `<article class="studio-wall-card studio-wall-pending">
+  const aspectRatio = String(job.aspectRatio || project().image?.aspectRatio || "").includes("16:9") ? "16:9" : "9:16";
+  const aspectClass = aspectRatio === "16:9" ? "landscape" : "portrait";
+  return `<article class="studio-wall-card studio-wall-pending ${aspectClass}" style="aspect-ratio:${esc(aspectRatio.replace(":", " / "))}">
     <div><b>${job.status === "processing" ? "Processing" : "Queued"}</b><button type="button" data-generation-cancel="${esc(job.id)}">Cancel</button></div>
   </article>`;
 }

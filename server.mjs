@@ -2473,6 +2473,7 @@ async function saveFailedGeneration(projectId, action, step, error, user) {
   return mutateDb(async (currentDb) => {
     const project = findProject(currentDb, projectId, user);
     const cost = generationCostFor(currentDb, project, action, { provider: providerForMediaModel(project.image?.model) });
+    const aspectRatio = action === "generate-image" ? imageAspectRatioFromProject(project) : project.original?.aspectRatio || project.image?.aspectRatio || "9:16";
     const createdAt = new Date().toISOString();
     const job = {
       id: crypto.randomUUID(),
@@ -2484,6 +2485,7 @@ async function saveFailedGeneration(projectId, action, step, error, user) {
       status: "failed",
       taskId: null,
       prompt: project.image?.prompt || "",
+      aspectRatio,
       creditsCharged: 0,
       errorMessage: publicGenerationError(),
       providerErrorMessage: error.message || "Generation failed",
@@ -2521,6 +2523,7 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
     const creditsToCharge = creditChargeFor(project, action);
     assertGenerationAccess(currentDb, user, roundCredits(creditsToCharge * batchCount), batchCount);
     const cost = generationCostFor(currentDb, project, action, { provider: providerForMediaModel(project.image?.model) });
+    const aspectRatio = action === "generate-image" ? imageAspectRatioFromProject(project) : project.original?.aspectRatio || project.image?.aspectRatio || "9:16";
     const createdAt = new Date().toISOString();
     const jobs = jobIds.map((jobId, index) => ({
       id: jobId,
@@ -2534,6 +2537,7 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
       creditsCharged: 0,
       creditsRequired: creditsToCharge,
       duration: videoDurationFor(project),
+      aspectRatio,
       createdAt,
       model: cost.model,
       provider: cost.provider,
