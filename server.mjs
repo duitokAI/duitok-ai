@@ -194,6 +194,20 @@ app.get("/api/admin/diagnostics/deepseek", async (req, res, next) => {
         }],
         tool_choice: "auto"
       });
+      result.tests.agentTools = await deepseekDiagnosticRequest({
+        messages: [
+          {
+            role: "system",
+            content: "You are Pokaya Agent. Answer in Chinese. Use tools only if useful."
+          },
+          {
+            role: "user",
+            content: "我要怎么做水果人短剧"
+          }
+        ],
+        tools: agentTools,
+        tool_choice: "auto"
+      });
     }
     res.json(result);
   } catch (error) {
