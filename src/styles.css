@@ -24466,22 +24466,29 @@ label {
 }
 
 .studio-shell.sidebar-collapsed {
-  --studio-sidebar-width: 84px;
+  --studio-sidebar-width: 76px;
   --studio-page-pad-x: clamp(26px, 3vw, 52px);
 }
 
 .studio-shell.sidebar-collapsed .sidebar {
   overflow-x: visible !important;
-  padding: 20px 10px 16px !important;
+  padding: 16px 8px 14px !important;
 }
 
 .studio-shell.sidebar-collapsed .sidebar-collapse-toggle {
-  margin: 0 auto 14px;
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  min-height: 34px;
+  margin: 0 auto 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.075);
 }
 
 .studio-shell.sidebar-collapsed .sidebar .brand-lockup {
   justify-content: center !important;
-  padding: 0 0 18px !important;
+  margin: 0 0 8px !important;
+  padding: 0 !important;
 }
 
 .studio-shell.sidebar-collapsed .sidebar .brand-core {
@@ -24490,8 +24497,9 @@ label {
 }
 
 .studio-shell.sidebar-collapsed .sidebar .brand-logo-mascot {
-  width: 46px !important;
-  height: 46px !important;
+  width: 50px !important;
+  height: 50px !important;
+  transform: none;
 }
 
 .studio-shell.sidebar-collapsed .sidebar .brand-wordmark,
@@ -24499,37 +24507,24 @@ label {
 .studio-shell.sidebar-collapsed .sidebar-language,
 .studio-shell.sidebar-collapsed .side-section span,
 .studio-shell.sidebar-collapsed .side-section:not(.account),
+.studio-shell.sidebar-collapsed .side-section.account,
 .studio-shell.sidebar-collapsed .sidebar-account-panel {
   display: none !important;
-}
-
-.studio-shell.sidebar-collapsed .side-section.account {
-  min-height: 20px !important;
-  display: flex !important;
-  justify-content: center !important;
-  margin: 12px 0 8px !important;
-  padding: 14px 0 4px !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.48) !important;
-}
-
-.studio-shell.sidebar-collapsed .side-section.account svg {
-  margin: 0 !important;
 }
 
 .studio-shell.sidebar-collapsed .agent-primary-card,
 .studio-shell.sidebar-collapsed .side-primary,
 .studio-shell.sidebar-collapsed .side-link,
 .studio-shell.sidebar-collapsed .side-support-button {
-  width: 56px !important;
-  min-width: 56px !important;
-  min-height: 56px !important;
+  width: 52px !important;
+  min-width: 52px !important;
+  min-height: 52px !important;
   display: inline-grid !important;
   grid-template-columns: 1fr !important;
   place-items: center !important;
   gap: 0 !important;
-  margin: 6px auto !important;
-  border-radius: 17px !important;
+  margin: 4px auto !important;
+  border-radius: 16px !important;
   padding: 0 !important;
   text-align: center !important;
 }
@@ -24544,15 +24539,29 @@ label {
 }
 
 .studio-shell.sidebar-collapsed .agent-primary-card {
-  margin-bottom: 14px !important;
+  margin: 8px auto 18px !important;
   animation: none;
+}
+
+.studio-shell.sidebar-collapsed .side-link[data-page="billing"] {
+  margin-top: 18px !important;
+}
+
+.studio-shell.sidebar-collapsed .side-link[data-page="billing"]::before {
+  content: "";
+  position: absolute;
+  top: -11px;
+  left: 8px;
+  right: 8px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .studio-shell.sidebar-collapsed .agent-primary-card::after {
   content: "";
   position: absolute;
-  right: 10px;
-  bottom: 10px;
+  right: 8px;
+  bottom: 8px;
   width: 8px;
   height: 8px;
   border: 2px solid rgba(27, 7, 31, 0.95);
@@ -24563,8 +24572,8 @@ label {
 
 .studio-shell.sidebar-collapsed .agent-primary-icon,
 .studio-shell.sidebar-collapsed .support-bubble-icon {
-  width: 38px !important;
-  height: 38px !important;
+  width: 34px !important;
+  height: 34px !important;
 }
 
 .studio-shell.sidebar-collapsed .side-primary svg,
@@ -24573,13 +24582,13 @@ label {
 }
 
 .studio-shell.sidebar-collapsed .studio-nav-button .studio-nav-mark {
-  width: 38px !important;
-  height: 38px !important;
-  flex-basis: 38px !important;
+  width: 34px !important;
+  height: 34px !important;
+  flex-basis: 34px !important;
 }
 
 .studio-shell.sidebar-collapsed .side-primary::before {
-  left: -10px;
+  left: -8px;
   top: 14px;
   bottom: 14px;
 }

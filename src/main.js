@@ -2907,10 +2907,10 @@ function studio() {
   return `
     <div class="studio-shell ${collapsed ? "sidebar-collapsed" : ""}">
       <aside class="sidebar">
+        ${brand()}
         <button class="sidebar-collapse-toggle" data-action="toggle-sidebar" type="button" title="${esc(collapseLabel)}" aria-label="${esc(collapseLabel)}" aria-expanded="${collapsed ? "false" : "true"}">
           ${icon(collapsed ? "panel-left-open" : "panel-left-close", 18)}
         </button>
-        ${brand()}
         <div class="sidebar-language">${languageSwitch()}</div>
         <button class="agent-primary-card ${state.page === "agent" ? "active" : ""}" data-page="agent" title="${esc(t("pokayaAgent"))}" aria-label="${esc(t("pokayaAgent"))}">
           <span class="agent-primary-icon">${icon("bot", 21)}</span>
