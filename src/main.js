@@ -4103,7 +4103,7 @@ function studioWallZoomStyleAttr() {
 
 function studioWallZoomControl() {
   const value = studioWallZoomValue();
-  return `<div class="studio-wall-zoom-control" aria-label="Preview size">
+  return `<div class="studio-wall-zoom-control" aria-label="Preview size" style="--studio-wall-zoom-progress:${(value / 4) * 100}%">
     <input type="range" min="0" max="4" step="1" value="${value}" data-studio-wall-zoom aria-label="Adjust preview size">
   </div>`;
 }
@@ -8296,6 +8296,7 @@ function updateStudioWallZoom(value) {
   document.querySelectorAll(".studio-wall-zoomable").forEach((el) => el.style.setProperty("--studio-wall-column", column));
   document.querySelectorAll("[data-studio-wall-zoom]").forEach((el) => {
     if (Number(el.value) !== zoom) el.value = zoom;
+    el.closest(".studio-wall-zoom-control")?.style.setProperty("--studio-wall-zoom-progress", `${(zoom / 4) * 100}%`);
   });
 }
 
