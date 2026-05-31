@@ -3606,7 +3606,7 @@ function contentLibraryPage() {
     return activeFilter === "all" || activeFilter === kind || activeFilter === item.type;
   });
   return `<header class="project-head asset-library-head">
-    <div><p class="folder-label">${icon("folder", 18)} Pokaya Asset Library</p><h1>Generated Assets</h1></div>
+    <div><h1>Generated Assets</h1></div>
   </header>
   <section class="asset-toolbar">
     <div class="asset-filter-row">
