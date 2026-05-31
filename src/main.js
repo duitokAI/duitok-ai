@@ -6278,6 +6278,12 @@ function attachmentPreview(item) {
   if (inlinePreview && /^data:image\//i.test(inlinePreview)) {
     return `<img src="${esc(inlinePreview)}" alt="${esc(item.name || "Attachment")}" loading="lazy">`;
   }
+  if ((item.assetStorageKey || item.mediaUrl) && item.mediaKind !== "video") {
+    return `<img src="/api/media/attachment/${encodeURIComponent(item.id)}/image?token=${token}" alt="${esc(item.name || "Attachment")}" loading="lazy">`;
+  }
+  if ((item.assetStorageKey || item.mediaUrl) && item.mediaKind === "video") {
+    return `<div class="attachment-placeholder">${icon("video", 44)}</div>`;
+  }
   if (item.sourceResultId && item.mediaKind !== "video") {
     return `<img src="/api/media/result/${encodeURIComponent(item.sourceResultId)}/image?token=${token}" alt="${esc(item.name || "Attachment")}" loading="lazy">`;
   }

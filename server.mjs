@@ -530,6 +530,38 @@ async function mirrorAssetToStorage(sourceUrl, { userId, projectId, resultId, ty
   }
 }
 
+function dataUrlToMediaBytes(dataUrl = "") {
+  const match = String(dataUrl).match(/^data:([^;,]+);base64,(.+)$/i);
+  if (!match) return null;
+  return {
+    contentType: match[1],
+    bytes: Buffer.from(match[2], "base64")
+  };
+}
+
+async function persistAttachmentMedia(attachment) {
+  const media = dataUrlToMediaBytes(attachment.dataUrl || attachment.previewUrl || "");
+  if (!media || !media.contentType.startsWith("image/")) return attachment;
+  if (!storageStatus().durableAssets) return attachment;
+  const extension = extensionFromContentType(media.contentType, attachment.name);
+  const key = [
+    "attachments",
+    attachment.userId,
+    attachment.projectId || "global",
+    `${attachment.id}.${extension}`
+  ].map((part) => String(part).replace(/[^a-zA-Z0-9._-]/g, "-")).join("/");
+  const mediaUrl = await putR2Object(key, media.bytes, media.contentType);
+  const { dataUrl: _dataUrl, previewUrl: _previewUrl, ...safeAttachment } = attachment;
+  return {
+    ...safeAttachment,
+    mediaUrl,
+    assetStorage: "cloudflare-r2",
+    assetStorageKey: key,
+    mediaKind: attachment.mediaKind || "image",
+    type: attachment.type || media.contentType
+  };
+}
+
 function blankProject(id, name, userId = adminUserId) {
   return {
     id,
@@ -6468,11 +6500,47 @@ app.get("/api/admin/agent-runs", async (req, res, next) => {
 app.post("/api/attachments", async (req, res) => {
   const { user } = await requireAuth(req);
   res.json(await mutateDb(async (db) => {
-    db.attachments.unshift({ id: crypto.randomUUID(), userId: user.id, ...req.body, createdAt: new Date().toISOString() });
+    const attachment = await persistAttachmentMedia({
+      id: crypto.randomUUID(),
+      userId: user.id,
+      ...req.body,
+      createdAt: new Date().toISOString()
+    });
+    db.attachments.unshift(attachment);
     db.usage.unshift(usage(`Uploaded ${req.body.kind}`, 0, user.id));
     await saveDb(db);
     return publicState(db, user);
   }));
+});
+
+app.get("/api/media/attachment/:id/:kind", async (req, res, next) => {
+  try {
+    const { db, user } = await requireAuth(req);
+    const attachment = (db.attachments || []).find((item) => item.id === req.params.id && item.userId === user.id);
+    if (!attachment) {
+      const error = new Error("Attachment not found");
+      error.status = 404;
+      throw error;
+    }
+    const isVideo = req.params.kind === "video";
+    if (attachment.assetStorageKey) {
+      const r2Response = await getR2Object(attachment.assetStorageKey);
+      res.setHeader("Content-Type", r2Response.headers.get("content-type") || attachment.type || (isVideo ? "video/mp4" : "image/png"));
+      res.setHeader("Cache-Control", "private, max-age=86400");
+      return res.send(Buffer.from(await r2Response.arrayBuffer()));
+    }
+    const media = dataUrlToMediaBytes(attachment.dataUrl || attachment.previewUrl || "");
+    if (!media) {
+      const error = new Error("Attachment media not found");
+      error.status = 404;
+      throw error;
+    }
+    res.setHeader("Content-Type", media.contentType);
+    res.setHeader("Cache-Control", "private, max-age=300");
+    res.send(media.bytes);
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.post("/api/results/:id/save-reference", async (req, res, next) => {
