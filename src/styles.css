@@ -27152,9 +27152,9 @@ label {
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-prompt {
   grid-area: prompt;
   display: grid !important;
-  grid-template-columns: 58px minmax(0, 1fr) !important;
+  grid-template-columns: 48px minmax(0, 1fr) !important;
   align-items: stretch !important;
-  gap: 10px !important;
+  gap: 12px !important;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-prompt textarea {
@@ -27167,15 +27167,16 @@ label {
 .image-prompt-insert {
   display: grid;
   place-items: center;
-  width: 58px;
-  min-width: 58px;
-  height: 76px;
-  border: 1px solid rgba(255, 214, 43, 0.28);
-  border-radius: 18px;
-  background: rgba(255, 214, 43, 0.06);
-  color: #fff7c7;
+  align-self: center;
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  border: 1px solid rgba(255, 214, 43, 0.22);
+  border-radius: 15px;
+  background: rgba(255, 250, 252, 0.04);
+  color: #ffffff;
   cursor: copy;
-  box-shadow: inset 0 0 0 1px rgba(255, 250, 252, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(255, 250, 252, 0.04);
   transition: border-color 0.16s ease, background 0.16s ease, color 0.16s ease, transform 0.16s ease;
 }
 
@@ -27306,15 +27307,15 @@ label {
 
 .studio-shell .image-generate-console.is-compact .image-console-prompt {
   display: grid !important;
-  grid-template-columns: 46px minmax(0, 1fr) !important;
+  grid-template-columns: 42px minmax(0, 1fr) !important;
   gap: 8px !important;
 }
 
 .studio-shell .image-generate-console.is-compact .image-prompt-insert {
-  width: 46px;
-  min-width: 46px;
-  height: 46px;
-  border-radius: 14px;
+  width: 42px;
+  min-width: 42px;
+  height: 42px;
+  border-radius: 13px;
 }
 
 @media (max-width: 1280px) {
@@ -27331,9 +27332,6 @@ label {
     max-height: 78px !important;
   }
 
-  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-insert {
-    height: 78px;
-  }
 }
 
 /* Agent loading state: do not inherit the assistant avatar grid. */
