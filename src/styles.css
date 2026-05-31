@@ -27076,3 +27076,8 @@ label {
     left: var(--studio-sidebar-width) !important;
   }
 }
+
+/* Keep the single divider under the fixed creation tabs visible in image studio. */
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .project-step-topbar {
+  border-bottom: 1px solid rgba(93, 54, 104, 0.14) !important;
+}
