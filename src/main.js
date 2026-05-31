@@ -38,6 +38,7 @@ let imagePresetSaveTimer = null;
 let autoFrameworkSaveTimer = null;
 let autoFrameworkSaveSeq = 0;
 let imageConsoleScrollCleanup = null;
+let sidebarTooltipCleanup = null;
 let imageCountSaveTimer = null;
 let imageCountSaveSeq = 0;
 const quickFieldSaveTimers = new Map();
@@ -1455,6 +1456,55 @@ function bindImageConsoleCompact() {
   };
 }
 
+
+function bindCollapsedSidebarTooltips() {
+  sidebarTooltipCleanup?.();
+  sidebarTooltipCleanup = null;
+  document.querySelectorAll(".sidebar-hover-tooltip").forEach((el) => el.remove());
+  const shell = document.querySelector(".studio-shell.sidebar-collapsed");
+  if (!shell) return;
+  const targets = shell.querySelectorAll(".agent-primary-card[aria-label], .side-primary[aria-label], .side-link[aria-label], .side-support-button[aria-label], .sidebar-collapse-toggle[aria-label]");
+  if (!targets.length) return;
+  const tooltip = document.createElement("div");
+  tooltip.className = "sidebar-hover-tooltip";
+  tooltip.setAttribute("role", "tooltip");
+  document.body.appendChild(tooltip);
+  const hide = () => {
+    tooltip.classList.remove("is-visible");
+    tooltip.textContent = "";
+  };
+  const show = (target) => {
+    const label = target.getAttribute("aria-label") || target.textContent.trim();
+    if (!label) return hide();
+    const rect = target.getBoundingClientRect();
+    tooltip.textContent = label;
+    tooltip.style.left = `${Math.round(rect.right + 12)}px`;
+    tooltip.style.top = `${Math.round(rect.top + rect.height / 2)}px`;
+    tooltip.classList.add("is-visible");
+  };
+  const listeners = [];
+  targets.forEach((target) => {
+    const enter = () => show(target);
+    const leave = hide;
+    const focus = () => show(target);
+    const blur = hide;
+    target.addEventListener("mouseenter", enter);
+    target.addEventListener("mouseleave", leave);
+    target.addEventListener("focus", focus);
+    target.addEventListener("blur", blur);
+    listeners.push([target, enter, leave, focus, blur]);
+  });
+  sidebarTooltipCleanup = () => {
+    listeners.forEach(([target, enter, leave, focus, blur]) => {
+      target.removeEventListener("mouseenter", enter);
+      target.removeEventListener("mouseleave", leave);
+      target.removeEventListener("focus", focus);
+      target.removeEventListener("blur", blur);
+    });
+    tooltip.remove();
+  };
+}
+
 function project() {
   return state.db.projects.find((item) => item.id === state.projectId) || state.db.projects[0];
 }
@@ -1506,6 +1556,7 @@ function render() {
   updatePromoCountdown();
   restoreSidebarScroll();
   bindImageConsoleCompact();
+  bindCollapsedSidebarTooltips();
   scrollToSopAnchor();
 }
 

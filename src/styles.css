@@ -26617,3 +26617,44 @@ label {
 .studio-shell:not(.sidebar-collapsed) .sidebar .sidebar-collapse-toggle:focus-visible {
   transform: none !important;
 }
+
+
+/* Collapsed sidebar body-mounted tooltip: avoids clipping inside the scroll rail/chat surface. */
+.studio-shell.sidebar-collapsed .sidebar-collapse-toggle::after,
+.studio-shell.sidebar-collapsed .sidebar .brand-core::after,
+.studio-shell.sidebar-collapsed .agent-primary-card::before,
+.studio-shell.sidebar-collapsed .agent-primary-card::after,
+.studio-shell.sidebar-collapsed .side-primary::after,
+.studio-shell.sidebar-collapsed .side-link::after,
+.studio-shell.sidebar-collapsed .side-support-button::after {
+  content: none !important;
+  display: none !important;
+}
+
+.sidebar-hover-tooltip {
+  position: fixed;
+  z-index: 2147483000;
+  top: 0;
+  left: 0;
+  max-width: min(240px, calc(100vw - 96px));
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  padding: 9px 12px;
+  background: rgba(45, 6, 55, 0.96);
+  color: #fff;
+  box-shadow: 0 18px 44px rgba(28, 0, 36, 0.28);
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: 0;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-50%) translateX(-4px) scale(0.98);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+}
+
+.sidebar-hover-tooltip.is-visible {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0) scale(1);
+}
