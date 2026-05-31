@@ -4179,7 +4179,6 @@ function imageGenerateConsole(p, selectedModel) {
     : "2K";
   return `<section class="image-generate-console">
     ${studioStepMenu("image-console-step-menu")}
-    <button class="image-console-add" type="button" data-action="open-attachment-picker" data-attachment-kind="product" title="Add reference">${icon("plus", 20)}</button>
     <label class="image-console-prompt">
       <textarea data-field="image.prompt" data-image-console-prompt rows="3" placeholder="Create a high-converting TikTok Shop product image...">${esc(p.image.prompt || "")}</textarea>
     </label>

@@ -24487,10 +24487,9 @@ label {
   width: 100% !important;
   max-width: 100% !important;
   overflow: visible !important;
-  grid-template-areas: "mode add prompt tools refs generate" !important;
+  grid-template-areas: "mode prompt tools refs generate" !important;
   grid-template-columns:
     minmax(92px, 0.22fr)
-    52px
     minmax(260px, 1fr)
     minmax(168px, 0.38fr)
     minmax(150px, 0.34fr)
@@ -24542,9 +24541,9 @@ label {
 @media (max-width: 1560px) {
   .studio-shell .image-generate-console {
     grid-template-areas:
-      "mode add prompt prompt generate"
-      "tools tools refs refs generate" !important;
-    grid-template-columns: minmax(96px, 0.18fr) 52px minmax(220px, 1fr) minmax(210px, 0.72fr) clamp(132px, 12vw, 164px) !important;
+      "mode prompt prompt generate"
+      "tools tools refs generate" !important;
+    grid-template-columns: minmax(96px, 0.18fr) minmax(220px, 1fr) minmax(210px, 0.72fr) clamp(132px, 12vw, 164px) !important;
   }
 
   .studio-shell .image-console-step-menu summary,
@@ -24565,7 +24564,7 @@ label {
       "prompt prompt"
       "tools generate"
       "refs generate"
-      "mode add" !important;
+      "mode mode" !important;
     grid-template-columns: minmax(0, 1fr) minmax(132px, 0.34fr) !important;
   }
 
