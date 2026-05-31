@@ -29038,7 +29038,7 @@ label {
 }
 
 .studio-shell .image-higgsfield-mode .studio-wall-grid {
-  --studio-wall-row-height: clamp(180px, calc(var(--studio-wall-column, 260px) * 0.78), 360px);
+  --studio-wall-row-height: clamp(150px, calc(var(--studio-wall-column, 260px) * 0.92), 520px);
   display: flex !important;
   flex-wrap: wrap !important;
   align-items: flex-start !important;
@@ -29055,7 +29055,7 @@ label {
   display: block !important;
   flex: var(--media-ratio, 1) 1 calc(var(--studio-wall-row-height) * var(--media-ratio, 1)) !important;
   width: auto !important;
-  min-width: 0 !important;
+  min-width: min(calc(var(--studio-wall-row-height) * var(--media-ratio, 1) * 0.74), 100%) !important;
   height: auto !important;
   max-width: none !important;
   margin: 0 0 4px !important;

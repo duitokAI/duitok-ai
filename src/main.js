@@ -4106,7 +4106,7 @@ function studioWallZoomValue() {
 }
 
 function studioWallZoomColumn(value = studioWallZoomValue()) {
-  return [180, 220, 260, 320, 400][value] || 260;
+  return [140, 220, 320, 460, 640][value] || 320;
 }
 
 function studioWallZoomStyleAttr() {
