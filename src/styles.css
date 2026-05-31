@@ -784,6 +784,7 @@
 }
 
 .image-higgsfield-mode .studio-result-wall {
+  width: 100%;
   min-height: min(70vh, 780px);
   overflow: visible;
   border: 0;
@@ -793,19 +794,19 @@
 }
 
 .image-higgsfield-mode .studio-wall-grid {
+  width: 100%;
   height: auto;
-  display: block;
-  columns: 4 220px;
-  column-gap: 4px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
+  gap: 4px;
   padding: 0;
 }
 
 .image-higgsfield-mode .studio-wall-card {
-  display: inline-block;
+  display: block;
   width: 100%;
-  margin: 0 0 4px;
+  margin: 0;
   overflow: hidden;
-  break-inside: avoid;
   border: 0;
   border-radius: 0;
   background: transparent;
