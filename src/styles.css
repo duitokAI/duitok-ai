@@ -6058,8 +6058,8 @@ button:disabled [data-lucide="loader-circle"] {
 }
 
 .attachment-add-button {
-  color: #ff5f8f;
-  text-shadow: 0 0 22px rgba(255, 95, 143, 0.32);
+  color: #fff;
+  text-shadow: 0 0 22px rgba(255, 255, 255, 0.22);
 }
 
 .attachment-add-button-product {
@@ -6072,7 +6072,7 @@ button:disabled [data-lucide="loader-circle"] {
 }
 
 .attachment-add-button:hover {
-  color: #ff8fb0;
+  color: #fff;
 }
 
 .attachment-add-button-product:hover {
