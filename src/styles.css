@@ -854,9 +854,7 @@
 }
 
 .image-higgsfield-mode .studio-wall-card footer {
-  inset: auto 8px 8px;
-  background: linear-gradient(135deg, rgba(94, 11, 108, 0.86), rgba(255, 78, 120, 0.72));
-  box-shadow: 0 10px 24px rgba(38, 0, 51, 0.14);
+  display: none !important;
 }
 
 .image-higgsfield-mode .studio-wall-pending {
