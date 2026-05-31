@@ -24636,6 +24636,7 @@ label {
   min-width: 0 !important;
   height: 40px !important;
   gap: 8px !important;
+  transform: translateY(4px);
 }
 
 .studio-shell .sidebar .sidebar-topbar .brand-logo-mascot {
