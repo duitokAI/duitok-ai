@@ -29115,6 +29115,7 @@ label {
 .studio-shell .image-higgsfield-mode .studio-wall-card {
   display: block !important;
   flex: var(--media-ratio, 1) 1 calc(var(--studio-wall-row-height) * var(--media-ratio, 1)) !important;
+  aspect-ratio: var(--media-ratio, 1) / 1 !important;
   width: auto !important;
   min-width: min(calc(var(--studio-wall-row-height) * var(--media-ratio, 1) * 0.74), 100%) !important;
   height: auto !important;
@@ -29130,8 +29131,8 @@ label {
 
 .studio-shell .image-higgsfield-mode .studio-wall-card .result-preview-trigger {
   width: 100% !important;
-  height: auto !important;
-  min-height: 0 !important;
+  height: 100% !important;
+  min-height: 100% !important;
   display: block !important;
   border: 0 !important;
   border-radius: 0 !important;
@@ -29145,19 +29146,43 @@ label {
 .studio-shell .image-higgsfield-mode .studio-wall-card .result-video,
 .studio-shell .image-higgsfield-mode .studio-wall-card .result-video-shell {
   width: 100% !important;
-  height: auto !important;
-  min-height: 0 !important;
+  height: 100% !important;
+  min-height: 100% !important;
   aspect-ratio: auto !important;
   display: block !important;
   border-radius: 0 !important;
   background: #efe2f5 !important;
-  object-fit: contain !important;
+  object-fit: cover !important;
   vertical-align: top !important;
 }
 
 .studio-shell .image-higgsfield-mode .studio-wall-card .result-video-shell .result-video {
-  height: auto !important;
+  height: 100% !important;
   aspect-ratio: auto !important;
+}
+
+.studio-shell .image-higgsfield-mode {
+  grid-template-rows: 46px minmax(520px, 1fr) auto !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-wall-zoom-control {
+  position: relative !important;
+  z-index: 8 !important;
+  top: auto !important;
+  right: auto !important;
+  grid-row: 1 !important;
+  justify-self: end !important;
+  align-self: center !important;
+  width: clamp(132px, 12vw, 210px) !important;
+  margin: 0 clamp(18px, 2.2vw, 42px) 0 0 !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-result-wall {
+  grid-row: 2 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console {
+  grid-row: 3 !important;
 }
 
 .studio-shell .image-higgsfield-mode .studio-wall-card .visual-card-preview,
