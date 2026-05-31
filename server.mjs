@@ -25,6 +25,8 @@ const apimartTaskPathPrefix = process.env.APIMART_TASK_PATH_PREFIX || "/v1/tasks
 const apimartTextModel = process.env.APIMART_TEXT_MODEL || "gpt-5-mini";
 const agentVisionModel = process.env.AGENT_VISION_MODEL || process.env.APIMART_VISION_MODEL || "gpt-4o-mini";
 const apimartImageModel = process.env.APIMART_IMAGE_MODEL || "gpt-image-2";
+const apimartSeedream50LiteModel = process.env.APIMART_SEEDREAM_5_LITE_MODEL || "seedream-5.0-lite";
+const apimartSeedream45Model = process.env.APIMART_SEEDREAM_4_5_MODEL || "seedream-4.5";
 const geminiBaseUrl = (process.env.GEMINI_BASE_URL || "https://generativelanguage.googleapis.com").replace(/\/$/, "");
 const geminiGeneratePathPrefix = process.env.GEMINI_GENERATE_PATH_PREFIX || "/v1beta/models";
 const geminiVisionModel = process.env.GEMINI_VISION_MODEL || process.env.GEMINI_MODEL || "gemini-2.5-flash";
@@ -46,6 +48,7 @@ const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET || "";
 const googleRedirectPath = process.env.GOOGLE_REDIRECT_PATH || "/api/auth/google/callback";
 const wuyinBaseUrl = (process.env.WUYIN_BASE_URL || "https://api.wuyinkeji.com").replace(/\/$/, "");
 const wuyinImagePaths = {
+  "Grok Imagine": process.env.WUYIN_GROK_IMAGE_PATH || "/api/async/image_grok_imagine",
   "Veo 3.1": "/api/async/video_veo3.1_fast",
   "Sora 2": "/api/async/video_sora2",
   "Gemini Omni": "/api/async/video_google_omni",
@@ -57,6 +60,7 @@ const grsaiChatPath = process.env.GRSAI_CHAT_PATH || "/v1/chat/completions";
 const grsaiDrawPath = process.env.GRSAI_DRAW_PATH || "/v1/draw/nano-banana";
 const grsaiResultPath = process.env.GRSAI_RESULT_PATH || "/v1/draw/result";
 const grsaiNanoModel = process.env.GRSAI_NANO_MODEL || "nano-banana-pro";
+const grsaiNanoBanana2Model = process.env.GRSAI_NANO_BANANA_2_MODEL || "nano-banana-2";
 const grsaiVisionModel = process.env.GRSAI_VISION_MODEL || "gemini-2.5-flash";
 const grsaiCloneModel = process.env.GRSAI_CLONE_MODEL || "gemini-3-pro";
 const atlasBaseUrl = (process.env.ATLASCLOUD_BASE_URL || "https://api.atlascloud.ai").replace(/\/$/, "");
@@ -64,12 +68,19 @@ const atlasGenerateVideoPath = process.env.ATLASCLOUD_GENERATE_VIDEO_PATH || "/a
 const atlasPredictionPathPrefix = process.env.ATLASCLOUD_PREDICTION_PATH_PREFIX || "/api/v1/model/prediction";
 const atlasSeedanceModel = process.env.ATLASCLOUD_SEEDANCE_MODEL || "bytedance/seedance-2.0/text-to-video";
 const webSearchBaseUrl = process.env.WEB_SEARCH_BASE_URL || "https://duckduckgo.com/html/";
-const allowedMediaModels = new Set(["GPT Image 2", "Nano Banana Pro", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"]);
+const allowedMediaModels = new Set(["GPT Image 2", "Seedream 5.0 Lite", "Seedream 4.5", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"]);
 const publicMediaModelMap = {
   "GPT Image 2": "GPT Image 2",
+  "Seedream 5.0 Lite": "Seedream 5.0 Lite",
+  "Seedream 4.5": "Seedream 4.5",
   "Nano Banana Pro": "Nano Banana Pro",
+  "Nano Banana 2": "Nano Banana 2",
+  "Grok Imagine": "Grok Imagine",
   "Pokaya Image": "GPT Image 2",
   "Pokaya Image Pro": "Nano Banana Pro",
+  "Pokaya Seedream": "Seedream 5.0 Lite",
+  "Pokaya Banana": "Nano Banana 2",
+  "Pokaya Grok Image": "Grok Imagine",
   "Pokaya Video": "Seedance 2.0",
   "Pokaya Video Plus": "Veo 3.1",
   "Pokaya Story Video": "Sora 2",
@@ -338,7 +349,11 @@ function defaultBilling() {
 function defaultModelCosts() {
   return {
     "GPT Image 2": { costRm: 0.024, costUsd: 0.006, unit: "image" },
+    "Seedream 5.0 Lite": { costRm: 0.024, costUsd: 0.006, unit: "image" },
+    "Seedream 4.5": { costRm: 0.024, costUsd: 0.006, unit: "image" },
     "Nano Banana Pro": { costRm: 0.105, costRmb: 0.18, unit: "image" },
+    "Nano Banana 2": { costRm: 0.105, costRmb: 0.18, unit: "image" },
+    "Grok Imagine": { costRm: 0.024, costRmb: 0.05, unit: "image" },
     "Seedance 2.0": { costRm: 0.48, costUsd: 0.4, unit: "4s video" },
     "Veo 3.1": { costRm: 0.234, costRmb: 0.4, unit: "8s video" },
     "Sora 2": { costRm: 0.093, costRmb: 0.16, unit: "8s video" },
@@ -1126,22 +1141,32 @@ function isVideoMediaModel(model) {
   return ["Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"].includes(internalMediaModel(model));
 }
 
+function imageCreditForModel(model = "") {
+  model = internalMediaModel(model);
+  if (model === "Nano Banana Pro") return 0.2;
+  return 0.15;
+}
+
 function requestedMediaModelFromText(content = "") {
   const text = String(content || "");
   if (/\bveo\b|veo\s*3(?:\.1)?|谷歌\s*veo/i.test(text)) return "Veo 3.1";
   if (/seedance|seedance\s*2(?:\.0)?|豆包|即梦/i.test(text)) return "Seedance 2.0";
   if (/\bsora\b|sora\s*2/i.test(text)) return "Sora 2";
+  if (/seedream\s*5|seedream\s*5\.0|seedream.*lite|seedream\s*lite|seedream\s*五/i.test(text)) return "Seedream 5.0 Lite";
+  if (/seedream\s*4(?:\.5)?|seedream|seedream\s*四/i.test(text)) return "Seedream 4.5";
+  if (/nano\s*banana\s*2|banana\s*2|香蕉\s*2/i.test(text)) return "Nano Banana 2";
   if (/nano\s*banana|banana\s*pro|香蕉|nano\s*pro/i.test(text)) return "Nano Banana Pro";
   if (/gpt\s*image|gpt-image|image\s*2/i.test(text)) return "GPT Image 2";
   if (/gemini\s*omni/i.test(text)) return "Gemini Omni";
-  if (/grok|imagine/i.test(text)) return "Grok Imagine Video";
+  if (/grok.*video|video.*grok|grok.*视频|imagine.*video/i.test(text)) return "Grok Imagine Video";
+  if (/grok|imagine/i.test(text)) return "Grok Imagine";
   return "";
 }
 
 function generationModelOptionsText(kind = "auto") {
-  if (kind === "image") return "GPT Image 2（0.15 credit/张）或 Nano Banana Pro（0.20 credit/张）";
+  if (kind === "image") return "GPT Image 2（0.15 credit/张）、Seedream 5.0 Lite（0.15 credit/张）、Seedream 4.5（0.15 credit/张）、Nano Banana Pro（0.20 credit/张）、Nano Banana 2（0.15 credit/张）或 Grok Imagine（0.15 credit/张）";
   if (kind === "video") return "Veo 3.1（0.40 credit/8秒）、Seedance 2.0（0.40 credit/4秒）、Sora 2（0.48 credit/8秒）";
-  return "图片：GPT Image 2（0.15）/ Nano Banana Pro（0.20）；视频：Veo 3.1（0.40）/ Seedance 2.0（0.40）/ Sora 2（0.48）";
+  return "图片：GPT Image 2（0.15）/ Seedream 5.0 Lite（0.15）/ Seedream 4.5（0.15）/ Nano Banana Pro（0.20）/ Nano Banana 2（0.15）/ Grok Imagine（0.15）；视频：Veo 3.1（0.40）/ Seedance 2.0（0.40）/ Sora 2（0.48）";
 }
 
 function redactProviderText(value, fallback = "") {
@@ -1442,10 +1467,10 @@ function hasOpenAiConfig() {
 
 function providerForMediaModel(model) {
   model = internalMediaModel(model);
-  if (model === "GPT Image 2") return process.env.APIMART_API_KEY ? "apimart" : "mock";
-  if (model === "Nano Banana Pro") return process.env.GRSAI_API_KEY ? "grsai" : "mock";
+  if (model === "GPT Image 2" || model === "Seedream 5.0 Lite" || model === "Seedream 4.5") return process.env.APIMART_API_KEY ? "apimart" : "mock";
+  if (model === "Nano Banana Pro" || model === "Nano Banana 2") return process.env.GRSAI_API_KEY ? "grsai" : "mock";
   if (model === "Seedance 2.0") return process.env.ATLASCLOUD_API_KEY ? "atlascloud" : "mock";
-  if (model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni" || model === "Grok Imagine Video") return process.env.WUYIN_API_KEY ? "wuyin" : "mock";
+  if (model === "Grok Imagine" || model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni" || model === "Grok Imagine Video") return process.env.WUYIN_API_KEY ? "wuyin" : "mock";
   return "unsupported";
 }
 
@@ -1481,8 +1506,7 @@ function imageBatchCount(value) {
 function creditChargeFor(project, action) {
   if (action !== "generate-image") return 0.1;
   const model = internalMediaModel(project.image?.model);
-  if (model === "GPT Image 2") return 0.15;
-  if (model === "Nano Banana Pro") return 0.2;
+  if (!isVideoMediaModel(model)) return imageCreditForModel(model);
   if (model === "Seedance 2.0") return roundCredits(videoDurationFor(project, model) * 0.1);
   if (model === "Veo 3.1") return 0.4;
   if (model === "Sora 2") return roundCredits(videoDurationFor(project, model) * 0.06);
@@ -2134,10 +2158,13 @@ async function generateTextWithApimart(project, action, step) {
 }
 
 function imageModelFromProject(project) {
+  const model = internalMediaModel(project.image?.model);
   const modelMap = {
-    "GPT Image 2": "gpt-image-2"
+    "GPT Image 2": process.env.APIMART_IMAGE_MODEL || "gpt-image-2",
+    "Seedream 5.0 Lite": apimartSeedream50LiteModel,
+    "Seedream 4.5": apimartSeedream45Model
   };
-  return process.env.APIMART_IMAGE_MODEL || modelMap[internalMediaModel(project.image?.model)] || apimartImageModel;
+  return modelMap[model] || apimartImageModel;
 }
 
 async function pollApimartTask(taskId) {
@@ -2251,8 +2278,9 @@ function generationEndpointFor(provider, project) {
 }
 
 function grsaiImageBody(project, prompt) {
+  const model = internalMediaModel(project.image?.model);
   return {
-    model: grsaiNanoModel,
+    model: model === "Nano Banana 2" ? grsaiNanoBanana2Model : grsaiNanoModel,
     prompt,
     aspectRatio: imageAspectRatioFromProject(project),
     imageSize: imageResolutionFromProject(project),
@@ -2291,6 +2319,14 @@ function wuyinImageBody(project, prompt) {
       prompt,
       duration: String(videoDurationFor(project, model)),
       aspect_ratio: process.env.WUYIN_GROK_ASPECT_RATIO || process.env.WUYIN_VIDEO_RATIO || "9:16"
+    };
+  }
+  if (model === "Grok Imagine") {
+    return {
+      prompt,
+      size: process.env.WUYIN_GROK_IMAGE_SIZE || imageSize,
+      aspectRatio: process.env.WUYIN_GROK_IMAGE_ASPECT_RATIO || aspectRatio,
+      model: process.env.WUYIN_GROK_IMAGE_MODEL || "grok-imagine"
     };
   }
   return { prompt, size: imageSize, aspectRatio };
@@ -2499,13 +2535,17 @@ async function generateWithProvider(project, action, step) {
       const video = await generateVideoWithWuyin(project);
       return { title: `速创API ${model}`, body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "wuyin" };
     }
+    if (provider === "wuyin" && model === "Grok Imagine") {
+      const image = await generateImageWithWuyin(project);
+      return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "wuyin" };
+    }
     if (provider === "grsai") {
       const image = await generateImageWithGrsai(project);
-      return { title: "Nano Banana Pro", body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "grsai" };
+      return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "grsai" };
     }
     if (provider === "apimart") {
       const image = await generateImageWithApimart(project);
-      return { title: "GPT Image 2", body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "apimart" };
+      return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "apimart" };
     }
   }
   if (process.env.APIMART_API_KEY) {
@@ -3504,7 +3544,7 @@ const agentTools = [
           },
           model: {
             type: "string",
-            enum: ["GPT Image 2", "Nano Banana Pro", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"],
+            enum: ["GPT Image 2", "Seedream 5.0 Lite", "Seedream 4.5", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"],
             description: "User-selected generation model. Ask the user to choose before passing this when the requested media type is unclear."
           }
         },
@@ -5899,7 +5939,7 @@ app.post("/api/agent", async (req, res, next) => {
           "Use trend_research before answering about fresh trends, unfamiliar aesthetic names, product-market fit, what to sell, content angles, competitors, recent demand, or terms that may have a changing meaning. Use raw web_search only for simple fact lookup. After research, answer naturally with practical guidance for the user's goal and cite source URLs briefly when useful.",
           "Act like a capable assistant: when the user asks for an output, fill the relevant content settings and run the matching tool if enough information is available.",
           "Pokaya AI is the platform, not a generation model. Never present Pokaya AI as a model option.",
-          "User-facing model names are allowed and should be shown when relevant: GPT Image 2 and Nano Banana Pro for images; Veo 3.1, Seedance 2.0, and Sora 2 for videos. Do not mention provider names, base URLs, routes, keys, or infrastructure.",
+          "User-facing model names are allowed and should be shown when relevant: GPT Image 2, Seedream 5.0 Lite, Seedream 4.5, Nano Banana Pro, Nano Banana 2, and Grok Imagine for images; Veo 3.1, Seedance 2.0, and Sora 2 for videos. Do not mention provider names, base URLs, routes, keys, or infrastructure.",
           "Before generating a video, make sure the user has selected a video model. If no model is selected or the request is ambiguous, ask one short question with the video model choices and estimated credits instead of generating. Use these user-facing estimates: Veo 3.1 = 0.40 credit/8s, Seedance 2.0 = 0.40 credit/4s, Sora 2 = 0.48 credit/8s.",
           "If the user already says a model name such as Veo, Seedance, or Sora, save that model to the current content settings before creating the prompt or queuing generation.",
           "Common workflows: product/content request = inspect_workspace_state -> create_project or update fields internally -> generate_project_output when the user needs an image, poster, cover, carousel asset, video, or other rendered media through Pokaya's platform models. Weekly content plan = inspect_workspace_state -> remember_agent_context when useful -> create_content_plan, and only create schedule drafts when the user asks for drafts. Video prompt request = create_seedance_prompt; video generation request = create_seedance_prompt -> generate_project_output after confirmation. In user-facing replies, say video prompt or generate video instead of naming the internal video model.",

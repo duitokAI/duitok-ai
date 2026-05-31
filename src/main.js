@@ -4241,7 +4241,11 @@ function studioDockCredit(meta = {}) {
 function imagePanel(p) {
   const imageModels = [
     ["GPT Image 2", "GPT Image 2"],
-    ["Nano Banana Pro", "Nano Banana Pro"]
+    ["Seedream 5.0 Lite", "Seedream 5.0 Lite"],
+    ["Seedream 4.5", "Seedream 4.5"],
+    ["Nano Banana Pro", "Nano Banana Pro"],
+    ["Nano Banana 2", "Nano Banana 2"],
+    ["Grok Imagine", "Grok Imagine"]
   ];
   const imageModelValues = imageModels.map(([value]) => value);
   const selectedModel = imageModelValues.includes(p.image.model) ? p.image.model : String(p.image.model || "").toLowerCase().includes("pro") ? "Nano Banana Pro" : "GPT Image 2";
@@ -4334,7 +4338,7 @@ function imageGenerateConsole(p, selectedModel) {
   const avatar = selectedImageReference("avatar");
   const product = selectedImageReference("product");
   const promptImage = p.image?.promptImage || null;
-  const unitCredit = selectedModel === "Nano Banana Pro" ? 0.2 : 0.15;
+  const unitCredit = imageModelCredit(selectedModel);
   const selectedCount = imageBatchCount(p);
   const credit = (unitCredit * selectedCount).toFixed(2);
   const aspectRatioOptions = ["9:16", "16:9"];
@@ -4381,6 +4385,10 @@ function imageGenerateConsole(p, selectedModel) {
   </section>`;
 }
 
+function imageModelCredit(model = "") {
+  return model === "Nano Banana Pro" ? 0.2 : 0.15;
+}
+
 function imagePromptMediaPreview(item = {}) {
   return `<div class="image-prompt-media-preview">
     <img src="${esc(item.dataUrl || "")}" alt="${esc(item.name || "Prompt image")}" loading="lazy">
@@ -4397,15 +4405,43 @@ function imageModelPicker(selectedModel) {
     {
       value: "GPT Image 2",
       provider: "openai",
-      title: "GPT Image 2",
+      title: "GPT Image 2 (0.15 Credit)",
       description: "4K images with strong text rendering",
       badge: "NEW"
     },
     {
+      value: "Seedream 5.0 Lite",
+      provider: "seedream",
+      title: "Seedream 5.0 Lite (0.15 Credit)",
+      description: "APIMart image model for fast product visuals",
+      badge: ""
+    },
+    {
+      value: "Seedream 4.5",
+      provider: "seedream",
+      title: "Seedream 4.5 (0.15 Credit)",
+      description: "APIMart image model for polished commercial shots",
+      badge: ""
+    },
+    {
       value: "Nano Banana Pro",
       provider: "google",
-      title: "Nano Banana Pro",
+      title: "Nano Banana Pro (0.20 Credit)",
       description: "Google flagship generation model",
+      badge: ""
+    },
+    {
+      value: "Nano Banana 2",
+      provider: "google",
+      title: "Nano Banana 2 (0.15 Credit)",
+      description: "GRS AI image model for flexible visuals",
+      badge: ""
+    },
+    {
+      value: "Grok Imagine",
+      provider: "xai",
+      title: "Grok Imagine (0.15 Credit)",
+      description: "速创API image model for punchy concepts",
       badge: ""
     }
   ];
@@ -4436,6 +4472,12 @@ function imageModelPicker(selectedModel) {
 function providerLogo(provider) {
   if (provider === "google") {
     return `<span class="provider-logo provider-logo-google" aria-hidden="true">G</span>`;
+  }
+  if (provider === "seedream") {
+    return `<span class="provider-logo provider-logo-seedream" aria-hidden="true">S</span>`;
+  }
+  if (provider === "xai") {
+    return `<span class="provider-logo provider-logo-xai" aria-hidden="true">X</span>`;
   }
   return `<span class="provider-logo provider-logo-openai" aria-hidden="true">
     <svg viewBox="0 0 24 24" focusable="false">
@@ -5177,7 +5219,11 @@ function resultMediaLabel(item) {
 function resultModelLabel(item) {
   const model = item.model || item.providerTitle || item.title || "";
   if (/gemini|video prompt|extract/i.test(model)) return "POKAYA AI";
+  if (/seedream\s*5/i.test(model)) return "SEEDREAM 5.0 LITE";
+  if (/seedream/i.test(model)) return "SEEDREAM 4.5";
+  if (/banana\s*2/i.test(model)) return "NANO BANANA 2";
   if (/nano|banana/i.test(model)) return "NANO BANANA PRO";
+  if (/grok imagine/i.test(model)) return "GROK IMAGINE";
   if (/gpt|apimart/i.test(model)) return "GPT IMAGE 2";
   return item.videoUrl ? "VIDEO MODEL" : "GPT IMAGE 2";
 }
@@ -5190,6 +5236,10 @@ function resultTitle(item) {
 function resultModelDisplay(item) {
   const label = resultModelLabel(item || {});
   if (label === "NANO BANANA PRO") return "Nano Banana Pro";
+  if (label === "NANO BANANA 2") return "Nano Banana 2";
+  if (label === "SEEDREAM 5.0 LITE") return "Seedream 5.0 Lite";
+  if (label === "SEEDREAM 4.5") return "Seedream 4.5";
+  if (label === "GROK IMAGINE") return "Grok Imagine";
   if (label === "GPT IMAGE 2") return "GPT Image 2";
   return label === "VIDEO MODEL" ? "Video model" : label;
 }

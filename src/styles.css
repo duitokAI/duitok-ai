@@ -29051,8 +29051,20 @@ label {
   font-weight: 950 !important;
 }
 
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .provider-logo-seedream,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .provider-logo-xai {
+  color: rgba(92, 88, 96, 0.82) !important;
+  font-size: 18px !important;
+  font-weight: 950 !important;
+}
+
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) summary .provider-logo-google {
   font-size: 16px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) summary .provider-logo-seedream,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) summary .provider-logo-xai {
+  font-size: 15px !important;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools select {
@@ -29650,7 +29662,9 @@ label {
 
 .studio-shell .image-higgsfield-mode .image-model-picker .image-model-option-icon,
 .studio-shell .image-higgsfield-mode .image-model-picker .image-model-option .provider-logo-openai,
-.studio-shell .image-higgsfield-mode .image-model-picker .image-model-option .provider-logo-google {
+.studio-shell .image-higgsfield-mode .image-model-picker .image-model-option .provider-logo-google,
+.studio-shell .image-higgsfield-mode .image-model-picker .image-model-option .provider-logo-seedream,
+.studio-shell .image-higgsfield-mode .image-model-picker .image-model-option .provider-logo-xai {
   color: rgba(92, 88, 96, 0.86) !important;
 }
 
