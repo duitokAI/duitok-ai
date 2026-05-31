@@ -4080,20 +4080,6 @@ function imagePanel(p) {
   const pending = pendingResultJobs(p, imageTypes);
   const selectedResult = history.find((item) => item.id === state.imageCanvasSelectedResultId) || history[0] || null;
   return `<section class="image-canvas-studio">
-    <header class="image-studio-topbar">
-      <div>
-        <h2>${icon("image", 21)} ${t("imageGenerator")}</h2>
-        <span>${history.length ? `${history.length} history items` : "Creative canvas"}</span>
-      </div>
-      <div class="image-studio-tabs" aria-label="Image workspace views">
-        <button class="active" type="button">${icon("folder-open", 16)} History</button>
-        <button type="button" data-action="open-attachment-picker" data-attachment-kind="product">${icon("image-plus", 16)} References</button>
-      </div>
-      <div class="image-studio-models">
-        ${select("image.model", "", imageModels, selectedModel)}
-        ${select("image.mode", "", modeOptions, selectedMode)}
-      </div>
-    </header>
     ${selectedMode === "Virtualize (Poster/Ad)" ? `<div class="image-studio-legacy">${virtualizePanel()}</div>` : `
       ${imageCanvasStage(p, selectedResult, history, pending)}
       ${imageGenerateConsole(p, selectedModel)}
