@@ -5818,7 +5818,8 @@ function resultPreviewModal() {
   const bg = item ? resultMediaSrc(item, item.videoUrl ? "video" : "image") : "";
   const promptText = item ? resultPromptText(item) : "";
   const safeTitle = esc(resultTitle(item));
-  return `<div class="modal-backdrop result-lightbox-backdrop" data-action="close-modal" ${bg ? `style="--result-bg-image: url(${esc(bg)})"` : ""}>
+  return `<div class="modal-backdrop result-lightbox-backdrop" data-action="close-modal" ${bg ? `style="--result-bg-image: url('${esc(bg)}')"` : ""}>
+    ${bg ? `<div class="result-lightbox-bg" aria-hidden="true" style="background-image: url('${esc(bg)}')"></div>` : ""}
     <section class="result-lightbox" role="dialog" aria-modal="true" aria-label="Result details">
       <button class="result-lightbox-close" data-action="close-modal" type="button" aria-label="Close">${icon("x", 34)}</button>
       <div class="result-lightbox-media">${item ? resultPreview(item, { full: true }) : ""}</div>
