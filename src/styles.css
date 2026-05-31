@@ -30599,3 +30599,64 @@ label {
       minmax(124px, 0.68fr) !important;
   }
 }
+
+/* P0 performance pass: keep the full history available while letting the
+   browser skip offscreen paint/layout work in heavy media walls. */
+.studio-shell .studio-wall-grid,
+.studio-shell .result-grid,
+.studio-shell .agent-thread {
+  content-visibility: auto;
+  contain-intrinsic-size: 720px;
+}
+
+.studio-shell .studio-wall-card,
+.studio-shell .result-card,
+.studio-shell .agent-thread > article,
+.studio-shell .agent-tool-card {
+  content-visibility: auto;
+  contain: layout paint style;
+  contain-intrinsic-size: 320px 520px;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-card {
+  contain-intrinsic-size: calc(var(--studio-wall-row-height, 300px) * var(--media-ratio, 1)) var(--studio-wall-row-height, 300px);
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-card:hover,
+.studio-shell .image-higgsfield-mode .studio-wall-card:focus-within {
+  content-visibility: visible;
+  contain: layout style;
+}
+
+.studio-shell .studio-wall-card .result-image,
+.studio-shell .studio-wall-card .result-video,
+.studio-shell .result-card .result-image,
+.studio-shell .result-card .result-video {
+  backface-visibility: hidden;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-actions,
+.studio-shell .studio-wall-card footer,
+.studio-shell .studio-generate-dock {
+  will-change: opacity, transform;
+}
+
+@supports not (content-visibility: auto) {
+  .studio-shell .studio-wall-card,
+  .studio-shell .result-card,
+  .studio-shell .agent-thread > article,
+  .studio-shell .agent-tool-card {
+    contain: layout paint;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studio-shell *,
+  .studio-shell *::before,
+  .studio-shell *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

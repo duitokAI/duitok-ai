@@ -43,6 +43,7 @@ let sidebarTooltipCleanup = null;
 let imageCountSaveTimer = null;
 let imageCountSaveSeq = 0;
 let resultTitleSaveTimer = null;
+let generationPollTimer = null;
 const quickFieldSaveTimers = new Map();
 let quickFieldSaveSeq = 0;
 
@@ -4207,7 +4208,7 @@ function studioPendingWallCard(job) {
 function studioWallCard(item) {
   const promptText = resultPromptText(item).replaceAll("\n", " ").trim();
   const canSaveReference = Boolean(item.imageUrl || item.videoUrl);
-  return `<article class="studio-wall-card">
+  return `<article class="studio-wall-card" style="--media-ratio:${esc(resultMediaRatio(item))}">
     ${resultPreview(item, { clickable: true })}
     <div class="studio-wall-actions" aria-label="Image actions">
       <button type="button" data-result-action="save-avatar" data-result-id="${esc(item.id)}" data-tooltip="Save as Avatar" aria-label="Save as Avatar" title="Save as Avatar" ${canSaveReference ? "" : "disabled"}>${icon("user-round-plus", 17)}</button>
@@ -5300,6 +5301,21 @@ function resultAspectRatioLabel(item) {
   return projectRatio || "Unknown";
 }
 
+function resultMediaRatio(item = {}) {
+  const width = Number(item.resolution?.width || item.width || 0);
+  const height = Number(item.resolution?.height || item.height || 0);
+  if (width > 0 && height > 0) return Math.min(2.4, Math.max(0.35, width / height)).toFixed(4);
+  const ratioText = String(item.aspectRatio || resultProject(item)?.image?.aspectRatio || "");
+  const match = ratioText.match(/(\d+(?:\.\d+)?)\s*[:/]\s*(\d+(?:\.\d+)?)/);
+  if (match) {
+    const ratio = Number(match[1]) / Number(match[2]);
+    if (Number.isFinite(ratio) && ratio > 0) return Math.min(2.4, Math.max(0.35, ratio)).toFixed(4);
+  }
+  if (/16\s*[:/]\s*9/.test(ratioText)) return "1.7778";
+  if (/9\s*[:/]\s*16/.test(ratioText)) return "0.5625";
+  return "1";
+}
+
 function resultCreatedLabel(item) {
   if (!item?.createdAt) return "Unknown";
   const date = new Date(item.createdAt);
@@ -5348,9 +5364,10 @@ function resultPreview(item, options = {}) {
   const videoSrc = item.videoUrl ? `/api/media/result/${encodeURIComponent(item.id)}/video?token=${token}` : "";
   const imageError = "this.replaceWith(Object.assign(document.createElement('div'),{className:'result-media-error',textContent:'图片保存失败，请联系客服处理'}))";
   const ratioSync = "this.closest('.studio-wall-card')?.style.setProperty('--media-ratio',(this.naturalWidth||this.videoWidth||1)/(this.naturalHeight||this.videoHeight||1))";
-  const image = imageSrc ? `<img class="result-image" src="${imageSrc}" alt="${esc(item.title)}" loading="${options.full ? "eager" : "lazy"}" decoding="async" onload="${esc(ratioSync)}" onerror="${esc(imageError)}">` : "";
-  const video = videoSrc ? `<div class="result-video-shell"><video class="result-video" src="${videoSrc}" preload="metadata" playsinline onloadedmetadata="${esc(ratioSync)}"></video><button type="button" class="result-play-button" data-video-play="${esc(item.id)}">${icon("play", 26)}<span>点击播放</span></button></div>` : "";
-  const videoTrigger = videoSrc ? `<button type="button" class="result-preview-trigger result-video-trigger" data-result-preview="${esc(item.id)}" aria-label="Open full video preview"><div class="result-video-shell"><video class="result-video" src="${videoSrc}" preload="metadata" playsinline muted onloadedmetadata="${esc(ratioSync)}"></video><span class="result-play-button">${icon("play", 26)}<span>点击查看</span></span></div></button>` : "";
+  const image = imageSrc ? `<img class="result-image" src="${imageSrc}" alt="${esc(item.title)}" loading="${options.full ? "eager" : "lazy"}" decoding="async" fetchpriority="${options.full ? "high" : "low"}" draggable="false" onload="${esc(ratioSync)}" onerror="${esc(imageError)}">` : "";
+  const videoPreload = options.full ? "metadata" : "none";
+  const video = videoSrc ? `<div class="result-video-shell"><video class="result-video" src="${videoSrc}" preload="${videoPreload}" playsinline onloadedmetadata="${esc(ratioSync)}"></video><button type="button" class="result-play-button" data-video-play="${esc(item.id)}">${icon("play", 26)}<span>点击播放</span></button></div>` : "";
+  const videoTrigger = videoSrc ? `<button type="button" class="result-preview-trigger result-video-trigger" data-result-preview="${esc(item.id)}" aria-label="Open full video preview"><div class="result-video-shell"><video class="result-video" src="${videoSrc}" preload="${videoPreload}" playsinline muted onloadedmetadata="${esc(ratioSync)}"></video><span class="result-play-button">${icon("play", 26)}<span>点击查看</span></span></div></button>` : "";
   const text = !image && !video ? `<div class="result-text-preview">${icon("file-text", 30)}<span>Text result</span></div>` : "";
   if (options.clickable && imageSrc) return `<button type="button" class="result-preview-trigger" data-result-preview="${esc(item.id)}" aria-label="Open full image preview">${image}</button>`;
   if (options.clickable && videoSrc) return videoTrigger;
@@ -9608,7 +9625,13 @@ async function syncImageConsoleBeforeGenerate(name) {
 }
 
 async function pollGenerationQueue(attempt = 0) {
+  if (document.hidden) {
+    state.queuePolling = false;
+    clearTimeout(generationPollTimer);
+    return;
+  }
   if (state.queuePolling && attempt === 0) return;
+  clearTimeout(generationPollTimer);
   state.queuePolling = true;
   try {
     const nextDb = await api("/state");
@@ -9621,13 +9644,34 @@ async function pollGenerationQueue(attempt = 0) {
     const db = nextDb;
     const hasRunning = db.generationJobs.some((job) => ["queued", "processing"].includes(job.status));
     if (hasRunning && attempt < 120) {
-      setTimeout(() => pollGenerationQueue(attempt + 1), 3000);
+      scheduleGenerationPoll(attempt + 1, db);
       return;
     }
   } catch (error) {
     notify(error.message);
   }
   state.queuePolling = false;
+}
+
+function hasRunningGenerationJobs(db = state.db) {
+  return (db?.generationJobs || []).some((job) => ["queued", "processing"].includes(job.status));
+}
+
+function generationPollDelay(attempt = 0, db = state.db) {
+  const runningCount = (db?.generationJobs || []).filter((job) => ["queued", "processing"].includes(job.status)).length;
+  if (runningCount > 1 && attempt < 6) return 1800;
+  if (attempt < 2) return 1500;
+  if (attempt < 12) return 3000;
+  return 5000;
+}
+
+function scheduleGenerationPoll(attempt = 0, db = state.db) {
+  clearTimeout(generationPollTimer);
+  if (document.hidden) {
+    state.queuePolling = false;
+    return;
+  }
+  generationPollTimer = setTimeout(() => pollGenerationQueue(attempt), generationPollDelay(attempt, db));
 }
 
 function generationResultSignature(db = state.db) {
@@ -10722,6 +10766,15 @@ async function showPaymentReturnNotice() {
     }
   }
 }
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    clearTimeout(generationPollTimer);
+    state.queuePolling = false;
+    return;
+  }
+  if (hasRunningGenerationJobs()) pollGenerationQueue();
+});
 
 boot().catch((error) => {
   state.loading = false;
