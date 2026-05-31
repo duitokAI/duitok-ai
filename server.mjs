@@ -2534,6 +2534,8 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
     const result = {
       id: resultId,
       type: resultTypeForGeneration(action, step, generated),
+      sourceAction: action,
+      sourceStep: step,
       title: publicTitle,
       body: publicBody,
       providerTitle: generated.title,
@@ -2742,6 +2744,8 @@ async function completeQueuedGeneration(jobId, generated) {
     const result = {
       id: resultId,
       type: resultTypeForGeneration(job.action, job.step, generated),
+      sourceAction: job.action,
+      sourceStep: job.step,
       title: publicTitle,
       body: publicBody,
       providerTitle: generated.title,

@@ -4101,10 +4101,10 @@ function stepPanel(p) {
 
 function studioStepMeta(step = state.step) {
   return {
-    image: { title: "图片", icon: "image", action: "generate-image", promptField: "image.prompt", prompt: "Create a high-converting TikTok Shop product image...", types: ["image", "video", "visual_card"], primary: "Generate" },
-    ugc: { title: "UGC", icon: "video", action: "generate-ugc", promptField: "ugc.script", prompt: "Describe the UGC scene, product action, and spoken line...", types: ["ugc"], primary: "Generate Video" },
+    image: { title: "图片", icon: "image", action: "generate-image", promptField: "image.prompt", prompt: "Create a high-converting TikTok Shop product image...", types: ["image", "visual_card"], primary: "Generate" },
+    ugc: { title: "UGC", icon: "video", action: "generate-ugc", promptField: "ugc.script", prompt: "Describe the UGC scene, product action, and spoken line...", types: ["ugc", "video"], primary: "Generate Video" },
     auto: { title: "商品扫描器", icon: "layout-template", action: "generate-auto", promptField: "auto.productUrl", prompt: "Paste product link or describe the product...", types: ["auto"], primary: "Generate Batch", input: true },
-    original: { title: "原创视频", icon: "film", action: "analyze-original", promptField: "original.brief", prompt: "Describe the video scene, camera, action, mood, and dialogue...", types: ["original"], primary: "Generate Video" },
+    original: { title: "原创视频", icon: "film", action: "analyze-original", promptField: "original.brief", prompt: "Describe the video scene, camera, action, mood, and dialogue...", types: ["original", "video"], primary: "Generate Video" },
     clone: { title: "影片 Prompt 提取", icon: "layers-3", action: "clone-prompt", promptField: "clone.notes", prompt: "Drop a reference video to extract its reusable prompt.", types: ["clone"], primary: "Extract Prompt" },
     story: { title: "故事脚本", icon: "book-open", action: "write-story", promptField: "story.notes", prompt: "Describe the story topic, emotion, product, or lesson...", types: ["story"], primary: "Preview" }
   }[step] || {};
@@ -4146,8 +4146,9 @@ function studioWallZoomControl() {
 
 function studioResultWall(p, meta = {}) {
   const types = Array.isArray(meta.types) ? meta.types : [state.step];
+  const step = state.step || "image";
   const pending = pendingResultJobs(p, types);
-  const items = p.results.filter((item) => types.includes(item.type)).slice(-12).reverse();
+  const items = p.results.filter((item) => studioResultBelongsToStep(item, step, types)).slice(-12).reverse();
   const cards = [
     ...pending.map(studioPendingWallCard),
     ...items.map(studioWallCard)
@@ -4158,6 +4159,15 @@ function studioResultWall(p, meta = {}) {
       ${cards.join("")}
     </div>
   </section>`;
+}
+
+function videoStudioStep(sourceStep = "") {
+  return ["ugc", "original", "story"].includes(sourceStep) ? sourceStep : "ugc";
+}
+
+function studioResultBelongsToStep(item = {}, step = state.step, types = []) {
+  if (item.type === "video") return step === videoStudioStep(item.sourceStep || item.step);
+  return types.includes(item.type);
 }
 
 function studioPendingWallCard(job) {
@@ -5090,9 +5100,12 @@ function results(p, type) {
 }
 
 function pendingResultJobs(projectItem, types) {
+  const step = state.step || "image";
   return (state.db?.generationJobs || [])
     .filter((job) => job.projectId === projectItem.id && ["queued", "processing"].includes(job.status))
-    .filter((job) => types.includes(job.type) || (job.action === "generate-image" && types.includes("image")))
+    .filter((job) => job.type === "video"
+      ? step === videoStudioStep(job.step)
+      : types.includes(job.type) || (job.action === "generate-image" && types.includes("image")))
     .slice(0, 4);
 }
 
@@ -9519,7 +9532,7 @@ async function pollGenerationQueue(attempt = 0) {
   try {
     const db = await refreshState();
     const hasRunning = db.generationJobs.some((job) => ["queued", "processing"].includes(job.status));
-    if (hasRunning && attempt < 30) {
+    if (hasRunning && attempt < 120) {
       setTimeout(() => pollGenerationQueue(attempt + 1), 3000);
       return;
     }
