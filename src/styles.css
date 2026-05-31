@@ -25657,3 +25657,44 @@ label {
   margin-top: 8px !important;
   margin-bottom: 16px !important;
 }
+
+/* Sidebar brand row alignment: keep mascot, wordmark, and collapse button on one optical line. */
+.studio-shell:not(.sidebar-collapsed) .sidebar .sidebar-topbar {
+  min-height: 58px !important;
+  grid-template-columns: minmax(0, 1fr) 34px !important;
+  align-items: center !important;
+  padding: 0 0 10px !important;
+}
+
+.studio-shell:not(.sidebar-collapsed) .sidebar .sidebar-topbar .brand-lockup {
+  height: 52px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  align-items: center !important;
+  overflow: visible !important;
+}
+
+.studio-shell:not(.sidebar-collapsed) .sidebar .sidebar-topbar .brand-core {
+  height: 52px !important;
+  align-items: center !important;
+  transform: none !important;
+}
+
+.studio-shell:not(.sidebar-collapsed) .sidebar .sidebar-topbar .brand-logo-mascot {
+  width: 50px !important;
+  height: 50px !important;
+  transform: translateY(1px) !important;
+}
+
+.studio-shell:not(.sidebar-collapsed) .sidebar .sidebar-topbar .brand-wordmark {
+  transform: translateY(1px) !important;
+}
+
+.studio-shell:not(.sidebar-collapsed) .sidebar-collapse-toggle {
+  top: 10px !important;
+  right: 0 !important;
+  width: 34px !important;
+  min-width: 34px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+}
