@@ -5245,7 +5245,7 @@ function resultPreview(item, options = {}) {
   }
   const imageSrc = item.imageUrl ? `/api/media/result/${encodeURIComponent(item.id)}/image?token=${token}` : "";
   const videoSrc = item.videoUrl ? `/api/media/result/${encodeURIComponent(item.id)}/video?token=${token}` : "";
-  const imageError = "this.replaceWith(Object.assign(document.createElement('div'),{className:'result-media-error',textContent:'图片链接已过期，请重新生成或联系客服'}))";
+  const imageError = "this.replaceWith(Object.assign(document.createElement('div'),{className:'result-media-error',textContent:'图片保存失败，请联系客服处理'}))";
   const ratioSync = "this.closest('.studio-wall-card')?.style.setProperty('--media-ratio',(this.naturalWidth||this.videoWidth||1)/(this.naturalHeight||this.videoHeight||1))";
   const image = imageSrc ? `<img class="result-image" src="${imageSrc}" alt="${esc(item.title)}" loading="${options.full ? "eager" : "lazy"}" onload="${esc(ratioSync)}" onerror="${esc(imageError)}">` : "";
   const video = videoSrc ? `<div class="result-video-shell"><video class="result-video" src="${videoSrc}" preload="metadata" playsinline onloadedmetadata="${esc(ratioSync)}"></video><button type="button" class="result-play-button" data-video-play="${esc(item.id)}">${icon("play", 26)}<span>点击播放</span></button></div>` : "";
