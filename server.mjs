@@ -2577,6 +2577,7 @@ async function completeQueuedGeneration(jobId, generated) {
   await mutateDb(async (currentDb) => {
     const job = currentDb.generationJobs.find((item) => item.id === jobId);
     if (!job) return saveDb(currentDb);
+    if (job.status === "cancelled") return saveDb(currentDb);
     const project = currentDb.projects.find((item) => item.id === job.projectId);
     if (!project) throw Object.assign(new Error("Project not found"), { status: 404 });
     const owner = currentDb.users.find((item) => item.id === project.userId);
@@ -2671,6 +2672,7 @@ async function failQueuedGeneration(jobId, error) {
   await mutateDb(async (currentDb) => {
     const job = currentDb.generationJobs.find((item) => item.id === jobId);
     if (!job) return saveDb(currentDb);
+    if (job.status === "cancelled") return saveDb(currentDb);
     const project = currentDb.projects.find((item) => item.id === job.projectId);
     const completedAt = new Date().toISOString();
     Object.assign(job, {
@@ -5567,6 +5569,23 @@ app.post("/api/projects/:id/generate", async (req, res) => {
     }
     throw error;
   }
+});
+
+app.post("/api/generation-jobs/:id/cancel", async (req, res) => {
+  const { user } = await requireAuth(req);
+  res.json(await mutateDb(async (db) => {
+    const job = (db.generationJobs || []).find((item) => item.id === req.params.id);
+    if (!job || job.userId !== user.id) throw Object.assign(new Error("Generation job not found"), { status: 404 });
+    if (["queued", "processing"].includes(job.status)) {
+      job.status = "cancelled";
+      job.completedAt = new Date().toISOString();
+      job.cancelledAt = job.completedAt;
+      job.creditsCharged = 0;
+      db.usage.unshift(usage("Cancelled generation", 0, user.id));
+      await saveDb(db);
+    }
+    return publicState(db, user);
+  }));
 });
 
 app.post("/api/agent", async (req, res, next) => {

@@ -982,14 +982,29 @@
   border: 2px solid rgba(255, 255, 255, 0.35);
   border-top-color: #fff;
   border-radius: 50%;
+  animation: studio-pending-spin 0.82s linear infinite;
 }
 
-.image-higgsfield-mode .studio-wall-pending span {
+.image-higgsfield-mode .studio-wall-pending button {
   border-radius: 999px;
   padding: 9px 13px;
+  border: 0;
   background: rgba(255, 255, 255, 0.06);
   color: rgba(255, 255, 255, 0.72);
   font-size: 13px;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.image-higgsfield-mode .studio-wall-pending button:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+@keyframes studio-pending-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .video-prompt-extractor-page {

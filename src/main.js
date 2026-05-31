@@ -4152,7 +4152,7 @@ function studioResultWall(p, meta = {}) {
 
 function studioPendingWallCard(job) {
   return `<article class="studio-wall-card studio-wall-pending">
-    <div><b>${job.status === "processing" ? "Processing" : "Queued"}</b><span>Cancel</span></div>
+    <div><b>${job.status === "processing" ? "Processing" : "Queued"}</b><button type="button" data-generation-cancel="${esc(job.id)}">Cancel</button></div>
   </article>`;
 }
 
@@ -8442,6 +8442,7 @@ function bind() {
   document.querySelectorAll("[data-image-canvas-result]").forEach((el) => el.addEventListener("click", () => set({ imageCanvasSelectedResultId: el.dataset.imageCanvasResult })));
   document.querySelectorAll("[data-image-console-prompt]").forEach((el) => el.addEventListener("input", () => updateImagePromptLocal(el.value)));
   document.querySelectorAll("[data-image-model-option]").forEach((el) => el.addEventListener("click", () => saveProjectField("image.model", el.dataset.imageModelOption)));
+  document.querySelectorAll("[data-generation-cancel]").forEach((el) => el.addEventListener("click", () => cancelGenerationJob(el.dataset.generationCancel)));
   document.querySelectorAll("[data-result-title]").forEach((el) => {
     el.addEventListener("input", () => {
       if (state.resultTitleSavedId === el.dataset.resultTitle) set({ resultTitleSavedId: null });
@@ -9387,6 +9388,29 @@ async function generate(name) {
   } catch (error) {
     set({ generating: false });
     notify(error.message);
+  }
+}
+
+async function cancelGenerationJob(jobId) {
+  if (!jobId || !state.db) return;
+  const previousDb = state.db;
+  const nextDb = {
+    ...previousDb,
+    generationJobs: (previousDb.generationJobs || []).map((job) => job.id === jobId
+      ? { ...job, status: "cancelled", completedAt: new Date().toISOString() }
+      : job)
+  };
+  set({ db: nextDb });
+  try {
+    const db = await api(`/generation-jobs/${encodeURIComponent(jobId)}/cancel`, {
+      method: "POST",
+      body: JSON.stringify({})
+    });
+    set({ db });
+    notify("Generation cancelled.");
+  } catch (error) {
+    set({ db: previousDb });
+    notify(error.message || "Could not cancel generation.");
   }
 }
 
