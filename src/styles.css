@@ -24644,10 +24644,11 @@ label {
 }
 
 .studio-shell.sidebar-collapsed .sidebar-topbar {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 0 0 16px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  gap: 0;
+  padding: 0 0 18px;
 }
 
 .studio-shell.sidebar-collapsed .sidebar-collapse-toggle {
@@ -24655,14 +24656,35 @@ label {
   min-width: 34px;
   height: 34px;
   min-height: 34px;
+  position: absolute;
+  left: 50%;
+  top: 2px;
+  z-index: 3;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) scale(0.92);
   border-radius: 10px;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.1);
+  transition: opacity 0.16s ease, transform 0.16s ease, background 0.16s ease;
+}
+
+.studio-shell.sidebar-collapsed .sidebar-topbar:hover .sidebar-collapse-toggle,
+.studio-shell.sidebar-collapsed .sidebar-collapse-toggle:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) scale(1);
+}
+
+.studio-shell.sidebar-collapsed .sidebar-topbar:hover .brand-lockup {
+  opacity: 0;
+  transform: scale(0.88);
 }
 
 .studio-shell.sidebar-collapsed .sidebar .brand-lockup {
   justify-content: center !important;
   margin: 0 0 8px !important;
   padding: 0 !important;
+  transition: opacity 0.16s ease, transform 0.16s ease;
 }
 
 .studio-shell.sidebar-collapsed .sidebar .brand-core {
