@@ -24866,16 +24866,16 @@ label {
 }
 
 .studio-shell:not(.sidebar-collapsed) .side-support-button {
-  grid-template-columns: 58px minmax(0, 1fr) !important;
-  min-height: 78px !important;
-  padding: 10px 18px !important;
+  grid-template-columns: 42px minmax(0, 1fr) !important;
+  min-height: 54px !important;
+  padding: 8px 12px !important;
 }
 
 .studio-shell:not(.sidebar-collapsed) .side-support-button .support-bubble-copy {
   min-width: 0 !important;
   display: flex !important;
   align-items: baseline !important;
-  gap: 10px !important;
+  gap: 8px !important;
   opacity: 1 !important;
   visibility: visible !important;
 }
@@ -24890,12 +24890,12 @@ label {
 
 .studio-shell:not(.sidebar-collapsed) .side-support-button .support-bubble-copy b {
   color: #fff !important;
-  font-size: 18px !important;
+  font-size: 15px !important;
 }
 
 .studio-shell:not(.sidebar-collapsed) .side-support-button .support-bubble-copy small {
   color: rgba(255, 255, 255, 0.86) !important;
-  font-size: 13px !important;
+  font-size: 10.5px !important;
   letter-spacing: 0.08em !important;
 }
 
