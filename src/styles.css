@@ -29865,3 +29865,14 @@ label {
   flex: 0 0 auto !important;
   transform: none !important;
 }
+
+/* Image console symbols should read as soft purple, not yellow. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools span svg,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools label svg,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools .image-aspect-ratio-select svg,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools .image-resolution-select svg,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb:not(.has-ref) > span:not(.image-reference-clear),
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb:not(.has-ref) > span:not(.image-reference-clear) svg {
+  color: #b78ad8 !important;
+  stroke: currentColor !important;
+}
