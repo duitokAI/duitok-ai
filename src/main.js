@@ -4310,6 +4310,7 @@ function imageBatchCount(p = project()) {
 function imageGenerateConsole(p, selectedModel) {
   const avatar = selectedImageReference("avatar");
   const product = selectedImageReference("product");
+  const promptImage = p.image?.promptImage || null;
   const unitCredit = selectedModel === "Nano Banana Pro" ? 0.2 : 0.15;
   const selectedCount = imageBatchCount(p);
   const credit = (unitCredit * selectedCount).toFixed(2);
@@ -4324,12 +4325,12 @@ function imageGenerateConsole(p, selectedModel) {
     : icon("smartphone", 15);
   return `<section class="image-generate-console">
     <div class="image-console-main">
-      <div class="image-console-prompt">
-        <label class="image-prompt-insert" title="Insert product image">
+      <div class="image-console-prompt ${promptImage ? "has-prompt-image" : ""}" data-image-console-prompt-zone>
+        <label class="image-prompt-insert" title="Insert image">
           ${icon("plus", 24)}
-          <input type="file" data-upload="product" data-upload-select="product" accept="image/*" hidden>
+          <input type="file" data-upload="image-prompt" accept="image/*" hidden>
         </label>
-        <textarea data-field="image.prompt" data-image-console-prompt rows="2" placeholder="Tell us what you want to generate">${esc(p.image.prompt || "")}</textarea>
+        ${promptImage ? imagePromptMediaPreview(promptImage) : `<textarea data-field="image.prompt" data-image-console-prompt rows="2" placeholder="Tell us what you want to generate">${esc(p.image.prompt || "")}</textarea>`}
       </div>
       <div class="image-console-tools">
         ${imageModelPicker(selectedModel)}
@@ -4353,6 +4354,17 @@ function imageGenerateConsole(p, selectedModel) {
       <small>${credit} Credit</small>
     </button>
   </section>`;
+}
+
+function imagePromptMediaPreview(item = {}) {
+  return `<div class="image-prompt-media-preview">
+    <img src="${esc(item.dataUrl || "")}" alt="${esc(item.name || "Prompt image")}" loading="lazy">
+    <span>
+      <b>${esc(item.name || "Pasted image")}</b>
+      <small>Image mode</small>
+    </span>
+    <button type="button" data-action="clear-image-prompt-media" aria-label="Remove prompt image">${icon("x", 14)}</button>
+  </div>`;
 }
 
 function imageModelPicker(selectedModel) {
@@ -8404,6 +8416,7 @@ function bind() {
     autoResizeAgentInput(e.target);
   });
   agentInput?.addEventListener("paste", handleAgentInputPaste);
+  document.querySelectorAll("[data-image-console-prompt-zone]").forEach((el) => el.addEventListener("paste", handleImagePromptPaste));
   agentInput?.addEventListener("keydown", (event) => {
     if (event.key !== "Enter" || event.shiftKey || event.metaKey || event.ctrlKey || event.altKey || event.isComposing || state.agentInputComposing || event.keyCode === 229) return;
     event.preventDefault();
@@ -8680,6 +8693,7 @@ async function action(event, name) {
   if (name === "image-count-down") return updateImageBatchCount(-1);
   if (name === "image-count-up") return updateImageBatchCount(1);
   if (name === "optimize-image-prompt") return optimizeImagePrompt();
+  if (name === "clear-image-prompt-media") return clearImagePromptMedia();
   if (name === "clear-clone-reference") return clearCloneReferenceVideo();
   if (name?.startsWith("generate") || ["analyze-original", "clone-prompt", "write-story", "decode-viral"].includes(name)) return generate(name);
 }
@@ -9103,6 +9117,11 @@ async function uploadChange(event) {
     event.target.value = "";
     return;
   }
+  if (event.target.dataset.upload === "image-prompt") {
+    await saveImagePromptMediaFile(file);
+    event.target.value = "";
+    return;
+  }
   await uploadAttachmentFile(file, event.target.dataset.upload, event.target.dataset.uploadSelect);
   event.target.value = "";
 }
@@ -9168,6 +9187,75 @@ async function uploadCloneReferenceVideo(file) {
   } catch (error) {
     notify(error.message || "Could not upload video.");
   }
+}
+
+async function saveImagePromptMediaFile(file) {
+  if (!/^image\//i.test(file.type || "")) return notify("Please upload an image file.");
+  const maxBytes = 12 * 1024 * 1024;
+  if (file.size > maxBytes) return notify("Image is too large. Please upload an image under 12 MB.");
+  try {
+    const dataUrl = await readFileAsDataUrl(file);
+    const value = {
+      name: file.name || agentPastedFilename(file, "image"),
+      size: file.size,
+      type: file.type || "image/png",
+      dataUrl,
+      updatedAt: new Date().toISOString()
+    };
+    const projectId = state.projectId;
+    const previousDb = state.db;
+    let nextDb = dbWithProjectField(previousDb, projectId, "image.promptImage", value);
+    nextDb = dbWithProjectField(nextDb, projectId, "image.prompt", "");
+    set({ db: nextDb });
+    const db = await api(`/projects/${projectId}/field`, {
+      method: "PATCH",
+      body: JSON.stringify({ field: "image.promptImage", value })
+    });
+    if (state.projectId === projectId) {
+      const clearedDb = dbWithProjectField(db, projectId, "image.prompt", "");
+      set({ db: clearedDb });
+    }
+    api(`/projects/${projectId}/field`, {
+      method: "PATCH",
+      body: JSON.stringify({ field: "image.prompt", value: "" })
+    }).catch((error) => notify(error.message || t("toastSaveFailed")));
+    notify("Image added. Text input is locked until you remove it.");
+  } catch (error) {
+    notify(error.message || "Could not add image.");
+  }
+}
+
+async function clearImagePromptMedia() {
+  const projectId = state.projectId;
+  const previousDb = state.db;
+  set({ db: dbWithProjectField(previousDb, projectId, "image.promptImage", null) });
+  try {
+    const db = await api(`/projects/${projectId}/field`, {
+      method: "PATCH",
+      body: JSON.stringify({ field: "image.promptImage", value: null })
+    });
+    if (state.projectId === projectId) set({ db });
+  } catch (error) {
+    set({ db: previousDb });
+    notify(error.message || t("toastSaveFailed"));
+  }
+}
+
+async function handleImagePromptPaste(event) {
+  const files = imageClipboardFiles(event.clipboardData);
+  if (!files.length) return;
+  event.preventDefault();
+  await saveImagePromptMediaFile(files[0]);
+}
+
+function imageClipboardFiles(clipboardData) {
+  const items = Array.from(clipboardData?.items || []);
+  const files = items
+    .filter((item) => item.kind === "file" && /^image\//.test(item.type || ""))
+    .map((item) => item.getAsFile())
+    .filter(Boolean);
+  if (files.length) return files;
+  return Array.from(clipboardData?.files || []).filter((file) => /^image\//.test(file.type || ""));
 }
 
 async function clearCloneReferenceVideo() {
