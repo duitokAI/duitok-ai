@@ -2925,13 +2925,13 @@ function studio() {
         <button class="side-link ${state.page === "sop" ? "active" : ""}" data-sop-target="dashboard">${icon("book-open")} SOP</button>
         <button class="side-link ${state.page === "autopost" ? "active" : ""}" data-page="autopost">${icon("send")} ${t("autopost")}</button>
         <button class="side-link" data-action="open-whatsapp">${icon("message-circle")} ${t("whatsapp")}${icon("arrow-up-right", 14)}</button>
+        <button class="side-support-button" data-action="support">
+          <span class="support-bubble-icon">${icon("message-circle", 24)}</span>
+          <span class="support-bubble-copy"><b>${t("humanSupport")}</b><small>${t("whatsappSupport")}</small></span>
+        </button>
         ${sidebarAccountPanel()}
       </aside>
       <main class="workspace">${page()}</main>
-      <button class="chat-bubble support-bubble" data-action="support" title="${esc(t("humanSupport"))}" aria-label="${esc(t("humanSupport"))}">
-        <span class="support-bubble-icon">${icon("message-circle", 26)}</span>
-        <span class="support-bubble-copy"><b>${t("humanSupport")}</b><small>${t("whatsappSupport")}</small></span>
-      </button>
       <div id="modal-root">${modal()}</div>
     </div>`;
 }
