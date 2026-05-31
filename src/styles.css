@@ -840,11 +840,13 @@
   background: rgba(255, 255, 255, 0.12);
   color: rgba(255, 255, 255, 0.9);
   box-shadow: none;
+  touch-action: manipulation;
+  will-change: transform, background, color;
   transition:
-    transform 120ms ease,
-    border-color 120ms ease,
-    background 120ms ease,
-    color 120ms ease;
+    transform 60ms ease,
+    border-color 60ms ease,
+    background 60ms ease,
+    color 60ms ease;
 }
 
 .image-higgsfield-mode .studio-wall-actions button svg {
@@ -858,6 +860,30 @@
   border-color: rgba(255, 255, 255, 0.48);
   background: rgba(255, 255, 255, 0.24);
   color: #fff;
+}
+
+.image-higgsfield-mode .studio-wall-actions button.is-pressed,
+.image-higgsfield-mode .studio-wall-actions button.is-working {
+  transform: translateX(-2px) scale(0.94);
+  border-color: rgba(255, 255, 255, 0.68);
+  background: rgba(255, 255, 255, 0.34);
+  color: #fff;
+}
+
+.image-higgsfield-mode .studio-wall-actions button.is-working svg {
+  animation: result-action-pulse 560ms ease-in-out infinite alternate;
+}
+
+@keyframes result-action-pulse {
+  from {
+    opacity: 0.56;
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .image-higgsfield-mode .studio-wall-actions button::after {
@@ -880,7 +906,7 @@
   opacity: 0;
   pointer-events: none;
   box-shadow: 0 8px 20px rgba(12, 0, 18, 0.24);
-  transition: opacity 100ms ease, transform 100ms ease;
+  transition: opacity 60ms ease, transform 60ms ease;
   backdrop-filter: blur(10px);
 }
 

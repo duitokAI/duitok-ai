@@ -8576,7 +8576,10 @@ function bind() {
   document.querySelectorAll("[data-invoice]").forEach((el) => el.addEventListener("click", () => download(`/api/export/invoice/${el.dataset.invoice}`, `${el.dataset.invoice}.txt`)));
   document.querySelectorAll("[data-result]").forEach((el) => el.addEventListener("click", () => download(`/api/export/result/${el.dataset.result}`, `pokaya-result.txt`)));
   document.querySelectorAll("[data-video-play]").forEach((el) => el.addEventListener("click", () => playResultVideo(el)));
-  document.querySelectorAll("[data-result-action]").forEach((el) => el.addEventListener("click", () => resultAction(el)));
+  document.querySelectorAll("[data-result-action]").forEach((el) => {
+    el.addEventListener("pointerdown", () => flashResultActionButton(el), { passive: true });
+    el.addEventListener("click", () => resultAction(el));
+  });
   document.querySelectorAll("[data-result-preview]").forEach((el) => el.addEventListener("click", () => set({ modal: "previewResult", activeResultId: el.dataset.resultPreview })));
   document.querySelectorAll("[data-result-prompt]").forEach((el) => el.addEventListener("click", () => set({ modal: "resultPrompt", activeResultId: el.dataset.resultPrompt })));
   document.querySelectorAll("[data-image-canvas-result]").forEach((el) => el.addEventListener("click", () => set({ imageCanvasSelectedResultId: el.dataset.imageCanvasResult })));
@@ -10541,11 +10544,34 @@ function findAssetResult(id) {
   return allResults().find((item) => item.id === id);
 }
 
+function flashResultActionButton(button) {
+  if (!button || button.disabled) return;
+  button.classList.remove("is-pressed");
+  void button.offsetWidth;
+  button.classList.add("is-pressed");
+  window.setTimeout(() => button.classList.remove("is-pressed"), 180);
+}
+
+function setResultActionBusy(button, busy) {
+  if (!button) return;
+  button.classList.toggle("is-working", Boolean(busy));
+  button.setAttribute("aria-busy", busy ? "true" : "false");
+  if (!button.dataset.originalTooltip && button.dataset.tooltip) button.dataset.originalTooltip = button.dataset.tooltip;
+  if (busy) {
+    button.dataset.tooltip = button.dataset.resultAction === "download" ? "Downloading" : "Saving";
+  } else if (button.dataset.originalTooltip) {
+    button.dataset.tooltip = button.dataset.originalTooltip;
+  }
+}
+
 async function resultAction(button) {
   const id = button?.dataset.resultId;
   const actionName = button?.dataset.resultAction;
   if (!id || !actionName) return;
   const item = findAssetResult(id);
+  const busyActions = new Set(["download", "schedule", "variant", "avatar", "product", "save-avatar", "save-product"]);
+  const shouldShowBusy = busyActions.has(actionName);
+  if (shouldShowBusy) setResultActionBusy(button, true);
   try {
     if (actionName === "save") return set({ modal: "saveResultReference", activeResultId: id });
     if (actionName === "edit-image") return set({ modal: "editResultImage", activeResultId: id });
@@ -10602,6 +10628,8 @@ async function resultAction(button) {
     }
   } catch (error) {
     notify(error.message);
+  } finally {
+    if (shouldShowBusy) setResultActionBusy(button, false);
   }
 }
 
