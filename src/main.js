@@ -1410,12 +1410,12 @@ function closeProjectMenusInDom() {
 }
 
 function rememberSidebarScroll() {
-  const sidebar = document.querySelector(".sidebar");
+  const sidebar = document.querySelector(".sidebar-scroll-area") || document.querySelector(".sidebar");
   if (sidebar) sidebarScrollTop = sidebar.scrollTop;
 }
 
 function restoreSidebarScroll() {
-  const sidebar = document.querySelector(".sidebar");
+  const sidebar = document.querySelector(".sidebar-scroll-area") || document.querySelector(".sidebar");
   if (!sidebar) return;
   const maxScroll = Math.max(0, sidebar.scrollHeight - sidebar.clientHeight);
   sidebar.scrollTop = Math.min(sidebarScrollTop, maxScroll);
@@ -2919,26 +2919,28 @@ function studio() {
           <span class="agent-primary-copy"><b>${t("pokayaAgent")}</b><small>Your AI operator</small></span>
           <span class="agent-primary-status"><i></i>READY</span>
         </button>
-        <div class="side-section">${icon("layout-dashboard", 18)} ${t("workspace")}</div>
-        <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard" title="${esc(t("dashboard"))}" aria-label="${esc(t("dashboard"))}">${icon("layout-dashboard", 22)} <span>${t("dashboard")}</span></button>
-        <button class="side-primary studio-nav-button ${state.page === "project" ? "active" : ""}" data-page="project" title="${esc(t("projects"))}" aria-label="${esc(t("projects"))}">${studioMark()} <span>${t("projects")}</span></button>
-        ${isOwnerAdminAccount() ? `<button class="side-link ${state.page === "admin" ? "active" : ""}" data-page="admin" title="Admin CRM" aria-label="Admin CRM">${icon("shield-check")} <span>Admin CRM</span></button>` : ""}
-        <button class="side-link ${state.page === "library" ? "active" : ""}" data-page="library" title="${esc(t("contentLibrary"))}" aria-label="${esc(t("contentLibrary"))}">${icon("folder")} <span>${t("contentLibrary")}</span></button>
-        <div class="side-section account">${icon("wallet-cards", 18)} ${t("business")}</div>
-        ${[
-          ["billing", "credit-card", "billing"],
-          ["topup", "wallet-cards", "topup"],
-          ["usage", "activity", "usage"],
-          ["affiliate", "users", "affiliate"]
-        ].map(([id, ic, key]) => `<button class="side-link ${state.page === id ? "active" : ""}" data-page="${id}" title="${esc(t(key))}" aria-label="${esc(t(key))}">${icon(ic)} <span>${t(key)}</span></button>`).join("")}
-        <button class="side-link ${state.page === "sop" ? "active" : ""}" data-sop-target="dashboard" title="SOP" aria-label="SOP">${icon("book-open")} <span>SOP</span></button>
-        <button class="side-link ${state.page === "autopost" ? "active" : ""}" data-page="autopost" title="${esc(t("autopost"))}" aria-label="${esc(t("autopost"))}">${icon("send")} <span>${t("autopost")}</span></button>
-        <button class="side-link" data-action="open-whatsapp" title="${esc(t("whatsapp"))}" aria-label="${esc(t("whatsapp"))}">${icon("message-circle")} <span>${t("whatsapp")}</span>${icon("arrow-up-right", 14)}</button>
-        <button class="side-support-button" data-action="support" title="${esc(t("humanSupport"))}" aria-label="${esc(t("humanSupport"))}">
-          <span class="support-bubble-icon">${icon("message-circle", 24)}</span>
-          <span class="support-bubble-copy"><b>${t("humanSupport")}</b><small>${t("whatsappSupport")}</small></span>
-        </button>
-        ${sidebarAccountPanel()}
+        <div class="sidebar-scroll-area">
+          <div class="side-section">${icon("layout-dashboard", 18)} ${t("workspace")}</div>
+          <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard" title="${esc(t("dashboard"))}" aria-label="${esc(t("dashboard"))}">${icon("layout-dashboard", 22)} <span>${t("dashboard")}</span></button>
+          <button class="side-primary studio-nav-button ${state.page === "project" ? "active" : ""}" data-page="project" title="${esc(t("projects"))}" aria-label="${esc(t("projects"))}">${studioMark()} <span>${t("projects")}</span></button>
+          ${isOwnerAdminAccount() ? `<button class="side-link ${state.page === "admin" ? "active" : ""}" data-page="admin" title="Admin CRM" aria-label="Admin CRM">${icon("shield-check")} <span>Admin CRM</span></button>` : ""}
+          <button class="side-link ${state.page === "library" ? "active" : ""}" data-page="library" title="${esc(t("contentLibrary"))}" aria-label="${esc(t("contentLibrary"))}">${icon("folder")} <span>${t("contentLibrary")}</span></button>
+          <div class="side-section account">${icon("wallet-cards", 18)} ${t("business")}</div>
+          ${[
+            ["billing", "credit-card", "billing"],
+            ["topup", "wallet-cards", "topup"],
+            ["usage", "activity", "usage"],
+            ["affiliate", "users", "affiliate"]
+          ].map(([id, ic, key]) => `<button class="side-link ${state.page === id ? "active" : ""}" data-page="${id}" title="${esc(t(key))}" aria-label="${esc(t(key))}">${icon(ic)} <span>${t(key)}</span></button>`).join("")}
+          <button class="side-link ${state.page === "sop" ? "active" : ""}" data-sop-target="dashboard" title="SOP" aria-label="SOP">${icon("book-open")} <span>SOP</span></button>
+          <button class="side-link ${state.page === "autopost" ? "active" : ""}" data-page="autopost" title="${esc(t("autopost"))}" aria-label="${esc(t("autopost"))}">${icon("send")} <span>${t("autopost")}</span></button>
+          <button class="side-link" data-action="open-whatsapp" title="${esc(t("whatsapp"))}" aria-label="${esc(t("whatsapp"))}">${icon("message-circle")} <span>${t("whatsapp")}</span>${icon("arrow-up-right", 14)}</button>
+          <button class="side-support-button" data-action="support" title="${esc(t("humanSupport"))}" aria-label="${esc(t("humanSupport"))}">
+            <span class="support-bubble-icon">${icon("message-circle", 24)}</span>
+            <span class="support-bubble-copy"><b>${t("humanSupport")}</b><small>${t("whatsappSupport")}</small></span>
+          </button>
+          ${sidebarAccountPanel()}
+        </div>
       </aside>
       <main class="workspace">${page()}</main>
       <div id="modal-root">${modal()}</div>
@@ -4165,6 +4167,7 @@ function imageHistoryThumb(item, selectedId = "") {
 function imageGenerateConsole(p, selectedModel) {
   const avatar = selectedImageReference("avatar");
   const product = selectedImageReference("product");
+  const credit = selectedModel === "Nano Banana Pro" ? "0.20" : "0.15";
   const modelOptions = [["GPT Image 2", "GPT Image 2 (0.15 Credit)"], ["Nano Banana Pro", "Nano Banana Pro (0.20 Credit)"]];
   const aspectRatioOptions = ["9:16", "16:9"];
   const selectedAspectRatio = aspectRatioOptions.includes(p.image.aspectRatio) ? p.image.aspectRatio : "9:16";
@@ -4188,6 +4191,7 @@ function imageGenerateConsole(p, selectedModel) {
     <button class="image-console-generate" type="button" data-action="generate-image" ${state.generating ? "disabled" : ""}>
       ${icon(state.generating ? "loader-circle" : "send", 20)}
       <b>${state.generating ? t("generating") : t("generateImage")}</b>
+      <small>${credit} Credit</small>
     </button>
   </section>`;
 }
