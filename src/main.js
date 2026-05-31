@@ -4283,7 +4283,6 @@ function imageGenerateConsole(p, selectedModel) {
   const unitCredit = selectedModel === "Nano Banana Pro" ? 0.2 : 0.15;
   const selectedCount = imageBatchCount(p);
   const credit = (unitCredit * selectedCount).toFixed(2);
-  const modelOptions = [["GPT Image 2", "GPT Image 2"], ["Nano Banana Pro", "Nano Banana Pro"]];
   const aspectRatioOptions = ["9:16", "16:9"];
   const selectedAspectRatio = aspectRatioOptions.includes(p.image.aspectRatio) ? p.image.aspectRatio : "9:16";
   const resolutionOptions = [["1K", "1k"], ["2K", "2k"], ["4K", "4k"]];
@@ -4303,7 +4302,7 @@ function imageGenerateConsole(p, selectedModel) {
         <textarea data-field="image.prompt" data-image-console-prompt rows="2" placeholder="Create a high-converting TikTok Shop product image...">${esc(p.image.prompt || "")}</textarea>
       </div>
       <div class="image-console-tools">
-        <label>${select("image.model", "", modelOptions, selectedModel)}</label>
+        ${imageModelPicker(selectedModel)}
         <label class="image-aspect-ratio-select">${aspectRatioIcon}<select data-field="image.aspectRatio">${aspectRatioOptions.map((value) => `<option value="${esc(value)}" ${value === selectedAspectRatio ? "selected" : ""}>${esc(value)}</option>`).join("")}</select></label>
         <label class="image-resolution-select">${icon("gem", 15)}<select data-field="image.resolution">${resolutionOptions.map(([value, label]) => `<option value="${esc(value)}" ${value === selectedResolution ? "selected" : ""}>${esc(label)}</option>`).join("")}</select></label>
         <div class="image-count-stepper" aria-label="Images to generate">
@@ -4324,6 +4323,47 @@ function imageGenerateConsole(p, selectedModel) {
       <small>${credit} Credit</small>
     </button>
   </section>`;
+}
+
+function imageModelPicker(selectedModel) {
+  const models = [
+    {
+      value: "GPT Image 2",
+      icon: "sparkles",
+      title: "GPT Image 2",
+      description: "4K images with strong text rendering",
+      badge: "NEW"
+    },
+    {
+      value: "Nano Banana Pro",
+      icon: "gem",
+      title: "Nano Banana Pro",
+      description: "Google flagship generation model",
+      badge: ""
+    }
+  ];
+  const selected = models.find((item) => item.value === selectedModel) || models[0];
+  return `<details class="image-model-picker">
+    <summary aria-label="Select image model">
+      <span class="image-model-current-icon">${icon(selected.icon, 16)}</span>
+      <span class="image-model-current-text"><b>${esc(selected.title)}</b></span>
+      ${icon("chevron-down", 15)}
+    </summary>
+    <div class="image-model-menu">
+      <div class="image-model-menu-title">${icon("sparkles", 13)} <span>Featured models</span></div>
+      ${models.map((item) => {
+        const active = item.value === selectedModel;
+        return `<button class="image-model-option ${active ? "active" : ""}" type="button" data-image-model-option="${esc(item.value)}" aria-pressed="${active ? "true" : "false"}">
+          <span class="image-model-option-icon">${icon(item.icon, 18)}</span>
+          <span class="image-model-option-copy">
+            <b>${esc(item.title)}${item.badge ? ` <em>${esc(item.badge)}</em>` : ""}</b>
+            <small>${esc(item.description)}</small>
+          </span>
+          ${active ? `<span class="image-model-option-check">${icon("check", 18)}</span>` : ""}
+        </button>`;
+      }).join("")}
+    </div>
+  </details>`;
 }
 
 function selectedImageReference(kind) {
@@ -8311,6 +8351,7 @@ function bind() {
   document.querySelectorAll("[data-result-prompt]").forEach((el) => el.addEventListener("click", () => set({ modal: "resultPrompt", activeResultId: el.dataset.resultPrompt })));
   document.querySelectorAll("[data-image-canvas-result]").forEach((el) => el.addEventListener("click", () => set({ imageCanvasSelectedResultId: el.dataset.imageCanvasResult })));
   document.querySelectorAll("[data-image-console-prompt]").forEach((el) => el.addEventListener("input", () => updateImagePromptLocal(el.value)));
+  document.querySelectorAll("[data-image-model-option]").forEach((el) => el.addEventListener("click", () => saveProjectField("image.model", el.dataset.imageModelOption)));
   document.querySelectorAll("[data-result-title]").forEach((el) => {
     el.addEventListener("change", () => renameResultInline(el));
     el.addEventListener("keydown", (event) => {

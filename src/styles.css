@@ -28383,7 +28383,7 @@ label {
   box-shadow:
     0 22px 56px rgba(70, 16, 84, 0.14),
     inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
-  overflow: hidden !important;
+  overflow: visible !important;
   backdrop-filter: blur(18px) !important;
 }
 
@@ -28397,6 +28397,7 @@ label {
   grid-template-columns: minmax(0, 1fr) !important;
   grid-template-rows: 58px 48px !important;
   gap: 12px !important;
+  overflow: visible !important;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-prompt {
@@ -28457,8 +28458,10 @@ label {
   grid-template-columns: minmax(360px, 1.45fr) 124px 118px 168px 116px !important;
   justify-content: start !important;
   gap: 8px !important;
+  overflow: visible !important;
 }
 
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker,
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools label,
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools span,
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper,
@@ -28470,6 +28473,200 @@ label {
   border-radius: 16px !important;
   background: rgba(255, 255, 255, 0.62) !important;
   color: #3b0a45 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker {
+  position: relative !important;
+  z-index: 40 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker[open] {
+  z-index: 80 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker summary {
+  width: 100% !important;
+  height: 100% !important;
+  display: grid !important;
+  grid-template-columns: 34px minmax(0, 1fr) 22px !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 0 13px !important;
+  border-radius: 16px !important;
+  cursor: pointer !important;
+  list-style: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker summary::-webkit-details-marker {
+  display: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker span,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker b,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker small,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker em {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  min-width: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-current-icon {
+  width: 32px !important;
+  height: 32px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border-radius: 11px !important;
+  background: rgba(255, 255, 255, 0.78) !important;
+  color: #ff315f !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-current-text {
+  display: block !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-current-text b {
+  display: block !important;
+  overflow: hidden !important;
+  color: #2a0633 !important;
+  font-size: clamp(15px, 1vw, 18px) !important;
+  font-weight: 950 !important;
+  line-height: 1.05 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker summary > svg {
+  color: #3b0a45 !important;
+  transition: transform 0.16s ease !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker[open] summary > svg {
+  transform: rotate(180deg) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-menu {
+  position: absolute !important;
+  left: 0 !important;
+  bottom: calc(100% + 10px) !important;
+  width: min(470px, calc(100vw - 34px)) !important;
+  display: grid !important;
+  gap: 8px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 22px !important;
+  padding: 12px !important;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(107, 255, 242, 0.08), transparent 34%),
+    linear-gradient(145deg, rgba(25, 27, 29, 0.98), rgba(31, 35, 37, 0.98)) !important;
+  box-shadow: 0 22px 60px rgba(9, 6, 13, 0.36) !important;
+  backdrop-filter: blur(18px) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-menu-title {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 0 4px 2px !important;
+  color: rgba(255, 255, 255, 0.46) !important;
+  font-size: 13px !important;
+  font-weight: 850 !important;
+  letter-spacing: 0 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-menu-title svg {
+  color: rgba(212, 255, 28, 0.9) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-option {
+  width: 100% !important;
+  min-height: 82px !important;
+  display: grid !important;
+  grid-template-columns: 56px minmax(0, 1fr) 26px !important;
+  align-items: center !important;
+  gap: 14px !important;
+  border: 0 !important;
+  border-radius: 16px !important;
+  padding: 10px 12px !important;
+  background: transparent !important;
+  color: #fff !important;
+  text-align: left !important;
+  cursor: pointer !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-option:hover,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-option.active {
+  background: rgba(255, 255, 255, 0.075) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-option-icon {
+  width: 56px !important;
+  height: 56px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border-radius: 13px !important;
+  background: rgba(255, 255, 255, 0.07) !important;
+  color: rgba(255, 255, 255, 0.62) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-option.active .image-model-option-icon {
+  color: #d7ff1f !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-option-copy {
+  display: grid !important;
+  gap: 7px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-option-copy b {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  overflow: hidden !important;
+  color: rgba(255, 255, 255, 0.96) !important;
+  font-size: 18px !important;
+  font-weight: 850 !important;
+  line-height: 1.08 !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-option-copy em {
+  flex: 0 0 auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  border-radius: 7px !important;
+  padding: 3px 7px !important;
+  background: #d7ff1f !important;
+  color: #111 !important;
+  font-size: 11px !important;
+  font-style: italic !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-option-copy small {
+  display: block !important;
+  overflow: hidden !important;
+  color: rgba(255, 255, 255, 0.48) !important;
+  font-size: 15px !important;
+  font-weight: 650 !important;
+  line-height: 1.28 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-option-check {
+  justify-self: end !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  color: #d7ff1f !important;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools select {
