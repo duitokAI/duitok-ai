@@ -25385,3 +25385,85 @@ label {
 .studio-shell .agent-page-panel .agent-thread article.assistant > .agent-feedback-row {
   grid-column: 2 !important;
 }
+
+/* Agent reply polish: compact, calmer, and more premium than oversized chat blocks. */
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant,
+.studio-shell .agent-page-panel .agent-thread article.assistant {
+  max-width: min(900px, 100%) !important;
+  grid-template-columns: 42px minmax(0, 1fr) !important;
+  column-gap: 16px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant > .agent-avatar-badge,
+.studio-shell .agent-page-panel .agent-thread article.assistant > .agent-avatar-badge {
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 16px !important;
+  border-color: rgba(255, 63, 110, 0.26) !important;
+  background:
+    radial-gradient(circle at 35% 18%, rgba(255, 255, 255, 0.16), transparent 34%),
+    linear-gradient(135deg, rgba(95, 23, 112, 0.98), rgba(47, 10, 58, 0.98)) !important;
+  box-shadow:
+    0 10px 24px rgba(27, 0, 34, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant > .agent-avatar-badge svg,
+.studio-shell .agent-page-panel .agent-thread article.assistant > .agent-avatar-badge svg {
+  width: 21px !important;
+  height: 21px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant > .agent-message,
+.studio-shell .agent-page-panel .agent-thread article.assistant > .agent-message {
+  max-width: 820px !important;
+  padding-top: 1px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant .agent-message,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant .agent-message p,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant .agent-message li,
+.studio-shell .agent-page-panel .agent-thread article.assistant .agent-message,
+.studio-shell .agent-page-panel .agent-thread article.assistant .agent-message p,
+.studio-shell .agent-page-panel .agent-thread article.assistant .agent-message li {
+  color: rgba(255, 246, 252, 0.88) !important;
+  font-size: clamp(16px, 1.1vw, 18px) !important;
+  font-weight: 560 !important;
+  line-height: 1.66 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant .agent-message p,
+.studio-shell .agent-page-panel .agent-thread article.assistant .agent-message p {
+  margin: 0 0 14px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant .agent-message p:last-child,
+.studio-shell .agent-page-panel .agent-thread article.assistant .agent-message p:last-child {
+  margin-bottom: 0 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-feedback-row,
+.studio-shell .agent-page-panel .agent-feedback-row {
+  display: flex !important;
+  gap: 8px !important;
+  margin-top: 18px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-feedback-row button,
+.studio-shell .agent-page-panel .agent-feedback-row button {
+  min-height: 34px !important;
+  border: 1px solid rgba(255, 63, 110, 0.2) !important;
+  border-radius: 999px !important;
+  padding: 0 12px !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+  color: rgba(255, 238, 248, 0.72) !important;
+  box-shadow: none !important;
+  font-size: 13px !important;
+  font-weight: 680 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-feedback-row button:hover,
+.studio-shell .agent-page-panel .agent-feedback-row button:hover {
+  background: rgba(255, 63, 110, 0.12) !important;
+  color: #fff !important;
+}
