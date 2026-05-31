@@ -31,6 +31,23 @@
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 248, 252, 0.94)) !important;
 }
 
+.studio-shell .canvas-card:has(.image-higgsfield-mode) {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .workspace:has(.image-higgsfield-mode) {
+  padding: 18px 0 64px !important;
+  overflow-x: hidden;
+}
+
+.studio-shell .workspace:has(.image-higgsfield-mode) > * {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
 .image-canvas-studio {
   min-height: calc(100vh - 230px);
   display: grid;
@@ -735,7 +752,9 @@
   min-height: calc(100vh - 72px);
   display: grid;
   grid-template-rows: auto minmax(520px, 1fr) auto;
-  gap: 10px;
+  gap: 14px;
+  align-content: start;
+  margin-inline: 0;
 }
 
 .studio-higgsfield-tabs {
@@ -743,49 +762,121 @@
   z-index: 3;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 18px;
+  padding: 0 22px;
 }
 
 .studio-higgsfield-tabs button {
-  min-height: 40px;
+  min-height: 34px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  padding: 0 16px;
-  background: rgba(18, 20, 20, 0.82);
-  color: rgba(255, 255, 255, 0.62);
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+  color: rgba(94, 11, 108, 0.62);
   font-size: 13px;
   font-weight: 900;
-  backdrop-filter: blur(14px);
+  letter-spacing: 0;
+  box-shadow: none;
+  cursor: pointer;
 }
 
 .studio-higgsfield-tabs button.active {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.08);
+  color: var(--pink, #ff4e78);
+}
+
+.studio-higgsfield-tabs button:focus-visible {
+  outline: 2px solid rgba(255, 78, 120, 0.42);
+  outline-offset: 5px;
 }
 
 .image-higgsfield-mode .studio-result-wall {
   min-height: min(70vh, 780px);
-  border-color: rgba(0, 0, 0, 0.14);
-  background: #121212;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .image-higgsfield-mode .studio-wall-grid {
-  grid-template-columns: repeat(4, minmax(190px, 1fr));
-  grid-auto-rows: 280px;
-  gap: 4px;
-  padding: 4px;
+  height: auto;
+  display: block;
+  columns: 4 220px;
+  column-gap: 10px;
+  padding: 0;
 }
 
 .image-higgsfield-mode .studio-wall-card {
-  border-radius: 0;
-  background: #202020;
+  display: inline-block;
+  width: 100%;
+  margin: 0 0 10px;
+  overflow: hidden;
+  break-inside: avoid;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.image-higgsfield-mode .studio-wall-card:nth-child(2),
+.image-higgsfield-mode .studio-wall-card:nth-child(3),
+.image-higgsfield-mode .studio-wall-card:nth-child(7),
+.image-higgsfield-mode .studio-wall-card:nth-child(8) {
+  grid-column: auto;
+  grid-row: auto;
+}
+
+.image-higgsfield-mode .studio-wall-card .result-preview-trigger {
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  display: block;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: zoom-in;
+}
+
+.image-higgsfield-mode .studio-wall-card .result-image,
+.image-higgsfield-mode .studio-wall-card .result-video,
+.image-higgsfield-mode .studio-wall-card .result-video-shell {
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  display: block;
+  border-radius: 0 !important;
+  object-fit: contain !important;
+}
+
+.image-higgsfield-mode .studio-wall-card .visual-card-preview,
+.image-higgsfield-mode .studio-wall-card .result-text-preview,
+.image-higgsfield-mode .studio-wall-card .result-media-error {
+  min-height: 320px !important;
+  border-radius: 0 !important;
+}
+
+.image-higgsfield-mode .studio-wall-empty {
+  min-height: 320px;
+  display: inline-grid;
+  aspect-ratio: 9 / 16;
+  background:
+    radial-gradient(circle at 24% 16%, rgba(255, 78, 120, 0.16), transparent 32%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.42), rgba(255, 238, 247, 0.6));
+}
+
+.image-higgsfield-mode .studio-wall-card footer {
+  inset: auto 8px 8px;
+  background: linear-gradient(135deg, rgba(94, 11, 108, 0.86), rgba(255, 78, 120, 0.72));
+  box-shadow: 0 10px 24px rgba(38, 0, 51, 0.14);
 }
 
 .image-higgsfield-mode .studio-wall-pending {
   place-items: start stretch;
+  aspect-ratio: 9 / 16;
+  min-height: 320px;
 }
 
 .image-higgsfield-mode .studio-wall-pending div {
@@ -795,7 +886,9 @@
   align-items: flex-start;
   justify-content: space-between;
   padding: 20px;
-  background: #202020;
+  background:
+    radial-gradient(circle at 26% 18%, rgba(255, 78, 120, 0.28), transparent 28%),
+    linear-gradient(135deg, rgba(94, 11, 108, 0.9), rgba(38, 0, 51, 0.96));
   color: #fff;
 }
 
