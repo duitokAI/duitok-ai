@@ -4007,21 +4007,20 @@ function projectPage() {
 
 function studioTopStepTabs() {
   return `<nav class="step-tabs studio-top-step-tabs" aria-label="Creation tools">
-    ${steps.map(([id, ic, key, no]) => `<button class="${state.step === id ? "active" : ""}" data-step="${id}" type="button">${icon(ic)} <span>${t(key)}</span><b>${no}</b></button>`).join("")}
+    ${steps.map(([id, ic, key]) => `<button class="${state.step === id ? "active" : ""}" data-step="${id}" type="button">${icon(ic)} <span>${t(key)}</span></button>`).join("")}
   </nav>`;
 }
 
 function studioStepMenu(extraClass = "") {
   const current = steps.find(([id]) => id === state.step) || steps[0];
-  const [, currentIcon, currentKey, currentNo] = current;
+  const [, currentIcon, currentKey] = current;
   return `<details class="studio-step-menu ${esc(extraClass)}">
     <summary>
       ${icon(currentIcon, 19)}
-      <span><b>${t(currentKey)}</b><small>${currentNo}</small></span>
-      ${icon("chevron-up", 16)}
+      <span><b>${t(currentKey)}</b></span>
     </summary>
     <div class="step-tabs studio-step-menu-list">
-      ${steps.map(([id, ic, key, no]) => `<button class="${state.step === id ? "active" : ""}" data-step="${id}" type="button">${icon(ic)} <span>${t(key)}</span><b>${no}</b></button>`).join("")}
+      ${steps.map(([id, ic, key]) => `<button class="${state.step === id ? "active" : ""}" data-step="${id}" type="button">${icon(ic)} <span>${t(key)}</span></button>`).join("")}
     </div>
   </details>`;
 }

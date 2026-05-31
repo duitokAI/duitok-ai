@@ -398,7 +398,7 @@
   height: 100%;
   min-height: 88px;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: 9px;
   padding: 0 12px;
@@ -436,10 +436,6 @@
 .studio-step-menu[open] summary {
   border-color: rgba(255, 47, 109, 0.28);
   background: rgba(255, 47, 109, 0.08);
-}
-
-.studio-step-menu[open] summary svg:last-child {
-  transform: rotate(180deg);
 }
 
 .studio-step-menu .studio-step-menu-list {
