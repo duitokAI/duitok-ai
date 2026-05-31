@@ -8027,6 +8027,8 @@ function agentVisibleRunPanel(run) {
   if (run.status === "waiting_confirmation" || run.status === "failed" || run.confirmation || run.recovery) {
     return agentRunPanel(run);
   }
+  const generationCards = agentGenerationRunCards(run);
+  if (generationCards) return generationCards;
   return "";
 }
 
@@ -8074,10 +8076,28 @@ function agentRunSummary(steps = []) {
 }
 
 function agentToolCards(run) {
-  const cards = [...(run.cards || []), ...(run.toolResults || []).map((item) => item.card).filter(Boolean)];
-  const unique = cards.filter((card, index, list) => index === list.findIndex((item) => `${item.type}:${item.resultId || item.projectId || item.title}` === `${card.type}:${card.resultId || card.projectId || card.title}`));
+  const unique = agentUniqueRunCards(run);
   if (!unique.length) return "";
   return `<div class="agent-tool-cards">${unique.map(agentToolCard).join("")}</div>`;
+}
+
+function agentRunCards(run) {
+  return [...(run?.cards || []), ...(run?.toolResults || []).map((item) => item.card).filter(Boolean)];
+}
+
+function agentCardIdentity(card = {}) {
+  return `${card.type}:${card.jobId || card.resultId || card.projectId || card.title || ""}`;
+}
+
+function agentUniqueRunCards(run) {
+  const cards = agentRunCards(run);
+  return cards.filter((card, index, list) => index === list.findIndex((item) => agentCardIdentity(item) === agentCardIdentity(card)));
+}
+
+function agentGenerationRunCards(run) {
+  const cards = agentUniqueRunCards(run).filter((card) => card.type === "generation_job");
+  if (!cards.length) return "";
+  return `<div class="agent-tool-cards agent-generation-run-cards">${cards.map(agentGenerationJobCard).join("")}</div>`;
 }
 
 function agentToolCard(card = {}) {
@@ -8180,6 +8200,9 @@ function agentGenerationJobCard(card = {}) {
   const isDone = status === "succeeded" && result;
   const isFailed = status === "failed";
   const mediaType = job?.type || card.resultType || resultMediaKind(result || {});
+  const aspectRatioRaw = String(job?.aspectRatio || card.aspectRatio || result?.aspectRatio || project().image?.aspectRatio || "");
+  const aspectRatio = aspectRatioRaw.includes("16:9") ? "16:9" : aspectRatioRaw.includes("1:1") ? "1:1" : "9:16";
+  const aspectStyle = aspectRatio === "16:9" ? "16 / 9" : aspectRatio === "1:1" ? "1 / 1" : "9 / 16";
   const title = isDone
     ? mediaType === "video" ? "视频已生成" : mediaType === "image" ? "图片已生成" : "内容已生成"
     : isFailed
@@ -8192,7 +8215,11 @@ function agentGenerationJobCard(card = {}) {
       : status === "processing" ? "模型正在生成，完成后会自动出现在这里。" : "任务已加入队列，马上开始生成。";
   const preview = isDone && result
     ? `<div class="agent-generation-preview">${resultPreview(result, { full: mediaType === "video" })}</div>`
-    : `<div class="agent-generation-pending">${icon(isFailed ? "triangle-alert" : "loader-circle", 28)}<strong>${esc(title)}</strong><span>${esc(summary)}</span></div>`;
+    : `<div class="agent-generation-pending agent-generation-processing-frame" data-agent-job-status="${esc(status)}" data-agent-ratio="${esc(aspectRatio)}" style="aspect-ratio:${esc(aspectStyle)}">
+        ${icon(isFailed ? "triangle-alert" : "loader-circle", 28)}
+        <strong>${esc(isFailed ? title : status === "processing" ? "Processing" : "Queued")}</strong>
+        <span>${esc(summary)}</span>
+      </div>`;
   return `<section class="agent-tool-card agent-generation-card" data-agent-card-type="generation_job" data-agent-job-status="${esc(status)}">
     <header><strong>${icon(mediaType === "video" ? "video" : mediaType === "image" ? "image" : "sparkles", 16)} ${esc(title)}</strong><span>${esc(summary)}</span></header>
     ${preview}
@@ -9623,6 +9650,7 @@ function compactAgentCardForStorage(card = {}) {
     projectId: card.projectId,
     jobId: card.jobId,
     resultType: card.resultType,
+    aspectRatio: card.aspectRatio,
     resultId: card.resultId,
     scheduleIds: card.scheduleIds,
     prompt: typeof card.prompt === "string" ? card.prompt.slice(0, 600) : undefined,

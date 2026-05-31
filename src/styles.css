@@ -13227,6 +13227,11 @@ label {
 
 .agent-generation-card {
   gap: 12px;
+  max-width: min(360px, 100%);
+}
+
+.agent-generation-run-cards {
+  align-items: start;
 }
 
 .agent-generation-preview,
@@ -13267,12 +13272,50 @@ label {
   color: rgba(57, 22, 67, 0.72);
 }
 
+.agent-generation-processing-frame {
+  width: min(260px, 100%);
+  min-height: unset;
+  margin: 0 auto;
+  align-content: center;
+  border: 1px solid rgba(93, 8, 108, 0.12);
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 57, 111, 0.1), transparent 28%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(253, 242, 255, 0.78));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.76);
+}
+
+.agent-generation-processing-frame[data-agent-ratio="16:9"] {
+  width: min(320px, 100%);
+}
+
+.agent-generation-processing-frame strong {
+  color: #4f055f;
+  font-size: 18px;
+  justify-content: center;
+}
+
+.agent-generation-processing-frame span {
+  max-width: 190px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
 .agent-generation-pending svg {
   color: var(--hot);
 }
 
+.agent-generation-processing-frame:not([data-agent-job-status="failed"]) svg {
+  animation: agentProcessingSpin 1.1s linear infinite;
+}
+
 .agent-generation-pending[data-agent-job-status="failed"] svg {
   color: #ef4444;
+}
+
+@keyframes agentProcessingSpin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .agent-tool-card div,

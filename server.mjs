@@ -3958,7 +3958,8 @@ function agentToolCard(name, result = {}) {
       projectId: data.projectId,
       jobId: data.jobId,
       resultId: data.resultId,
-      resultType: data.resultType || "media"
+      resultType: data.resultType || "media",
+      aspectRatio: data.aspectRatio || ""
     };
   }
   if (name === "inspect_workspace_state") {
@@ -4147,6 +4148,7 @@ async function executeAgentTool(name, args, user) {
         projectId: args.projectId,
         jobId: queued.jobId,
         resultType: job?.type || "media",
+        aspectRatio: job?.aspectRatio || "",
         title: "Generation queued",
         mediaUrl: ""
       }
