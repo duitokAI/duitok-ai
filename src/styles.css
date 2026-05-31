@@ -24487,14 +24487,16 @@ label {
   width: 100% !important;
   max-width: 100% !important;
   overflow: visible !important;
-  grid-template-areas: "mode prompt tools refs generate" !important;
+  grid-template-areas:
+    "mode prompt prompt refs generate"
+    "mode tools tools refs generate" !important;
   grid-template-columns:
-    minmax(92px, 0.22fr)
+    minmax(108px, 0.2fr)
     minmax(260px, 1fr)
-    minmax(168px, 0.38fr)
-    minmax(150px, 0.34fr)
-    clamp(126px, 9vw, 158px) !important;
-  gap: 8px !important;
+    minmax(190px, 0.48fr)
+    minmax(230px, 0.46fr)
+    clamp(148px, 10vw, 190px) !important;
+  gap: 10px !important;
 }
 
 .studio-shell .image-console-step-menu {
@@ -24523,7 +24525,7 @@ label {
 
 .studio-shell .image-console-generate {
   grid-area: generate;
-  min-width: 126px !important;
+  min-width: 148px !important;
 }
 
 .studio-shell .image-console-tools,
@@ -24538,22 +24540,43 @@ label {
   min-width: 0 !important;
 }
 
+.studio-shell .image-console-step-menu summary,
+.studio-shell .image-console-generate {
+  min-height: 136px !important;
+}
+
+.studio-shell .image-console-prompt textarea {
+  min-height: 74px !important;
+}
+
+.studio-shell .image-console-tools {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+
+.studio-shell .image-console-references {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.studio-shell .image-reference-thumb {
+  align-content: end;
+}
+
 @media (max-width: 1560px) {
   .studio-shell .image-generate-console {
     grid-template-areas:
-      "mode prompt prompt generate"
-      "tools tools refs generate" !important;
-    grid-template-columns: minmax(96px, 0.18fr) minmax(220px, 1fr) minmax(210px, 0.72fr) clamp(132px, 12vw, 164px) !important;
+      "mode prompt generate"
+      "mode tools generate"
+      "refs refs generate" !important;
+    grid-template-columns: minmax(100px, 0.16fr) minmax(0, 1fr) clamp(140px, 12vw, 176px) !important;
   }
 
   .studio-shell .image-console-step-menu summary,
-  .studio-shell .image-console-add,
   .studio-shell .image-console-generate {
-    min-height: 64px !important;
+    min-height: 128px !important;
   }
 
   .studio-shell .image-console-prompt textarea {
-    min-height: 64px !important;
+    min-height: 68px !important;
     max-height: 92px !important;
   }
 }
