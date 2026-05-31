@@ -30351,3 +30351,44 @@ label {
     display: none !important;
   }
 }
+
+/* Keep compact option pills readable: the aspect-ratio value must show 9:16 / 16:9 fully. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools {
+  grid-template-columns:
+    minmax(224px, 1.2fr)
+    minmax(108px, 0.56fr)
+    minmax(92px, 0.44fr)
+    minmax(132px, 0.56fr) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-select {
+  min-width: 108px !important;
+  grid-template-columns: 22px minmax(54px, 1fr) 14px !important;
+  column-gap: 6px !important;
+  padding: 0 10px !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-select select {
+  width: 100% !important;
+  min-width: 54px !important;
+  padding: 0 16px 0 0 !important;
+  overflow: visible !important;
+  color: #2a0633 !important;
+  font-size: 19px !important;
+  letter-spacing: 0 !important;
+  text-align: center !important;
+  text-align-last: center !important;
+  text-overflow: clip !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 1500px) {
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools {
+    grid-template-columns:
+      minmax(172px, 1.18fr)
+      minmax(104px, 0.6fr)
+      minmax(82px, 0.48fr)
+      minmax(124px, 0.68fr) !important;
+  }
+}
