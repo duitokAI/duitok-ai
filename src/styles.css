@@ -29464,3 +29464,20 @@ label {
   background: rgba(255, 49, 95, 0.1) !important;
   color: #2a0633 !important;
 }
+
+/* Use the ChatGPT/OpenAI mark directly for GPT Image models. */
+.studio-shell .image-higgsfield-mode .image-model-picker .provider-logo-openai {
+  color: #111111 !important;
+}
+
+.studio-shell .image-higgsfield-mode .image-model-picker .provider-logo-openai svg {
+  width: 82% !important;
+  height: 82% !important;
+  fill: currentColor !important;
+}
+
+.studio-shell .image-higgsfield-mode .image-model-picker .image-model-current-icon:has(.provider-logo-openai),
+.studio-shell .image-higgsfield-mode .image-model-picker .image-model-option-icon:has(.provider-logo-openai) {
+  background: #ffffff !important;
+  color: #111111 !important;
+}
