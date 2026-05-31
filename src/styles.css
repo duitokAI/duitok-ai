@@ -29443,6 +29443,55 @@ label {
   min-height: clamp(130px, calc(var(--studio-wall-column, 260px) * 0.56), 260px) !important;
 }
 
+.studio-shell .image-higgsfield-mode .studio-wall-pending,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending {
+  position: relative !important;
+  min-height: 0 !important;
+  background: linear-gradient(145deg, #7a2389 0%, #4b0f5b 100%) !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-pending.landscape,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending.landscape {
+  min-height: 0 !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-pending > div,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending > div {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background:
+    radial-gradient(circle at 38% 22%, rgba(255, 95, 143, 0.2), transparent 34%),
+    linear-gradient(145deg, rgba(122, 35, 137, 0.98), rgba(45, 5, 57, 0.98)) !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-pending b,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending b {
+  max-width: calc(100% - 28px) !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  padding: 9px 12px !important;
+  font-size: clamp(12px, 1.08vw, 15px) !important;
+  line-height: 1 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-pending button,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending button {
+  position: absolute !important;
+  right: 10px !important;
+  bottom: 10px !important;
+  max-width: calc(100% - 20px) !important;
+  padding: 7px 10px !important;
+  font-size: 11px !important;
+}
+
 .studio-shell .image-higgsfield-mode .studio-wall-card:has(.studio-wall-actions button:hover),
 .studio-shell .image-higgsfield-mode .studio-wall-card:has(.studio-wall-actions button:focus-visible) {
   z-index: 30 !important;
