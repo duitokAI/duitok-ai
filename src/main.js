@@ -398,7 +398,7 @@ const copy = {
     pro: "Pro",
     settings: "Settings",
     contactSupport: "Contact Support",
-    humanSupport: "Support manusia",
+    humanSupport: "Support Manusia",
     whatsappSupport: "WhatsApp",
     dashboardSubtitle: "Ringkasan produksi untuk workspace short-video selling anda.",
     dashboardKicker: "Dashboard",
