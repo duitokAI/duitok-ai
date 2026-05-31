@@ -4329,14 +4329,14 @@ function imageModelPicker(selectedModel) {
   const models = [
     {
       value: "GPT Image 2",
-      icon: "sparkles",
+      provider: "openai",
       title: "GPT Image 2",
       description: "4K images with strong text rendering",
       badge: "NEW"
     },
     {
       value: "Nano Banana Pro",
-      icon: "gem",
+      provider: "google",
       title: "Nano Banana Pro",
       description: "Google flagship generation model",
       badge: ""
@@ -4345,16 +4345,16 @@ function imageModelPicker(selectedModel) {
   const selected = models.find((item) => item.value === selectedModel) || models[0];
   return `<details class="image-model-picker">
     <summary aria-label="Select image model">
-      <span class="image-model-current-icon">${icon(selected.icon, 16)}</span>
+      <span class="image-model-current-icon">${providerLogo(selected.provider)}</span>
       <span class="image-model-current-text"><b>${esc(selected.title)}</b></span>
       ${icon("chevron-down", 15)}
     </summary>
     <div class="image-model-menu">
-      <div class="image-model-menu-title">${icon("sparkles", 13)} <span>Featured models</span></div>
+      <div class="image-model-menu-title"><span>Featured models</span></div>
       ${models.map((item) => {
         const active = item.value === selectedModel;
         return `<button class="image-model-option ${active ? "active" : ""}" type="button" data-image-model-option="${esc(item.value)}" aria-pressed="${active ? "true" : "false"}">
-          <span class="image-model-option-icon">${icon(item.icon, 18)}</span>
+          <span class="image-model-option-icon">${providerLogo(item.provider)}</span>
           <span class="image-model-option-copy">
             <b>${esc(item.title)}${item.badge ? ` <em>${esc(item.badge)}</em>` : ""}</b>
             <small>${esc(item.description)}</small>
@@ -4364,6 +4364,17 @@ function imageModelPicker(selectedModel) {
       }).join("")}
     </div>
   </details>`;
+}
+
+function providerLogo(provider) {
+  if (provider === "google") {
+    return `<span class="provider-logo provider-logo-google" aria-hidden="true">G</span>`;
+  }
+  return `<span class="provider-logo provider-logo-openai" aria-hidden="true">
+    <svg viewBox="0 0 24 24" focusable="false">
+      <path d="M12 2.4a5.2 5.2 0 0 1 4.55 2.64 5.28 5.28 0 0 1 3.05 8.21 5.24 5.24 0 0 1-5.15 6.34A5.24 5.24 0 0 1 6 18.96a5.28 5.28 0 0 1-3.06-8.2A5.24 5.24 0 0 1 8.1 4.42 5.18 5.18 0 0 1 12 2.4Zm3.26 3.58a3.4 3.4 0 0 0-5.54-1.18l-.2.18 5.2 3 .54-2Zm-7.9.42a3.4 3.4 0 0 0-3.3 4.23l.07.26 5.2-3-1.97-1.49Zm10.02 2.42-.06.26-5.2 3 1.97 1.5a3.4 3.4 0 0 0 3.29-4.76ZM6.6 10.42l-.54 2a3.4 3.4 0 0 0 5.54 1.18l.2-.18-5.2-3Zm8.08 5.69-5.2-3-.54 2a3.4 3.4 0 0 0 5.54 1.18l.2-.18Zm-2.68-6.4-2.24 1.29 2.24 1.29 2.24-1.29L12 9.71Z"/>
+    </svg>
+  </span>`;
 }
 
 function selectedImageReference(kind) {
