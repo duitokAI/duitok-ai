@@ -4023,20 +4023,6 @@ function studioWallCard(item) {
   </article>`;
 }
 
-function studioEmptyWall(meta = {}) {
-  const samples = [
-    "Product hero",
-    "Creator shot",
-    "Promo poster",
-    "UGC scene",
-    "Hook angle",
-    "Story asset"
-  ];
-  return samples.map((label, index) => `<article class="studio-wall-card studio-wall-empty" style="--empty-index:${index}">
-    <div><b>${esc(label)}</b><span>${icon(meta.icon || "sparkles", 24)}</span></div>
-  </article>`).join("");
-}
-
 function studioGenerateDock(p, meta = {}) {
   const value = fieldValue(p, meta.promptField);
   const input = meta.input

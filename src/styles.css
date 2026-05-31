@@ -586,15 +586,6 @@
   font-weight: 750;
 }
 
-.studio-wall-empty {
-  display: grid;
-  place-items: center;
-  background:
-    linear-gradient(135deg, rgba(31, 6, 38, 0.16), rgba(255, 47, 109, 0.1)),
-    rgba(255, 255, 255, 0.28);
-}
-
-.studio-wall-empty div,
 .studio-wall-pending div {
   display: grid;
   place-items: center;
@@ -859,15 +850,6 @@
 .image-higgsfield-mode .studio-wall-card .result-media-error {
   min-height: 320px !important;
   border-radius: 0 !important;
-}
-
-.image-higgsfield-mode .studio-wall-empty {
-  min-height: 320px;
-  display: inline-grid;
-  aspect-ratio: 9 / 16;
-  background:
-    radial-gradient(circle at 24% 16%, rgba(255, 78, 120, 0.16), transparent 32%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.42), rgba(255, 238, 247, 0.6));
 }
 
 .image-higgsfield-mode .studio-wall-card footer {
