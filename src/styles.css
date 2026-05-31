@@ -24455,6 +24455,22 @@ label {
   font-size: 11.5px !important;
 }
 
+/* Hide the visible scrollbar rail when the studio sidebar is collapsed. */
+.studio-shell.sidebar-collapsed .sidebar {
+  overflow-y: auto !important;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.studio-shell.sidebar-collapsed .sidebar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.studio-shell.sidebar-collapsed .workspace {
+  border-left: 0 !important;
+}
+
 /* Collapsible studio sidebar: icon rail when users need more workspace width. */
 .studio-shell {
   transition: grid-template-columns 0.22s ease;
