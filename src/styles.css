@@ -799,15 +799,15 @@
   flex-direction: column;
   gap: 4px;
   padding: 3px 3px 3px 4px;
-  border: 1px solid rgba(245, 238, 248, 0.34);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-right: 0;
   border-radius: 12px 0 0 12px;
-  background: rgba(44, 13, 51, 0.18);
-  box-shadow: 0 8px 18px rgba(28, 0, 36, 0.14);
+  background: rgba(30, 8, 38, 0.12);
+  box-shadow: 0 8px 18px rgba(28, 0, 36, 0.08);
   opacity: 0;
   transform: translateX(4px);
   transition: opacity 120ms ease, transform 120ms ease;
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(14px);
 }
 
 .image-higgsfield-mode .studio-wall-card:hover .studio-wall-actions,
@@ -817,16 +817,23 @@
 }
 
 .image-higgsfield-mode .studio-wall-actions button {
+  position: relative;
   width: 28px;
   height: 28px;
   min-width: 28px;
   display: grid;
   place-items: center;
-  border: 0;
+  border: 1px solid rgba(255, 255, 255, 0.24);
   border-radius: 9px;
   padding: 0;
-  color: #fff;
-  box-shadow: 0 5px 12px rgba(26, 4, 32, 0.13);
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.9);
+  box-shadow: none;
+  transition:
+    transform 120ms ease,
+    border-color 120ms ease,
+    background 120ms ease,
+    color 120ms ease;
 }
 
 .image-higgsfield-mode .studio-wall-actions button svg {
@@ -835,29 +842,41 @@
   stroke-width: 2.15;
 }
 
-.image-higgsfield-mode .studio-wall-actions button:nth-child(1) {
-  background: #cfeff6;
-  color: #fff;
-}
-
-.image-higgsfield-mode .studio-wall-actions button:nth-child(2) {
-  background: #d8c9ed;
-  color: #fff;
-}
-
-.image-higgsfield-mode .studio-wall-actions button:nth-child(3) {
-  background: #428df4;
-  color: #fff;
-}
-
-.image-higgsfield-mode .studio-wall-actions button:nth-child(4) {
-  background: #ff5053;
-  color: #fff;
-}
-
 .image-higgsfield-mode .studio-wall-actions button:hover:not(:disabled) {
-  transform: translateX(-1px);
-  filter: brightness(1.04);
+  transform: translateX(-2px);
+  border-color: rgba(255, 255, 255, 0.48);
+  background: rgba(255, 255, 255, 0.24);
+  color: #fff;
+}
+
+.image-higgsfield-mode .studio-wall-actions button::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 8px);
+  z-index: 10;
+  max-width: 150px;
+  transform: translate(6px, -50%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 6px 9px;
+  background: rgba(20, 18, 22, 0.92);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 850;
+  line-height: 1;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 8px 20px rgba(12, 0, 18, 0.24);
+  transition: opacity 100ms ease, transform 100ms ease;
+  backdrop-filter: blur(10px);
+}
+
+.image-higgsfield-mode .studio-wall-actions button:hover::after,
+.image-higgsfield-mode .studio-wall-actions button:focus-visible::after {
+  opacity: 1;
+  transform: translate(0, -50%);
 }
 
 .image-higgsfield-mode .studio-wall-actions button:disabled {
