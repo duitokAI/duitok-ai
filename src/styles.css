@@ -28961,11 +28961,12 @@ label {
 }
 
 .studio-shell .image-higgsfield-mode .studio-wall-grid {
+  --studio-wall-row-height: clamp(180px, calc(var(--studio-wall-column, 260px) * 0.78), 360px);
   display: flex !important;
   flex-wrap: wrap !important;
   align-items: flex-start !important;
-  justify-content: flex-start !important;
   align-content: flex-start !important;
+  justify-content: flex-start !important;
   gap: 4px !important;
   width: 100% !important;
   margin: 0 !important;
@@ -28974,12 +28975,13 @@ label {
 }
 
 .studio-shell .image-higgsfield-mode .studio-wall-card {
-  flex: 1 1 min(var(--studio-wall-column, 260px), 100%) !important;
+  display: block !important;
+  flex: var(--media-ratio, 1) 1 calc(var(--studio-wall-row-height) * var(--media-ratio, 1)) !important;
   width: auto !important;
-  min-width: min(var(--studio-wall-column, 260px), 100%) !important;
-  height: clamp(190px, calc(var(--studio-wall-column, 260px) * 0.82), 390px) !important;
+  min-width: 0 !important;
+  height: auto !important;
   max-width: none !important;
-  margin: 0 !important;
+  margin: 0 0 4px !important;
   padding: 0 !important;
   border: 0 !important;
   border-radius: 0 !important;
@@ -28988,27 +28990,10 @@ label {
   overflow: hidden !important;
 }
 
-.studio-shell .image-higgsfield-mode .studio-wall-card:nth-child(4n + 1) {
-  flex-basis: min(calc(var(--studio-wall-column, 260px) * 1.3), 100%) !important;
-}
-
-.studio-shell .image-higgsfield-mode .studio-wall-card:nth-child(4n + 2) {
-  flex-basis: min(calc(var(--studio-wall-column, 260px) * 1.8), 100%) !important;
-}
-
-.studio-shell .image-higgsfield-mode .studio-wall-card:nth-child(4n + 3) {
-  flex-basis: min(calc(var(--studio-wall-column, 260px) * 1.05), 100%) !important;
-}
-
-.studio-shell .image-higgsfield-mode .studio-wall-card:nth-child(6n + 4),
-.studio-shell .image-higgsfield-mode .studio-wall-card:nth-child(6n + 5) {
-  flex-basis: min(calc(var(--studio-wall-column, 260px) * 1.6), 100%) !important;
-}
-
 .studio-shell .image-higgsfield-mode .studio-wall-card .result-preview-trigger {
   width: 100% !important;
-  height: 100% !important;
-  min-height: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
   display: block !important;
   border: 0 !important;
   border-radius: 0 !important;
@@ -29022,18 +29007,18 @@ label {
 .studio-shell .image-higgsfield-mode .studio-wall-card .result-video,
 .studio-shell .image-higgsfield-mode .studio-wall-card .result-video-shell {
   width: 100% !important;
-  height: 100% !important;
-  min-height: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
   aspect-ratio: auto !important;
   display: block !important;
   border-radius: 0 !important;
   background: #08070a !important;
-  object-fit: cover !important;
+  object-fit: contain !important;
   vertical-align: top !important;
 }
 
 .studio-shell .image-higgsfield-mode .studio-wall-card .result-video-shell .result-video {
-  height: 100% !important;
+  height: auto !important;
   aspect-ratio: auto !important;
 }
 
@@ -29041,7 +29026,7 @@ label {
 .studio-shell .image-higgsfield-mode .studio-wall-card .result-text-preview,
 .studio-shell .image-higgsfield-mode .studio-wall-card .result-media-error,
 .studio-shell .image-higgsfield-mode .studio-wall-pending {
-  min-height: 100% !important;
+  min-height: clamp(190px, calc(var(--studio-wall-column, 260px) * 1.15), 420px) !important;
   border-radius: 0 !important;
   background: #141018 !important;
 }
