@@ -26549,3 +26549,66 @@ label {
     left: calc(var(--studio-sidebar-width) - 54px) !important;
   }
 }
+
+/* Sidebar brand header compact lock: keep logo row short and button aligned. */
+.studio-shell:not(.sidebar-collapsed) .sidebar {
+  padding-top: 14px !important;
+}
+
+.studio-shell:not(.sidebar-collapsed) .sidebar .sidebar-topbar {
+  min-height: 74px !important;
+  height: 74px !important;
+  max-height: 74px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 36px !important;
+  align-items: center !important;
+  column-gap: 10px !important;
+  padding: 0 8px 10px 0 !important;
+  overflow: visible !important;
+}
+
+.studio-shell:not(.sidebar-collapsed) .sidebar .sidebar-topbar .brand-lockup {
+  height: 64px !important;
+  min-height: 64px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  align-items: center !important;
+}
+
+.studio-shell:not(.sidebar-collapsed) .sidebar .sidebar-topbar .brand-core {
+  height: 64px !important;
+  gap: 10px !important;
+  align-items: center !important;
+  transform: none !important;
+}
+
+.studio-shell:not(.sidebar-collapsed) .sidebar .sidebar-topbar .brand-logo-mascot {
+  width: 46px !important;
+  height: 46px !important;
+  transform: none !important;
+}
+
+.studio-shell:not(.sidebar-collapsed) .sidebar .sidebar-topbar .brand-wordmark {
+  font-size: 32px !important;
+  line-height: 1 !important;
+  transform: none !important;
+}
+
+.studio-shell:not(.sidebar-collapsed) .sidebar .sidebar-collapse-toggle {
+  position: static !important;
+  grid-column: 2 !important;
+  justify-self: end !important;
+  align-self: center !important;
+  width: 34px !important;
+  min-width: 34px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  margin: 0 !important;
+  transform: none !important;
+  z-index: 20 !important;
+}
+
+.studio-shell:not(.sidebar-collapsed) .sidebar .sidebar-collapse-toggle:hover,
+.studio-shell:not(.sidebar-collapsed) .sidebar .sidebar-collapse-toggle:focus-visible {
+  transform: none !important;
+}
