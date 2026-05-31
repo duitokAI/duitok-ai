@@ -3905,6 +3905,10 @@ function studioStepMenu(extraClass = "") {
   </details>`;
 }
 
+function studioBottomStepSwitcher() {
+  return `<section class="studio-bottom-step-switcher">${studioStepMenu("studio-bottom-step-menu")}</section>`;
+}
+
 function sopButtonLabel() {
   const labels = {
     ms: {
@@ -4218,7 +4222,8 @@ function ugcPanel(p) {
         <button class="gold-button" data-action="generate-ugc">${icon("video")} Generate Video</button>
       </div>
     </section>
-    ${results(p, "ugc")}`;
+    ${results(p, "ugc")}
+    ${studioBottomStepSwitcher()}`;
 }
 
 function ugcProductReferences(provider) {
@@ -4355,7 +4360,8 @@ function autoPanel(p) {
       </div>
     </section>
     ${autoProcessLog(p)}
-    ${autoHistoryPanel(p)}`;
+    ${autoHistoryPanel(p)}
+    ${studioBottomStepSwitcher()}`;
 }
 
 function autoButton(field, value, label, active) {
@@ -4486,7 +4492,8 @@ function originalPanel(p) {
       </div>
       <button class="original-generate-button" data-action="analyze-original">🎬 Generate ${esc(originalProviderLabel(provider))} Video · ~${esc(originalProviderCredits(provider))} credits</button>
     </section>
-    ${results(p, "original")}`;
+    ${results(p, "original")}
+    ${studioBottomStepSwitcher()}`;
 }
 
 function originalChoiceButton(field, value, label, active) {
@@ -4509,7 +4516,8 @@ function clonePanel(p) {
         <button class="clone-generate-button" data-action="clone-prompt">📋 Generate Prompt</button>
       </div>
     </section>
-    ${results(p, "clone")}`;
+    ${results(p, "clone")}
+    ${studioBottomStepSwitcher()}`;
 }
 
 function storyPanel(p) {
@@ -4563,7 +4571,8 @@ function storyPanel(p) {
       </div>
       <button class="story-preview-button" data-action="write-story">Preview & Continue</button>
     </section>
-    ${results(p, "story")}`;
+    ${results(p, "story")}
+    ${studioBottomStepSwitcher()}`;
 }
 
 function storyStyleButton(value, active, index) {
