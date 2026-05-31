@@ -1430,9 +1430,15 @@ function bindImageConsoleCompact() {
   const consoleEl = document.querySelector(".image-higgsfield-mode .image-generate-console");
   if (!consoleEl) return;
   let ticking = false;
+  let compact = consoleEl.classList.contains("is-compact");
+  const compactAt = 220;
+  const expandAt = 80;
   const sync = () => {
     ticking = false;
-    const compact = window.scrollY > 120;
+    const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    const nextCompact = compact ? scrollY > expandAt : scrollY > compactAt;
+    if (nextCompact === compact) return;
+    compact = nextCompact;
     consoleEl.classList.toggle("is-compact", compact);
   };
   const requestSync = () => {

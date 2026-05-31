@@ -25208,15 +25208,12 @@ label {
 .studio-shell .image-reference-thumb > span,
 .studio-shell .image-console-generate {
   transition:
-    min-height 0.22s ease,
-    max-height 0.22s ease,
-    height 0.22s ease,
-    padding 0.22s ease,
-    border-radius 0.22s ease,
-    grid-template-columns 0.22s ease,
-    box-shadow 0.22s ease,
-    transform 0.22s ease,
-    opacity 0.18s ease;
+    border-radius 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.14s ease,
+    opacity 0.12s ease,
+    background 0.12s ease,
+    color 0.12s ease;
 }
 
 .studio-shell .image-generate-console.is-compact {
