@@ -29765,6 +29765,25 @@ label {
   }
 }
 
+/* Agent chat safety: keep the composer from covering the last visible messages. */
+.studio-shell .agent-chat-shell.agent-page-panel {
+  isolation: isolate !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread {
+  padding-bottom: clamp(132px, 16vh, 190px) !important;
+  scroll-padding-bottom: clamp(132px, 16vh, 190px) !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-form {
+  z-index: 2 !important;
+  margin-bottom: max(18px, env(safe-area-inset-bottom)) !important;
+  align-self: end !important;
+  box-shadow:
+    0 8px 24px rgba(68, 14, 82, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.78) !important;
+}
+
 /* Reference cards final cleanup: no cramped pill, no ellipsis. */
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb:not(.has-ref) {
   grid-template-rows: 1fr auto !important;
