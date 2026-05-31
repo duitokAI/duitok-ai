@@ -4171,7 +4171,7 @@ function imageGenerateConsole(p, selectedModel) {
   const avatar = selectedImageReference("avatar");
   const product = selectedImageReference("product");
   const credit = selectedModel === "Nano Banana Pro" ? "0.20" : "0.15";
-  const modelOptions = [["GPT Image 2", "GPT Image 2"], ["Nano Banana Pro", "Nano Pro"]];
+  const modelOptions = [["GPT Image 2", "GPT Image 2 (0.15 Credit)"], ["Nano Banana Pro", "Nano Banana Pro (0.20 Credit)"]];
   const aspectRatioOptions = ["9:16", "16:9"];
   const selectedAspectRatio = aspectRatioOptions.includes(p.image.aspectRatio) ? p.image.aspectRatio : "9:16";
   const resolutionOptions = [["1K", "1k"], ["2K", "2k"], ["4K", "4k"]];
