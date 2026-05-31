@@ -24713,6 +24713,26 @@ label {
   }
 }
 
+/* Result detail lightbox should show the media itself, not the 9:16 gallery canvas. */
+.studio-shell .result-lightbox-media .result-image {
+  display: block !important;
+  width: auto !important;
+  max-width: min(100%, 920px) !important;
+  height: auto !important;
+  max-height: min(82dvh, 920px) !important;
+  aspect-ratio: auto !important;
+  margin: 0 !important;
+  border-radius: 22px !important;
+  background: transparent !important;
+  object-fit: contain !important;
+}
+
+.studio-shell .result-lightbox-media .result-video,
+.studio-shell .result-lightbox-media .result-video-shell {
+  aspect-ratio: auto !important;
+  background: transparent !important;
+}
+
 /* Result gallery model label belongs in the info area, not over the image. */
 .studio-shell .result-card {
   display: flex !important;
