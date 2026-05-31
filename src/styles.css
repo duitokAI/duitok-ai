@@ -25093,8 +25093,8 @@ label {
   line-height: 1;
   opacity: 0;
   pointer-events: none;
-  transform: translate(6px, -50%) scale(0.98);
-  transition: opacity 0.14s ease, transform 0.14s ease;
+  transform: translate(3px, -50%) scale(0.99);
+  transition: opacity 0.04s linear, transform 0.06s ease-out;
   white-space: nowrap;
   animation: none;
 }
@@ -25126,8 +25126,8 @@ label {
   line-height: 1;
   opacity: 0;
   pointer-events: none;
-  transform: translate(6px, -50%) scale(0.98);
-  transition: opacity 0.14s ease, transform 0.14s ease;
+  transform: translate(3px, -50%) scale(0.99);
+  transition: opacity 0.04s linear, transform 0.06s ease-out;
   white-space: nowrap;
   animation: none;
 }
