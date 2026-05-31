@@ -1450,6 +1450,7 @@ function bindImageConsoleCompact() {
   if (!consoleEl) return;
   let ticking = false;
   let compact = consoleEl.classList.contains("is-compact");
+  let hovering = false;
   const scrollTargets = [
     window,
     document.querySelector(".workspace"),
@@ -1481,21 +1482,42 @@ function bindImageConsoleCompact() {
     const compactAt = Math.max(12, Math.min(120, range * 0.35));
     const expandAt = Math.max(4, Math.min(36, compactAt * 0.3));
     const nextCompact = compact ? scrollY > expandAt : scrollY > compactAt;
-    if (nextCompact === compact) return;
-    compact = nextCompact;
-    consoleEl.classList.toggle("is-compact", compact);
+    if (nextCompact !== compact) compact = nextCompact;
+    consoleEl.classList.toggle("is-compact", compact && !hovering);
   };
   const requestSync = () => {
     if (ticking) return;
     ticking = true;
     window.requestAnimationFrame(sync);
   };
+  const expandForHover = () => {
+    hovering = true;
+    consoleEl.classList.add("is-hover-expanded");
+    consoleEl.classList.remove("is-compact");
+  };
+  const restoreAfterHover = () => {
+    hovering = false;
+    consoleEl.classList.remove("is-hover-expanded");
+    requestSync();
+  };
+  const restoreAfterFocus = (event) => {
+    if (event.relatedTarget && consoleEl.contains(event.relatedTarget)) return;
+    restoreAfterHover();
+  };
   uniqueScrollTargets.forEach((target) => target.addEventListener("scroll", requestSync, { passive: true }));
   window.addEventListener("resize", requestSync);
+  consoleEl.addEventListener("mouseenter", expandForHover);
+  consoleEl.addEventListener("mouseleave", restoreAfterHover);
+  consoleEl.addEventListener("focusin", expandForHover);
+  consoleEl.addEventListener("focusout", restoreAfterFocus);
   sync();
   imageConsoleScrollCleanup = () => {
     uniqueScrollTargets.forEach((target) => target.removeEventListener("scroll", requestSync));
     window.removeEventListener("resize", requestSync);
+    consoleEl.removeEventListener("mouseenter", expandForHover);
+    consoleEl.removeEventListener("mouseleave", restoreAfterHover);
+    consoleEl.removeEventListener("focusin", expandForHover);
+    consoleEl.removeEventListener("focusout", restoreAfterFocus);
   };
 }
 

@@ -30223,7 +30223,17 @@ label {
   margin: 8px auto 14px !important;
   padding: 10px !important;
   overflow: visible !important;
+  border: 1px solid rgba(111, 28, 132, 0.16) !important;
   border-radius: 28px !important;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(255, 255, 255, 0.98), transparent 34%),
+    radial-gradient(circle at 86% 0%, rgba(255, 90, 145, 0.09), transparent 36%),
+    linear-gradient(135deg, rgba(255, 252, 255, 0.97), rgba(244, 232, 250, 0.94)) !important;
+  box-shadow:
+    0 20px 54px rgba(70, 16, 84, 0.16),
+    0 8px 22px rgba(255, 90, 145, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(18px) !important;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-main {
@@ -30252,16 +30262,29 @@ label {
   min-width: 44px !important;
   height: 44px !important;
   min-height: 44px !important;
+  border-color: rgba(111, 28, 132, 0.16) !important;
   border-radius: 14px !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  color: #6f1d82 !important;
+  box-shadow: 0 10px 24px rgba(42, 6, 51, 0.08) !important;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-prompt textarea {
   height: 58px !important;
   min-height: 58px !important;
   max-height: 58px !important;
+  border-color: transparent !important;
   padding: 15px 18px !important;
+  background: transparent !important;
+  color: #2a0633 !important;
   line-height: 1.25 !important;
   overflow: hidden !important;
+  box-shadow: none !important;
+  -webkit-text-fill-color: #2a0633 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-prompt textarea::placeholder {
+  color: rgba(42, 6, 51, 0.42) !important;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-tools {
@@ -30287,8 +30310,12 @@ label {
   display: grid !important;
   grid-template-columns: 1fr !important;
   place-items: center !important;
+  border-color: rgba(111, 28, 132, 0.14) !important;
   padding: 0 !important;
   border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.76) !important;
+  color: #b78ad8 !important;
+  box-shadow: 0 10px 24px rgba(42, 6, 51, 0.08) !important;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-reference-thumb img,
@@ -30318,6 +30345,14 @@ label {
   right: -5px !important;
 }
 
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-reference-thumb:not(.has-ref) svg,
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-reference-thumb:not(.has-ref) svg *,
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-prompt-insert svg,
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-prompt-insert svg * {
+  color: #b78ad8 !important;
+  stroke: currentColor !important;
+}
+
 .studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-generate {
   grid-area: generate !important;
   width: 66px !important;
@@ -30327,8 +30362,11 @@ label {
   max-height: 66px !important;
   display: grid !important;
   place-items: center !important;
+  border-color: rgba(255, 112, 136, 0.62) !important;
   border-radius: 18px !important;
   padding: 0 !important;
+  background: linear-gradient(135deg, #ff4d78 0%, #ff7467 100%) !important;
+  box-shadow: 0 14px 34px rgba(255, 81, 118, 0.26) !important;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-generate svg {
