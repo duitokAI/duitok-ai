@@ -144,6 +144,7 @@ const state = {
   imagePromptGroup: "avatar",
   generating: false,
   promptAdvancedBusy: false,
+  promptAdvancedEnabled: false,
   projectMenuId: null,
   editingProjectId: null,
   paymentReturn: null,
@@ -4347,7 +4348,7 @@ function imageGenerateConsole(p, selectedModel) {
       <div class="image-console-tools">
         <div class="image-model-enhance-group">
           ${imageModelPicker(selectedModel)}
-          <button class="image-prompt-enhance" type="button" data-action="optimize-image-prompt" aria-label="Prompt enhance" title="Prompt enhance" ${state.promptAdvancedBusy ? "disabled" : ""}>${icon(state.promptAdvancedBusy ? "loader-circle" : "wand-sparkles", 18)}</button>
+          <button class="image-prompt-enhance ${state.promptAdvancedEnabled ? "is-active" : ""}" type="button" data-action="toggle-prompt-advanced" aria-label="Prompt enhance" aria-pressed="${state.promptAdvancedEnabled ? "true" : "false"}" title="Prompt enhance" ${state.generating || state.promptAdvancedBusy ? "disabled" : ""}>${icon("wand-sparkles", 18)}</button>
         </div>
         <label class="image-aspect-ratio-select">${aspectRatioIcon}<select data-field="image.aspectRatio">${aspectRatioOptions.map((value) => `<option value="${esc(value)}" ${value === selectedAspectRatio ? "selected" : ""}>${esc(value)}</option>`).join("")}</select></label>
         <label class="image-resolution-select">${icon("gem", 15)}<select data-field="image.resolution">${resolutionOptions.map(([value, label]) => `<option value="${esc(value)}" ${value === selectedResolution ? "selected" : ""}>${esc(label)}</option>`).join("")}</select></label>
@@ -8575,32 +8576,10 @@ function updateImagePromptLocal(value = "") {
   state.db = dbWithProjectField(state.db, state.projectId, "image.prompt", value);
 }
 
-async function optimizeImagePrompt() {
-  if (state.promptAdvancedBusy) return;
-  const input = document.querySelector("[data-image-console-prompt]");
-  const promptText = input?.value || project().image?.prompt || "";
-  const projectId = state.projectId;
-  const previousDb = state.db;
-  try {
-    set({ promptAdvancedBusy: true });
-    notify(project().image?.promptImage ? "Reading image and enhancing prompt..." : "Enhancing prompt...");
-    const res = await api(`/projects/${projectId}/prompt-advanced`, {
-      method: "POST",
-      body: JSON.stringify({ prompt: promptText, step: state.step || "image" })
-    });
-    if (state.projectId !== projectId) return;
-    set({ db: res.state, promptAdvancedBusy: false });
-    requestAnimationFrame(() => {
-      const nextInput = document.querySelector("[data-image-console-prompt]");
-      if (!nextInput) return;
-      nextInput.focus({ preventScroll: true });
-      nextInput.setSelectionRange(nextInput.value.length, nextInput.value.length);
-    });
-    notify(res.visualUsed ? "Image understood. Prompt enhanced." : "Prompt enhanced.");
-  } catch (error) {
-    set({ db: previousDb, promptAdvancedBusy: false });
-    notify(error.message || "Prompt enhance failed.");
-  }
+function togglePromptAdvanced() {
+  if (state.generating || state.promptAdvancedBusy) return;
+  const enabled = !state.promptAdvancedEnabled;
+  set({ promptAdvancedEnabled: enabled });
 }
 
 function syncImageAspectRatioIcon(selectEl) {
@@ -8743,7 +8722,7 @@ async function action(event, name) {
   if (name === "export-project") return download(`/api/export/project/${state.projectId}`, `${project().name}.json`);
   if (name === "image-count-down") return updateImageBatchCount(-1);
   if (name === "image-count-up") return updateImageBatchCount(1);
-  if (name === "optimize-image-prompt") return optimizeImagePrompt();
+  if (name === "toggle-prompt-advanced" || name === "optimize-image-prompt") return togglePromptAdvanced();
   if (name === "clear-image-prompt-media") return clearImagePromptMedia();
   if (name === "stop-agent-response") return stopAgentResponse();
   if (name === "clear-clone-reference") return clearCloneReferenceVideo();
@@ -9485,7 +9464,7 @@ async function generate(name, event = null) {
     notify(generationFeedbackCopy("queued", count));
     pollGenerationQueue();
   } catch (error) {
-    set({ generating: false });
+    set({ generating: false, promptAdvancedBusy: false });
     notify(error.message);
   }
 }
@@ -9516,13 +9495,22 @@ async function cancelGenerationJob(jobId) {
 async function syncImageConsoleBeforeGenerate(name) {
   if (name !== "generate-image") return;
   const promptInput = document.querySelector("[data-image-console-prompt]");
-  if (!promptInput) return;
-  const value = promptInput.value || "";
+  const value = promptInput?.value || project().image?.prompt || "";
   updateImagePromptLocal(value);
   await api(`/projects/${state.projectId}/field`, {
     method: "PATCH",
     body: JSON.stringify({ field: "image.prompt", value })
   });
+  if (!state.promptAdvancedEnabled) return;
+  const projectId = state.projectId;
+  set({ promptAdvancedBusy: true });
+  notify(project().image?.promptImage ? "Reading image and enhancing prompt..." : "Enhancing prompt...");
+  const res = await api(`/projects/${projectId}/prompt-advanced`, {
+    method: "POST",
+    body: JSON.stringify({ prompt: value, step: state.step || "image" })
+  });
+  if (state.projectId === projectId) set({ db: res.state, promptAdvancedBusy: false });
+  else set({ promptAdvancedBusy: false });
 }
 
 async function pollGenerationQueue(attempt = 0) {

@@ -30124,6 +30124,20 @@ label {
   box-shadow: 0 14px 28px rgba(42, 6, 51, 0.2) !important;
 }
 
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance.is-active {
+  border-color: rgba(255, 49, 95, 0.36) !important;
+  background: linear-gradient(135deg, #ff315f, #8a2be2) !important;
+  color: #ffffff !important;
+  box-shadow:
+    0 0 0 3px rgba(255, 49, 95, 0.14),
+    0 14px 32px rgba(138, 43, 226, 0.28) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance.is-active svg {
+  color: #ffffff !important;
+  stroke: currentColor !important;
+}
+
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance:disabled {
   cursor: wait !important;
   opacity: 0.72 !important;
