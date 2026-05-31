@@ -24294,6 +24294,49 @@ label {
   order: 6;
 }
 
+/* Dashboard production chart uses the full canvas instead of leaving an empty right rail. */
+.studio-shell .dashboard-main-grid {
+  grid-template-columns: 1fr !important;
+}
+
+.studio-shell .dashboard-main-grid .chart-card {
+  width: 100%;
+}
+
+.studio-shell .chart-card .card-title {
+  align-items: flex-start;
+}
+
+.studio-shell .chart-card .legend-row {
+  max-width: 100%;
+}
+
+.studio-shell .chart-card .bar-chart {
+  height: clamp(280px, 27vw, 390px) !important;
+  grid-template-columns: repeat(31, minmax(18px, 1fr)) !important;
+  gap: clamp(6px, 0.65vw, 12px) !important;
+  padding: 22px 18px 16px !important;
+}
+
+.studio-shell .chart-card .bar-day {
+  min-width: 0;
+}
+
+.studio-shell .chart-card .bar-day small {
+  writing-mode: horizontal-tb;
+  transform: none;
+  font-size: 10px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+.studio-shell .chart-card .bar-chart {
+    grid-template-columns: repeat(31, minmax(22px, 1fr)) !important;
+    overflow-x: auto;
+  }
+}
+
 /* Image console premium polish: calmer color, tighter rhythm, clearer control hierarchy. */
 .studio-shell .image-generate-console {
   grid-template-columns:
