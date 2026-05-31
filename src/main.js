@@ -4156,7 +4156,6 @@ function imageHistoryThumb(item, selectedId = "") {
 function imageGenerateConsole(p, selectedModel) {
   const avatar = selectedImageReference("avatar");
   const product = selectedImageReference("product");
-  const credit = selectedModel === "Nano Banana Pro" ? "0.20" : "0.15";
   const modelOptions = [["GPT Image 2", "GPT Image 2 (0.15 Credit)"], ["Nano Banana Pro", "Nano Banana Pro (0.20 Credit)"]];
   const aspectRatioOptions = ["9:16", "16:9"];
   const selectedAspectRatio = aspectRatioOptions.includes(p.image.aspectRatio) ? p.image.aspectRatio : "9:16";
@@ -4173,7 +4172,6 @@ function imageGenerateConsole(p, selectedModel) {
       <label>${select("image.model", "", modelOptions, selectedModel)}</label>
       <label class="image-aspect-ratio-select">${icon("smartphone", 15)}<select data-field="image.aspectRatio">${aspectRatioOptions.map((value) => `<option value="${esc(value)}" ${value === selectedAspectRatio ? "selected" : ""}>${esc(value)}</option>`).join("")}</select></label>
       <label class="image-resolution-select">${icon("gem", 15)}<select data-field="image.resolution">${resolutionOptions.map(([value, label]) => `<option value="${esc(value)}" ${value === selectedResolution ? "selected" : ""}>${esc(label)}</option>`).join("")}</select></label>
-      <span>${icon("coins", 15)} ~${credit} credit</span>
     </div>
     <div class="image-console-references">
       ${imageReferenceThumb("avatar", avatar, "Avatar optional")}
@@ -4182,7 +4180,6 @@ function imageGenerateConsole(p, selectedModel) {
     <button class="image-console-generate" type="button" data-action="generate-image" ${state.generating ? "disabled" : ""}>
       ${icon(state.generating ? "loader-circle" : "send", 20)}
       <b>${state.generating ? t("generating") : t("generateImage")}</b>
-      <small>${credit} credit</small>
     </button>
   </section>`;
 }
