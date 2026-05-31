@@ -4079,10 +4079,6 @@ function imagePanel(p) {
   const meta = studioStepMeta("image");
   return `<section class="image-canvas-studio image-higgsfield-mode">
     ${selectedMode === "Virtualize (Poster/Ad)" ? `<div class="image-studio-legacy">${virtualizePanel()}</div>` : `
-      <div class="studio-higgsfield-tabs">
-        <button class="active" type="button">${icon("folder-open", 16)} History</button>
-        <button type="button">${icon("globe-2", 16)} Community</button>
-      </div>
       ${studioResultWall(p, meta)}
       ${imageGenerateConsole(p, selectedModel)}
     `}

@@ -751,7 +751,7 @@
   position: relative;
   min-height: calc(100vh - 72px);
   display: grid;
-  grid-template-rows: auto minmax(520px, 1fr) auto;
+  grid-template-rows: minmax(520px, 1fr) auto;
   gap: 14px;
   align-content: start;
   margin-inline: 0;
