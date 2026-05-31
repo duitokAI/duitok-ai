@@ -4164,10 +4164,18 @@ function imageHistoryThumb(item, selectedId = "") {
   </button>`;
 }
 
+function imageBatchCount(p = project()) {
+  const count = Number.parseInt(p?.image?.count, 10);
+  if (!Number.isFinite(count)) return 1;
+  return Math.min(4, Math.max(1, count));
+}
+
 function imageGenerateConsole(p, selectedModel) {
   const avatar = selectedImageReference("avatar");
   const product = selectedImageReference("product");
-  const credit = selectedModel === "Nano Banana Pro" ? "0.20" : "0.15";
+  const unitCredit = selectedModel === "Nano Banana Pro" ? 0.2 : 0.15;
+  const selectedCount = imageBatchCount(p);
+  const credit = (unitCredit * selectedCount).toFixed(2);
   const modelOptions = [["GPT Image 2", "GPT Image 2 (0.15 Credit)"], ["Nano Banana Pro", "Nano Banana Pro (0.20 Credit)"]];
   const aspectRatioOptions = ["9:16", "16:9"];
   const selectedAspectRatio = aspectRatioOptions.includes(p.image.aspectRatio) ? p.image.aspectRatio : "9:16";
@@ -4183,6 +4191,11 @@ function imageGenerateConsole(p, selectedModel) {
       <label>${select("image.model", "", modelOptions, selectedModel)}</label>
       <label class="image-aspect-ratio-select">${icon("smartphone", 15)}<select data-field="image.aspectRatio">${aspectRatioOptions.map((value) => `<option value="${esc(value)}" ${value === selectedAspectRatio ? "selected" : ""}>${esc(value)}</option>`).join("")}</select></label>
       <label class="image-resolution-select">${icon("gem", 15)}<select data-field="image.resolution">${resolutionOptions.map(([value, label]) => `<option value="${esc(value)}" ${value === selectedResolution ? "selected" : ""}>${esc(label)}</option>`).join("")}</select></label>
+      <div class="image-count-stepper" aria-label="Images to generate">
+        <button type="button" data-action="image-count-down" aria-label="Generate fewer images" ${selectedCount <= 1 ? "disabled" : ""}>${icon("minus", 15)}</button>
+        <span><b>${selectedCount}</b><small>/4</small></span>
+        <button type="button" data-action="image-count-up" aria-label="Generate more images" ${selectedCount >= 4 ? "disabled" : ""}>${icon("plus", 15)}</button>
+      </div>
     </div>
     <div class="image-console-references">
       ${imageReferenceThumb("avatar", avatar, "Avatar optional")}
@@ -8200,6 +8213,8 @@ async function action(event, name) {
   if (name === "download-autopost-extension") return download("/api/export/autopost-extension", "pokaya-autopost-extension.zip");
   if (name === "export-all") return download("/api/export/all", "pokaya-data.json");
   if (name === "export-project") return download(`/api/export/project/${state.projectId}`, `${project().name}.json`);
+  if (name === "image-count-down") return updateImageBatchCount(-1);
+  if (name === "image-count-up") return updateImageBatchCount(1);
   if (name?.startsWith("generate") || ["analyze-original", "clone-prompt", "write-story", "decode-viral"].includes(name)) return generate(name);
 }
 
@@ -8354,6 +8369,25 @@ async function useUgcBuiltPrompt() {
   state.ugcPromptBuilder = { ...defaultUgcPromptBuilder(), ...(state.ugcPromptBuilder || {}), builtPrompt: promptText };
   await saveProjectField("ugc.script", promptText);
   set({ modal: null });
+}
+
+async function updateImageBatchCount(delta) {
+  const projectId = state.projectId;
+  const previousDb = state.db;
+  const nextCount = Math.min(4, Math.max(1, imageBatchCount(project()) + delta));
+  if (nextCount === imageBatchCount(project())) return;
+  set({ db: dbWithProjectField(previousDb, projectId, "image.count", nextCount) });
+  try {
+    const db = await api(`/projects/${projectId}/field`, {
+      method: "PATCH",
+      body: JSON.stringify({ field: "image.count", value: nextCount })
+    });
+    if (state.projectId !== projectId) return;
+    set({ db });
+  } catch (error) {
+    if (state.projectId === projectId) set({ db: previousDb });
+    notify(error.message || t("toastSaveFailed"));
+  }
 }
 
 async function saveProjectField(field, value) {
@@ -8663,7 +8697,8 @@ async function generate(name) {
   try {
     set({ generating: true });
     await syncImageConsoleBeforeGenerate(name);
-    const db = await api(`/projects/${state.projectId}/generate`, { method: "POST", body: JSON.stringify({ action: name, step: state.step }) });
+    const count = name === "generate-image" ? imageBatchCount(project()) : 1;
+    const db = await api(`/projects/${state.projectId}/generate`, { method: "POST", body: JSON.stringify({ action: name, step: state.step, count }) });
     set({ db, generating: false });
     pollGenerationQueue();
   } catch (error) {

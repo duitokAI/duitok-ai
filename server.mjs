@@ -466,7 +466,7 @@ function blankProject(id, name, userId = adminUserId) {
     userId,
     name,
     createdAt: new Date().toISOString(),
-    image: { model: "GPT Image 2", mode: "Create Image", duration: "8", aspectRatio: "9:16", resolution: "2K", prompt: "" },
+    image: { model: "GPT Image 2", mode: "Create Image", duration: "8", aspectRatio: "9:16", resolution: "2K", count: 1, prompt: "" },
     ugc: { avatar: "Malay female", voice: "BM Casual", length: "30 seconds", script: "Hook, product proof, objection, offer, CTA." },
     auto: { platform: "TikTok", batch: "7 posts", tone: "Viral hook", productUrl: "" },
     original: { brief: "Rewrite this into Pokaya AI style while keeping the product claim safe." },
@@ -1413,6 +1413,12 @@ function roundCredits(value) {
   return Math.round(Number(value || 0) * 100) / 100;
 }
 
+function imageBatchCount(value) {
+  const count = Number.parseInt(value, 10);
+  if (!Number.isFinite(count)) return 1;
+  return Math.min(4, Math.max(1, count));
+}
+
 function creditChargeFor(project, action) {
   if (action !== "generate-image") return 0.1;
   const model = internalMediaModel(project.image?.model);
@@ -1426,7 +1432,7 @@ function creditChargeFor(project, action) {
   return 0.1;
 }
 
-function assertGenerationAccess(db, user, requiredCredits = 0.1) {
+function assertGenerationAccess(db, user, requiredCredits = 0.1, requestedCount = 1) {
   if (hasAdminPrivileges(user)) return;
 
   user.billing ||= defaultBilling();
@@ -1437,13 +1443,13 @@ function assertGenerationAccess(db, user, requiredCredits = 0.1) {
   }
 
   const now = Date.now();
-  const perMinuteLimit = Number(process.env.USER_GENERATE_PER_MINUTE || 3);
+  const perMinuteLimit = Math.max(Number(process.env.USER_GENERATE_PER_MINUTE || 3), requestedCount);
   const perDayLimit = Number(process.env.USER_GENERATE_PER_DAY || 50);
   const userJobs = (db.generationJobs || []).filter((job) => job.userId === user.id);
   const inLastMinute = userJobs.filter((job) => Date.parse(job.createdAt || 0) > now - 60 * 1000).length;
   const inLastDay = userJobs.filter((job) => Date.parse(job.createdAt || 0) > now - 24 * 60 * 60 * 1000).length;
 
-  if (inLastMinute >= perMinuteLimit || inLastDay >= perDayLimit) {
+  if (inLastMinute + requestedCount > perMinuteLimit || inLastDay + requestedCount > perDayLimit) {
     const error = new Error("Too many generations. Please wait a moment and try again.");
     error.status = 429;
     throw error;
@@ -2367,15 +2373,16 @@ async function saveFailedGeneration(projectId, action, step, error, user) {
   });
 }
 
-async function enqueueGeneration(projectId, action, step, user) {
-  const jobId = crypto.randomUUID();
+async function enqueueGeneration(projectId, action, step, user, options = {}) {
+  const batchCount = action === "generate-image" ? imageBatchCount(options.count) : 1;
+  const jobIds = Array.from({ length: batchCount }, () => crypto.randomUUID());
   const state = await mutateDb(async (currentDb) => {
     const project = findProject(currentDb, projectId, user);
     const creditsToCharge = creditChargeFor(project, action);
-    assertGenerationAccess(currentDb, user, creditsToCharge);
+    assertGenerationAccess(currentDb, user, roundCredits(creditsToCharge * batchCount), batchCount);
     const cost = generationCostFor(currentDb, project, action, { provider: providerForMediaModel(project.image?.model) });
     const createdAt = new Date().toISOString();
-    currentDb.generationJobs.unshift({
+    const jobs = jobIds.map((jobId, index) => ({
       id: jobId,
       userId: project.userId,
       projectId,
@@ -2390,14 +2397,19 @@ async function enqueueGeneration(projectId, action, step, user) {
       createdAt,
       model: cost.model,
       provider: cost.provider,
-      unit: cost.unit
-    });
-    currentDb.usage.unshift(usage("Queued generation", 0, project.userId));
+      unit: cost.unit,
+      batchIndex: batchCount > 1 ? index + 1 : undefined,
+      batchCount: batchCount > 1 ? batchCount : undefined
+    }));
+    currentDb.generationJobs.unshift(...jobs);
+    currentDb.usage.unshift(usage(batchCount > 1 ? `Queued ${batchCount} generations` : "Queued generation", 0, project.userId));
     await saveDb(currentDb);
     return publicState(currentDb, user);
   });
-  setTimeout(() => processGenerationJob(jobId).catch((error) => console.error("Generation job failed", error)), 0);
-  return { jobId, state };
+  jobIds.forEach((jobId) => {
+    setTimeout(() => processGenerationJob(jobId).catch((error) => console.error("Generation job failed", error)), 0);
+  });
+  return { jobId: jobIds[0], jobIds, state };
 }
 
 async function processGenerationJob(jobId) {
@@ -4515,6 +4527,7 @@ const agentAllowedFieldPaths = new Set([
   "image.duration",
   "image.aspectRatio",
   "image.resolution",
+  "image.count",
   "image.prompt",
   "ugc.avatar",
   "ugc.voice",
@@ -5663,7 +5676,7 @@ app.patch("/api/projects/:id/field", async (req, res) => {
 app.post("/api/projects/:id/generate", async (req, res) => {
   try {
     const { user } = await requireAuth(req);
-    const result = await enqueueGeneration(req.params.id, req.body.action, req.body.step, user);
+    const result = await enqueueGeneration(req.params.id, req.body.action, req.body.step, user, { count: req.body.count });
     res.json(result.state);
   } catch (error) {
     const { user } = await requireAuth(req).catch(() => ({ user: null }));

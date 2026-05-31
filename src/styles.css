@@ -24607,6 +24607,66 @@ label {
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
 }
 
+.studio-shell .image-count-stepper {
+  display: grid;
+  grid-template-columns: 34px minmax(42px, 1fr) 34px;
+  align-items: center;
+  gap: 6px;
+  min-width: 0 !important;
+  min-height: 34px !important;
+  border: 1px solid rgba(255, 250, 252, 0.12) !important;
+  border-radius: 12px !important;
+  background: rgba(255, 250, 252, 0.055) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 250, 252, 0.06),
+    0 8px 22px rgba(20, 0, 27, 0.18) !important;
+  padding: 0 6px;
+}
+
+.studio-shell .image-count-stepper button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 28px;
+  border: 0;
+  border-radius: 10px;
+  color: rgba(255, 250, 252, 0.9);
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, opacity 0.18s ease;
+}
+
+.studio-shell .image-count-stepper button:hover:not(:disabled) {
+  color: #ffd21a;
+  background: rgba(255, 250, 252, 0.09);
+}
+
+.studio-shell .image-count-stepper button:disabled {
+  opacity: 0.36;
+  cursor: default;
+}
+
+.studio-shell .image-count-stepper span {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 1px;
+  color: #fffafc;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.studio-shell .image-count-stepper span b {
+  font-size: 15px;
+}
+
+.studio-shell .image-count-stepper span small {
+  color: rgba(255, 250, 252, 0.62);
+  font-size: 12px;
+  font-weight: 850;
+}
+
 .studio-shell .image-console-references {
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
 }
