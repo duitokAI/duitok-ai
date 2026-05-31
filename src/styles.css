@@ -21925,6 +21925,26 @@ label {
   padding: var(--project-card-pad) !important;
 }
 
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) {
+  --project-page-pad-y: 0px;
+  --project-page-pad-x: 0px;
+  padding: 0 0 56px !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) > * {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .project-step-topbar {
+  margin: 0 !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .canvas-card {
+  border-radius: 0 !important;
+  padding: 0 !important;
+}
+
 .studio-shell .workspace:has(.step-tabs) .studio-workbench-card {
   display: grid !important;
   gap: 18px !important;
