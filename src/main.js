@@ -7971,13 +7971,14 @@ function agentConfirmModal() {
 function agentConfirmationCard(run) {
   const confirmation = run?.confirmation;
   if (!confirmation || run.status !== "waiting_confirmation") return "";
+  const credits = Number(confirmation.creditsRequired || 0);
   return `
     <div class="agent-confirm-card">
       <strong>${icon("shield-check", 18)} ${esc(confirmation.title || "需要确认")}</strong>
       <p>${esc(confirmation.message || "确认后才会执行。")}</p>
       <small>${esc(confirmation.impact || "工作区动作")}</small>
       <div>
-        <button class="gold-button" data-action="open-agent-confirm" data-agent-run-id="${esc(run.id)}">${icon("shield-check", 16)} 打开确认弹窗</button>
+        <button class="gold-button" data-agent-confirm="${esc(run.id)}" data-agent-token="${esc(confirmation.token || "")}" ${state.agentBusy ? "disabled" : ""}>${icon("shield-check", 16)} ${credits ? `确认生成，扣 ${esc(credits)} credits` : "确认执行"}</button>
         <button class="dark-button" data-action="clear-agent-confirm">${icon("x", 16)} 取消</button>
       </div>
     </div>`;
