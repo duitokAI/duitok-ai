@@ -25275,3 +25275,26 @@ label {
     max-width: 86% !important;
   }
 }
+
+/* Agent assistant avatar badge: branded bot mark in chat replies. */
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant > .agent-avatar-badge,
+.studio-shell .agent-page-panel .agent-thread article.assistant > .agent-avatar-badge {
+  width: 50px !important;
+  height: 50px !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 1px solid rgba(255, 63, 110, 0.2) !important;
+  border-radius: 20px !important;
+  background: linear-gradient(135deg, rgba(92, 22, 104, 0.98), rgba(58, 14, 69, 0.98)) !important;
+  color: #fff !important;
+  box-shadow:
+    0 14px 30px rgba(30, 0, 38, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant > .agent-avatar-badge svg,
+.studio-shell .agent-page-panel .agent-thread article.assistant > .agent-avatar-badge svg {
+  width: 24px !important;
+  height: 24px !important;
+  stroke-width: 2.7 !important;
+}

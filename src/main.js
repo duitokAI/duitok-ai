@@ -7357,6 +7357,9 @@ function agentMessageArticle(item, index = 0) {
   const c = agentUiCopy();
   const displayContent = item.isTyping ? `${item.content || ""}▍` : item.content;
   const body = item.role === "assistant" ? agentMessageMarkdown(displayContent) : `<p>${esc(item.content).replaceAll("\n", "<br>")}</p>`;
+  const roleMarker = item.role === "assistant"
+    ? `<span class="agent-avatar-badge" aria-label="${esc(c.agentLabel)}">${icon("bot", 22)}</span>`
+    : `<span>${c.userLabel}</span>`;
   const chips = "";
   const runId = item.agentRun?.id || "";
   const feedback = item.role === "assistant" && runId ? `<div class="agent-feedback-row">
@@ -7365,7 +7368,7 @@ function agentMessageArticle(item, index = 0) {
   </div>` : "";
   const runPanel = agentVisibleRunPanel(item.agentRun);
   return `<article class="${item.role}">
-    <span>${item.role === "user" ? c.userLabel : c.agentLabel}</span>
+    ${roleMarker}
     ${item.role === "user" ? agentMessageAttachments(item.attachments) : ""}
     <div class="agent-message">${body}</div>
     ${chips}${runPanel}${feedback}
