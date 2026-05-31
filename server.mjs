@@ -4217,67 +4217,6 @@ async function executeAgentTool(name, args, user) {
   return { ok: false, error: `Unknown tool: ${name}` };
 }
 
-function inferAgentAction(content) {
-  const text = String(content || "").toLowerCase();
-  const abilityQuestion = isAgentAbilityQuestion(content);
-  return {
-    wantsProject: /create|project|项目|專案|新建|创建|建立|buat project|projek/.test(text),
-    wantsSeedance: /seedance|视频|影片|video|t2v|text.?to.?video/.test(text),
-    wantsSeedancePrompt: /seedance/.test(text) && /prompt|提示词|腳本|脚本|分镜|运镜/.test(text),
-    wantsContentPlan: /content plan|内容计划|內容計劃|7\s*天|七天|14\s*天|十四天|week|weekly|一周/.test(text),
-    wantsInspect: /缺什么|还缺|today|今天|状态|检查|inspect|diagnose|看一下/.test(text),
-    wantsMemory: /记住|remember|保存.*语气|品牌语气|目标人群|audience|language/.test(text),
-    wantsVisualCard: /visual card|视觉卡|視覺卡|图文卡|圖文卡|小红书|小紅書|封面|cover|poster|海报|海報|素材卡|卖点卡|賣點卡|教程卡|金句卡|data card|carousel/.test(text),
-    wantsGenerate: !abilityQuestion && /generate|生成|hasilkan|buat|run|create|做|产出/.test(text),
-    wantsSchedule: /schedule|排期|发布|posting|post|draft|草稿|日历|calendar/.test(text),
-    wantsAutoBatch: /7\s*天|七天|week|weekly|batch|content plan|内容计划|內容計劃|auto content/.test(text),
-    wantsTrendResearch: /trend|趋势|趨勢|aesthetic|风格|風格|适合卖|可以卖|卖什么|帶貨|带货|选题|對標|对标|爆款|流行|短剧|水果人|fruit drama|fruit character|loft girl|clean girl|dopamine|downtown girl/i.test(text)
-  };
-}
-
-function agentProjectName(content) {
-  const compact = String(content || "").replace(/\s+/g, " ").trim();
-  if (!compact) return `Agent Project ${new Date().toISOString().slice(0, 10)}`;
-  return compact.length > 42 ? `${compact.slice(0, 42)}...` : compact;
-}
-
-function agentTrendQuery(content = "") {
-  const source = sanitizeAgentText(content);
-  const text = source
-    .replace(/^(我想|我要|帮我|請問|请问)?\s*(怎么做|如何做|怎么拍|怎么写|怎么规划|how\s+to|make|create)\s*/i, "")
-    .replace(/^(我想|我要|帮我)\s*/i, "")
-    .trim();
-  if (/水果人|fruit\s*drama|fruit\s*character/i.test(text || source)) return "水果人短剧 AI fruit drama short video";
-  return text || source.slice(0, 120) || "TikTok content trend";
-}
-
-function agentIntentFromContent(content = "") {
-  const text = String(content || "").toLowerCase();
-  if (isAgentAbilityQuestion(content)) return "chat";
-  if (/publish|direct post|发\s*tiktok|发布|post ke tiktok|直接发|直接发布/.test(text)) return "publish";
-  if (/schedule|排期|草稿|draft|calendar|今晚|today|tomorrow|明天/.test(text)) return "schedule";
-  if (/support|客服|human|人工|help|problem|bug/.test(text)) return "support";
-  if (/visual card|视觉卡|視覺卡|图文卡|圖文卡|小红书|小紅書|cover|封面|poster|海报|素材卡/.test(text)) return "generate";
-  if (/generate|生成|buat|hasilkan|image|video|图片|视频|影片|seedance|nano|ugc/.test(text)) return "generate";
-  if (/create|project|项目|projek|campaign|新建|创建|建立/.test(text)) return "create_project";
-  if (/open|go to|打开|跳转|进入/.test(text)) return "navigate";
-  return "chat";
-}
-
-function isAgentAbilityQuestion(content = "") {
-  const text = String(content || "").trim().toLowerCase();
-  return /^(你|妳|你们|你們|agent|pokaya\s*agent)?\s*(能|可以|会|會)?\s*(做什么|做些?什么|帮我做什么|能干嘛|可以干嘛|会什么|有什么功能|功能是什么|怎么用|如何使用)[？?。!！\s]*$/.test(text)
-    || /^(what can you do|what do you do|how can you help|help|capabilities|features)\??$/i.test(text);
-}
-
-function agentAbilityReply(content = "") {
-  const isChinese = /[\u3400-\u9fff]/.test(String(content || ""));
-  if (isChinese) {
-    return "我可以帮你做这些：整理项目和素材、写图片/视频 prompt、生成图片或视频、做 Product Scanner 内容计划、写 Storytelling/Clone Prompt、管理排期草稿、检查 workspace 状态。只要涉及扣 credits、发布 TikTok 或高影响操作，我都会先让你确认。";
-  }
-  return "I can help organize projects and references, write image/video prompts, generate images or videos, build Product Scanner content plans, create Storytelling/Clone prompts, manage schedule drafts, and inspect workspace status. Anything that spends credits, publishes, or changes important workspace state will ask for confirmation first.";
-}
-
 function agentToolLabel(name = "") {
   return {
     inspect_workspace_state: "检查工作区",
@@ -4361,83 +4300,6 @@ function toolNeedsConfirmation(name, args = {}, context = {}) {
   if (name === "create_schedule_draft" && Array.isArray(args.drafts) && args.drafts.length > 3) return true;
   if (name === "create_content_plan" && args.saveDrafts && normalizePlanDays(args.days) > 7) return true;
   return false;
-}
-
-function agentClarificationForUncertainAction(content = "", { intent = "chat", projectId = "" } = {}) {
-  const action = inferAgentAction(content);
-  const actionable = intent !== "chat" || action.wantsGenerate || action.wantsSchedule || action.wantsContentPlan || action.wantsSeedance || action.wantsProject || action.wantsVisualCard;
-  if (!actionable) return null;
-  const text = String(content || "").trim();
-  if (action.wantsGenerate && action.wantsSeedance && !requestedMediaModelFromText(text)) {
-    return /[\u3400-\u9fff]/.test(text)
-      ? `你要生成视频的话，先选模型：${generationModelOptionsText("video")}。你要用哪一个？`
-      : `Before generating video, choose a model: ${generationModelOptionsText("video")}. Which one do you want?`;
-  }
-  const clearAction = /(图片|image|海报|poster|visual card|视觉卡|图文卡|封面|cover|video|视频|seedance|ugc|7\s*天|七天|内容计划|content plan|排期|schedule|草稿|draft|发布|publish)/i.test(text);
-  const tooVague = /^(做一下|帮我做|帮我弄|do it|make it|buat|生成|做|run)$/i.test(text) || (text.length < 8 && !clearAction);
-  if (!tooVague && projectId && !(action.wantsGenerate && !/(图片|image|visual card|视觉卡|图文卡|封面|cover|video|视频|seedance|ugc|auto|批量|海报|poster)/i.test(text))) return null;
-  if (/[\u3400-\u9fff]/.test(text)) {
-    return `我还不够确定要做哪一种内容。您想让我做哪一步？请补一句：1. 生成图片/海报/封面（${generationModelOptionsText("image")}）；2. 写视频 prompt；3. 生成视频（${generationModelOptionsText("video")}）；4. 做 7 天内容计划；5. 创建排期草稿。若会扣 credits，我会先弹窗让您确认。`;
-  }
-  return `I need one more detail before I execute. Which action should I take: generate image/poster/cover (${generationModelOptionsText("image")}), write a video prompt, generate video (${generationModelOptionsText("video")}), build a 7-day content plan, or create schedule drafts? If credits will be charged, I will ask for confirmation first.`;
-}
-
-function agentPublishArgsFromMessage(content = "") {
-  const text = String(content || "");
-  if (!/publish|direct post|发\s*tiktok|发布|直接发|直接发布|post ke tiktok/i.test(text)) return null;
-  const scheduleId = text.match(/scheduleId\s*[:=]\s*([A-Za-z0-9_-]{8,})/i)?.[1]
-    || text.match(/\b([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b/i)?.[1];
-  if (!scheduleId) return null;
-  const mediaUrl = text.match(/https?:\/\/[^\s"'<>]+/i)?.[0];
-  return validateAgentToolArgs("publish_tiktok_video", {
-    scheduleId,
-    ...(mediaUrl ? { mediaUrl } : {})
-  });
-}
-
-function agentShortcutToolFromMessage(content = "", projectId = "") {
-  const intent = inferAgentAction(content);
-  if (intent.wantsTrendResearch) return { name: "trend_research", args: { query: agentTrendQuery(content), market: "Malaysia TikTok Shop", depth: "standard" } };
-  if (!projectId) return null;
-  if (intent.wantsProject) return { name: "create_project", args: { name: agentProjectName(content) } };
-  if (intent.wantsSeedancePrompt) {
-    const model = requestedMediaModelFromText(content);
-    return {
-      name: "create_seedance_prompt",
-      args: {
-        projectId,
-        ...(model && isVideoMediaModel(model) ? { model } : {}),
-        keyMessage: content,
-        duration: String(content).match(/\b(4|6|8|10|12|15)\s*s(?:ec|econd|秒)?/i)?.[1] || "8"
-      }
-    };
-  }
-  if (intent.wantsContentPlan) {
-    return {
-      name: "create_content_plan",
-      args: {
-        projectId,
-        days: /14|十四/.test(content) ? 14 : 7,
-        objective: /launch|上新|新品/.test(content) ? "launch" : "sales",
-        saveDrafts: /草稿|draft|排期|schedule/.test(content)
-      }
-    };
-  }
-  if (intent.wantsInspect) return { name: "inspect_workspace_state", args: { projectId, focus: /今天|today/i.test(content) ? "today" : "workspace" } };
-  if (intent.wantsGenerate) {
-    const model = requestedMediaModelFromText(content);
-    if (intent.wantsSeedance && !model) return null;
-    return {
-      name: "generate_project_output",
-      args: {
-        projectId,
-        ...(model ? { model } : {}),
-        action: intent.wantsAutoBatch ? "generate-auto" : "generate-image",
-        step: intent.wantsAutoBatch ? "auto" : "image"
-      }
-    };
-  }
-  return null;
 }
 
 function agentConfirmationForTool(name, args = {}, context = {}) {
@@ -4852,146 +4714,6 @@ async function synthesizeAgentToolReply(userMessage = "", toolResults = [], fall
   } catch {
     return fallback || "";
   }
-}
-
-async function runDeterministicAgent(content, { projectId, user, workspace = null }) {
-  const intent = inferAgentAction(content);
-  const toolResults = [];
-  const uiActions = [];
-  const diffs = [];
-  const cards = [];
-  let latestDb = workspace;
-  let activeProjectId = projectId;
-  let pendingTool = null;
-  let confirmation = null;
-
-  async function run(name, args) {
-    if (pendingTool) return { ok: false, needsConfirmation: true, message: confirmation?.message || "需要确认后才会执行。" };
-    const safeArgs = validateAgentToolArgs(name, args);
-    const confirmationWorkspace = latestDb || publicState(await ensureDb(), user);
-    if (toolNeedsConfirmation(name, safeArgs, { workspace: confirmationWorkspace, user })) {
-      pendingTool = { name, args: safeArgs };
-      confirmation = agentConfirmationForTool(name, safeArgs, { workspace: confirmationWorkspace, user });
-      return { ok: false, needsConfirmation: true, message: confirmation.message };
-    }
-    const result = await executeAgentTool(name, safeArgs, user);
-    if (result.db) latestDb = result.db;
-    if (result.uiAction) uiActions.push(result.uiAction);
-    if (result.data?.projectId) activeProjectId = result.data.projectId;
-    const publicResult = safeAgentToolResult(name, safeArgs, result);
-    toolResults.push(publicResult);
-    if (result.diffs?.length) diffs.push(...result.diffs);
-    if (publicResult.card) cards.push(publicResult.card);
-    return result;
-  }
-
-  if (!activeProjectId || intent.wantsProject) {
-    await run("create_project", { name: agentProjectName(content) });
-  }
-
-  if (intent.wantsInspect) {
-    await run("inspect_workspace_state", { projectId: activeProjectId, focus: /今天|today/i.test(content) ? "today" : "workspace" });
-  }
-
-  if (intent.wantsTrendResearch) {
-    await run("trend_research", { query: agentTrendQuery(content), market: "Malaysia TikTok Shop", depth: "standard" });
-  }
-
-  if (intent.wantsMemory && activeProjectId) {
-    await run("remember_agent_context", {
-      projectId: activeProjectId,
-      notes: content
-    });
-  }
-
-  if (intent.wantsContentPlan && activeProjectId) {
-    await run("create_content_plan", {
-      projectId: activeProjectId,
-      days: /14|十四/.test(content) ? 14 : 7,
-      objective: /launch|上新|新品/.test(content) ? "launch" : "sales",
-      saveDrafts: /草稿|draft|排期|schedule/.test(content)
-    });
-  }
-
-  if (intent.wantsVisualCard && activeProjectId) {
-    await run("update_project_field", { projectId: activeProjectId, field: "image.prompt", value: content });
-    await run("generate_project_output", { projectId: activeProjectId, action: "generate-image", step: "image" });
-  }
-
-  if (intent.wantsSeedancePrompt && activeProjectId) {
-    const model = requestedMediaModelFromText(content);
-    if (intent.wantsSeedance && !model) {
-      return {
-        reply: `你要生成视频的话，先选模型：${generationModelOptionsText("video")}。你要用哪一个？`,
-        db: latestDb,
-        toolResults,
-        uiActions,
-        diffs,
-        cards,
-        pendingTool,
-        confirmation
-      };
-    }
-    await run("create_seedance_prompt", {
-      projectId: activeProjectId,
-      ...(model ? { model } : {}),
-      keyMessage: content,
-      duration: String(content).match(/\b(4|6|8|10|12|15)\s*s(?:ec|econd|秒)?/i)?.[1] || "8"
-    });
-  } else if (intent.wantsSeedance) {
-    const model = requestedMediaModelFromText(content);
-    if (!model) {
-      return {
-        reply: `你要生成视频的话，先选模型：${generationModelOptionsText("video")}。你要用哪一个？`,
-        db: latestDb,
-        toolResults,
-        uiActions,
-        diffs,
-        cards,
-        pendingTool,
-        confirmation
-      };
-    }
-    await run("update_project_field", { projectId: activeProjectId, field: "image.model", value: model });
-    await run("update_project_field", { projectId: activeProjectId, field: "image.prompt", value: content });
-    const duration = String(content).match(/\b(4|6|8|10|12|15)\s*s(?:ec|econd|秒)?/i)?.[1];
-    if (duration) await run("update_project_field", { projectId: activeProjectId, field: "image.duration", value: duration });
-    if (intent.wantsGenerate) await run("generate_project_output", { projectId: activeProjectId, action: "generate-image", step: "image" });
-  } else if (intent.wantsAutoBatch && !intent.wantsContentPlan) {
-    await run("update_project_field", { projectId: activeProjectId, field: "auto.productUrl", value: content });
-    await run("update_project_field", { projectId: activeProjectId, field: "auto.batch", value: "7 posts" });
-    await run("update_project_field", { projectId: activeProjectId, field: "auto.tone", value: "Viral hook" });
-    if (intent.wantsGenerate) await run("generate_project_output", { projectId: activeProjectId, action: "generate-auto", step: "auto" });
-  }
-
-  if (intent.wantsSchedule) {
-    await run("create_schedule_draft", {
-      projectId: activeProjectId,
-      title: agentProjectName(content),
-      caption: content,
-      hashtags: "#pokaya #tiktokshop",
-      status: "Draft"
-    });
-  }
-
-  const actionNames = toolResults.map((item) => item.name).join(", ");
-  const researchedReply = buildTrendResearchAgentReply(content, toolResults) || buildWebSearchAgentReply(content, toolResults);
-  return {
-    reply: pendingTool
-      ? confirmation.message
-      : researchedReply
-      ? researchedReply
-      : toolResults.length
-      ? `已完成：${actionNames || "工作区更新"}。Agent 大脑暂时不可用，所以我用 Pokaya 内置执行器先处理了可确定的动作。`
-      : "Agent 大脑暂时不可用。我还能帮您创建草稿、更新工作台、创建排期草稿；复杂规划恢复后会自动回到完整 Agent 模式。",
-    db: latestDb,
-    toolResults,
-    uiActions,
-    diffs,
-    cards,
-    pendingTool,
-    confirmation
-  };
 }
 
 function requireChipConfig() {
@@ -5720,7 +5442,7 @@ app.post("/api/agent", async (req, res, next) => {
       projectId
     });
     const runId = crypto.randomUUID();
-    const intent = agentIntentFromContent(latestUserMessage);
+    const intent = "chat";
     const startedAt = Date.now();
     let agentRun = {
       id: runId,
@@ -5748,24 +5470,6 @@ app.post("/api/agent", async (req, res, next) => {
       await saveAgentRun(agentRun);
       return res.json({
         reply: agentSecurityRefusal(latestUserMessage),
-        db: stateForUser,
-        toolResults: [],
-        uiActions: [],
-        agentRun: publicAgentRun(agentRun)
-      });
-    }
-
-    if (isAgentAbilityQuestion(latestUserMessage)) {
-      agentRun = {
-        ...agentRun,
-        status: "completed",
-        plan: completeAgentPlan(agentRun.plan),
-        confidence: agentConfidence("chat", { projectId, executionReady: false }),
-        durationMs: Date.now() - startedAt
-      };
-      await saveAgentRun(agentRun);
-      return res.json({
-        reply: agentAbilityReply(latestUserMessage),
         db: stateForUser,
         toolResults: [],
         uiActions: [],
@@ -5880,87 +5584,6 @@ app.post("/api/agent", async (req, res, next) => {
       messages.push(message);
       const calls = message.tool_calls || [];
       if (!calls.length) {
-        const shortcut = agentShortcutToolFromMessage(latestUserMessage, projectId);
-        if (shortcut) {
-          const safeArgs = validateAgentToolArgs(shortcut.name, shortcut.args);
-          if (toolNeedsConfirmation(shortcut.name, safeArgs, { workspace: latestDb, user })) {
-            const confirmation = agentConfirmationForTool(shortcut.name, safeArgs, { workspace: latestDb, user });
-            agentRun = {
-              ...agentRun,
-              status: "waiting_confirmation",
-              plan: planWithTool(agentRun.plan, shortcut.name, "waiting_confirmation", `${agentToolLabel(shortcut.name)}需要确认`),
-              toolResults,
-              uiActions,
-              confirmation,
-              pendingTool: { name: shortcut.name, args: safeArgs },
-              diffs: runDiffs,
-              cards: runCards,
-              durationMs: Date.now() - startedAt
-            };
-            await saveAgentRun(agentRun);
-            return res.json({
-              reply: confirmation.message,
-              db: latestDb,
-              toolResults,
-              uiActions,
-              agentRun: publicAgentRun(agentRun)
-            });
-          }
-          const result = await executeAgentTool(shortcut.name, safeArgs, user);
-          if (result.db) latestDb = result.db;
-          if (result.uiAction) uiActions.push(result.uiAction);
-        const publicResult = safeAgentToolResult(shortcut.name, safeArgs, result);
-        toolResults.push(publicResult);
-        if (publicResult.card) runCards.push(publicResult.card);
-        if (result.diffs?.length) runDiffs.push(...result.diffs);
-          agentRun = {
-            ...agentRun,
-            status: "completed",
-            plan: completeAgentPlan(planWithTool(agentRun.plan, shortcut.name, "completed", result.message || agentToolLabel(shortcut.name))),
-            toolResults,
-            uiActions,
-            diffs: runDiffs,
-            cards: runCards,
-            confidence: agentConfidence(intent, { projectId, toolName: shortcut.name, executionReady: true }),
-            durationMs: Date.now() - startedAt
-          };
-          await saveAgentRun(agentRun);
-          const reply = shortcut.name === "trend_research"
-            ? await synthesizeAgentToolReply(latestUserMessage, toolResults, result.message || message.content || "")
-            : result.message || message.content || "Done.";
-          return res.json({
-            reply: sanitizeAgentReply(reply, latestUserMessage),
-            db: latestDb,
-            toolResults,
-            uiActions,
-            agentRun: publicAgentRun(agentRun)
-          });
-        }
-        const publishArgs = agentPublishArgsFromMessage(latestUserMessage);
-        if (publishArgs) {
-          const confirmation = agentConfirmationForTool("publish_tiktok_video", publishArgs, { workspace: latestDb, user });
-          agentRun = {
-            ...agentRun,
-            status: "waiting_confirmation",
-            plan: planWithTool(agentRun.plan, "publish_tiktok_video", "waiting_confirmation", "发布 TikTok 需要确认"),
-            toolResults,
-            uiActions,
-            confidence: agentConfidence("publish", { projectId, toolName: "publish_tiktok_video" }),
-            confirmation,
-            pendingTool: { name: "publish_tiktok_video", args: publishArgs },
-            diffs: runDiffs,
-            cards: runCards,
-            durationMs: Date.now() - startedAt
-          };
-          await saveAgentRun(agentRun);
-          return res.json({
-            reply: confirmation.message,
-            db: latestDb,
-            toolResults,
-            uiActions,
-            agentRun: publicAgentRun(agentRun)
-          });
-        }
         agentRun = {
           ...agentRun,
           status: "completed",
