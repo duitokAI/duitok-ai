@@ -6119,14 +6119,16 @@ function attachmentPickerModal() {
           <button class="icon-only attachment-picker-close" data-action="close-modal" type="button">${icon("x", 28)}</button>
         </div>
       </header>
-      ${lockedKind ? "" : `<div class="attachment-picker-tabs">
-        ${attachmentPickerTab("product", "box", filter)}
-        ${attachmentPickerTab("avatar", "circle-user-round", filter)}
-        ${attachmentPickerTab("all", "gallery-horizontal", filter)}
-      </div>`}
-      ${lockedKind ? attachmentPickerUploadPanel(filter, items.length) : ""}
-      <div class="attachment-picker-grid ${lockedKind ? "is-locked" : ""}">
-        ${items.length ? items.map((item) => attachmentPickerCard(item, kind)).join("") : lockedKind ? attachmentPickerSavedEmpty(filter) : attachmentPickerEmpty(filter)}
+      <div class="attachment-picker-body">
+        ${lockedKind ? "" : `<div class="attachment-picker-tabs">
+          ${attachmentPickerTab("product", "box", filter)}
+          ${attachmentPickerTab("avatar", "circle-user-round", filter)}
+          ${attachmentPickerTab("all", "gallery-horizontal", filter)}
+        </div>`}
+        ${lockedKind ? attachmentPickerUploadPanel(filter, items.length) : ""}
+        <div class="attachment-picker-grid ${lockedKind ? "is-locked" : ""}">
+          ${items.length ? items.map((item) => attachmentPickerCard(item, kind)).join("") : lockedKind ? attachmentPickerSavedEmpty(filter) : attachmentPickerEmpty(filter)}
+        </div>
       </div>
     </section>
   </div>`;

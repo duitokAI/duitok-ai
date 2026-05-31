@@ -6255,11 +6255,15 @@ button:disabled [data-lucide="loader-circle"] {
 
 .attachment-picker-backdrop {
   background: rgba(0, 0, 0, 0.68);
+  padding: clamp(18px, 4vh, 42px) clamp(18px, 4vw, 56px);
+  overflow: hidden;
 }
 
 .attachment-picker-modal {
-  width: min(78vw, 1120px);
-  max-height: min(70vh, 620px);
+  width: min(72vw, 960px);
+  max-height: min(74vh, 620px);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 16px;
@@ -6268,20 +6272,27 @@ button:disabled [data-lucide="loader-circle"] {
   box-shadow: 0 22px 70px rgba(0, 0, 0, 0.42);
 }
 
+.attachment-picker-body {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
 .attachment-picker-head,
 .attachment-picker-tabs {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  padding: 20px 26px;
+  padding: 16px 22px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.14);
 }
 
 .attachment-picker-head h2 {
   margin: 0;
   color: #f4f1f5;
-  font-size: 22px;
+  font-size: 20px;
   letter-spacing: 0;
   text-transform: none;
 }
@@ -6337,7 +6348,7 @@ button:disabled [data-lucide="loader-circle"] {
 
 .attachment-picker-tabs {
   justify-content: flex-start;
-  padding: 16px 26px;
+  padding: 14px 22px;
 }
 
 .attachment-picker-tabs button {
@@ -6367,17 +6378,15 @@ button:disabled [data-lucide="loader-circle"] {
 
 .attachment-picker-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-  gap: 16px;
-  min-height: 240px;
-  max-height: 420px;
-  overflow: auto;
-  padding: 26px;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+  min-height: 180px;
+  overflow: visible;
+  padding: 20px 22px 24px;
 }
 
 .attachment-picker-grid.is-locked {
-  min-height: 170px;
-  max-height: 300px;
+  min-height: 150px;
   padding-top: 0;
 }
 
@@ -6385,10 +6394,10 @@ button:disabled [data-lucide="loader-circle"] {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 18px;
-  margin: 24px 26px 18px;
-  min-height: 128px;
-  padding: 24px 28px;
+  gap: 14px;
+  margin: 18px 22px 14px;
+  min-height: 96px;
+  padding: 18px 20px;
   border: 1.5px dashed rgba(255, 255, 255, 0.26);
   border-radius: 18px;
   background:
@@ -6424,9 +6433,9 @@ button:disabled [data-lucide="loader-circle"] {
 .attachment-upload-panel-icon {
   display: grid;
   place-items: center;
-  width: 66px;
-  height: 66px;
-  border-radius: 18px;
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
   background: rgba(255, 95, 143, 0.13);
   color: #ff8fb0;
   box-shadow: inset 0 0 0 1px rgba(255, 95, 143, 0.22);
@@ -6442,7 +6451,7 @@ button:disabled [data-lucide="loader-circle"] {
   display: block;
   margin-bottom: 6px;
   color: #ffffff;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 950;
   letter-spacing: 0;
 }
@@ -6467,7 +6476,7 @@ button:disabled [data-lucide="loader-circle"] {
   display: grid;
   gap: 10px;
   overflow: hidden;
-  min-height: 238px;
+  min-height: 206px;
   padding: 0 0 12px;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 10px;
