@@ -25003,6 +25003,105 @@ label {
   margin-bottom: 3px !important;
 }
 
+.studio-shell.sidebar-collapsed .sidebar {
+  overflow-x: visible !important;
+}
+
+.studio-shell.sidebar-collapsed .sidebar-collapse-toggle,
+.studio-shell.sidebar-collapsed .sidebar .brand-core,
+.studio-shell.sidebar-collapsed .agent-primary-card,
+.studio-shell.sidebar-collapsed .side-primary,
+.studio-shell.sidebar-collapsed .side-link,
+.studio-shell.sidebar-collapsed .side-support-button {
+  position: relative !important;
+  overflow: visible !important;
+}
+
+.studio-shell.sidebar-collapsed .sidebar-collapse-toggle::after,
+.studio-shell.sidebar-collapsed .sidebar .brand-core::after,
+.studio-shell.sidebar-collapsed .side-primary::after,
+.studio-shell.sidebar-collapsed .side-link::after,
+.studio-shell.sidebar-collapsed .side-support-button::after {
+  content: attr(aria-label);
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%;
+  right: auto;
+  bottom: auto;
+  z-index: 80;
+  width: max-content;
+  max-width: 220px;
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 0 15px;
+  background: rgba(24, 24, 24, 0.97);
+  color: #fff;
+  box-shadow:
+    0 16px 34px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  font-size: 14px;
+  font-weight: 820;
+  letter-spacing: 0;
+  line-height: 1;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(6px, -50%) scale(0.98);
+  transition: opacity 0.14s ease, transform 0.14s ease;
+  white-space: nowrap;
+  animation: none;
+}
+
+.studio-shell.sidebar-collapsed .agent-primary-card::before {
+  content: attr(aria-label);
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%;
+  right: auto;
+  bottom: auto;
+  z-index: 80;
+  width: max-content;
+  max-width: 220px;
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 0 15px;
+  background: rgba(24, 24, 24, 0.97);
+  color: #fff;
+  box-shadow:
+    0 16px 34px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  font-size: 14px;
+  font-weight: 820;
+  letter-spacing: 0;
+  line-height: 1;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(6px, -50%) scale(0.98);
+  transition: opacity 0.14s ease, transform 0.14s ease;
+  white-space: nowrap;
+  animation: none;
+}
+
+.studio-shell.sidebar-collapsed .sidebar-collapse-toggle:hover::after,
+.studio-shell.sidebar-collapsed .sidebar .brand-core:hover::after,
+.studio-shell.sidebar-collapsed .side-primary:hover::after,
+.studio-shell.sidebar-collapsed .side-link:hover::after,
+.studio-shell.sidebar-collapsed .side-support-button:hover::after,
+.studio-shell.sidebar-collapsed .sidebar-collapse-toggle:focus-visible::after,
+.studio-shell.sidebar-collapsed .side-primary:focus-visible::after,
+.studio-shell.sidebar-collapsed .side-link:focus-visible::after,
+.studio-shell.sidebar-collapsed .side-support-button:focus-visible::after,
+.studio-shell.sidebar-collapsed .agent-primary-card:hover::before,
+.studio-shell.sidebar-collapsed .agent-primary-card:focus-visible::before {
+  opacity: 1;
+  transform: translate(0, -50%) scale(1);
+}
+
 @media (max-width: 1000px) {
   .studio-shell.sidebar-collapsed {
     --studio-sidebar-width: 100%;
