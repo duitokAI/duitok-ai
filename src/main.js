@@ -4132,8 +4132,15 @@ function studioPendingWallCard(job) {
 
 function studioWallCard(item) {
   const promptText = resultPromptText(item).replaceAll("\n", " ").trim();
+  const canSaveReference = Boolean(item.imageUrl || item.videoUrl);
   return `<article class="studio-wall-card">
     ${resultPreview(item, { clickable: true })}
+    <div class="studio-wall-actions" aria-label="Image actions">
+      <button type="button" data-result-action="save" data-result-id="${esc(item.id)}" title="保存到附件" ${canSaveReference ? "" : "disabled"}>${icon("cloud-upload", 17)}</button>
+      <button type="button" data-result-action="edit-image" data-result-id="${esc(item.id)}" title="Edit Image" ${canSaveReference ? "" : "disabled"}>${icon("palette", 17)}</button>
+      <button type="button" data-result-action="download" data-result-id="${esc(item.id)}" data-result-kind="${item.videoUrl ? "video" : item.imageUrl ? "image" : "text"}" title="下载">${icon("download", 18)}</button>
+      <button type="button" data-result-action="delete" data-result-id="${esc(item.id)}" title="删除">${icon("trash-2", 18)}</button>
+    </div>
     <footer><b>${esc(item.title || resultModelLabel(item))}</b><span>${esc(promptText ? promptText.slice(0, 92) : resultMediaLabel(item))}</span></footer>
   </article>`;
 }
