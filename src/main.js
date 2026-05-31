@@ -5837,7 +5837,7 @@ function attachmentPickerModal() {
       <header class="attachment-picker-head">
         <h2>${esc(title)}</h2>
         <div>
-          <label class="attachment-add-button">${icon("upload", 21)} <span>Add new</span><input type="file" data-upload="${esc(kind)}" hidden></label>
+          <label class="attachment-add-button">${icon("upload", 21)} <span>Add new</span><input type="file" data-upload="${esc(kind)}" accept="image/*,video/*" hidden></label>
           <button class="icon-only attachment-picker-close" data-action="close-modal" type="button">${icon("x", 28)}</button>
         </div>
       </header>
@@ -5883,10 +5883,15 @@ function attachmentPreview(item) {
 
 function attachmentPickerEmpty(kind) {
   const noun = kind === "all" ? "attachments" : kind === "avatar" ? "avatars" : "products";
-  return `<div class="attachment-picker-empty">
-    ${icon(kind === "avatar" ? "camera" : kind === "product" ? "package" : "image", 38)}
-    <p>No ${esc(noun)} here yet. Click <b>Add new</b> above to upload one.</p>
-  </div>`;
+  const uploadKind = kind === "all" ? state.attachmentPickerKind || "product" : kind;
+  const actionLabel = kind === "avatar" ? "Drop avatar image here" : kind === "product" ? "Drop product image here" : "Drop image here";
+  return `<label class="attachment-picker-empty" data-drop-upload="${esc(uploadKind)}">
+    <input type="file" data-upload="${esc(uploadKind)}" accept="image/*,video/*" hidden>
+    <span class="attachment-drop-icon">${icon("image-up", 42)}</span>
+    <strong>${esc(actionLabel)}</strong>
+    <p>Drag from desktop, or click this box to upload ${esc(noun === "attachments" ? "a reference" : `one of your ${noun}`)}.</p>
+    <small>PNG, JPG, WebP, or video references</small>
+  </label>`;
 }
 
 function sopDashboardContent() {
@@ -8153,6 +8158,7 @@ function bind() {
   }));
   document.querySelectorAll("[data-attachment-filter]").forEach((el) => el.addEventListener("click", () => set({ attachmentPickerFilter: el.dataset.attachmentFilter || "all" })));
   document.querySelectorAll("[data-attachment-pick]").forEach((el) => el.addEventListener("click", () => pickAttachment(el.dataset.attachmentPick, el.dataset.attachmentTarget)));
+  document.querySelectorAll("[data-drop-upload]").forEach((el) => bindAttachmentDropZone(el));
   document.querySelectorAll("form").forEach((el) => el.addEventListener("submit", submit));
   document.querySelectorAll("[data-lang-toggle]").forEach((el) => el.addEventListener("click", (event) => {
     event.stopPropagation();
@@ -8751,7 +8757,36 @@ async function startFirstGenerationWizard() {
 async function uploadChange(event) {
   const file = event.target.files?.[0];
   if (!file) return;
-  const db = await api("/attachments", { method: "POST", body: JSON.stringify({ projectId: state.projectId, kind: event.target.dataset.upload, name: file.name, size: file.size, type: file.type }) });
+  await uploadAttachmentFile(file, event.target.dataset.upload);
+  event.target.value = "";
+}
+
+function bindAttachmentDropZone(el) {
+  const kind = el.dataset.dropUpload || state.attachmentPickerKind || "product";
+  const clear = () => el.classList.remove("is-dragging");
+  el.addEventListener("dragenter", (event) => {
+    event.preventDefault();
+    el.classList.add("is-dragging");
+  });
+  el.addEventListener("dragover", (event) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "copy";
+    el.classList.add("is-dragging");
+  });
+  el.addEventListener("dragleave", (event) => {
+    if (!el.contains(event.relatedTarget)) clear();
+  });
+  el.addEventListener("drop", async (event) => {
+    event.preventDefault();
+    clear();
+    const file = [...(event.dataTransfer?.files || [])].find((item) => /^(image|video)\//i.test(item.type || ""));
+    if (!file) return notify("Please drop an image or video file.");
+    await uploadAttachmentFile(file, kind);
+  });
+}
+
+async function uploadAttachmentFile(file, kind = state.attachmentPickerKind || "product") {
+  const db = await api("/attachments", { method: "POST", body: JSON.stringify({ projectId: state.projectId, kind, name: file.name, size: file.size, type: file.type }) });
   set({ db });
   notify(tf("toastFileSaved", { name: file.name }));
 }
