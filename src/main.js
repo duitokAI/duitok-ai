@@ -2947,7 +2947,6 @@ function studio() {
           <span class="agent-primary-status"><i></i>READY</span>
         </button>
         <div class="sidebar-scroll-area">
-          <div class="side-section">${icon("layout-dashboard", 18)} ${t("workspace")}</div>
           <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard" aria-label="${esc(t("dashboard"))}">${icon("layout-dashboard", 22)} <span>${t("dashboard")}</span></button>
           <button class="side-primary studio-nav-button ${state.page === "project" ? "active" : ""}" data-page="project" aria-label="${esc(t("projects"))}">${studioMark()} <span>${t("projects")}</span></button>
           ${isOwnerAdminAccount() ? `<button class="side-link ${state.page === "admin" ? "active" : ""}" data-page="admin" aria-label="Admin CRM">${icon("shield-check")} <span>Admin CRM</span></button>` : ""}
