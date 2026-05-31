@@ -5869,11 +5869,11 @@ function attachmentPickerModal() {
     return projectMatch && filterMatch;
   });
   return `<div class="modal-backdrop attachment-picker-backdrop" data-action="close-modal">
-    <section class="attachment-picker-modal" role="dialog" aria-modal="true" aria-label="${esc(title)}">
+    <section class="attachment-picker-modal ${lockedKind ? `attachment-picker-modal-${esc(filter)}` : ""}" role="dialog" aria-modal="true" aria-label="${esc(title)}">
       <header class="attachment-picker-head">
         <h2>${esc(title)}</h2>
         <div>
-          <label class="attachment-add-button">${icon("upload", 21)} <span>Add new</span><input type="file" data-upload="${esc(kind)}" accept="image/*,video/*" hidden></label>
+          <label class="attachment-add-button ${lockedKind ? `attachment-add-button-${esc(filter)}` : ""}">${icon("upload", 21)} <span>Add new</span><input type="file" data-upload="${esc(kind)}" data-upload-select="${lockedKind ? esc(filter) : ""}" accept="image/*,video/*" hidden></label>
           <button class="icon-only attachment-picker-close" data-action="close-modal" type="button">${icon("x", 28)}</button>
         </div>
       </header>
@@ -5882,8 +5882,9 @@ function attachmentPickerModal() {
         ${attachmentPickerTab("avatar", "circle-user-round", filter)}
         ${attachmentPickerTab("all", "gallery-horizontal", filter)}
       </div>`}
-      <div class="attachment-picker-grid">
-        ${items.length ? items.map((item) => attachmentPickerCard(item, kind)).join("") : attachmentPickerEmpty(filter)}
+      ${lockedKind ? attachmentPickerUploadPanel(filter, items.length) : ""}
+      <div class="attachment-picker-grid ${lockedKind ? "is-locked" : ""}">
+        ${items.length ? items.map((item) => attachmentPickerCard(item, kind)).join("") : lockedKind ? attachmentPickerSavedEmpty(filter) : attachmentPickerEmpty(filter)}
       </div>
     </section>
   </div>`;
@@ -5899,7 +5900,7 @@ function attachmentPickerCard(item, targetKind) {
   const title = item.name || (item.kind === "avatar" ? "Avatar reference" : "Product reference");
   const isVideo = item.mediaKind === "video" || /^video\//i.test(item.type || "");
   return `<button class="attachment-picker-card" type="button" data-attachment-pick="${esc(item.id)}" data-attachment-target="${esc(targetKind)}">
-    <span class="attachment-kind-badge">${icon(item.kind === "avatar" ? "circle-user-round" : "box", 14)} ${esc(String(item.kind || "file").toUpperCase())}</span>
+    <span class="attachment-kind-badge ${item.kind === "product" ? "product" : "avatar"}">${icon(item.kind === "avatar" ? "circle-user-round" : "box", 14)} ${esc(String(item.kind || "file").toUpperCase())}</span>
     ${preview}
     <b>${esc(title)}</b>
     <small>${isVideo ? icon("video", 14) : icon("image", 14)} ${esc(item.prompt || item.type || "Saved reference")}</small>
@@ -5915,6 +5916,32 @@ function attachmentPreview(item) {
     return `<div class="attachment-placeholder">${icon("video", 44)}</div>`;
   }
   return `<div class="attachment-placeholder">${icon(item.kind === "avatar" ? "camera" : "package", 44)}</div>`;
+}
+
+function attachmentPickerUploadPanel(kind, count = 0) {
+  const isAvatar = kind === "avatar";
+  const title = isAvatar ? "Drop avatar image here" : "Drop product image here";
+  const copy = isAvatar
+    ? "Drag from desktop, or click to upload a face / creator reference."
+    : "Drag from desktop, or click to upload a product reference.";
+  const saved = isAvatar ? `${count} saved avatar${count === 1 ? "" : "s"}` : `${count} saved product${count === 1 ? "" : "s"}`;
+  return `<label class="attachment-upload-panel ${isAvatar ? "avatar" : "product"}" data-drop-upload="${esc(kind)}">
+    <input type="file" data-upload="${esc(kind)}" data-upload-select="${esc(kind)}" accept="image/*,video/*" hidden>
+    <span class="attachment-upload-panel-icon">${icon(isAvatar ? "circle-user-round" : "package", 34)}</span>
+    <span>
+      <strong>${esc(title)}</strong>
+      <p>${esc(copy)}</p>
+    </span>
+    <small>${esc(saved)} · PNG, JPG, WebP, or video</small>
+  </label>`;
+}
+
+function attachmentPickerSavedEmpty(kind) {
+  const label = kind === "avatar" ? "avatars" : "products";
+  return `<div class="attachment-picker-saved-empty">
+    <b>No saved ${esc(label)} yet</b>
+    <span>Use the upload area above to add one.</span>
+  </div>`;
 }
 
 function attachmentPickerEmpty(kind) {

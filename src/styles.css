@@ -6062,8 +6062,21 @@ button:disabled [data-lucide="loader-circle"] {
   text-shadow: 0 0 22px rgba(255, 95, 143, 0.32);
 }
 
+.attachment-add-button-product {
+  color: #f7b84d;
+  text-shadow: 0 0 22px rgba(247, 184, 77, 0.28);
+}
+
+.attachment-add-button-avatar {
+  color: #ff7aa8;
+}
+
 .attachment-add-button:hover {
   color: #ff8fb0;
+}
+
+.attachment-add-button-product:hover {
+  color: #ffd084;
 }
 
 .attachment-picker-close {
@@ -6111,6 +6124,93 @@ button:disabled [data-lucide="loader-circle"] {
   padding: 26px;
 }
 
+.attachment-picker-grid.is-locked {
+  min-height: 170px;
+  max-height: 300px;
+  padding-top: 0;
+}
+
+.attachment-upload-panel {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  margin: 24px 26px 18px;
+  min-height: 128px;
+  padding: 24px 28px;
+  border: 1.5px dashed rgba(255, 255, 255, 0.26);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018)),
+    #080808;
+  color: #f5f2f6;
+  cursor: copy;
+  transition: border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+.attachment-upload-panel:hover,
+.attachment-upload-panel.is-dragging {
+  border-color: rgba(255, 95, 143, 0.78);
+  background:
+    radial-gradient(circle at 18% 50%, rgba(255, 95, 143, 0.18), transparent 34%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.02)),
+    #090909;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 20px 58px rgba(95, 0, 103, 0.2);
+  transform: translateY(-1px);
+}
+
+.attachment-upload-panel.product:hover,
+.attachment-upload-panel.product.is-dragging {
+  border-color: rgba(247, 184, 77, 0.82);
+  background:
+    radial-gradient(circle at 18% 50%, rgba(247, 184, 77, 0.16), transparent 34%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.02)),
+    #090909;
+}
+
+.attachment-upload-panel-icon {
+  display: grid;
+  place-items: center;
+  width: 66px;
+  height: 66px;
+  border-radius: 18px;
+  background: rgba(255, 95, 143, 0.13);
+  color: #ff8fb0;
+  box-shadow: inset 0 0 0 1px rgba(255, 95, 143, 0.22);
+}
+
+.attachment-upload-panel.product .attachment-upload-panel-icon {
+  background: rgba(247, 184, 77, 0.12);
+  color: #ffd084;
+  box-shadow: inset 0 0 0 1px rgba(247, 184, 77, 0.22);
+}
+
+.attachment-upload-panel strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.attachment-upload-panel p {
+  margin: 0;
+  color: #aaa1ad;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.attachment-upload-panel small {
+  justify-self: end;
+  color: #7e7484;
+  font-size: 12px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
 .attachment-picker-card {
   position: relative;
   display: grid;
@@ -6128,6 +6228,14 @@ button:disabled [data-lucide="loader-circle"] {
 .attachment-picker-card:hover {
   border-color: #22c967;
   transform: translateY(-1px);
+}
+
+.attachment-picker-modal-product .attachment-picker-card:hover {
+  border-color: #f7b84d;
+}
+
+.attachment-picker-modal-avatar .attachment-picker-card:hover {
+  border-color: #ff7aa8;
 }
 
 .attachment-picker-card img,
@@ -6158,6 +6266,16 @@ button:disabled [data-lucide="loader-circle"] {
   color: #ffffff;
   font-size: 11px;
   font-weight: 950;
+}
+
+.attachment-kind-badge.product {
+  background: #f7b84d;
+  color: #2b0634;
+}
+
+.attachment-kind-badge.avatar {
+  background: #ff7aa8;
+  color: #ffffff;
 }
 
 .attachment-picker-card b,
@@ -6248,6 +6366,51 @@ button:disabled [data-lucide="loader-circle"] {
 
 .attachment-picker-empty b {
   color: #cfc9d1;
+}
+
+.attachment-picker-saved-empty {
+  grid-column: 1 / -1;
+  display: grid;
+  place-items: center;
+  gap: 6px;
+  min-height: 150px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.018);
+  color: #8d8492;
+  text-align: center;
+}
+
+.attachment-picker-saved-empty b {
+  color: #d8d2dc;
+  font-size: 16px;
+}
+
+.attachment-picker-saved-empty span {
+  font-size: 13px;
+}
+
+@media (max-width: 720px) {
+  .attachment-picker-modal {
+    width: min(94vw, 520px);
+    max-height: 78vh;
+  }
+
+  .attachment-upload-panel {
+    grid-template-columns: auto minmax(0, 1fr);
+    margin: 18px 18px 14px;
+    padding: 18px;
+  }
+
+  .attachment-upload-panel small {
+    grid-column: 1 / -1;
+    justify-self: start;
+    white-space: normal;
+  }
+
+  .attachment-picker-grid.is-locked {
+    padding: 0 18px 18px;
+  }
 }
 
 .ugc-builder-backdrop {
