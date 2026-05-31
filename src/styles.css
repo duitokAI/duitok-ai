@@ -27217,3 +27217,69 @@ label {
     max-height: 78px !important;
   }
 }
+
+/* Agent loading state: do not inherit the assistant avatar grid. */
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.agent-thinking,
+.studio-shell .agent-page-panel .agent-thread article.agent-thinking {
+  width: min(540px, calc(100% - 24px)) !important;
+  max-width: min(540px, calc(100% - 24px)) !important;
+  display: flex !important;
+  grid-template-columns: none !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-self: flex-start !important;
+  gap: 12px !important;
+  border: 1px solid rgba(111, 28, 132, 0.14) !important;
+  border-radius: 18px !important;
+  padding: 16px 18px !important;
+  background: rgba(255, 250, 252, 0.94) !important;
+  color: #2a0633 !important;
+  box-shadow: 0 14px 36px rgba(62, 8, 70, 0.08) !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thinking > span,
+.studio-shell .agent-page-panel .agent-thinking > span {
+  display: inline-flex !important;
+  width: auto !important;
+  max-width: 100% !important;
+  color: rgba(62, 22, 74, 0.58) !important;
+  writing-mode: horizontal-tb !important;
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thinking-row,
+.studio-shell .agent-page-panel .agent-thinking-row {
+  width: 100% !important;
+  display: grid !important;
+  grid-template-columns: 30px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thinking-row b,
+.studio-shell .agent-page-panel .agent-thinking-row b {
+  width: 30px !important;
+  height: 30px !important;
+  color: #5f176f !important;
+  background: rgba(255, 214, 43, 0.18) !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thinking-row strong,
+.studio-shell .agent-page-panel .agent-thinking-row strong {
+  display: block !important;
+  color: #2a0633 !important;
+  writing-mode: horizontal-tb !important;
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thinking-row p,
+.studio-shell .agent-page-panel .agent-thinking-row p {
+  color: rgba(62, 22, 74, 0.68) !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thinking-steps,
+.studio-shell .agent-page-panel .agent-thinking-steps {
+  display: flex !important;
+}
