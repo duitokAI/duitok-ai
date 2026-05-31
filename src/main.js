@@ -16,6 +16,7 @@ const storageKeys = {
   adminKey: "pokaya-admin-key",
   lang: "pokaya-lang",
   sidebarCollapsed: "pokaya-sidebar-collapsed",
+  studioWallZoom: "pokaya-studio-wall-zoom",
   agentMessages: "pokaya-agent-messages",
   agentContextSummary: "pokaya-agent-context-summary",
   agentHistory: "pokaya-agent-history"
@@ -120,6 +121,7 @@ const state = {
   agentBusy: false,
   agentTyping: false,
   sidebarCollapsed: localStorage.getItem(storageKeys.sidebarCollapsed) === "true",
+  studioWallZoom: Number(localStorage.getItem(storageKeys.studioWallZoom) || 2),
   agentBusyStartedAt: 0,
   agentWorkingTick: 0,
   agentDebugOpen: false,
@@ -4074,7 +4076,8 @@ function fieldValue(p, path = "") {
 
 function studioImmersiveShell(p, step, advancedHtml = "") {
   const meta = studioStepMeta(step);
-  return `<section class="studio-immersive-page" data-studio-mode="${esc(step)}">
+  return `<section class="studio-immersive-page studio-wall-zoomable" data-studio-mode="${esc(step)}" ${studioWallZoomStyleAttr()}>
+    ${studioWallZoomControl()}
     ${studioResultWall(p, meta)}
     <details class="studio-advanced-drawer">
       <summary>${icon("sliders-horizontal", 18)} Advanced settings</summary>
@@ -4082,6 +4085,27 @@ function studioImmersiveShell(p, step, advancedHtml = "") {
     </details>
     ${studioGenerateDock(p, meta)}
   </section>`;
+}
+
+function studioWallZoomValue() {
+  const value = Number(state.studioWallZoom);
+  if (!Number.isFinite(value)) return 2;
+  return Math.max(0, Math.min(4, Math.round(value)));
+}
+
+function studioWallZoomColumn(value = studioWallZoomValue()) {
+  return [180, 220, 260, 320, 400][value] || 260;
+}
+
+function studioWallZoomStyleAttr() {
+  return `style="--studio-wall-column:${studioWallZoomColumn()}px"`;
+}
+
+function studioWallZoomControl() {
+  const value = studioWallZoomValue();
+  return `<div class="studio-wall-zoom-control" aria-label="Preview size">
+    <input type="range" min="0" max="4" step="1" value="${value}" data-studio-wall-zoom aria-label="Adjust preview size">
+  </div>`;
 }
 
 function studioResultWall(p, meta = {}) {
@@ -4169,8 +4193,9 @@ function imagePanel(p) {
   const selectedMode = modeOptions.includes(p.image.mode) ? p.image.mode : "Create Image";
   const imageTypes = ["image", "video", "visual_card"];
   const meta = studioStepMeta("image");
-  return `<section class="image-canvas-studio image-higgsfield-mode">
+  return `<section class="image-canvas-studio image-higgsfield-mode studio-wall-zoomable" ${studioWallZoomStyleAttr()}>
     ${selectedMode === "Virtualize (Poster/Ad)" ? `<div class="image-studio-legacy">${virtualizePanel()}</div>` : `
+      ${studioWallZoomControl()}
       ${studioResultWall(p, meta)}
       ${imageGenerateConsole(p, selectedModel)}
     `}
@@ -8063,6 +8088,7 @@ function bind() {
   }));
   document.querySelectorAll("[data-date-field]").forEach((el) => el.addEventListener("change", () => set({ [el.dataset.dateField]: el.value })));
   document.querySelectorAll("[data-action]").forEach((el) => el.addEventListener("click", (e) => action(e, el.dataset.action)));
+  document.querySelectorAll("[data-studio-wall-zoom]").forEach((el) => el.addEventListener("input", () => updateStudioWallZoom(el.value)));
   document.querySelectorAll("[data-field-set]").forEach((el) => el.addEventListener("click", () => saveProjectFieldQuick(el.dataset.fieldSet, el.dataset.value, el)));
   document.querySelectorAll('[data-field="image.aspectRatio"]').forEach((el) => el.addEventListener("input", () => syncImageAspectRatioIcon(el)));
   document.querySelectorAll("[data-field]").forEach((el) => el.addEventListener("change", fieldChange));
@@ -8221,6 +8247,17 @@ function syncImageAspectRatioIcon(selectEl) {
   const iconEl = selectEl?.closest(".image-aspect-ratio-select")?.querySelector("svg, i");
   if (!iconEl) return;
   iconEl.style.transform = selectEl.value === "16:9" ? "rotate(90deg)" : "";
+}
+
+function updateStudioWallZoom(value) {
+  const zoom = Math.max(0, Math.min(4, Math.round(Number(value) || 0)));
+  state.studioWallZoom = zoom;
+  localStorage.setItem(storageKeys.studioWallZoom, String(zoom));
+  const column = `${studioWallZoomColumn(zoom)}px`;
+  document.querySelectorAll(".studio-wall-zoomable").forEach((el) => el.style.setProperty("--studio-wall-column", column));
+  document.querySelectorAll("[data-studio-wall-zoom]").forEach((el) => {
+    if (Number(el.value) !== zoom) el.value = zoom;
+  });
 }
 
 function closeLangMenu(event) {
