@@ -4159,6 +4159,10 @@ function imageGenerateConsole(p, selectedModel) {
   const product = selectedImageReference("product");
   const credit = selectedModel === "Nano Banana Pro" ? "0.20" : "0.15";
   const modelOptions = [["GPT Image 2", "GPT Image 2"], ["Nano Banana Pro", "Nano Pro"]];
+  const resolutionOptions = [["1K", "1k"], ["2K", "2k"], ["4K", "4k"]];
+  const selectedResolution = ["1K", "2K", "4K"].includes(String(p.image.resolution || "").toUpperCase())
+    ? String(p.image.resolution).toUpperCase()
+    : "2K";
   return `<section class="image-generate-console">
     ${studioStepMenu("image-console-step-menu")}
     <button class="image-console-add" type="button" data-action="open-attachment-picker" data-attachment-kind="product" title="Add reference">${icon("plus", 20)}</button>
@@ -4168,7 +4172,7 @@ function imageGenerateConsole(p, selectedModel) {
     <div class="image-console-tools">
       <label>${select("image.model", "", modelOptions, selectedModel)}</label>
       <span>${icon("smartphone", 15)} 9:16</span>
-      <span>${icon("gem", 15)} 2k</span>
+      <label class="image-resolution-select">${icon("gem", 15)}<select data-field="image.resolution">${resolutionOptions.map(([value, label]) => `<option value="${esc(value)}" ${value === selectedResolution ? "selected" : ""}>${esc(label)}</option>`).join("")}</select></label>
       <span>${icon("coins", 15)} ~${credit} credit</span>
     </div>
     <div class="image-console-references">

@@ -466,7 +466,7 @@ function blankProject(id, name, userId = adminUserId) {
     userId,
     name,
     createdAt: new Date().toISOString(),
-    image: { model: "GPT Image 2", mode: "Create Image", duration: "8", prompt: "" },
+    image: { model: "GPT Image 2", mode: "Create Image", duration: "8", resolution: "2K", prompt: "" },
     ugc: { avatar: "Malay female", voice: "BM Casual", length: "30 seconds", script: "Hook, product proof, objection, offer, CTA." },
     auto: { platform: "TikTok", batch: "7 posts", tone: "Viral hook", productUrl: "" },
     original: { brief: "Rewrite this into Pokaya AI style while keeping the product claim safe." },
@@ -1922,6 +1922,7 @@ function flattenUrlValues(value) {
 }
 
 async function generateImageWithApimart(project) {
+  const resolution = imageResolutionFromProject(project);
   const prompt = [
     project.image?.prompt || "Create a high-converting TikTok Shop product image.",
     `Mode: ${project.image?.mode || "Create Image"}.`,
@@ -1934,7 +1935,7 @@ async function generateImageWithApimart(project) {
       prompt,
       n: 1,
       size: process.env.APIMART_IMAGE_SIZE || "1:1",
-      resolution: process.env.APIMART_IMAGE_RESOLUTION || "1K"
+      resolution
     })
   });
   const task = Array.isArray(data) ? data[0] : data;
@@ -1953,12 +1954,18 @@ function wuyinPathFromProject(project) {
   return wuyinImagePaths[internalMediaModel(project.image?.model)] || process.env.WUYIN_IMAGE_PATH || "/api/async/image_nanoBanana_pro";
 }
 
-function grsaiImageBody(prompt) {
+function imageResolutionFromProject(project) {
+  const value = String(project?.image?.resolution || "").trim().toUpperCase();
+  const fallback = String(process.env.APIMART_IMAGE_RESOLUTION || process.env.GRSAI_NANO_IMAGE_SIZE || "2K").trim().toUpperCase();
+  return ["1K", "2K", "4K"].includes(value) ? value : ["1K", "2K", "4K"].includes(fallback) ? fallback : "2K";
+}
+
+function grsaiImageBody(project, prompt) {
   return {
     model: grsaiNanoModel,
     prompt,
     aspectRatio: process.env.GRSAI_NANO_ASPECT_RATIO || process.env.WUYIN_IMAGE_ASPECT_RATIO || "1:1",
-    imageSize: process.env.GRSAI_NANO_IMAGE_SIZE || process.env.WUYIN_IMAGE_SIZE || "1K",
+    imageSize: imageResolutionFromProject(project),
     shutProgress: true
   };
 }
@@ -2097,7 +2104,7 @@ async function generateImageWithGrsai(project) {
     "Style: realistic commercial product scene, clear product focus, vertical-social friendly, no fake brand claims."
   ].join("\n");
   const payload = await grsaiRequest(grsaiDrawPath, {
-    body: grsaiImageBody(prompt)
+    body: grsaiImageBody(project, prompt)
   });
   const data = payload.data || payload;
   const taskId = data.id || data.task_id || payload.id || payload.task_id;
@@ -4499,6 +4506,7 @@ const agentAllowedFieldPaths = new Set([
   "image.model",
   "image.mode",
   "image.duration",
+  "image.resolution",
   "image.prompt",
   "ugc.avatar",
   "ugc.voice",
