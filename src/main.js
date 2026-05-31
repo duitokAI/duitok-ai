@@ -5764,26 +5764,28 @@ function deleteResultModal() {
 
 function attachmentPickerModal() {
   const kind = state.attachmentPickerKind || "avatar";
-  const filter = state.attachmentPickerFilter || kind;
+  const lockedKind = ["avatar", "product"].includes(kind);
+  const filter = lockedKind ? kind : state.attachmentPickerFilter || "all";
+  const title = filter === "avatar" ? "Pick Avatar" : filter === "product" ? "Pick Product" : "Pick from Attachments";
   const items = (state.db?.attachments || []).filter((item) => {
     const projectMatch = !item.projectId || item.projectId === state.projectId;
     const filterMatch = filter === "all" || item.kind === filter;
     return projectMatch && filterMatch;
   });
   return `<div class="modal-backdrop attachment-picker-backdrop" data-action="close-modal">
-    <section class="attachment-picker-modal" role="dialog" aria-modal="true" aria-label="Pick from Attachments">
+    <section class="attachment-picker-modal" role="dialog" aria-modal="true" aria-label="${esc(title)}">
       <header class="attachment-picker-head">
-        <h2>Pick from Attachments</h2>
+        <h2>${esc(title)}</h2>
         <div>
           <label class="attachment-add-button">${icon("upload", 21)} <span>Add new</span><input type="file" data-upload="${esc(kind)}" hidden></label>
           <button class="icon-only attachment-picker-close" data-action="close-modal" type="button">${icon("x", 28)}</button>
         </div>
       </header>
-      <div class="attachment-picker-tabs">
+      ${lockedKind ? "" : `<div class="attachment-picker-tabs">
         ${attachmentPickerTab("product", "box", filter)}
         ${attachmentPickerTab("avatar", "circle-user-round", filter)}
         ${attachmentPickerTab("all", "gallery-horizontal", filter)}
-      </div>
+      </div>`}
       <div class="attachment-picker-grid">
         ${items.length ? items.map((item) => attachmentPickerCard(item, kind)).join("") : attachmentPickerEmpty(filter)}
       </div>
