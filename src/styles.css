@@ -28716,7 +28716,7 @@ label {
   align-items: center !important;
   gap: 6px !important;
   padding: 0 4px 4px !important;
-  color: rgba(255, 255, 255, 0.46) !important;
+  color: rgba(255, 255, 255, 0.96) !important;
   font-size: 12px !important;
   font-weight: 850 !important;
   letter-spacing: 0 !important;
@@ -28749,12 +28749,12 @@ label {
   display: inline-grid !important;
   place-items: center !important;
   border-radius: 11px !important;
-  background: rgba(255, 255, 255, 0.07) !important;
-  color: rgba(255, 255, 255, 0.62) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: rgba(214, 214, 218, 0.82) !important;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-option.active .image-model-option-icon {
-  color: #d7ff1f !important;
+  color: rgba(235, 235, 239, 0.96) !important;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-option-copy {
@@ -28836,7 +28836,7 @@ label {
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .provider-logo-google {
-  color: #4285f4 !important;
+  color: rgba(214, 214, 218, 0.82) !important;
   font-size: 20px !important;
   font-weight: 950 !important;
 }
