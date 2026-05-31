@@ -4281,16 +4281,13 @@ function imageGenerateConsole(p, selectedModel) {
   const selectedResolution = ["1K", "2K", "4K"].includes(String(p.image.resolution || "").toUpperCase())
     ? String(p.image.resolution).toUpperCase()
     : "2K";
-  const aspectRatioIcon = selectedAspectRatio === "16:9"
-    ? `<i data-lucide="smartphone" style="width:15px;height:15px;transform:rotate(90deg)"></i>`
-    : icon("smartphone", 15);
   return `<section class="image-generate-console">
     <label class="image-console-prompt">
       <textarea data-field="image.prompt" data-image-console-prompt rows="3" placeholder="Create a high-converting TikTok Shop product image...">${esc(p.image.prompt || "")}</textarea>
     </label>
     <div class="image-console-tools">
       <label>${select("image.model", "", modelOptions, selectedModel)}</label>
-      <label class="image-aspect-ratio-select">${aspectRatioIcon}<select data-field="image.aspectRatio">${aspectRatioOptions.map((value) => `<option value="${esc(value)}" ${value === selectedAspectRatio ? "selected" : ""}>${esc(value)}</option>`).join("")}</select></label>
+      <label class="image-aspect-ratio-select">${icon("smartphone", 15)}<select data-field="image.aspectRatio">${aspectRatioOptions.map((value) => `<option value="${esc(value)}" ${value === selectedAspectRatio ? "selected" : ""}>${esc(value)}</option>`).join("")}</select></label>
       <label class="image-resolution-select">${icon("gem", 15)}<select data-field="image.resolution">${resolutionOptions.map(([value, label]) => `<option value="${esc(value)}" ${value === selectedResolution ? "selected" : ""}>${esc(label)}</option>`).join("")}</select></label>
       <div class="image-count-stepper" aria-label="Images to generate">
         <button type="button" data-action="image-count-down" aria-label="Generate fewer images" ${selectedCount <= 1 ? "disabled" : ""}>${icon("minus", 15)}</button>
