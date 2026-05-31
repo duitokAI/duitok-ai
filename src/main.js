@@ -1449,8 +1449,6 @@ function bindImageConsoleCompact() {
   if (!consoleEl) return;
   let ticking = false;
   let compact = consoleEl.classList.contains("is-compact");
-  const compactAt = 120;
-  const expandAt = 36;
   const scrollTargets = [
     window,
     document.querySelector(".workspace"),
@@ -1467,9 +1465,20 @@ function bindImageConsoleCompact() {
       .filter((target) => target !== window)
       .map((target) => target.scrollTop || 0)
   );
+  const scrollRange = () => Math.max(
+    Math.max(0, (document.scrollingElement?.scrollHeight || 0) - window.innerHeight),
+    Math.max(0, document.documentElement.scrollHeight - window.innerHeight),
+    Math.max(0, (document.body?.scrollHeight || 0) - window.innerHeight),
+    ...uniqueScrollTargets
+      .filter((target) => target !== window)
+      .map((target) => Math.max(0, (target.scrollHeight || 0) - (target.clientHeight || 0)))
+  );
   const sync = () => {
     ticking = false;
     const scrollY = scrollOffset();
+    const range = scrollRange();
+    const compactAt = Math.max(12, Math.min(120, range * 0.35));
+    const expandAt = Math.max(4, Math.min(36, compactAt * 0.3));
     const nextCompact = compact ? scrollY > expandAt : scrollY > compactAt;
     if (nextCompact === compact) return;
     compact = nextCompact;
