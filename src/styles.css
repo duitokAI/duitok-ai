@@ -29360,6 +29360,44 @@ label {
   min-width: 0 !important;
 }
 
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-select,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-select {
+  display: grid !important;
+  grid-template-columns: 24px minmax(46px, 1fr) 20px !important;
+  align-items: center !important;
+  column-gap: 9px !important;
+  padding: 0 14px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-select svg,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-select i,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-select svg,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-select i {
+  grid-column: 1 !important;
+  justify-self: center !important;
+  flex: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-select select,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-select select {
+  grid-column: 2 / 4 !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  padding: 0 24px 0 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #2a0633 !important;
+  font-size: clamp(15px, 1vw, 18px) !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  text-align-last: center !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: #2a0633 !important;
+  appearance: auto !important;
+}
+
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references {
   min-width: 0 !important;
   width: 100% !important;
