@@ -4196,7 +4196,7 @@ function studioPendingWallCard(job) {
   const aspectRatio = String(job.aspectRatio || project().image?.aspectRatio || "").includes("16:9") ? "16:9" : "9:16";
   const aspectClass = aspectRatio === "16:9" ? "landscape" : "portrait";
   const mediaRatio = aspectRatio === "16:9" ? "1.7778" : "0.5625";
-  return `<article class="studio-wall-card studio-wall-pending ${aspectClass}" style="--media-ratio:${mediaRatio};aspect-ratio:${esc(aspectRatio.replace(":", " / "))}">
+  return `<article class="studio-wall-card studio-wall-pending ${aspectClass}" data-generation-job-id="${esc(job.id)}" data-generation-job-status="${esc(job.status || "queued")}" style="--media-ratio:${mediaRatio};aspect-ratio:${esc(aspectRatio.replace(":", " / "))}">
     <div><b>${job.status === "processing" ? "Processing" : "Queued"}</b><button type="button" data-generation-cancel="${esc(job.id)}">Cancel</button></div>
   </article>`;
 }
@@ -5352,7 +5352,7 @@ function resultPreview(item, options = {}) {
   const videoSrc = item.videoUrl ? `/api/media/result/${encodeURIComponent(item.id)}/video?token=${token}` : "";
   const imageError = "this.replaceWith(Object.assign(document.createElement('div'),{className:'result-media-error',textContent:'图片保存失败，请联系客服处理'}))";
   const ratioSync = "this.closest('.studio-wall-card')?.style.setProperty('--media-ratio',(this.naturalWidth||this.videoWidth||1)/(this.naturalHeight||this.videoHeight||1))";
-  const image = imageSrc ? `<img class="result-image" src="${imageSrc}" alt="${esc(item.title)}" loading="${options.full ? "eager" : "lazy"}" onload="${esc(ratioSync)}" onerror="${esc(imageError)}">` : "";
+  const image = imageSrc ? `<img class="result-image" src="${imageSrc}" alt="${esc(item.title)}" loading="${options.full ? "eager" : "lazy"}" decoding="async" onload="${esc(ratioSync)}" onerror="${esc(imageError)}">` : "";
   const video = videoSrc ? `<div class="result-video-shell"><video class="result-video" src="${videoSrc}" preload="metadata" playsinline onloadedmetadata="${esc(ratioSync)}"></video><button type="button" class="result-play-button" data-video-play="${esc(item.id)}">${icon("play", 26)}<span>点击播放</span></button></div>` : "";
   const videoTrigger = videoSrc ? `<button type="button" class="result-preview-trigger result-video-trigger" data-result-preview="${esc(item.id)}" aria-label="Open full video preview"><div class="result-video-shell"><video class="result-video" src="${videoSrc}" preload="metadata" playsinline muted onloadedmetadata="${esc(ratioSync)}"></video><span class="result-play-button">${icon("play", 26)}<span>点击查看</span></span></div></button>` : "";
   const text = !image && !video ? `<div class="result-text-preview">${icon("file-text", 30)}<span>Text result</span></div>` : "";
@@ -9612,7 +9612,14 @@ async function pollGenerationQueue(attempt = 0) {
   if (state.queuePolling && attempt === 0) return;
   state.queuePolling = true;
   try {
-    const db = await refreshState();
+    const nextDb = await api("/state");
+    const shouldRender = shouldRenderGenerationRefresh(state.db, nextDb);
+    if (shouldRender) set({ db: nextDb });
+    else {
+      state.db = nextDb;
+      updateGenerationStatusInDom(nextDb);
+    }
+    const db = nextDb;
     const hasRunning = db.generationJobs.some((job) => ["queued", "processing"].includes(job.status));
     if (hasRunning && attempt < 120) {
       setTimeout(() => pollGenerationQueue(attempt + 1), 3000);
@@ -9622,6 +9629,41 @@ async function pollGenerationQueue(attempt = 0) {
     notify(error.message);
   }
   state.queuePolling = false;
+}
+
+function generationResultSignature(db = state.db) {
+  return (db?.projects || [])
+    .map((projectItem) => `${projectItem.id}:${(projectItem.results || []).map((item) => item.id).join(",")}`)
+    .join("|");
+}
+
+function generationJobTerminal(status = "") {
+  return ["succeeded", "failed", "cancelled"].includes(status);
+}
+
+function shouldRenderGenerationRefresh(previousDb, nextDb) {
+  if (!previousDb || !nextDb) return true;
+  if (generationResultSignature(previousDb) !== generationResultSignature(nextDb)) return true;
+  const previousJobs = new Map((previousDb.generationJobs || []).map((job) => [job.id, job]));
+  const nextJobs = nextDb.generationJobs || [];
+  if (previousJobs.size !== nextJobs.length) return true;
+  return nextJobs.some((job) => {
+    const previous = previousJobs.get(job.id);
+    if (!previous) return true;
+    if (previous.status === job.status) return false;
+    return generationJobTerminal(previous.status) || generationJobTerminal(job.status);
+  });
+}
+
+function updateGenerationStatusInDom(db = state.db) {
+  const jobs = new Map((db?.generationJobs || []).map((job) => [job.id, job]));
+  document.querySelectorAll("[data-generation-job-id]").forEach((card) => {
+    const job = jobs.get(card.dataset.generationJobId);
+    if (!job) return;
+    card.dataset.generationJobStatus = job.status || "queued";
+    const label = card.querySelector("b");
+    if (label) label.textContent = job.status === "processing" ? "Processing" : job.status === "queued" ? "Queued" : job.status || "";
+  });
 }
 
 function rememberAgentMessages(messages) {

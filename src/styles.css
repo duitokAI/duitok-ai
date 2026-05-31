@@ -523,6 +523,7 @@
 .studio-wall-card {
   position: relative;
   overflow: hidden;
+  contain: layout paint;
   border-radius: 14px;
   background: rgba(31, 6, 38, 0.08);
   color: #fff;
