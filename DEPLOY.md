@@ -61,11 +61,18 @@ APIMART_API_KEY=your_apimart_api_key
 APIMART_BASE_URL=https://api.apimart.ai
 APIMART_CHAT_PATH=/v1/chat/completions
 APIMART_IMAGE_PATH=/v1/images/generations
+APIMART_VIDEO_PATH=/v1/videos/generations
 APIMART_TASK_PATH_PREFIX=/v1/tasks
+APIMART_POLL_ATTEMPTS=60
+APIMART_POLL_MS=5000
 APIMART_TEXT_MODEL=gpt-5-mini
 APIMART_IMAGE_MODEL=gpt-image-2
 APIMART_IMAGE_SIZE=1:1
 APIMART_IMAGE_RESOLUTION=1K
+APIMART_SEEDANCE_MODEL=doubao-seedance-2.0
+APIMART_SEEDANCE_DURATION=5
+APIMART_SEEDANCE_RESOLUTION=1080p
+APIMART_SEEDANCE_GENERATE_AUDIO=true
 DEEPSEEK_API_KEY=your_deepseek_api_key
 DEEPSEEK_BASE_URL=https://api.deepseek.com
 DEEPSEEK_CHAT_PATH=/chat/completions
@@ -95,18 +102,6 @@ WUYIN_OMNI_DURATION=10
 WUYIN_OMNI_SIZE=720x1280
 WUYIN_GROK_DURATION=10
 WUYIN_GROK_ASPECT_RATIO=9:16
-ATLASCLOUD_API_KEY=your_atlascloud_api_key
-ATLASCLOUD_BASE_URL=https://api.atlascloud.ai
-ATLASCLOUD_GENERATE_VIDEO_PATH=/api/v1/model/generateVideo
-ATLASCLOUD_PREDICTION_PATH_PREFIX=/api/v1/model/prediction
-ATLASCLOUD_SEEDANCE_MODEL=bytedance/seedance-2.0/text-to-video
-ATLASCLOUD_SEEDANCE_DURATION=4
-ATLASCLOUD_SEEDANCE_ASPECT_RATIO=9:16
-ATLASCLOUD_SEEDANCE_FPS=24
-ATLASCLOUD_SEEDANCE_WATERMARK=false
-ATLASCLOUD_POLL_ATTEMPTS=60
-ATLASCLOUD_POLL_MS=5000
-ATLASCLOUD_TIMEOUT_MS=120000
 ASSET_STORAGE_PROVIDER=r2
 REQUIRE_DURABLE_ASSETS=true
 R2_ACCOUNT_ID=your_cloudflare_account_id
@@ -190,15 +185,16 @@ The media endpoints used are:
 
 All tasks are polled through `/api/async/detail`.
 
-## Optional: Connect Atlas Cloud Seedance 2.0
+## Optional: Connect APIMart Seedance 2.0
 
-Atlas Cloud powers only `Seedance 2.0` video generation. The other media models stay on their existing providers.
+APIMart powers `GPT Image 2` image generation and `Seedance 2.0` video generation. The other video models stay on their existing providers.
 
 The media endpoints used are:
 
-- `Seedance 2.0` -> `/api/v1/model/generateVideo` with `model=bytedance/seedance-2.0/text-to-video`
+- `GPT Image 2` -> `/v1/images/generations`
+- `Seedance 2.0` -> `/v1/videos/generations` with `model=doubao-seedance-2.0`
 
-Results are polled through `/api/v1/model/prediction/{id}`.
+Results are polled through `/v1/tasks/{task_id}`.
 
 ## Later, Not Now
 

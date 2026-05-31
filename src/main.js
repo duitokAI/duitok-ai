@@ -4869,7 +4869,7 @@ function originalProviderLabel(provider) {
 
 function originalProviderCredits(provider) {
   const credits = {
-    "Seedance 2.0": "0.40",
+    "Seedance 2.0": "0.50",
     "Veo 3.1": "0.40",
     "Grok Imagine Video": "0.48",
     "Sora 2": "0.48",

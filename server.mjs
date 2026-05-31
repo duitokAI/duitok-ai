@@ -21,12 +21,14 @@ const postgresStateId = process.env.POSTGRES_STATE_ID || "default";
 const apimartBaseUrl = (process.env.APIMART_BASE_URL || "https://api.apimart.ai").replace(/\/$/, "");
 const apimartChatPath = process.env.APIMART_CHAT_PATH || "/v1/chat/completions";
 const apimartImagePath = process.env.APIMART_IMAGE_PATH || "/v1/images/generations";
+const apimartVideoPath = process.env.APIMART_VIDEO_PATH || "/v1/videos/generations";
 const apimartTaskPathPrefix = process.env.APIMART_TASK_PATH_PREFIX || "/v1/tasks";
 const apimartTextModel = process.env.APIMART_TEXT_MODEL || "gpt-5-mini";
 const agentVisionModel = process.env.AGENT_VISION_MODEL || process.env.APIMART_VISION_MODEL || "gpt-4o-mini";
 const apimartImageModel = process.env.APIMART_IMAGE_MODEL || "gpt-image-2";
 const apimartSeedream50LiteModel = process.env.APIMART_SEEDREAM_5_LITE_MODEL || "seedream-5.0-lite";
 const apimartSeedream45Model = process.env.APIMART_SEEDREAM_4_5_MODEL || "seedream-4.5";
+const apimartSeedanceModel = process.env.APIMART_SEEDANCE_MODEL || "doubao-seedance-2.0";
 const geminiBaseUrl = (process.env.GEMINI_BASE_URL || "https://generativelanguage.googleapis.com").replace(/\/$/, "");
 const geminiGeneratePathPrefix = process.env.GEMINI_GENERATE_PATH_PREFIX || "/v1beta/models";
 const geminiVisionModel = process.env.GEMINI_VISION_MODEL || process.env.GEMINI_MODEL || "gemini-2.5-flash";
@@ -63,10 +65,6 @@ const grsaiNanoModel = process.env.GRSAI_NANO_MODEL || "nano-banana-pro";
 const grsaiNanoBanana2Model = process.env.GRSAI_NANO_BANANA_2_MODEL || "nano-banana-2";
 const grsaiVisionModel = process.env.GRSAI_VISION_MODEL || "gemini-2.5-flash";
 const grsaiCloneModel = process.env.GRSAI_CLONE_MODEL || "gemini-3-pro";
-const atlasBaseUrl = (process.env.ATLASCLOUD_BASE_URL || "https://api.atlascloud.ai").replace(/\/$/, "");
-const atlasGenerateVideoPath = process.env.ATLASCLOUD_GENERATE_VIDEO_PATH || "/api/v1/model/generateVideo";
-const atlasPredictionPathPrefix = process.env.ATLASCLOUD_PREDICTION_PATH_PREFIX || "/api/v1/model/prediction";
-const atlasSeedanceModel = process.env.ATLASCLOUD_SEEDANCE_MODEL || "bytedance/seedance-2.0/text-to-video";
 const webSearchBaseUrl = process.env.WEB_SEARCH_BASE_URL || "https://duckduckgo.com/html/";
 const allowedMediaModels = new Set(["GPT Image 2", "Seedream 5.0 Lite", "Seedream 4.5", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"]);
 const publicMediaModelMap = {
@@ -354,7 +352,7 @@ function defaultModelCosts() {
     "Nano Banana Pro": { costRm: 0.105, costRmb: 0.18, unit: "image" },
     "Nano Banana 2": { costRm: 0.105, costRmb: 0.18, unit: "image" },
     "Grok Imagine": { costRm: 0.024, costRmb: 0.05, unit: "image" },
-    "Seedance 2.0": { costRm: 0.48, costUsd: 0.4, unit: "4s video" },
+    "Seedance 2.0": { costRm: 0.98, costUsd: 0.208, unit: "5s video" },
     "Veo 3.1": { costRm: 0.234, costRmb: 0.4, unit: "8s video" },
     "Sora 2": { costRm: 0.093, costRmb: 0.16, unit: "8s video" },
     "Gemini Omni": { costRm: 0.584, costRmb: 1, unit: "10s video" },
@@ -1165,8 +1163,8 @@ function requestedMediaModelFromText(content = "") {
 
 function generationModelOptionsText(kind = "auto") {
   if (kind === "image") return "GPT Image 2（0.15 credit/张）、Seedream 5.0 Lite（0.15 credit/张）、Seedream 4.5（0.15 credit/张）、Nano Banana Pro（0.20 credit/张）、Nano Banana 2（0.15 credit/张）或 Grok Imagine（0.15 credit/张）";
-  if (kind === "video") return "Veo 3.1（0.40 credit/8秒）、Seedance 2.0（0.40 credit/4秒）、Sora 2（0.48 credit/8秒）";
-  return "图片：GPT Image 2（0.15）/ Seedream 5.0 Lite（0.15）/ Seedream 4.5（0.15）/ Nano Banana Pro（0.20）/ Nano Banana 2（0.15）/ Grok Imagine（0.15）；视频：Veo 3.1（0.40）/ Seedance 2.0（0.40）/ Sora 2（0.48）";
+  if (kind === "video") return "Veo 3.1（0.40 credit/8秒）、Seedance 2.0（0.50 credit/5秒）、Sora 2（0.48 credit/8秒）";
+  return "图片：GPT Image 2（0.15）/ Seedream 5.0 Lite（0.15）/ Seedream 4.5（0.15）/ Nano Banana Pro（0.20）/ Nano Banana 2（0.15）/ Grok Imagine（0.15）；视频：Veo 3.1（0.40）/ Seedance 2.0（0.50）/ Sora 2（0.48）";
 }
 
 function redactProviderText(value, fallback = "") {
@@ -1473,7 +1471,7 @@ function providerForMediaModel(model) {
   model = internalMediaModel(model);
   if (model === "GPT Image 2" || model === "Seedream 5.0 Lite" || model === "Seedream 4.5") return process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Nano Banana Pro" || model === "Nano Banana 2") return process.env.GRSAI_API_KEY ? "grsai" : "mock";
-  if (model === "Seedance 2.0") return process.env.ATLASCLOUD_API_KEY ? "atlascloud" : "mock";
+  if (model === "Seedance 2.0") return process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Grok Imagine" || model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni" || model === "Grok Imagine Video") return process.env.WUYIN_API_KEY ? "wuyin" : "mock";
   return "unsupported";
 }
@@ -1489,7 +1487,7 @@ function generationCostFor(db, project, action, generated) {
 
 function videoDurationFor(project, model = project.image?.model) {
   model = internalMediaModel(model);
-  if (model === "Seedance 2.0") return Number(project.image?.duration || process.env.ATLASCLOUD_SEEDANCE_DURATION || 4);
+  if (model === "Seedance 2.0") return Number(project.image?.duration || process.env.APIMART_SEEDANCE_DURATION || 5);
   if (model === "Sora 2") return Number(project.image?.duration || process.env.WUYIN_SORA_DURATION || 8);
   if (model === "Gemini Omni") return 10;
   if (model === "Grok Imagine Video") return Number(project.image?.duration || process.env.WUYIN_GROK_DURATION || 8);
@@ -1769,16 +1767,6 @@ function requireWuyinConfig() {
   return apiKey;
 }
 
-function requireAtlasConfig() {
-  const apiKey = process.env.ATLASCLOUD_API_KEY;
-  if (!apiKey || apiKey.includes("replace_with")) {
-    const error = new Error("Atlas Cloud belum configure. Isi ATLASCLOUD_API_KEY dalam Render Environment Variables dulu.");
-    error.status = 503;
-    throw error;
-  }
-  return apiKey;
-}
-
 function requireGrsaiConfig() {
   const apiKey = process.env.GRSAI_API_KEY;
   if (!apiKey || apiKey.includes("replace_with")) {
@@ -1998,27 +1986,6 @@ async function enhancePromptWithDeepSeek({ project, prompt, visualSummary = "" }
   };
 }
 
-async function atlasRequest(pathname, { method = "POST", body } = {}) {
-  const apiKey = requireAtlasConfig();
-  const response = await fetch(`${atlasBaseUrl}${pathname}`, {
-    method,
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json"
-    },
-    body: body ? JSON.stringify(body) : undefined,
-    signal: AbortSignal.timeout(Number(process.env.ATLASCLOUD_TIMEOUT_MS || 120000))
-  });
-  const text = await response.text();
-  const payload = parseJsonishPayload(text);
-  if (!response.ok || payload.error || payload.message?.toLowerCase?.().includes("error")) {
-    const error = new Error(payload.error || payload.message || payload.msg || `Atlas Cloud request failed (${response.status})`);
-    error.status = response.status || 502;
-    throw error;
-  }
-  return payload;
-}
-
 async function wuyinRequest(pathname, { method = "GET", body, query = {} } = {}) {
   const apiKey = requireWuyinConfig();
   const url = new URL(`${wuyinBaseUrl}${pathname}`);
@@ -2172,8 +2139,8 @@ function imageModelFromProject(project) {
 }
 
 async function pollApimartTask(taskId) {
-  const maxAttempts = Number(process.env.APIMART_IMAGE_POLL_ATTEMPTS || 24);
-  const delayMs = Number(process.env.APIMART_IMAGE_POLL_MS || 2500);
+  const maxAttempts = Number(process.env.APIMART_POLL_ATTEMPTS || process.env.APIMART_IMAGE_POLL_ATTEMPTS || 60);
+  const delayMs = Number(process.env.APIMART_POLL_MS || process.env.APIMART_IMAGE_POLL_MS || 5000);
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, delayMs));
     const data = await apimartRequest(`${apimartTaskPathPrefix}/${encodeURIComponent(taskId)}?language=en`);
@@ -2193,6 +2160,12 @@ function extractImageUrls(taskData) {
   return (taskData.result?.images || [])
     .flatMap((image) => Array.isArray(image.url) ? image.url : [image.url])
     .filter(Boolean);
+}
+
+function extractVideoUrls(taskData) {
+  const videos = taskData.result?.videos || taskData.result?.video || taskData.result?.outputs || taskData.videos || [];
+  const directUrls = flattenUrlValues(videos).filter((url) => /\.(mp4|mov|webm)(\?|$)/i.test(url) || /\/video\//i.test(url));
+  return [...new Set([...directUrls, ...extractUrlsDeep(taskData).filter((url) => /\.(mp4|mov|webm)(\?|$)/i.test(url))])];
 }
 
 function extractUrlsDeep(value) {
@@ -2275,7 +2248,7 @@ function imageAspectRatioFromProject(project) {
 function generationEndpointFor(provider, project) {
   if (provider === "gemini") return `${geminiGeneratePathPrefix}/${geminiVisionModel}:generateContent`;
   if (provider === "grsai" && project?.clone?.referenceVideo) return grsaiChatPath;
-  if (provider === "atlascloud") return atlasGenerateVideoPath;
+  if (provider === "apimart" && internalMediaModel(project?.image?.model) === "Seedance 2.0") return apimartVideoPath;
   if (provider === "grsai") return grsaiDrawPath;
   if (provider === "wuyin") return wuyinPathFromProject(project);
   return apimartImagePath;
@@ -2336,22 +2309,17 @@ function wuyinImageBody(project, prompt) {
   return { prompt, size: imageSize, aspectRatio };
 }
 
-function atlasSeedanceBody(project, prompt) {
-  const aspectRatio = process.env.ATLASCLOUD_SEEDANCE_ASPECT_RATIO || process.env.WUYIN_VIDEO_RATIO || "9:16";
-  const [width, height] = aspectRatio === "1:1"
-    ? [1024, 1024]
-    : aspectRatio === "16:9"
-      ? [1280, 720]
-      : [720, 1280];
+function apimartSeedanceBody(project, prompt) {
+  const resolution = String(process.env.APIMART_SEEDANCE_RESOLUTION || project.image?.resolution || "1080p").trim().toLowerCase();
+  const size = imageAspectRatioFromProject(project);
+  const duration = Math.min(15, Math.max(5, Number(videoDurationFor(project, "Seedance 2.0")) || 5));
   return {
-    model: atlasSeedanceModel,
+    model: apimartSeedanceModel,
     prompt,
-    width: Number(process.env.ATLASCLOUD_SEEDANCE_WIDTH || width),
-    height: Number(process.env.ATLASCLOUD_SEEDANCE_HEIGHT || height),
-    duration: videoDurationFor(project, "Seedance 2.0"),
-    fps: Number(process.env.ATLASCLOUD_SEEDANCE_FPS || 24),
-    watermark: process.env.ATLASCLOUD_SEEDANCE_WATERMARK === "true",
-    return_last_frame: false
+    resolution,
+    size,
+    duration,
+    generate_audio: process.env.APIMART_SEEDANCE_GENERATE_AUDIO !== "false"
   };
 }
 
@@ -2391,32 +2359,6 @@ async function pollGrsaiTask(taskId) {
   const error = new Error("GRS AI image task is still processing. Please try again later.");
   error.status = 202;
   throw error;
-}
-
-async function pollAtlasPrediction(predictionId) {
-  const maxAttempts = Number(process.env.ATLASCLOUD_POLL_ATTEMPTS || 60);
-  const delayMs = Number(process.env.ATLASCLOUD_POLL_MS || 5000);
-  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-    if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, delayMs));
-    const payload = await atlasRequest(`${atlasPredictionPathPrefix}/${encodeURIComponent(predictionId)}`, { method: "GET" });
-    const data = payload.data || payload;
-    const status = String(data.status || payload.status || "").toLowerCase();
-    if (["completed", "succeeded", "success"].includes(status)) return payload;
-    if (["failed", "error", "cancelled", "canceled"].includes(status)) {
-      const error = new Error(data.error || data.message || payload.error || payload.message || `Atlas Cloud Seedance task ${status || "failed"}`);
-      error.status = 502;
-      throw error;
-    }
-  }
-  const error = new Error("Atlas Cloud Seedance task is still processing. Please try again later.");
-  error.status = 202;
-  throw error;
-}
-
-function extractAtlasOutputs(taskData) {
-  const data = taskData.data || taskData;
-  const outputs = Array.isArray(data.outputs) ? data.outputs : [];
-  return [...new Set([...flattenUrlValues(outputs), ...extractUrlsDeep(taskData)])];
 }
 
 function extractGrsaiUrls(taskData) {
@@ -2490,24 +2432,25 @@ async function generateVideoWithWuyin(project) {
   };
 }
 
-async function generateVideoWithAtlasSeedance(project) {
+async function generateVideoWithApimartSeedance(project) {
   const prompt = [
     project.image?.prompt || "Create a high-converting TikTok Shop product video.",
     `Mode: ${project.image?.mode || "Create Video"}.`,
     "Style: realistic short-form ecommerce video, native-looking TikTok Shop pacing, clear product focus, no fake brand claims."
   ].join("\n");
-  const payload = await atlasRequest(atlasGenerateVideoPath, {
-    body: atlasSeedanceBody(project, prompt)
+  const data = await apimartRequest(apimartVideoPath, {
+    method: "POST",
+    body: JSON.stringify(apimartSeedanceBody(project, prompt))
   });
-  const data = payload.data || payload;
-  const predictionId = data.id || data.prediction_id || payload.id || payload.prediction_id;
-  if (!predictionId) return { text: JSON.stringify(payload, null, 2), urls: extractAtlasOutputs(payload) };
-  const taskData = await pollAtlasPrediction(predictionId);
-  const urls = extractAtlasOutputs(taskData);
+  const task = Array.isArray(data) ? data[0] : data;
+  const taskId = task?.task_id || task?.id;
+  if (!taskId) return { text: JSON.stringify(data, null, 2), urls: extractVideoUrls(data) };
+  const taskData = await pollApimartTask(taskId);
+  const urls = extractVideoUrls(taskData);
   return {
-    text: urls.length ? `Video generated with Atlas Cloud Seedance 2.0.\n\nTask ID: ${predictionId}` : `Seedance 2.0 task completed with Atlas Cloud.\n\nTask ID: ${predictionId}`,
+    text: urls.length ? `Video generated with Seedance 2.0.\n\nTask ID: ${taskId}` : `Seedance 2.0 task completed.\n\nTask ID: ${taskId}`,
     urls,
-    taskId: predictionId
+    taskId
   };
 }
 
@@ -2531,9 +2474,9 @@ async function generateWithProvider(project, action, step) {
       throw error;
     }
     const provider = providerForMediaModel(model);
-    if (provider === "atlascloud" && model === "Seedance 2.0") {
-      const video = await generateVideoWithAtlasSeedance(project);
-      return { title: "Atlas Cloud Seedance 2.0", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "atlascloud" };
+    if (provider === "apimart" && model === "Seedance 2.0") {
+      const video = await generateVideoWithApimartSeedance(project);
+      return { title: "Seedance 2.0", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" };
     }
     if (provider === "wuyin" && (model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni" || model === "Grok Imagine Video")) {
       const video = await generateVideoWithWuyin(project);
@@ -5949,7 +5892,8 @@ app.post("/api/agent", async (req, res, next) => {
           "Act like a capable assistant: when the user asks for an output, fill the relevant content settings and run the matching tool if enough information is available.",
           "Pokaya AI is the platform, not a generation model. Never present Pokaya AI as a model option.",
           "User-facing model names are allowed and should be shown when relevant: GPT Image 2, Seedream 5.0 Lite, Seedream 4.5, Nano Banana Pro, Nano Banana 2, and Grok Imagine for images; Veo 3.1, Seedance 2.0, and Sora 2 for videos. Do not mention provider names, base URLs, routes, keys, or infrastructure.",
-          "Before generating a video, make sure the user has selected a video model. If no model is selected or the request is ambiguous, ask one short question with the video model choices and estimated credits instead of generating. Use these user-facing estimates: Veo 3.1 = 0.40 credit/8s, Seedance 2.0 = 0.40 credit/4s, Sora 2 = 0.48 credit/8s.",
+          "User-facing model names are allowed and should be shown when relevant: GPT Image 2, Seedream 5.0 Lite, Seedream 4.5, Nano Banana Pro, Nano Banana 2, and Grok Imagine for images; Veo 3.1, Seedance 2.0, and Sora 2 for videos. Do not mention provider names, base URLs, routes, keys, or infrastructure.",
+          "Before generating a video, make sure the user has selected a video model. If no model is selected or the request is ambiguous, ask one short question with the video model choices and estimated credits instead of generating. Use these user-facing estimates: Veo 3.1 = 0.40 credit/8s, Seedance 2.0 = 0.50 credit/5s, Sora 2 = 0.48 credit/8s.",
           "If the user already says a model name such as Veo, Seedance, or Sora, save that model to the current content settings before creating the prompt or queuing generation.",
           "Common workflows: product/content request = inspect_workspace_state -> create_project or update fields internally -> generate_project_output when the user needs an image, poster, cover, carousel asset, video, or other rendered media through Pokaya's platform models. Weekly content plan = inspect_workspace_state -> remember_agent_context when useful -> create_content_plan, and only create schedule drafts when the user asks for drafts. Video prompt request = create_seedance_prompt; video generation request = create_seedance_prompt -> generate_project_output after confirmation. In user-facing replies, say video prompt or generate video instead of naming the internal video model.",
           "Do not use DeepSeek or any hidden design skill to create final design assets. DeepSeek is only the planner/orchestrator. Rendered image/video/design outputs must be created by Pokaya platform generation tools, charged by the platform credit rules, and confirmed by the user before credit deduction.",
