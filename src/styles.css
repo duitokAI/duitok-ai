@@ -31428,6 +31428,41 @@ label {
   max-width: 100% !important;
 }
 
+/* Agent replies should sit on the workspace surface, not inside another card. */
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant > .agent-message,
+.studio-shell .agent-page-panel .agent-thread article.assistant > .agent-message,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant > .agent-run-card,
+.studio-shell .agent-page-panel .agent-thread article.assistant > .agent-run-card,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant > .agent-tool-cards,
+.studio-shell .agent-page-panel .agent-thread article.assistant > .agent-tool-cards,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant > .agent-generation-run-cards,
+.studio-shell .agent-page-panel .agent-thread article.assistant > .agent-generation-run-cards {
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant .agent-tool-card,
+.studio-shell .agent-page-panel .agent-thread article.assistant .agent-tool-card,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant .agent-generation-card,
+.studio-shell .agent-page-panel .agent-thread article.assistant .agent-generation-card {
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant .agent-generation-preview,
+.studio-shell .agent-page-panel .agent-thread article.assistant .agent-generation-preview,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant .agent-generation-preview .result-image,
+.studio-shell .agent-page-panel .agent-thread article.assistant .agent-generation-preview .result-image {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
 /* Image composer control polish: keep aspect, resolution, and count controls
    visually aligned as one compact control strip. */
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools {
