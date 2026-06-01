@@ -73,6 +73,7 @@ const thumbnailInflight = new Map();
 const thumbnailCacheMaxItems = Number(process.env.THUMBNAIL_CACHE_MAX_ITEMS || 160);
 const thumbnailCacheMaxBytes = Number(process.env.THUMBNAIL_CACHE_MAX_BYTES || 96 * 1024 * 1024);
 let thumbnailCacheBytes = 0;
+const persistentThumbnailWidths = [360, 640, 960];
 const publicMediaModelMap = {
   "GPT Image 2": "GPT Image 2",
   "Seedream 5.0 Lite": "Seedream 5.0 Lite",
@@ -518,11 +519,16 @@ async function mirrorAssetToStorage(sourceUrl, { userId, projectId, resultId, ty
       projectId,
       `${resultId}.${extension}`
     ].map((part) => String(part).replace(/[^a-zA-Z0-9._-]/g, "-")).join("/");
+    const url = await putR2Object(key, bytes, contentType);
+    const thumbnailStorageKeys = type === "image" && contentType.startsWith("image/")
+      ? await persistImageThumbnails(bytes, { userId, projectId, resultId })
+      : {};
     return {
-      url: await putR2Object(key, bytes, contentType),
+      url,
       originalUrl: sourceUrl,
       storage: "cloudflare-r2",
       storageKey: key,
+      thumbnailStorageKeys,
       bytes: bytes.length,
       contentType
     };
@@ -566,6 +572,32 @@ async function persistAttachmentMedia(attachment) {
     mediaKind: attachment.mediaKind || "image",
     type: attachment.type || media.contentType
   };
+}
+
+async function persistImageThumbnails(bytes, { userId, projectId, resultId } = {}) {
+  try {
+    const baseImage = sharp(bytes, { animated: false, limitInputPixels: 80_000_000 }).rotate();
+    const entries = await Promise.all(persistentThumbnailWidths.map(async (width) => {
+      const thumb = await baseImage
+        .clone()
+        .resize({ width, withoutEnlargement: true })
+        .webp({ quality: 74, effort: 4 })
+        .toBuffer();
+      const key = [
+        "generated-assets",
+        userId,
+        projectId,
+        "thumbs",
+        `${resultId}-${width}.webp`
+      ].map((part) => String(part || "asset").replace(/[^a-zA-Z0-9._-]/g, "-")).join("/");
+      await putR2Object(key, thumb, "image/webp");
+      return [width, key];
+    }));
+    return Object.fromEntries(entries);
+  } catch (error) {
+    console.warn("Thumbnail persistence failed", error);
+    return {};
+  }
 }
 
 function blankProject(id, name, userId = adminUserId) {
@@ -1250,6 +1282,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
       originalVideoUrl: _originalVideoUrl,
       assetStorage: _assetStorage,
       assetStorageKey: _assetStorageKey,
+      thumbnailStorageKeys: _thumbnailStorageKeys,
       assetStorageError: _assetStorageError,
       taskId: _taskId,
       providerTaskId: _providerTaskId,
@@ -1300,6 +1333,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
       originalVideoUrl: _originalVideoUrl,
       assetStorage: _assetStorage,
       assetStorageKey: _assetStorageKey,
+      thumbnailStorageKeys: _thumbnailStorageKeys,
       assetStorageError: _assetStorageError,
       ...safe
     } = job;
@@ -2584,6 +2618,7 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
       originalVideoUrl: generated.videoUrl && mirrored.originalUrl !== mirrored.url ? mirrored.originalUrl : undefined,
       assetStorage: mirrored.storage,
       assetStorageKey: mirrored.storageKey,
+      thumbnailStorageKeys: mirrored.thumbnailStorageKeys,
       assetStorageError: mirrored.storageError,
       taskId: generated.taskId,
       providerTaskId: generated.taskId,
@@ -2616,6 +2651,7 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
       originalVideoUrl: result.originalVideoUrl,
       assetStorage: result.assetStorage,
       assetStorageKey: result.assetStorageKey,
+      thumbnailStorageKeys: result.thumbnailStorageKeys,
       assetStorageError: result.assetStorageError,
       textOutput: publicBody,
       providerTextOutput: generated.body,
@@ -2799,6 +2835,7 @@ async function completeQueuedGeneration(jobId, generated) {
       originalVideoUrl: generated.videoUrl && mirrored.originalUrl !== mirrored.url ? mirrored.originalUrl : undefined,
       assetStorage: mirrored.storage,
       assetStorageKey: mirrored.storageKey,
+      thumbnailStorageKeys: mirrored.thumbnailStorageKeys,
       assetStorageError: mirrored.storageError,
       taskId: generated.taskId,
       providerTaskId: generated.taskId,
@@ -2825,6 +2862,7 @@ async function completeQueuedGeneration(jobId, generated) {
       originalVideoUrl: result.originalVideoUrl,
       assetStorage: result.assetStorage,
       assetStorageKey: result.assetStorageKey,
+      thumbnailStorageKeys: result.thumbnailStorageKeys,
       assetStorageError: result.assetStorageError,
       textOutput: publicBody,
       providerTextOutput: generated.body,
@@ -7119,6 +7157,13 @@ app.get("/api/media/result/:id/:kind", async (req, res, next) => {
     const thumbCacheKey = wantsThumb ? resultThumbnailCacheKey(result, thumbWidth) : "";
     const cachedThumb = getCachedThumbnail(thumbCacheKey);
     if (cachedThumb) return sendThumbnail(res, cachedThumb.bytes, thumbCacheKey);
+    const persistentThumbKey = wantsThumb ? selectPersistentThumbnailKey(result.thumbnailStorageKeys, thumbWidth) : "";
+    if (persistentThumbKey) {
+      const r2Response = await getR2Object(persistentThumbKey);
+      const thumb = Buffer.from(await r2Response.arrayBuffer());
+      rememberThumbnail(thumbCacheKey, thumb);
+      return sendThumbnail(res, thumb, thumbCacheKey);
+    }
     if (result.assetStorageKey) {
       const r2Response = await getR2Object(result.assetStorageKey);
       const contentType = r2Response.headers.get("content-type") || (isVideo ? "video/mp4" : "image/png");
@@ -7179,6 +7224,16 @@ function resultThumbnailCacheKey(result = {}, width = 720) {
     result.updatedAt || result.createdAt || "",
     width
   ].join("|");
+}
+
+function selectPersistentThumbnailKey(keys = {}, width = 720) {
+  if (!keys || typeof keys !== "object") return "";
+  const options = Object.entries(keys)
+    .map(([entryWidth, key]) => [Number(entryWidth), String(key || "")])
+    .filter(([entryWidth, key]) => Number.isFinite(entryWidth) && entryWidth > 0 && key);
+  if (!options.length) return "";
+  options.sort((a, b) => a[0] - b[0]);
+  return (options.find(([entryWidth]) => entryWidth >= width) || options[options.length - 1])[1];
 }
 
 function weakEtag(value = "") {
