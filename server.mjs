@@ -1452,6 +1452,62 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
   };
 }
 
+function publicGenerationResult(result = {}) {
+  const publicType = result.videoUrl ? "video" : result.imageUrl ? "image" : result.type;
+  return {
+    id: result.id,
+    type: result.type,
+    sourceAction: result.sourceAction,
+    sourceStep: result.sourceStep,
+    title: redactProviderText(result.title, publicGenerationTitle(publicType)),
+    body: redactProviderText(result.body, publicGenerationBody(publicType)),
+    prompt: redactProviderText(result.prompt || ""),
+    imageUrl: publicMediaMarker(result.imageUrl),
+    videoUrl: publicMediaMarker(result.videoUrl),
+    visualCard: result.visualCard,
+    model: publicMediaModel(result.model),
+    resolution: result.resolution,
+    aspectRatio: result.aspectRatio,
+    createdAt: result.createdAt
+  };
+}
+
+function publicGenerationJob(job = {}) {
+  return {
+    id: job.id,
+    userId: job.userId,
+    projectId: job.projectId,
+    resultId: job.resultId,
+    action: job.action,
+    step: job.step,
+    type: job.type,
+    status: job.status,
+    prompt: redactProviderText(job.prompt || ""),
+    imageUrl: publicMediaMarker(job.imageUrl),
+    videoUrl: publicMediaMarker(job.videoUrl),
+    textOutput: redactProviderText(job.textOutput, publicGenerationBody(job.type)),
+    errorMessage: job.status === "failed" ? publicGenerationError() : redactProviderText(job.errorMessage || ""),
+    aspectRatio: job.aspectRatio,
+    createdAt: job.createdAt,
+    startedAt: job.startedAt,
+    completedAt: job.completedAt
+  };
+}
+
+function publicProjectGenerationState(db, user, projectId) {
+  const project = findProject(db, projectId, user);
+  return {
+    project: {
+      id: project.id,
+      results: (project.results || []).map(publicGenerationResult)
+    },
+    generationJobs: (db.generationJobs || [])
+      .filter((job) => job.projectId === project.id && (hasAdminPrivileges(user) || job.userId === user.id))
+      .map(publicGenerationJob),
+    billing: user?.billing || defaultBilling()
+  };
+}
+
 function setDeep(target, dotted, value) {
   const parts = dotted.split(".");
   let cursor = target;
@@ -5812,6 +5868,15 @@ app.patch("/api/projects/:id/field", async (req, res) => {
     await saveDb(db);
     return publicState(db, user);
   }));
+});
+
+app.get("/api/projects/:id/generation-state", async (req, res, next) => {
+  try {
+    const { db, user } = await requireAuth(req);
+    res.json(publicProjectGenerationState(db, user, req.params.id));
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.post("/api/projects/:id/prompt-advanced", async (req, res, next) => {

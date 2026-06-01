@@ -9748,7 +9748,7 @@ async function pollGenerationQueue(attempt = 0) {
   clearTimeout(generationPollTimer);
   state.queuePolling = true;
   try {
-    const nextDb = await api("/state");
+    const nextDb = await fetchGenerationRefreshDb();
     const shouldRender = shouldRenderGenerationRefresh(state.db, nextDb);
     if (shouldRender) {
       const patchedWall = patchStudioResultWallFromDb(nextDb);
@@ -9768,6 +9768,34 @@ async function pollGenerationQueue(attempt = 0) {
     notify(error.message);
   }
   state.queuePolling = false;
+}
+
+async function fetchGenerationRefreshDb() {
+  if (!state.projectId || !state.db) return api("/state");
+  try {
+    const payload = await api(`/projects/${encodeURIComponent(state.projectId)}/generation-state`);
+    return mergeGenerationRefreshState(state.db, payload);
+  } catch (error) {
+    console.warn("Lightweight generation refresh failed; falling back to full state.", error);
+    return api("/state");
+  }
+}
+
+function mergeGenerationRefreshState(previousDb, payload = {}) {
+  if (!previousDb || !payload.project?.id) return previousDb;
+  const projectId = payload.project.id;
+  const projectJobs = Array.isArray(payload.generationJobs) ? payload.generationJobs : [];
+  return {
+    ...previousDb,
+    billing: payload.billing || previousDb.billing,
+    projects: (previousDb.projects || []).map((projectItem) => projectItem.id === projectId
+      ? { ...projectItem, results: payload.project.results || projectItem.results || [] }
+      : projectItem),
+    generationJobs: [
+      ...(previousDb.generationJobs || []).filter((job) => job.projectId !== projectId),
+      ...projectJobs
+    ]
+  };
 }
 
 function hasRunningGenerationJobs(db = state.db) {
