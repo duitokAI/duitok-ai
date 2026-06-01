@@ -28815,13 +28815,13 @@ label {
   max-height: 56px !important;
   border: 0 !important;
   border-radius: 0 !important;
-  padding: 15px 0 12px !important;
+  padding: 13px 0 12px !important;
   background: transparent !important;
   box-shadow: none !important;
   color: #2a0633 !important;
-  font-size: clamp(17px, 1.35vw, 24px) !important;
-  font-weight: 760 !important;
-  line-height: 1.15 !important;
+  font-size: 18px !important;
+  font-weight: 560 !important;
+  line-height: 1.35 !important;
   resize: none !important;
 }
 
@@ -30526,10 +30526,12 @@ label {
   min-height: 58px !important;
   max-height: 58px !important;
   border-color: transparent !important;
-  padding: 15px 18px !important;
+  padding: 14px 18px !important;
   background: transparent !important;
   color: #2a0633 !important;
-  line-height: 1.25 !important;
+  font-size: 18px !important;
+  font-weight: 560 !important;
+  line-height: 1.35 !important;
   overflow: hidden !important;
   box-shadow: none !important;
   -webkit-text-fill-color: #2a0633 !important;
