@@ -5460,7 +5460,7 @@ function resultPreview(item, options = {}) {
   const imageSrc = item.imageUrl ? `/api/media/result/${encodeURIComponent(item.id)}/image?token=${token}` : "";
   const videoSrc = item.videoUrl ? `/api/media/result/${encodeURIComponent(item.id)}/video?token=${token}` : "";
   const imageError = "this.replaceWith(Object.assign(document.createElement('div'),{className:'result-media-error',textContent:'图片保存失败，请联系客服处理'}))";
-  const ratioSync = mediaRatioSyncScript();
+  const ratioSync = options.wall ? "this.closest('.studio-wall-card')?.setAttribute('data-media-ready','true')" : mediaRatioSyncScript();
   const eagerMedia = Boolean(options.full || options.priority);
   const imagePriority = options.full || options.priority ? "high" : options.wall ? "auto" : "low";
   const imageDecoding = options.full ? "sync" : "async";

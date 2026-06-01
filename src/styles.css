@@ -30804,3 +30804,28 @@ label {
 .is-route-changing .studio-shell .agent-primary-card {
   transition: none !important;
 }
+
+/* Stability lock: the masonry image wall must keep exact media dimensions.
+   content-visibility placeholders and load-time ratio rewrites make the flex
+   wall recalculate, which looks like images are breathing in and out. */
+.studio-shell .image-higgsfield-mode .studio-wall-grid,
+.studio-shell .video-prompt-extractor-page .studio-wall-grid,
+.studio-shell .image-higgsfield-mode .studio-wall-card,
+.studio-shell .video-prompt-extractor-page .studio-wall-card {
+  content-visibility: visible !important;
+  contain: none !important;
+  contain-intrinsic-size: auto !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-card,
+.studio-shell .video-prompt-extractor-page .studio-wall-card,
+.studio-shell .image-higgsfield-mode .studio-wall-card .result-image,
+.studio-shell .image-higgsfield-mode .studio-wall-card .result-video,
+.studio-shell .image-higgsfield-mode .studio-wall-card .result-video-shell,
+.studio-shell .video-prompt-extractor-page .studio-wall-card .result-image,
+.studio-shell .video-prompt-extractor-page .studio-wall-card .result-video,
+.studio-shell .video-prompt-extractor-page .studio-wall-card .result-video-shell {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+}
