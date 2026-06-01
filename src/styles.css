@@ -31271,3 +31271,92 @@ label {
   min-width: 0 !important;
   max-width: 100% !important;
 }
+
+/* Image composer control polish: keep aspect, resolution, and count controls
+   visually aligned as one compact control strip. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools {
+  align-items: stretch !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-select,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-select,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper {
+  min-height: 44px !important;
+  height: 44px !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(120, 72, 132, 0.14) !important;
+  background: rgba(255, 255, 255, 0.82) !important;
+  box-shadow: 0 8px 20px rgba(66, 16, 76, 0.08) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-select,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-select {
+  grid-template-columns: 20px minmax(44px, 1fr) 14px !important;
+  gap: 8px !important;
+  padding: 0 12px !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-select svg,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-select svg,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-select i,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-select i {
+  width: 18px !important;
+  height: 18px !important;
+  flex: 0 0 18px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-select select,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-select select {
+  height: 100% !important;
+  min-height: 0 !important;
+  padding: 0 16px 0 0 !important;
+  font-size: clamp(17px, 1.35vw, 22px) !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  color: #2b0636 !important;
+  text-align: center !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper {
+  display: grid !important;
+  grid-template-columns: 34px minmax(48px, 1fr) 34px !important;
+  gap: 4px !important;
+  padding: 4px !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper button {
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(120, 72, 132, 0.1) !important;
+  background: rgba(255, 255, 255, 0.55) !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper span {
+  height: 34px !important;
+  min-width: 48px !important;
+  padding: 0 8px !important;
+  border-radius: 14px !important;
+  display: inline-flex !important;
+  align-items: baseline !important;
+  justify-content: center !important;
+  gap: 1px !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  color: #2b0636 !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper span b {
+  font-size: clamp(20px, 1.6vw, 26px) !important;
+  line-height: 1 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper span small {
+  font-size: 12px !important;
+  line-height: 1 !important;
+  color: rgba(43, 6, 54, 0.55) !important;
+}
