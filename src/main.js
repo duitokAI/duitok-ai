@@ -4480,8 +4480,8 @@ function imageGenerateConsole(p, selectedModel) {
       </div>
     </div>
     <div class="image-console-references">
-      ${imageReferenceThumb("avatar", avatar, "Add photo")}
-      ${imageReferenceThumb("product", product, "Add photo")}
+      ${imageReferenceThumb("avatar", avatar, "Avatar")}
+      ${imageReferenceThumb("product", product, "Product")}
     </div>
     <button class="image-console-generate" type="button" data-action="generate-image" ${state.generating ? "disabled" : ""}>
       ${icon(state.generating ? "loader-circle" : "send", 20)}
