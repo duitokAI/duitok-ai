@@ -68,6 +68,11 @@ const grsaiVisionModel = process.env.GRSAI_VISION_MODEL || "gemini-2.5-flash";
 const grsaiCloneModel = process.env.GRSAI_CLONE_MODEL || "gemini-3-pro";
 const webSearchBaseUrl = process.env.WEB_SEARCH_BASE_URL || "https://duckduckgo.com/html/";
 const allowedMediaModels = new Set(["GPT Image 2", "Seedream 5.0 Lite", "Seedream 4.5", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"]);
+const thumbnailCache = new Map();
+const thumbnailInflight = new Map();
+const thumbnailCacheMaxItems = Number(process.env.THUMBNAIL_CACHE_MAX_ITEMS || 160);
+const thumbnailCacheMaxBytes = Number(process.env.THUMBNAIL_CACHE_MAX_BYTES || 96 * 1024 * 1024);
+let thumbnailCacheBytes = 0;
 const publicMediaModelMap = {
   "GPT Image 2": "GPT Image 2",
   "Seedream 5.0 Lite": "Seedream 5.0 Lite",
@@ -7111,15 +7116,16 @@ app.get("/api/media/result/:id/:kind", async (req, res, next) => {
     const isVideo = req.params.kind === "video";
     const wantsThumb = !isVideo && req.query.thumb === "1";
     const thumbWidth = Math.max(160, Math.min(1280, Number(req.query.w || 720) || 720));
+    const thumbCacheKey = wantsThumb ? resultThumbnailCacheKey(result, thumbWidth) : "";
+    const cachedThumb = getCachedThumbnail(thumbCacheKey);
+    if (cachedThumb) return sendThumbnail(res, cachedThumb.bytes, thumbCacheKey);
     if (result.assetStorageKey) {
       const r2Response = await getR2Object(result.assetStorageKey);
       const contentType = r2Response.headers.get("content-type") || (isVideo ? "video/mp4" : "image/png");
       const bytes = Buffer.from(await r2Response.arrayBuffer());
       if (wantsThumb && contentType.startsWith("image/")) {
-        const thumb = await imageThumbnail(bytes, thumbWidth);
-        res.setHeader("Content-Type", "image/webp");
-        res.setHeader("Cache-Control", "private, max-age=86400");
-        return res.send(thumb);
+        const thumb = await cachedImageThumbnail(thumbCacheKey, bytes, thumbWidth);
+        return sendThumbnail(res, thumb, thumbCacheKey);
       }
       res.setHeader("Content-Type", contentType);
       res.setHeader("Cache-Control", "private, max-age=86400");
@@ -7147,10 +7153,8 @@ app.get("/api/media/result/:id/:kind", async (req, res, next) => {
     const contentType = response.headers.get("content-type") || (isVideo ? "video/mp4" : "image/png");
     const bytes = Buffer.from(await response.arrayBuffer());
     if (wantsThumb && contentType.startsWith("image/")) {
-      const thumb = await imageThumbnail(bytes, thumbWidth);
-      res.setHeader("Content-Type", "image/webp");
-      res.setHeader("Cache-Control", "private, max-age=86400");
-      return res.send(thumb);
+      const thumb = await cachedImageThumbnail(thumbCacheKey, bytes, thumbWidth);
+      return sendThumbnail(res, thumb, thumbCacheKey);
     }
     res.setHeader("Content-Type", contentType);
     res.setHeader("Cache-Control", "private, max-age=300");
@@ -7166,6 +7170,66 @@ async function imageThumbnail(bytes, width = 720) {
     .resize({ width, withoutEnlargement: true })
     .webp({ quality: 74, effort: 4 })
     .toBuffer();
+}
+
+function resultThumbnailCacheKey(result = {}, width = 720) {
+  return [
+    result.id || result.assetStorageKey || result.imageUrl || result.originalImageUrl || "result",
+    result.assetStorageKey || result.imageUrl || result.originalImageUrl || "",
+    result.updatedAt || result.createdAt || "",
+    width
+  ].join("|");
+}
+
+function weakEtag(value = "") {
+  return `W/"${crypto.createHash("sha1").update(String(value)).digest("base64url")}"`;
+}
+
+function getCachedThumbnail(key) {
+  if (!key) return null;
+  const cached = thumbnailCache.get(key);
+  if (cached) cached.lastUsed = Date.now();
+  return cached || null;
+}
+
+function sendThumbnail(res, bytes, cacheKey = "") {
+  res.setHeader("Content-Type", "image/webp");
+  res.setHeader("Cache-Control", "private, max-age=86400");
+  res.setHeader("ETag", weakEtag(`${cacheKey}:${bytes.length}`));
+  return res.send(bytes);
+}
+
+async function cachedImageThumbnail(cacheKey, bytes, width = 720) {
+  const key = cacheKey || `${sha256(bytes)}|${width}`;
+  const cached = getCachedThumbnail(key);
+  if (cached) return cached.bytes;
+  const inflight = thumbnailInflight.get(key);
+  if (inflight) return inflight;
+  const promise = imageThumbnail(bytes, width)
+    .then((thumb) => {
+      rememberThumbnail(key, thumb);
+      return thumb;
+    })
+    .finally(() => thumbnailInflight.delete(key));
+  thumbnailInflight.set(key, promise);
+  return promise;
+}
+
+function rememberThumbnail(key, bytes) {
+  const previous = thumbnailCache.get(key);
+  if (previous) thumbnailCacheBytes -= previous.bytes.length;
+  thumbnailCache.set(key, { bytes, lastUsed: Date.now() });
+  thumbnailCacheBytes += bytes.length;
+  pruneThumbnailCache();
+}
+
+function pruneThumbnailCache() {
+  while (thumbnailCache.size > thumbnailCacheMaxItems || thumbnailCacheBytes > thumbnailCacheMaxBytes) {
+    const oldest = [...thumbnailCache.entries()].sort((a, b) => a[1].lastUsed - b[1].lastUsed)[0];
+    if (!oldest) break;
+    thumbnailCache.delete(oldest[0]);
+    thumbnailCacheBytes -= oldest[1].bytes.length;
+  }
 }
 
 app.get(/^\/api\/media\/(.+)/, async (req, res, next) => {

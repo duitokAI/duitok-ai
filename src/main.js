@@ -5459,7 +5459,7 @@ function resultPreview(item, options = {}) {
     if (options.clickable) return `<button type="button" class="result-preview-trigger" data-result-preview="${esc(item.id)}" aria-label="Open full preview">${visual}</button>`;
     return visual;
   }
-  const imageVariant = options.wall ? `&thumb=1&w=${Math.max(480, Math.min(960, studioWallZoomColumn()))}` : "";
+  const imageVariant = options.wall ? `&thumb=1&w=${studioWallThumbnailWidth()}` : "";
   const imageSrc = item.imageUrl ? `/api/media/result/${encodeURIComponent(item.id)}/image?token=${token}${imageVariant}` : "";
   const videoSrc = item.videoUrl ? `/api/media/result/${encodeURIComponent(item.id)}/video?token=${token}` : "";
   const imageError = "this.replaceWith(Object.assign(document.createElement('div'),{className:'result-media-error',textContent:'图片保存失败，请联系客服处理'}))";
@@ -5477,6 +5477,13 @@ function resultPreview(item, options = {}) {
   if (options.clickable && imageSrc) return `<button type="button" class="result-preview-trigger" data-result-preview="${esc(item.id)}" aria-label="Open full image preview">${image}</button>`;
   if (options.clickable && videoSrc) return videoTrigger;
   return `${image}${video}${text}`;
+}
+
+function studioWallThumbnailWidth() {
+  const column = studioWallZoomColumn();
+  if (column <= 220) return 360;
+  if (column <= 460) return 640;
+  return 960;
 }
 
 function visualCardPreview(card = {}) {
