@@ -30639,6 +30639,25 @@ label {
 .studio-shell .image-higgsfield-mode .studio-wall-actions,
 .studio-shell .studio-wall-card footer,
 .studio-shell .studio-generate-dock {
+  will-change: auto;
+}
+
+.studio-shell .image-generate-console {
+  contain: layout paint;
+  transition:
+    background 0.12s ease,
+    box-shadow 0.12s ease !important;
+}
+
+.studio-shell .image-generate-console.is-compact,
+.studio-shell .image-generate-console.is-hover-expanded {
+  transition: none !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-actions:hover,
+.studio-shell .image-higgsfield-mode .studio-wall-actions:focus-within,
+.studio-shell .studio-wall-card:hover footer,
+.studio-shell .studio-wall-card:focus-within footer {
   will-change: opacity, transform;
 }
 

@@ -1452,36 +1452,33 @@ function bindImageConsoleCompact() {
   let ticking = false;
   let compact = consoleEl.classList.contains("is-compact");
   let hovering = false;
+  let compactAt = 48;
+  let expandAt = 12;
   const scrollTargets = [
     window,
     document.querySelector(".workspace"),
-    document.querySelector(".studio-shell"),
-    document.scrollingElement,
-    document.documentElement
+    document.querySelector(".studio-shell")
   ].filter(Boolean);
   const uniqueScrollTargets = [...new Set(scrollTargets)];
   const scrollOffset = () => Math.max(
     window.scrollY || 0,
-    document.documentElement.scrollTop || 0,
-    document.body?.scrollTop || 0,
     ...uniqueScrollTargets
       .filter((target) => target !== window)
       .map((target) => target.scrollTop || 0)
   );
-  const scrollRange = () => Math.max(
+  const refreshThresholds = () => {
+    const range = Math.max(
     Math.max(0, (document.scrollingElement?.scrollHeight || 0) - window.innerHeight),
-    Math.max(0, document.documentElement.scrollHeight - window.innerHeight),
-    Math.max(0, (document.body?.scrollHeight || 0) - window.innerHeight),
-    ...uniqueScrollTargets
-      .filter((target) => target !== window)
-      .map((target) => Math.max(0, (target.scrollHeight || 0) - (target.clientHeight || 0)))
-  );
+      ...uniqueScrollTargets
+        .filter((target) => target !== window)
+        .map((target) => Math.max(0, (target.scrollHeight || 0) - (target.clientHeight || 0)))
+    );
+    compactAt = Math.max(18, Math.min(140, range * 0.28));
+    expandAt = Math.max(6, Math.min(42, compactAt * 0.32));
+  };
   const sync = () => {
     ticking = false;
     const scrollY = scrollOffset();
-    const range = scrollRange();
-    const compactAt = Math.max(12, Math.min(120, range * 0.35));
-    const expandAt = Math.max(4, Math.min(36, compactAt * 0.3));
     const nextCompact = compact ? scrollY > expandAt : scrollY > compactAt;
     if (nextCompact !== compact) compact = nextCompact;
     consoleEl.classList.toggle("is-compact", compact && !hovering);
@@ -1505,16 +1502,21 @@ function bindImageConsoleCompact() {
     if (event.relatedTarget && consoleEl.contains(event.relatedTarget)) return;
     restoreAfterHover();
   };
+  const handleResize = () => {
+    refreshThresholds();
+    requestSync();
+  };
   uniqueScrollTargets.forEach((target) => target.addEventListener("scroll", requestSync, { passive: true }));
-  window.addEventListener("resize", requestSync);
+  window.addEventListener("resize", handleResize);
   consoleEl.addEventListener("mouseenter", expandForHover);
   consoleEl.addEventListener("mouseleave", restoreAfterHover);
   consoleEl.addEventListener("focusin", expandForHover);
   consoleEl.addEventListener("focusout", restoreAfterFocus);
+  refreshThresholds();
   sync();
   imageConsoleScrollCleanup = () => {
     uniqueScrollTargets.forEach((target) => target.removeEventListener("scroll", requestSync));
-    window.removeEventListener("resize", requestSync);
+    window.removeEventListener("resize", handleResize);
     consoleEl.removeEventListener("mouseenter", expandForHover);
     consoleEl.removeEventListener("mouseleave", restoreAfterHover);
     consoleEl.removeEventListener("focusin", expandForHover);
@@ -9936,14 +9938,7 @@ function agentTypingChunkSize(length = 0) {
 function typeAgentReply({ baseMessages, assistantMessage, fullContent, finalPatch = {}, onDone = () => {} }) {
   clearAgentTypingTimer();
   const runId = agentTypingRunId;
-  const chars = [...String(fullContent || "Done.")];
-  const chunkSize = agentTypingChunkSize(chars.length);
-  const delay = chars.length > 900 ? 14 : 20;
-  let index = 0;
-
-  const finalAssistantMessage = { ...assistantMessage, content: chars.join(""), isTyping: false };
-  const initialAssistantMessage = { ...assistantMessage, content: "", isTyping: true };
-  set({ ...finalPatch, agentMessages: [...baseMessages, initialAssistantMessage], agentTyping: true });
+  const finalAssistantMessage = { ...assistantMessage, content: String(fullContent || "Done."), isTyping: false };
 
   const finish = () => {
     if (runId !== agentTypingRunId) return;
@@ -9954,22 +9949,7 @@ function typeAgentReply({ baseMessages, assistantMessage, fullContent, finalPatc
     onDone(messages);
   };
 
-  const tick = () => {
-    if (runId !== agentTypingRunId) return;
-    index = Math.min(chars.length, index + chunkSize);
-    if (index >= chars.length) return finish();
-    set({
-      agentMessages: [
-        ...baseMessages,
-        { ...assistantMessage, content: chars.slice(0, index).join(""), isTyping: true }
-      ],
-      agentTyping: true,
-      suppressAgentAutoScroll: true
-    });
-    agentTypingTimer = setTimeout(tick, delay);
-  };
-
-  agentTypingTimer = setTimeout(tick, 80);
+  agentTypingTimer = setTimeout(finish, 80);
 }
 
 function startAgentVisual(content) {
