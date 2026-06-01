@@ -83,6 +83,11 @@ const projectGenerationStateResultLimit = Number(process.env.PROJECT_GENERATION_
 const httpCompressionMinBytes = Number(process.env.HTTP_COMPRESSION_MIN_BYTES || 1024);
 const maxConcurrentGenerationJobs = Math.max(1, Number(process.env.MAX_CONCURRENT_GENERATION_JOBS || 4));
 const userConcurrentGenerationLimit = Math.max(1, Number(process.env.USER_CONCURRENT_GENERATIONS || 2));
+const projectResultStorageLimit = Math.max(0, Number(process.env.PROJECT_RESULT_STORAGE_LIMIT || 1500));
+const storedGenerationJobLimit = Math.max(0, Number(process.env.STORED_GENERATION_JOB_LIMIT || 6000));
+const storedApiCallLimit = Math.max(0, Number(process.env.STORED_API_CALL_LIMIT || 6000));
+const storedUsageLimit = Math.max(0, Number(process.env.STORED_USAGE_LIMIT || 6000));
+const storedAdminAuditLimit = Math.max(0, Number(process.env.STORED_ADMIN_AUDIT_LIMIT || 6000));
 const publicMediaModelMap = {
   "GPT Image 2": "GPT Image 2",
   "Seedream 5.0 Lite": "Seedream 5.0 Lite",
@@ -1111,6 +1116,33 @@ function normalizeDb(db) {
   db.creditLedger = db.creditLedger.map((item) => ({ userId: item.userId || adminUserId, ...item }));
   db.modelCosts = { ...defaultModelCosts(), ...(db.modelCosts || {}) };
   db.storage ||= storageStatus();
+  compactStoredDb(db);
+  return db;
+}
+
+function keepNewestRows(rows = [], limit = 0) {
+  if (!Array.isArray(rows) || !limit || rows.length <= limit) return rows || [];
+  return rows.slice(0, limit);
+}
+
+function keepNewestTimelineRows(rows = [], limit = 0) {
+  if (!Array.isArray(rows) || !limit || rows.length <= limit) return rows || [];
+  return rows.slice(Math.max(0, rows.length - limit));
+}
+
+function compactStoredDb(db) {
+  db.generationJobs = keepNewestRows(db.generationJobs || [], storedGenerationJobLimit);
+  db.apiCalls = keepNewestRows(db.apiCalls || [], storedApiCallLimit);
+  db.usage = keepNewestRows(db.usage || [], storedUsageLimit);
+  db.adminAuditLogs = keepNewestRows(db.adminAuditLogs || [], storedAdminAuditLimit);
+  for (const project of db.projects || []) {
+    project.results ||= [];
+    if (projectResultStorageLimit && project.results.length > projectResultStorageLimit) {
+      const removed = project.results.length - projectResultStorageLimit;
+      project.archivedResultCount = Number(project.archivedResultCount || 0) + removed;
+      project.results = keepNewestTimelineRows(project.results, projectResultStorageLimit);
+    }
+  }
   return db;
 }
 
@@ -1336,6 +1368,10 @@ function recentProjectResults(results = [], limit = publicStateResultLimit) {
   return results.slice(Math.max(0, results.length - limit));
 }
 
+function projectResultCount(project = {}) {
+  return Number(project.archivedResultCount || 0) + (project.results || []).length;
+}
+
 function recentGenerationJobs(jobs = [], limit = publicStateJobLimit) {
   if (!Array.isArray(jobs)) return [];
   const running = jobs.filter((job) => ["queued", "processing"].includes(job.status));
@@ -1395,7 +1431,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
     },
     agentMemory: sanitizeAgentObject(project.agentMemory || {}),
     results: (isAdmin ? (project.results || []) : recentProjectResults(project.results || [])).map(sanitizeResult),
-    resultCount: (project.results || []).length
+    resultCount: projectResultCount(project)
   });
   const sanitizeJob = (job) => {
     if (isAdmin) return job;
@@ -1585,13 +1621,39 @@ function publicProjectGenerationState(db, user, projectId) {
     project: {
       id: project.id,
       results: recentResults.map(publicGenerationResult),
-      resultCount: (project.results || []).length
+      resultCount: projectResultCount(project)
     },
     generationJobs: (db.generationJobs || [])
       .filter((job) => job.projectId === project.id && (hasAdminPrivileges(user) || job.userId === user.id))
       .filter((job) => ["queued", "processing"].includes(job.status) || recentResultIds.has(job.resultId))
       .map(publicGenerationJob),
     billing: user?.billing || defaultBilling()
+  };
+}
+
+function publicProjectResultsPage(db, user, projectId, query = {}) {
+  const project = findProject(db, projectId, user);
+  const limit = Math.min(96, Math.max(1, Number.parseInt(query.limit || "48", 10) || 48));
+  const before = String(query.before || "").trim();
+  let results = project.results || [];
+  if (before) {
+    const beforeIndex = results.findIndex((result) => result.id === before);
+    if (beforeIndex >= 0) {
+      results = results.slice(0, beforeIndex);
+    } else {
+      const beforeTime = Date.parse(before);
+      if (Number.isFinite(beforeTime)) {
+        results = results.filter((result) => Date.parse(result.createdAt || 0) < beforeTime);
+      }
+    }
+  }
+  const page = results.slice(Math.max(0, results.length - limit));
+  return {
+    projectId: project.id,
+    results: page.map(publicGenerationResult),
+    hasMore: results.length > page.length,
+    resultCount: projectResultCount(project),
+    archivedResultCount: Number(project.archivedResultCount || 0)
   };
 }
 
@@ -6008,6 +6070,15 @@ app.get("/api/projects/:id/generation-state", async (req, res, next) => {
     res.setHeader("ETag", etag);
     if (req.get("if-none-match") === etag) return res.sendStatus(304);
     res.json(payload);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/projects/:id/results", async (req, res, next) => {
+  try {
+    const { db, user } = await requireAuth(req);
+    res.json(publicProjectResultsPage(db, user, req.params.id, req.query));
   } catch (error) {
     next(error);
   }

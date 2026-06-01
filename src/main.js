@@ -4304,7 +4304,8 @@ function studioResultWall(p, meta = {}) {
   const wallKey = studioWallKey(p, step, types);
   const limit = studioWallLimit(wallKey);
   const visibleItems = items.slice(0, limit);
-  const hiddenCount = Math.max(0, items.length - visibleItems.length);
+  const unloadedCount = Math.max(0, Number(p.resultCount || 0) - (p.results || []).length);
+  const hiddenCount = Math.max(0, items.length - visibleItems.length) + unloadedCount;
   const cards = [
     ...pending.map(studioPendingWallCard),
     ...visibleItems.map((item, index) => studioWallCard(item, index))
@@ -4329,13 +4330,48 @@ function studioWallLimit(key) {
   return Math.max(studioWallPageSize, saved || studioWallPageSize);
 }
 
-function showMoreStudioWall(key) {
+async function showMoreStudioWall(key) {
   if (!key) return;
+  const nextLimit = studioWallLimit(key) + studioWallPageSize;
   const next = {
     ...(state.studioWallLimits || {}),
-    [key]: studioWallLimit(key) + studioWallPageSize
+    [key]: nextLimit
   };
   set({ studioWallLimits: next });
+  await loadOlderStudioWallResults(key, nextLimit);
+}
+
+async function loadOlderStudioWallResults(key, targetLimit) {
+  if (!state.db) return;
+  const [projectId, step = state.step, ...types] = key.split(":");
+  const projectItem = (state.db.projects || []).find((item) => item.id === projectId);
+  if (!projectItem || Number(projectItem.resultCount || 0) <= (projectItem.results || []).length) return;
+  const matchingCount = (projectItem.results || []).filter((item) => studioResultBelongsToStep(item, step, types)).length;
+  if (matchingCount >= targetLimit) return;
+  const oldest = (projectItem.results || [])[0];
+  if (!oldest?.id) return;
+  try {
+    const payload = await api(`/projects/${encodeURIComponent(projectId)}/results?before=${encodeURIComponent(oldest.id)}&limit=96`);
+    const olderResults = Array.isArray(payload.results) ? payload.results : [];
+    if (!olderResults.length) return;
+    const olderIds = new Set(olderResults.map((item) => item.id));
+    const nextDb = {
+      ...state.db,
+      projects: (state.db.projects || []).map((item) => item.id === projectId
+        ? {
+            ...item,
+            resultCount: payload.resultCount || item.resultCount,
+            results: [
+              ...olderResults,
+              ...(item.results || []).filter((result) => !olderIds.has(result.id))
+            ]
+          }
+        : item)
+    };
+    set({ db: nextDb });
+  } catch (error) {
+    notify(error.message);
+  }
 }
 
 function videoStudioStep(sourceStep = "") {
@@ -9938,13 +9974,30 @@ function mergeGenerationRefreshState(previousDb, payload = {}) {
     ...previousDb,
     billing: payload.billing || previousDb.billing,
     projects: (previousDb.projects || []).map((projectItem) => projectItem.id === projectId
-      ? { ...projectItem, results: payload.project.results || projectItem.results || [] }
+      ? {
+          ...projectItem,
+          resultCount: payload.project.resultCount || projectItem.resultCount,
+          results: mergeProjectResults(projectItem.results || [], payload.project.results || [])
+        }
       : projectItem),
     generationJobs: [
       ...(previousDb.generationJobs || []).filter((job) => job.projectId !== projectId),
       ...projectJobs
     ]
   };
+}
+
+function mergeProjectResults(existing = [], incoming = []) {
+  const byId = new Map();
+  [...existing, ...incoming].forEach((item) => {
+    if (item?.id) byId.set(item.id, { ...(byId.get(item.id) || {}), ...item });
+  });
+  return [...byId.values()].sort((a, b) => {
+    const aTime = Date.parse(a.createdAt || 0);
+    const bTime = Date.parse(b.createdAt || 0);
+    if (Number.isFinite(aTime) && Number.isFinite(bTime) && aTime !== bTime) return aTime - bTime;
+    return String(a.id || "").localeCompare(String(b.id || ""));
+  });
 }
 
 function hasRunningGenerationJobs(db = state.db) {
