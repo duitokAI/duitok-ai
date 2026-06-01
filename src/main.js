@@ -1511,8 +1511,19 @@ function bindImageConsoleCompact() {
   let ticking = false;
   let compact = consoleEl.classList.contains("is-compact");
   let hovering = false;
+  let menuOpen = false;
   let compactAt = 48;
   let expandAt = 12;
+  const modelPickers = [...consoleEl.querySelectorAll(".image-model-picker")];
+  const closeModelMenus = () => modelPickers.forEach((el) => el.removeAttribute("open"));
+  const updateMenuState = () => {
+    menuOpen = modelPickers.some((el) => el.hasAttribute("open"));
+    consoleEl.classList.toggle("has-open-menu", menuOpen);
+    if (menuOpen) {
+      consoleEl.classList.add("is-hover-expanded");
+      consoleEl.classList.remove("is-compact");
+    }
+  };
   const scrollTargets = [
     window,
     document.querySelector(".workspace"),

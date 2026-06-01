@@ -30810,13 +30810,44 @@ label {
 
 .studio-shell .image-generate-console {
   contain: layout style;
+  z-index: 500 !important;
+  overflow: visible !important;
   transition:
     background 0.12s ease,
     box-shadow 0.12s ease !important;
 }
 
 .studio-shell .image-generate-console:has(.image-model-picker[open]) {
+  z-index: 5000 !important;
   contain: none !important;
+}
+
+.studio-shell .image-generate-console.has-open-menu {
+  z-index: 5000 !important;
+  contain: none !important;
+}
+
+.studio-shell .image-generate-console.has-open-menu .image-console-main,
+.studio-shell .image-generate-console.has-open-menu .image-console-tools,
+.studio-shell .image-generate-console.has-open-menu .image-model-enhance-group,
+.studio-shell .image-generate-console.has-open-menu .image-model-picker {
+  overflow: visible !important;
+  contain: none !important;
+}
+
+.studio-shell .image-generate-console.is-compact .image-console-tools {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.studio-shell .image-generate-console.is-compact .image-console-tools *,
+.studio-shell .image-generate-console.is-compact .image-model-menu {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-open-menu .image-model-menu {
+  z-index: 5001 !important;
 }
 
 .studio-shell .image-generate-console.is-compact,
@@ -30939,9 +30970,39 @@ label {
    edge-hugging controls over dense media thumbnails. */
 .studio-shell .image-higgsfield-mode .studio-wall-actions {
   right: 6px !important;
+  z-index: 40 !important;
   border-right: 1px solid rgba(255, 255, 255, 0.22) !important;
   border-radius: 12px !important;
   background: rgba(28, 8, 36, 0.24) !important;
+}
+
+.studio-shell button,
+.studio-shell summary,
+.studio-shell select,
+.studio-shell .image-reference-thumb,
+.studio-shell .image-model-picker {
+  touch-action: manipulation;
+}
+
+.studio-shell .image-console-generate,
+.studio-shell .image-prompt-enhance,
+.studio-shell .image-count-stepper button,
+.studio-shell .image-reference-thumb,
+.studio-shell .studio-wall-actions button {
+  transition:
+    background-color 80ms ease,
+    border-color 80ms ease,
+    color 80ms ease,
+    opacity 80ms ease,
+    transform 80ms ease !important;
+}
+
+.studio-shell .image-console-generate:active,
+.studio-shell .image-prompt-enhance:active,
+.studio-shell .image-count-stepper button:active,
+.studio-shell .image-reference-thumb:active,
+.studio-shell .studio-wall-actions button:active {
+  transform: scale(0.97) !important;
 }
 
 .studio-shell .image-higgsfield-mode .studio-wall-actions button::after {
