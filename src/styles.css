@@ -22658,6 +22658,33 @@ label {
   padding-bottom: 0 !important;
 }
 
+/* Sticky media-wall tabs: keep labels readable while scrolling over thumbnails. */
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .project-step-topbar,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .project-step-topbar {
+  background: rgba(255, 250, 255, 0.82) !important;
+  border-bottom: 1px solid rgba(42, 6, 51, 0.08) !important;
+  box-shadow: 0 10px 26px rgba(42, 6, 51, 0.08) !important;
+  backdrop-filter: blur(18px) saturate(1.12) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .step-tabs button,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .step-tabs button {
+  color: rgba(43, 20, 51, 0.76) !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.62) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .step-tabs button.active,
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .step-tabs button:hover,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .step-tabs button.active,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .step-tabs button:hover {
+  color: #4b0759 !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .step-tabs button.active,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .step-tabs button.active {
+  font-weight: 950 !important;
+}
+
 .studio-shell .workspace:has(.step-tabs) .studio-workbench-card {
   display: grid !important;
   gap: 18px !important;
