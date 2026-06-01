@@ -7910,7 +7910,7 @@ function agentMessageArticle(item, index = 0) {
     <button type="button" data-agent-feedback="negative_feedback" data-agent-run-id="${esc(runId)}">${icon("thumbs-down", 14)} 不准</button>
   </div>` : "";
   const runPanel = agentVisibleRunPanel(item.agentRun);
-  return `<article class="${item.role}">
+  return `<article class="${item.role}" data-agent-message-index="${index}">
     ${roleMarker}
     ${item.role === "user" ? agentMessageAttachments(item.attachments) : ""}
     <div class="agent-message">${body}</div>
@@ -9943,7 +9943,22 @@ function agentTypingChunkSize(length = 0) {
 function typeAgentReply({ baseMessages, assistantMessage, fullContent, finalPatch = {}, onDone = () => {} }) {
   clearAgentTypingTimer();
   const runId = agentTypingRunId;
-  const finalAssistantMessage = { ...assistantMessage, content: String(fullContent || "Done."), isTyping: false };
+  const chars = [...String(fullContent || "Done.")];
+  const chunkSize = agentTypingChunkSize(chars.length);
+  const delay = chars.length > 900 ? 24 : 30;
+  const finalAssistantMessage = { ...assistantMessage, content: chars.join(""), isTyping: false };
+  const initialAssistantMessage = { ...assistantMessage, content: "", isTyping: true };
+  const messageIndex = baseMessages.length;
+  let index = 0;
+
+  set({ ...finalPatch, agentMessages: [...baseMessages, initialAssistantMessage], agentTyping: true });
+
+  const target = document.querySelector(`.agent-thread article.assistant[data-agent-message-index="${messageIndex}"] .agent-message`);
+  const paintPartial = () => {
+    if (!target) return;
+    const partial = chars.slice(0, index).join("");
+    target.innerHTML = agentMessageMarkdown(`${partial}▍`);
+  };
 
   const finish = () => {
     if (runId !== agentTypingRunId) return;
@@ -9954,7 +9969,15 @@ function typeAgentReply({ baseMessages, assistantMessage, fullContent, finalPatc
     onDone(messages);
   };
 
-  agentTypingTimer = setTimeout(finish, 80);
+  const tick = () => {
+    if (runId !== agentTypingRunId) return;
+    index = Math.min(chars.length, index + chunkSize);
+    if (index >= chars.length) return finish();
+    paintPartial();
+    agentTypingTimer = setTimeout(tick, delay);
+  };
+
+  agentTypingTimer = setTimeout(tick, 80);
 }
 
 function startAgentVisual(content) {
