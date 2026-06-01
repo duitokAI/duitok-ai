@@ -13215,8 +13215,6 @@ label {
 .agent-tool-cards {
   display: grid;
   gap: 10px;
-  min-width: 0;
-  max-width: 100%;
 }
 
 .agent-tool-card,
@@ -13224,8 +13222,6 @@ label {
 .agent-undo-card {
   display: grid;
   gap: 10px;
-  min-width: 0;
-  max-width: 100%;
   border: 1px solid rgba(93, 8, 108, 0.1);
   border-radius: 10px;
   padding: 12px;
@@ -13235,7 +13231,6 @@ label {
 .agent-tool-card header {
   display: grid;
   gap: 3px;
-  min-width: 0;
 }
 
 .agent-tool-card strong,
@@ -13254,7 +13249,6 @@ label {
   margin: 0;
   color: rgba(31, 6, 38, 0.72);
   font-weight: 760;
-  overflow-wrap: anywhere;
 }
 
 .agent-tool-card pre {
@@ -13272,7 +13266,6 @@ label {
 .agent-generation-card {
   gap: 12px;
   max-width: min(360px, 100%);
-  min-width: 0;
 }
 
 .agent-generation-run-cards {
@@ -13322,7 +13315,6 @@ label {
   min-height: unset;
   margin: 0 auto;
   align-content: center;
-  gap: 8px;
   border: 1px solid rgba(93, 8, 108, 0.12);
   background:
     radial-gradient(circle at 50% 42%, rgba(255, 57, 111, 0.1), transparent 28%),
@@ -13344,15 +13336,6 @@ label {
   max-width: 190px;
   font-size: 12px;
   line-height: 1.45;
-  overflow-wrap: anywhere;
-}
-
-.agent-generation-processing-frame button {
-  justify-self: center;
-  min-height: 32px;
-  margin-top: 4px;
-  padding: 0 12px;
-  font-size: 12px;
 }
 
 .agent-generation-pending svg {
