@@ -27394,6 +27394,35 @@ label {
   color: #2a0633 !important;
 }
 
+/* Agent page should read as one continuous workspace. Remove the outer panel
+   frame and let generated media/results sit directly on the page surface. */
+.studio-shell .workspace:has(.agent-page) .agent-workspace-shell,
+.studio-shell .workspace:has(.agent-page) .agent-chat-shell.agent-page-panel,
+.studio-shell .workspace:has(.agent-page) .agent-page-panel {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-card,
+.studio-shell .agent-page-panel .agent-generation-card {
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-preview,
+.studio-shell .agent-page-panel .agent-generation-preview {
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
 .studio-shell .agent-chat-shell.agent-page-panel .agent-thread {
   width: min(920px, 100%) !important;
   padding: clamp(36px, 7vh, 86px) 20px 32px !important;
