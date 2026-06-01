@@ -46,6 +46,7 @@ let imageCountSaveTimer = null;
 let imageCountSaveSeq = 0;
 let resultTitleSaveTimer = null;
 let generationPollTimer = null;
+const generationStateEtags = new Map();
 const quickFieldSaveTimers = new Map();
 let quickFieldSaveSeq = 0;
 
@@ -1539,9 +1540,10 @@ function bindImageConsoleCompact() {
     const scrollY = scrollOffset();
     const nextCompact = compact ? scrollY > expandAt : scrollY > compactAt;
     if (nextCompact !== compact) compact = nextCompact;
-    const shouldCompact = compact && !hovering;
+    updateMenuState();
+    const shouldCompact = compact && !hovering && !menuOpen;
     consoleEl.classList.toggle("is-compact", shouldCompact);
-    if (shouldCompact) consoleEl.querySelectorAll(".image-model-picker[open]").forEach((el) => el.removeAttribute("open"));
+    if (shouldCompact) closeModelMenus();
   };
   const requestSync = () => {
     if (ticking) return;
@@ -1555,7 +1557,8 @@ function bindImageConsoleCompact() {
   };
   const restoreAfterHover = () => {
     hovering = false;
-    consoleEl.classList.remove("is-hover-expanded");
+    updateMenuState();
+    if (!menuOpen) consoleEl.classList.remove("is-hover-expanded");
     requestSync();
   };
   const restoreAfterFocus = (event) => {
@@ -1566,12 +1569,17 @@ function bindImageConsoleCompact() {
     refreshThresholds();
     requestSync();
   };
+  const handleModelPickerToggle = () => {
+    updateMenuState();
+    requestSync();
+  };
   uniqueScrollTargets.forEach((target) => target.addEventListener("scroll", requestSync, { passive: true }));
   window.addEventListener("resize", handleResize);
   consoleEl.addEventListener("mouseenter", expandForHover);
   consoleEl.addEventListener("mouseleave", restoreAfterHover);
   consoleEl.addEventListener("focusin", expandForHover);
   consoleEl.addEventListener("focusout", restoreAfterFocus);
+  modelPickers.forEach((el) => el.addEventListener("toggle", handleModelPickerToggle));
   refreshThresholds();
   sync();
   imageConsoleScrollCleanup = () => {
@@ -1581,6 +1589,7 @@ function bindImageConsoleCompact() {
     consoleEl.removeEventListener("mouseleave", restoreAfterHover);
     consoleEl.removeEventListener("focusin", expandForHover);
     consoleEl.removeEventListener("focusout", restoreAfterFocus);
+    modelPickers.forEach((el) => el.removeEventListener("toggle", handleModelPickerToggle));
   };
 }
 
@@ -9892,7 +9901,17 @@ async function pollGenerationQueue(attempt = 0) {
 async function fetchGenerationRefreshDb() {
   if (!state.projectId || !state.db) return api("/state");
   try {
-    const payload = await api(`/projects/${encodeURIComponent(state.projectId)}/generation-state`);
+    const cacheKey = state.projectId;
+    const headers = {};
+    if (generationStateEtags.has(cacheKey)) headers["If-None-Match"] = generationStateEtags.get(cacheKey);
+    if (state.token) headers.Authorization = `Bearer ${state.token}`;
+    if (state.adminKey) headers["X-Admin-Key"] = state.adminKey;
+    const response = await fetch(`${apiBaseUrl}/api/projects/${encodeURIComponent(state.projectId)}/generation-state`, { headers });
+    if (response.status === 304) return state.db;
+    if (!response.ok) throw new Error((await response.json().catch(() => ({}))).error || "Request failed");
+    const nextEtag = response.headers.get("etag");
+    if (nextEtag) generationStateEtags.set(cacheKey, nextEtag);
+    const payload = await response.json();
     return mergeGenerationRefreshState(state.db, payload);
   } catch (error) {
     console.warn("Lightweight generation refresh failed; falling back to full state.", error);

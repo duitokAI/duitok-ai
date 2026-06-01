@@ -4,6 +4,7 @@ import { readFile, writeFile, mkdir, readdir, stat } from "node:fs/promises";
 import { createReadStream } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createBrotliCompress, createGzip } from "node:zlib";
 import express from "express";
 import pg from "pg";
 import sharp from "sharp";
@@ -79,6 +80,9 @@ const publicStateJobLimit = Number(process.env.PUBLIC_STATE_JOB_LIMIT || 200);
 const publicStateRowLimit = Number(process.env.PUBLIC_STATE_ROW_LIMIT || 200);
 const publicStateAttachmentLimit = Number(process.env.PUBLIC_STATE_ATTACHMENT_LIMIT || 240);
 const projectGenerationStateResultLimit = Number(process.env.PROJECT_GENERATION_STATE_RESULT_LIMIT || 260);
+const httpCompressionMinBytes = Number(process.env.HTTP_COMPRESSION_MIN_BYTES || 1024);
+const maxConcurrentGenerationJobs = Math.max(1, Number(process.env.MAX_CONCURRENT_GENERATION_JOBS || 4));
+const userConcurrentGenerationLimit = Math.max(1, Number(process.env.USER_CONCURRENT_GENERATIONS || 2));
 const publicMediaModelMap = {
   "GPT Image 2": "GPT Image 2",
   "Seedream 5.0 Lite": "Seedream 5.0 Lite",
@@ -191,6 +195,55 @@ app.use((req, res, next) => {
     res.setHeader("Cache-Control", "no-store");
   }
   if (req.method === "OPTIONS") return res.sendStatus(204);
+  next();
+});
+app.use((req, res, next) => {
+  const accepted = req.get("accept-encoding") || "";
+  const useBrotli = accepted.includes("br");
+  const useGzip = !useBrotli && accepted.includes("gzip");
+  const mediaLikePath = /^\/api\/(?:media|export)\//.test(req.path) || /\.(?:png|jpe?g|webp|gif|avif|mp4|mov|webm|zip|ico|woff2?)$/i.test(req.path);
+  if (mediaLikePath || req.method === "HEAD" || (!useBrotli && !useGzip)) return next();
+
+  const originalWrite = res.write.bind(res);
+  const originalEnd = res.end.bind(res);
+  const chunks = [];
+  let buffering = true;
+
+  res.write = (chunk, encoding, callback) => {
+    if (!buffering) return originalWrite(chunk, encoding, callback);
+    if (chunk) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding));
+    if (typeof callback === "function") callback();
+    return true;
+  };
+
+  res.end = (chunk, encoding, callback) => {
+    if (!buffering) return originalEnd(chunk, encoding, callback);
+    buffering = false;
+    if (chunk) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding));
+    const body = Buffer.concat(chunks);
+    const contentType = String(res.getHeader("Content-Type") || "");
+    const alreadyEncoded = Boolean(res.getHeader("Content-Encoding"));
+    const compressible = /json|javascript|text|css|svg|xml/i.test(contentType);
+    if (alreadyEncoded || body.length < httpCompressionMinBytes || !compressible || res.statusCode < 200 || res.statusCode === 204 || res.statusCode === 304) {
+      return originalEnd(body, undefined, callback);
+    }
+
+    const stream = useBrotli ? createBrotliCompress() : createGzip({ level: 5 });
+    const compressedChunks = [];
+    stream.on("data", (part) => compressedChunks.push(part));
+    stream.on("error", () => originalEnd(body, undefined, callback));
+    stream.on("end", () => {
+      const compressed = Buffer.concat(compressedChunks);
+      res.setHeader("Content-Encoding", useBrotli ? "br" : "gzip");
+      res.setHeader("Vary", [res.getHeader("Vary"), "Accept-Encoding"].filter(Boolean).join(", "));
+      res.setHeader("Content-Length", compressed.length);
+      originalEnd(compressed, undefined, callback);
+    });
+    res.removeHeader("Content-Length");
+    stream.end(body);
+    return res;
+  };
+
   next();
 });
 app.use(express.json({
@@ -1162,6 +1215,7 @@ async function saveDb(db) {
 }
 
 let dbMutationQueue = Promise.resolve();
+const activeGenerationJobs = new Set();
 
 function mutateDb(handler) {
   const run = dbMutationQueue.then(async () => {
@@ -1541,6 +1595,23 @@ function publicProjectGenerationState(db, user, projectId) {
   };
 }
 
+function generationStateEtag(payload = {}) {
+  const signature = JSON.stringify({
+    projectId: payload.project?.id || "",
+    resultCount: payload.project?.resultCount || 0,
+    latestResultId: payload.project?.results?.at?.(-1)?.id || "",
+    jobs: (payload.generationJobs || []).map((job) => [
+      job.id,
+      job.status,
+      job.resultId || "",
+      job.startedAt || "",
+      job.completedAt || ""
+    ]),
+    credits: payload.billing?.credits
+  });
+  return `"${crypto.createHash("sha1").update(signature).digest("hex")}"`;
+}
+
 function setDeep(target, dotted, value) {
   const parts = dotted.split(".");
   let cursor = target;
@@ -1696,8 +1767,15 @@ function assertGenerationAccess(db, user, requiredCredits = 0.1, requestedCount 
   const perMinuteLimit = Math.max(Number(process.env.USER_GENERATE_PER_MINUTE || 3), requestedCount);
   const perDayLimit = Number(process.env.USER_GENERATE_PER_DAY || 50);
   const userJobs = (db.generationJobs || []).filter((job) => job.userId === user.id);
+  const runningJobs = userJobs.filter((job) => ["queued", "processing"].includes(job.status)).length;
   const inLastMinute = userJobs.filter((job) => Date.parse(job.createdAt || 0) > now - 60 * 1000).length;
   const inLastDay = userJobs.filter((job) => Date.parse(job.createdAt || 0) > now - 24 * 60 * 60 * 1000).length;
+
+  if (runningJobs + requestedCount > userConcurrentGenerationLimit) {
+    const error = new Error("Too many generations are already running. Please wait for the current images to finish.");
+    error.status = 429;
+    throw error;
+  }
 
   if (inLastMinute + requestedCount > perMinuteLimit || inLastDay + requestedCount > perDayLimit) {
     const error = new Error("Too many generations. Please wait a moment and try again.");
@@ -2857,33 +2935,52 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
     await saveDb(currentDb);
     return publicState(currentDb, user);
   });
-  jobIds.forEach((jobId) => {
-    setTimeout(() => processGenerationJob(jobId).catch((error) => console.error("Generation job failed", error)), 0);
-  });
+  kickGenerationQueue();
   return { jobId: jobIds[0], jobIds, state };
 }
 
-async function processGenerationJob(jobId) {
-  const snapshot = await mutateDb(async (db) => {
-    const job = db.generationJobs.find((item) => item.id === jobId);
-    if (!job || job.status !== "queued") return null;
-    const project = db.projects.find((item) => item.id === job.projectId);
-    if (!project) throw Object.assign(new Error("Project not found"), { status: 404 });
-    job.status = "processing";
-    job.startedAt = new Date().toISOString();
-    await saveDb(db);
-    return { job: structuredClone(job), project: structuredClone(project) };
-  });
-  if (!snapshot) return;
-  if (snapshot.job.internalPromptOverride && snapshot.project?.image) {
-    snapshot.project.image.prompt = snapshot.job.internalPromptOverride;
-  }
-
+async function kickGenerationQueue() {
+  const availableSlots = maxConcurrentGenerationJobs - activeGenerationJobs.size;
+  if (availableSlots <= 0) return;
   try {
+    const db = await ensureDb();
+    const nextJobs = (db.generationJobs || [])
+      .filter((job) => job.status === "queued" && !activeGenerationJobs.has(job.id))
+      .slice(-availableSlots)
+      .reverse();
+    nextJobs.forEach((job) => {
+      activeGenerationJobs.add(job.id);
+      setTimeout(() => processGenerationJob(job.id).catch((error) => console.error("Generation job failed", error)), 0);
+    });
+  } catch (error) {
+    console.error("Generation queue dispatch failed", error);
+  }
+}
+
+async function processGenerationJob(jobId) {
+  try {
+    const snapshot = await mutateDb(async (db) => {
+      const job = db.generationJobs.find((item) => item.id === jobId);
+      if (!job || job.status !== "queued") return null;
+      const project = db.projects.find((item) => item.id === job.projectId);
+      if (!project) throw Object.assign(new Error("Project not found"), { status: 404 });
+      job.status = "processing";
+      job.startedAt = new Date().toISOString();
+      await saveDb(db);
+      return { job: structuredClone(job), project: structuredClone(project) };
+    });
+    if (!snapshot) return;
+    if (snapshot.job.internalPromptOverride && snapshot.project?.image) {
+      snapshot.project.image.prompt = snapshot.job.internalPromptOverride;
+    }
+
     const generated = await generateWithProvider(snapshot.project, snapshot.job.action, snapshot.job.step);
     await completeQueuedGeneration(jobId, generated);
   } catch (error) {
     await failQueuedGeneration(jobId, error);
+  } finally {
+    activeGenerationJobs.delete(jobId);
+    kickGenerationQueue();
   }
 }
 
@@ -5906,7 +6003,11 @@ app.patch("/api/projects/:id/field", async (req, res) => {
 app.get("/api/projects/:id/generation-state", async (req, res, next) => {
   try {
     const { db, user } = await requireAuth(req);
-    res.json(publicProjectGenerationState(db, user, req.params.id));
+    const payload = publicProjectGenerationState(db, user, req.params.id);
+    const etag = generationStateEtag(payload);
+    res.setHeader("ETag", etag);
+    if (req.get("if-none-match") === etag) return res.sendStatus(304);
+    res.json(payload);
   } catch (error) {
     next(error);
   }
@@ -7479,4 +7580,5 @@ if (process.env.NODE_ENV === "production" && serveStatic) {
 
 app.listen(port, "0.0.0.0", () => {
   console.log(`Pokaya AI running on http://localhost:${port}`);
+  kickGenerationQueue();
 });
