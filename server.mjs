@@ -74,6 +74,11 @@ const thumbnailCacheMaxItems = Number(process.env.THUMBNAIL_CACHE_MAX_ITEMS || 1
 const thumbnailCacheMaxBytes = Number(process.env.THUMBNAIL_CACHE_MAX_BYTES || 96 * 1024 * 1024);
 let thumbnailCacheBytes = 0;
 const persistentThumbnailWidths = [360, 640, 960];
+const publicStateResultLimit = Number(process.env.PUBLIC_STATE_RESULT_LIMIT || 160);
+const publicStateJobLimit = Number(process.env.PUBLIC_STATE_JOB_LIMIT || 200);
+const publicStateRowLimit = Number(process.env.PUBLIC_STATE_ROW_LIMIT || 200);
+const publicStateAttachmentLimit = Number(process.env.PUBLIC_STATE_ATTACHMENT_LIMIT || 240);
+const projectGenerationStateResultLimit = Number(process.env.PROJECT_GENERATION_STATE_RESULT_LIMIT || 260);
 const publicMediaModelMap = {
   "GPT Image 2": "GPT Image 2",
   "Seedream 5.0 Lite": "Seedream 5.0 Lite",
@@ -1267,6 +1272,29 @@ function publicMediaMarker(value) {
   return value ? "pokaya-media-ready" : undefined;
 }
 
+function recentRows(rows = [], limit = publicStateRowLimit) {
+  if (!Array.isArray(rows)) return [];
+  return rows.slice(0, Math.max(0, limit));
+}
+
+function recentProjectResults(results = [], limit = publicStateResultLimit) {
+  if (!Array.isArray(results)) return [];
+  return results.slice(Math.max(0, results.length - limit));
+}
+
+function recentGenerationJobs(jobs = [], limit = publicStateJobLimit) {
+  if (!Array.isArray(jobs)) return [];
+  const running = jobs.filter((job) => ["queued", "processing"].includes(job.status));
+  const recent = jobs.filter((job) => !["queued", "processing"].includes(job.status)).slice(0, Math.max(0, limit));
+  const seen = new Set();
+  return [...running, ...recent].filter((job) => {
+    const key = job.id || `${job.projectId}:${job.createdAt}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 function publicState(db, user = db.users?.find((item) => item.id === adminUserId)) {
   const isAdmin = hasAdminPrivileges(user) && Boolean(user.__adminVerified);
   const owns = (item) => item.userId === user.id;
@@ -1312,7 +1340,8 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
       model: publicMediaModel(project.image?.model)
     },
     agentMemory: sanitizeAgentObject(project.agentMemory || {}),
-    results: (project.results || []).map(sanitizeResult)
+    results: (isAdmin ? (project.results || []) : recentProjectResults(project.results || [])).map(sanitizeResult),
+    resultCount: (project.results || []).length
   });
   const sanitizeJob = (job) => {
     if (isAdmin) return job;
@@ -1368,14 +1397,14 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
     metadata: safeLedgerMetadata(item.metadata)
   });
   const projects = (db.projects || []).filter(owns).map(sanitizeProject);
-  const usageRows = (db.usage || []).filter(owns).map(sanitizeUsage);
-  const scheduleRows = (db.schedule || []).filter(owns).map(sanitizeSchedule);
-  const generationJobs = (db.generationJobs || []).filter(owns).map(sanitizeJob);
+  const usageRows = recentRows((db.usage || []).filter(owns)).map(sanitizeUsage);
+  const scheduleRows = recentRows((db.schedule || []).filter(owns)).map(sanitizeSchedule);
+  const generationJobs = recentGenerationJobs((db.generationJobs || []).filter(owns)).map(sanitizeJob);
   const apiCalls = isAdmin ? (db.apiCalls || []).filter(owns) : [];
-  const payments = (db.payments || []).filter(owns);
-  const supportTickets = (db.supportTickets || []).filter(owns);
-  const attachments = (db.attachments || []).filter(owns);
-  const creditLedger = (db.creditLedger || []).filter(owns).map(sanitizeCreditLedger);
+  const payments = recentRows((db.payments || []).filter(owns));
+  const supportTickets = recentRows((db.supportTickets || []).filter(owns));
+  const attachments = recentRows((db.attachments || []).filter(owns), publicStateAttachmentLimit);
+  const creditLedger = recentRows((db.creditLedger || []).filter(owns)).map(sanitizeCreditLedger);
   const tiktokConnections = (db.tiktok?.connections || []).filter(owns);
   const tiktokPublishes = (db.tiktok?.publishes || []).filter(owns).map(sanitizePublish);
   const agentTemplates = (db.agentTemplates || []).filter(owns).map(publicAgentTemplate);
