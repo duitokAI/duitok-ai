@@ -10212,7 +10212,7 @@ function updateGenerationStatusInDom(db = state.db) {
     const label = card.matches(".agent-generation-processing-frame")
       ? card.querySelector("strong")
       : card.querySelector(".agent-generation-processing-frame strong, b");
-    if (label) label.textContent = card.matches(".agent-generation-processing-frame") ? (job.status === "processing" ? "Processing" : job.status === "queued" ? "Queued" : job.status || "") : generationJobStatusLabel(job);
+    if (label) label.textContent = generationJobStatusLabel(job);
     const frameSummary = card.matches(".agent-generation-processing-frame")
       ? card.querySelector("span")
       : card.querySelector(".agent-generation-processing-frame span");

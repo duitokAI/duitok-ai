@@ -31586,3 +31586,85 @@ label {
   line-height: 1 !important;
   color: rgba(43, 6, 54, 0.55) !important;
 }
+
+/* Generation feedback polish: make status, failure recovery, and long prompts visible. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt {
+  min-height: 168px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt .image-console-main {
+  height: 158px !important;
+  max-height: 158px !important;
+  grid-template-rows: 98px 48px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt .image-console-prompt,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt .image-console-prompt textarea {
+  height: 98px !important;
+  min-height: 98px !important;
+  max-height: 98px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt .image-console-prompt textarea {
+  overflow-y: auto !important;
+  padding-top: 12px !important;
+}
+
+.studio-shell .image-prompt-enhance span {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+}
+
+.studio-wall-failed-actions,
+.generation-job-actions {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  max-width: calc(100% - 20px) !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-pending .studio-wall-failed-actions button,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending .studio-wall-failed-actions button {
+  position: static !important;
+  inset: auto !important;
+  min-height: 28px !important;
+  max-width: none !important;
+  padding: 6px 9px !important;
+  border-color: rgba(255, 255, 255, 0.24) !important;
+  background: rgba(255, 255, 255, 0.14) !important;
+  color: #fff !important;
+}
+
+.generation-job-actions .dark-button {
+  min-height: 32px !important;
+  padding: 7px 10px !important;
+  font-size: 12px !important;
+}
+
+.studio-wall-new-badge {
+  position: absolute !important;
+  z-index: 5 !important;
+  top: 8px !important;
+  left: 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 22px !important;
+  padding: 0 8px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #6f1d82 !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  box-shadow: 0 8px 18px rgba(42, 6, 51, 0.18) !important;
+  pointer-events: none !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-card.is-new {
+  box-shadow: inset 0 0 0 2px rgba(255, 49, 95, 0.56) !important;
+}
