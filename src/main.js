@@ -40,6 +40,7 @@ let autoFrameworkSaveTimer = null;
 let autoFrameworkSaveSeq = 0;
 let imageConsoleScrollCleanup = null;
 let sidebarTooltipCleanup = null;
+let navigationFrame = null;
 let imageCountSaveTimer = null;
 let imageCountSaveSeq = 0;
 let resultTitleSaveTimer = null;
@@ -1638,6 +1639,23 @@ function render() {
   bindImageConsoleCompact();
   bindCollapsedSidebarTooltips();
   scrollToSopAnchor();
+}
+
+function scheduleNavigation(patch = {}) {
+  const nextPage = patch.page;
+  const nextStep = patch.step;
+  const nextProjectId = patch.projectId;
+  const samePage = !nextPage || nextPage === state.page;
+  const sameStep = !nextStep || nextStep === state.step;
+  const sameProject = !nextProjectId || nextProjectId === state.projectId;
+  if (samePage && sameStep && sameProject && !patch.modal && !patch.projectMenuId) return;
+  document.documentElement.classList.add("is-route-changing");
+  if (navigationFrame) window.cancelAnimationFrame(navigationFrame);
+  navigationFrame = window.requestAnimationFrame(() => {
+    navigationFrame = null;
+    set(patch);
+    window.setTimeout(() => document.documentElement.classList.remove("is-route-changing"), 90);
+  });
 }
 
 function studioChineseDictionary() {
@@ -4211,7 +4229,7 @@ function studioWallCard(item, index = 0) {
   const promptText = resultPromptText(item).replaceAll("\n", " ").trim();
   const canSaveReference = Boolean(item.imageUrl || item.videoUrl);
   return `<article class="studio-wall-card" style="--media-ratio:${esc(resultMediaRatio(item))}">
-    ${resultPreview(item, { clickable: true, wall: true, priority: index < 12 })}
+    ${resultPreview(item, { clickable: true, wall: true, priority: index < 6 })}
     <div class="studio-wall-actions" aria-label="Image actions">
       <button type="button" data-result-action="save-avatar" data-result-id="${esc(item.id)}" data-tooltip="Save as Avatar" aria-label="Save as Avatar" title="Save as Avatar" ${canSaveReference ? "" : "disabled"}>${icon("user-round-plus", 17)}</button>
       <button type="button" data-result-action="save-product" data-result-id="${esc(item.id)}" data-tooltip="Save as Product" aria-label="Save as Product" title="Save as Product" ${canSaveReference ? "" : "disabled"}>${icon("package-plus", 17)}</button>
@@ -5368,7 +5386,8 @@ function resultPreview(item, options = {}) {
   const ratioSync = "this.closest('.studio-wall-card')?.style.setProperty('--media-ratio',(this.naturalWidth||this.videoWidth||1)/(this.naturalHeight||this.videoHeight||1))";
   const eagerMedia = Boolean(options.full || options.priority);
   const imagePriority = options.full || options.priority ? "high" : options.wall ? "auto" : "low";
-  const image = imageSrc ? `<img class="result-image" src="${imageSrc}" alt="${esc(item.title)}" loading="${eagerMedia ? "eager" : "lazy"}" decoding="${eagerMedia ? "sync" : "async"}" fetchpriority="${imagePriority}" draggable="false" onload="${esc(ratioSync)}" onerror="${esc(imageError)}">` : "";
+  const imageDecoding = options.full ? "sync" : "async";
+  const image = imageSrc ? `<img class="result-image" src="${imageSrc}" alt="${esc(item.title)}" loading="${eagerMedia ? "eager" : "lazy"}" decoding="${imageDecoding}" fetchpriority="${imagePriority}" draggable="false" onload="${esc(ratioSync)}" onerror="${esc(imageError)}">` : "";
   const videoPreload = eagerMedia ? "metadata" : "none";
   const video = videoSrc ? `<div class="result-video-shell"><video class="result-video" src="${videoSrc}" preload="${videoPreload}" playsinline onloadedmetadata="${esc(ratioSync)}"></video><button type="button" class="result-play-button" data-video-play="${esc(item.id)}">${icon("play", 26)}<span>点击播放</span></button></div>` : "";
   const videoTrigger = videoSrc ? `<button type="button" class="result-preview-trigger result-video-trigger" data-result-preview="${esc(item.id)}" aria-label="Open full video preview"><div class="result-video-shell"><video class="result-video" src="${videoSrc}" preload="${videoPreload}" playsinline muted onloadedmetadata="${esc(ratioSync)}"></video><span class="result-play-button">${icon("play", 26)}<span>点击查看</span></span></div></button>` : "";
@@ -8426,11 +8445,11 @@ function bind() {
     if (el.dataset.sopModal === "true") return set({ sopTopic, modal: "sop" });
     set({ page: "sop", sopTopic, sopSearch: "", sopStepAnchor: "", modal: null });
   }));
-  document.querySelectorAll("[data-page]").forEach((el) => el.addEventListener("click", () => set({ page: el.dataset.page })));
-  document.querySelectorAll("[data-step]").forEach((el) => el.addEventListener("click", () => set({ step: el.dataset.step })));
-  document.querySelectorAll("[data-step-open]").forEach((el) => el.addEventListener("click", () => set({ page: "project", step: el.dataset.stepOpen })));
+  document.querySelectorAll("[data-page]").forEach((el) => el.addEventListener("click", () => scheduleNavigation({ page: el.dataset.page })));
+  document.querySelectorAll("[data-step]").forEach((el) => el.addEventListener("click", () => scheduleNavigation({ step: el.dataset.step })));
+  document.querySelectorAll("[data-step-open]").forEach((el) => el.addEventListener("click", () => scheduleNavigation({ page: "project", step: el.dataset.stepOpen })));
   document.querySelectorAll("[data-affiliate-tab]").forEach((el) => el.addEventListener("click", () => set({ affiliateTab: el.dataset.affiliateTab })));
-  document.querySelectorAll("[data-project]").forEach((el) => el.addEventListener("click", () => set({ projectId: el.dataset.project, page: "project", projectMenuId: null })));
+  document.querySelectorAll("[data-project]").forEach((el) => el.addEventListener("click", () => scheduleNavigation({ projectId: el.dataset.project, page: "project", projectMenuId: null })));
   document.querySelectorAll("[data-wizard-feature]").forEach((el) => el.addEventListener("click", () => {
     const patch = { wizardFeature: el.dataset.wizardFeature };
     if (el.dataset.wizardAuto === "true") patch.wizardStep = 2;

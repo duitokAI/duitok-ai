@@ -30701,3 +30701,61 @@ label {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Sidebar and image-studio performance pass: keep navigation taps responsive
+   while the heavy media wall is being torn down or rebuilt. */
+.studio-shell .sidebar {
+  contain: layout paint style;
+  transform: translateZ(0);
+}
+
+.studio-shell .sidebar-scroll-area {
+  contain: layout paint;
+  overscroll-behavior: contain;
+}
+
+.studio-shell .side-primary,
+.studio-shell .side-link,
+.studio-shell .project-button,
+.studio-shell .agent-primary-card {
+  transition:
+    background-color 80ms ease,
+    border-color 80ms ease,
+    color 80ms ease,
+    opacity 80ms ease !important;
+  transform: none !important;
+  will-change: auto !important;
+}
+
+.studio-shell .side-primary.active,
+.studio-shell .side-link.active,
+.studio-shell .project-button.active,
+.studio-shell .agent-primary-card.active {
+  box-shadow: inset 3px 0 0 var(--pink) !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-card,
+.studio-shell .video-prompt-extractor-page .studio-wall-card {
+  content-visibility: auto !important;
+  contain: layout paint style !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-card:hover,
+.studio-shell .image-higgsfield-mode .studio-wall-card:focus-within,
+.studio-shell .video-prompt-extractor-page .studio-wall-card:hover,
+.studio-shell .video-prompt-extractor-page .studio-wall-card:focus-within {
+  content-visibility: visible !important;
+}
+
+.is-route-changing .studio-shell .workspace {
+  pointer-events: none;
+}
+
+.is-route-changing .studio-shell .image-generate-console,
+.is-route-changing .studio-shell .studio-wall-card,
+.is-route-changing .studio-shell .side-primary,
+.is-route-changing .studio-shell .side-link,
+.is-route-changing .studio-shell .project-button,
+.is-route-changing .studio-shell .agent-primary-card {
+  transition: none !important;
+}
