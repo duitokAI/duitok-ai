@@ -30837,3 +30837,92 @@ label {
   transition: none !important;
   animation: none !important;
 }
+
+/* Agent composer stability lock: message rendering must move only the thread,
+   never the bottom input bar. */
+.studio-shell:has(.agent-page),
+.studio-shell .workspace:has(.agent-page),
+.studio-shell .agent-page,
+.studio-shell .agent-workspace-shell,
+.studio-shell .agent-chat-shell.agent-page-panel {
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .workspace:has(.agent-page) {
+  height: 100dvh !important;
+  padding: 0 !important;
+}
+
+.studio-shell .agent-page,
+.studio-shell .agent-workspace-shell,
+.studio-shell .agent-chat-shell.agent-page-panel {
+  height: 100% !important;
+  max-height: 100% !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel {
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) auto !important;
+  align-content: stretch !important;
+  gap: 0 !important;
+  isolation: isolate !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-chat-toolbar {
+  grid-row: 1 !important;
+  flex: 0 0 auto !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread {
+  grid-row: 2 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  width: min(820px, calc(100% - 32px)) !important;
+  margin: 0 auto !important;
+  padding: clamp(20px, 3vh, 32px) 0 18px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  scrollbar-gutter: stable !important;
+  scroll-padding-bottom: 24px !important;
+  overflow-anchor: none !important;
+  content-visibility: visible !important;
+  contain: none !important;
+  contain-intrinsic-size: auto !important;
+  transform: translateZ(0);
+  will-change: scroll-position;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread > article,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread .agent-message,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread .agent-run-card,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread .agent-feedback-row {
+  content-visibility: visible !important;
+  contain: none !important;
+  contain-intrinsic-size: auto !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-form {
+  grid-row: 3 !important;
+  position: relative !important;
+  inset: auto !important;
+  z-index: 3 !important;
+  flex: 0 0 auto !important;
+  align-self: end !important;
+  width: min(820px, calc(100% - 32px)) !important;
+  margin: 0 auto max(18px, env(safe-area-inset-bottom)) !important;
+  transform: none !important;
+  contain: layout paint style !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-form textarea {
+  max-height: 112px !important;
+  overflow-y: auto !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-attachment-tray {
+  max-height: 104px !important;
+  overflow-y: auto !important;
+}
