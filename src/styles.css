@@ -30863,6 +30863,30 @@ label {
   animation: none !important;
 }
 
+/* Result-wall action polish: keep a single, predictable tooltip and avoid
+   edge-hugging controls over dense media thumbnails. */
+.studio-shell .image-higgsfield-mode .studio-wall-actions {
+  right: 6px !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.22) !important;
+  border-radius: 12px !important;
+  background: rgba(28, 8, 36, 0.24) !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-actions button::after {
+  display: none !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .studio-shell .image-higgsfield-mode .studio-wall-actions button::after {
+    display: block !important;
+    right: calc(100% + 10px) !important;
+    max-width: min(160px, calc(100vw - 40px)) !important;
+    border-radius: 8px !important;
+    background: rgba(20, 18, 22, 0.96) !important;
+    line-height: 1.1 !important;
+  }
+}
+
 /* Agent composer stability lock: message rendering must move only the thread,
    never the bottom input bar. */
 .studio-shell:has(.agent-page),

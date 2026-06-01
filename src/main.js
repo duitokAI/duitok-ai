@@ -4291,10 +4291,10 @@ function studioWallCard(item, index = 0) {
   return `<article class="studio-wall-card" data-media-ratio="${esc(mediaRatio)}" style="--media-ratio:${esc(mediaRatio)}">
     ${resultPreview(item, { clickable: true, wall: true, priority: index < 6 })}
     <div class="studio-wall-actions" aria-label="Image actions">
-      <button type="button" data-result-action="save-avatar" data-result-id="${esc(item.id)}" data-tooltip="Save as Avatar" aria-label="Save as Avatar" title="Save as Avatar" ${canSaveReference ? "" : "disabled"}>${icon("user-round-plus", 17)}</button>
-      <button type="button" data-result-action="save-product" data-result-id="${esc(item.id)}" data-tooltip="Save as Product" aria-label="Save as Product" title="Save as Product" ${canSaveReference ? "" : "disabled"}>${icon("package-plus", 17)}</button>
-      <button type="button" data-result-action="download" data-result-id="${esc(item.id)}" data-result-kind="${item.videoUrl ? "video" : item.imageUrl ? "image" : "text"}" data-tooltip="Download" aria-label="Download" title="Download">${icon("download", 18)}</button>
-      <button type="button" data-result-action="delete" data-result-id="${esc(item.id)}" data-tooltip="Delete" aria-label="Delete" title="Delete">${icon("trash-2", 18)}</button>
+      <button type="button" data-result-action="save-avatar" data-result-id="${esc(item.id)}" data-tooltip="Save as Avatar" aria-label="Save as Avatar" ${canSaveReference ? "" : "disabled"}>${icon("user-round-plus", 17)}</button>
+      <button type="button" data-result-action="save-product" data-result-id="${esc(item.id)}" data-tooltip="Save as Product" aria-label="Save as Product" ${canSaveReference ? "" : "disabled"}>${icon("package-plus", 17)}</button>
+      <button type="button" data-result-action="download" data-result-id="${esc(item.id)}" data-result-kind="${item.videoUrl ? "video" : item.imageUrl ? "image" : "text"}" data-tooltip="Download" aria-label="Download">${icon("download", 18)}</button>
+      <button type="button" data-result-action="delete" data-result-id="${esc(item.id)}" data-tooltip="Delete" aria-label="Delete">${icon("trash-2", 18)}</button>
     </div>
     <footer><b>${esc(item.title || resultModelLabel(item))}</b><span>${esc(promptText ? promptText.slice(0, 92) : resultMediaLabel(item))}</span></footer>
   </article>`;
