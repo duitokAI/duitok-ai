@@ -23339,14 +23339,35 @@ label {
   min-height: 48px !important;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(111, 28, 132, 0.18);
   border-radius: 16px;
   padding: 0 !important;
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
-  box-shadow: none;
+  background: rgba(255, 255, 255, 0.72);
+  color: #4b0f5b;
+  box-shadow: 0 14px 32px rgba(70, 16, 84, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.78);
   backdrop-filter: blur(12px);
   cursor: pointer;
+}
+
+.result-lightbox-close svg,
+.result-lightbox-close svg * {
+  color: #4b0f5b;
+  stroke: currentColor;
+  stroke-width: 2.45;
+}
+
+.result-lightbox-close:hover,
+.result-lightbox-close:focus-visible {
+  border-color: rgba(111, 28, 132, 0.28);
+  background: rgba(255, 255, 255, 0.9);
+  color: #2a0633;
+}
+
+.result-lightbox-close:hover svg,
+.result-lightbox-close:focus-visible svg,
+.result-lightbox-close:hover svg *,
+.result-lightbox-close:focus-visible svg * {
+  color: #2a0633;
 }
 
 .result-lightbox-media {
