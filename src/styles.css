@@ -31002,3 +31002,50 @@ label {
   max-height: 104px !important;
   overflow-y: auto !important;
 }
+
+/* Agent phase-1 performance: keep runtime cards dimensionally stable during
+   partial message updates and backend polling. */
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.agent-thinking,
+.studio-shell .agent-page-panel .agent-thread article.agent-thinking {
+  min-height: 132px !important;
+  contain: layout paint style !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thinking-row,
+.studio-shell .agent-page-panel .agent-thinking-row {
+  min-height: 42px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thinking-row p,
+.studio-shell .agent-page-panel .agent-thinking-row p {
+  min-height: 18px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread .agent-run-card,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread .agent-tool-card,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread .agent-generation-card,
+.studio-shell .agent-page-panel .agent-thread .agent-run-card,
+.studio-shell .agent-page-panel .agent-thread .agent-tool-card,
+.studio-shell .agent-page-panel .agent-thread .agent-generation-card {
+  min-height: 72px !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  contain: layout paint style !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread .agent-generation-preview,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread .agent-generation-processing-frame,
+.studio-shell .agent-page-panel .agent-thread .agent-generation-preview,
+.studio-shell .agent-page-panel .agent-thread .agent-generation-processing-frame {
+  aspect-ratio: 1 / 1 !important;
+  min-height: 220px !important;
+  max-height: min(420px, 54vh) !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread .agent-tool-cards,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread .agent-generation-run-cards,
+.studio-shell .agent-page-panel .agent-thread .agent-tool-cards,
+.studio-shell .agent-page-panel .agent-thread .agent-generation-run-cards {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}

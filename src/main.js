@@ -1328,6 +1328,12 @@ function set(patch) {
     if (Object.prototype.hasOwnProperty.call(statePatch, "projectMenuId") && !statePatch.projectMenuId) closeProjectMenusInDom();
     return;
   }
+  if (shouldPatchAgentChatOnly(statePatch) && patchAgentChatDom(statePatch)) {
+    restoreAgentInputFocus(agentInputFocus);
+    if (shouldScrollAgentThread) scrollAgentThreadToBottom();
+    else restoreAgentThreadScroll(agentScroll);
+    return;
+  }
   render();
   restoreAgentInputFocus(agentInputFocus);
   if (shouldScrollAgentThread) scrollAgentThreadToBottom();
@@ -1372,6 +1378,55 @@ function shouldAutoScrollAgentThread(patch = {}, scroll = null) {
     || Object.prototype.hasOwnProperty.call(patch, "agentBusy")
     || Object.prototype.hasOwnProperty.call(patch, "agentQueue");
   return affectsThread && (!scroll || scroll.nearBottom);
+}
+
+function shouldPatchAgentChatOnly(patch = {}) {
+  if (state.page !== "agent") return false;
+  if (!document.querySelector(".agent-chat-shell.agent-page-panel")) return false;
+  const keys = Object.keys(patch);
+  if (!keys.length) return false;
+  const agentOnlyKeys = new Set([
+    "agentMessages",
+    "agentInput",
+    "agentAttachments",
+    "agentBusy",
+    "agentTyping",
+    "agentQueue",
+    "agentBusyStartedAt",
+    "agentWorkingTick",
+    "agentTaskMode",
+    "agentVisualPhase",
+    "agentIdleActivity",
+    "agentContextSummary",
+    "db"
+  ]);
+  return keys.every((key) => agentOnlyKeys.has(key));
+}
+
+function patchAgentChatDom(patch = {}) {
+  const shell = document.querySelector(".agent-chat-shell.agent-page-panel");
+  if (!shell) return false;
+  const affectsThread = ["agentMessages", "agentBusy", "agentTyping", "agentQueue", "agentBusyStartedAt", "agentWorkingTick", "db"].some((key) => Object.prototype.hasOwnProperty.call(patch, key));
+  const affectsForm = ["agentInput", "agentAttachments", "agentBusy", "agentTyping", "agentMessages"].some((key) => Object.prototype.hasOwnProperty.call(patch, key));
+  if (affectsThread) {
+    const thread = shell.querySelector(".agent-thread");
+    if (!thread) return false;
+    thread.innerHTML = agentThreadHtml();
+    bindAgentThreadControls(thread);
+  }
+  if (affectsForm) {
+    const form = shell.querySelector(".agent-form");
+    if (!form) return false;
+    form.outerHTML = agentFormHtml();
+    bindAgentControls();
+  }
+  if (state.agentDebugOpen) {
+    const debug = shell.querySelector(".agent-debug-panel");
+    const nextDebug = agentDebugPanel();
+    if (debug && nextDebug) debug.outerHTML = nextDebug;
+  }
+  window.lucide?.createIcons();
+  return true;
 }
 
 function captureAgentThreadScroll() {
@@ -7847,6 +7902,17 @@ function agentPage() {
 }
 
 function chatPanel() {
+  return `
+    <section class="agent-panel agent-page-panel agent-chat-shell">
+      ${agentChatToolbar()}
+      ${agentHistoryPanel()}
+      ${agentDebugPanel()}
+      <div class="agent-thread">${agentThreadHtml()}</div>
+      ${agentFormHtml()}
+    </section>`;
+}
+
+function agentThreadHtml() {
   const c = agentUiCopy();
   const visibleMessages = visibleAgentMessages();
   const intro = state.agentMessages.length
@@ -7855,6 +7921,16 @@ function chatPanel() {
         <strong>${c.emptyTitle}</strong>
         <p>${c.emptyBody}</p>
       </div>`;
+  return `
+    ${intro}
+    ${agentCollapsedHistoryBar()}
+    ${visibleMessages.map(({ item, index }) => agentMessageArticle(item, index)).join("")}
+    ${state.agentBusy && !state.agentTyping ? agentThinkingCard() : ""}
+    ${agentQueuedMessages()}`;
+}
+
+function agentFormHtml() {
+  const c = agentUiCopy();
   const pendingConfirmation = agentHasPendingConfirmation();
   const inputPlaceholder = state.agentBusy
     ? c.inputBusy
@@ -7862,30 +7938,17 @@ function chatPanel() {
       ? c.inputConfirm
       : c.inputReady;
   const canStopAgent = state.agentBusy && (state.agentTyping || agentAbortController);
-  return `
-    <section class="agent-panel agent-page-panel agent-chat-shell">
-      ${agentChatToolbar()}
-      ${agentHistoryPanel()}
-      ${agentDebugPanel()}
-      <div class="agent-thread">
-        ${intro}
-        ${agentCollapsedHistoryBar()}
-        ${visibleMessages.map(({ item, index }) => agentMessageArticle(item, index)).join("")}
-        ${state.agentBusy && !state.agentTyping ? agentThinkingCard() : ""}
-        ${agentQueuedMessages()}
-      </div>
-      <form class="agent-form" data-form="agent">
-        ${agentAttachmentTray()}
-        <label class="agent-attach-button" title="Add image or video" aria-label="Add image or video">
-          ${icon("paperclip", 18)}
-          <input type="file" data-agent-file accept="image/*,video/*" multiple hidden>
-        </label>
-        <textarea name="message" rows="1" data-agent-input placeholder="${esc(inputPlaceholder)}" ${pendingConfirmation ? "disabled" : ""}>${esc(state.agentInput)}</textarea>
-        ${canStopAgent
-          ? `<button class="gold-button agent-send-button agent-stop-button" type="button" data-action="stop-agent-response" title="Stop Agent" aria-label="Stop Agent">${icon("square", 17)}<span>Stop</span></button>`
-          : `<button class="gold-button agent-send-button" type="submit" title="${esc(c.send)}" aria-label="${esc(c.send)}" ${pendingConfirmation || state.agentBusy ? "disabled" : ""}>${icon(state.agentBusy ? "loader-circle" : "send", 19)}<span>${c.send}</span></button>`}
-      </form>
-    </section>`;
+  return `<form class="agent-form" data-form="agent">
+    ${agentAttachmentTray()}
+    <label class="agent-attach-button" title="Add image or video" aria-label="Add image or video">
+      ${icon("paperclip", 18)}
+      <input type="file" data-agent-file accept="image/*,video/*" multiple hidden>
+    </label>
+    <textarea name="message" rows="1" data-agent-input placeholder="${esc(inputPlaceholder)}" ${pendingConfirmation ? "disabled" : ""}>${esc(state.agentInput)}</textarea>
+    ${canStopAgent
+      ? `<button class="gold-button agent-send-button agent-stop-button" type="button" data-action="stop-agent-response" title="Stop Agent" aria-label="Stop Agent">${icon("square", 17)}<span>Stop</span></button>`
+      : `<button class="gold-button agent-send-button" type="submit" title="${esc(c.send)}" aria-label="${esc(c.send)}" ${pendingConfirmation || state.agentBusy ? "disabled" : ""}>${icon(state.agentBusy ? "loader-circle" : "send", 19)}<span>${c.send}</span></button>`}
+  </form>`;
 }
 
 function agentAttachmentTray() {
@@ -8567,27 +8630,7 @@ function bind() {
   }));
   document.querySelectorAll("[data-agent-history-restore]").forEach((el) => el.addEventListener("click", () => restoreAgentHistory(el.dataset.agentHistoryRestore)));
   document.querySelectorAll("[data-agent-history-delete]").forEach((el) => el.addEventListener("click", () => deleteAgentHistory(el.dataset.agentHistoryDelete)));
-  document.querySelectorAll("[data-agent-file]").forEach((el) => el.addEventListener("change", (event) => {
-    addAgentAttachments(event.target.files);
-    event.target.value = "";
-  }));
-  document.querySelectorAll("[data-agent-remove-attachment]").forEach((el) => el.addEventListener("click", () => removeAgentAttachment(el.dataset.agentRemoveAttachment)));
-  document.querySelectorAll(".agent-form").forEach((el) => {
-    el.addEventListener("dragover", (event) => {
-      const items = Array.from(event.dataTransfer?.items || []);
-      if (!items.some((item) => item.kind === "file")) return;
-      event.preventDefault();
-      el.classList.add("is-dragging");
-    });
-    el.addEventListener("dragleave", () => el.classList.remove("is-dragging"));
-    el.addEventListener("drop", (event) => {
-      const files = event.dataTransfer?.files;
-      if (!files?.length) return;
-      event.preventDefault();
-      el.classList.remove("is-dragging");
-      addAgentAttachments(files);
-    });
-  });
+  bindAgentControls();
   document.querySelectorAll("[data-admin-user]").forEach((el) => el.addEventListener("click", () => set({ adminUserId: el.dataset.adminUser })));
   document.querySelectorAll("[data-admin-search]").forEach((el) => el.addEventListener("input", (event) => {
     state.adminSearch = event.target.value;
@@ -8668,39 +8711,8 @@ function bind() {
     });
   });
   document.querySelectorAll("[data-upload]").forEach((el) => el.addEventListener("change", uploadChange));
-  const agentInput = document.querySelector("[data-agent-input]");
-  autoResizeAgentInput(agentInput);
-  agentInput?.addEventListener("compositionstart", (event) => {
-    state.agentInputComposing = true;
-    event.currentTarget.dataset.composing = "true";
-  });
-  agentInput?.addEventListener("compositionend", (event) => {
-    state.agentInputComposing = false;
-    delete event.currentTarget.dataset.composing;
-    state.agentInput = event.currentTarget.value;
-    autoResizeAgentInput(event.currentTarget);
-    if (state.agentRenderAfterComposition) {
-      state.agentRenderAfterComposition = false;
-      render();
-      restoreAgentInputFocus({
-        value: state.agentInput,
-        start: event.currentTarget.selectionStart,
-        end: event.currentTarget.selectionEnd,
-        composing: false
-      });
-    }
-  });
-  agentInput?.addEventListener("input", (e) => {
-    state.agentInput = e.target.value;
-    autoResizeAgentInput(e.target);
-  });
-  agentInput?.addEventListener("paste", handleAgentInputPaste);
+  bindAgentInput();
   document.querySelectorAll("[data-image-console-prompt-zone]").forEach((el) => el.addEventListener("paste", handleImagePromptPaste));
-  agentInput?.addEventListener("keydown", (event) => {
-    if (event.key !== "Enter" || event.shiftKey || event.metaKey || event.ctrlKey || event.altKey || event.isComposing || state.agentInputComposing || event.keyCode === 229) return;
-    event.preventDefault();
-    event.currentTarget.form?.requestSubmit();
-  });
   document.querySelectorAll("[data-prompt-group]").forEach((el) => el.addEventListener("click", () => set({ imagePromptGroup: el.dataset.promptGroup })));
   document.querySelectorAll("[data-image-preset]").forEach((el) => el.addEventListener("click", () => applyImagePreset(el.dataset.imagePreset)));
   document.querySelectorAll("[data-topup-select]").forEach((el) => el.addEventListener("click", () => set({ topupAmount: Number(el.dataset.topupSelect) })));
@@ -8768,7 +8780,7 @@ function bind() {
   document.querySelectorAll("[data-attachment-filter]").forEach((el) => el.addEventListener("click", () => set({ attachmentPickerFilter: el.dataset.attachmentFilter || "all" })));
   document.querySelectorAll("[data-attachment-pick]").forEach((el) => el.addEventListener("click", () => pickAttachment(el.dataset.attachmentPick, el.dataset.attachmentTarget)));
   document.querySelectorAll("[data-drop-upload]").forEach((el) => bindAttachmentDropZone(el));
-  document.querySelectorAll("form").forEach((el) => el.addEventListener("submit", submit));
+  document.querySelectorAll("form:not(.agent-form)").forEach((el) => el.addEventListener("submit", submit));
   document.querySelectorAll("[data-lang-toggle]").forEach((el) => el.addEventListener("click", (event) => {
     event.stopPropagation();
     set({ langOpen: !state.langOpen });
@@ -8779,6 +8791,110 @@ function bind() {
     set({ lang: el.dataset.lang, langOpen: false });
   }));
   document.addEventListener("click", closeLangMenu, { once: true });
+}
+
+function bindAgentControls() {
+  bindAgentInput();
+  document.querySelectorAll("[data-agent-file]").forEach((el) => el.addEventListener("change", (event) => {
+    addAgentAttachments(event.target.files);
+    event.target.value = "";
+  }));
+  document.querySelectorAll("[data-agent-remove-attachment]").forEach((el) => el.addEventListener("click", () => removeAgentAttachment(el.dataset.agentRemoveAttachment)));
+  document.querySelectorAll(".agent-form").forEach((el) => {
+    el.addEventListener("submit", submit);
+    el.addEventListener("dragover", (event) => {
+      const items = Array.from(event.dataTransfer?.items || []);
+      if (!items.some((item) => item.kind === "file")) return;
+      event.preventDefault();
+      el.classList.add("is-dragging");
+    });
+    el.addEventListener("dragleave", () => el.classList.remove("is-dragging"));
+    el.addEventListener("drop", (event) => {
+      const files = event.dataTransfer?.files;
+      if (!files?.length) return;
+      event.preventDefault();
+      el.classList.remove("is-dragging");
+      addAgentAttachments(files);
+    });
+  });
+}
+
+function bindAgentInput() {
+  const agentInput = document.querySelector("[data-agent-input]");
+  autoResizeAgentInput(agentInput);
+  agentInput?.addEventListener("compositionstart", (event) => {
+    state.agentInputComposing = true;
+    event.currentTarget.dataset.composing = "true";
+  });
+  agentInput?.addEventListener("compositionend", (event) => {
+    state.agentInputComposing = false;
+    delete event.currentTarget.dataset.composing;
+    state.agentInput = event.currentTarget.value;
+    autoResizeAgentInput(event.currentTarget);
+    if (state.agentRenderAfterComposition) {
+      state.agentRenderAfterComposition = false;
+      render();
+      restoreAgentInputFocus({
+        value: state.agentInput,
+        start: event.currentTarget.selectionStart,
+        end: event.currentTarget.selectionEnd,
+        composing: false
+      });
+    }
+  });
+  agentInput?.addEventListener("input", (e) => {
+    state.agentInput = e.target.value;
+    autoResizeAgentInput(e.target);
+  });
+  agentInput?.addEventListener("paste", handleAgentInputPaste);
+  agentInput?.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" || event.shiftKey || event.metaKey || event.ctrlKey || event.altKey || event.isComposing || state.agentInputComposing || event.keyCode === 229) return;
+    event.preventDefault();
+    event.currentTarget.form?.requestSubmit();
+  });
+}
+
+function bindAgentThreadControls(root = document) {
+  root.querySelectorAll("[data-agent-prompt]").forEach((el) => el.addEventListener("click", () => {
+    const card = el.closest("[data-agent-card-type]");
+    const run = el.closest("[data-agent-run-id]");
+    recordAgentFeedback({
+      agentRunId: run?.dataset.agentRunId || "",
+      eventType: "tool_card_clicked",
+      targetType: card?.dataset.agentCardType || "agent_prompt",
+      targetId: card?.dataset.agentTrendName || el.dataset.agentPrompt || "",
+      sourceTool: card?.dataset.agentCardType || "",
+      metadata: {
+        action: el.dataset.agentPrompt,
+        trendName: card?.dataset.agentTrendName || "",
+        category: card?.dataset.agentCardType || ""
+      }
+    });
+    sendAgentMessage(el.dataset.agentPrompt);
+  }));
+  root.querySelectorAll("[data-agent-feedback]").forEach((el) => el.addEventListener("click", () => {
+    recordAgentFeedback({
+      agentRunId: el.dataset.agentRunId || "",
+      eventType: el.dataset.agentFeedback,
+      targetType: "agent_reply",
+      targetId: el.dataset.agentRunId || "",
+      metadata: { action: el.dataset.agentFeedback }
+    });
+    notify(el.dataset.agentFeedback === "positive_feedback" ? "已记录：这个回复有用。" : "已记录：我会少走这个方向。");
+  }));
+  root.querySelectorAll("[data-agent-template-save]").forEach((el) => el.addEventListener("click", () => saveAgentTemplate(el)));
+  root.querySelectorAll("[data-agent-template-use]").forEach((el) => el.addEventListener("click", () => useAgentTemplate(el.dataset.agentTemplateUse)));
+  root.querySelectorAll("[data-agent-template-delete]").forEach((el) => el.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    deleteAgentTemplate(el.dataset.agentTemplateDelete);
+  }));
+  root.querySelectorAll("[data-agent-confirm]").forEach((el) => el.addEventListener("click", () => confirmAgentAction(el.dataset.agentConfirm, el.dataset.agentToken)));
+  root.querySelectorAll("[data-agent-undo]").forEach((el) => el.addEventListener("click", () => {
+    recordAgentFeedback({ agentRunId: el.dataset.agentUndo, eventType: "agent_run_undone", targetType: "agent_run", targetId: el.dataset.agentUndo, metadata: { action: "undo" } });
+    undoAgentRun(el.dataset.agentUndo);
+  }));
+  root.querySelectorAll("[data-date-field]").forEach((el) => el.addEventListener("change", () => set({ [el.dataset.dateField]: el.value })));
 }
 
 function autoResizeAgentInput(input) {
