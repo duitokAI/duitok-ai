@@ -6,6 +6,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import express from "express";
 import pg from "pg";
+import sharp from "sharp";
 import { createServer as createViteServer } from "vite";
 
 const { Pool } = pg;
@@ -7108,12 +7109,21 @@ app.get("/api/media/result/:id/:kind", async (req, res, next) => {
       throw error;
     }
     const isVideo = req.params.kind === "video";
+    const wantsThumb = !isVideo && req.query.thumb === "1";
+    const thumbWidth = Math.max(160, Math.min(1280, Number(req.query.w || 720) || 720));
     if (result.assetStorageKey) {
       const r2Response = await getR2Object(result.assetStorageKey);
       const contentType = r2Response.headers.get("content-type") || (isVideo ? "video/mp4" : "image/png");
+      const bytes = Buffer.from(await r2Response.arrayBuffer());
+      if (wantsThumb && contentType.startsWith("image/")) {
+        const thumb = await imageThumbnail(bytes, thumbWidth);
+        res.setHeader("Content-Type", "image/webp");
+        res.setHeader("Cache-Control", "private, max-age=86400");
+        return res.send(thumb);
+      }
       res.setHeader("Content-Type", contentType);
       res.setHeader("Cache-Control", "private, max-age=86400");
-      return res.send(Buffer.from(await r2Response.arrayBuffer()));
+      return res.send(bytes);
     }
     const sourceUrl = isVideo
       ? (result.videoUrl || result.originalVideoUrl)
@@ -7135,14 +7145,28 @@ app.get("/api/media/result/:id/:kind", async (req, res, next) => {
       throw error;
     }
     const contentType = response.headers.get("content-type") || (isVideo ? "video/mp4" : "image/png");
+    const bytes = Buffer.from(await response.arrayBuffer());
+    if (wantsThumb && contentType.startsWith("image/")) {
+      const thumb = await imageThumbnail(bytes, thumbWidth);
+      res.setHeader("Content-Type", "image/webp");
+      res.setHeader("Cache-Control", "private, max-age=86400");
+      return res.send(thumb);
+    }
     res.setHeader("Content-Type", contentType);
     res.setHeader("Cache-Control", "private, max-age=300");
-    const bytes = Buffer.from(await response.arrayBuffer());
     res.send(bytes);
   } catch (error) {
     next(error);
   }
 });
+
+async function imageThumbnail(bytes, width = 720) {
+  return sharp(bytes, { animated: false, limitInputPixels: 80_000_000 })
+    .rotate()
+    .resize({ width, withoutEnlargement: true })
+    .webp({ quality: 74, effort: 4 })
+    .toBuffer();
+}
 
 app.get(/^\/api\/media\/(.+)/, async (req, res, next) => {
   try {

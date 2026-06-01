@@ -4480,8 +4480,8 @@ function imageGenerateConsole(p, selectedModel) {
       </div>
     </div>
     <div class="image-console-references">
-      ${imageReferenceThumb("avatar", avatar, "Avatar optional")}
-      ${imageReferenceThumb("product", product, "Product optional")}
+      ${imageReferenceThumb("avatar", avatar, "Add photo")}
+      ${imageReferenceThumb("product", product, "Add photo")}
     </div>
     <button class="image-console-generate" type="button" data-action="generate-image" ${state.generating ? "disabled" : ""}>
       ${icon(state.generating ? "loader-circle" : "send", 20)}
@@ -5459,7 +5459,8 @@ function resultPreview(item, options = {}) {
     if (options.clickable) return `<button type="button" class="result-preview-trigger" data-result-preview="${esc(item.id)}" aria-label="Open full preview">${visual}</button>`;
     return visual;
   }
-  const imageSrc = item.imageUrl ? `/api/media/result/${encodeURIComponent(item.id)}/image?token=${token}` : "";
+  const imageVariant = options.wall ? `&thumb=1&w=${Math.max(480, Math.min(960, studioWallZoomColumn()))}` : "";
+  const imageSrc = item.imageUrl ? `/api/media/result/${encodeURIComponent(item.id)}/image?token=${token}${imageVariant}` : "";
   const videoSrc = item.videoUrl ? `/api/media/result/${encodeURIComponent(item.id)}/video?token=${token}` : "";
   const imageError = "this.replaceWith(Object.assign(document.createElement('div'),{className:'result-media-error',textContent:'图片保存失败，请联系客服处理'}))";
   const ratioSync = options.wall ? "this.closest('.studio-wall-card')?.setAttribute('data-media-ready','true')" : mediaRatioSyncScript();
