@@ -28920,6 +28920,10 @@ label {
   z-index: 1200 !important;
 }
 
+.studio-shell .image-higgsfield-mode > .image-generate-console:has(.image-model-picker[open]) {
+  z-index: 5000 !important;
+}
+
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker summary {
   width: 100% !important;
   height: 100% !important;
@@ -28996,9 +29000,9 @@ label {
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-menu {
-  position: fixed !important;
-  left: clamp(26px, 3.8vw, 64px) !important;
-  bottom: clamp(104px, 15dvh, 142px) !important;
+  position: absolute !important;
+  left: 0 !important;
+  bottom: calc(100% + 6px) !important;
   z-index: 1201 !important;
   width: min(420px, calc(100vw - 34px)) !important;
   min-width: 0 !important;
@@ -29018,6 +29022,10 @@ label {
   overflow-y: auto !important;
   overscroll-behavior: contain !important;
   scrollbar-gutter: stable !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-model-menu {
+  display: none !important;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-menu-title {

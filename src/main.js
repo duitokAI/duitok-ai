@@ -1484,7 +1484,9 @@ function bindImageConsoleCompact() {
     const scrollY = scrollOffset();
     const nextCompact = compact ? scrollY > expandAt : scrollY > compactAt;
     if (nextCompact !== compact) compact = nextCompact;
-    consoleEl.classList.toggle("is-compact", compact && !hovering);
+    const shouldCompact = compact && !hovering;
+    consoleEl.classList.toggle("is-compact", shouldCompact);
+    if (shouldCompact) consoleEl.querySelectorAll(".image-model-picker[open]").forEach((el) => el.removeAttribute("open"));
   };
   const requestSync = () => {
     if (ticking) return;
