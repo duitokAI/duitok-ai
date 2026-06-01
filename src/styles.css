@@ -30323,6 +30323,35 @@ label {
   fill: #b78ad8 !important;
 }
 
+/* Empty reference icon position lock: keep Avatar/Product icons centered in the tile. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb:not(.has-ref) {
+  position: relative !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb:not(.has-ref) > span:not(.image-reference-clear) {
+  position: absolute !important;
+  top: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: 50% !important;
+  display: grid !important;
+  place-items: center !important;
+  margin: 0 !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb:not(.has-ref) > span:not(.image-reference-clear) svg {
+  display: block !important;
+  margin: 0 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb:not(.has-ref) > div {
+  display: none !important;
+}
+
 /* Clone Prompt should cover the whole studio surface like Image Page, including
    the area below the sticky composer. */
 .studio-shell:has(.video-prompt-extractor-page),
