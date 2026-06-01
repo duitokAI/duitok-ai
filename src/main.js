@@ -42,6 +42,7 @@ let autoFrameworkSaveSeq = 0;
 let imageConsoleScrollCleanup = null;
 let sidebarTooltipCleanup = null;
 let navigationFrame = null;
+let aspectRatioPopoverCleanup = null;
 let imageCountSaveTimer = null;
 let imageCountSaveSeq = 0;
 let resultTitleSaveTimer = null;
@@ -4642,6 +4643,85 @@ function imageAspectRatioPicker(selectedAspectRatio, options = []) {
   </details>`;
 }
 
+function bindAspectRatioFloatingMenus() {
+  document.querySelectorAll(".image-aspect-ratio-menu summary").forEach((summary) => {
+    summary.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      openAspectRatioPopover(summary);
+    });
+  });
+}
+
+function closeAspectRatioPopover() {
+  aspectRatioPopoverCleanup?.();
+  aspectRatioPopoverCleanup = null;
+  document.querySelector(".floating-aspect-ratio-options")?.remove();
+}
+
+function openAspectRatioPopover(summary) {
+  const source = summary.closest(".image-aspect-ratio-menu");
+  const sourceId = source?.dataset.popoverSource || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  if (!source) return;
+  source.dataset.popoverSource = sourceId;
+  const options = [...source.querySelectorAll(".image-aspect-ratio-options [data-field-set]")]
+    .map((button) => ({
+      value: button.dataset.value || "",
+      active: button.classList.contains("active")
+    }))
+    .filter((item) => item.value);
+  if (!options.length) return;
+  const existing = document.querySelector(".floating-aspect-ratio-options");
+  if (existing?.dataset.sourceId === sourceId) {
+    closeAspectRatioPopover();
+    return;
+  }
+  closeAspectRatioPopover();
+  const popover = document.createElement("div");
+  popover.className = "image-aspect-ratio-options floating-aspect-ratio-options";
+  popover.dataset.sourceId = sourceId;
+  popover.setAttribute("role", "listbox");
+  popover.setAttribute("aria-label", "Aspect ratio");
+  popover.innerHTML = options.map((item) => `<button type="button" class="${item.active ? "active" : ""}" data-value="${esc(item.value)}" role="option" aria-selected="${item.active ? "true" : "false"}">
+    ${aspectRatioGlyph(item.value)}
+    <span>${esc(item.value)}</span>
+  </button>`).join("");
+  document.body.appendChild(popover);
+  const place = () => {
+    const rect = summary.getBoundingClientRect();
+    const width = Math.max(168, popover.offsetWidth || 168);
+    const height = popover.offsetHeight || 324;
+    const left = Math.min(window.innerWidth - width - 12, Math.max(12, rect.left + rect.width / 2 - width / 2));
+    const top = rect.top - height - 10 > 12 ? rect.top - height - 10 : Math.min(window.innerHeight - height - 12, rect.bottom + 10);
+    popover.style.left = `${left}px`;
+    popover.style.top = `${Math.max(12, top)}px`;
+  };
+  place();
+  popover.querySelectorAll("button").forEach((button) => button.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    saveProjectFieldQuick("image.aspectRatio", button.dataset.value, button);
+    closeAspectRatioPopover();
+  }));
+  const closeOnOutside = (event) => {
+    if (popover.contains(event.target) || source.contains(event.target)) return;
+    closeAspectRatioPopover();
+  };
+  const closeOnEscape = (event) => {
+    if (event.key === "Escape") closeAspectRatioPopover();
+  };
+  setTimeout(() => document.addEventListener("pointerdown", closeOnOutside, { capture: true }), 0);
+  window.addEventListener("resize", place);
+  window.addEventListener("scroll", place, true);
+  document.addEventListener("keydown", closeOnEscape);
+  aspectRatioPopoverCleanup = () => {
+    document.removeEventListener("pointerdown", closeOnOutside, { capture: true });
+    window.removeEventListener("resize", place);
+    window.removeEventListener("scroll", place, true);
+    document.removeEventListener("keydown", closeOnEscape);
+  };
+}
+
 function imageModelCredit(model = "") {
   return model === "Nano Banana Pro" ? 0.2 : 0.15;
 }
@@ -8812,6 +8892,7 @@ function bind() {
   document.querySelectorAll("[data-date-field]").forEach((el) => el.addEventListener("change", () => set({ [el.dataset.dateField]: el.value })));
   document.querySelectorAll("[data-action]").forEach((el) => el.addEventListener("click", (e) => action(e, el.dataset.action)));
   document.querySelectorAll("[data-studio-wall-zoom]").forEach((el) => el.addEventListener("input", () => updateStudioWallZoom(el.value)));
+  bindAspectRatioFloatingMenus();
   document.querySelectorAll("[data-field-set]").forEach((el) => el.addEventListener("click", () => {
     el.closest("details")?.removeAttribute("open");
     saveProjectFieldQuick(el.dataset.fieldSet, el.dataset.value, el);
