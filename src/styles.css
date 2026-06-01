@@ -30623,6 +30623,18 @@ label {
   contain-intrinsic-size: calc(var(--studio-wall-row-height, 300px) * var(--media-ratio, 1)) var(--studio-wall-row-height, 300px);
 }
 
+.studio-shell .image-higgsfield-mode .studio-wall-grid,
+.studio-shell .video-prompt-extractor-page .studio-wall-grid,
+.studio-shell .image-higgsfield-mode .studio-wall-card,
+.studio-shell .video-prompt-extractor-page .studio-wall-card {
+  content-visibility: visible !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-card,
+.studio-shell .video-prompt-extractor-page .studio-wall-card {
+  contain: layout paint style !important;
+}
+
 .studio-shell .image-higgsfield-mode .studio-wall-card:hover,
 .studio-shell .image-higgsfield-mode .studio-wall-card:focus-within {
   content-visibility: visible;
