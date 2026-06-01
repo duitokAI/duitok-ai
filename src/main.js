@@ -8420,10 +8420,12 @@ function agentToolCard(card = {}) {
 function agentGenerationJobCard(card = {}) {
   const job = (state.db?.generationJobs || []).find((item) => item.id === card.jobId)
     || (state.db?.generationJobs || []).find((item) => item.resultId && item.resultId === card.resultId);
-  const result = job?.resultId
-    ? (state.db?.projects || []).flatMap((project) => project.results || []).find((item) => item.id === job.resultId)
+  const resultId = job?.resultId || card.resultId || "";
+  const result = resultId
+    ? (state.db?.projects || []).flatMap((project) => project.results || []).find((item) => item.id === resultId)
     : null;
-  const status = job?.status || "queued";
+  const jobId = job?.id || card.jobId || "";
+  const status = job?.status || (result ? "succeeded" : "queued");
   const isDone = status === "succeeded" && result;
   const isFailed = status === "failed";
   const mediaType = job?.type || card.resultType || resultMediaKind(result || {});
@@ -8442,12 +8444,13 @@ function agentGenerationJobCard(card = {}) {
       : status === "processing" ? "模型正在生成，完成后会自动出现在这里。" : "任务已加入队列，马上开始生成。";
   const preview = isDone && result
     ? `<div class="agent-generation-preview">${resultPreview(result, { full: mediaType === "video" })}</div>`
-    : `<div class="agent-generation-pending agent-generation-processing-frame" data-agent-job-status="${esc(status)}" data-agent-ratio="${esc(aspectRatio)}" style="aspect-ratio:${esc(aspectStyle)}">
+    : `<div class="agent-generation-pending agent-generation-processing-frame" ${jobId ? `data-generation-job-id="${esc(jobId)}"` : ""} data-agent-job-status="${esc(status)}" data-agent-ratio="${esc(aspectRatio)}" style="aspect-ratio:${esc(aspectStyle)}">
         ${icon(isFailed ? "triangle-alert" : "loader-circle", 28)}
         <strong>${esc(isFailed ? title : status === "processing" ? "Processing" : "Queued")}</strong>
         <span>${esc(summary)}</span>
+        ${isFailed ? `<button type="button" class="dark-button" data-agent-prompt="Try generating this image again with a clearer prompt.">Retry</button>` : ""}
       </div>`;
-  return `<section class="agent-tool-card agent-generation-card" data-agent-card-type="generation_job" data-agent-job-status="${esc(status)}">
+  return `<section class="agent-tool-card agent-generation-card" data-agent-card-type="generation_job" ${jobId ? `data-generation-job-id="${esc(jobId)}"` : ""} data-agent-job-status="${esc(status)}">
     <header><strong>${icon(mediaType === "video" ? "video" : mediaType === "image" ? "image" : "sparkles", 16)} ${esc(title)}</strong><span>${esc(summary)}</span></header>
     ${preview}
   </section>`;
@@ -9870,9 +9873,29 @@ function updateGenerationStatusInDom(db = state.db) {
     const job = jobs.get(card.dataset.generationJobId);
     if (!job) return;
     card.dataset.generationJobStatus = job.status || "queued";
-    const label = card.querySelector("b");
+    card.dataset.agentJobStatus = job.status || "queued";
+    const label = card.matches(".agent-generation-processing-frame")
+      ? card.querySelector("strong")
+      : card.querySelector(".agent-generation-processing-frame strong, b");
     if (label) label.textContent = job.status === "processing" ? "Processing" : job.status === "queued" ? "Queued" : job.status || "";
+    const frameSummary = card.matches(".agent-generation-processing-frame")
+      ? card.querySelector("span")
+      : card.querySelector(".agent-generation-processing-frame span");
+    const nextSummary = job.status === "processing" ? "模型正在生成，完成后会自动出现在这里。" : "任务已加入队列，马上开始生成。";
+    if (frameSummary && ["queued", "processing"].includes(job.status)) {
+      frameSummary.textContent = nextSummary;
+    }
+    if (card.matches(".agent-generation-card")) {
+      const headerSummary = card.querySelector("header span");
+      if (headerSummary && ["queued", "processing"].includes(job.status)) headerSummary.textContent = nextSummary;
+    }
+    const title = card.matches(".agent-generation-card") ? card.querySelector("header strong") : null;
+    if (title && ["queued", "processing"].includes(job.status)) {
+      const titleText = job.type === "video" ? "视频生成中" : job.type === "image" ? "图片生成中" : "生成中";
+      title.innerHTML = `${icon(job.type === "video" ? "video" : job.type === "image" ? "image" : "sparkles", 16)} ${esc(titleText)}`;
+    }
   });
+  window.lucide?.createIcons();
 }
 
 function rememberAgentMessages(messages) {

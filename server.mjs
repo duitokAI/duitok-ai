@@ -4315,7 +4315,7 @@ async function executeAgentTool(name, args, user) {
     const job = (queued.state?.generationJobs || []).find((item) => item.id === queued.jobId);
     return {
       ok: true,
-      message: "Generation queued. Pokaya will save the result to this project when it is ready.",
+      message: "Generation started. The result will appear here when ready.",
       db: queued.state,
       data: {
         projectId: args.projectId,

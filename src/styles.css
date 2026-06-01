@@ -13215,6 +13215,8 @@ label {
 .agent-tool-cards {
   display: grid;
   gap: 10px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .agent-tool-card,
@@ -13222,6 +13224,8 @@ label {
 .agent-undo-card {
   display: grid;
   gap: 10px;
+  min-width: 0;
+  max-width: 100%;
   border: 1px solid rgba(93, 8, 108, 0.1);
   border-radius: 10px;
   padding: 12px;
@@ -13231,6 +13235,7 @@ label {
 .agent-tool-card header {
   display: grid;
   gap: 3px;
+  min-width: 0;
 }
 
 .agent-tool-card strong,
@@ -13249,6 +13254,7 @@ label {
   margin: 0;
   color: rgba(31, 6, 38, 0.72);
   font-weight: 760;
+  overflow-wrap: anywhere;
 }
 
 .agent-tool-card pre {
@@ -13266,6 +13272,7 @@ label {
 .agent-generation-card {
   gap: 12px;
   max-width: min(360px, 100%);
+  min-width: 0;
 }
 
 .agent-generation-run-cards {
@@ -13315,6 +13322,7 @@ label {
   min-height: unset;
   margin: 0 auto;
   align-content: center;
+  gap: 8px;
   border: 1px solid rgba(93, 8, 108, 0.12);
   background:
     radial-gradient(circle at 50% 42%, rgba(255, 57, 111, 0.1), transparent 28%),
@@ -13336,6 +13344,15 @@ label {
   max-width: 190px;
   font-size: 12px;
   line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.agent-generation-processing-frame button {
+  justify-self: center;
+  min-height: 32px;
+  margin-top: 4px;
+  padding: 0 12px;
+  font-size: 12px;
 }
 
 .agent-generation-pending svg {
@@ -13362,7 +13379,7 @@ label {
 .studio-shell .agent-chat-shell.agent-page-panel .agent-generation-card,
 .studio-shell .agent-page-panel .agent-generation-card {
   width: min(720px, 100%) !important;
-  min-width: min(420px, 100%) !important;
+  min-width: 0 !important;
   max-width: 100% !important;
   justify-self: start !important;
   align-items: start !important;
@@ -13393,7 +13410,9 @@ label {
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-generation-preview,
-.studio-shell .agent-page-panel .agent-generation-preview {
+.studio-shell .agent-page-panel .agent-generation-preview,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-processing-frame,
+.studio-shell .agent-page-panel .agent-generation-processing-frame {
   width: min(360px, 100%) !important;
   min-width: min(260px, 100%) !important;
   max-width: 100% !important;
@@ -26009,9 +26028,15 @@ label {
 .studio-shell .agent-page-panel .agent-thread article.assistant > .agent-message,
 .studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant > .agent-run-card,
 .studio-shell .agent-page-panel .agent-thread article.assistant > .agent-run-card,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant > .agent-tool-cards,
+.studio-shell .agent-page-panel .agent-thread article.assistant > .agent-tool-cards,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant > .agent-generation-run-cards,
+.studio-shell .agent-page-panel .agent-thread article.assistant > .agent-generation-run-cards,
 .studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant > .agent-feedback-row,
 .studio-shell .agent-page-panel .agent-thread article.assistant > .agent-feedback-row {
   grid-column: 2 !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
 }
 
 /* Agent reply polish: compact, calmer, and more premium than oversized chat blocks. */
