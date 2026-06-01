@@ -31479,6 +31479,17 @@ label {
   overflow: visible !important;
 }
 
+.studio-shell .image-generate-console:has(.image-aspect-ratio-menu[open]) {
+  z-index: 6000 !important;
+  overflow: visible !important;
+}
+
+.studio-shell .image-generate-console:has(.image-aspect-ratio-menu[open]) .image-console-main,
+.studio-shell .image-generate-console:has(.image-aspect-ratio-menu[open]) .image-console-tools,
+.studio-shell .image-generate-console:has(.image-aspect-ratio-menu[open]) .image-aspect-ratio-menu {
+  overflow: visible !important;
+}
+
 .studio-shell .image-aspect-ratio-menu summary {
   width: 100%;
   height: 100%;
@@ -31528,7 +31539,7 @@ label {
   position: absolute;
   left: 50%;
   bottom: calc(100% + 10px);
-  z-index: 80;
+  z-index: 6001;
   width: max-content;
   min-width: 168px;
   padding: 8px;
