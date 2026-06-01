@@ -4593,7 +4593,7 @@ function imageGenerateConsole(p, selectedModel) {
       <div class="image-console-tools">
         <div class="image-model-enhance-group">
           ${imageModelPicker(selectedModel)}
-        <button class="image-prompt-enhance ${state.promptAdvancedEnabled ? "is-active" : ""}" type="button" data-action="toggle-prompt-advanced" aria-label="${esc(enhanceLabel)}" aria-pressed="${state.promptAdvancedEnabled ? "true" : "false"}" title="${esc(enhanceLabel)}" ${state.promptAdvancedBusy ? "disabled" : ""}>${icon("wand-sparkles", 18)}<span>${esc(enhanceLabel)}</span></button>
+        <button class="image-prompt-enhance ${state.promptAdvancedEnabled ? "is-active" : ""}" type="button" data-action="toggle-prompt-advanced" aria-label="${esc(enhanceLabel)}" aria-pressed="${state.promptAdvancedEnabled ? "true" : "false"}" title="${esc(enhanceLabel)}" ${state.promptAdvancedBusy ? "disabled" : ""}>${icon("wand-sparkles", 18)}</button>
         </div>
         ${imageAspectRatioPicker(selectedAspectRatio, aspectRatioOptions)}
         <label class="image-resolution-select" title="1k Fast preview · 2k Balanced quality · 4k Best detail">${icon("gem", 15)}<select data-field="image.resolution" aria-label="Select quality">${resolutionOptions.map(([value, label]) => `<option value="${esc(value)}" ${value === selectedResolution ? "selected" : ""}>${esc(label)}</option>`).join("")}</select></label>
