@@ -1905,7 +1905,15 @@ function parsePromptAdvancedJson(text = "") {
 function projectAttachmentVisual(db, attachmentId, label) {
   if (!attachmentId) return null;
   const attachment = (db.attachments || []).find((item) => item.id === attachmentId);
-  if (!attachment?.sourceResultId || attachment.mediaKind === "video" || /^video\//i.test(attachment.type || "")) return null;
+  if (!attachment || attachment.mediaKind === "video" || /^video\//i.test(attachment.type || "")) return null;
+  const directDataUrl = attachment.dataUrl || attachment.previewUrl || "";
+  if (/^data:image\//i.test(directDataUrl)) {
+    return { label: `${label}: ${attachment.name || "uploaded reference"}`, dataUrl: directDataUrl };
+  }
+  if (attachment.mediaUrl) {
+    return { label: `${label}: ${attachment.name || "uploaded reference"}`, url: attachment.mediaUrl };
+  }
+  if (!attachment.sourceResultId) return null;
   let resultInfo = null;
   try {
     resultInfo = findResultWithProject(db, attachment.sourceResultId, null);

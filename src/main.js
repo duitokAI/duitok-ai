@@ -4211,7 +4211,7 @@ function studioWallCard(item) {
   const promptText = resultPromptText(item).replaceAll("\n", " ").trim();
   const canSaveReference = Boolean(item.imageUrl || item.videoUrl);
   return `<article class="studio-wall-card" style="--media-ratio:${esc(resultMediaRatio(item))}">
-    ${resultPreview(item, { clickable: true })}
+    ${resultPreview(item, { clickable: true, wall: true })}
     <div class="studio-wall-actions" aria-label="Image actions">
       <button type="button" data-result-action="save-avatar" data-result-id="${esc(item.id)}" data-tooltip="Save as Avatar" aria-label="Save as Avatar" title="Save as Avatar" ${canSaveReference ? "" : "disabled"}>${icon("user-round-plus", 17)}</button>
       <button type="button" data-result-action="save-product" data-result-id="${esc(item.id)}" data-tooltip="Save as Product" aria-label="Save as Product" title="Save as Product" ${canSaveReference ? "" : "disabled"}>${icon("package-plus", 17)}</button>
@@ -5366,7 +5366,8 @@ function resultPreview(item, options = {}) {
   const videoSrc = item.videoUrl ? `/api/media/result/${encodeURIComponent(item.id)}/video?token=${token}` : "";
   const imageError = "this.replaceWith(Object.assign(document.createElement('div'),{className:'result-media-error',textContent:'图片保存失败，请联系客服处理'}))";
   const ratioSync = "this.closest('.studio-wall-card')?.style.setProperty('--media-ratio',(this.naturalWidth||this.videoWidth||1)/(this.naturalHeight||this.videoHeight||1))";
-  const image = imageSrc ? `<img class="result-image" src="${imageSrc}" alt="${esc(item.title)}" loading="${options.full ? "eager" : "lazy"}" decoding="async" fetchpriority="${options.full ? "high" : "low"}" draggable="false" onload="${esc(ratioSync)}" onerror="${esc(imageError)}">` : "";
+  const eagerMedia = Boolean(options.full || options.wall);
+  const image = imageSrc ? `<img class="result-image" src="${imageSrc}" alt="${esc(item.title)}" loading="${eagerMedia ? "eager" : "lazy"}" decoding="async" fetchpriority="${options.full ? "high" : "auto"}" draggable="false" onload="${esc(ratioSync)}" onerror="${esc(imageError)}">` : "";
   const videoPreload = options.full ? "metadata" : "none";
   const video = videoSrc ? `<div class="result-video-shell"><video class="result-video" src="${videoSrc}" preload="${videoPreload}" playsinline onloadedmetadata="${esc(ratioSync)}"></video><button type="button" class="result-play-button" data-video-play="${esc(item.id)}">${icon("play", 26)}<span>点击播放</span></button></div>` : "";
   const videoTrigger = videoSrc ? `<button type="button" class="result-preview-trigger result-video-trigger" data-result-preview="${esc(item.id)}" aria-label="Open full video preview"><div class="result-video-shell"><video class="result-video" src="${videoSrc}" preload="${videoPreload}" playsinline muted onloadedmetadata="${esc(ratioSync)}"></video><span class="result-play-button">${icon("play", 26)}<span>点击查看</span></span></div></button>` : "";
@@ -8698,7 +8699,11 @@ function updateImagePromptLocal(value = "") {
 function togglePromptAdvanced() {
   if (state.generating || state.promptAdvancedBusy) return;
   const enabled = !state.promptAdvancedEnabled;
-  set({ promptAdvancedEnabled: enabled });
+  state.promptAdvancedEnabled = enabled;
+  document.querySelectorAll('[data-action="toggle-prompt-advanced"]').forEach((button) => {
+    button.classList.toggle("is-active", enabled);
+    button.setAttribute("aria-pressed", enabled ? "true" : "false");
+  });
 }
 
 function syncImageAspectRatioIcon(selectEl) {
