@@ -4387,10 +4387,13 @@ function studioPendingWallCard(job) {
   const aspectRatio = String(job.aspectRatio || project().image?.aspectRatio || "").includes("16:9") ? "16:9" : "9:16";
   const aspectClass = aspectRatio === "16:9" ? "landscape" : "portrait";
   const mediaRatio = aspectRatio === "16:9" ? "1.7778" : "0.5625";
-  return `<article class="studio-wall-card studio-wall-pending ${aspectClass}" data-generation-job-id="${esc(job.id)}" data-generation-job-status="${esc(job.status || "queued")}" style="--media-ratio:${mediaRatio};aspect-ratio:${esc(aspectRatio.replace(":", " / "))}">
-    <div class="studio-wall-pending-controls" aria-label="${esc(job.status === "processing" ? "Processing" : "Queued")}">
-      <span class="studio-wall-pending-spinner" role="status" aria-label="${esc(job.status === "processing" ? "Processing" : "Queued")}" title="${esc(job.status === "processing" ? "Processing" : "Queued")}">${icon("loader-circle", 22)}</span>
-      <button type="button" data-generation-cancel="${esc(job.id)}" aria-label="Cancel generation" title="Cancel generation">${icon("ban", 22)}</button>
+  const isFailed = job.status === "failed";
+  const statusLabel = isFailed ? "Generation failed" : job.status === "processing" ? "Processing" : "Queued";
+  return `<article class="studio-wall-card studio-wall-pending ${aspectClass} ${isFailed ? "failed" : ""}" data-generation-job-id="${esc(job.id)}" data-generation-job-status="${esc(job.status || "queued")}" style="--media-ratio:${mediaRatio};aspect-ratio:${esc(aspectRatio.replace(":", " / "))}">
+    <div class="studio-wall-pending-controls" aria-label="${esc(statusLabel)}">
+      <span class="studio-wall-pending-spinner" role="status" aria-label="${esc(statusLabel)}" title="${esc(statusLabel)}">${icon(isFailed ? "triangle-alert" : "loader-circle", 22)}</span>
+      <b>${esc(statusLabel)}</b>
+      ${isFailed ? `<small>${esc(job.errorMessage || "Please adjust the prompt and try again.")}</small>` : `<button type="button" data-generation-cancel="${esc(job.id)}" aria-label="Cancel generation" title="Cancel generation">${icon("ban", 22)}</button>`}
     </div>
   </article>`;
 }
@@ -5369,7 +5372,7 @@ function results(p, type) {
 function pendingResultJobs(projectItem, types) {
   const step = state.step || "image";
   return (state.db?.generationJobs || [])
-    .filter((job) => job.projectId === projectItem.id && ["queued", "processing"].includes(job.status))
+    .filter((job) => job.projectId === projectItem.id && ["queued", "processing", "failed"].includes(job.status))
     .filter((job) => job.type === "video"
       ? step === videoStudioStep(job.step)
       : types.includes(job.type) || (job.action === "generate-image" && types.includes("image")))
@@ -5377,15 +5380,17 @@ function pendingResultJobs(projectItem, types) {
 }
 
 function generationJobCard(job) {
-  const label = job.status === "processing" ? "Generating..." : "Preparing...";
+  const isFailed = job.status === "failed";
+  const label = isFailed ? "Generation failed" : job.status === "processing" ? "Generating..." : "Preparing...";
   const type = job.type === "video" ? "VIDEO" : job.type === "image" ? "IMAGE" : "OUTPUT";
-  return `<article class="result-card generation-job-card" aria-live="polite">
+  return `<article class="result-card generation-job-card ${isFailed ? "failed" : ""}" aria-live="polite">
     <div class="generation-job-canvas">
-      ${icon("loader-circle", 34)}
+      ${icon(isFailed ? "triangle-alert" : "loader-circle", 34)}
       <strong>${label}</strong>
+      ${isFailed ? `<span>${esc(job.errorMessage || "Please adjust the prompt and try again.")}</span>` : ""}
     </div>
     <footer>
-      <span>${icon("loader-circle", 16)}</span>
+      <span>${icon(isFailed ? "triangle-alert" : "loader-circle", 16)}</span>
       <b>${esc(type)}</b>
     </footer>
   </article>`;

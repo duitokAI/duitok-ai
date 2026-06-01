@@ -1618,15 +1618,16 @@ function publicProjectGenerationState(db, user, projectId) {
   const project = findProject(db, projectId, user);
   const recentResults = recentProjectResults(project.results || [], projectGenerationStateResultLimit);
   const recentResultIds = new Set(recentResults.map((result) => result.id));
+  const projectJobs = (db.generationJobs || [])
+    .filter((job) => job.projectId === project.id && (hasAdminPrivileges(user) || job.userId === user.id));
   return {
     project: {
       id: project.id,
       results: recentResults.map(publicGenerationResult),
       resultCount: projectResultCount(project)
     },
-    generationJobs: (db.generationJobs || [])
-      .filter((job) => job.projectId === project.id && (hasAdminPrivileges(user) || job.userId === user.id))
-      .filter((job) => ["queued", "processing"].includes(job.status) || recentResultIds.has(job.resultId))
+    generationJobs: recentGenerationJobs(projectJobs)
+      .filter((job) => ["queued", "processing", "failed", "cancelled"].includes(job.status) || recentResultIds.has(job.resultId))
       .map(publicGenerationJob),
     billing: user?.billing || defaultBilling()
   };
@@ -2471,9 +2472,22 @@ async function pollApimartTask(taskId) {
 }
 
 function extractImageUrls(taskData) {
-  return (taskData.result?.images || [])
-    .flatMap((image) => Array.isArray(image.url) ? image.url : [image.url])
-    .filter(Boolean);
+  const imageBuckets = [
+    taskData.result?.images,
+    taskData.result?.image,
+    taskData.result?.outputs,
+    taskData.result?.output,
+    taskData.images,
+    taskData.image,
+    taskData.output,
+    taskData.data?.images,
+    taskData.data?.image,
+    taskData.data?.output
+  ];
+  const directUrls = imageBuckets.flatMap(flattenUrlValues);
+  const deepUrls = extractUrlsDeep(taskData);
+  return [...new Set([...directUrls, ...deepUrls])]
+    .filter((url) => !/\.(mp4|mov|webm)(\?|$)/i.test(url));
 }
 
 function extractVideoUrls(taskData) {
@@ -2536,6 +2550,11 @@ async function generateImageWithApimart(project) {
   if (!taskId) return { text: JSON.stringify(data, null, 2), urls: [] };
   const taskData = await pollApimartTask(taskId);
   const urls = extractImageUrls(taskData);
+  if (!urls.length) {
+    const error = new Error("Image generation completed, but no image file was returned. Please try again.");
+    error.status = 502;
+    throw error;
+  }
   return {
     text: urls.length ? `Image generated with APIMart.\n\nTask ID: ${taskId}` : `Image task completed.\n\nTask ID: ${taskId}`,
     urls,
@@ -2697,6 +2716,11 @@ async function generateImageWithGrsai(project) {
   if (!taskId) return { text: JSON.stringify(payload, null, 2), urls: extractGrsaiUrls(payload) };
   const taskData = await pollGrsaiTask(taskId);
   const urls = extractGrsaiUrls(taskData);
+  if (!urls.length) {
+    const error = new Error("Image generation completed, but no image file was returned. Please try again.");
+    error.status = 502;
+    throw error;
+  }
   return {
     text: urls.length ? `Image generated with GRS AI.\n\nTask ID: ${taskId}` : `Image task completed with GRS AI.\n\nTask ID: ${taskId}`,
     urls,
@@ -2718,6 +2742,11 @@ async function generateImageWithWuyin(project) {
   if (!taskId) return { text: JSON.stringify(data, null, 2), urls: [] };
   const taskData = await pollWuyinTask(taskId);
   const urls = extractUrlsDeep(taskData);
+  if (!urls.length) {
+    const error = new Error("Image generation completed, but no image file was returned. Please try again.");
+    error.status = 502;
+    throw error;
+  }
   return {
     text: urls.length ? `Image generated with 速创API.\n\nTask ID: ${taskId}` : `Image task completed with 速创API.\n\nTask ID: ${taskId}`,
     urls,
