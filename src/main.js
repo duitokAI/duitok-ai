@@ -9857,9 +9857,9 @@ async function generate(name, event = null) {
     markGenerateTriggerSubmitting(event?.currentTarget);
     set({ generating: true });
     notify(generationFeedbackCopy("submitting"));
-    const promptOverride = await syncImageConsoleBeforeGenerate(name);
+    const generationOptions = syncImageConsoleBeforeGenerate(name);
     const count = name === "generate-image" ? imageBatchCount(project()) : 1;
-    const db = await api(`/projects/${state.projectId}/generate`, { method: "POST", body: JSON.stringify({ action: name, step: state.step, count, promptOverride }) });
+    const db = await api(`/projects/${state.projectId}/generate`, { method: "POST", body: JSON.stringify({ action: name, step: state.step, count, ...generationOptions }) });
     set({ db, generating: false });
     notify(generationFeedbackCopy("queued", count));
     pollGenerationQueue();
@@ -9892,25 +9892,15 @@ async function cancelGenerationJob(jobId) {
   }
 }
 
-async function syncImageConsoleBeforeGenerate(name) {
-  if (name !== "generate-image") return;
+function syncImageConsoleBeforeGenerate(name) {
+  if (name !== "generate-image") return {};
   const promptInput = document.querySelector("[data-image-console-prompt]");
   const value = promptInput?.value || project().image?.prompt || "";
   updateImagePromptLocal(value);
-  await api(`/projects/${state.projectId}/field`, {
-    method: "PATCH",
-    body: JSON.stringify({ field: "image.prompt", value })
-  });
-  if (!state.promptAdvancedEnabled) return;
-  const projectId = state.projectId;
-  set({ promptAdvancedBusy: true });
-  notify(project().image?.promptImage ? "Reading image and enhancing prompt..." : "Enhancing prompt...");
-  const res = await api(`/projects/${projectId}/prompt-advanced`, {
-    method: "POST",
-    body: JSON.stringify({ prompt: value, step: state.step || "image", persist: false })
-  });
-  set({ promptAdvancedBusy: false });
-  return state.projectId === projectId ? res.prompt : "";
+  return {
+    prompt: value,
+    advancePrompt: Boolean(state.promptAdvancedEnabled)
+  };
 }
 
 async function pollGenerationQueue(attempt = 0) {

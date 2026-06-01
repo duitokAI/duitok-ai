@@ -1447,6 +1447,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
       providerTextOutput: _providerTextOutput,
       providerErrorMessage: _providerErrorMessage,
       internalPromptOverride: _internalPromptOverride,
+      internalPromptAdvanced: _internalPromptAdvanced,
       promptOverride: _promptOverride,
       originalImageUrl: _originalImageUrl,
       originalVideoUrl: _originalVideoUrl,
@@ -2962,10 +2963,16 @@ async function saveFailedGeneration(projectId, action, step, error, user) {
 
 async function enqueueGeneration(projectId, action, step, user, options = {}) {
   const batchCount = action === "generate-image" ? imageBatchCount(options.count) : 1;
+  const promptValue = action === "generate-image" ? sanitizeAgentText(options.prompt ?? "").slice(0, 3000) : "";
   const promptOverride = action === "generate-image" ? sanitizeAgentText(options.promptOverride || "").slice(0, 3000) : "";
+  const shouldAdvancePrompt = action === "generate-image" && options.advancePrompt === true;
   const jobIds = Array.from({ length: batchCount }, () => crypto.randomUUID());
   const state = await mutateDb(async (currentDb) => {
     const project = findProject(currentDb, projectId, user);
+    if (promptValue) {
+      project.image ||= {};
+      project.image.prompt = promptValue;
+    }
     const creditsToCharge = creditChargeFor(project, action);
     assertGenerationAccess(currentDb, user, roundCredits(creditsToCharge * batchCount), batchCount);
     const cost = generationCostFor(currentDb, project, action, { provider: providerForMediaModel(project.image?.model) });
@@ -2989,6 +2996,7 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
       provider: cost.provider,
       unit: cost.unit,
       internalPromptOverride: promptOverride || undefined,
+      internalPromptAdvanced: shouldAdvancePrompt || undefined,
       batchIndex: batchCount > 1 ? index + 1 : undefined,
       batchCount: batchCount > 1 ? batchCount : undefined
     }));
@@ -3034,6 +3042,32 @@ async function processGenerationJob(jobId) {
     if (!snapshot) return;
     if (snapshot.job.internalPromptOverride && snapshot.project?.image) {
       snapshot.project.image.prompt = snapshot.job.internalPromptOverride;
+    }
+    if (snapshot.job.internalPromptAdvanced && snapshot.project?.image) {
+      try {
+        const db = await ensureDb();
+        const liveProject = db.projects.find((item) => item.id === snapshot.job.projectId) || snapshot.project;
+        const prompt = snapshot.project.image.prompt || liveProject.image?.prompt || "";
+        const visualInputs = projectPromptVisualInputs(db, liveProject);
+        const visualSummary = visualInputs.length && hasGrsaiConfig()
+          ? await summarizePromptVisualsWithGrsai(visualInputs, prompt)
+          : "";
+        const enhanced = await enhancePromptWithDeepSeek({ project: snapshot.project, prompt, visualSummary });
+        if (enhanced.finalPrompt) {
+          snapshot.project.image.prompt = enhanced.finalPrompt;
+          await mutateDb(async (db) => {
+            const job = db.generationJobs.find((item) => item.id === jobId);
+            if (job) {
+              job.prompt = enhanced.finalPrompt;
+              job.promptAdvanced = true;
+              job.promptAdvancedNotes = enhanced.notes || [];
+            }
+            await saveDb(db);
+          });
+        }
+      } catch (error) {
+        console.warn("Prompt advanced skipped for generation job", jobId, error.message);
+      }
     }
 
     const generated = await generateWithProvider(snapshot.project, snapshot.job.action, snapshot.job.step);
@@ -6121,7 +6155,12 @@ app.post("/api/projects/:id/prompt-advanced", async (req, res, next) => {
 app.post("/api/projects/:id/generate", async (req, res) => {
   try {
     const { user } = await requireAuth(req);
-    const result = await enqueueGeneration(req.params.id, req.body.action, req.body.step, user, { count: req.body.count, promptOverride: req.body.promptOverride });
+    const result = await enqueueGeneration(req.params.id, req.body.action, req.body.step, user, {
+      count: req.body.count,
+      prompt: req.body.prompt,
+      promptOverride: req.body.promptOverride,
+      advancePrompt: req.body.advancePrompt === true
+    });
     res.json(result.state);
   } catch (error) {
     const { user } = await requireAuth(req).catch(() => ({ user: null }));
