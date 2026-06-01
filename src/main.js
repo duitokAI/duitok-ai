@@ -4243,7 +4243,7 @@ function studioResultWall(p, meta = {}) {
   </section>`;
 }
 
-const studioWallPageSize = 48;
+const studioWallPageSize = 24;
 
 function studioWallKey(projectItem, step = state.step, types = []) {
   return [projectItem?.id || "project", step || "image", ...types].join(":");
@@ -9743,7 +9743,10 @@ async function pollGenerationQueue(attempt = 0) {
   try {
     const nextDb = await api("/state");
     const shouldRender = shouldRenderGenerationRefresh(state.db, nextDb);
-    if (shouldRender) set({ db: nextDb });
+    if (shouldRender) {
+      const patchedWall = patchStudioResultWallFromDb(nextDb);
+      if (!patchedWall) set({ db: nextDb });
+    }
     else {
       state.db = nextDb;
       updateGenerationStatusInDom(nextDb);
@@ -9803,6 +9806,27 @@ function shouldRenderGenerationRefresh(previousDb, nextDb) {
     if (previous.status === job.status) return false;
     return generationJobTerminal(previous.status) || generationJobTerminal(job.status);
   });
+}
+
+function patchStudioResultWallFromDb(nextDb) {
+  if (state.page !== "project" || !state.projectId || !nextDb) return false;
+  const shell = document.querySelector(".image-higgsfield-mode, .studio-immersive-page");
+  if (!shell) return false;
+  const nextProject = (nextDb.projects || []).find((item) => item.id === state.projectId);
+  if (!nextProject) return false;
+  state.db = nextDb;
+  const wallHtml = studioResultWall(nextProject, studioStepMeta(state.step));
+  const existingWall = shell.querySelector(".studio-result-wall");
+  if (existingWall) {
+    if (wallHtml) existingWall.outerHTML = wallHtml;
+    else existingWall.remove();
+  } else if (wallHtml) {
+    const dock = shell.querySelector(".image-generate-console, .studio-generate-dock");
+    if (dock) dock.insertAdjacentHTML("beforebegin", wallHtml);
+    else shell.insertAdjacentHTML("afterbegin", wallHtml);
+  }
+  window.lucide?.createIcons();
+  return true;
 }
 
 function updateGenerationStatusInDom(db = state.db) {
