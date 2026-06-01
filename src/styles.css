@@ -6344,14 +6344,17 @@ button:disabled [data-lucide="loader-circle"] {
 .attachment-picker-backdrop {
   background: rgba(0, 0, 0, 0.68);
   padding: clamp(18px, 4vh, 42px) clamp(18px, 4vw, 56px);
-  overflow: hidden;
+  align-items: start;
+  overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .attachment-picker-modal {
-  width: min(72vw, 960px);
-  max-height: min(74vh, 620px);
+  width: min(94vw, 1180px);
+  max-height: calc(100dvh - clamp(36px, 8vh, 84px));
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
+  margin: auto 0;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 16px;
@@ -6365,6 +6368,7 @@ button:disabled [data-lucide="loader-circle"] {
   overflow: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
 }
 
 .attachment-picker-head,
@@ -6466,11 +6470,11 @@ button:disabled [data-lucide="loader-circle"] {
 
 .attachment-picker-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 14px;
   min-height: 180px;
   overflow: visible;
-  padding: 20px 22px 24px;
+  padding: 20px 22px max(44px, env(safe-area-inset-bottom));
 }
 
 .attachment-picker-grid.is-locked {
@@ -6741,7 +6745,7 @@ button:disabled [data-lucide="loader-circle"] {
 @media (max-width: 720px) {
   .attachment-picker-modal {
     width: min(94vw, 520px);
-    max-height: 78vh;
+    max-height: calc(100dvh - 28px);
   }
 
   .attachment-upload-panel {
@@ -6757,7 +6761,7 @@ button:disabled [data-lucide="loader-circle"] {
   }
 
   .attachment-picker-grid.is-locked {
-    padding: 0 18px 18px;
+    padding: 0 18px max(34px, env(safe-area-inset-bottom));
   }
 }
 
