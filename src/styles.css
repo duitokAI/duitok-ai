@@ -31515,23 +31515,30 @@ label {
   text-align: center !important;
 }
 
-.studio-shell .image-aspect-ratio-menu {
+.studio-shell .image-aspect-ratio-menu,
+.studio-shell .image-resolution-menu {
   position: relative !important;
   overflow: visible !important;
 }
 
-.studio-shell .image-generate-console:has(.image-aspect-ratio-menu[open]) {
+.studio-shell .image-generate-console:has(.image-aspect-ratio-menu[open]),
+.studio-shell .image-generate-console:has(.image-resolution-menu[open]) {
   z-index: 6000 !important;
   overflow: visible !important;
 }
 
 .studio-shell .image-generate-console:has(.image-aspect-ratio-menu[open]) .image-console-main,
 .studio-shell .image-generate-console:has(.image-aspect-ratio-menu[open]) .image-console-tools,
-.studio-shell .image-generate-console:has(.image-aspect-ratio-menu[open]) .image-aspect-ratio-menu {
+.studio-shell .image-generate-console:has(.image-aspect-ratio-menu[open]) .image-aspect-ratio-menu,
+.studio-shell .image-generate-console:has(.image-resolution-menu[open]) .image-console-main,
+.studio-shell .image-generate-console:has(.image-resolution-menu[open]) .image-console-tools,
+.studio-shell .image-generate-console:has(.image-resolution-menu[open]) .image-resolution-menu {
   overflow: visible !important;
 }
 
-.studio-shell .image-aspect-ratio-menu summary {
+.studio-shell .image-aspect-ratio-menu summary,
+.studio-shell .image-resolution-menu summary {
+  grid-column: 1 / -1;
   width: 100%;
   height: 100%;
   display: grid;
@@ -31542,11 +31549,13 @@ label {
   cursor: pointer;
 }
 
-.studio-shell .image-aspect-ratio-menu summary::-webkit-details-marker {
+.studio-shell .image-aspect-ratio-menu summary::-webkit-details-marker,
+.studio-shell .image-resolution-menu summary::-webkit-details-marker {
   display: none;
 }
 
-.studio-shell .image-aspect-ratio-menu summary b {
+.studio-shell .image-aspect-ratio-menu summary b,
+.studio-shell .image-resolution-menu summary b {
   color: #2b0636;
   font-size: clamp(18px, 1.5vw, 25px);
   font-weight: 950;
@@ -31554,14 +31563,16 @@ label {
   text-align: center;
 }
 
-.studio-shell .image-aspect-ratio-menu summary svg {
+.studio-shell .image-aspect-ratio-menu summary svg,
+.studio-shell .image-resolution-menu summary svg {
   width: 16px !important;
   height: 16px !important;
   color: #2b0636 !important;
   transition: transform 120ms ease;
 }
 
-.studio-shell .image-aspect-ratio-menu[open] summary svg {
+.studio-shell .image-aspect-ratio-menu[open] summary > svg:last-child,
+.studio-shell .image-resolution-menu[open] summary > svg:last-child {
   transform: rotate(180deg);
 }
 
@@ -31630,6 +31641,114 @@ label {
   z-index: 20000 !important;
   left: 0;
   top: 0;
+}
+
+.studio-shell .image-resolution-options {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 10px);
+  z-index: 6001;
+  width: min(390px, calc(100vw - 28px));
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid rgba(111, 28, 132, 0.12);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 255, 255, 0.98), transparent 38%),
+    radial-gradient(circle at 88% 0%, rgba(255, 90, 145, 0.12), transparent 35%),
+    linear-gradient(145deg, rgba(255, 252, 255, 0.99), rgba(247, 236, 252, 0.99));
+  box-shadow:
+    0 18px 46px rgba(70, 16, 84, 0.17),
+    inset 0 1px 0 rgba(255, 255, 255, 0.76);
+  backdrop-filter: blur(18px);
+}
+
+.studio-shell .image-resolution-menu-title {
+  padding: 0 2px 4px;
+  color: #2a0633;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.studio-shell .image-resolution-options button {
+  width: 100%;
+  min-height: 70px;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 28px;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  border-radius: 18px;
+  padding: 12px 14px;
+  background: transparent;
+  color: #2a0633;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.studio-shell .image-resolution-options button:hover,
+.studio-shell .image-resolution-options button.active {
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: inset 0 0 0 1px rgba(111, 28, 132, 0.08);
+}
+
+.studio-shell .image-resolution-option-icon {
+  width: 34px;
+  height: 34px;
+  display: inline-grid;
+  place-items: center;
+  color: #b988dc;
+}
+
+.studio-shell .image-resolution-option-copy {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.studio-shell .image-resolution-option-copy b {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #2a0633;
+  font-size: 22px;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.studio-shell .image-resolution-option-copy em {
+  border-radius: 999px;
+  padding: 3px 8px;
+  background: rgba(255, 49, 95, 0.1);
+  color: #2a0633;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.studio-shell .image-resolution-option-copy small {
+  min-width: 0;
+  overflow: hidden;
+  color: rgba(42, 6, 51, 0.58);
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.studio-shell .image-resolution-option-check {
+  opacity: 0;
+  color: #b988dc;
+}
+
+.studio-shell .image-resolution-options button.active .image-resolution-option-check {
+  opacity: 1;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper {

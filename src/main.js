@@ -4575,9 +4575,9 @@ function imageGenerateConsole(p, selectedModel) {
   const aspectRatioOptions = ["9:16", "3:4", "2:3", "1:1", "4:3", "16:9", "3:2"];
   const selectedAspectRatio = aspectRatioOptions.includes(p.image.aspectRatio) ? p.image.aspectRatio : "9:16";
   const resolutionOptions = [
-    ["1K", "1k Fast"],
-    ["2K", "2k Balanced"],
-    ["4K", "4k Best"]
+    { value: "1K", title: "1k", description: "Fast preview for quick drafts", badge: "FAST" },
+    { value: "2K", title: "2k", description: "Balanced quality for daily creative work", badge: "DEFAULT" },
+    { value: "4K", title: "4k", description: "Best detail for polished final images", badge: "PRO" }
   ];
   const selectedResolution = ["1K", "2K", "4K"].includes(String(p.image.resolution || "").toUpperCase())
     ? String(p.image.resolution).toUpperCase()
@@ -4597,7 +4597,7 @@ function imageGenerateConsole(p, selectedModel) {
         <button class="image-prompt-enhance ${state.promptAdvancedEnabled ? "is-active" : ""}" type="button" data-action="toggle-prompt-advanced" aria-label="${esc(enhanceLabel)}" aria-pressed="${state.promptAdvancedEnabled ? "true" : "false"}" title="${esc(enhanceLabel)}" ${state.promptAdvancedBusy ? "disabled" : ""}>${icon("wand-sparkles", 18)}</button>
         </div>
         ${imageAspectRatioPicker(selectedAspectRatio, aspectRatioOptions)}
-        <label class="image-resolution-select" title="1k Fast preview · 2k Balanced quality · 4k Best detail">${icon("gem", 15)}<select data-field="image.resolution" aria-label="Select quality">${resolutionOptions.map(([value, label]) => `<option value="${esc(value)}" ${value === selectedResolution ? "selected" : ""}>${esc(label)}</option>`).join("")}</select></label>
+        ${imageResolutionPicker(selectedResolution, resolutionOptions)}
         <div class="image-count-stepper" aria-label="Images to generate">
           <button type="button" data-action="image-count-down" aria-label="Generate fewer images" ${selectedCount <= 1 ? "disabled" : ""}>${icon("minus", 15)}</button>
           <span><b>${selectedCount}</b><small>/4</small></span>
@@ -4615,6 +4615,31 @@ function imageGenerateConsole(p, selectedModel) {
       <small>${state.generating ? "You can keep typing" : `${credit} Credit`}</small>
     </button>
   </section>`;
+}
+
+function imageResolutionPicker(selectedResolution, options = []) {
+  const selected = options.find((item) => item.value === selectedResolution) || options[1] || options[0];
+  return `<details class="image-resolution-select image-resolution-menu" title="Select image resolution">
+    <summary aria-label="Select quality">
+      ${icon("gem", 15)}
+      <b data-resolution-current>${esc(selected?.title || "2k")}</b>
+      ${icon("chevron-down", 16)}
+    </summary>
+    <div class="image-resolution-options" role="listbox" aria-label="Select quality">
+      <div class="image-resolution-menu-title">Select quality</div>
+      ${options.map((item) => {
+        const active = item.value === selectedResolution;
+        return `<button type="button" class="${active ? "active" : ""}" data-field-set="image.resolution" data-value="${esc(item.value)}" data-label="${esc(item.title)}" role="option" aria-selected="${active ? "true" : "false"}">
+          <span class="image-resolution-option-icon">${icon("gem", 18)}</span>
+          <span class="image-resolution-option-copy">
+            <b>${esc(item.title)} <em>${esc(item.badge)}</em></b>
+            <small>${esc(item.description)}</small>
+          </span>
+          <span class="image-resolution-option-check">${icon("check", 20)}</span>
+        </button>`;
+      }).join("")}
+    </div>
+  </details>`;
 }
 
 function aspectRatioGlyph(value = "9:16") {
@@ -9527,6 +9552,16 @@ function setFieldSetActive(field, value, source = null) {
   if (source && source.dataset.fieldSet === field) {
     source.classList.add("active");
     source.setAttribute("aria-pressed", "true");
+  }
+  if (field === "image.resolution") {
+    const label = source?.dataset.label || String(value || "").toLowerCase();
+    document.querySelectorAll("[data-resolution-current]").forEach((el) => {
+      el.textContent = label;
+    });
+    document.querySelectorAll('[data-field-set="image.resolution"]').forEach((el) => {
+      const active = el.dataset.value === value;
+      el.setAttribute("aria-selected", active ? "true" : "false");
+    });
   }
   if (field === "original.provider") {
     const provider = originalProviderValue(value);
