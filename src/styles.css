@@ -30710,6 +30710,51 @@ label {
   }
 }
 
+/* Keep selected image model names fully readable in the composer. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools {
+  grid-template-columns:
+    minmax(292px, 1.5fr)
+    minmax(104px, 0.52fr)
+    minmax(92px, 0.42fr)
+    minmax(124px, 0.56fr) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-enhance-group {
+  grid-template-columns: minmax(236px, 1fr) 48px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-enhance-group .image-model-picker {
+  min-width: 236px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker summary {
+  grid-template-columns: 28px minmax(150px, 1fr) 18px !important;
+  gap: 8px !important;
+  padding: 0 11px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-current-text,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-current-text b {
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-current-text b {
+  font-size: clamp(13px, 0.82vw, 15px) !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 1180px) {
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-enhance-group,
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-enhance-group .image-model-picker {
+    min-width: 0 !important;
+  }
+}
+
 /* P0 performance pass: keep the full history available while letting the
    browser skip offscreen paint/layout work in heavy media walls. */
 .studio-shell .studio-wall-grid,
