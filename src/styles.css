@@ -30189,8 +30189,8 @@ label {
 
 .studio-shell .video-prompt-extractor-page {
   min-height: calc(100dvh - var(--project-fixed-tabs-height, 58px)) !important;
-  grid-template-rows: 46px auto auto !important;
-  align-content: start !important;
+  grid-template-rows: 46px minmax(520px, 1fr) auto !important;
+  align-content: stretch !important;
 }
 
 /* Clone Prompt media wall follows the same packed media logic as Image Page. */
@@ -30200,6 +30200,7 @@ label {
     radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.96), transparent 32%),
     linear-gradient(135deg, #fff8fc 0%, #f5edf8 54%, #eee2f4 100%) !important;
   height: auto !important;
+  min-height: 100% !important;
   max-height: none !important;
   overflow: visible !important;
 }
