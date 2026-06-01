@@ -31616,6 +31616,37 @@ label {
   color: rgba(43, 6, 54, 0.55) !important;
 }
 
+/* Match sidebar behavior: model menu scrollbar stays transparent until hover. */
+.studio-shell .image-higgsfield-mode .image-model-menu {
+  scrollbar-color: transparent transparent !important;
+  scrollbar-width: thin !important;
+}
+
+.studio-shell .image-higgsfield-mode .image-model-menu:hover,
+.studio-shell .image-higgsfield-mode .image-model-menu:focus-within {
+  scrollbar-color: rgba(111, 28, 132, 0.28) transparent !important;
+}
+
+.studio-shell .image-higgsfield-mode .image-model-menu::-webkit-scrollbar {
+  width: 10px !important;
+}
+
+.studio-shell .image-higgsfield-mode .image-model-menu::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.studio-shell .image-higgsfield-mode .image-model-menu::-webkit-scrollbar-thumb {
+  border: 3px solid transparent !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  background-clip: padding-box !important;
+}
+
+.studio-shell .image-higgsfield-mode .image-model-menu:hover::-webkit-scrollbar-thumb,
+.studio-shell .image-higgsfield-mode .image-model-menu:focus-within::-webkit-scrollbar-thumb {
+  background: rgba(111, 28, 132, 0.28) !important;
+}
+
 /* Generation feedback polish: make status, failure recovery, and long prompts visible. */
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt {
   min-height: 168px !important;
