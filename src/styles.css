@@ -30658,6 +30658,27 @@ label {
   display: none !important;
 }
 
+/* Prompt composer cleanup: the text area should feel embedded in the control
+   bar, not like a second rounded card inside it. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-prompt {
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-prompt textarea {
+  padding: 10px 0 8px !important;
+  background: transparent !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-insert {
+  border-color: rgba(111, 28, 132, 0.16) !important;
+  background: rgba(248, 239, 252, 0.68) !important;
+  box-shadow: none !important;
+}
+
 @media (max-width: 900px) {
   .studio-shell .image-higgsfield-mode > .image-generate-console.is-compact {
     grid-template-columns: minmax(0, 1fr) 70px !important;
