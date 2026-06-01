@@ -28992,9 +28992,9 @@ label {
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-menu {
-  position: absolute !important;
-  left: 0 !important;
-  bottom: calc(100% + 6px) !important;
+  position: fixed !important;
+  left: clamp(26px, 3.8vw, 64px) !important;
+  bottom: clamp(104px, 15dvh, 142px) !important;
   z-index: 1201 !important;
   width: min(420px, calc(100vw - 34px)) !important;
   min-width: 0 !important;
@@ -29010,7 +29010,7 @@ label {
     linear-gradient(145deg, rgba(255, 252, 255, 0.98), rgba(246, 235, 251, 0.98)) !important;
   box-shadow: 0 14px 34px rgba(70, 16, 84, 0.14) !important;
   backdrop-filter: blur(18px) !important;
-  max-height: min(34dvh, 246px) !important;
+  max-height: min(42dvh, 292px) !important;
   overflow-y: auto !important;
   overscroll-behavior: contain !important;
   scrollbar-gutter: stable !important;
