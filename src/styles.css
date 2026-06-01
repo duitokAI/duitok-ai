@@ -25588,6 +25588,38 @@ label {
     0 12px 28px rgba(20, 0, 27, 0.2) !important;
 }
 
+.studio-shell .image-console-prompt textarea {
+  scrollbar-gutter: stable;
+  scrollbar-color: transparent transparent;
+  scrollbar-width: thin;
+}
+
+.studio-shell .image-console-prompt:hover textarea,
+.studio-shell .image-console-prompt:focus-within textarea {
+  scrollbar-color: rgba(86, 69, 92, 0.34) transparent;
+}
+
+.studio-shell .image-console-prompt textarea::-webkit-scrollbar {
+  width: 10px;
+}
+
+.studio-shell .image-console-prompt textarea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.studio-shell .image-console-prompt textarea::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  background-clip: padding-box;
+}
+
+.studio-shell .image-console-prompt:hover textarea::-webkit-scrollbar-thumb,
+.studio-shell .image-console-prompt:focus-within textarea::-webkit-scrollbar-thumb {
+  background: rgba(86, 69, 92, 0.34);
+  background-clip: padding-box;
+}
+
 .studio-shell .image-console-tools {
   gap: 7px !important;
 }
