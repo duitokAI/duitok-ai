@@ -4228,7 +4228,8 @@ function studioPendingWallCard(job) {
 function studioWallCard(item, index = 0) {
   const promptText = resultPromptText(item).replaceAll("\n", " ").trim();
   const canSaveReference = Boolean(item.imageUrl || item.videoUrl);
-  return `<article class="studio-wall-card" style="--media-ratio:${esc(resultMediaRatio(item))}">
+  const mediaRatio = resultMediaRatio(item);
+  return `<article class="studio-wall-card" data-media-ratio="${esc(mediaRatio)}" style="--media-ratio:${esc(mediaRatio)}">
     ${resultPreview(item, { clickable: true, wall: true, priority: index < 6 })}
     <div class="studio-wall-actions" aria-label="Image actions">
       <button type="button" data-result-action="save-avatar" data-result-id="${esc(item.id)}" data-tooltip="Save as Avatar" aria-label="Save as Avatar" title="Save as Avatar" ${canSaveReference ? "" : "disabled"}>${icon("user-round-plus", 17)}</button>
@@ -5336,6 +5337,20 @@ function resultMediaRatio(item = {}) {
   return "1";
 }
 
+function mediaRatioSyncScript() {
+  return [
+    "const card=this.closest('.studio-wall-card')",
+    "if(card){",
+    "const current=parseFloat(card.dataset.mediaRatio||getComputedStyle(card).getPropertyValue('--media-ratio'))||1",
+    "const width=this.naturalWidth||this.videoWidth||1",
+    "const height=this.naturalHeight||this.videoHeight||1",
+    "const next=Math.min(2.4,Math.max(0.35,width/height))",
+    "if(Math.abs(next-current)<=0.18){card.dataset.mediaRatio=next.toFixed(4);card.style.setProperty('--media-ratio',next.toFixed(4))}",
+    "card.dataset.mediaReady='true'",
+    "}"
+  ].join(";");
+}
+
 function resultCreatedLabel(item) {
   if (!item?.createdAt) return "Unknown";
   const date = new Date(item.createdAt);
@@ -5383,7 +5398,7 @@ function resultPreview(item, options = {}) {
   const imageSrc = item.imageUrl ? `/api/media/result/${encodeURIComponent(item.id)}/image?token=${token}` : "";
   const videoSrc = item.videoUrl ? `/api/media/result/${encodeURIComponent(item.id)}/video?token=${token}` : "";
   const imageError = "this.replaceWith(Object.assign(document.createElement('div'),{className:'result-media-error',textContent:'图片保存失败，请联系客服处理'}))";
-  const ratioSync = "this.closest('.studio-wall-card')?.style.setProperty('--media-ratio',(this.naturalWidth||this.videoWidth||1)/(this.naturalHeight||this.videoHeight||1))";
+  const ratioSync = mediaRatioSyncScript();
   const eagerMedia = Boolean(options.full || options.priority);
   const imagePriority = options.full || options.priority ? "high" : options.wall ? "auto" : "low";
   const imageDecoding = options.full ? "sync" : "async";

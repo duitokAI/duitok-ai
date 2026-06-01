@@ -24,6 +24,10 @@
     sans-serif;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 /* Image Generator canvas studio */
 .studio-shell .canvas-card:has(.image-canvas-studio) {
   padding: 0 !important;
@@ -30738,6 +30742,7 @@ label {
 .studio-shell .video-prompt-extractor-page .studio-wall-card {
   content-visibility: auto !important;
   contain: layout paint style !important;
+  contain-intrinsic-size: 260px var(--studio-wall-row-height, 260px) !important;
 }
 
 .studio-shell .image-higgsfield-mode .studio-wall-card:hover,
