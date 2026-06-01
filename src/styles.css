@@ -30716,10 +30716,14 @@ label {
 }
 
 .studio-shell .image-generate-console {
-  contain: layout paint;
+  contain: layout style;
   transition:
     background 0.12s ease,
     box-shadow 0.12s ease !important;
+}
+
+.studio-shell .image-generate-console:has(.image-model-picker[open]) {
+  contain: none !important;
 }
 
 .studio-shell .image-generate-console.is-compact,
