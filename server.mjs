@@ -80,6 +80,8 @@ const publicStateJobLimit = Number(process.env.PUBLIC_STATE_JOB_LIMIT || 200);
 const publicStateRowLimit = Number(process.env.PUBLIC_STATE_ROW_LIMIT || 200);
 const publicStateAttachmentLimit = Number(process.env.PUBLIC_STATE_ATTACHMENT_LIMIT || 240);
 const projectGenerationStateResultLimit = Number(process.env.PROJECT_GENERATION_STATE_RESULT_LIMIT || 260);
+const promptAdvancedCacheTtlMs = 10 * 60 * 1000;
+const promptAdvancedCache = new Map();
 const httpCompressionMinBytes = Number(process.env.HTTP_COMPRESSION_MIN_BYTES || 1024);
 const maxConcurrentGenerationJobs = Math.max(1, Number(process.env.MAX_CONCURRENT_GENERATION_JOBS || 4));
 const userConcurrentGenerationLimit = Math.max(1, Number(process.env.USER_CONCURRENT_GENERATIONS || 2));
@@ -88,6 +90,7 @@ const storedGenerationJobLimit = Math.max(0, Number(process.env.STORED_GENERATIO
 const storedApiCallLimit = Math.max(0, Number(process.env.STORED_API_CALL_LIMIT || 6000));
 const storedUsageLimit = Math.max(0, Number(process.env.STORED_USAGE_LIMIT || 6000));
 const storedAdminAuditLimit = Math.max(0, Number(process.env.STORED_ADMIN_AUDIT_LIMIT || 6000));
+const supportedImageAspectRatios = ["9:16", "3:4", "2:3", "1:1", "4:3", "16:9", "3:2"];
 const publicMediaModelMap = {
   "GPT Image 2": "GPT Image 2",
   "Seedream 5.0 Lite": "Seedream 5.0 Lite",
@@ -1602,6 +1605,7 @@ function publicGenerationJob(job = {}) {
     step: job.step,
     type: job.type,
     status: job.status,
+    stage: job.stage || "",
     prompt: redactProviderText(job.prompt || ""),
     imageUrl: publicMediaMarker(job.imageUrl),
     videoUrl: publicMediaMarker(job.videoUrl),
@@ -2301,6 +2305,36 @@ async function enhancePromptWithDeepSeek({ project, prompt, visualSummary = "" }
   };
 }
 
+function promptAdvancedCacheKey(project, prompt = "", visualInputs = []) {
+  return JSON.stringify({
+    model: internalMediaModel(project.image?.model),
+    mode: project.image?.mode || "Create Image",
+    aspectRatio: imageAspectRatioFromProject(project),
+    resolution: imageResolutionFromProject(project),
+    prompt: sanitizeAgentText(prompt).slice(0, 1600),
+    refs: visualInputs.map((item) => item.label || item.url || "").slice(0, 4)
+  });
+}
+
+async function enhancePromptForGenerationJob(db, project, prompt = "") {
+  const visualInputs = projectPromptVisualInputs(db, project);
+  const cacheKey = promptAdvancedCacheKey(project, prompt, visualInputs);
+  const cached = promptAdvancedCache.get(cacheKey);
+  if (cached && Date.now() - cached.createdAt < promptAdvancedCacheTtlMs) {
+    return { ...cached.value, cached: true };
+  }
+  const visualSummary = visualInputs.length && hasGrsaiConfig()
+    ? await summarizePromptVisualsWithGrsai(visualInputs, prompt)
+    : "";
+  const enhanced = await enhancePromptWithDeepSeek({ project, prompt, visualSummary });
+  promptAdvancedCache.set(cacheKey, { createdAt: Date.now(), value: enhanced });
+  if (promptAdvancedCache.size > 80) {
+    const oldestKey = promptAdvancedCache.keys().next().value;
+    if (oldestKey) promptAdvancedCache.delete(oldestKey);
+  }
+  return enhanced;
+}
+
 async function wuyinRequest(pathname, { method = "GET", body, query = {} } = {}) {
   const apiKey = requireWuyinConfig();
   const url = new URL(`${wuyinBaseUrl}${pathname}`);
@@ -2575,7 +2609,7 @@ function imageResolutionFromProject(project) {
 function imageAspectRatioFromProject(project) {
   const value = String(project?.image?.aspectRatio || "").trim();
   const fallback = String(process.env.APIMART_IMAGE_SIZE || process.env.GRSAI_NANO_ASPECT_RATIO || "9:16").trim();
-  return ["9:16", "16:9"].includes(value) ? value : ["9:16", "16:9"].includes(fallback) ? fallback : "9:16";
+  return supportedImageAspectRatios.includes(value) ? value : supportedImageAspectRatios.includes(fallback) ? fallback : "9:16";
 }
 
 function generationEndpointFor(provider, project) {
@@ -3015,6 +3049,7 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
       step,
       type: action === "generate-image" && isVideoMediaModel(project.image?.model) ? "video" : action === "generate-image" ? "image" : "text",
       status: "queued",
+      stage: shouldAdvancePrompt ? "prompt_advanced" : "queued",
       prompt: project.image?.prompt || "",
       creditsCharged: 0,
       creditsRequired: creditsToCharge,
@@ -3064,6 +3099,7 @@ async function processGenerationJob(jobId) {
       const project = db.projects.find((item) => item.id === job.projectId);
       if (!project) throw Object.assign(new Error("Project not found"), { status: 404 });
       job.status = "processing";
+      job.stage = job.internalPromptAdvanced ? "prompt_advanced" : "provider_submitted";
       job.startedAt = new Date().toISOString();
       await saveDb(db);
       return { job: structuredClone(job), project: structuredClone(project) };
@@ -3077,11 +3113,7 @@ async function processGenerationJob(jobId) {
         const db = await ensureDb();
         const liveProject = db.projects.find((item) => item.id === snapshot.job.projectId) || snapshot.project;
         const prompt = snapshot.project.image.prompt || liveProject.image?.prompt || "";
-        const visualInputs = projectPromptVisualInputs(db, liveProject);
-        const visualSummary = visualInputs.length && hasGrsaiConfig()
-          ? await summarizePromptVisualsWithGrsai(visualInputs, prompt)
-          : "";
-        const enhanced = await enhancePromptWithDeepSeek({ project: snapshot.project, prompt, visualSummary });
+        const enhanced = await enhancePromptForGenerationJob(db, liveProject, prompt);
         if (enhanced.finalPrompt) {
           snapshot.project.image.prompt = enhanced.finalPrompt;
           await mutateDb(async (db) => {
@@ -3089,17 +3121,29 @@ async function processGenerationJob(jobId) {
             if (job) {
               job.prompt = enhanced.finalPrompt;
               job.promptAdvanced = true;
+              job.promptAdvancedCached = Boolean(enhanced.cached);
               job.promptAdvancedNotes = enhanced.notes || [];
+              job.stage = "provider_submitted";
             }
             await saveDb(db);
           });
         }
       } catch (error) {
         console.warn("Prompt advanced skipped for generation job", jobId, error.message);
+        await mutateDb(async (db) => {
+          const job = db.generationJobs.find((item) => item.id === jobId);
+          if (job && job.status === "processing") job.stage = "provider_submitted";
+          await saveDb(db);
+        });
       }
     }
 
     const generated = await generateWithProvider(snapshot.project, snapshot.job.action, snapshot.job.step);
+    await mutateDb(async (db) => {
+      const job = db.generationJobs.find((item) => item.id === jobId);
+      if (job && job.status === "processing") job.stage = "saving_asset";
+      await saveDb(db);
+    });
     await completeQueuedGeneration(jobId, generated);
   } catch (error) {
     await failQueuedGeneration(jobId, error);
@@ -3165,6 +3209,7 @@ async function completeQueuedGeneration(jobId, generated) {
     Object.assign(job, {
       resultId: result.id,
       status: "succeeded",
+      stage: "succeeded",
       taskId: generated.taskId,
       providerTaskId: generated.taskId,
       imageUrl: result.imageUrl,
@@ -3217,6 +3262,7 @@ async function failQueuedGeneration(jobId, error) {
     const completedAt = new Date().toISOString();
     Object.assign(job, {
       status: "failed",
+      stage: "failed",
       errorMessage: publicGenerationError(),
       providerErrorMessage: error.message || "Generation failed",
       creditsCharged: 0,

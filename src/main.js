@@ -147,6 +147,7 @@ const state = {
   langOpen: false,
   imagePromptGroup: "avatar",
   generating: false,
+  optimisticGenerationJobs: [],
   promptAdvancedBusy: false,
   promptAdvancedEnabled: false,
   projectMenuId: null,
@@ -1734,7 +1735,7 @@ function handleDelegatedPointerDown(event) {
 }
 
 function handleDelegatedClick(event) {
-  const target = event.target.closest?.("[data-page],[data-step],[data-step-open],[data-project],[data-studio-wall-more],[data-result-action],[data-result-preview],[data-result-prompt],[data-image-canvas-result],[data-image-model-option],[data-generation-cancel]");
+  const target = event.target.closest?.("[data-page],[data-step],[data-step-open],[data-project],[data-studio-wall-more],[data-result-action],[data-result-preview],[data-result-prompt],[data-image-canvas-result],[data-image-model-option],[data-generation-cancel],[data-generation-retry],[data-generation-edit]");
   if (!target || !app.contains(target)) return;
 
   if (target.dataset.page) return scheduleNavigation({ page: target.dataset.page });
@@ -1748,6 +1749,8 @@ function handleDelegatedClick(event) {
   if (target.dataset.imageCanvasResult) return set({ imageCanvasSelectedResultId: target.dataset.imageCanvasResult });
   if (target.dataset.imageModelOption) return saveProjectField("image.model", target.dataset.imageModelOption);
   if (target.dataset.generationCancel) return cancelGenerationJob(target.dataset.generationCancel);
+  if (target.dataset.generationRetry) return retryGenerationJob(target.dataset.generationRetry);
+  if (target.dataset.generationEdit) return editGenerationJobPrompt(target.dataset.generationEdit);
 }
 
 function scheduleNavigation(patch = {}) {
@@ -4388,12 +4391,14 @@ function studioPendingWallCard(job) {
   const aspectClass = aspectRatio === "16:9" ? "landscape" : "portrait";
   const mediaRatio = aspectRatio === "16:9" ? "1.7778" : "0.5625";
   const isFailed = job.status === "failed";
-  const statusLabel = isFailed ? "Generation failed" : job.status === "processing" ? "Processing" : "Queued";
+  const statusLabel = generationJobStatusLabel(job);
+  const promptPreview = String(job.promptSnapshot || job.prompt || "").replaceAll("\n", " ").trim();
   return `<article class="studio-wall-card studio-wall-pending ${aspectClass} ${isFailed ? "failed" : ""}" data-generation-job-id="${esc(job.id)}" data-generation-job-status="${esc(job.status || "queued")}" style="--media-ratio:${mediaRatio};aspect-ratio:${esc(aspectRatio.replace(":", " / "))}">
     <div class="studio-wall-pending-controls" aria-label="${esc(statusLabel)}">
       <span class="studio-wall-pending-spinner" role="status" aria-label="${esc(statusLabel)}" title="${esc(statusLabel)}">${icon(isFailed ? "triangle-alert" : "loader-circle", 22)}</span>
       <b>${esc(statusLabel)}</b>
-      ${isFailed ? `<small>${esc(job.errorMessage || "Please adjust the prompt and try again.")}</small>` : `<button type="button" data-generation-cancel="${esc(job.id)}" aria-label="Cancel generation" title="Cancel generation">${icon("ban", 22)}</button>`}
+      <small>${esc(isFailed ? (job.errorMessage || "Please adjust the prompt and try again.") : promptPreview ? promptPreview.slice(0, 110) : generationJobStageHelp(job))}</small>
+      ${isFailed ? `<div class="studio-wall-failed-actions"><button type="button" data-generation-retry="${esc(job.id)}">${icon("refresh-cw", 14)} Retry</button><button type="button" data-generation-edit="${esc(job.id)}">${icon("pencil-line", 14)} Edit</button></div>` : job.optimistic ? "" : `<button type="button" data-generation-cancel="${esc(job.id)}" aria-label="Cancel generation" title="Cancel generation">${icon("ban", 22)}</button>`}
     </div>
   </article>`;
 }
@@ -4402,7 +4407,9 @@ function studioWallCard(item, index = 0) {
   const promptText = resultPromptText(item).replaceAll("\n", " ").trim();
   const canSaveReference = Boolean(item.imageUrl || item.videoUrl);
   const mediaRatio = resultMediaRatio(item);
-  return `<article class="studio-wall-card" data-media-ratio="${esc(mediaRatio)}" style="--media-ratio:${esc(mediaRatio)}">
+  const isNew = Date.now() - Date.parse(item.createdAt || 0) < 120000;
+  return `<article class="studio-wall-card ${isNew ? "is-new" : ""}" data-media-ratio="${esc(mediaRatio)}" style="--media-ratio:${esc(mediaRatio)}">
+    ${isNew ? `<span class="studio-wall-new-badge">New</span>` : ""}
     ${resultPreview(item, { clickable: true, wall: true, priority: index < 6 })}
     <div class="studio-wall-actions" aria-label="Image actions">
       <button type="button" data-result-action="save-avatar" data-result-id="${esc(item.id)}" data-tooltip="Save as Avatar" aria-label="Save as Avatar" ${canSaveReference ? "" : "disabled"}>${icon("user-round-plus", 17)}</button>
@@ -4561,16 +4568,20 @@ function imageGenerateConsole(p, selectedModel) {
   const unitCredit = imageModelCredit(selectedModel);
   const selectedCount = imageBatchCount(p);
   const credit = (unitCredit * selectedCount).toFixed(2);
-  const aspectRatioOptions = ["9:16", "16:9"];
+  const promptText = String(p.image?.prompt || "");
+  const longPromptClass = promptText.length > 120 || promptText.includes("\n") ? "has-long-prompt" : "";
+  const enhanceLabel = state.promptAdvancedEnabled ? "Enhance on" : "Enhance off";
+  const aspectRatioOptions = ["9:16", "3:4", "2:3", "1:1", "4:3", "16:9", "3:2"];
   const selectedAspectRatio = aspectRatioOptions.includes(p.image.aspectRatio) ? p.image.aspectRatio : "9:16";
-  const resolutionOptions = [["1K", "1k"], ["2K", "2k"], ["4K", "4k"]];
+  const resolutionOptions = [
+    ["1K", "1k Fast"],
+    ["2K", "2k Balanced"],
+    ["4K", "4k Best"]
+  ];
   const selectedResolution = ["1K", "2K", "4K"].includes(String(p.image.resolution || "").toUpperCase())
     ? String(p.image.resolution).toUpperCase()
     : "2K";
-  const aspectRatioIcon = selectedAspectRatio === "16:9"
-    ? `<i data-lucide="smartphone" style="width:15px;height:15px;transform:rotate(90deg)"></i>`
-    : icon("smartphone", 15);
-  return `<section class="image-generate-console">
+  return `<section class="image-generate-console ${longPromptClass}">
     <div class="image-console-main">
       <div class="image-console-prompt ${promptImage ? "has-prompt-image" : ""}" data-image-console-prompt-zone>
         <label class="image-prompt-insert" title="Insert image">
@@ -4582,10 +4593,10 @@ function imageGenerateConsole(p, selectedModel) {
       <div class="image-console-tools">
         <div class="image-model-enhance-group">
           ${imageModelPicker(selectedModel)}
-          <button class="image-prompt-enhance ${state.promptAdvancedEnabled ? "is-active" : ""}" type="button" data-action="toggle-prompt-advanced" aria-label="Prompt enhance" aria-pressed="${state.promptAdvancedEnabled ? "true" : "false"}" title="Prompt enhance" ${state.generating || state.promptAdvancedBusy ? "disabled" : ""}>${icon("wand-sparkles", 18)}</button>
+        <button class="image-prompt-enhance ${state.promptAdvancedEnabled ? "is-active" : ""}" type="button" data-action="toggle-prompt-advanced" aria-label="${esc(enhanceLabel)}" aria-pressed="${state.promptAdvancedEnabled ? "true" : "false"}" title="${esc(enhanceLabel)}" ${state.promptAdvancedBusy ? "disabled" : ""}>${icon("wand-sparkles", 18)}<span>${esc(enhanceLabel)}</span></button>
         </div>
-        <label class="image-aspect-ratio-select">${aspectRatioIcon}<select data-field="image.aspectRatio">${aspectRatioOptions.map((value) => `<option value="${esc(value)}" ${value === selectedAspectRatio ? "selected" : ""}>${esc(value)}</option>`).join("")}</select></label>
-        <label class="image-resolution-select">${icon("gem", 15)}<select data-field="image.resolution">${resolutionOptions.map(([value, label]) => `<option value="${esc(value)}" ${value === selectedResolution ? "selected" : ""}>${esc(label)}</option>`).join("")}</select></label>
+        ${imageAspectRatioPicker(selectedAspectRatio, aspectRatioOptions)}
+        <label class="image-resolution-select" title="1k Fast preview · 2k Balanced quality · 4k Best detail">${icon("gem", 15)}<select data-field="image.resolution" aria-label="Select quality">${resolutionOptions.map(([value, label]) => `<option value="${esc(value)}" ${value === selectedResolution ? "selected" : ""}>${esc(label)}</option>`).join("")}</select></label>
         <div class="image-count-stepper" aria-label="Images to generate">
           <button type="button" data-action="image-count-down" aria-label="Generate fewer images" ${selectedCount <= 1 ? "disabled" : ""}>${icon("minus", 15)}</button>
           <span><b>${selectedCount}</b><small>/4</small></span>
@@ -4597,12 +4608,38 @@ function imageGenerateConsole(p, selectedModel) {
       ${imageReferenceThumb("avatar", avatar, "Avatar")}
       ${imageReferenceThumb("product", product, "Product")}
     </div>
-    <button class="image-console-generate" type="button" data-action="generate-image" ${state.generating ? "disabled" : ""}>
+    <button class="image-console-generate" type="button" data-action="generate-image" ${state.generating ? "aria-busy=\"true\"" : ""}>
       ${icon(state.generating ? "loader-circle" : "send", 20)}
-      <b>${state.generating ? "Generating" : t("generateImage")}</b>
-      <small>${state.generating ? "Submitting..." : `${credit} Credit`}</small>
+      <b>${state.generating ? "Queuing" : t("generateImage")}</b>
+      <small>${state.generating ? "You can keep typing" : `${credit} Credit`}</small>
     </button>
   </section>`;
+}
+
+function aspectRatioGlyph(value = "9:16") {
+  const [w = 9, h = 16] = String(value).split(":").map((item) => Number(item) || 1);
+  const isWide = w > h;
+  const maxSide = 22;
+  const minSide = 10;
+  const width = isWide ? maxSide : Math.max(minSide, Math.round(maxSide * (w / h)));
+  const height = isWide ? Math.max(minSide, Math.round(maxSide * (h / w))) : maxSide;
+  return `<span class="aspect-ratio-glyph" aria-hidden="true" style="--ratio-icon-width:${width}px;--ratio-icon-height:${height}px"></span>`;
+}
+
+function imageAspectRatioPicker(selectedAspectRatio, options = []) {
+  return `<details class="image-aspect-ratio-select image-aspect-ratio-menu">
+    <summary aria-label="Aspect ratio">
+      ${aspectRatioGlyph(selectedAspectRatio)}
+      <b>${esc(selectedAspectRatio)}</b>
+      ${icon("chevron-down", 16)}
+    </summary>
+    <div class="image-aspect-ratio-options" role="listbox" aria-label="Aspect ratio">
+      ${options.map((value) => `<button type="button" class="${value === selectedAspectRatio ? "active" : ""}" data-field-set="image.aspectRatio" data-value="${esc(value)}" role="option" aria-selected="${value === selectedAspectRatio ? "true" : "false"}">
+        ${aspectRatioGlyph(value)}
+        <span>${esc(value)}</span>
+      </button>`).join("")}
+    </div>
+  </details>`;
 }
 
 function imageModelCredit(model = "") {
@@ -5371,7 +5408,10 @@ function results(p, type) {
 
 function pendingResultJobs(projectItem, types) {
   const step = state.step || "image";
-  return (state.db?.generationJobs || [])
+  const optimistic = (state.optimisticGenerationJobs || []).filter((job) => job.projectId === projectItem.id);
+  const serverJobs = state.db?.generationJobs || [];
+  const serverIds = new Set(serverJobs.map((job) => job.id));
+  return [...optimistic.filter((job) => !serverIds.has(job.id)), ...serverJobs]
     .filter((job) => job.projectId === projectItem.id && ["queued", "processing", "failed"].includes(job.status))
     .filter((job) => job.type === "video"
       ? step === videoStudioStep(job.step)
@@ -5379,15 +5419,34 @@ function pendingResultJobs(projectItem, types) {
     .slice(0, 4);
 }
 
+function generationJobStatusLabel(job = {}) {
+  if (job.status === "failed") return "Generation failed";
+  if (job.status === "queued") return job.stage === "prompt_advanced" ? "Optimizing prompt" : "Queued";
+  if (job.stage === "prompt_advanced") return "Optimizing prompt";
+  if (job.stage === "provider_submitted") return job.type === "video" ? "Generating video" : "Generating image";
+  if (job.stage === "saving_asset") return "Saving result";
+  if (job.status === "processing") return "Processing";
+  return job.status || "Queued";
+}
+
+function generationJobStageHelp(job = {}) {
+  if (job.stage === "prompt_advanced") return "Prompt Advanced is running in the background.";
+  if (job.stage === "provider_submitted") return "You can keep creating while this finishes.";
+  if (job.stage === "saving_asset") return "Final asset is being saved to this project.";
+  return "Task is queued. You can keep writing the next prompt.";
+}
+
 function generationJobCard(job) {
   const isFailed = job.status === "failed";
-  const label = isFailed ? "Generation failed" : job.status === "processing" ? "Generating..." : "Preparing...";
+  const label = generationJobStatusLabel(job);
   const type = job.type === "video" ? "VIDEO" : job.type === "image" ? "IMAGE" : "OUTPUT";
+  const promptPreview = String(job.promptSnapshot || job.prompt || "").replaceAll("\n", " ").trim();
   return `<article class="result-card generation-job-card ${isFailed ? "failed" : ""}" aria-live="polite">
     <div class="generation-job-canvas">
       ${icon(isFailed ? "triangle-alert" : "loader-circle", 34)}
       <strong>${label}</strong>
-      ${isFailed ? `<span>${esc(job.errorMessage || "Please adjust the prompt and try again.")}</span>` : ""}
+      <span>${esc(isFailed ? (job.errorMessage || "Please adjust the prompt and try again.") : promptPreview ? promptPreview.slice(0, 110) : generationJobStageHelp(job))}</span>
+      ${isFailed ? `<div class="generation-job-actions"><button type="button" class="dark-button" data-generation-retry="${esc(job.id)}">${icon("refresh-cw", 14)} Retry</button><button type="button" class="dark-button" data-generation-edit="${esc(job.id)}">${icon("pencil-line", 14)} Edit prompt</button></div>` : ""}
     </div>
     <footer>
       <span>${icon(isFailed ? "triangle-alert" : "loader-circle", 16)}</span>
@@ -8753,8 +8812,10 @@ function bind() {
   document.querySelectorAll("[data-date-field]").forEach((el) => el.addEventListener("change", () => set({ [el.dataset.dateField]: el.value })));
   document.querySelectorAll("[data-action]").forEach((el) => el.addEventListener("click", (e) => action(e, el.dataset.action)));
   document.querySelectorAll("[data-studio-wall-zoom]").forEach((el) => el.addEventListener("input", () => updateStudioWallZoom(el.value)));
-  document.querySelectorAll("[data-field-set]").forEach((el) => el.addEventListener("click", () => saveProjectFieldQuick(el.dataset.fieldSet, el.dataset.value, el)));
-  document.querySelectorAll('[data-field="image.aspectRatio"]').forEach((el) => el.addEventListener("input", () => syncImageAspectRatioIcon(el)));
+  document.querySelectorAll("[data-field-set]").forEach((el) => el.addEventListener("click", () => {
+    el.closest("details")?.removeAttribute("open");
+    saveProjectFieldQuick(el.dataset.fieldSet, el.dataset.value, el);
+  }));
   document.querySelectorAll("[data-field]").forEach((el) => el.addEventListener("change", fieldChange));
   document.querySelectorAll("[data-ugc-builder-option]").forEach((el) => el.addEventListener("click", () => updateUgcBuilderOption(el)));
   document.querySelectorAll("[data-ugc-builder-field]").forEach((el) => el.addEventListener("click", () => updateUgcBuilderField(el.dataset.ugcBuilderField, el.dataset.ugcBuilderValue, true)));
@@ -8788,7 +8849,14 @@ function bind() {
   document.querySelectorAll("[data-invoice]").forEach((el) => el.addEventListener("click", () => download(`/api/export/invoice/${el.dataset.invoice}`, `${el.dataset.invoice}.txt`)));
   document.querySelectorAll("[data-result]").forEach((el) => el.addEventListener("click", () => download(`/api/export/result/${el.dataset.result}`, `pokaya-result.txt`)));
   document.querySelectorAll("[data-video-play]").forEach((el) => el.addEventListener("click", () => playResultVideo(el)));
-  document.querySelectorAll("[data-image-console-prompt]").forEach((el) => el.addEventListener("input", () => updateImagePromptLocal(el.value)));
+  document.querySelectorAll("[data-image-console-prompt]").forEach((el) => {
+    el.addEventListener("input", () => updateImagePromptLocal(el.value));
+    el.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" || (!event.metaKey && !event.ctrlKey) || event.shiftKey || event.altKey || event.isComposing) return;
+      event.preventDefault();
+      generate("generate-image", event);
+    });
+  });
   document.querySelectorAll("[data-result-title]").forEach((el) => {
     el.addEventListener("input", () => {
       if (state.resultTitleSavedId === el.dataset.resultTitle) set({ resultTitleSavedId: null });
@@ -8975,22 +9043,61 @@ function fillAgentInput(value = "") {
 function updateImagePromptLocal(value = "") {
   if (!state.projectId || !state.db) return;
   state.db = dbWithProjectField(state.db, state.projectId, "image.prompt", value);
+  syncImagePromptDensityClass(value);
+}
+
+function syncImagePromptDensityClass(value = project()?.image?.prompt || "") {
+  const promptText = String(value || "");
+  const isLong = promptText.length > 120 || promptText.includes("\n");
+  document.querySelectorAll(".image-generate-console").forEach((el) => {
+    el.classList.toggle("has-long-prompt", isLong);
+  });
+}
+
+function fillImagePrompt(value = "") {
+  const promptText = String(value || "").trim();
+  if (!promptText) return;
+  updateImagePromptLocal(promptText);
+  const input = document.querySelector("[data-image-console-prompt]");
+  if (input) {
+    input.value = promptText;
+    input.focus({ preventScroll: true });
+    input.setSelectionRange(promptText.length, promptText.length);
+    syncImagePromptDensityClass(promptText);
+  } else if (state.projectId && state.db) {
+    set({ db: dbWithProjectField(state.db, state.projectId, "image.prompt", promptText) });
+  }
+}
+
+function generationJobById(jobId = "") {
+  return [...(state.optimisticGenerationJobs || []), ...(state.db?.generationJobs || [])]
+    .find((job) => job.id === jobId);
+}
+
+async function retryGenerationJob(jobId = "") {
+  const job = generationJobById(jobId);
+  const promptText = job?.promptSnapshot || job?.prompt || project()?.image?.prompt || "";
+  fillImagePrompt(promptText);
+  notify("Retrying generation...");
+  await generate("generate-image");
+}
+
+function editGenerationJobPrompt(jobId = "") {
+  const job = generationJobById(jobId);
+  const promptText = job?.promptSnapshot || job?.prompt || "";
+  fillImagePrompt(promptText);
+  document.querySelector("[data-image-console-prompt]")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  notify("Prompt loaded. Adjust it, then generate again.");
 }
 
 function togglePromptAdvanced() {
-  if (state.generating || state.promptAdvancedBusy) return;
+  if (state.promptAdvancedBusy) return;
   const enabled = !state.promptAdvancedEnabled;
   state.promptAdvancedEnabled = enabled;
   document.querySelectorAll('[data-action="toggle-prompt-advanced"]').forEach((button) => {
     button.classList.toggle("is-active", enabled);
     button.setAttribute("aria-pressed", enabled ? "true" : "false");
   });
-}
-
-function syncImageAspectRatioIcon(selectEl) {
-  const iconEl = selectEl?.closest(".image-aspect-ratio-select")?.querySelector("svg, i");
-  if (!iconEl) return;
-  iconEl.style.transform = selectEl.value === "16:9" ? "rotate(90deg)" : "";
 }
 
 function updateStudioWallZoom(value) {
@@ -9252,7 +9359,6 @@ async function submit(event) {
 
 async function fieldChange(event) {
   if (event.target.dataset.field === "image.aspectRatio") {
-    syncImageAspectRatioIcon(event.target);
     saveProjectFieldQuick(event.target.dataset.field, event.target.value);
     return;
   }
@@ -9848,28 +9954,62 @@ function generationFeedbackCopy(key, count = 1) {
 
 function markGenerateTriggerSubmitting(trigger) {
   if (!trigger || trigger.disabled) return;
-  trigger.disabled = true;
   trigger.setAttribute("aria-busy", "true");
   trigger.classList.add("is-submitting");
 }
 
+function optimisticGenerationJobs(name, count, options = {}) {
+  if (name !== "generate-image") return [];
+  const current = project();
+  const aspectRatio = current.image?.aspectRatio || "9:16";
+  const type = /seedance|veo|sora|video|omni/i.test(String(current.image?.model || "")) ? "video" : "image";
+  const createdAt = new Date().toISOString();
+  return Array.from({ length: count }, (_, index) => ({
+    id: `optimistic_${Date.now()}_${index}_${Math.random().toString(16).slice(2)}`,
+    projectId: state.projectId,
+    action: name,
+    step: state.step || "image",
+    type,
+    status: "queued",
+    stage: options.advancePrompt ? "prompt_advanced" : "queued",
+    prompt: options.prompt || "",
+    promptSnapshot: options.prompt || "",
+    aspectRatio,
+    optimistic: true,
+    createdAt
+  }));
+}
+
 async function generate(name, event = null) {
-  if (state.generating) {
+  if (state.generating && name !== "generate-image") {
     notify(generationFeedbackCopy("busy"));
     return;
   }
+  const generationOptions = syncImageConsoleBeforeGenerate(name);
+  const count = name === "generate-image" ? imageBatchCount(project()) : 1;
+  const optimisticJobs = optimisticGenerationJobs(name, count, generationOptions);
+  const optimisticIds = new Set(optimisticJobs.map((job) => job.id));
   try {
     markGenerateTriggerSubmitting(event?.currentTarget);
-    set({ generating: true });
-    notify(generationFeedbackCopy("submitting"));
-    const generationOptions = syncImageConsoleBeforeGenerate(name);
-    const count = name === "generate-image" ? imageBatchCount(project()) : 1;
+    set({
+      generating: true,
+      optimisticGenerationJobs: [...(state.optimisticGenerationJobs || []), ...optimisticJobs]
+    });
+    notify(generationOptions.advancePrompt ? "Queued. Prompt Enhance will run before generation." : generationFeedbackCopy("submitting"));
     const db = await api(`/projects/${state.projectId}/generate`, { method: "POST", body: JSON.stringify({ action: name, step: state.step, count, ...generationOptions }) });
-    set({ db, generating: false });
+    set({
+      db,
+      generating: false,
+      optimisticGenerationJobs: (state.optimisticGenerationJobs || []).filter((job) => !optimisticIds.has(job.id))
+    });
     notify(generationFeedbackCopy("queued", count));
     pollGenerationQueue();
   } catch (error) {
-    set({ generating: false, promptAdvancedBusy: false });
+    set({
+      generating: false,
+      promptAdvancedBusy: false,
+      optimisticGenerationJobs: (state.optimisticGenerationJobs || []).filter((job) => !optimisticIds.has(job.id))
+    });
     notify(error.message);
   }
 }
@@ -10068,14 +10208,15 @@ function updateGenerationStatusInDom(db = state.db) {
     if (!job) return;
     card.dataset.generationJobStatus = job.status || "queued";
     card.dataset.agentJobStatus = job.status || "queued";
+    card.dataset.generationJobStage = job.stage || "";
     const label = card.matches(".agent-generation-processing-frame")
       ? card.querySelector("strong")
       : card.querySelector(".agent-generation-processing-frame strong, b");
-    if (label) label.textContent = job.status === "processing" ? "Processing" : job.status === "queued" ? "Queued" : job.status || "";
+    if (label) label.textContent = card.matches(".agent-generation-processing-frame") ? (job.status === "processing" ? "Processing" : job.status === "queued" ? "Queued" : job.status || "") : generationJobStatusLabel(job);
     const frameSummary = card.matches(".agent-generation-processing-frame")
       ? card.querySelector("span")
       : card.querySelector(".agent-generation-processing-frame span");
-    const nextSummary = job.status === "processing" ? "模型正在生成，完成后会自动出现在这里。" : "任务已加入队列，马上开始生成。";
+    const nextSummary = generationJobStageHelp(job);
     if (frameSummary && ["queued", "processing"].includes(job.status)) {
       frameSummary.textContent = nextSummary;
     }
