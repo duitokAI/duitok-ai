@@ -29819,6 +29819,60 @@ label {
   left: 10px !important;
 }
 
+/* Failed generation cards should read as a compact status, not a full red wall. */
+.studio-shell .image-higgsfield-mode .studio-wall-pending.failed,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending.failed {
+  background: #170617 !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-pending.failed > div,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending.failed > div {
+  position: absolute !important;
+  inset: 0 !important;
+  display: grid !important;
+  grid-template-rows: auto auto auto !important;
+  place-items: center !important;
+  align-content: center !important;
+  gap: 8px !important;
+  padding: clamp(18px, 4vw, 34px) !important;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(255, 255, 255, 0.12), transparent 28%),
+    linear-gradient(145deg, rgba(83, 10, 32, 0.96), rgba(31, 4, 22, 0.98)) !important;
+  text-align: center !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-pending.failed .studio-wall-pending-spinner,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending.failed .studio-wall-pending-spinner {
+  position: static !important;
+  width: 48px !important;
+  height: 48px !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: rgba(255, 255, 255, 0.92) !important;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18) !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-pending.failed b,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending.failed b {
+  max-width: min(220px, 100%) !important;
+  padding: 0 !important;
+  color: #fff !important;
+  font-size: clamp(13px, 1.05vw, 16px) !important;
+  line-height: 1.08 !important;
+  white-space: normal !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-pending.failed small,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending.failed small {
+  max-width: min(260px, 100%) !important;
+  color: rgba(255, 239, 244, 0.76) !important;
+  font-size: 11px !important;
+  line-height: 1.35 !important;
+}
+
 .studio-shell .image-higgsfield-mode .studio-wall-card:has(.studio-wall-actions button:hover),
 .studio-shell .image-higgsfield-mode .studio-wall-card:has(.studio-wall-actions button:focus-visible) {
   z-index: 30 !important;
