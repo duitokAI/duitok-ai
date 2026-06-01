@@ -1496,13 +1496,17 @@ function publicGenerationJob(job = {}) {
 
 function publicProjectGenerationState(db, user, projectId) {
   const project = findProject(db, projectId, user);
+  const recentResults = recentProjectResults(project.results || [], projectGenerationStateResultLimit);
+  const recentResultIds = new Set(recentResults.map((result) => result.id));
   return {
     project: {
       id: project.id,
-      results: (project.results || []).map(publicGenerationResult)
+      results: recentResults.map(publicGenerationResult),
+      resultCount: (project.results || []).length
     },
     generationJobs: (db.generationJobs || [])
       .filter((job) => job.projectId === project.id && (hasAdminPrivileges(user) || job.userId === user.id))
+      .filter((job) => ["queued", "processing"].includes(job.status) || recentResultIds.has(job.resultId))
       .map(publicGenerationJob),
     billing: user?.billing || defaultBilling()
   };
