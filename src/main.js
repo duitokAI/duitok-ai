@@ -4662,6 +4662,19 @@ function aspectRatioGlyph(value = "9:16") {
   return `<span class="aspect-ratio-glyph" aria-hidden="true" style="--ratio-icon-width:${width}px;--ratio-icon-height:${height}px"></span>`;
 }
 
+function aspectRatioDescription(value = "9:16") {
+  const descriptions = {
+    "9:16": "Vertical shorts and mobile-first posts",
+    "3:4": "Tall product or portrait scenes",
+    "2:3": "Editorial vertical compositions",
+    "1:1": "Square social feed images",
+    "4:3": "Classic landscape product frames",
+    "16:9": "Wide banners and video covers",
+    "3:2": "Photo-style horizontal images"
+  };
+  return descriptions[value] || "Custom image composition";
+}
+
 function imageAspectRatioPicker(selectedAspectRatio, options = []) {
   return `<details class="image-aspect-ratio-select image-aspect-ratio-menu">
     <summary aria-label="Aspect ratio">
@@ -4670,9 +4683,14 @@ function imageAspectRatioPicker(selectedAspectRatio, options = []) {
       ${icon("chevron-down", 16)}
     </summary>
     <div class="image-aspect-ratio-options" role="listbox" aria-label="Aspect ratio">
+      <div class="image-aspect-ratio-menu-title">Aspect ratio</div>
       ${options.map((value) => `<button type="button" class="${value === selectedAspectRatio ? "active" : ""}" data-field-set="image.aspectRatio" data-value="${esc(value)}" role="option" aria-selected="${value === selectedAspectRatio ? "true" : "false"}">
         ${aspectRatioGlyph(value)}
-        <span>${esc(value)}</span>
+        <span class="image-aspect-ratio-option-copy">
+          <b>${esc(value)}</b>
+          <small>${esc(aspectRatioDescription(value))}</small>
+        </span>
+        <span class="image-aspect-ratio-option-check">${icon("check", 20)}</span>
       </button>`).join("")}
     </div>
   </details>`;
@@ -4717,15 +4735,20 @@ function openAspectRatioPopover(summary) {
   popover.dataset.sourceId = sourceId;
   popover.setAttribute("role", "listbox");
   popover.setAttribute("aria-label", "Aspect ratio");
-  popover.innerHTML = options.map((item) => `<button type="button" class="${item.active ? "active" : ""}" data-value="${esc(item.value)}" role="option" aria-selected="${item.active ? "true" : "false"}">
+  popover.innerHTML = `<div class="image-aspect-ratio-menu-title">Aspect ratio</div>${options.map((item) => `<button type="button" class="${item.active ? "active" : ""}" data-value="${esc(item.value)}" role="option" aria-selected="${item.active ? "true" : "false"}">
     ${aspectRatioGlyph(item.value)}
-    <span>${esc(item.value)}</span>
-  </button>`).join("");
+    <span class="image-aspect-ratio-option-copy">
+      <b>${esc(item.value)}</b>
+      <small>${esc(aspectRatioDescription(item.value))}</small>
+    </span>
+    <span class="image-aspect-ratio-option-check">${icon("check", 20)}</span>
+  </button>`).join("")}`;
   document.body.appendChild(popover);
+  window.lucide?.createIcons();
   const place = () => {
     const rect = summary.getBoundingClientRect();
-    const width = Math.max(168, popover.offsetWidth || 168);
-    const height = popover.offsetHeight || 324;
+    const width = Math.max(340, popover.offsetWidth || 340);
+    const height = popover.offsetHeight || 460;
     const left = Math.min(window.innerWidth - width - 12, Math.max(12, rect.left + rect.width / 2 - width / 2));
     const top = rect.top - height - 10 > 12 ? rect.top - height - 10 : Math.min(window.innerHeight - height - 12, rect.bottom + 10);
     popover.style.left = `${left}px`;
