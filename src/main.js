@@ -30,6 +30,16 @@ function migrateStorageKey(key) {
 }
 Object.values(storageKeys).forEach(migrateStorageKey);
 const agentHistoryStorageKey = storageKeys.agentHistory;
+function readStoredJson(key, fallback) {
+  const raw = localStorage.getItem(key);
+  if (!raw) return fallback;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    localStorage.removeItem(key);
+    return fallback;
+  }
+}
 const agentHistoryLimit = 12;
 let sidebarScrollTop = 0;
 let promoCountdownTimer = null;
@@ -100,7 +110,7 @@ function defaultUgcPromptBuilder() {
 
 const state = {
   loading: true,
-  user: JSON.parse(localStorage.getItem(storageKeys.user) || "null"),
+  user: readStoredJson(storageKeys.user, null),
   token: localStorage.getItem(storageKeys.token) || "",
   adminKey: localStorage.getItem(storageKeys.adminKey) || "",
   lang: localStorage.getItem(storageKeys.lang) || "zh",
@@ -122,7 +132,7 @@ const state = {
   sopTopic: "dashboard",
   sopSearch: "",
   sopStepAnchor: "",
-  sopProgress: JSON.parse(localStorage.getItem("pokaya-sop-progress") || "{}"),
+  sopProgress: readStoredJson("pokaya-sop-progress", {}),
   agentInput: "",
   agentInputComposing: false,
   agentRenderAfterComposition: false,
@@ -137,12 +147,12 @@ const state = {
   agentTaskMode: "idle",
   agentIdleActivity: "sleep",
   agentQueue: [],
-  agentMessages: JSON.parse(localStorage.getItem(storageKeys.agentMessages) || "[]"),
+  agentMessages: readStoredJson(storageKeys.agentMessages, []),
   agentContextSummary: localStorage.getItem(storageKeys.agentContextSummary) || "",
   agentAttachments: [],
   agentExpandedMessages: {},
   agentHistoryOpen: false,
-  agentHistorySessions: JSON.parse(localStorage.getItem(agentHistoryStorageKey) || "[]"),
+  agentHistorySessions: readStoredJson(agentHistoryStorageKey, []),
   activeAgentRunId: null,
   queuePolling: false,
   langOpen: false,
