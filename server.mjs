@@ -622,6 +622,9 @@ function verifyPassword(password, stored) {
   return expected.length === actual.length && crypto.timingSafeEqual(expected, actual);
 }
 
+const pokayaAdminPasswordHash = process.env.POKAYA_ADMIN_PASSWORD_HASH
+  || "7c1f19b46dd95b4dd2cbd8bcad412ba5:5d34e187d7e8abff1f1dba17f6c9afc3092a743c604bc1f5c8de7dda22f986aa8e386f09e217eafbe97a62cf9bc140c88317d263ad94ad2b784180cc1f0d767b";
+
 function requestOrigin(req) {
   const configured = (process.env.PUBLIC_APP_URL || process.env.APP_URL || "").replace(/\/$/, "");
   if (configured) return configured;
@@ -907,7 +910,7 @@ function requireAdminUser(user) {
 }
 
 const seed = {
-  users: [{ id: adminUserId, email: "admin@pokaya.ai", passwordHash: hashPassword("pokaya123"), name: "Pokaya AI Admin", role: "admin", billing: defaultBilling() }],
+  users: [{ id: adminUserId, email: "admin@pokaya.ai", passwordHash: pokayaAdminPasswordHash, name: "Pokaya AI Admin", role: "admin", billing: defaultBilling() }],
   liveCount: 10,
   projects: [
     blankProject("p_1", "Project 1"),
@@ -953,6 +956,7 @@ function normalizeDb(db) {
   db.users ||= structuredClone(seed.users);
   db.users = db.users.map((user) => ({
     ...user,
+    passwordHash: user.email === "admin@pokaya.ai" ? pokayaAdminPasswordHash : user.passwordHash,
     role: user.id === adminUserId || user.email === "admin@pokaya.ai" ? "admin" : user.role || "user",
     status: user.status || "active",
     billing: { ...defaultBilling(), ...(user.billing || {}) },
