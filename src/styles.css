@@ -27926,6 +27926,29 @@ label {
   transform: translateY(-50%) translateX(0) scale(1);
 }
 
+/* Collapsed sidebar scroll lock: the icon rail must remain its own wheel
+   target. Tooltips are body-mounted, so the rail no longer needs visible
+   overflow that disables sidebar scrolling. */
+.studio-shell.sidebar-collapsed .sidebar {
+  height: 100dvh !important;
+  overflow: hidden !important;
+}
+
+.studio-shell.sidebar-collapsed .sidebar-scroll-area {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  max-height: calc(100dvh - 76px) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  scrollbar-width: none !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+.studio-shell.sidebar-collapsed .sidebar-scroll-area::-webkit-scrollbar {
+  display: none;
+}
+
 /* Agent toolbar action buttons: lighter, smaller, and keep the history badge clear. */
 .studio-shell .agent-chat-toolbar {
   min-height: 48px !important;
