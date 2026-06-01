@@ -5172,10 +5172,15 @@ function select(field, label, options, value) {
 function upload(title, main, sub, ic, kind) {
   const selectedId = kind === "avatar" ? project().image?.avatarAttachmentId : project().image?.productAttachmentId;
   const selected = selectedId ? (state.db.attachments || []).find((item) => item.id === selectedId) : null;
+  const selectedCopy = {
+    zh: ["已选择照片", "点击更换"],
+    ms: ["Foto dipilih", "Klik untuk tukar"],
+    en: ["Photo selected", "Click to change"]
+  }[state.lang] || ["Photo selected", "Click to change"];
   return `<section class="upload-card"><h2>${icon(ic)} ${title}</h2><button class="drop-zone attachment-open-zone" type="button" data-action="open-attachment-picker" data-attachment-kind="${esc(kind)}">
     <span>${icon(ic, 44)}</span>
-    <strong>${selected ? esc(selected.name || main) : main}</strong>
-    <small>${selected ? `${esc(selected.kind || kind)} reference selected` : sub}</small>
+    <strong>${selected ? esc(selectedCopy[0]) : main}</strong>
+    <small>${selected ? esc(selectedCopy[1]) : sub}</small>
   </button></section>`;
 }
 
