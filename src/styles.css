@@ -29480,6 +29480,46 @@ label {
   vertical-align: top !important;
 }
 
+.studio-shell .result-video-poster {
+  display: grid !important;
+  place-items: center !important;
+  background:
+    radial-gradient(circle at 50% 24%, rgba(255, 255, 255, 0.28), transparent 36%),
+    linear-gradient(135deg, #321142, #16081f 62%, #070509) !important;
+}
+
+.studio-shell .result-video-poster-icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.studio-shell .studio-wall-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: min(420px, calc(100% - 28px));
+  min-height: 42px;
+  margin: 14px auto 0;
+  border: 1px solid rgba(57, 22, 67, 0.14);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.82);
+  color: #371643;
+  font-size: 13px;
+  font-weight: 900;
+  box-shadow: 0 12px 28px rgba(57, 22, 67, 0.08);
+}
+
+.studio-shell .studio-wall-more:hover {
+  background: #fff;
+  border-color: rgba(255, 47, 109, 0.34);
+}
+
 .studio-shell .image-higgsfield-mode .studio-wall-card .result-video-shell .result-video {
   height: 100% !important;
   aspect-ratio: auto !important;

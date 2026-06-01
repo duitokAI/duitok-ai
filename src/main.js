@@ -34,6 +34,7 @@ const agentHistoryLimit = 12;
 let sidebarScrollTop = 0;
 let promoCountdownTimer = null;
 let assetSearchTimer = null;
+let adminSearchTimer = null;
 let sopSearchTimer = null;
 let imagePresetSaveTimer = null;
 let autoFrameworkSaveTimer = null;
@@ -163,6 +164,7 @@ const state = {
   assetSearch: "",
   assetTypeFilter: "all",
   assetProjectFilter: "all",
+  studioWallLimits: {},
   wizardStep: 1,
   wizardFeature: "",
   wizardProductName: "",
@@ -1630,6 +1632,7 @@ function routeShell(content) {
 }
 
 function render() {
+  initDelegatedEvents();
   app.innerHTML = state.loading ? `<main class="loading">${icon("loader-circle")} Loading...</main>` : routeShell(route());
   applyStudioChineseLocalization();
   bind();
@@ -1639,6 +1642,35 @@ function render() {
   bindImageConsoleCompact();
   bindCollapsedSidebarTooltips();
   scrollToSopAnchor();
+}
+
+function initDelegatedEvents() {
+  if (app.dataset.delegatedEvents === "true") return;
+  app.dataset.delegatedEvents = "true";
+  app.addEventListener("click", handleDelegatedClick);
+  app.addEventListener("pointerdown", handleDelegatedPointerDown, { passive: true });
+}
+
+function handleDelegatedPointerDown(event) {
+  const resultActionButton = event.target.closest?.("[data-result-action]");
+  if (resultActionButton && app.contains(resultActionButton)) flashResultActionButton(resultActionButton);
+}
+
+function handleDelegatedClick(event) {
+  const target = event.target.closest?.("[data-page],[data-step],[data-step-open],[data-project],[data-studio-wall-more],[data-result-action],[data-result-preview],[data-result-prompt],[data-image-canvas-result],[data-image-model-option],[data-generation-cancel]");
+  if (!target || !app.contains(target)) return;
+
+  if (target.dataset.page) return scheduleNavigation({ page: target.dataset.page });
+  if (target.dataset.step) return scheduleNavigation({ step: target.dataset.step });
+  if (target.dataset.stepOpen) return scheduleNavigation({ page: "project", step: target.dataset.stepOpen });
+  if (target.dataset.project) return scheduleNavigation({ projectId: target.dataset.project, page: "project", projectMenuId: null });
+  if (target.dataset.studioWallMore) return showMoreStudioWall(target.dataset.studioWallMore);
+  if (target.dataset.resultAction) return resultAction(target);
+  if (target.dataset.resultPreview) return set({ modal: "previewResult", activeResultId: target.dataset.resultPreview });
+  if (target.dataset.resultPrompt) return set({ modal: "resultPrompt", activeResultId: target.dataset.resultPrompt });
+  if (target.dataset.imageCanvasResult) return set({ imageCanvasSelectedResultId: target.dataset.imageCanvasResult });
+  if (target.dataset.imageModelOption) return saveProjectField("image.model", target.dataset.imageModelOption);
+  if (target.dataset.generationCancel) return cancelGenerationJob(target.dataset.generationCancel);
 }
 
 function scheduleNavigation(patch = {}) {
@@ -4192,16 +4224,41 @@ function studioResultWall(p, meta = {}) {
   const step = state.step || "image";
   const pending = pendingResultJobs(p, types);
   const items = p.results.filter((item) => studioResultBelongsToStep(item, step, types)).slice().reverse();
+  const wallKey = studioWallKey(p, step, types);
+  const limit = studioWallLimit(wallKey);
+  const visibleItems = items.slice(0, limit);
+  const hiddenCount = Math.max(0, items.length - visibleItems.length);
   const cards = [
     ...pending.map(studioPendingWallCard),
-    ...items.map((item, index) => studioWallCard(item, index))
+    ...visibleItems.map((item, index) => studioWallCard(item, index))
   ];
   if (!cards.length) return "";
   return `<section class="studio-result-wall">
     <div class="studio-wall-grid">
       ${cards.join("")}
     </div>
+    ${hiddenCount ? `<button type="button" class="studio-wall-more" data-studio-wall-more="${esc(wallKey)}">${icon("chevrons-down", 18)} Load ${Math.min(studioWallPageSize, hiddenCount)} more · ${hiddenCount} hidden</button>` : ""}
   </section>`;
+}
+
+const studioWallPageSize = 48;
+
+function studioWallKey(projectItem, step = state.step, types = []) {
+  return [projectItem?.id || "project", step || "image", ...types].join(":");
+}
+
+function studioWallLimit(key) {
+  const saved = Number(state.studioWallLimits?.[key] || 0);
+  return Math.max(studioWallPageSize, saved || studioWallPageSize);
+}
+
+function showMoreStudioWall(key) {
+  if (!key) return;
+  const next = {
+    ...(state.studioWallLimits || {}),
+    [key]: studioWallLimit(key) + studioWallPageSize
+  };
+  set({ studioWallLimits: next });
 }
 
 function videoStudioStep(sourceStep = "") {
@@ -5410,7 +5467,9 @@ function resultPreview(item, options = {}) {
   const image = imageSrc ? `<img class="result-image" src="${imageSrc}" alt="${esc(item.title)}" loading="${eagerMedia ? "eager" : "lazy"}" decoding="${imageDecoding}" fetchpriority="${imagePriority}" draggable="false" onload="${esc(ratioSync)}" onerror="${esc(imageError)}">` : "";
   const videoPreload = eagerMedia ? "metadata" : "none";
   const video = videoSrc ? `<div class="result-video-shell"><video class="result-video" src="${videoSrc}" preload="${videoPreload}" playsinline onloadedmetadata="${esc(ratioSync)}"></video><button type="button" class="result-play-button" data-video-play="${esc(item.id)}">${icon("play", 26)}<span>点击播放</span></button></div>` : "";
-  const videoTrigger = videoSrc ? `<button type="button" class="result-preview-trigger result-video-trigger" data-result-preview="${esc(item.id)}" aria-label="Open full video preview"><div class="result-video-shell"><video class="result-video" src="${videoSrc}" preload="${videoPreload}" playsinline muted onloadedmetadata="${esc(ratioSync)}"></video><span class="result-play-button">${icon("play", 26)}<span>点击查看</span></span></div></button>` : "";
+  const videoPoster = videoSrc ? `<div class="result-video-shell result-video-poster" aria-hidden="true"><span class="result-video-poster-icon">${icon("video", 30)}</span><span class="result-play-button">${icon("play", 26)}<span>点击查看</span></span></div>` : "";
+  const videoTriggerMedia = options.wall ? videoPoster : `<div class="result-video-shell"><video class="result-video" src="${videoSrc}" preload="${videoPreload}" playsinline muted onloadedmetadata="${esc(ratioSync)}"></video><span class="result-play-button">${icon("play", 26)}<span>点击查看</span></span></div>`;
+  const videoTrigger = videoSrc ? `<button type="button" class="result-preview-trigger result-video-trigger" data-result-preview="${esc(item.id)}" aria-label="Open full video preview">${videoTriggerMedia}</button>` : "";
   const text = !image && !video ? `<div class="result-text-preview">${icon("file-text", 30)}<span>Text result</span></div>` : "";
   if (options.clickable && imageSrc) return `<button type="button" class="result-preview-trigger" data-result-preview="${esc(item.id)}" aria-label="Open full image preview">${image}</button>`;
   if (options.clickable && videoSrc) return videoTrigger;
@@ -8465,11 +8524,7 @@ function bind() {
     if (el.dataset.sopModal === "true") return set({ sopTopic, modal: "sop" });
     set({ page: "sop", sopTopic, sopSearch: "", sopStepAnchor: "", modal: null });
   }));
-  document.querySelectorAll("[data-page]").forEach((el) => el.addEventListener("click", () => scheduleNavigation({ page: el.dataset.page })));
-  document.querySelectorAll("[data-step]").forEach((el) => el.addEventListener("click", () => scheduleNavigation({ step: el.dataset.step })));
-  document.querySelectorAll("[data-step-open]").forEach((el) => el.addEventListener("click", () => scheduleNavigation({ page: "project", step: el.dataset.stepOpen })));
   document.querySelectorAll("[data-affiliate-tab]").forEach((el) => el.addEventListener("click", () => set({ affiliateTab: el.dataset.affiliateTab })));
-  document.querySelectorAll("[data-project]").forEach((el) => el.addEventListener("click", () => scheduleNavigation({ projectId: el.dataset.project, page: "project", projectMenuId: null })));
   document.querySelectorAll("[data-wizard-feature]").forEach((el) => el.addEventListener("click", () => {
     const patch = { wizardFeature: el.dataset.wizardFeature };
     if (el.dataset.wizardAuto === "true") patch.wizardStep = 2;
@@ -8521,7 +8576,12 @@ function bind() {
     });
   });
   document.querySelectorAll("[data-admin-user]").forEach((el) => el.addEventListener("click", () => set({ adminUserId: el.dataset.adminUser })));
-  document.querySelectorAll("[data-admin-search]").forEach((el) => el.addEventListener("input", () => set({ adminSearch: el.value, adminUserId: null })));
+  document.querySelectorAll("[data-admin-search]").forEach((el) => el.addEventListener("input", (event) => {
+    state.adminSearch = event.target.value;
+    state.adminUserId = null;
+    clearTimeout(adminSearchTimer);
+    adminSearchTimer = setTimeout(render, 160);
+  }));
   document.querySelectorAll("[data-admin-status-filter]").forEach((el) => el.addEventListener("change", () => set({ adminStatusFilter: el.value, adminUserId: null })));
   document.querySelectorAll("[data-admin-sort]").forEach((el) => el.addEventListener("change", () => set({ adminSort: el.value })));
   document.querySelectorAll("[data-admin-filter]").forEach((el) => el.addEventListener("click", () => set({ adminStatusFilter: el.dataset.adminFilter || "all", adminUserId: null })));
@@ -8642,16 +8702,7 @@ function bind() {
   document.querySelectorAll("[data-invoice]").forEach((el) => el.addEventListener("click", () => download(`/api/export/invoice/${el.dataset.invoice}`, `${el.dataset.invoice}.txt`)));
   document.querySelectorAll("[data-result]").forEach((el) => el.addEventListener("click", () => download(`/api/export/result/${el.dataset.result}`, `pokaya-result.txt`)));
   document.querySelectorAll("[data-video-play]").forEach((el) => el.addEventListener("click", () => playResultVideo(el)));
-  document.querySelectorAll("[data-result-action]").forEach((el) => {
-    el.addEventListener("pointerdown", () => flashResultActionButton(el), { passive: true });
-    el.addEventListener("click", () => resultAction(el));
-  });
-  document.querySelectorAll("[data-result-preview]").forEach((el) => el.addEventListener("click", () => set({ modal: "previewResult", activeResultId: el.dataset.resultPreview })));
-  document.querySelectorAll("[data-result-prompt]").forEach((el) => el.addEventListener("click", () => set({ modal: "resultPrompt", activeResultId: el.dataset.resultPrompt })));
-  document.querySelectorAll("[data-image-canvas-result]").forEach((el) => el.addEventListener("click", () => set({ imageCanvasSelectedResultId: el.dataset.imageCanvasResult })));
   document.querySelectorAll("[data-image-console-prompt]").forEach((el) => el.addEventListener("input", () => updateImagePromptLocal(el.value)));
-  document.querySelectorAll("[data-image-model-option]").forEach((el) => el.addEventListener("click", () => saveProjectField("image.model", el.dataset.imageModelOption)));
-  document.querySelectorAll("[data-generation-cancel]").forEach((el) => el.addEventListener("click", () => cancelGenerationJob(el.dataset.generationCancel)));
   document.querySelectorAll("[data-result-title]").forEach((el) => {
     el.addEventListener("input", () => {
       if (state.resultTitleSavedId === el.dataset.resultTitle) set({ resultTitleSavedId: null });
