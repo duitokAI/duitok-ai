@@ -31289,6 +31289,40 @@ label {
   display: none !important;
 }
 
+/* Final override: empty Avatar/Product reference icons must be centered in the tile itself. */
+.studio-shell .image-generate-console .image-reference-thumb:not(.has-ref) {
+  position: relative !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+}
+
+.studio-shell .image-generate-console .image-reference-thumb:not(.has-ref) > span:not(.image-reference-clear) {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  margin: 0 !important;
+  border-radius: inherit !important;
+  background: transparent !important;
+  transform: none !important;
+}
+
+.studio-shell .image-generate-console .image-reference-thumb:not(.has-ref) > span:not(.image-reference-clear) svg {
+  width: 34px !important;
+  height: 34px !important;
+  display: block !important;
+  margin: 0 !important;
+}
+
+.studio-shell .image-generate-console .image-reference-thumb:not(.has-ref) > div {
+  display: none !important;
+}
+
 @media (hover: hover) and (pointer: fine) {
   .studio-shell .image-higgsfield-mode .studio-wall-actions button::after {
     display: block !important;
@@ -31924,7 +31958,7 @@ label {
   grid-template-columns: 38px minmax(0, 1fr) 22px !important;
   gap: 11px !important;
   border: 0 !important;
-  border-radius: 14px !important;
+  border-radius: 0 !important;
   padding: 7px 10px !important;
   background: transparent !important;
   box-shadow: none !important;
@@ -31932,10 +31966,8 @@ label {
 
 .studio-shell .image-higgsfield-mode .image-resolution-options button:hover,
 .studio-shell .image-higgsfield-mode .image-resolution-options button.active {
-  background: rgba(255, 255, 255, 0.78) !important;
-  box-shadow:
-    inset 0 0 0 1px rgba(111, 28, 132, 0.1),
-    0 12px 26px rgba(70, 16, 84, 0.06) !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .studio-shell .image-higgsfield-mode .image-resolution-option-icon {
@@ -31970,8 +32002,9 @@ label {
 
 .studio-shell .image-higgsfield-mode .image-resolution-option-copy em {
   flex: 0 0 auto !important;
-  border-radius: 6px !important;
-  padding: 2px 6px !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
   font-size: 10px !important;
   font-style: italic !important;
 }
