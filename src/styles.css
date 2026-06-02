@@ -37504,7 +37504,7 @@ body:has(.studio-shell .image-higgsfield-mode),
   top: 0 !important;
   right: auto !important;
   bottom: 0 !important;
-  left: 70px !important;
+  left: var(--studio-sidebar-width, 70px) !important;
   z-index: 24 !important;
   width: min(252px, calc(100vw - 118px)) !important;
   height: 100dvh !important;
@@ -37522,6 +37522,11 @@ body:has(.studio-shell .image-higgsfield-mode),
   box-shadow: 18px 0 42px rgba(111, 28, 132, 0.1) !important;
   color: #35113f !important;
   pointer-events: auto !important;
+}
+
+.studio-shell.sidebar-collapsed .agent-chat-shell.agent-page-panel .agent-chat-toolbar.agent-session-sidebar,
+.studio-shell.sidebar-collapsed .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-chat-toolbar.agent-session-sidebar {
+  left: 70px !important;
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-actions {
@@ -37724,6 +37729,10 @@ body:has(.studio-shell .image-higgsfield-mode),
   .studio-shell .agent-chat-shell.agent-page-panel .agent-chat-toolbar.agent-session-sidebar {
     width: 232px !important;
     left: 70px !important;
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel .agent-chat-toolbar.agent-session-sidebar {
+    left: var(--studio-sidebar-width, 288px) !important;
   }
 }
 
