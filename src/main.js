@@ -173,6 +173,7 @@ const state = {
   activeResultId: null,
   selectedResultIds: [],
   bulkDeleteBusy: false,
+  bulkReferenceBusy: "",
   resultTitleSavedId: null,
   imageCanvasSelectedResultId: null,
   editImageBusy: false,
@@ -4492,17 +4493,21 @@ function studioBulkSelectionBar() {
   if (!items.length) return "";
   const downloadableCount = items.filter((item) => item.imageUrl || item.videoUrl).length;
   const selectedLabel = `${items.length} selected`;
+  const busyKind = state.bulkReferenceBusy || "";
+  const savingAvatar = busyKind === "avatar";
+  const savingProduct = busyKind === "product";
+  const savingReference = Boolean(busyKind);
   return `<div class="studio-bulk-selection-bar" role="region" aria-label="Bulk selected results">
     <div class="studio-bulk-selection-count">
       <span class="studio-bulk-selection-icon">${icon("panel-left", 21)}</span>
       <b>${esc(selectedLabel)}</b>
     </div>
     <div class="studio-bulk-selection-actions">
-      <button type="button" data-bulk-result-action="download" ${downloadableCount ? "" : "disabled"}>${icon("download", 19)} <span>Download</span></button>
-      <button type="button" data-bulk-result-action="delete" class="danger">${icon("trash-2", 19)} <span>Delete</span></button>
-      <button type="button" data-bulk-result-action="save-avatar">${icon("user-round-plus", 19)} <span>Save as Avatar</span></button>
-      <button type="button" data-bulk-result-action="save-product">${icon("package-plus", 19)} <span>Save as Product</span></button>
-      <button type="button" data-bulk-result-action="clear" class="icon-only-bulk ghost" aria-label="Clear selected results">${icon("x", 26)}</button>
+      <button type="button" data-bulk-result-action="download" ${downloadableCount && !savingReference ? "" : "disabled"}>${icon("download", 19)} <span>Download</span></button>
+      <button type="button" data-bulk-result-action="delete" class="danger" ${savingReference ? "disabled" : ""}>${icon("trash-2", 19)} <span>Delete</span></button>
+      <button type="button" data-bulk-result-action="save-avatar" ${savingReference ? "disabled" : ""}>${icon(savingAvatar ? "loader-circle" : "user-round-plus", 19)} <span>${savingAvatar ? "Saving" : "Save as Avatar"}</span></button>
+      <button type="button" data-bulk-result-action="save-product" ${savingReference ? "disabled" : ""}>${icon(savingProduct ? "loader-circle" : "package-plus", 19)} <span>${savingProduct ? "Saving" : "Save as Product"}</span></button>
+      <button type="button" data-bulk-result-action="clear" class="icon-only-bulk ghost" aria-label="Clear selected results" ${savingReference ? "disabled" : ""}>${icon("x", 26)}</button>
     </div>
   </div>`;
 }
@@ -11511,7 +11516,7 @@ function toggleResultSelection(id) {
 
 function clearResultSelection() {
   if (!isBulkSelectingResults()) return;
-  set({ selectedResultIds: [], bulkDeleteBusy: false });
+  set({ selectedResultIds: [], bulkDeleteBusy: false, bulkReferenceBusy: "" });
 }
 
 async function bulkResultAction(actionName) {
@@ -11545,22 +11550,42 @@ async function bulkSaveSelectedResultsAsReference(kind = "avatar") {
   const items = selectedResults().filter((item) => item.id && (item.imageUrl || item.videoUrl));
   if (!items.length) return notify("没有可保存的生成结果。");
   const label = kind === "avatar" ? "Avatar" : "Product";
+  const selectedIds = new Set(items.map((item) => item.id));
+  set({ bulkReferenceBusy: kind });
   notify(`正在保存 ${items.length} 个 ${label} reference。`);
   let nextDb = state.db;
   let failed = 0;
-  for (const item of items) {
-    try {
-      nextDb = await api(`/results/${item.id}/save-reference`, {
-        method: "POST",
-        body: JSON.stringify({ kind })
-      });
-    } catch {
-      failed += 1;
+  try {
+    for (const item of items) {
+      try {
+        nextDb = await api(`/results/${item.id}/save-reference`, {
+          method: "POST",
+          body: JSON.stringify({ kind })
+        });
+      } catch {
+        failed += 1;
+      }
     }
+    const saved = (nextDb.attachments || []).find((attachment) => attachment.kind === kind && selectedIds.has(attachment.sourceResultId));
+    const field = kind === "product" ? "image.productAttachmentId" : "image.avatarAttachmentId";
+    if (saved?.id && state.projectId) {
+      nextDb = dbWithProjectField(nextDb, state.projectId, field, saved.id);
+      try {
+        nextDb = await api(`/projects/${state.projectId}/field`, {
+          method: "PATCH",
+          body: JSON.stringify({ field, value: saved.id })
+        });
+      } catch (error) {
+        notify(error.message || t("toastSaveFailed"));
+      }
+    }
+    set({ db: nextDb, selectedResultIds: [], bulkReferenceBusy: "" });
+    if (failed) notify(`已保存 ${items.length - failed} 个，${failed} 个失败。`);
+    else notify(`已保存 ${items.length} 个 ${label} reference。`);
+  } catch (error) {
+    set({ bulkReferenceBusy: "" });
+    notify(error.message || t("toastSaveFailed"));
   }
-  set({ db: nextDb });
-  if (failed) notify(`已保存 ${items.length - failed} 个，${failed} 个失败。`);
-  else notify(`已保存 ${items.length} 个 ${label} reference。`);
 }
 
 function setResultActionBusy(button, busy) {
