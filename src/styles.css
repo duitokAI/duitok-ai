@@ -33668,3 +33668,138 @@ label {
   font-size: 17px !important;
   transform: translateY(2px) !important;
 }
+
+/* Bulk result mode replaces the composer with a compact action bar. */
+.studio-shell .image-canvas-studio.is-bulk-selecting-results {
+  padding-bottom: 112px !important;
+}
+
+.studio-shell .image-canvas-studio.is-bulk-selecting-results .studio-result-wall {
+  padding-bottom: 0 !important;
+}
+
+.studio-shell .image-canvas-studio.is-bulk-selecting-results .studio-bulk-selection-bar {
+  position: fixed !important;
+  right: max(24px, env(safe-area-inset-right)) !important;
+  bottom: max(18px, env(safe-area-inset-bottom)) !important;
+  left: calc(var(--studio-sidebar-width, 88px) + 24px) !important;
+  z-index: 6400 !important;
+  width: auto !important;
+  min-height: 82px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  margin: 0 !important;
+  padding: 10px 14px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 28px !important;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(255, 255, 255, 0.08), transparent 30%),
+    linear-gradient(135deg, rgba(36, 31, 37, 0.98), rgba(38, 21, 34, 0.98)) !important;
+  box-shadow:
+    0 24px 58px rgba(20, 7, 26, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+  backdrop-filter: blur(18px) !important;
+}
+
+.studio-shell .image-canvas-studio.is-bulk-selecting-results .studio-bulk-selection-count {
+  min-width: 206px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  color: #ffffff !important;
+}
+
+.studio-shell .image-canvas-studio.is-bulk-selecting-results .studio-bulk-selection-icon {
+  width: 34px !important;
+  height: 34px !important;
+  display: grid !important;
+  place-items: center !important;
+  color: #ffffff !important;
+}
+
+.studio-shell .image-canvas-studio.is-bulk-selecting-results .studio-bulk-selection-count b {
+  color: #ffffff !important;
+  font-size: clamp(19px, 1.55vw, 28px) !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .image-canvas-studio.is-bulk-selecting-results .studio-bulk-selection-actions {
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+}
+
+.studio-shell .image-canvas-studio.is-bulk-selecting-results .studio-bulk-selection-actions button {
+  min-width: 0 !important;
+  min-height: 62px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  flex: 0 0 auto !important;
+  padding: 0 26px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+  color: #ffffff !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+  font-size: clamp(16px, 1.35vw, 25px) !important;
+  font-weight: 760 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .image-canvas-studio.is-bulk-selecting-results .studio-bulk-selection-actions button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.09) !important;
+}
+
+.studio-shell .image-canvas-studio.is-bulk-selecting-results .studio-bulk-selection-actions button.icon-only-bulk {
+  width: 76px !important;
+  padding: 0 !important;
+}
+
+.studio-shell .image-canvas-studio.is-bulk-selecting-results .studio-bulk-selection-actions button.danger,
+.studio-shell .image-canvas-studio.is-bulk-selecting-results .studio-bulk-selection-actions button.ghost {
+  background: rgba(255, 255, 255, 0.045) !important;
+  color: #ffffff !important;
+}
+
+.studio-shell .image-canvas-studio.is-bulk-selecting-results .studio-bulk-selection-actions button:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.45 !important;
+}
+
+@media (max-width: 860px) {
+  .studio-shell .image-canvas-studio.is-bulk-selecting-results {
+    padding-bottom: 136px !important;
+  }
+
+  .studio-shell .image-canvas-studio.is-bulk-selecting-results .studio-bulk-selection-bar {
+    right: 12px !important;
+    bottom: max(12px, env(safe-area-inset-bottom)) !important;
+    left: 12px !important;
+    min-height: 74px !important;
+    border-radius: 24px !important;
+  }
+
+  .studio-shell .image-canvas-studio.is-bulk-selecting-results .studio-bulk-selection-count {
+    min-width: 138px !important;
+  }
+
+  .studio-shell .image-canvas-studio.is-bulk-selecting-results .studio-bulk-selection-actions button {
+    min-height: 54px !important;
+    padding: 0 18px !important;
+  }
+
+  .studio-shell .image-canvas-studio.is-bulk-selecting-results .studio-bulk-selection-actions button.icon-only-bulk {
+    width: 58px !important;
+  }
+}
