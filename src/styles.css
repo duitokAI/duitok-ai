@@ -32264,13 +32264,13 @@ label {
 }
 
 .generation-credit-refund-note {
-  width: min(100%, 190px) !important;
+  width: auto !important;
   display: grid !important;
-  gap: 2px !important;
+  gap: 1px !important;
   margin: 0 !important;
-  padding: 7px 9px !important;
+  padding: 7px 12px !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  border-radius: 11px !important;
+  border-radius: 999px !important;
   background: rgba(255, 255, 255, 0.1) !important;
   color: rgba(255, 255, 255, 0.88) !important;
   text-align: center !important;
@@ -32485,21 +32485,22 @@ label {
 /* Absolute last pass: center empty Avatar/Product icons after every console override. */
 .studio-shell .image-generate-console .image-reference-thumb.is-empty-ref {
   position: relative !important;
-  display: block !important;
+  display: grid !important;
+  place-items: center !important;
   padding: 0 !important;
 }
 
 .studio-shell .image-generate-console .image-reference-thumb.is-empty-ref .image-reference-empty-icon,
 .studio-shell .image-generate-console .image-reference-thumb.is-empty-ref > span:not(.image-reference-clear) {
-  position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
   min-width: 0 !important;
   min-height: 0 !important;
-  display: block !important;
+  display: grid !important;
+  place-items: center !important;
   margin: 0 !important;
-  border-radius: inherit !important;
+  border-radius: 0 !important;
   background: transparent !important;
   transform: none !important;
   pointer-events: none !important;
@@ -32507,15 +32508,13 @@ label {
 
 .studio-shell .image-generate-console .image-reference-thumb.is-empty-ref .image-reference-empty-icon svg,
 .studio-shell .image-generate-console .image-reference-thumb.is-empty-ref > span:not(.image-reference-clear) svg {
-  position: absolute !important;
-  top: 50% !important;
-  left: 50% !important;
+  position: static !important;
   width: 34px !important;
   height: 34px !important;
   margin: 0 !important;
   color: #b78ad8 !important;
   stroke: currentColor !important;
-  transform: translate(-50%, -50%) !important;
+  transform: none !important;
 }
 
 .studio-shell .image-generate-console .image-reference-thumb.is-empty-ref > div {
