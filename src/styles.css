@@ -36573,3 +36573,40 @@ body:has(.studio-shell .image-higgsfield-mode),
 .studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option[aria-selected="true"] .image-resolution-option-check {
   opacity: 1 !important;
 }
+
+/* Keep the selected quality check pinned to the row's right edge. */
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option {
+  position: relative !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  padding-right: 38px !important;
+}
+
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option .image-resolution-option-check,
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option.active .image-resolution-option-check,
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option[aria-selected="true"] .image-resolution-option-check {
+  position: absolute !important;
+  right: 4px !important;
+  top: 50% !important;
+  grid-column: auto !important;
+  grid-row: auto !important;
+  width: 26px !important;
+  height: 26px !important;
+  min-width: 26px !important;
+  min-height: 26px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: translateY(-50%) !important;
+}
+
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option .image-resolution-option-check svg {
+  position: static !important;
+  grid-column: auto !important;
+  width: 18px !important;
+  height: 18px !important;
+  display: block !important;
+  color: #9c65cf !important;
+}
