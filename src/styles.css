@@ -39144,3 +39144,43 @@ body:has(.studio-shell .video-prompt-extractor-page),
     transform: none !important;
   }
 }
+
+
+/* Download action feedback: show a compact spinner instead of opening an export modal. */
+.studio-shell .studio-wall-actions button[data-result-action="download"].is-working svg,
+.studio-shell .agent-generation-result-actions button[data-result-action="download"].is-working svg,
+.studio-shell .result-actions button[data-result-action="download"].is-working svg,
+.studio-shell .result-detail-file-button[data-result-action="download"].is-working svg {
+  opacity: 0 !important;
+  animation: none !important;
+}
+
+.studio-shell .studio-wall-actions button[data-result-action="download"].is-working::before,
+.studio-shell .agent-generation-result-actions button[data-result-action="download"].is-working::before,
+.studio-shell .result-actions button[data-result-action="download"].is-working::before,
+.studio-shell .result-detail-file-button[data-result-action="download"].is-working::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border: 2px solid rgba(255, 255, 255, 0.26);
+  border-top-color: rgba(255, 255, 255, 0.92);
+  border-radius: 999px;
+  animation: download-action-spin 680ms linear infinite;
+  pointer-events: none;
+}
+
+.studio-shell .result-actions button[data-result-action="download"].is-working::before,
+.studio-shell .result-detail-file-button[data-result-action="download"].is-working::before {
+  border-color: rgba(122, 87, 136, 0.22);
+  border-top-color: rgba(122, 87, 136, 0.92);
+}
+
+@keyframes download-action-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

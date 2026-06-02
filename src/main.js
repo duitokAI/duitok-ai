@@ -11952,7 +11952,6 @@ function downloadDirect(url, filename, options = {}) {
   document.body.appendChild(link);
   link.click();
   link.remove();
-  if (!options.keepModal) setTimeout(() => set({ modal: "export" }), 0);
 }
 
 function playResultVideo(button) {
@@ -12085,8 +12084,10 @@ async function resultAction(button) {
       const kind = button.dataset.resultKind || "text";
       const filename = resultDownloadFilename(item, kind);
       const path = kind === "text" ? `/api/export/result/${id}` : `/api/media/result/${id}/${kind}`;
-      if (kind !== "text") return downloadDirect(path, filename);
-      return download(path, filename);
+      if (kind !== "text") downloadDirect(path, filename, { keepModal: true });
+      else await download(path, filename, { keepModal: true });
+      await wait(520);
+      return;
     }
     if (actionName === "delete") {
       return set({ modal: "deleteResult", activeResultId: id });
