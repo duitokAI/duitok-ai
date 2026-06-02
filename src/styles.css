@@ -40520,3 +40520,52 @@ body:has(.studio-shell .video-prompt-extractor-page),
     padding-top: clamp(64px, 6vh, 88px) !important;
   }
 }
+
+/* Final empty-reference icon center lock: this applies in every console state,
+   including compact hover states, so Avatar/Product symbols cannot drift. */
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-references .image-reference-thumb.is-empty-ref {
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  grid-template-rows: 1fr !important;
+  place-items: center !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-references .image-reference-thumb.is-empty-ref > div,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-references .image-reference-thumb.is-empty-ref b,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-references .image-reference-thumb.is-empty-ref small {
+  display: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-references .image-reference-thumb.is-empty-ref .image-reference-empty-icon,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-references .image-reference-thumb.is-empty-ref:hover .image-reference-empty-icon,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-references .image-reference-thumb.is-empty-ref:focus-visible .image-reference-empty-icon {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+  z-index: 1 !important;
+  width: 42px !important;
+  min-width: 42px !important;
+  max-width: 42px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  max-height: 42px !important;
+  display: grid !important;
+  place-items: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 0 !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-references .image-reference-thumb.is-empty-ref .image-reference-empty-icon svg {
+  position: static !important;
+  display: block !important;
+  width: 38px !important;
+  height: 38px !important;
+  margin: 0 !important;
+  transform: none !important;
+}
