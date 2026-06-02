@@ -31706,6 +31706,88 @@ label {
   transform: none !important;
 }
 
+.studio-shell .image-aspect-ratio-menu > .image-aspect-ratio-options {
+  display: none !important;
+}
+
+.floating-aspect-ratio-options {
+  width: min(188px, calc(100vw - 24px)) !important;
+  min-width: min(188px, calc(100vw - 24px)) !important;
+  display: grid !important;
+  gap: 2px !important;
+  padding: 16px 12px 14px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 22px !important;
+  background: #171717 !important;
+  box-shadow:
+    0 20px 46px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  max-height: min(72dvh, 560px) !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+}
+
+.floating-aspect-ratio-options .image-aspect-ratio-menu-title {
+  padding: 0 14px 10px !important;
+  color: rgba(255, 255, 255, 0.58) !important;
+  font-size: 22px !important;
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+}
+
+.floating-aspect-ratio-options button {
+  width: 100% !important;
+  min-height: 61px !important;
+  display: grid !important;
+  grid-template-columns: 52px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 14px !important;
+  border: 0 !important;
+  border-radius: 11px !important;
+  padding: 0 12px !important;
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.94) !important;
+  font: inherit !important;
+  text-align: left !important;
+  cursor: pointer !important;
+}
+
+.floating-aspect-ratio-options button.active {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+}
+
+.floating-aspect-ratio-options button:not(.active):hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.floating-aspect-ratio-options .aspect-ratio-glyph {
+  width: var(--ratio-icon-width, 13px) !important;
+  height: var(--ratio-icon-height, 22px) !important;
+  justify-self: center !important;
+  border: 2px solid currentColor !important;
+  border-radius: 4px !important;
+  color: currentColor !important;
+  box-sizing: border-box !important;
+}
+
+.floating-aspect-ratio-options .image-aspect-ratio-option-copy {
+  min-width: 0 !important;
+  display: block !important;
+}
+
+.floating-aspect-ratio-options .image-aspect-ratio-option-copy b {
+  color: currentColor !important;
+  font-size: 26px !important;
+  font-weight: 500 !important;
+  line-height: 1 !important;
+}
+
+.floating-aspect-ratio-options .image-aspect-ratio-option-copy small,
+.floating-aspect-ratio-options .image-aspect-ratio-option-check {
+  display: none !important;
+}
+
 @media (max-width: 520px) {
   .studio-shell .image-aspect-ratio-options {
     width: calc(100vw - 24px);
