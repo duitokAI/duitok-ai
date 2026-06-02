@@ -4595,15 +4595,19 @@ function studioResultWall(p, meta = {}) {
   const visibleItems = items.slice(0, limit);
   const unloadedCount = Math.max(0, Number(p.resultCount || 0) - (p.results || []).length);
   const hiddenCount = Math.max(0, items.length - visibleItems.length) + unloadedCount;
+  const failedJobs = pending.filter((job) => job.status === "failed");
+  const activeJobs = pending.filter((job) => job.status !== "failed");
+  const failedCards = failedJobs.map(studioPendingWallCard);
   const cards = [
-    ...pending.map(studioPendingWallCard),
+    ...activeJobs.map(studioPendingWallCard),
     ...visibleItems.map((item, index) => studioWallCard(item, index))
   ];
-  if (!cards.length) return "";
+  if (!failedCards.length && !cards.length) return "";
   return `<section class="studio-result-wall">
-    <div class="studio-wall-grid">
+    ${failedCards.length ? `<div class="studio-wall-failed-grid" aria-label="Failed generations">${failedCards.join("")}</div>` : ""}
+    ${cards.length ? `<div class="studio-wall-grid">
       ${cards.join("")}
-    </div>
+    </div>` : ""}
     ${hiddenCount ? `<button type="button" class="studio-wall-more" data-studio-wall-more="${esc(wallKey)}">${icon("chevrons-down", 18)} Load ${Math.min(studioWallPageSize, hiddenCount)} more · ${hiddenCount} hidden</button>` : ""}
     ${studioBulkSelectionBar()}
   </section>`;

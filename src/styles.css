@@ -39624,6 +39624,111 @@ body:has(.studio-shell .video-prompt-extractor-page),
   }
 }
 
+/* Failed generations use their own readable grid, independent from the media
+   wall zoom column. */
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-failed-grid,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-failed-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)) !important;
+  gap: 12px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 0 12px !important;
+  padding: 0 !important;
+  align-items: start !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-failed-grid > .studio-wall-pending.failed,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-failed-grid > .studio-wall-pending.failed {
+  width: 100% !important;
+  min-width: 0 !important;
+  aspect-ratio: auto !important;
+  min-height: 188px !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-failed-grid .studio-wall-pending.failed > .studio-wall-pending-controls,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-failed-grid .studio-wall-pending.failed > .studio-wall-pending-controls {
+  position: relative !important;
+  inset: auto !important;
+  min-height: 188px !important;
+  height: 100% !important;
+  padding: 14px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-failed-grid .studio-wall-pending.failed .studio-wall-failed-center,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-failed-grid .studio-wall-pending.failed .studio-wall-failed-center {
+  position: relative !important;
+  inset: auto !important;
+  left: auto !important;
+  top: auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 160px !important;
+  display: grid !important;
+  grid-template-rows: auto auto auto auto auto !important;
+  place-items: center !important;
+  gap: 8px !important;
+  transform: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-failed-grid .studio-wall-pending.failed b,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-failed-grid .studio-wall-pending.failed b {
+  width: 100% !important;
+  overflow: hidden !important;
+  font-size: clamp(17px, 1.45vw, 22px) !important;
+  line-height: 1.08 !important;
+  text-align: center !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-failed-grid .studio-wall-pending.failed small,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-failed-grid .studio-wall-pending.failed small {
+  width: 100% !important;
+  display: -webkit-box !important;
+  overflow: hidden !important;
+  font-size: clamp(12px, 1.1vw, 14px) !important;
+  line-height: 1.18 !important;
+  text-align: center !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-failed-grid .studio-wall-pending.failed .generation-credit-refund-note,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-failed-grid .studio-wall-pending.failed .generation-credit-refund-note {
+  width: min(100%, 210px) !important;
+  min-width: 0 !important;
+  padding: 8px 12px !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-failed-grid .studio-wall-pending.failed .studio-wall-failed-actions,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-failed-grid .studio-wall-pending.failed .studio-wall-failed-actions {
+  width: min(100%, 230px) !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-failed-grid .studio-wall-pending.failed .studio-wall-failed-actions button,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-failed-grid .studio-wall-pending.failed .studio-wall-failed-actions button {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 0 10px !important;
+  overflow: hidden !important;
+}
+
+@media (max-width: 760px) {
+  .studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-failed-grid,
+  .studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-failed-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
 /* Compact composer generate alignment: keep the right action group optically
    centered inside the collapsed bar instead of hugging the right edge. */
 @media (min-width: 761px) {
