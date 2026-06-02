@@ -39770,3 +39770,23 @@ body:has(.studio-shell .video-prompt-extractor-page),
   width: clamp(13px, 7cqw, 18px) !important;
   height: clamp(13px, 7cqw, 18px) !important;
 }
+
+/* Failed result optical centering: keep the fixed message group in the visual
+   middle of the card, with a slight upward bias to account for button weight. */
+.studio-shell .image-higgsfield-mode .studio-wall-pending.failed .studio-wall-failed-center,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending.failed .studio-wall-failed-center {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  width: min(92%, 320px) !important;
+  max-width: min(92%, 320px) !important;
+  transform: translate(-50%, -54%) !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-pending.failed > .studio-wall-pending-controls,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending.failed > .studio-wall-pending-controls {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  padding: 0 !important;
+}
