@@ -40079,3 +40079,19 @@ body:has(.studio-shell .video-prompt-extractor-page),
   width: 100% !important;
   max-width: 188px !important;
 }
+
+/* Result wall zoom control lock: keep the preview-size control visible when the
+   sidebar is expanded. It belongs to the canvas edge, not the tab row. */
+.studio-shell .image-higgsfield-mode > .studio-wall-zoom-control {
+  position: absolute !important;
+  top: calc(var(--project-fixed-tabs-height, 58px) + 12px) !important;
+  right: clamp(18px, 2.2vw, 42px) !important;
+  z-index: 80 !important;
+  width: clamp(132px, 12vw, 210px) !important;
+  margin: 0 !important;
+  pointer-events: auto !important;
+}
+
+.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .studio-wall-zoom-control {
+  right: clamp(16px, 1.8vw, 32px) !important;
+}
