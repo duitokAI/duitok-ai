@@ -78,6 +78,8 @@ const persistentThumbnailWidths = [360, 640, 960];
 const publicStateResultLimit = Number(process.env.PUBLIC_STATE_RESULT_LIMIT || 160);
 const publicStateJobLimit = Number(process.env.PUBLIC_STATE_JOB_LIMIT || 200);
 const publicStateRowLimit = Number(process.env.PUBLIC_STATE_ROW_LIMIT || 200);
+const creditsPerUsd = Number(process.env.CREDITS_PER_USD || 1000);
+const usdPerRm = Number(process.env.USD_PER_RM || 0.21);
 const publicStateAttachmentLimit = Number(process.env.PUBLIC_STATE_ATTACHMENT_LIMIT || 240);
 const projectGenerationStateResultLimit = Number(process.env.PROJECT_GENERATION_STATE_RESULT_LIMIT || 260);
 const promptAdvancedCacheTtlMs = 10 * 60 * 1000;
@@ -1313,6 +1315,23 @@ function imageCreditForModel(model = "") {
   return 0.15;
 }
 
+function creditsForUsd(amount) {
+  return roundCredits(Number(amount || 0) * creditsPerUsd);
+}
+
+function creditsFromProviderCost(cost = {}, fallbackCredits = 0.1) {
+  const costUsd = Number(cost.costUsd || 0);
+  if (Number.isFinite(costUsd) && costUsd > 0) return creditsForUsd(costUsd);
+  const costRm = Number(cost.costRm || 0);
+  if (Number.isFinite(costRm) && costRm > 0) return creditsForUsd(costRm * usdPerRm);
+  return roundCredits(fallbackCredits);
+}
+
+function formatCreditValue(value) {
+  const credits = roundCredits(value);
+  return Number.isInteger(credits) ? String(credits) : String(credits).replace(/0+$/, "").replace(/\.$/, "");
+}
+
 function requestedMediaModelFromText(content = "") {
   const text = String(content || "");
   if (/\bveo\b|veo\s*3(?:\.1)?|谷歌\s*veo/i.test(text)) return "Veo 3.1";
@@ -1330,9 +1349,10 @@ function requestedMediaModelFromText(content = "") {
 }
 
 function generationModelOptionsText(kind = "auto") {
-  if (kind === "image") return "GPT Image 2（0.15 credit/张）、Seedream 5.0 Lite（0.15 credit/张）、Seedream 4.5（0.15 credit/张）、Nano Banana Pro（0.20 credit/张）、Nano Banana 2（0.15 credit/张）或 Grok Imagine（0.15 credit/张）";
-  if (kind === "video") return "Veo 3.1（0.40 credit/8秒）、Seedance 2.0（0.50 credit/5秒）、Sora 2（0.48 credit/8秒）";
-  return "图片：GPT Image 2（0.15）/ Seedream 5.0 Lite（0.15）/ Seedream 4.5（0.15）/ Nano Banana Pro（0.20）/ Nano Banana 2（0.15）/ Grok Imagine（0.15）；视频：Veo 3.1（0.40）/ Seedance 2.0（0.50）/ Sora 2（0.48）";
+  const estimate = (model) => formatCreditValue(creditChargeFor({ image: { model } }, "generate-image"));
+  if (kind === "image") return `GPT Image 2（${estimate("GPT Image 2")} credits/张）、Seedream 5.0 Lite（${estimate("Seedream 5.0 Lite")} credits/张）、Seedream 4.5（${estimate("Seedream 4.5")} credits/张）、Nano Banana Pro（${estimate("Nano Banana Pro")} credits/张）、Nano Banana 2（${estimate("Nano Banana 2")} credits/张）或 Grok Imagine（${estimate("Grok Imagine")} credits/张）`;
+  if (kind === "video") return `Veo 3.1（${estimate("Veo 3.1")} credits/8秒）、Seedance 2.0（${estimate("Seedance 2.0")} credits/5秒）、Sora 2（${estimate("Sora 2")} credits/8秒）`;
+  return `图片：GPT Image 2（${estimate("GPT Image 2")}）/ Seedream 5.0 Lite（${estimate("Seedream 5.0 Lite")}）/ Seedream 4.5（${estimate("Seedream 4.5")}）/ Nano Banana Pro（${estimate("Nano Banana Pro")}）/ Nano Banana 2（${estimate("Nano Banana 2")}）/ Grok Imagine（${estimate("Grok Imagine")}）；视频：Veo 3.1（${estimate("Veo 3.1")}）/ Seedance 2.0（${estimate("Seedance 2.0")}）/ Sora 2（${estimate("Sora 2")}）`;
 }
 
 function redactProviderText(value, fallback = "") {
@@ -1809,16 +1829,19 @@ function imageBatchCount(value) {
   return Math.min(4, Math.max(1, count));
 }
 
-function creditChargeFor(project, action) {
+function creditChargeFor(project, action, db = null) {
   if (action !== "generate-image") return 0.1;
   const model = internalMediaModel(project.image?.model);
-  if (!isVideoMediaModel(model)) return imageCreditForModel(model);
-  if (model === "Seedance 2.0") return roundCredits(videoDurationFor(project, model) * 0.1);
-  if (model === "Veo 3.1") return 0.4;
-  if (model === "Sora 2") return roundCredits(videoDurationFor(project, model) * 0.06);
-  if (model === "Gemini Omni") return 1.3;
-  if (model === "Grok Imagine Video") return roundCredits(videoDurationFor(project, model) * 0.06);
-  return 0.1;
+  const costs = { ...defaultModelCosts(), ...(db?.modelCosts || {}) };
+  const cost = costs[model] || {};
+  if (!isVideoMediaModel(model)) return creditsFromProviderCost(cost, imageCreditForModel(model));
+  const duration = videoDurationFor(project, model);
+  if (model === "Seedance 2.0") return creditsFromProviderCost(cost, roundCredits(duration * 0.1));
+  if (model === "Veo 3.1") return creditsFromProviderCost(cost, 0.4);
+  if (model === "Sora 2") return creditsFromProviderCost(cost, roundCredits(duration * 0.06));
+  if (model === "Gemini Omni") return creditsFromProviderCost(cost, 1.3);
+  if (model === "Grok Imagine Video") return creditsFromProviderCost(cost, roundCredits(duration * 0.06));
+  return creditsFromProviderCost(cost, 0.1);
 }
 
 function assertGenerationAccess(db, user, requiredCredits = 0.1, requestedCount = 1) {
@@ -2883,7 +2906,7 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
   return mutateDb(async (currentDb) => {
     const project = findProject(currentDb, projectId, user);
     const cost = generationCostFor(currentDb, project, action, generated);
-    const creditsToCharge = creditChargeFor(project, action);
+    const creditsToCharge = creditChargeFor(project, action, currentDb);
     const resultId = crypto.randomUUID();
     const jobId = crypto.randomUUID();
     const assetType = generated.videoUrl ? "video" : generated.imageUrl ? "image" : "text";
@@ -2920,6 +2943,7 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
       resolution: project.image?.resolution || imageResolutionFromProject(project),
       aspectRatio: project.image?.aspectRatio || imageAspectRatioFromProject(project),
       costRm: cost.costRm,
+      costUsd: cost.costUsd,
       createdAt: new Date().toISOString()
     };
     project.results.push(result);
@@ -2965,6 +2989,7 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
       status: "succeeded",
       taskId: generated.taskId,
       costRm: job.costRm,
+      costUsd: job.costUsd,
       createdAt: result.createdAt
     });
     currentDb.usage.unshift(usage(publicTitle, creditsToCharge, project.userId));
@@ -3036,7 +3061,7 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
       project.image ||= {};
       project.image.prompt = promptValue;
     }
-    const creditsToCharge = creditChargeFor(project, action);
+    const creditsToCharge = creditChargeFor(project, action, currentDb);
     assertGenerationAccess(currentDb, user, roundCredits(creditsToCharge * batchCount), batchCount);
     const cost = generationCostFor(currentDb, project, action, { provider: providerForMediaModel(project.image?.model) });
     const aspectRatio = action === "generate-image" ? imageAspectRatioFromProject(project) : project.original?.aspectRatio || project.image?.aspectRatio || "9:16";
@@ -3162,7 +3187,7 @@ async function completeQueuedGeneration(jobId, generated) {
     if (!project) throw Object.assign(new Error("Project not found"), { status: 404 });
     const owner = currentDb.users.find((item) => item.id === project.userId);
     const cost = generationCostFor(currentDb, project, job.action, generated);
-    const creditsToCharge = creditChargeFor(project, job.action);
+    const creditsToCharge = creditChargeFor(project, job.action, currentDb);
     const completedAt = new Date().toISOString();
     const resultId = crypto.randomUUID();
     const assetType = generated.videoUrl ? "video" : generated.imageUrl ? "image" : "text";
@@ -3199,6 +3224,7 @@ async function completeQueuedGeneration(jobId, generated) {
       resolution: project.image?.resolution || imageResolutionFromProject(project),
       aspectRatio: project.image?.aspectRatio || imageAspectRatioFromProject(project),
       costRm: cost.costRm,
+      costUsd: cost.costUsd,
       createdAt: completedAt
     };
     project.results.push(result);
@@ -3240,6 +3266,7 @@ async function completeQueuedGeneration(jobId, generated) {
       status: "succeeded",
       taskId: generated.taskId,
       costRm: job.costRm,
+      costUsd: job.costUsd,
       createdAt: completedAt
     });
     currentDb.usage.unshift(usage(publicTitle, creditsToCharge, project.userId));
@@ -5487,7 +5514,7 @@ function requireChipConfig() {
   return { token, brandId };
 }
 
-async function createChipPurchase({ orderId, amount, email, fullName, productName, credits = amount, metadata = {}, successPath = "/" }) {
+async function createChipPurchase({ orderId, amount, email, fullName, productName, credits = amount, currency = "MYR", metadata = {}, successPath = "/" }) {
   const { token, brandId } = requireChipConfig();
   const response = await fetch("https://gate.chip-in.asia/api/v1/purchases/", {
     method: "POST",
@@ -5502,14 +5529,15 @@ async function createChipPurchase({ orderId, amount, email, fullName, productNam
       },
       purchase: {
         products: [{
-          name: productName || `Pokaya AI ${amount} credits`,
-          price: amount * 100,
+          name: productName || `Pokaya AI ${credits} credits`,
+          price: Math.round(amount * 100),
           quantity: 1
         }],
-        currency: "MYR",
+        currency,
         metadata: {
           order_id: orderId,
           credits,
+          currency,
           ...metadata
         }
       },
@@ -5578,10 +5606,11 @@ async function markChipPurchasePaid(db, payload) {
     db.usage.unshift(usage(`Activated ${user.billing.plan}`, 0, user.id));
   }
   if (payment.credits) user.billing.credits += payment.credits;
-  user.billing.invoices.unshift({ id: `INV-${Date.now()}`, amount: payment.amount, createdAt: new Date().toISOString() });
+  const paymentCurrency = payment.currency || (payment.kind === "topup" ? "USD" : "MYR");
+  user.billing.invoices.unshift({ id: `INV-${Date.now()}`, amount: payment.amount, currency: paymentCurrency, createdAt: new Date().toISOString() });
   if (payment.credits) {
     db.usage.unshift(usage(`Top up ${payment.credits} credits`, 0, user.id));
-    db.creditLedger.unshift(creditEntry(user.id, "credit", payment.credits, `Top up RM${payment.amount}`, {
+    db.creditLedger.unshift(creditEntry(user.id, "credit", payment.credits, `Top up ${paymentCurrency} ${payment.amount}`, {
       paymentId: payment.id,
       orderId: payment.orderId,
       chipPurchaseId: payment.chipPurchaseId
@@ -5596,6 +5625,8 @@ function publicPaymentStatus(payment) {
     status: payment.status,
     kind: payment.kind || "topup",
     amount: payment.amount,
+    currency: payment.currency || (payment.kind === "topup" ? "USD" : "MYR"),
+    credits: payment.credits || 0,
     plan: payment.plan || "",
     createdAt: payment.createdAt,
     paidAt: payment.paidAt || null,
@@ -6365,7 +6396,7 @@ app.post("/api/agent", async (req, res, next) => {
           "Pokaya AI is the platform, not a generation model. Never present Pokaya AI as a model option.",
           "User-facing model names are allowed and should be shown when relevant: GPT Image 2, Seedream 5.0 Lite, Seedream 4.5, Nano Banana Pro, Nano Banana 2, and Grok Imagine for images; Veo 3.1, Seedance 2.0, and Sora 2 for videos. Do not mention provider names, base URLs, routes, keys, or infrastructure.",
           "User-facing model names are allowed and should be shown when relevant: GPT Image 2, Seedream 5.0 Lite, Seedream 4.5, Nano Banana Pro, Nano Banana 2, and Grok Imagine for images; Veo 3.1, Seedance 2.0, and Sora 2 for videos. Do not mention provider names, base URLs, routes, keys, or infrastructure.",
-          "Before generating a video, make sure the user has selected a video model. If no model is selected or the request is ambiguous, ask one short question with the video model choices and estimated credits instead of generating. Use these user-facing estimates: Veo 3.1 = 0.40 credit/8s, Seedance 2.0 = 0.50 credit/5s, Sora 2 = 0.48 credit/8s.",
+          "Before generating a video, make sure the user has selected a video model. If no model is selected or the request is ambiguous, ask one short question with the video model choices and estimated credits instead of generating. Credits are USD-denominated: USD 1 = 1000 credits. Use backend estimates from the selected model instead of old RM-based credit values.",
           "If the user already says a model name such as Veo, Seedance, or Sora, save that model to the current content settings before creating the prompt or queuing generation.",
           "Common workflows: product/content request = inspect_workspace_state -> create_project or update fields internally -> generate_project_output when the user needs an image, poster, cover, carousel asset, video, or other rendered media through Pokaya's platform models. Weekly content plan = inspect_workspace_state -> remember_agent_context when useful -> create_content_plan, and only create schedule drafts when the user asks for drafts. Video prompt request = create_seedance_prompt; video generation request = create_seedance_prompt -> generate_project_output after confirmation. In user-facing replies, say video prompt or generate video instead of naming the internal video model.",
           "Do not use DeepSeek or any hidden design skill to create final design assets. DeepSeek is only the planner/orchestrator. Rendered image/video/design outputs must be created by Pokaya platform generation tools, charged by the platform credit rules, and confirmed by the user before credit deduction.",
@@ -7151,14 +7182,22 @@ app.post("/api/billing/topup", async (req, res, next) => {
   try {
     const { user } = await requireAuth(req);
     const amount = Number(req.body.amount || 0);
-    if (![10, 20, 30, 50, 100].includes(amount)) return res.status(400).json({ error: "Invalid top up amount" });
+    if (![1, 5, 10, 20, 50, 100].includes(amount)) return res.status(400).json({ error: "Invalid top up amount" });
+    const credits = creditsForUsd(amount);
 
     const orderId = `DT-${Date.now()}`;
     const chipPurchase = await createChipPurchase({
       orderId,
       amount,
       email: req.body.email,
-      fullName: req.body.fullName
+      fullName: req.body.fullName,
+      productName: `Pokaya AI ${credits} credits`,
+      credits,
+      currency: "USD",
+      metadata: {
+        kind: "topup",
+        rate: "USD 1 = 1000 credits"
+      }
     });
 
     await mutateDb(async (db) => {
@@ -7170,7 +7209,9 @@ app.post("/api/billing/topup", async (req, res, next) => {
         checkoutUrl: chipPurchase.checkout_url,
         directPostUrl: chipPurchase.direct_post_url,
         amount,
-        credits: amount,
+        currency: "USD",
+        credits,
+        kind: "topup",
         status: "pending",
         createdAt: new Date().toISOString()
       });

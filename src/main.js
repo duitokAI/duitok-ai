@@ -164,7 +164,7 @@ const state = {
   projectMenuId: null,
   editingProjectId: null,
   paymentReturn: null,
-  topupAmount: 50,
+  topupAmount: 10,
   usageFilter: "all",
   affiliateTab: "overview",
   attachmentPickerKind: "avatar",
@@ -189,6 +189,29 @@ const state = {
   wizardStyle: "Soft sell",
   wizardBusy: false
 };
+
+const creditsPerUsd = 1000;
+const usdPerRm = 0.21;
+
+function creditsForUsd(amount) {
+  return Math.round(Number(amount || 0) * creditsPerUsd);
+}
+
+function formatUsdAmount(value) {
+  const amount = Number(value || 0);
+  return Number.isInteger(amount) ? `$${amount}` : `$${amount.toFixed(2)}`;
+}
+
+function formatPaymentAmount(payment = {}) {
+  const currency = payment.currency || (payment.kind === "topup" ? "USD" : "MYR");
+  const amount = Number(payment.amount || 0);
+  if (currency === "USD") return formatUsdAmount(amount);
+  return `RM${amount.toFixed(2)}`;
+}
+
+function formatUsdCost(value) {
+  return `$${Number(value || 0).toFixed(3)}`;
+}
 
 let agentVisualTimer = null;
 let agentWorkingTimer = null;
@@ -501,7 +524,7 @@ const copy = {
     affiliateHowTitle: "How affiliate works",
     affiliateHow1: "Share your Pokaya link or referral code with sellers.",
     affiliateHow2: "When they top up and use Pokaya through your link, you earn 20% commission.",
-    affiliateHow3: "Example: they top up RM100, you get RM20. They top up RM1000, you get RM200.",
+    affiliateHow3: "Example: they top up $100, you get $20. They top up $1000, you get $200.",
     affiliateHow4: "Cash out after the minimum RM50 threshold to a Malaysian bank account.",
     totalReferrals: "Total referrals",
     commissionEvents: "Commission events",
@@ -517,11 +540,11 @@ const copy = {
     batch: "batch",
     autoContentPackNote: "10 video x 8s + 1 master plan",
     selectCreditPackage: "Pilih pakej credit",
-    creditRateNote: "RM1 = 1 credit. Tiada hidden fees.",
+    creditRateNote: "USD 1 = 1000 credits. Tiada hidden fees.",
     instantTopupChip: "Instant top-up via CHIP",
     credits: "Credits",
-    payForCredits: "Pay RM{amount} for {credits} Credits",
-    topupSecureNote: "Secured via Chip · FPX online banking & DuitNow QR",
+    payForCredits: "Pay {amount} for {credits} Credits",
+    topupSecureNote: "Secured via Chip · priced in USD",
     topupHistory: "Top up history",
     noTopupRecords: "Belum ada rekod top up.",
     creditsAdded: "+{credits} credits",
@@ -791,7 +814,7 @@ const copy = {
     affiliateHowTitle: "Affiliate 如何运作",
     affiliateHow1: "把您的 Pokaya 分享链接或推荐码发给用户。",
     affiliateHow2: "对方通过您的链接入金并使用 Pokaya 后，您可获得 20% 佣金。",
-    affiliateHow3: "例子：用户入金 RM100，您拿 RM20；用户入金 RM1000，您拿 RM200。",
+    affiliateHow3: "例子：用户入金 $100，您拿 $20；用户入金 $1000，您拿 $200。",
     affiliateHow4: "达到最低 RM50 后，可以提现到马来西亚银行账户。",
     totalReferrals: "总推荐数",
     commissionEvents: "佣金事件",
@@ -807,11 +830,11 @@ const copy = {
     batch: "组",
     autoContentPackNote: "10 条 8 秒视频 + 1 份主计划",
     selectCreditPackage: "选择充值配套",
-    creditRateNote: "RM1 = 1 credit，没有隐藏费用。",
+    creditRateNote: "USD 1 = 1000 credits，没有隐藏费用。",
     instantTopupChip: "通过 CHIP 即时充值",
     credits: "Credits",
-    payForCredits: "支付 RM{amount} 获得 {credits} Credits",
-    topupSecureNote: "通过 Chip 保障付款 · FPX online banking & DuitNow QR",
+    payForCredits: "支付 {amount} 获得 {credits} Credits",
+    topupSecureNote: "通过 Chip 保障付款 · 以 USD 计价",
     topupHistory: "充值记录",
     noTopupRecords: "还没有充值记录。",
     creditsAdded: "+{credits} credits",
@@ -1080,7 +1103,7 @@ const copy = {
     affiliateHowTitle: "How affiliate works",
     affiliateHow1: "Share your Pokaya link or referral code with users.",
     affiliateHow2: "When they top up and use Pokaya through your link, you earn 20% commission.",
-    affiliateHow3: "Example: they top up RM100, you get RM20. They top up RM1000, you get RM200.",
+    affiliateHow3: "Example: they top up $100, you get $20. They top up $1000, you get $200.",
     affiliateHow4: "Cash out after the minimum RM50 threshold to a Malaysian bank account.",
     totalReferrals: "Total referrals",
     commissionEvents: "Commission events",
@@ -1096,11 +1119,11 @@ const copy = {
     batch: "batch",
     autoContentPackNote: "10 video x 8s + 1 master plan",
     selectCreditPackage: "Select credit package",
-    creditRateNote: "RM1 = 1 credit. No hidden fees.",
+    creditRateNote: "USD 1 = 1000 credits. No hidden fees.",
     instantTopupChip: "Instant top-up via CHIP",
     credits: "Credits",
-    payForCredits: "Pay RM{amount} for {credits} Credits",
-    topupSecureNote: "Secured via Chip · FPX online banking & DuitNow QR",
+    payForCredits: "Pay {amount} for {credits} Credits",
+    topupSecureNote: "Secured via Chip · priced in USD",
     topupHistory: "Top up history",
     noTopupRecords: "No top up records yet.",
     creditsAdded: "+{credits} credits",
@@ -3107,7 +3130,7 @@ function pricingSteps() {
   const data = {
     ms: [
       ["1", "Subscribe RM79.80/bulan", "Unlock semua studio, prompt library dan tools utama."],
-      ["2", "Top up credit bila perlu", "RM1 = 1 credit. Credit digunakan untuk image dan video generation."],
+      ["2", "Top up credit bila perlu", "USD 1 = 1000 credits. Credit digunakan untuk image dan video generation."],
       ["3", "Generate, auto-deduct", "Setiap generation auto-tolak ikut rate. Anda nampak kos sebelum generate."]
     ],
     zh: [
@@ -3117,7 +3140,7 @@ function pricingSteps() {
     ],
     en: [
       ["1", "Subscribe RM79.80/month", "Unlock studios, prompt library, and main tools."],
-      ["2", "Top up credits when needed", "RM1 = 1 credit. Credits are used for image and video generation."],
+      ["2", "Top up credits when needed", "USD 1 = 1000 credits. Credits are used for image and video generation."],
       ["3", "Generate, auto-deduct", "Each generation auto-deducts by rate. Show the cost before generation."]
     ]
   };
@@ -3929,7 +3952,7 @@ function paymentRow(payment, adminActions = false) {
   const buyer = payment.buyer || {};
   const phoneLink = whatsappLink(buyer.phone);
   const kind = payment.kind || "topup";
-  const status = `${payment.status} | ${kind} | RM ${payment.amount}`;
+  const status = `${payment.status} | ${kind} | ${formatPaymentAmount(payment)}`;
   const detail = [
     buyer.fullName || buyer.email || payment.userId || "",
     buyer.phone ? (phoneLink ? `<a href="${phoneLink}" target="_blank" rel="noreferrer">${esc(buyer.phone)}</a>` : esc(buyer.phone)) : "",
@@ -4051,7 +4074,7 @@ function adminPage() {
     .filter((user) => {
       const haystack = [user.email, user.id, user.role, user.status, user.lifecycle].join(" ").toLowerCase();
       const statusMatch = state.adminStatusFilter === "all"
-        || (state.adminStatusFilter === "lowCredits" ? user.credits < 4 : state.adminStatusFilter === "failed" ? user.failedJobs.length > 0 : haystack.includes(state.adminStatusFilter.toLowerCase()));
+        || (state.adminStatusFilter === "lowCredits" ? user.credits < 6 : state.adminStatusFilter === "failed" ? user.failedJobs.length > 0 : haystack.includes(state.adminStatusFilter.toLowerCase()));
       return statusMatch && (!query || haystack.includes(query));
     })
     .sort((a, b) => {
@@ -4069,7 +4092,7 @@ function adminPage() {
   const selectedFailedJobs = selectedJobs.filter((job) => /fail|error/i.test(`${job.status || ""} ${job.errorMessage || ""}`));
   const modelCosts = admin.modelCosts || {};
   const permissions = selectedUser?.agentPermissions || {};
-  const lowCreditUsers = userRows.filter((user) => user.credits < 4 && (user.status || "active") !== "suspended");
+  const lowCreditUsers = userRows.filter((user) => user.credits < 6 && (user.status || "active") !== "suspended");
   const highCostJobs = jobs.filter((job) => Number(job.costRm || 0) >= 1);
   const healthItems = [
     ["Users", totals.users || users.length, "users", `${filteredUsers.length} visible`, "data-admin-filter=\"all\""],
@@ -4093,7 +4116,7 @@ function adminPage() {
       icon: lowCreditUsers.length ? "battery-warning" : "badge-check",
       title: "Low credit users",
       value: `${lowCreditUsers.length}`,
-      note: lowCreditUsers.length ? "Users below 4 credits" : "No low-credit active users",
+      note: lowCreditUsers.length ? "Users below 6 credits" : "No low-credit active users",
       action: "data-admin-filter=\"lowCredits\""
     },
     {
@@ -4219,12 +4242,12 @@ function adminPage() {
         </article>
         <article class="activity-card">
           <div class="card-title"><h2>${icon("sliders-horizontal", 22)} Internal Model Costs</h2><span>Admin only</span></div>
-          ${table(Object.entries(modelCosts).map(([model, cost]) => [model, `RM ${Number(cost.costRm || 0).toFixed(3)}`, cost.unit || ""]))}
+          ${table(Object.entries(modelCosts).map(([model, cost]) => [model, formatUsdCost(cost.costUsd ?? Number(cost.costRm || 0) * usdPerRm), cost.unit || ""]))}
         </article>
       <article class="activity-card">
         <div class="card-title"><h2>${icon("shield-check", 22)} Guardrails</h2><span>Active</span></div>
         ${table([
-          ["Credit check", "4 credits per generation", "Blocks normal users when balance is below 4"],
+          ["Credit check", "USD 1 = 1000 credits", "Blocks normal users when balance is below the estimated generation cost"],
           ["Rate limit", "3/minute, 50/day", "Admin accounts are exempt for testing"],
           ["Failure ledger", "No credit charge", "Failed API calls are recorded for admin review"],
           ["Admin audit", `${adminAuditLogs.length} events`, "Sensitive admin actions are logged"]
@@ -5989,14 +6012,14 @@ function billingPage() {
 
 function billingPaymentRow(payment) {
   const status = payment.status || "pending";
-  const credits = Number(payment.credits ?? payment.amount ?? 0);
+  const credits = Number(payment.credits ?? ((payment.kind || "topup") === "topup" ? creditsForUsd(payment.amount) : payment.amount) ?? 0);
   const description = (payment.kind || "topup") === "subscription"
     ? "Pokaya AI Pro subscription"
     : `Top up ${formatCreditNumber(credits)} credits`;
   return `<div class="billing-history-row">
     <time>${formatTopupDate(payment.createdAt)}</time>
     <b>${esc(description)}</b>
-    <strong>RM${Number(payment.amount || 0).toFixed(2)}</strong>
+    <strong>${formatPaymentAmount(payment)}</strong>
     <div class="billing-status-wrap">
       <span class="payment-status ${esc(status)}">${icon(status === "paid" ? "check-circle-2" : "clock", 16)} ${esc(status)}</span>
       ${status === "pending" ? `<button class="mini-button" data-action="refresh-payment-status" data-order="${esc(payment.orderId)}">${icon("refresh-cw", 15)} ${t("check")}</button>` : ""}
@@ -6064,17 +6087,17 @@ function affiliateCommissionExamples() {
     zh: {
       title: "20% 佣金怎么算？",
       copy: "用户通过您的链接入金并使用 Pokaya，系统按入金金额计算 20% 佣金。",
-      examples: [["用户入金", "RM100", "您获得", "RM20"], ["用户入金", "RM1000", "您获得", "RM200"]]
+      examples: [["用户入金", "$100", "您获得", "$20"], ["用户入金", "$1000", "您获得", "$200"]]
     },
     ms: {
       title: "Cara kira komisen 20%",
       copy: "Bila user top up dan guna Pokaya melalui link anda, sistem kira 20% komisen daripada jumlah top up.",
-      examples: [["User top up", "RM100", "Anda dapat", "RM20"], ["User top up", "RM1000", "Anda dapat", "RM200"]]
+      examples: [["User top up", "$100", "Anda dapat", "$20"], ["User top up", "$1000", "Anda dapat", "$200"]]
     },
     en: {
       title: "How the 20% commission works",
       copy: "When a user tops up and uses Pokaya through your link, you earn 20% of the top-up amount.",
-      examples: [["User tops up", "RM100", "You earn", "RM20"], ["User tops up", "RM1000", "You earn", "RM200"]]
+      examples: [["User tops up", "$100", "You earn", "$20"], ["User tops up", "$1000", "You earn", "$200"]]
     }
   }[state.lang] || {};
   return `<div class="affiliate-rate-box">
@@ -6180,10 +6203,14 @@ function affiliateTabCopy(tab) {
 
 function topupPage() {
   const credits = Number(state.db.billing?.credits || 0);
-  const selectedAmount = Number(state.topupAmount || 50);
-  const imagePossible = Math.floor(credits / 0.2);
-  const videoPossible = Math.floor(credits / 0.4);
-  const autoBatches = Math.floor(credits / 4);
+  const selectedAmount = Number(state.topupAmount || 10);
+  const selectedCredits = creditsForUsd(selectedAmount);
+  const imageEstimateCredits = 6;
+  const videoEstimateCredits = 50;
+  const autoContentPackCredits = videoEstimateCredits * 10;
+  const imagePossible = Math.floor(credits / imageEstimateCredits);
+  const videoPossible = Math.floor(credits / videoEstimateCredits);
+  const autoBatches = Math.floor(credits / autoContentPackCredits);
   return `
     <section class="topup-experience">
       <div class="credit-balance-panel">
@@ -6207,14 +6234,14 @@ function topupPage() {
           ${topupPackages().map((item) => `
             <button class="topup-package ${item.amount === selectedAmount ? "active" : ""}" type="button" data-topup-select="${item.amount}">
               ${item.badge ? `<i>${item.badge}</i>` : ""}
-              <strong>${item.amount}</strong>
+              <strong>${formatCreditNumber(item.credits)}</strong>
               <span>${t("credits")}</span>
-              <b>RM${item.amount}</b>
+              <b>${formatUsdAmount(item.amount)}</b>
               <small>${item.note}</small>
             </button>
           `).join("")}
         </div>
-        <button class="topup-pay-button" data-topup="${selectedAmount}">${icon("zap", 22)} ${tf("payForCredits", { amount: selectedAmount, credits: selectedAmount })} ${icon("arrow-right", 22)}</button>
+        <button class="topup-pay-button" data-topup="${selectedAmount}">${icon("zap", 22)} ${tf("payForCredits", { amount: formatUsdAmount(selectedAmount), credits: formatCreditNumber(selectedCredits) })} ${icon("arrow-right", 22)}</button>
         <p class="topup-secure-note">${t("topupSecureNote")}</p>
       </div>
       ${topupHistory()}
@@ -6223,12 +6250,12 @@ function topupPage() {
 
 function topupPackages() {
   return [
-    { amount: 10, note: t("starterPack") },
-    { amount: 20, note: t("tryItOut") },
-    { amount: 30, note: t("common") },
-    { amount: 50, note: t("bestValue"), badge: t("best") },
-    { amount: 100, note: t("powerUser") }
-  ];
+    { amount: 1, note: t("starterPack") },
+    { amount: 5, note: t("tryItOut") },
+    { amount: 10, note: t("common") },
+    { amount: 20, note: t("bestValue"), badge: t("best") },
+    { amount: 50, note: t("powerUser") }
+  ].map((item) => ({ ...item, credits: creditsForUsd(item.amount) }));
 }
 
 function formatCreditNumber(value) {
@@ -6251,7 +6278,7 @@ function topupHistory() {
         return `<div>
           <time>${formatTopupDate(payment.createdAt)}</time>
           <b>${tf("creditsAdded", { credits })}</b>
-          <strong>RM${Number(payment.amount || 0).toFixed(2)}</strong>
+          <strong>${formatPaymentAmount(payment)}</strong>
           <span class="payment-status ${status}">${icon(status === "paid" ? "check-circle-2" : "clock", 16)} ${status}</span>
           ${status === "pending" ? `<button class="mini-button" data-action="refresh-payment-status" data-order="${esc(payment.orderId)}">${icon("refresh-cw", 15)} ${t("check")}</button>` : ""}
         </div>`;
@@ -6308,7 +6335,7 @@ function table(rows) {
 }
 
 function invoiceTable() {
-  return `<div class="table">${state.db.billing.invoices.map((x) => `<div><span>${x.id}</span><b>RM${x.amount}</b><button data-invoice="${x.id}">${icon("download")} ${t("export")}</button></div>`).join("")}</div>`;
+  return `<div class="table">${state.db.billing.invoices.map((x) => `<div><span>${x.id}</span><b>${formatPaymentAmount(x)}</b><button data-invoice="${x.id}">${icon("download")} ${t("export")}</button></div>`).join("")}</div>`;
 }
 
 function autoPostPage() {
