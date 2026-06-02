@@ -36359,11 +36359,12 @@ body:has(.studio-shell .image-higgsfield-mode),
   inset: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  display: grid !important;
-  grid-template-rows: 1fr auto auto 1fr !important;
-  place-items: center !important;
-  gap: 10px !important;
-  padding: clamp(14px, 1.8vw, 22px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  padding: clamp(14px, 1.6vw, 20px) !important;
   overflow: hidden !important;
   text-align: center !important;
 }
@@ -36374,12 +36375,12 @@ body:has(.studio-shell .image-higgsfield-mode),
   top: clamp(12px, 1.5vw, 18px) !important;
   left: clamp(12px, 1.5vw, 18px) !important;
   z-index: 3 !important;
-  max-width: calc(100% - 72px) !important;
+  max-width: calc(100% - 68px) !important;
   overflow: hidden !important;
   color: rgba(255, 246, 255, 0.9) !important;
-  font-size: clamp(14px, 1.45vw, 22px) !important;
-  font-weight: 950 !important;
-  line-height: 1 !important;
+  font-size: clamp(14px, 1.1vw, 17px) !important;
+  font-weight: 850 !important;
+  line-height: 1.1 !important;
   text-align: left !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
@@ -36387,10 +36388,9 @@ body:has(.studio-shell .image-higgsfield-mode),
 
 .studio-shell .image-higgsfield-mode .studio-wall-pending:not(.failed) .studio-wall-pending-spinner,
 .studio-shell .video-prompt-extractor-page .studio-wall-pending:not(.failed) .studio-wall-pending-spinner {
-  grid-row: 2 !important;
   position: static !important;
-  width: clamp(42px, 4.5vw, 62px) !important;
-  height: clamp(42px, 4.5vw, 62px) !important;
+  width: clamp(42px, 4vw, 54px) !important;
+  height: clamp(42px, 4vw, 54px) !important;
   display: inline-grid !important;
   place-items: center !important;
   border: 1px solid rgba(255, 255, 255, 0.18) !important;
@@ -36403,17 +36403,16 @@ body:has(.studio-shell .image-higgsfield-mode),
 
 .studio-shell .image-higgsfield-mode .studio-wall-pending:not(.failed) > .studio-wall-pending-controls > b,
 .studio-shell .video-prompt-extractor-page .studio-wall-pending:not(.failed) > .studio-wall-pending-controls > b {
-  grid-row: 3 !important;
-  max-width: calc(100% - 24px) !important;
+  max-width: calc(100% - 20px) !important;
   display: block !important;
-  overflow: hidden !important;
+  overflow: visible !important;
   padding: 0 !important;
   color: #fff !important;
-  font-size: clamp(20px, 2.25vw, 34px) !important;
+  font-size: clamp(20px, 2vw, 28px) !important;
   font-weight: 950 !important;
-  line-height: 1 !important;
+  line-height: 1.05 !important;
   text-align: center !important;
-  text-overflow: ellipsis !important;
+  text-overflow: clip !important;
   white-space: nowrap !important;
 }
 
