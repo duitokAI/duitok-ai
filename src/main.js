@@ -9179,18 +9179,17 @@ function agentGenerationStatusRail(entries = []) {
 
 function agentGenerationResultMeta(result) {
   if (!result) return "";
-  return `<div class="agent-generation-result-meta">
-    <span class="agent-generation-model-chip">${providerLogo(resultModelProvider(result))} ${esc(resultModelDisplay(result))}</span>
-    <span>${icon("maximize", 14)} ${esc(resultAspectRatioLabel(result))}</span>
-    <span>${icon("gem", 14)} ${esc(resultResolutionLabel(result))}</span>
-  </div>`;
+  return "";
 }
 
 function agentGenerationResultActions(result) {
   if (!result) return "";
+  const canSaveReference = Boolean(result.imageUrl || result.videoUrl);
   return `<div class="agent-generation-result-actions">
+    <button type="button" data-result-action="save-avatar" data-result-id="${esc(result.id)}" ${canSaveReference ? "" : "disabled"}>${icon("user-round-plus", 15)} Save as Avatar</button>
+    <button type="button" data-result-action="save-product" data-result-id="${esc(result.id)}" ${canSaveReference ? "" : "disabled"}>${icon("package-plus", 15)} Save as Product</button>
     <button type="button" data-result-action="download" data-result-id="${esc(result.id)}" data-result-kind="${result.videoUrl ? "video" : result.imageUrl ? "image" : "text"}">${icon("download", 15)} Download</button>
-    <button type="button" data-result-action="save" data-result-id="${esc(result.id)}">${icon("bookmark-plus", 15)} Save ref</button>
+    <button type="button" data-result-action="delete" data-result-id="${esc(result.id)}">${icon("trash-2", 15)} Delete</button>
   </div>`;
 }
 
@@ -9246,7 +9245,6 @@ function agentGenerationGalleryCard(cards = []) {
     ${agentGenerationStatusRail(entries)}
     ${done.length ? `<div class="agent-generation-gallery-grid" data-gallery-count="${esc(done.length)}">${resultTiles}</div>` : ""}
     ${pendingTiles ? `<div class="agent-generation-pending-list">${pendingTiles}</div>` : ""}
-    ${done[0]?.result ? agentGenerationResultMeta(done[0].result) : ""}
     ${done[0]?.result ? agentGenerationResultActions(done[0].result) : ""}
   </section>`;
 }
@@ -9269,7 +9267,6 @@ function agentGenerationJobCard(card = {}) {
   const preview = isDone && result
     ? `<div class="agent-generation-preview agent-generation-result-preview" data-result-id="${esc(result.id)}">
         ${resultPreview(result, { clickable: true, full: mediaType === "video" })}
-        ${agentGenerationResultMeta(result)}
         ${agentGenerationResultActions(result)}
       </div>`
     : agentGenerationPendingFrame(entry);
