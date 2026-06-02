@@ -1710,6 +1710,34 @@ function restoreSidebarScroll() {
   sidebar.scrollTop = Math.min(sidebarScrollTop, maxScroll);
 }
 
+function stabilizeImageConsoleExpansion(duration = 900) {
+  imageConsoleExpandLockUntil = Math.max(imageConsoleExpandLockUntil, Date.now() + duration);
+  const scrollSnapshot = {
+    windowY: window.scrollY || 0,
+    windowX: window.scrollX || 0,
+    workspace: document.querySelector(".workspace")?.scrollTop || 0,
+    shell: document.querySelector(".studio-shell")?.scrollTop || 0
+  };
+  if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+  const restore = () => {
+    window.scrollTo(scrollSnapshot.windowX, scrollSnapshot.windowY);
+    const workspace = document.querySelector(".workspace");
+    const shell = document.querySelector(".studio-shell");
+    if (workspace) workspace.scrollTop = scrollSnapshot.workspace;
+    if (shell) shell.scrollTop = scrollSnapshot.shell;
+    document.querySelectorAll(".image-generate-console").forEach((el) => {
+      el.classList.add("is-hover-expanded");
+      el.classList.remove("is-compact");
+    });
+  };
+  restore();
+  requestAnimationFrame(() => {
+    restore();
+    requestAnimationFrame(restore);
+  });
+  [40, 120, 260, 600, duration].forEach((delay) => window.setTimeout(restore, delay));
+}
+
 function bindImageConsoleCompact() {
   imageConsoleScrollCleanup?.();
   imageConsoleScrollCleanup = null;
@@ -1808,6 +1836,7 @@ function bindImageConsoleCompact() {
   const handleSummaryPointerDown = (event) => {
     const menu = event.target.closest?.(".image-model-picker,.image-resolution-menu,.image-aspect-ratio-menu");
     if (!menu) return;
+    stabilizeImageConsoleExpansion(700);
     closeImageConsoleMenus(menu);
     updateMenuState();
   };
@@ -1978,7 +2007,11 @@ function handleDelegatedClick(event) {
   }
   if (target.dataset.resultPrompt) return set({ modal: "resultPrompt", activeResultId: target.dataset.resultPrompt });
   if (target.dataset.imageCanvasResult) return set({ imageCanvasSelectedResultId: target.dataset.imageCanvasResult });
-  if (target.dataset.imageModelOption) return saveProjectField("image.model", target.dataset.imageModelOption);
+  if (target.dataset.imageModelOption) {
+    stabilizeImageConsoleExpansion(1000);
+    target.closest("details")?.removeAttribute("open");
+    return saveProjectField("image.model", target.dataset.imageModelOption);
+  }
   if (target.dataset.generationCancel) return cancelGenerationJob(target.dataset.generationCancel);
   if (target.dataset.generationRetry) return retryGenerationJob(target.dataset.generationRetry);
   if (target.dataset.generationEdit) return editGenerationJobPrompt(target.dataset.generationEdit);
@@ -5070,6 +5103,7 @@ function openAspectRatioPopover(summary) {
   popover.querySelectorAll("button").forEach((button) => button.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
+    stabilizeImageConsoleExpansion(1000);
     saveProjectFieldQuick("image.aspectRatio", button.dataset.value, button);
     closeAspectRatioPopover();
   }));
@@ -9435,6 +9469,7 @@ function bind() {
   document.querySelectorAll("[data-studio-wall-zoom]").forEach((el) => el.addEventListener("input", () => updateStudioWallZoom(el.value)));
   bindAspectRatioFloatingMenus();
   document.querySelectorAll("[data-field-set]").forEach((el) => el.addEventListener("click", () => {
+    if (el.dataset.fieldSet?.startsWith("image.")) stabilizeImageConsoleExpansion(1000);
     el.closest("details")?.removeAttribute("open");
     saveProjectFieldQuick(el.dataset.fieldSet, el.dataset.value, el);
   }));
