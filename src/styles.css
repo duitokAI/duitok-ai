@@ -40284,7 +40284,6 @@ body:has(.studio-shell .video-prompt-extractor-page),
   margin: 0 clamp(18px, 2.2vw, 42px) 0 0 !important;
 }
 
-
 /* Processing tile responsive lock: keep the Generating state fixed inside the
    card while scaling icon, cancel, and title with the result-wall column. */
 .studio-shell .image-higgsfield-mode .studio-wall-pending:not(.failed),
@@ -40432,4 +40431,48 @@ body:has(.studio-shell .video-prompt-extractor-page),
   width: 16px !important;
   min-width: 16px !important;
   height: 16px !important;
+}
+
+/* Empty reference hover labels: Avatar/Product appear only before an image is
+   inserted, and stay inside the fixed button bounds. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb.is-empty-ref[data-reference-label]::after {
+  content: attr(data-reference-label) !important;
+  position: absolute !important;
+  left: 8px !important;
+  right: 8px !important;
+  bottom: 8px !important;
+  z-index: 4 !important;
+  display: block !important;
+  max-width: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #2a0633 !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  line-height: 13px !important;
+  opacity: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  text-align: center !important;
+  text-overflow: ellipsis !important;
+  transform: translateY(4px) !important;
+  transition: opacity 120ms ease, transform 120ms ease !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb.is-empty-ref[data-reference-label]:hover::after,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb.is-empty-ref[data-reference-label]:focus-visible::after {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb.is-empty-ref:hover .image-reference-empty-icon,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb.is-empty-ref:focus-visible .image-reference-empty-icon {
+  transform: translateY(-7px) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb.has-ref[data-reference-label]::after {
+  display: none !important;
+  content: none !important;
 }
