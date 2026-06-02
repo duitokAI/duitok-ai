@@ -38725,6 +38725,83 @@ body:has(.studio-shell .video-prompt-extractor-page),
   display: none !important;
 }
 
+/* Image composer overall size lock: reduce the bar footprint without changing the controls row layout. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) {
+  min-height: 108px !important;
+  padding: 10px !important;
+  gap: 10px !important;
+  border-radius: 21px !important;
+  grid-template-columns: minmax(560px, 1fr) 198px 180px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-main {
+  height: 100px !important;
+  max-height: 100px !important;
+  grid-template-rows: 50px 42px !important;
+  gap: 8px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-prompt {
+  height: 50px !important;
+  min-height: 50px !important;
+  max-height: 50px !important;
+  grid-template-columns: 44px minmax(0, 1fr) !important;
+  gap: 12px !important;
+  border-radius: 16px !important;
+  padding: 0 14px 0 7px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-insert {
+  width: 36px !important;
+  min-width: 36px !important;
+  height: 36px !important;
+  border-radius: 12px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-prompt textarea {
+  height: 48px !important;
+  min-height: 48px !important;
+  max-height: 48px !important;
+  padding: 10px 0 !important;
+  font-size: 16px !important;
+  line-height: 1.28 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references {
+  width: 198px !important;
+  min-width: 198px !important;
+  max-width: 198px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb {
+  height: 50px !important;
+  min-height: 50px !important;
+  max-height: 50px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate {
+  width: 180px !important;
+  min-width: 180px !important;
+  max-width: 180px !important;
+  height: 100px !important;
+  min-height: 100px !important;
+  max-height: 100px !important;
+  border-radius: 18px !important;
+}
+
+@media (max-width: 1180px) {
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references,
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+}
+
 .studio-shell .video-prompt-extractor-page > .video-prompt-dock::after {
   display: none !important;
   content: none !important;
