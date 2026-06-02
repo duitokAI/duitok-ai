@@ -4575,8 +4575,7 @@ function studioWallZoomColumn(value = studioWallZoomValue()) {
 }
 
 function studioWallZoomStyleAttr() {
-  const zoom = studioWallZoomValue();
-  return `data-studio-wall-zoom-level="${zoom}" style="--studio-wall-column:${studioWallZoomColumn(zoom)}px"`;
+  return `style="--studio-wall-column:${studioWallZoomColumn()}px"`;
 }
 
 function studioWallZoomControl() {
@@ -4596,19 +4595,15 @@ function studioResultWall(p, meta = {}) {
   const visibleItems = items.slice(0, limit);
   const unloadedCount = Math.max(0, Number(p.resultCount || 0) - (p.results || []).length);
   const hiddenCount = Math.max(0, items.length - visibleItems.length) + unloadedCount;
-  const failedJobs = pending.filter((job) => job.status === "failed");
-  const activeJobs = pending.filter((job) => job.status !== "failed");
-  const failedCards = failedJobs.map(studioPendingWallCard);
   const cards = [
-    ...activeJobs.map(studioPendingWallCard),
+    ...pending.map(studioPendingWallCard),
     ...visibleItems.map((item, index) => studioWallCard(item, index))
   ];
-  if (!failedCards.length && !cards.length) return "";
+  if (!cards.length) return "";
   return `<section class="studio-result-wall">
-    ${failedCards.length ? `<div class="studio-wall-failed-grid" aria-label="Failed generations">${failedCards.join("")}</div>` : ""}
-    ${cards.length ? `<div class="studio-wall-grid">
+    <div class="studio-wall-grid">
       ${cards.join("")}
-    </div>` : ""}
+    </div>
     ${hiddenCount ? `<button type="button" class="studio-wall-more" data-studio-wall-more="${esc(wallKey)}">${icon("chevrons-down", 18)} Load ${Math.min(studioWallPageSize, hiddenCount)} more · ${hiddenCount} hidden</button>` : ""}
     ${studioBulkSelectionBar()}
   </section>`;
@@ -9851,10 +9846,7 @@ function updateStudioWallZoom(value) {
   state.studioWallZoom = zoom;
   localStorage.setItem(storageKeys.studioWallZoom, String(zoom));
   const column = `${studioWallZoomColumn(zoom)}px`;
-  document.querySelectorAll(".studio-wall-zoomable").forEach((el) => {
-    el.style.setProperty("--studio-wall-column", column);
-    el.dataset.studioWallZoomLevel = String(zoom);
-  });
+  document.querySelectorAll(".studio-wall-zoomable").forEach((el) => el.style.setProperty("--studio-wall-column", column));
   document.querySelectorAll("[data-studio-wall-zoom]").forEach((el) => {
     if (Number(el.value) !== zoom) el.value = zoom;
     el.closest(".studio-wall-zoom-control")?.style.setProperty("--studio-wall-zoom-progress", `${(zoom / 4) * 100}%`);
