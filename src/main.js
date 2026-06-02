@@ -4656,12 +4656,16 @@ function studioPendingWallCard(job) {
       ${statusIcon}
       <b>${esc(statusLabel)}</b>
       <small>${esc(isFailed ? (job.errorMessage || "Please adjust the prompt and try again.") : promptPreview ? promptPreview.slice(0, 110) : generationJobStageHelp(job))}</small>`;
+  const processingBody = `
+      <span class="studio-wall-pending-status">${esc(statusLabel)}</span>
+      ${statusIcon}
+      <b>${esc(generationJobCenterLabel(job))}</b>`;
   return `<article class="studio-wall-card studio-wall-pending ${aspectClass} ${isFailed ? "failed" : ""}" data-generation-job-id="${esc(job.id)}" data-generation-job-status="${esc(job.status || "queued")}" style="--media-ratio:${mediaRatio};aspect-ratio:${esc(aspectRatio.replace(":", " / "))}">
     <div class="studio-wall-pending-controls" aria-label="${esc(statusLabel)}">
       ${isFailed ? `<div class="studio-wall-failed-center">${statusBody}
         <p class="generation-credit-refund-note"><strong>Credits safe</strong><span>No charge.</span></p>
         <div class="studio-wall-failed-actions"><button type="button" data-generation-retry="${esc(job.id)}">${icon("refresh-cw", 14)} Retry</button><button type="button" data-generation-edit="${esc(job.id)}">${icon("pencil-line", 14)} Edit</button></div>
-      </div>` : `${statusBody}${job.optimistic ? "" : `<button type="button" data-generation-cancel="${esc(job.id)}" aria-label="Cancel generation" title="Cancel generation">${icon("ban", 22)}</button>`}`}
+      </div>` : `${processingBody}${job.optimistic ? "" : `<button type="button" data-generation-cancel="${esc(job.id)}" aria-label="Cancel generation" title="Cancel generation">${icon("ban", 22)}</button>`}`}
     </div>
   </article>`;
 }
@@ -5899,6 +5903,12 @@ function generationJobStageHelp(job = {}) {
   if (job.stage === "provider_submitted") return "You can keep creating while this finishes.";
   if (job.stage === "saving_asset") return "Final asset is being saved to this project.";
   return "Task is queued. You can keep writing the next prompt.";
+}
+
+function generationJobCenterLabel(job = {}) {
+  if (job.stage === "saving_asset") return "Saving";
+  if (job.stage === "prompt_advanced") return "Optimizing";
+  return "Generating";
 }
 
 function generationJobWaitSeconds(job = {}, fallbackTime = "") {
@@ -10844,6 +10854,18 @@ function updateGenerationStatusInDom(db = state.db) {
       ? card.querySelector("strong")
       : card.querySelector(".agent-generation-processing-frame strong, b");
     if (label) label.textContent = generationJobStatusLabel(job);
+    const wallStatus = card.matches(".studio-wall-pending")
+      ? card.querySelector(".studio-wall-pending-status")
+      : null;
+    if (wallStatus && ["queued", "processing"].includes(job.status)) {
+      wallStatus.textContent = generationJobStatusLabel(job);
+    }
+    const wallCenterLabel = card.matches(".studio-wall-pending")
+      ? card.querySelector(".studio-wall-pending-controls > b")
+      : null;
+    if (wallCenterLabel && ["queued", "processing"].includes(job.status)) {
+      wallCenterLabel.textContent = generationJobCenterLabel(job);
+    }
     const wallSummary = card.matches(".studio-wall-pending")
       ? card.querySelector(".studio-wall-pending-copy small")
       : null;
