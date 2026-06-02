@@ -31511,6 +31511,94 @@ label {
   display: none !important;
 }
 
+/* Result-wall responsive controls: quick actions and selection checkbox scale
+   with the current preview size instead of staying fixed over small images. */
+.studio-shell .studio-wall-zoomable {
+  --studio-wall-action-size: clamp(30px, calc(var(--studio-wall-column, 320px) * 0.11), 46px);
+  --studio-wall-action-icon: clamp(15px, calc(var(--studio-wall-column, 320px) * 0.045), 21px);
+  --studio-wall-action-gap: clamp(4px, calc(var(--studio-wall-column, 320px) * 0.018), 8px);
+  --studio-wall-action-pad: clamp(4px, calc(var(--studio-wall-column, 320px) * 0.018), 8px);
+  --studio-wall-action-inset: clamp(5px, calc(var(--studio-wall-column, 320px) * 0.032), 14px);
+  --studio-wall-action-radius: clamp(10px, calc(var(--studio-wall-column, 320px) * 0.04), 17px);
+  --studio-wall-select-size: clamp(24px, calc(var(--studio-wall-column, 320px) * 0.09), 34px);
+  --studio-wall-select-icon: clamp(14px, calc(var(--studio-wall-column, 320px) * 0.05), 19px);
+  --studio-wall-select-inset: clamp(6px, calc(var(--studio-wall-column, 320px) * 0.04), 16px);
+}
+
+.studio-shell .image-higgsfield-mode.studio-wall-zoomable .studio-wall-card {
+  overflow: hidden !important;
+}
+
+.studio-shell .image-higgsfield-mode.studio-wall-zoomable .studio-wall-card:hover,
+.studio-shell .image-higgsfield-mode.studio-wall-zoomable .studio-wall-card:focus-within {
+  overflow: hidden !important;
+}
+
+.studio-shell .image-higgsfield-mode.studio-wall-zoomable .studio-wall-actions {
+  top: var(--studio-wall-action-inset) !important;
+  right: var(--studio-wall-action-inset) !important;
+  width: calc(var(--studio-wall-action-size) + (var(--studio-wall-action-pad) * 2)) !important;
+  max-width: calc(100% - (var(--studio-wall-action-inset) * 2)) !important;
+  display: grid !important;
+  grid-template-columns: var(--studio-wall-action-size) !important;
+  grid-auto-rows: var(--studio-wall-action-size) !important;
+  justify-content: center !important;
+  align-content: start !important;
+  gap: var(--studio-wall-action-gap) !important;
+  padding: var(--studio-wall-action-pad) !important;
+  border: 1px solid rgba(255, 255, 255, 0.26) !important;
+  border-radius: calc(var(--studio-wall-action-radius) + 2px) !important;
+  background: rgba(34, 24, 40, 0.42) !important;
+  box-shadow: 0 10px 24px rgba(18, 0, 28, 0.18) !important;
+  transform: translateY(calc(var(--studio-wall-action-inset) * -0.24)) scale(0.98) !important;
+  backdrop-filter: blur(14px) saturate(1.08) !important;
+}
+
+.studio-shell .image-higgsfield-mode.studio-wall-zoomable .studio-wall-card:hover .studio-wall-actions,
+.studio-shell .image-higgsfield-mode.studio-wall-zoomable .studio-wall-card:focus-within .studio-wall-actions,
+.studio-shell .image-higgsfield-mode.studio-wall-zoomable .studio-wall-card.is-selected .studio-wall-actions {
+  transform: none !important;
+}
+
+.studio-shell .image-higgsfield-mode.studio-wall-zoomable .studio-wall-actions button {
+  width: var(--studio-wall-action-size) !important;
+  min-width: var(--studio-wall-action-size) !important;
+  max-width: var(--studio-wall-action-size) !important;
+  height: var(--studio-wall-action-size) !important;
+  min-height: var(--studio-wall-action-size) !important;
+  max-height: var(--studio-wall-action-size) !important;
+  border-radius: var(--studio-wall-action-radius) !important;
+  transform: none !important;
+}
+
+.studio-shell .image-higgsfield-mode.studio-wall-zoomable .studio-wall-actions button svg {
+  width: var(--studio-wall-action-icon) !important;
+  height: var(--studio-wall-action-icon) !important;
+}
+
+.studio-shell .image-higgsfield-mode.studio-wall-zoomable .studio-wall-actions button:hover:not(:disabled),
+.studio-shell .image-higgsfield-mode.studio-wall-zoomable .studio-wall-actions button:active:not(:disabled),
+.studio-shell .image-higgsfield-mode.studio-wall-zoomable .studio-wall-actions button.is-working {
+  transform: none !important;
+}
+
+.studio-shell .studio-wall-zoomable .studio-wall-select-toggle {
+  top: var(--studio-wall-select-inset) !important;
+  left: var(--studio-wall-select-inset) !important;
+  width: var(--studio-wall-select-size) !important;
+  min-width: var(--studio-wall-select-size) !important;
+  max-width: var(--studio-wall-select-size) !important;
+  height: var(--studio-wall-select-size) !important;
+  min-height: var(--studio-wall-select-size) !important;
+  max-height: var(--studio-wall-select-size) !important;
+  border-radius: clamp(8px, calc(var(--studio-wall-select-size) * 0.34), 12px) !important;
+}
+
+.studio-shell .studio-wall-zoomable .studio-wall-select-toggle svg {
+  width: var(--studio-wall-select-icon) !important;
+  height: var(--studio-wall-select-icon) !important;
+}
+
 /* Final override: empty Avatar/Product reference icons must be centered in the tile itself. */
 .studio-shell .image-generate-console .image-reference-thumb:not(.has-ref) {
   position: relative !important;
@@ -32822,6 +32910,28 @@ label {
 .studio-shell .studio-wall-card.is-selected footer,
 .studio-shell .studio-wall-card.is-selected .studio-wall-new-badge {
   z-index: 6;
+}
+
+.studio-shell .studio-wall-zoomable .studio-wall-select-toggle {
+  box-sizing: border-box !important;
+  top: var(--studio-wall-select-inset) !important;
+  left: var(--studio-wall-select-inset) !important;
+  width: var(--studio-wall-select-size) !important;
+  min-width: var(--studio-wall-select-size) !important;
+  max-width: var(--studio-wall-select-size) !important;
+  height: var(--studio-wall-select-size) !important;
+  min-height: var(--studio-wall-select-size) !important;
+  max-height: var(--studio-wall-select-size) !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  border-radius: clamp(8px, calc(var(--studio-wall-select-size) * 0.34), 12px) !important;
+  line-height: 1 !important;
+}
+
+.studio-shell .studio-wall-zoomable .studio-wall-select-toggle svg {
+  width: var(--studio-wall-select-icon) !important;
+  height: var(--studio-wall-select-icon) !important;
 }
 
 .studio-shell .studio-bulk-selection-bar {
@@ -39866,4 +39976,30 @@ body:has(.studio-shell .video-prompt-extractor-page),
   border-radius: 16px !important;
   overflow: visible !important;
   background-clip: padding-box !important;
+}
+
+/* Final lock: the result-wall selection checkbox must scale with the preview,
+   not inherit global 42px button height rules. */
+.studio-shell .workspace .studio-wall-zoomable .studio-wall-card > .studio-wall-select-toggle,
+.studio-shell .studio-wall-zoomable .studio-wall-card > .studio-wall-select-toggle {
+  box-sizing: border-box !important;
+  top: var(--studio-wall-select-inset) !important;
+  left: var(--studio-wall-select-inset) !important;
+  width: var(--studio-wall-select-size) !important;
+  min-width: var(--studio-wall-select-size) !important;
+  max-width: var(--studio-wall-select-size) !important;
+  height: var(--studio-wall-select-size) !important;
+  min-height: var(--studio-wall-select-size) !important;
+  max-height: var(--studio-wall-select-size) !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  border-radius: clamp(8px, calc(var(--studio-wall-select-size) * 0.34), 12px) !important;
+  line-height: 1 !important;
+}
+
+.studio-shell .workspace .studio-wall-zoomable .studio-wall-card > .studio-wall-select-toggle svg,
+.studio-shell .studio-wall-zoomable .studio-wall-card > .studio-wall-select-toggle svg {
+  width: var(--studio-wall-select-icon) !important;
+  height: var(--studio-wall-select-icon) !important;
 }

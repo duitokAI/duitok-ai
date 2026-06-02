@@ -4601,7 +4601,8 @@ function studioWallZoomColumn(value = studioWallZoomValue()) {
 }
 
 function studioWallZoomStyleAttr() {
-  return `style="--studio-wall-column:${studioWallZoomColumn()}px"`;
+  const zoom = studioWallZoomValue();
+  return `data-studio-wall-zoom-level="${zoom}" style="--studio-wall-column:${studioWallZoomColumn(zoom)}px"`;
 }
 
 function studioWallZoomControl() {
@@ -9872,7 +9873,10 @@ function updateStudioWallZoom(value) {
   state.studioWallZoom = zoom;
   localStorage.setItem(storageKeys.studioWallZoom, String(zoom));
   const column = `${studioWallZoomColumn(zoom)}px`;
-  document.querySelectorAll(".studio-wall-zoomable").forEach((el) => el.style.setProperty("--studio-wall-column", column));
+  document.querySelectorAll(".studio-wall-zoomable").forEach((el) => {
+    el.style.setProperty("--studio-wall-column", column);
+    el.dataset.studioWallZoomLevel = String(zoom);
+  });
   document.querySelectorAll("[data-studio-wall-zoom]").forEach((el) => {
     if (Number(el.value) !== zoom) el.value = zoom;
     el.closest(".studio-wall-zoom-control")?.style.setProperty("--studio-wall-zoom-progress", `${(zoom / 4) * 100}%`);
