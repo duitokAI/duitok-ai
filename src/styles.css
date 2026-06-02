@@ -33470,3 +33470,32 @@ label {
   width: clamp(16px, 1.7vw, 22px) !important;
   height: clamp(16px, 1.7vw, 22px) !important;
 }
+
+/* Generate CTA: keep icon, label, and credit visually centered as one stack. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate {
+  display: grid !important;
+  grid-template-rows: 34px auto auto !important;
+  place-items: center !important;
+  align-content: center !important;
+  justify-content: center !important;
+  row-gap: 8px !important;
+  padding: 18px 18px 20px !important;
+  text-align: center !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate svg {
+  display: block !important;
+  align-self: center !important;
+  justify-self: center !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate b,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate small {
+  display: block !important;
+  justify-self: center !important;
+  margin: 0 !important;
+  text-align: center !important;
+  transform: none !important;
+}
