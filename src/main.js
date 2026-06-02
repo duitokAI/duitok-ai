@@ -1524,6 +1524,7 @@ function bindImageConsoleCompact() {
   let compact = consoleEl.classList.contains("is-compact");
   let hovering = false;
   let menuOpen = false;
+  let scrollReleaseTimer = null;
   let compactAt = 48;
   let expandAt = 12;
   const modelPickers = [...consoleEl.querySelectorAll(".image-model-picker")];
@@ -1584,18 +1585,26 @@ function bindImageConsoleCompact() {
   };
   const expandForHover = () => {
     hovering = true;
+    if (scrollReleaseTimer) window.clearTimeout(scrollReleaseTimer);
     consoleEl.classList.add("is-hover-expanded");
     consoleEl.classList.remove("is-compact");
   };
-  const restoreAfterHover = () => {
+  const releaseHoverExpansion = () => {
     hovering = false;
     updateMenuState();
     if (!menuOpen) consoleEl.classList.remove("is-hover-expanded");
     requestSync();
   };
+  const handleScroll = () => {
+    if (scrollReleaseTimer) window.clearTimeout(scrollReleaseTimer);
+    scrollReleaseTimer = window.setTimeout(() => {
+      if (hovering) releaseHoverExpansion();
+      else requestSync();
+    }, 240);
+  };
   const restoreAfterFocus = (event) => {
     if (event.relatedTarget && consoleEl.contains(event.relatedTarget)) return;
-    restoreAfterHover();
+    releaseHoverExpansion();
   };
   const handleResize = () => {
     refreshThresholds();
@@ -1613,10 +1622,9 @@ function bindImageConsoleCompact() {
     closeImageConsoleMenus(menu);
     updateMenuState();
   };
-  uniqueScrollTargets.forEach((target) => target.addEventListener("scroll", requestSync, { passive: true }));
+  uniqueScrollTargets.forEach((target) => target.addEventListener("scroll", handleScroll, { passive: true }));
   window.addEventListener("resize", handleResize);
   consoleEl.addEventListener("mouseenter", expandForHover);
-  consoleEl.addEventListener("mouseleave", restoreAfterHover);
   consoleEl.addEventListener("focusin", expandForHover);
   consoleEl.addEventListener("focusout", restoreAfterFocus);
   allMenus.forEach((el) => el.addEventListener("toggle", handleMenuToggle));
@@ -1624,10 +1632,10 @@ function bindImageConsoleCompact() {
   refreshThresholds();
   sync();
   imageConsoleScrollCleanup = () => {
-    uniqueScrollTargets.forEach((target) => target.removeEventListener("scroll", requestSync));
+    if (scrollReleaseTimer) window.clearTimeout(scrollReleaseTimer);
+    uniqueScrollTargets.forEach((target) => target.removeEventListener("scroll", handleScroll));
     window.removeEventListener("resize", handleResize);
     consoleEl.removeEventListener("mouseenter", expandForHover);
-    consoleEl.removeEventListener("mouseleave", restoreAfterHover);
     consoleEl.removeEventListener("focusin", expandForHover);
     consoleEl.removeEventListener("focusout", restoreAfterFocus);
     allMenus.forEach((el) => el.removeEventListener("toggle", handleMenuToggle));
@@ -4612,6 +4620,8 @@ function imageGenerateConsole(p, selectedModel) {
   const selectedResolution = ["1K", "2K", "4K"].includes(String(p.image.resolution || "").toUpperCase())
     ? String(p.image.resolution).toUpperCase()
     : "2K";
+  const selectedResolutionLabel = resolutionOptions.find((item) => item.value === selectedResolution)?.title || selectedResolution.toLowerCase();
+  const compactSummary = `${selectedModel || "Model"} · ${selectedAspectRatio} · ${selectedResolutionLabel} · ${selectedCount} image${selectedCount > 1 ? "s" : ""}`;
   return `<section class="image-generate-console ${longPromptClass}">
     <div class="image-console-main">
       <div class="image-console-prompt ${promptImage ? "has-prompt-image" : ""}" data-image-console-prompt-zone>
@@ -4619,8 +4629,9 @@ function imageGenerateConsole(p, selectedModel) {
           ${icon("plus", 24)}
           <input type="file" data-upload="image-prompt" accept="image/*" hidden>
         </label>
-        ${promptImage ? imagePromptMediaPreview(promptImage) : `<textarea data-field="image.prompt" data-image-console-prompt rows="2" placeholder="Tell us what you want to generate">${esc(p.image.prompt || "")}</textarea>`}
+        ${promptImage ? imagePromptMediaPreview(promptImage) : `<textarea data-field="image.prompt" data-image-console-prompt rows="2" placeholder="Describe your image">${esc(p.image.prompt || "")}</textarea>`}
       </div>
+      <div class="image-console-compact-summary" aria-hidden="true">${esc(compactSummary)}</div>
       <div class="image-console-tools">
         <div class="image-model-enhance-group">
           ${imageModelPicker(selectedModel)}
@@ -4919,12 +4930,13 @@ function selectedImageReference(kind) {
 
 function imageReferenceThumb(kind, item, emptyLabel) {
   const label = kind === "avatar" ? "Avatar" : "Product";
+  const displayLabel = emptyLabel || label;
   const preview = item ? attachmentPreview(item) : `<span class="image-reference-empty-icon">${icon(kind === "avatar" ? "circle-user-round" : "package", 34)}</span>`;
   const clearButton = item ? `<span class="image-reference-clear" role="button" tabindex="0" data-action="clear-image-reference" data-attachment-kind="${esc(kind)}" aria-label="${esc("Remove selected photo")}">${icon("x", 13)}</span>` : "";
-  return `<button class="image-reference-thumb ${item ? "has-ref" : "is-empty-ref"}" type="button" data-action="open-attachment-picker" data-attachment-kind="${esc(kind)}">
+  return `<button class="image-reference-thumb ${item ? "has-ref" : "is-empty-ref"}" type="button" data-action="open-attachment-picker" data-attachment-kind="${esc(kind)}" data-reference-label="${esc(displayLabel)}" aria-label="${esc(item ? `Change ${displayLabel}` : `Add ${displayLabel}`)}">
     ${preview}
     ${clearButton}
-    ${item ? "" : `<div><b>${esc(emptyLabel || label)}</b></div>`}
+    ${item ? "" : `<div><b>${esc(displayLabel)}</b></div>`}
   </button>`;
 }
 

@@ -32687,3 +32687,96 @@ label {
   width: 24px !important;
   height: 24px !important;
 }
+
+/* Image composer refinements: calmer CTA, hover labels, compact summary. */
+.studio-shell .image-console-compact-summary {
+  display: none;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate {
+  justify-self: end !important;
+  max-width: 226px !important;
+  border-radius: 24px !important;
+  background: linear-gradient(135deg, #f55374 0%, #f57068 100%) !important;
+  box-shadow:
+    0 14px 34px rgba(245, 82, 112, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate svg {
+  width: 30px !important;
+  height: 30px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate b {
+  font-size: clamp(20px, 1.45vw, 30px) !important;
+  line-height: 1.05 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate small {
+  font-size: 15px !important;
+}
+
+.studio-shell .image-reference-thumb[data-reference-label] {
+  position: relative !important;
+}
+
+.studio-shell .image-reference-thumb[data-reference-label]::after {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  z-index: 4;
+  max-width: calc(100% - 14px);
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(42, 6, 51, 0.74);
+  color: #fff;
+  content: attr(data-reference-label);
+  font-size: 11px;
+  font-weight: 850;
+  line-height: 1;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  text-overflow: ellipsis;
+  transform: translate(-50%, 4px);
+  transition: opacity 120ms ease, transform 120ms ease;
+  white-space: nowrap;
+}
+
+.studio-shell .image-reference-thumb[data-reference-label]:hover::after,
+.studio-shell .image-reference-thumb[data-reference-label]:focus-visible::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-reference-thumb[data-reference-label]::after {
+  display: none;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-main {
+  position: relative !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-compact-summary {
+  position: absolute !important;
+  top: 50%;
+  right: 14px;
+  left: 64px;
+  display: block !important;
+  overflow: hidden;
+  color: #2a0633;
+  font-size: 15px;
+  font-weight: 850;
+  line-height: 1;
+  pointer-events: none;
+  text-overflow: ellipsis;
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-prompt textarea {
+  color: transparent !important;
+  caret-color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+}
