@@ -7916,7 +7916,6 @@ function agent3DScene(options = {}) {
         <b>${status.label}</b>
       </div>`}
       <div class="agent-life-stage" aria-label="Pokaya Agent work, chat, and rest states">
-        <img class="agent-life-render-image agent-life-render-active" src="/pokaya-agent-stage-chat-bg.png" alt="Pokaya Agent workstation, chat station, and sleeping bed">
         <img class="agent-life-render-image agent-life-render-sleep" src="/pokaya-agent-stage-chat-sleep-bg.png" alt="Pokaya Agent sleeping in bed">
         <span class="agent-life-route" aria-hidden="true"></span>
         <span class="agent-chair-mask" aria-hidden="true"></span>

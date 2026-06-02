@@ -244,7 +244,7 @@ Do not overuse:
 Recommended final files:
 
 ```text
-public/pokaya-logo-horizontal.png
+public/brand/pokaya/final/pokaya-logo-horizontal-transparent.png
 public/pokaya-logo-horizontal-dark.png
 public/pokaya-logo-horizontal-light.png
 public/pokaya-wordmark.png

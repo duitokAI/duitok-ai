@@ -37,6 +37,11 @@ We are continuing from docs/codex-handoffs/current-state.md. Read this handoff f
   - API 响应跳过自写压缩缓冲，减少大 JSON 响应的内存尖峰。
   - Render `starter` 环境已收紧生成并发、缩略图缓存和 JSON body 上限。
   - `public/` 图片资源已压缩，目录约从 54MB 降到 26MB。
+- 已删除两个旧素材：
+  - `public/pokaya-logo-horizontal.png`
+  - `public/pokaya-agent-stage-chat-bg.png`
+  - `public/pokaya-agent-stage-bg.png`
+  - Agent active stage 不再使用旧背景图层。
 - `output/`、`dist/`、`node_modules/` 都是本地/构建产物，不应提交。
 
 ## 当前工作区基线

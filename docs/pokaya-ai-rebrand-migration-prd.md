@@ -278,7 +278,6 @@ Current files with old brand patterns:
 
 - `public/pokaya-tab-icon-transparent.png`
 - `public/pokaya-logo-transparent.png`
-- `public/pokaya-logo-horizontal.png`
 - `public/pokaya-logo-stacked.png`
 - `public/pokaya-brand-banner.png`
 - `public/pokaya-brand-banner-transparent.png`

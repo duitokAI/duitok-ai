@@ -215,7 +215,6 @@ P1 再改：
 
 旧资源包括：
 
-- `public/pokaya-logo-horizontal.png`
 - `public/pokaya-logo-transparent.png`
 - `public/pokaya-tab-icon-transparent.png`
 - `public/pokaya-mascot-transparent.png`
