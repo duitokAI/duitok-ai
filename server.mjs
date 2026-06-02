@@ -2659,7 +2659,7 @@ function grsaiImageBody(project, prompt) {
 
 function wuyinImageBody(project, prompt) {
   const model = internalMediaModel(project.image?.model);
-  const aspectRatio = process.env.WUYIN_IMAGE_ASPECT_RATIO || "1:1";
+  const aspectRatio = imageAspectRatioFromProject(project);
   const imageSize = process.env.WUYIN_IMAGE_SIZE || "1K";
   if (model === "Veo 3.1") {
     return {
@@ -2694,7 +2694,7 @@ function wuyinImageBody(project, prompt) {
     return {
       prompt,
       size: process.env.WUYIN_GROK_IMAGE_SIZE || imageSize,
-      aspectRatio: process.env.WUYIN_GROK_IMAGE_ASPECT_RATIO || aspectRatio,
+      aspectRatio,
       model: process.env.WUYIN_GROK_IMAGE_MODEL || "grok-imagine"
     };
   }
