@@ -36261,6 +36261,39 @@ body:has(.studio-shell .image-higgsfield-mode),
   pointer-events: none;
 }
 
+/* Image composer bottom strip collapse: do not draw a visible base below the
+   rounded composer. The page background is already locked above. */
+.studio-shell .image-higgsfield-mode > .image-generate-console::after {
+  display: none !important;
+  content: none !important;
+  height: 0 !important;
+  bottom: auto !important;
+  background: transparent !important;
+}
+
+.studio-shell .image-canvas-studio.image-higgsfield-mode,
+.studio-shell .image-higgsfield-mode {
+  padding-bottom: 0 !important;
+}
+
+/* Image composer dock position lock: keep the empty result row flexible so the
+   sticky composer sits at the bottom instead of leaving a visible floor below. */
+.studio-shell .image-canvas-studio.image-higgsfield-mode,
+.studio-shell .image-higgsfield-mode {
+  grid-template-rows: auto minmax(0, 1fr) auto !important;
+  align-content: stretch !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall {
+  grid-row: 2 !important;
+  min-height: 0 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console {
+  grid-row: 3 !important;
+  align-self: end !important;
+}
+
 /* Final visible toolbar diet: make the composer controls read as a compact
    parameter strip, not a row of oversized hero buttons. */
 .studio-shell .image-higgsfield-mode > .image-generate-console,
