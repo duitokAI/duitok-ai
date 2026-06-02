@@ -38503,3 +38503,26 @@ body:has(.studio-shell .video-prompt-extractor-page),
     display: none !important;
   }
 }
+
+/* Clone Prompt empty state: remove the extra tinted block under the upload bar. */
+.studio-shell .video-prompt-extractor-page > .video-prompt-empty-wall {
+  min-height: 0 !important;
+  height: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.studio-shell .video-prompt-extractor-page > .video-prompt-empty-wall > div {
+  display: none !important;
+}
+
+.studio-shell .video-prompt-extractor-page > .video-prompt-dock::after {
+  display: none !important;
+  content: none !important;
+}
+
+.studio-shell .video-prompt-extractor-page > .video-prompt-dock {
+  margin-top: clamp(18px, 2.4vw, 48px) !important;
+}
