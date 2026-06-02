@@ -41086,7 +41086,7 @@ body:has(.studio-shell .video-prompt-extractor-page),
     width: var(--agent-expanded-lane-width) !important;
     max-width: 100% !important;
     min-width: 0 !important;
-    margin-left: auto !important;
+    margin-left: 0 !important;
     margin-right: auto !important;
     padding-right: 0 !important;
     box-sizing: border-box !important;
@@ -41127,7 +41127,7 @@ body:has(.studio-shell .video-prompt-extractor-page),
     width: var(--agent-expanded-lane-width) !important;
     max-width: 100% !important;
     min-width: 0 !important;
-    margin: 0 auto max(18px, env(safe-area-inset-bottom)) !important;
+    margin: 0 auto max(18px, env(safe-area-inset-bottom)) 0 !important;
     box-sizing: border-box !important;
   }
 }
