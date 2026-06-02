@@ -37361,9 +37361,15 @@ body:has(.studio-shell .image-higgsfield-mode),
     --agent-chat-expanded-left: calc(
       var(--studio-sidebar-width, 304px) +
       var(--agent-session-panel-width, 252px) +
-      clamp(28px, 2.4vw, 52px)
+      clamp(18px, 2vw, 40px)
     );
-    --agent-chat-expanded-right: clamp(18px, 2vw, 40px);
+    --agent-chat-expanded-right: clamp(14px, 1.6vw, 32px);
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .agent-page {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
   }
 
   .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel,
@@ -37375,18 +37381,24 @@ body:has(.studio-shell .image-higgsfield-mode),
     left: var(--agent-chat-expanded-left) !important;
     width: auto !important;
     max-width: none !important;
+    min-width: 0 !important;
     height: 100dvh !important;
     max-height: 100dvh !important;
     margin: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
   }
 
   .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel .agent-thread,
   .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-thread,
   .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel .agent-form,
   .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-form {
-    width: min(920px, calc(100% - 32px)) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
     margin-left: 0 !important;
     margin-right: auto !important;
+    box-sizing: border-box !important;
   }
 
   .studio-shell.sidebar-collapsed .agent-chat-shell.agent-page-panel,
@@ -37397,6 +37409,38 @@ body:has(.studio-shell .image-higgsfield-mode),
     max-width: none !important;
     margin: 0 !important;
   }
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-form {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article {
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  overflow-wrap: anywhere !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.user {
+  align-self: flex-end !important;
+  justify-self: end !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-message,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-message p,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-message li,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.user p {
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-form textarea {
+  min-width: 0 !important;
 }
 
 /* Agent generated result layout lock: status, media, and actions each own a
@@ -37775,6 +37819,7 @@ body:has(.studio-shell .image-higgsfield-mode),
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-recents {
+  flex: 1 1 auto !important;
   min-height: 0 !important;
   align-self: start !important;
   display: grid !important;
