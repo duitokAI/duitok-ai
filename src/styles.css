@@ -40083,6 +40083,69 @@ body:has(.studio-shell .video-prompt-extractor-page),
   max-width: 188px !important;
 }
 
+/* Collapsed sidebar composer lock: when the workspace is wide, Avatar/Product
+   must live in their own column instead of overlaying the prompt/tools lane. */
+.studio-shell.sidebar-collapsed .image-higgsfield-mode > .image-generate-console:not(.is-compact),
+.studio-shell.sidebar-collapsed .image-higgsfield-mode > .image-generate-console:not(.is-compact).is-hover-expanded,
+.studio-shell.sidebar-collapsed .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-open-menu,
+.studio-shell.sidebar-collapsed .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt {
+  grid-template-columns: minmax(0, 1fr) 168px 188px !important;
+  grid-template-rows: 100px !important;
+  column-gap: 10px !important;
+}
+
+.studio-shell.sidebar-collapsed .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-main,
+.studio-shell.sidebar-collapsed .image-higgsfield-mode > .image-generate-console:not(.is-compact).is-hover-expanded .image-console-main,
+.studio-shell.sidebar-collapsed .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-open-menu .image-console-main,
+.studio-shell.sidebar-collapsed .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt .image-console-main {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+}
+
+.studio-shell.sidebar-collapsed .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-prompt {
+  padding-right: 14px !important;
+}
+
+.studio-shell.sidebar-collapsed .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools {
+  width: min(100%, 840px) !important;
+  grid-template-columns: minmax(190px, 380px) 92px 92px 108px !important;
+  gap: 8px !important;
+}
+
+.studio-shell.sidebar-collapsed .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references,
+.studio-shell.sidebar-collapsed .image-higgsfield-mode > .image-generate-console:not(.is-compact).is-hover-expanded .image-console-references,
+.studio-shell.sidebar-collapsed .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-open-menu .image-console-references,
+.studio-shell.sidebar-collapsed .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt .image-console-references {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  justify-self: stretch !important;
+  align-self: center !important;
+  width: 168px !important;
+  min-width: 168px !important;
+  max-width: 168px !important;
+  height: 76px !important;
+  min-height: 76px !important;
+  max-height: 76px !important;
+  grid-template-columns: 80px 80px !important;
+  grid-template-rows: 76px !important;
+  gap: 8px !important;
+  margin: 0 !important;
+  z-index: 4 !important;
+}
+
+.studio-shell.sidebar-collapsed .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate,
+.studio-shell.sidebar-collapsed .image-higgsfield-mode > .image-generate-console:not(.is-compact).is-hover-expanded .image-console-generate,
+.studio-shell.sidebar-collapsed .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-open-menu .image-console-generate,
+.studio-shell.sidebar-collapsed .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt .image-console-generate {
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  justify-self: center !important;
+  align-self: center !important;
+  width: 188px !important;
+  min-width: 0 !important;
+  max-width: 188px !important;
+}
+
 /* Result wall zoom control lock: keep the preview-size control visible when the
    sidebar is expanded. It belongs to the canvas edge, not the tab row. */
 .studio-shell .image-higgsfield-mode > .studio-wall-zoom-control {
