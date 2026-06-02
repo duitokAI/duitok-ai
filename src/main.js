@@ -1973,6 +1973,18 @@ function dbWithProjectField(db, projectId, field, value) {
   };
 }
 
+function dbWithoutResult(db, resultId) {
+  if (!db || !resultId) return db;
+  return {
+    ...db,
+    projects: (db.projects || []).map((item) => ({
+      ...item,
+      results: (item.results || []).filter((result) => result.id !== resultId),
+      resultCount: Math.max(0, Number(item.resultCount || 0) - ((item.results || []).some((result) => result.id === resultId) ? 1 : 0))
+    }))
+  };
+}
+
 function routeShell(content) {
   const dock = pathIs("/login") ? `<div class="global-lang-dock">${languageSwitch()}</div>` : "";
   return `${dock}${content}`;
@@ -12240,13 +12252,21 @@ async function editResultImage(data) {
 async function deleteResult() {
   const id = state.activeResultId;
   if (!id) return;
+  const previousDb = state.db;
+  const selectedIds = selectedResultIdSet();
+  selectedIds.delete(id);
+  set({
+    db: dbWithoutResult(previousDb, id),
+    modal: null,
+    activeResultId: null,
+    selectedResultIds: [...selectedIds]
+  });
   try {
     const db = await api(`/results/${id}`, { method: "DELETE" });
-    const selectedIds = selectedResultIdSet();
-    selectedIds.delete(id);
-    set({ db, modal: null, activeResultId: null, selectedResultIds: [...selectedIds] });
+    set({ db, selectedResultIds: [...selectedIds] });
     notify("已删除生成结果。");
   } catch (error) {
+    set({ db: previousDb });
     notify(error.message);
   }
 }
