@@ -4892,9 +4892,9 @@ function selectedImageReference(kind) {
 
 function imageReferenceThumb(kind, item, emptyLabel) {
   const label = kind === "avatar" ? "Avatar" : "Product";
-  const preview = item ? attachmentPreview(item) : `<span>${icon(kind === "avatar" ? "circle-user-round" : "package", 20)}</span>`;
+  const preview = item ? attachmentPreview(item) : `<span class="image-reference-empty-icon">${icon(kind === "avatar" ? "circle-user-round" : "package", 34)}</span>`;
   const clearButton = item ? `<span class="image-reference-clear" role="button" tabindex="0" data-action="clear-image-reference" data-attachment-kind="${esc(kind)}" aria-label="${esc("Remove selected photo")}">${icon("x", 13)}</span>` : "";
-  return `<button class="image-reference-thumb ${item ? "has-ref" : ""}" type="button" data-action="open-attachment-picker" data-attachment-kind="${esc(kind)}">
+  return `<button class="image-reference-thumb ${item ? "has-ref" : "is-empty-ref"}" type="button" data-action="open-attachment-picker" data-attachment-kind="${esc(kind)}">
     ${preview}
     ${clearButton}
     ${item ? "" : `<div><b>${esc(emptyLabel || label)}</b></div>`}
