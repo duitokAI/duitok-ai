@@ -5294,6 +5294,24 @@ function imageReferenceThumb(kind, item, emptyLabel) {
   </button>`;
 }
 
+function patchImageReferencesDom() {
+  const references = document.querySelector(".image-higgsfield-mode .image-console-references");
+  if (!references || !state.db || !state.projectId) return;
+  references.innerHTML = `
+    ${imageReferenceThumb("avatar", selectedImageReference("avatar"), "Avatar")}
+    ${imageReferenceThumb("product", selectedImageReference("product"), "Product")}
+  `;
+  references.querySelectorAll("[data-action]").forEach((el) => {
+    el.addEventListener("click", (event) => action(event, el.dataset.action));
+  });
+  window.lucide?.createIcons();
+}
+
+function closeModalDom() {
+  state.modal = null;
+  document.querySelector(".modal-backdrop")?.remove();
+}
+
 function virtualizePanel() {
   const promptText = "Recreate the uploaded poster/ad design using the uploaded real product photo. Keep the exact poster composition, lighting direction, typography space, product details, labels, and packaging. Replace only the placeholder product with the real product, make it commercial and ready for TikTok Shop.";
   return `
@@ -10774,6 +10792,13 @@ async function uploadAttachmentFile(file, kind = state.attachmentPickerKind || "
       }).catch((error) => notify(error.message));
     }
   }
+  if (selectTarget === "product" || selectTarget === "avatar") {
+    state.db = nextDb;
+    closeModalDom();
+    patchImageReferencesDom();
+    notify(tf("toastFileSaved", { name: file.name }));
+    return;
+  }
   set({ db: nextDb });
   notify(tf("toastFileSaved", { name: file.name }));
 }
@@ -10783,15 +10808,21 @@ async function pickAttachment(id, targetKind = state.attachmentPickerKind) {
   const field = targetKind === "product" ? "image.productAttachmentId" : "image.avatarAttachmentId";
   const projectId = state.projectId;
   const previousDb = state.db;
-  set({ db: dbWithProjectField(previousDb, projectId, field, id), modal: null });
+  state.db = dbWithProjectField(previousDb, projectId, field, id);
+  closeModalDom();
+  patchImageReferencesDom();
   try {
     const db = await api(`/projects/${projectId}/field`, {
       method: "PATCH",
       body: JSON.stringify({ field, value: id })
     });
-    if (state.projectId === projectId) set({ db });
+    if (state.projectId === projectId) {
+      state.db = db;
+      patchImageReferencesDom();
+    }
   } catch (error) {
-    set({ db: previousDb });
+    state.db = previousDb;
+    patchImageReferencesDom();
     notify(error.message || t("toastSaveFailed"));
   }
 }
@@ -10801,15 +10832,20 @@ async function clearImageReference(kind = "avatar") {
   const field = targetKind === "product" ? "image.productAttachmentId" : "image.avatarAttachmentId";
   const projectId = state.projectId;
   const previousDb = state.db;
-  set({ db: dbWithProjectField(previousDb, projectId, field, "") });
+  state.db = dbWithProjectField(previousDb, projectId, field, "");
+  patchImageReferencesDom();
   try {
     const db = await api(`/projects/${projectId}/field`, {
       method: "PATCH",
       body: JSON.stringify({ field, value: "" })
     });
-    if (state.projectId === projectId) set({ db });
+    if (state.projectId === projectId) {
+      state.db = db;
+      patchImageReferencesDom();
+    }
   } catch (error) {
-    set({ db: previousDb });
+    state.db = previousDb;
+    patchImageReferencesDom();
     notify(error.message || t("toastSaveFailed"));
   }
 }

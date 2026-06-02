@@ -40598,3 +40598,69 @@ body:has(.studio-shell .video-prompt-extractor-page),
   margin: 0 !important;
   transform: none !important;
 }
+
+/* Reference thumb stability lock: selecting or clearing Avatar/Product should
+   swap content only, never resize the composer or reflow the button grid. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references {
+  box-sizing: border-box !important;
+  grid-auto-flow: column !important;
+  grid-auto-columns: 80px !important;
+  grid-template-columns: 80px 80px !important;
+  grid-template-rows: 76px !important;
+  width: 168px !important;
+  min-width: 168px !important;
+  max-width: 168px !important;
+  height: 76px !important;
+  min-height: 76px !important;
+  max-height: 76px !important;
+  contain: layout paint !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references .image-reference-thumb,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references .image-reference-thumb.is-empty-ref,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references .image-reference-thumb.has-ref {
+  box-sizing: border-box !important;
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  grid-template-rows: 1fr !important;
+  place-items: center !important;
+  width: 80px !important;
+  min-width: 80px !important;
+  max-width: 80px !important;
+  height: 76px !important;
+  min-height: 76px !important;
+  max-height: 76px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  contain: layout paint !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references .image-reference-thumb.has-ref img,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references .image-reference-thumb.has-ref .attachment-placeholder {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  max-height: 100% !important;
+  display: block !important;
+  border-radius: inherit !important;
+  object-fit: cover !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references .image-reference-thumb.has-ref .image-reference-clear {
+  position: absolute !important;
+  inset: 6px 6px auto auto !important;
+  z-index: 3 !important;
+  width: 22px !important;
+  min-width: 22px !important;
+  max-width: 22px !important;
+  height: 22px !important;
+  min-height: 22px !important;
+  max-height: 22px !important;
+  transform: none !important;
+}
