@@ -40414,6 +40414,41 @@ body:has(.studio-shell .video-prompt-extractor-page),
 
 /* Empty reference hover labels: Avatar/Product appear only before an image is
    inserted, and stay inside the fixed button bounds. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb.is-empty-ref > div,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb.is-empty-ref b,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb.is-empty-ref small {
+  display: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb.is-empty-ref .image-reference-empty-icon {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 1 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 0 !important;
+  transform: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb.is-empty-ref .image-reference-empty-icon svg {
+  position: static !important;
+  display: block !important;
+  flex: 0 0 auto !important;
+  width: 38px !important;
+  height: 38px !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb.is-empty-ref[data-reference-label]::after {
   content: attr(data-reference-label) !important;
   position: absolute !important;
@@ -40448,7 +40483,7 @@ body:has(.studio-shell .video-prompt-extractor-page),
 
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb.is-empty-ref:hover .image-reference-empty-icon,
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb.is-empty-ref:focus-visible .image-reference-empty-icon {
-  transform: translateY(-7px) !important;
+  transform: none !important;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb.has-ref[data-reference-label]::after {
