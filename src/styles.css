@@ -34439,3 +34439,25 @@ label {
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu[open] summary > svg:last-child {
   display: none !important;
 }
+
+/* Final sidebar support lock: this is the sidebar chat/support button, not the
+   floating .support-bubble. It must never overlap Agent page copy. */
+.studio-shell .sidebar-scroll-area > .side-support-button,
+.studio-shell .side-support-button {
+  position: relative !important;
+  inset: auto !important;
+  z-index: 1 !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .side-support-button .support-bubble-icon,
+.studio-shell.sidebar-collapsed .side-support-button .support-bubble-icon,
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .side-support-button .support-bubble-icon {
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+}
+
+.studio-shell:has(.agent-page) .side-support-button {
+  display: none !important;
+}
