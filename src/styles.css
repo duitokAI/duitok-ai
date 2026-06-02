@@ -37513,14 +37513,14 @@ body:has(.studio-shell .image-higgsfield-mode),
   grid-template-rows: auto minmax(0, 1fr) !important;
   align-content: stretch !important;
   gap: 18px !important;
-  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-right: 1px solid rgba(111, 28, 132, 0.12) !important;
   border-radius: 0 !important;
   padding: 14px 12px 18px !important;
   margin: 0 !important;
   overflow: hidden !important;
-  background: linear-gradient(180deg, rgba(24, 3, 28, 0.94), rgba(13, 0, 18, 0.96)) !important;
-  box-shadow: 18px 0 42px rgba(46, 0, 55, 0.18) !important;
-  color: #fff !important;
+  background: linear-gradient(180deg, rgba(255, 251, 255, 0.96), rgba(248, 239, 250, 0.98)) !important;
+  box-shadow: 18px 0 42px rgba(111, 28, 132, 0.1) !important;
+  color: #35113f !important;
   pointer-events: auto !important;
 }
 
@@ -37528,7 +37528,7 @@ body:has(.studio-shell .image-higgsfield-mode),
   display: grid !important;
   gap: 4px !important;
   padding-bottom: 14px !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-bottom: 1px solid rgba(111, 28, 132, 0.12) !important;
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-action,
@@ -37543,7 +37543,7 @@ body:has(.studio-shell .image-higgsfield-mode),
   border-radius: 10px !important;
   padding: 0 10px !important;
   background: transparent !important;
-  color: rgba(255, 255, 255, 0.92) !important;
+  color: rgba(53, 17, 63, 0.9) !important;
   box-shadow: none !important;
   font-size: 16px !important;
   font-weight: 780 !important;
@@ -37554,8 +37554,8 @@ body:has(.studio-shell .image-higgsfield-mode),
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-action:hover,
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-search:focus-within,
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-search:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
-  color: #fff !important;
+  background: rgba(111, 28, 132, 0.08) !important;
+  color: #4f0b62 !important;
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-action svg,
@@ -37573,12 +37573,12 @@ body:has(.studio-shell .image-higgsfield-mode),
   outline: 0 !important;
   padding: 0 !important;
   background: transparent !important;
-  color: #fff !important;
+  color: #35113f !important;
   font: inherit !important;
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-search input::placeholder {
-  color: rgba(255, 255, 255, 0.86) !important;
+  color: rgba(53, 17, 63, 0.56) !important;
   opacity: 1 !important;
 }
 
@@ -37598,13 +37598,13 @@ body:has(.studio-shell .image-higgsfield-mode),
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-recents strong {
-  color: rgba(255, 255, 255, 0.96) !important;
+  color: #35113f !important;
   font-size: 15px !important;
   font-weight: 860 !important;
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-recents small {
-  color: rgba(255, 255, 255, 0.48) !important;
+  color: rgba(53, 17, 63, 0.48) !important;
   font-size: 12px !important;
   font-weight: 760 !important;
 }
@@ -37617,7 +37617,7 @@ body:has(.studio-shell .image-higgsfield-mode),
   overflow-y: auto !important;
   padding-right: 4px !important;
   scrollbar-width: thin !important;
-  scrollbar-color: rgba(255, 255, 255, 0.18) transparent !important;
+  scrollbar-color: rgba(111, 28, 132, 0.2) transparent !important;
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-list::-webkit-scrollbar {
@@ -37626,7 +37626,7 @@ body:has(.studio-shell .image-higgsfield-mode),
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-list::-webkit-scrollbar-thumb {
   border-radius: 999px !important;
-  background: rgba(255, 255, 255, 0.16) !important;
+  background: rgba(111, 28, 132, 0.18) !important;
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-item {
@@ -37652,7 +37652,7 @@ body:has(.studio-shell .image-higgsfield-mode),
   border-radius: 10px !important;
   padding: 7px 10px !important;
   background: transparent !important;
-  color: rgba(255, 255, 255, 0.84) !important;
+  color: rgba(53, 17, 63, 0.82) !important;
   box-shadow: none !important;
   text-align: left !important;
   cursor: pointer !important;
@@ -37661,8 +37661,8 @@ body:has(.studio-shell .image-higgsfield-mode),
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-item.is-latest .agent-session-restore,
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-item:hover .agent-session-restore,
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-restore:focus-visible {
-  background: rgba(255, 255, 255, 0.14) !important;
-  color: #fff !important;
+  background: rgba(111, 28, 132, 0.1) !important;
+  color: #35113f !important;
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-restore span,
@@ -37679,7 +37679,7 @@ body:has(.studio-shell .image-higgsfield-mode),
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-restore small {
-  color: rgba(255, 255, 255, 0.46) !important;
+  color: rgba(53, 17, 63, 0.46) !important;
   font-size: 11px !important;
   font-weight: 650 !important;
 }
@@ -37695,7 +37695,7 @@ body:has(.studio-shell .image-higgsfield-mode),
   border-radius: 9px !important;
   padding: 0 !important;
   background: transparent !important;
-  color: rgba(255, 255, 255, 0.38) !important;
+  color: rgba(53, 17, 63, 0.38) !important;
   box-shadow: none !important;
   opacity: 0 !important;
   cursor: pointer !important;
@@ -37707,15 +37707,15 @@ body:has(.studio-shell .image-higgsfield-mode),
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-delete:hover {
-  background: rgba(255, 91, 126, 0.18) !important;
-  color: #ffb4c4 !important;
+  background: rgba(255, 91, 126, 0.12) !important;
+  color: #b51f4d !important;
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-empty {
   margin: 0 !important;
   border-radius: 10px !important;
   padding: 10px !important;
-  color: rgba(255, 255, 255, 0.52) !important;
+  color: rgba(53, 17, 63, 0.52) !important;
   font-size: 13px !important;
   font-weight: 700 !important;
 }
