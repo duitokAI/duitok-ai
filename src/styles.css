@@ -35478,9 +35478,12 @@ label {
   align-content: start !important;
   column-gap: 16px !important;
   row-gap: 10px !important;
+  flex: 0 0 auto !important;
   width: min(920px, 100%) !important;
   max-width: min(920px, 100%) !important;
   min-width: 0 !important;
+  height: auto !important;
+  block-size: auto !important;
   min-height: 42px !important;
   border: 0 !important;
   border-radius: 0 !important;
@@ -35529,6 +35532,8 @@ label {
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-thread > article.assistant > .agent-message,
 .studio-shell .agent-page-panel .agent-thread > article.assistant > .agent-message,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread > article.assistant > .agent-response-stack,
+.studio-shell .agent-page-panel .agent-thread > article.assistant > .agent-response-stack,
 .studio-shell .agent-chat-shell.agent-page-panel .agent-thread > article.assistant > .agent-run-card,
 .studio-shell .agent-page-panel .agent-thread > article.assistant > .agent-run-card,
 .studio-shell .agent-chat-shell.agent-page-panel .agent-thread > article.assistant > .agent-tool-cards,
@@ -35545,13 +35550,66 @@ label {
   transform: none !important;
 }
 
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread > article.assistant > .agent-response-stack,
+.studio-shell .agent-page-panel .agent-thread > article.assistant > .agent-response-stack {
+  grid-row: 1 !important;
+  display: grid !important;
+  align-content: start !important;
+  justify-items: start !important;
+  gap: 12px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  min-height: 42px !important;
+  padding: 1px 0 0 !important;
+  overflow: visible !important;
+  contain: none !important;
+}
+
 .studio-shell .agent-chat-shell.agent-page-panel .agent-thread > article.assistant > .agent-message,
-.studio-shell .agent-page-panel .agent-thread > article.assistant > .agent-message {
+.studio-shell .agent-page-panel .agent-thread > article.assistant > .agent-message,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread > article.assistant > .agent-response-stack > .agent-message,
+.studio-shell .agent-page-panel .agent-thread > article.assistant > .agent-response-stack > .agent-message {
   grid-row: 1 !important;
   width: 100% !important;
   padding: 1px 0 0 !important;
   overflow: visible !important;
   line-height: 1.58 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread > article.assistant > .agent-response-stack > .agent-message,
+.studio-shell .agent-page-panel .agent-thread > article.assistant > .agent-response-stack > .agent-message,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread > article.assistant > .agent-response-stack > .agent-run-card,
+.studio-shell .agent-page-panel .agent-thread > article.assistant > .agent-response-stack > .agent-run-card,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread > article.assistant > .agent-response-stack > .agent-tool-cards,
+.studio-shell .agent-page-panel .agent-thread > article.assistant > .agent-response-stack > .agent-tool-cards,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread > article.assistant > .agent-response-stack > .agent-generation-run-cards,
+.studio-shell .agent-page-panel .agent-thread > article.assistant > .agent-response-stack > .agent-generation-run-cards,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread > article.assistant > .agent-response-stack > .agent-feedback-row,
+.studio-shell .agent-page-panel .agent-thread > article.assistant > .agent-response-stack > .agent-feedback-row {
+  position: static !important;
+  grid-column: auto !important;
+  grid-row: auto !important;
+  justify-self: start !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  transform: none !important;
+  contain: none !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread > article.assistant > .agent-response-stack > .agent-run-card,
+.studio-shell .agent-page-panel .agent-thread > article.assistant > .agent-response-stack > .agent-run-card,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread > article.assistant > .agent-response-stack > .agent-tool-cards,
+.studio-shell .agent-page-panel .agent-thread > article.assistant > .agent-response-stack > .agent-tool-cards,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread > article.assistant > .agent-response-stack > .agent-generation-run-cards,
+.studio-shell .agent-page-panel .agent-thread > article.assistant > .agent-response-stack > .agent-generation-run-cards {
+  margin-top: 0 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread > article.assistant > .agent-response-stack > .agent-feedback-row,
+.studio-shell .agent-page-panel .agent-thread > article.assistant > .agent-response-stack > .agent-feedback-row {
+  margin-top: 0 !important;
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-thread > article.assistant > .agent-run-card,

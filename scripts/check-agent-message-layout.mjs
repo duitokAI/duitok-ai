@@ -29,6 +29,10 @@ const checks = [
     ok: main.includes("agent-layout-fixture-active") && main.includes("data-agent-layout-fixture")
   },
   {
+    label: "Assistant content is wrapped in a response stack",
+    ok: main.includes("agent-response-stack") && /<article class="assistant"[\s\S]*agent-avatar-badge[\s\S]*agent-response-stack/.test(main)
+  },
+  {
     label: "CSS has the v2 layout source-of-truth block",
     ok: css.includes("Agent assistant message layout v2")
   },
@@ -42,7 +46,8 @@ const checks = [
   },
   {
     label: "Assistant article cannot clip avatar/text",
-    ok: /article\.assistant[\s\S]*overflow:\s*visible !important[\s\S]*contain:\s*none !important/.test(css)
+    ok: /article\.assistant[\s\S]*flex:\s*0 0 auto !important/.test(css)
+      && /article\.assistant[\s\S]*overflow:\s*visible !important[\s\S]*contain:\s*none !important/.test(css)
   },
   {
     label: "Avatar has fixed 42px box contract",
@@ -51,6 +56,12 @@ const checks = [
   {
     label: "Assistant children are pinned to the message column",
     ok: /agent-feedback-row[\s\S]*grid-column:\s*2 !important/.test(css)
+  },
+  {
+    label: "Assistant response stack owns vertical content flow",
+    ok: /agent-response-stack[\s\S]*grid-column:\s*2 !important/.test(css)
+      && /agent-response-stack[\s\S]*display:\s*grid !important[\s\S]*gap:\s*12px !important/.test(css)
+      && /agent-response-stack > \.agent-message[\s\S]*grid-row:\s*auto !important/.test(css)
   },
   {
     label: "Mobile contract keeps avatar fixed",
