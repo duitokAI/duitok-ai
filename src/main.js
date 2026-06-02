@@ -5810,7 +5810,7 @@ function resultMediaRatio(item = {}) {
 
 function mediaRatioSyncScript() {
   return [
-    "const card=this.closest('.studio-wall-card,.result-card')",
+    "const card=this.closest('.studio-wall-card,.result-card,.agent-generation-preview,.agent-generation-gallery-tile')",
     "if(card){",
     "const width=this.naturalWidth||this.videoWidth||1",
     "const height=this.naturalHeight||this.videoHeight||1",

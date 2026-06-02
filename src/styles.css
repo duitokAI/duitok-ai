@@ -33526,6 +33526,42 @@ label {
   fill: currentColor !important;
 }
 
+/* Agent result previews should show the full generated frame, not crop it. */
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread .agent-generation-preview.agent-generation-result-preview,
+.studio-shell .agent-page-panel .agent-thread .agent-generation-preview.agent-generation-result-preview,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-gallery-tile,
+.studio-shell .agent-page-panel .agent-generation-gallery-tile {
+  aspect-ratio: var(--media-ratio, 0.5625) / 1 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-preview .result-preview-trigger,
+.studio-shell .agent-page-panel .agent-generation-result-preview .result-preview-trigger,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-gallery-tile .result-preview-trigger,
+.studio-shell .agent-page-panel .agent-generation-gallery-tile .result-preview-trigger {
+  aspect-ratio: var(--media-ratio, 0.5625) / 1 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  background: #0f0a14 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-preview .result-image,
+.studio-shell .agent-page-panel .agent-generation-result-preview .result-image,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-gallery-tile .result-image,
+.studio-shell .agent-page-panel .agent-generation-gallery-tile .result-image {
+  width: 100% !important;
+  height: auto !important;
+  max-height: none !important;
+  aspect-ratio: var(--media-ratio, 0.5625) / 1 !important;
+  display: block !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+}
+
 /* Image composer compact toolbar size lock: the controls should read like a
    toolbar, not oversized primary action buttons. */
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools {
@@ -33632,4 +33668,3 @@ label {
   font-size: 17px !important;
   transform: translateY(2px) !important;
 }
-
