@@ -158,6 +158,7 @@ const state = {
   agentHistoryOpen: false,
   agentHistorySessions: readStoredJson(agentHistoryStorageKey, []),
   agentHistoryEditingId: null,
+  activeAgentHistoryId: null,
   activeAgentRunId: null,
   queuePolling: false,
   langOpen: false,
@@ -8860,11 +8861,12 @@ function agentHistoryRecentsLabel() {
 function agentHistorySidebarList(sessions = []) {
   if (!sessions.length) return `<p class="agent-session-empty">还没有历史记录</p>`;
   return `<div class="agent-session-list">
-    ${sessions.map((item, index) => {
+    ${sessions.map((item) => {
       const title = item.title || "未命名对话";
       const isEditing = state.agentHistoryEditingId === item.id;
+      const isActive = state.activeAgentHistoryId === item.id;
       const searchText = `${title} ${agentHistoryMeta(item)}`.toLowerCase();
-      return `<article class="agent-session-item ${index === 0 ? "is-latest" : ""}" data-agent-history-row data-agent-history-text="${esc(searchText)}">
+      return `<article class="agent-session-item ${isActive ? "is-active" : ""}" data-agent-history-row data-agent-history-text="${esc(searchText)}">
         ${isEditing ? `<label class="agent-session-edit" title="重命名对话">
           <input data-agent-history-title-input data-agent-history-title-id="${esc(item.id)}" value="${esc(title)}" maxlength="64" autofocus>
           <small>Enter 保存 · Esc 取消</small>
@@ -10185,7 +10187,7 @@ async function action(event, name) {
     clearAgentTypingTimer();
     saveCurrentAgentHistory();
     localStorage.removeItem(storageKeys.agentMessages);
-    return set({ agentMessages: [], agentInput: "", agentAttachments: [], agentQueue: [], agentTyping: false, agentExpandedMessages: {}, agentHistoryOpen: false, agentDebugOpen: false });
+    return set({ agentMessages: [], agentInput: "", agentAttachments: [], agentQueue: [], agentTyping: false, agentExpandedMessages: {}, activeAgentHistoryId: null, agentHistoryOpen: false, agentDebugOpen: false });
   }
   if (name === "clear-agent-context" || name === "clear-agent") {
     clearAgentTypingTimer();
@@ -11493,14 +11495,14 @@ function restoreAgentHistory(id) {
   const messages = agentMessagesForStorage(session.messages);
   localStorage.setItem(storageKeys.agentMessages, JSON.stringify(messages));
   notify("已恢复历史对话。");
-  set({ agentMessages: messages, agentInput: "", agentExpandedMessages: {}, agentHistoryOpen: false });
+  set({ agentMessages: messages, agentInput: "", agentExpandedMessages: {}, activeAgentHistoryId: id, agentHistoryOpen: false });
 }
 
 function deleteAgentHistory(id) {
   const sessions = (state.agentHistorySessions || []).filter((item) => item.id !== id);
   rememberAgentHistorySessions(sessions);
   notify("已删除这条历史记录。");
-  set({ agentHistorySessions: sessions, agentHistoryEditingId: null });
+  set({ agentHistorySessions: sessions, activeAgentHistoryId: state.activeAgentHistoryId === id ? null : state.activeAgentHistoryId, agentHistoryEditingId: null });
 }
 
 function renameAgentHistory(id, title, options = {}) {

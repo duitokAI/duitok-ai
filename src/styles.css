@@ -38615,7 +38615,7 @@ body:has(.studio-shell .image-higgsfield-mode),
   cursor: pointer !important;
 }
 
-.studio-shell .agent-chat-shell.agent-page-panel .agent-session-item.is-latest .agent-session-restore,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-item.is-active .agent-session-restore,
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-item:hover .agent-session-restore,
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-restore:focus-visible {
   background: rgba(111, 28, 132, 0.1) !important;
