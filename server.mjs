@@ -1292,7 +1292,7 @@ function publicGenerationBody(type = "text") {
 }
 
 function publicGenerationError() {
-  return "Generation failed. Please try again or contact support if it keeps happening.";
+  return "Try again or edit the prompt.";
 }
 
 function internalMediaModel(model) {

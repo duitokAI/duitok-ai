@@ -32274,13 +32274,13 @@ label {
 }
 
 .generation-credit-refund-note {
-  width: auto !important;
+  width: min(100%, 190px) !important;
   display: grid !important;
-  gap: 1px !important;
+  gap: 2px !important;
   margin: 0 !important;
-  padding: 7px 12px !important;
+  padding: 7px 9px !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  border-radius: 999px !important;
+  border-radius: 11px !important;
   background: rgba(255, 255, 255, 0.1) !important;
   color: rgba(255, 255, 255, 0.88) !important;
   text-align: center !important;
@@ -32296,9 +32296,9 @@ label {
 
 .generation-credit-refund-note span {
   color: rgba(255, 255, 255, 0.72) !important;
-  font-size: 9px !important;
+  font-size: 10px !important;
   font-weight: 750 !important;
-  line-height: 1.18 !important;
+  line-height: 1 !important;
 }
 
 /* Image composer control lock: align model, size, quality, and count controls. */
