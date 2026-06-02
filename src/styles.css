@@ -36787,3 +36787,18 @@ body:has(.studio-shell .image-higgsfield-mode),
   display: block !important;
   color: #9c65cf !important;
 }
+
+/* Image studio top edge clean lock: the fixed tool tabs should blend into the
+   image canvas instead of drawing a visible horizontal divider. */
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .project-step-topbar {
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .studio-top-step-tabs,
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .step-tabs {
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+}
