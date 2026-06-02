@@ -36787,3 +36787,98 @@ body:has(.studio-shell .image-higgsfield-mode),
   font-weight: 800 !important;
   line-height: 1.18 !important;
 }
+
+/* Quality menu selected state: keep two-line rows, show only a right check. */
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options {
+  width: min(390px, calc(100vw - 34px)) !important;
+  gap: 8px !important;
+  padding: 14px !important;
+}
+
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option,
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option:hover,
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option:focus,
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option:focus-visible,
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option.active,
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option[aria-selected="true"] {
+  width: 100% !important;
+  min-height: 78px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 26px !important;
+  align-items: center !important;
+  gap: 14px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 8px 2px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option-copy {
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 8px !important;
+  align-content: center !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option-copy b {
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 7px !important;
+  overflow: visible !important;
+  color: #2a0633 !important;
+  font-size: 31px !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option-copy em {
+  display: inline !important;
+  flex: 0 0 auto !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  color: #2a0633 !important;
+  font-size: 15px !important;
+  font-style: italic !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.04em !important;
+}
+
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option-copy small {
+  display: block !important;
+  overflow: visible !important;
+  color: rgba(42, 6, 51, 0.58) !important;
+  font-size: 22px !important;
+  font-weight: 780 !important;
+  line-height: 1.18 !important;
+  text-overflow: clip !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option-check {
+  grid-column: 2 !important;
+  justify-self: end !important;
+  width: 26px !important;
+  min-width: 26px !important;
+  height: 26px !important;
+  min-height: 26px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  opacity: 0 !important;
+  color: #9c65cf !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option.active .image-resolution-option-check,
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option[aria-selected="true"] .image-resolution-option-check {
+  opacity: 1 !important;
+}

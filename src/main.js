@@ -4971,6 +4971,7 @@ function imageResolutionPicker(selectedResolution, options = []) {
             <b>${esc(item.title)} <em>${esc(item.badge)}</em></b>
             <small>${esc(item.description)}</small>
           </span>
+          <span class="image-resolution-option-check" aria-hidden="true">${active ? icon("check", 18) : ""}</span>
         </div>`;
       }).join("")}
     </div>
@@ -8741,21 +8742,26 @@ function agentMessageArticle(item, index = 0) {
   const c = agentUiCopy();
   const displayContent = item.isTyping ? `${item.content || ""}▍` : item.content;
   const body = item.role === "assistant" ? agentMessageMarkdown(displayContent) : `<p>${esc(item.content).replaceAll("\n", "<br>")}</p>`;
-  const roleMarker = item.role === "assistant"
-    ? `<span class="agent-avatar-badge" aria-label="${esc(c.agentLabel)}">${icon("bot", 22)}</span>`
-    : `<span>${c.userLabel}</span>`;
-  const chips = "";
+  if (item.role !== "assistant") {
+    return `<article class="${item.role}" data-agent-message-index="${index}">
+      <span>${c.userLabel}</span>
+      ${agentMessageAttachments(item.attachments)}
+      <div class="agent-message">${body}</div>
+    </article>`;
+  }
   const runId = item.agentRun?.id || "";
-  const feedback = item.role === "assistant" && runId ? `<div class="agent-feedback-row">
+  const feedback = runId ? `<div class="agent-feedback-row">
     <button type="button" data-agent-feedback="positive_feedback" data-agent-run-id="${esc(runId)}">${icon("thumbs-up", 14)} 有用</button>
     <button type="button" data-agent-feedback="negative_feedback" data-agent-run-id="${esc(runId)}">${icon("thumbs-down", 14)} 不准</button>
   </div>` : "";
   const runPanel = agentVisibleRunPanel(item.agentRun);
-  return `<article class="${item.role}" data-agent-message-index="${index}">
-    ${roleMarker}
-    ${item.role === "user" ? agentMessageAttachments(item.attachments) : ""}
-    <div class="agent-message">${body}</div>
-    ${chips}${runPanel}${feedback}
+  return `<article class="assistant" data-agent-message-index="${index}">
+    <span class="agent-avatar-badge" aria-label="${esc(c.agentLabel)}">${icon("bot", 22)}</span>
+    <div class="agent-response-stack">
+      <div class="agent-message">${body}</div>
+      ${runPanel}
+      ${feedback}
+    </div>
   </article>`;
 }
 
