@@ -40146,8 +40146,8 @@ body:has(.studio-shell .video-prompt-extractor-page),
   max-width: 188px !important;
 }
 
-/* Prompt row clipping lock: long textarea content must stay inside the prompt
-   capsule and never paint over the controls row below it. */
+/* Prompt row scroll lock: long textarea content stays in the prompt capsule,
+   but remains vertically scrollable so the full prompt can be reviewed. */
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-prompt,
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).is-hover-expanded .image-console-prompt,
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-open-menu .image-console-prompt,
@@ -40165,12 +40165,88 @@ body:has(.studio-shell .video-prompt-extractor-page),
   height: 42px !important;
   min-height: 42px !important;
   max-height: 42px !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-  overflow: hidden !important;
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
   resize: none !important;
-  line-height: 42px !important;
+  line-height: 20px !important;
+  white-space: pre-wrap !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
   overscroll-behavior: contain !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-prompt textarea::-webkit-scrollbar {
+  width: 4px !important;
+  height: 4px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-prompt textarea::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-prompt textarea::-webkit-scrollbar-thumb {
+  border-radius: 999px !important;
+  background: rgba(126, 75, 150, 0.24) !important;
+}
+
+/* Long prompt layout: expand into a readable editor with controls below.
+   The prompt shows up to six lines, then scrolls vertically inside the field. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt.is-hover-expanded,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt.has-open-menu,
+.studio-shell.sidebar-collapsed .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt,
+.studio-shell.sidebar-collapsed .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt.is-hover-expanded,
+.studio-shell.sidebar-collapsed .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt.has-open-menu,
+.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt,
+.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt.is-hover-expanded,
+.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt.has-open-menu {
+  height: 212px !important;
+  min-height: 212px !important;
+  max-height: 212px !important;
+  grid-template-rows: 192px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt .image-console-main,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt.is-hover-expanded .image-console-main,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt.has-open-menu .image-console-main {
+  height: 192px !important;
+  min-height: 192px !important;
+  max-height: 192px !important;
+  grid-template-rows: 142px 42px !important;
+  gap: 8px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt .image-console-prompt,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt.is-hover-expanded .image-console-prompt,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt.has-open-menu .image-console-prompt {
+  height: 142px !important;
+  min-height: 142px !important;
+  max-height: 142px !important;
+  align-items: stretch !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt .image-console-prompt textarea,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt.is-hover-expanded .image-console-prompt textarea,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt.has-open-menu .image-console-prompt textarea {
+  height: 132px !important;
+  min-height: 132px !important;
+  max-height: 132px !important;
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+  line-height: 20px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt .image-console-references,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt.is-hover-expanded .image-console-references,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt.has-open-menu .image-console-references,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt .image-console-generate,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt.is-hover-expanded .image-console-generate,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt.has-open-menu .image-console-generate {
+  align-self: end !important;
 }
 
 /* Result wall zoom control lock: keep the preview-size control visible when the
