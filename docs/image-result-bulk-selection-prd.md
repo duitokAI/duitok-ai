@@ -335,3 +335,4 @@ bulk_delete_failed
 - 不要让 checkbox 点击冒泡打开图片详情。
 - 不要把 selected 状态写入后端，除非未来需要跨页面保留选择。
 - 批量操作需要保护用户已有 Attachments，不要误删已经保存的 Product / Avatar reference。
+
