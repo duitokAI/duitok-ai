@@ -4794,6 +4794,7 @@ function closeAspectRatioPopover() {
   aspectRatioPopoverCleanup?.();
   aspectRatioPopoverCleanup = null;
   document.querySelector(".floating-aspect-ratio-options")?.remove();
+  document.querySelectorAll(".image-aspect-ratio-menu[open]").forEach((el) => el.removeAttribute("open"));
   document.querySelectorAll(".image-generate-console.has-open-menu").forEach((consoleEl) => {
     const hasOpenDetails = consoleEl.querySelector(".image-model-picker[open],.image-resolution-menu[open],.image-aspect-ratio-menu[open]");
     if (!hasOpenDetails) consoleEl.classList.remove("has-open-menu");
@@ -4820,6 +4821,7 @@ function openAspectRatioPopover(summary) {
   closeAspectRatioPopover();
   const consoleEl = source.closest(".image-generate-console");
   consoleEl?.querySelectorAll(".image-model-picker[open],.image-resolution-menu[open]").forEach((el) => el.removeAttribute("open"));
+  source.removeAttribute("open");
   consoleEl?.classList.add("has-open-menu", "is-hover-expanded");
   consoleEl?.classList.remove("is-compact");
   const popover = document.createElement("div");
