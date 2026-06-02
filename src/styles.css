@@ -39508,3 +39508,37 @@ body:has(.studio-shell .video-prompt-extractor-page),
     transform-origin: center center !important;
   }
 }
+
+/* Compact composer vertical alignment: the collapsed Generate button should sit
+   on the same optical centerline as Avatar/Product, not sag below the pill. */
+@media (min-width: 761px) {
+  .studio-shell .image-higgsfield-mode > .image-generate-console.is-compact {
+    align-items: center !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-references {
+    align-self: center !important;
+    transform: translateY(-2px) !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-reference-thumb {
+    align-self: center !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-generate {
+    height: 54px !important;
+    min-height: 54px !important;
+    max-height: 54px !important;
+    width: 54px !important;
+    min-width: 54px !important;
+    max-width: 54px !important;
+    align-self: center !important;
+    justify-self: center !important;
+    transform: translateY(-3px) !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-generate:hover:not(:disabled),
+  .studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-generate:active:not(:disabled) {
+    transform: translateY(-3px) !important;
+  }
+}
