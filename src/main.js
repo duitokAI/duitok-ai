@@ -1801,9 +1801,9 @@ function bindImageConsoleCompact() {
     window.requestAnimationFrame(sync);
   };
   const expandForHover = () => {
-    hovering = true;
-    consoleEl.classList.add("is-hover-expanded");
-    consoleEl.classList.remove("is-compact");
+    hovering = false;
+    updateMenuState();
+    requestSync();
   };
   const releaseHoverExpansion = () => {
     hovering = false;

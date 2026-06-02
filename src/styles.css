@@ -39598,3 +39598,50 @@ body:has(.studio-shell .video-prompt-extractor-page),
     transform: translateY(-3px) !important;
   }
 }
+
+
+/* Image composer hover size lock: mouse movement must not switch the bar into a
+   subtly different layout. Hover-expanded/open-menu/long-prompt states share the
+   same expanded shell dimensions. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact),
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).is-hover-expanded,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-open-menu,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt {
+  box-sizing: border-box !important;
+  height: 120px !important;
+  min-height: 120px !important;
+  max-height: 120px !important;
+  grid-template-rows: 100px !important;
+  align-items: center !important;
+  transition: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-main,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).is-hover-expanded .image-console-main,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-open-menu .image-console-main,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt .image-console-main {
+  height: 100px !important;
+  min-height: 100px !important;
+  max-height: 100px !important;
+  grid-template-rows: 50px 42px !important;
+  gap: 8px !important;
+  align-self: center !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-prompt,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).is-hover-expanded .image-console-prompt,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-open-menu .image-console-prompt,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt .image-console-prompt {
+  height: 50px !important;
+  min-height: 50px !important;
+  max-height: 50px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).is-hover-expanded .image-console-tools,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-open-menu .image-console-tools,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt .image-console-tools {
+  height: 42px !important;
+  min-height: 42px !important;
+  max-height: 42px !important;
+}
