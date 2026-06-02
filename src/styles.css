@@ -32043,6 +32043,33 @@ label {
   font-size: 12px !important;
 }
 
+.generation-credit-refund-note {
+  width: min(100%, 210px) !important;
+  display: grid !important;
+  gap: 3px !important;
+  margin: 0 !important;
+  padding: 8px 10px !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: rgba(255, 255, 255, 0.88) !important;
+  text-align: center !important;
+}
+
+.generation-credit-refund-note strong {
+  color: #fff !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+  line-height: 1.05 !important;
+}
+
+.generation-credit-refund-note span {
+  color: rgba(255, 255, 255, 0.72) !important;
+  font-size: 10px !important;
+  font-weight: 750 !important;
+  line-height: 1.25 !important;
+}
+
 .studio-wall-new-badge {
   position: absolute !important;
   z-index: 5 !important;
