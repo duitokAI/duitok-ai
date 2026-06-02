@@ -37231,6 +37231,77 @@ body:has(.studio-shell .image-higgsfield-mode),
     max-height: min(420px, calc(100dvh - 112px)) !important;
   }
 }
+
+/* Agent generated result layout lock: status, media, and actions each own a
+   row so images cannot cover labels and buttons cannot cover images. */
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-card,
+.studio-shell .agent-page-panel .agent-generation-card {
+  display: grid !important;
+  grid-template-rows: auto auto auto !important;
+  align-items: start !important;
+  row-gap: 14px !important;
+  overflow: visible !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-status-rail,
+.studio-shell .agent-page-panel .agent-generation-status-rail {
+  position: relative !important;
+  z-index: 2 !important;
+  margin: 0 0 4px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread .agent-generation-preview.agent-generation-result-preview,
+.studio-shell .agent-page-panel .agent-thread .agent-generation-preview.agent-generation-result-preview {
+  position: relative !important;
+  z-index: 1 !important;
+  grid-template-rows: auto auto !important;
+  align-items: start !important;
+  gap: 14px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-preview .result-preview-trigger,
+.studio-shell .agent-page-panel .agent-generation-result-preview .result-preview-trigger {
+  position: relative !important;
+  z-index: 1 !important;
+  display: block !important;
+  margin: 0 !important;
+  transform: none !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-preview .result-image,
+.studio-shell .agent-page-panel .agent-generation-result-preview .result-image,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-preview .result-video-shell,
+.studio-shell .agent-page-panel .agent-generation-result-preview .result-video-shell {
+  position: static !important;
+  z-index: auto !important;
+  display: block !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-actions,
+.studio-shell .agent-page-panel .agent-generation-result-actions {
+  position: relative !important;
+  z-index: 2 !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  align-items: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transform: none !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-actions button,
+.studio-shell .agent-page-panel .agent-generation-result-actions button {
+  min-height: 38px !important;
+  margin: 0 !important;
+}
 /* Toolbar summary symbol lock: dropdown chevrons always sit on the right. */
 .studio-shell .image-higgsfield-mode > .image-generate-console .image-model-picker summary,
 .studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-model-picker summary,
