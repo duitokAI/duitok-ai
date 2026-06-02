@@ -1986,7 +1986,9 @@ function initDelegatedEvents() {
 
 function handleDelegatedPointerDown(event) {
   const resultActionButton = event.target.closest?.("[data-result-action]");
-  if (resultActionButton && app.contains(resultActionButton)) flashResultActionButton(resultActionButton);
+  if (!resultActionButton || !app.contains(resultActionButton)) return;
+  flashResultActionButton(resultActionButton);
+  if (resultActionButton.dataset.resultAction === "download") setResultActionBusy(resultActionButton, true);
 }
 
 function handleDelegatedClick(event) {
@@ -11954,6 +11956,10 @@ function downloadDirect(url, filename, options = {}) {
   link.remove();
 }
 
+function wait(ms = 0) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
 function playResultVideo(button) {
   const shell = button?.closest(".result-video-shell");
   const video = shell?.querySelector("video");
@@ -12084,9 +12090,10 @@ async function resultAction(button) {
       const kind = button.dataset.resultKind || "text";
       const filename = resultDownloadFilename(item, kind);
       const path = kind === "text" ? `/api/export/result/${id}` : `/api/media/result/${id}/${kind}`;
+      await wait(80);
       if (kind !== "text") downloadDirect(path, filename, { keepModal: true });
       else await download(path, filename, { keepModal: true });
-      await wait(520);
+      await wait(620);
       return;
     }
     if (actionName === "delete") {

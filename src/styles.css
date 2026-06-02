@@ -39184,3 +39184,34 @@ body:has(.studio-shell .video-prompt-extractor-page),
     transform: rotate(360deg);
   }
 }
+
+
+/* Download spinner repaint lock: force the icon out and the spinner above all
+   toolbar icon rules while the direct download is being triggered. */
+.studio-shell button[data-result-action="download"].is-working {
+  position: relative !important;
+}
+
+.studio-shell button[data-result-action="download"].is-working > svg,
+.studio-shell button[data-result-action="download"].is-working > i,
+.studio-shell button[data-result-action="download"].is-working .lucide {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  animation: none !important;
+}
+
+.studio-shell button[data-result-action="download"].is-working::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  z-index: 3 !important;
+  width: 18px !important;
+  height: 18px !important;
+  margin: -9px 0 0 -9px !important;
+  border: 2px solid rgba(255, 255, 255, 0.28) !important;
+  border-top-color: rgba(255, 255, 255, 0.96) !important;
+  border-radius: 999px !important;
+  animation: download-action-spin 680ms linear infinite !important;
+  pointer-events: none !important;
+}
