@@ -32086,6 +32086,25 @@ label {
   justify-self: center !important;
 }
 
+/* Dropdown copy should wrap to a second line before truncating. */
+.studio-shell .image-higgsfield-mode .image-model-picker .image-model-option,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-option,
+.studio-shell .image-higgsfield-mode .image-resolution-options button {
+  min-height: 64px !important;
+  align-items: center !important;
+}
+
+.studio-shell .image-higgsfield-mode .image-model-picker .image-model-option-copy small,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-option-copy small,
+.studio-shell .image-higgsfield-mode .image-resolution-option-copy small {
+  display: -webkit-box !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: normal !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+}
+
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper {
   display: grid !important;
   grid-template-columns: 34px minmax(48px, 1fr) 34px !important;
