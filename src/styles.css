@@ -35218,3 +35218,108 @@ label {
 .studio-shell .agent-page-panel .agent-thread article.assistant > .agent-message {
   padding-top: 2px !important;
 }
+
+/* Image composer toolbar polish: keep inner glyphs from inheriting pill sizing. */
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-tools {
+  grid-template-columns: 256px 44px 104px 108px 132px !important;
+  gap: 8px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu {
+  width: 104px !important;
+  min-width: 104px !important;
+  max-width: 104px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu summary {
+  display: grid !important;
+  grid-template-columns: 18px minmax(0, 1fr) 12px !important;
+  align-items: center !important;
+  justify-items: center !important;
+  gap: 6px !important;
+  padding: 0 10px !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu summary .aspect-ratio-glyph {
+  width: var(--ratio-icon-width, 14px) !important;
+  min-width: var(--ratio-icon-width, 14px) !important;
+  max-width: 18px !important;
+  height: var(--ratio-icon-height, 18px) !important;
+  min-height: var(--ratio-icon-height, 18px) !important;
+  max-height: 18px !important;
+  display: inline-block !important;
+  justify-self: center !important;
+  border: 2px solid rgba(181, 132, 218, 0.76) !important;
+  border-radius: 5px !important;
+  padding: 0 !important;
+  background: rgba(255, 255, 255, 0.58) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu summary b,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu summary b {
+  min-width: 0 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  display: block !important;
+  justify-self: center !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  color: #2a0633 !important;
+  font-size: 21px !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  text-overflow: clip !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu summary > svg:last-child {
+  justify-self: end !important;
+  color: rgba(142, 91, 180, 0.9) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu summary > svg:first-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu summary > i:first-child {
+  width: 17px !important;
+  min-width: 17px !important;
+  height: 17px !important;
+  min-height: 17px !important;
+  justify-self: center !important;
+  color: rgba(142, 91, 180, 0.9) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-count-stepper span {
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  min-width: 0 !important;
+  display: inline-flex !important;
+  align-items: baseline !important;
+  justify-content: center !important;
+  gap: 1px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  background: rgba(255, 255, 255, 0.56) !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-count-stepper span b,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-count-stepper span small {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  border: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}

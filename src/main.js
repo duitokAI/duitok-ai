@@ -4787,7 +4787,7 @@ function aspectRatioDescription(value = "9:16") {
 function imageAspectRatioPicker(selectedAspectRatio, options = []) {
   return `<details class="image-aspect-ratio-select image-aspect-ratio-menu">
     <summary aria-label="Aspect ratio">
-      ${aspectRatioGlyph(selectedAspectRatio)}
+      ${icon("crop", 15)}
       <b>${esc(selectedAspectRatio)}</b>
       ${icon("chevron-down", 16)}
     </summary>
