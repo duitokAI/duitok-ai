@@ -22167,7 +22167,7 @@ label {
 /* Agent Chat UX v2: one clean chat surface, hidden background memory, mobile-first behavior. */
 .studio-shell:has(.agent-page) {
   --agent-session-panel-width: min(252px, calc(100vw - 118px));
-  --agent-session-panel-gap: clamp(24px, 2vw, 36px);
+  --agent-session-panel-gap: clamp(88px, 6vw, 116px);
 }
 
 .studio-shell .workspace:has(.agent-page) {
@@ -37550,7 +37550,7 @@ body:has(.studio-shell .image-higgsfield-mode),
   padding: 14px 12px 18px !important;
   margin: 0 !important;
   overflow: hidden !important;
-  background: linear-gradient(180deg, rgba(255, 251, 255, 0.96), rgba(248, 239, 250, 0.98)) !important;
+  background: linear-gradient(180deg, #fffbff, #f8effa) !important;
   box-shadow: 18px 0 42px rgba(111, 28, 132, 0.1) !important;
   color: #35113f !important;
   pointer-events: auto !important;
