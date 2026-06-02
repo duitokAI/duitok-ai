@@ -56,6 +56,8 @@ let aspectRatioPopoverCleanup = null;
 let imageCountSaveTimer = null;
 let imageCountSaveSeq = 0;
 let imageConsoleExpandLockUntil = 0;
+let imageConsoleExpandedUntilUserScroll = false;
+let imageConsoleUserScrollIntentUntil = 0;
 let resultTitleSaveTimer = null;
 let generationPollTimer = null;
 const generationStateEtags = new Map();
@@ -1746,7 +1748,6 @@ function bindImageConsoleCompact() {
   let ticking = false;
   let compact = consoleEl.classList.contains("is-compact");
   let hovering = false;
-  let expandedUntilScroll = false;
   let menuOpen = false;
   let compactAt = 1;
   let expandAt = 0;
@@ -1791,7 +1792,11 @@ function bindImageConsoleCompact() {
     const nextCompact = compact ? scrollY > expandAt : scrollY > compactAt;
     if (nextCompact !== compact) compact = nextCompact;
     updateMenuState();
-    const expandLocked = expandedUntilScroll || Date.now() < imageConsoleExpandLockUntil || consoleEl.contains(document.activeElement);
+    const expandLocked = imageConsoleExpandedUntilUserScroll || Date.now() < imageConsoleExpandLockUntil || consoleEl.contains(document.activeElement);
+    if (expandLocked) {
+      consoleEl.classList.add("is-hover-expanded");
+      consoleEl.classList.remove("is-compact");
+    }
     const shouldCompact = compact && !hovering && !menuOpen && !expandLocked;
     consoleEl.classList.toggle("is-compact", shouldCompact);
     if (shouldCompact) closeModelMenus();
@@ -1803,7 +1808,7 @@ function bindImageConsoleCompact() {
   };
   const expandForHover = () => {
     hovering = true;
-    expandedUntilScroll = true;
+    imageConsoleExpandedUntilUserScroll = true;
     consoleEl.classList.add("is-hover-expanded");
     consoleEl.classList.remove("is-compact");
   };
@@ -1816,13 +1821,22 @@ function bindImageConsoleCompact() {
     updateMenuState();
     requestSync();
   };
-  const handleScroll = () => {
-    imageConsoleExpandLockUntil = 0;
-    expandedUntilScroll = false;
-    if (hovering) {
-      hovering = false;
+  const markUserScrollIntent = () => {
+    imageConsoleUserScrollIntentUntil = Date.now() + 800;
+  };
+  const handleUserScrollKey = (event) => {
+    if (["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "].includes(event.key)) {
+      markUserScrollIntent();
     }
-    if (!menuOpen) consoleEl.classList.remove("is-hover-expanded");
+  };
+  const handleScroll = () => {
+    const hasUserScrollIntent = Date.now() < imageConsoleUserScrollIntentUntil;
+    if (hasUserScrollIntent) {
+      imageConsoleExpandLockUntil = 0;
+      imageConsoleExpandedUntilUserScroll = false;
+      if (hovering) hovering = false;
+      if (!menuOpen) consoleEl.classList.remove("is-hover-expanded");
+    }
     requestSync();
   };
   const restoreAfterFocus = (event) => {
@@ -1847,6 +1861,9 @@ function bindImageConsoleCompact() {
     updateMenuState();
   };
   uniqueScrollTargets.forEach((target) => target.addEventListener("scroll", handleScroll, { passive: true }));
+  window.addEventListener("wheel", markUserScrollIntent, { passive: true, capture: true });
+  window.addEventListener("touchmove", markUserScrollIntent, { passive: true, capture: true });
+  window.addEventListener("keydown", handleUserScrollKey, true);
   window.addEventListener("resize", handleResize);
   consoleEl.addEventListener("mouseenter", expandForHover);
   consoleEl.addEventListener("mousemove", expandForHover);
@@ -1862,6 +1879,9 @@ function bindImageConsoleCompact() {
   sync();
   imageConsoleScrollCleanup = () => {
     uniqueScrollTargets.forEach((target) => target.removeEventListener("scroll", handleScroll));
+    window.removeEventListener("wheel", markUserScrollIntent, true);
+    window.removeEventListener("touchmove", markUserScrollIntent, true);
+    window.removeEventListener("keydown", handleUserScrollKey, true);
     window.removeEventListener("resize", handleResize);
     consoleEl.removeEventListener("mouseenter", expandForHover);
     consoleEl.removeEventListener("mousemove", expandForHover);
