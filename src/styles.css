@@ -35096,40 +35096,50 @@ label {
   inset: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  display: grid !important;
-  grid-template-rows: minmax(0, 1fr) repeat(5, auto) minmax(0, 1fr) !important;
-  justify-items: center !important;
-  align-items: center !important;
-  align-content: stretch !important;
-  gap: clamp(7px, 1vw, 11px) !important;
+  display: block !important;
   padding: clamp(10px, 2.4vw, 20px) !important;
   overflow: hidden !important;
   transform: none !important;
 }
 
+.studio-shell .image-higgsfield-mode .studio-wall-pending.failed .studio-wall-failed-center,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending.failed .studio-wall-failed-center {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  width: min(312px, calc(100% - 28px)) !important;
+  display: grid !important;
+  grid-template-rows: repeat(5, auto) !important;
+  justify-items: center !important;
+  align-items: center !important;
+  gap: clamp(7px, 1vw, 11px) !important;
+  text-align: center !important;
+  transform: translate(-50%, -50%) !important;
+}
+
 .studio-shell .image-higgsfield-mode .studio-wall-pending.failed .studio-wall-pending-spinner,
 .studio-shell .video-prompt-extractor-page .studio-wall-pending.failed .studio-wall-pending-spinner {
-  grid-row: 2 !important;
+  grid-row: 1 !important;
 }
 
 .studio-shell .image-higgsfield-mode .studio-wall-pending.failed b,
 .studio-shell .video-prompt-extractor-page .studio-wall-pending.failed b {
-  grid-row: 3 !important;
+  grid-row: 2 !important;
 }
 
 .studio-shell .image-higgsfield-mode .studio-wall-pending.failed small,
 .studio-shell .video-prompt-extractor-page .studio-wall-pending.failed small {
-  grid-row: 4 !important;
+  grid-row: 3 !important;
 }
 
 .studio-shell .image-higgsfield-mode .studio-wall-pending.failed .generation-credit-refund-note,
 .studio-shell .video-prompt-extractor-page .studio-wall-pending.failed .generation-credit-refund-note {
-  grid-row: 5 !important;
+  grid-row: 4 !important;
 }
 
 .studio-shell .image-higgsfield-mode .studio-wall-pending.failed .studio-wall-failed-actions,
 .studio-shell .video-prompt-extractor-page .studio-wall-pending.failed .studio-wall-failed-actions {
-  grid-row: 6 !important;
+  grid-row: 5 !important;
 }
 
 .studio-shell .image-higgsfield-mode .studio-wall-pending.failed b,

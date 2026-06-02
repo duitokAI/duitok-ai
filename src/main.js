@@ -4464,13 +4464,17 @@ function studioPendingWallCard(job) {
   const isFailed = job.status === "failed";
   const statusLabel = generationJobStatusLabel(job);
   const promptPreview = String(job.promptSnapshot || job.prompt || "").replaceAll("\n", " ").trim();
+  const statusIcon = `<span class="studio-wall-pending-spinner" role="status" aria-label="${esc(statusLabel)}" title="${esc(statusLabel)}">${icon(isFailed ? "triangle-alert" : "loader-circle", 22)}</span>`;
+  const statusBody = `
+      ${statusIcon}
+      <b>${esc(statusLabel)}</b>
+      <small>${esc(isFailed ? (job.errorMessage || "Please adjust the prompt and try again.") : promptPreview ? promptPreview.slice(0, 110) : generationJobStageHelp(job))}</small>`;
   return `<article class="studio-wall-card studio-wall-pending ${aspectClass} ${isFailed ? "failed" : ""}" data-generation-job-id="${esc(job.id)}" data-generation-job-status="${esc(job.status || "queued")}" style="--media-ratio:${mediaRatio};aspect-ratio:${esc(aspectRatio.replace(":", " / "))}">
     <div class="studio-wall-pending-controls" aria-label="${esc(statusLabel)}">
-      <span class="studio-wall-pending-spinner" role="status" aria-label="${esc(statusLabel)}" title="${esc(statusLabel)}">${icon(isFailed ? "triangle-alert" : "loader-circle", 22)}</span>
-      <b>${esc(statusLabel)}</b>
-      <small>${esc(isFailed ? (job.errorMessage || "Please adjust the prompt and try again.") : promptPreview ? promptPreview.slice(0, 110) : generationJobStageHelp(job))}</small>
-      ${isFailed ? `<p class="generation-credit-refund-note"><strong>Credits safe</strong><span>No charge.</span></p>` : ""}
-      ${isFailed ? `<div class="studio-wall-failed-actions"><button type="button" data-generation-retry="${esc(job.id)}">${icon("refresh-cw", 14)} Retry</button><button type="button" data-generation-edit="${esc(job.id)}">${icon("pencil-line", 14)} Edit</button></div>` : job.optimistic ? "" : `<button type="button" data-generation-cancel="${esc(job.id)}" aria-label="Cancel generation" title="Cancel generation">${icon("ban", 22)}</button>`}
+      ${isFailed ? `<div class="studio-wall-failed-center">${statusBody}
+        <p class="generation-credit-refund-note"><strong>Credits safe</strong><span>No charge.</span></p>
+        <div class="studio-wall-failed-actions"><button type="button" data-generation-retry="${esc(job.id)}">${icon("refresh-cw", 14)} Retry</button><button type="button" data-generation-edit="${esc(job.id)}">${icon("pencil-line", 14)} Edit</button></div>
+      </div>` : `${statusBody}${job.optimistic ? "" : `<button type="button" data-generation-cancel="${esc(job.id)}" aria-label="Cancel generation" title="Cancel generation">${icon("ban", 22)}</button>`}`}
     </div>
   </article>`;
 }
