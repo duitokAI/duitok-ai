@@ -34024,3 +34024,71 @@ label {
   caret-color: transparent !important;
   -webkit-text-fill-color: transparent !important;
 }
+
+
+/* Compact bulk result actions: four primary actions plus close. */
+.studio-shell .image-canvas-studio.is-bulk-selecting-results {
+  padding-bottom: 86px !important;
+}
+
+.studio-shell .image-canvas-studio.is-bulk-selecting-results .studio-bulk-selection-bar {
+  bottom: max(14px, env(safe-area-inset-bottom)) !important;
+  min-height: 58px !important;
+  gap: 10px !important;
+  padding: 7px 9px 7px 14px !important;
+  border-radius: 22px !important;
+  box-shadow:
+    0 18px 42px rgba(20, 7, 26, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.studio-shell .image-canvas-studio.is-bulk-selecting-results .studio-bulk-selection-count {
+  min-width: 160px !important;
+  gap: 10px !important;
+}
+
+.studio-shell .image-canvas-studio.is-bulk-selecting-results .studio-bulk-selection-icon {
+  width: 26px !important;
+  height: 26px !important;
+}
+
+.studio-shell .image-canvas-studio.is-bulk-selecting-results .studio-bulk-selection-count b {
+  font-size: clamp(17px, 1.24vw, 22px) !important;
+}
+
+.studio-shell .image-canvas-studio.is-bulk-selecting-results .studio-bulk-selection-actions {
+  gap: 7px !important;
+}
+
+.studio-shell .image-canvas-studio.is-bulk-selecting-results .studio-bulk-selection-actions button {
+  min-height: 44px !important;
+  gap: 8px !important;
+  padding: 0 16px !important;
+  border-radius: 14px !important;
+  font-size: clamp(13px, 0.98vw, 17px) !important;
+  font-weight: 820 !important;
+}
+
+@media (max-width: 860px) {
+  .studio-shell .image-canvas-studio.is-bulk-selecting-results {
+    padding-bottom: 104px !important;
+  }
+
+  .studio-shell .image-canvas-studio.is-bulk-selecting-results .studio-bulk-selection-bar {
+    min-height: 58px !important;
+    border-radius: 20px !important;
+  }
+
+  .studio-shell .image-canvas-studio.is-bulk-selecting-results .studio-bulk-selection-count {
+    min-width: 124px !important;
+  }
+
+  .studio-shell .image-canvas-studio.is-bulk-selecting-results .studio-bulk-selection-actions button {
+    min-height: 44px !important;
+    padding: 0 14px !important;
+  }
+
+  .studio-shell .image-canvas-studio.is-bulk-selecting-results .studio-bulk-selection-actions button.icon-only-bulk {
+    width: 48px !important;
+  }
+}

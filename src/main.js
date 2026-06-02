@@ -4498,11 +4498,10 @@ function studioBulkSelectionBar() {
       <b>${esc(selectedLabel)}</b>
     </div>
     <div class="studio-bulk-selection-actions">
-      <button type="button" data-bulk-result-action="download" ${downloadableCount ? "" : "disabled"}>${icon("download", 22)} <span>Download</span></button>
-      <button type="button" data-bulk-result-action="publish">${icon("upload", 22)} <span>Publish all</span></button>
-      <button type="button" data-bulk-result-action="projects">${icon("folder-up", 22)} <span>Add to projects</span></button>
-      <button type="button" data-bulk-result-action="favorite" class="icon-only-bulk" aria-label="Favorite selected results">${icon("heart", 24)}</button>
-      <button type="button" data-bulk-result-action="delete" class="icon-only-bulk danger" aria-label="Delete selected results">${icon("trash-2", 24)}</button>
+      <button type="button" data-bulk-result-action="download" ${downloadableCount ? "" : "disabled"}>${icon("download", 19)} <span>Download</span></button>
+      <button type="button" data-bulk-result-action="delete" class="danger">${icon("trash-2", 19)} <span>Delete</span></button>
+      <button type="button" data-bulk-result-action="save-avatar">${icon("user-round-plus", 19)} <span>Save as Avatar</span></button>
+      <button type="button" data-bulk-result-action="save-product">${icon("package-plus", 19)} <span>Save as Product</span></button>
       <button type="button" data-bulk-result-action="clear" class="icon-only-bulk ghost" aria-label="Clear selected results">${icon("x", 26)}</button>
     </div>
   </div>`;
@@ -11522,9 +11521,8 @@ async function bulkResultAction(actionName) {
     return set({ modal: "bulkDeleteResults" });
   }
   if (actionName === "download") return bulkDownloadSelectedResults();
-  if (actionName === "publish") return bulkPublishSelectedResults();
-  if (actionName === "projects") return notify("Add to projects will open after project picker is connected.");
-  if (actionName === "favorite") return notify(`${selectedResults().length} selected result${selectedResults().length > 1 ? "s" : ""} marked for saving.`);
+  if (actionName === "save-avatar") return bulkSaveSelectedResultsAsReference("avatar");
+  if (actionName === "save-product") return bulkSaveSelectedResultsAsReference("product");
 }
 
 async function bulkDownloadSelectedResults() {
@@ -11543,22 +11541,26 @@ async function bulkDownloadSelectedResults() {
   if (failed) notify(`已下载 ${items.length - failed} 张，${failed} 张失败。`);
 }
 
-async function bulkPublishSelectedResults() {
+async function bulkSaveSelectedResultsAsReference(kind = "avatar") {
   const items = selectedResults().filter((item) => item.id && (item.imageUrl || item.videoUrl));
-  if (!items.length) return notify("没有可发布的生成结果。");
-  notify(`正在加入 ${items.length} 个发布草稿。`);
+  if (!items.length) return notify("没有可保存的生成结果。");
+  const label = kind === "avatar" ? "Avatar" : "Product";
+  notify(`正在保存 ${items.length} 个 ${label} reference。`);
   let nextDb = state.db;
   let failed = 0;
   for (const item of items) {
     try {
-      nextDb = await api(`/results/${item.id}/schedule`, { method: "POST", body: JSON.stringify({}) });
+      nextDb = await api(`/results/${item.id}/save-reference`, {
+        method: "POST",
+        body: JSON.stringify({ kind })
+      });
     } catch {
       failed += 1;
     }
   }
   set({ db: nextDb });
-  if (failed) notify(`已加入 ${items.length - failed} 个，${failed} 个失败。`);
-  else notify(`已加入 ${items.length} 个发布草稿。`);
+  if (failed) notify(`已保存 ${items.length - failed} 个，${failed} 个失败。`);
+  else notify(`已保存 ${items.length} 个 ${label} reference。`);
 }
 
 function setResultActionBusy(button, busy) {
