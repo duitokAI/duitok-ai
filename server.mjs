@@ -4,6 +4,7 @@ import { readFile, writeFile, mkdir, readdir, stat } from "node:fs/promises";
 import { createReadStream } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { Readable } from "node:stream";
 import { createBrotliCompress, createGzip } from "node:zlib";
 import express from "express";
 import pg from "pg";
@@ -208,6 +209,7 @@ app.use((req, res, next) => {
   next();
 });
 app.use((req, res, next) => {
+  if (req.path.startsWith("/api/")) return next();
   const accepted = req.get("accept-encoding") || "";
   const useBrotli = accepted.includes("br");
   const useGzip = !useBrotli && accepted.includes("gzip");
@@ -6996,9 +6998,10 @@ app.get("/api/media/attachment/:id/:kind", async (req, res, next) => {
     const isVideo = req.params.kind === "video";
     if (attachment.assetStorageKey) {
       const r2Response = await getR2Object(attachment.assetStorageKey);
-      res.setHeader("Content-Type", r2Response.headers.get("content-type") || attachment.type || (isVideo ? "video/mp4" : "image/png"));
-      res.setHeader("Cache-Control", "private, max-age=86400");
-      return res.send(Buffer.from(await r2Response.arrayBuffer()));
+      return pipeFetchBody(r2Response, res, {
+        contentType: r2Response.headers.get("content-type") || attachment.type || (isVideo ? "video/mp4" : "image/png"),
+        cacheControl: "private, max-age=86400"
+      });
     }
     const media = dataUrlToMediaBytes(attachment.dataUrl || attachment.previewUrl || "");
     if (!media) {
@@ -7592,6 +7595,12 @@ app.get("/api/media/result/:id/:kind", async (req, res, next) => {
     if (result.assetStorageKey) {
       const r2Response = await getR2Object(result.assetStorageKey);
       const contentType = r2Response.headers.get("content-type") || (isVideo ? "video/mp4" : "image/png");
+      if (!wantsThumb) {
+        return pipeFetchBody(r2Response, res, {
+          contentType,
+          cacheControl: "private, max-age=86400"
+        });
+      }
       const bytes = Buffer.from(await r2Response.arrayBuffer());
       if (wantsThumb && contentType.startsWith("image/")) {
         const thumb = await cachedImageThumbnail(thumbCacheKey, bytes, thumbWidth);
@@ -7621,6 +7630,12 @@ app.get("/api/media/result/:id/:kind", async (req, res, next) => {
       throw error;
     }
     const contentType = response.headers.get("content-type") || (isVideo ? "video/mp4" : "image/png");
+    if (!wantsThumb) {
+      return pipeFetchBody(response, res, {
+        contentType,
+        cacheControl: "private, max-age=300"
+      });
+    }
     const bytes = Buffer.from(await response.arrayBuffer());
     if (wantsThumb && contentType.startsWith("image/")) {
       const thumb = await cachedImageThumbnail(thumbCacheKey, bytes, thumbWidth);
@@ -7679,6 +7694,18 @@ function sendThumbnail(res, bytes, cacheKey = "") {
   return res.send(bytes);
 }
 
+function pipeFetchBody(response, res, { contentType = "application/octet-stream", cacheControl = "", headers = {} } = {}) {
+  res.setHeader("Content-Type", contentType);
+  if (cacheControl) res.setHeader("Cache-Control", cacheControl);
+  for (const [key, value] of Object.entries(headers)) {
+    if (value) res.setHeader(key, value);
+  }
+  const contentLength = response.headers.get("content-length");
+  if (contentLength) res.setHeader("Content-Length", contentLength);
+  if (!response.body) return res.end();
+  return Readable.fromWeb(response.body).on("error", (error) => res.destroy(error)).pipe(res);
+}
+
 async function cachedImageThumbnail(cacheKey, bytes, width = 720) {
   const key = cacheKey || `${sha256(bytes)}|${width}`;
   const cached = getCachedThumbnail(key);
@@ -7730,12 +7757,11 @@ app.get(/^\/api\/media\/(.+)/, async (req, res, next) => {
     const response = await getR2Object(key);
     const contentType = response.headers.get("content-type") || "application/octet-stream";
     const cacheControl = response.headers.get("cache-control") || "public, max-age=31536000, immutable";
-    res.setHeader("Content-Type", contentType);
-    res.setHeader("Cache-Control", cacheControl);
-    res.setHeader("X-Content-Type-Options", "nosniff");
-    const contentLength = response.headers.get("content-length");
-    if (contentLength) res.setHeader("Content-Length", contentLength);
-    res.send(Buffer.from(await response.arrayBuffer()));
+    return pipeFetchBody(response, res, {
+      contentType,
+      cacheControl,
+      headers: { "X-Content-Type-Options": "nosniff" }
+    });
   } catch (error) {
     next(error);
   }

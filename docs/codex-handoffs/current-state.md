@@ -32,6 +32,11 @@ We are continuing from docs/codex-handoffs/current-state.md. Read this handoff f
 - 项目根目录的 QA 截图、录屏和构建产物已移到项目外归档：
   - `/Users/zixian/Documents/Codex/project-artifacts/pokaya-ai/2026-06-02-cleanup`
 - 项目目录体积已从约 623MB 降到约 453MB。
+- 进一步执行了服务端和资源优化：
+  - 媒体代理的普通 R2/外部媒体返回已改成流式转发，避免图片/视频整包进入内存。
+  - API 响应跳过自写压缩缓冲，减少大 JSON 响应的内存尖峰。
+  - Render `starter` 环境已收紧生成并发、缩略图缓存和 JSON body 上限。
+  - `public/` 图片资源已压缩，目录约从 54MB 降到 26MB。
 - `output/`、`dist/`、`node_modules/` 都是本地/构建产物，不应提交。
 
 ## 当前工作区基线
@@ -73,7 +78,7 @@ git status --short --branch
 - 长聊天会让 Codex 误判上下文，复杂任务应开新 chat 并先读本文件。
 - 根目录不要堆 QA 截图、录屏、临时 preview 图。
 - `dist/` 可随时通过 `npm run build` 再生成，不应依赖旧构建产物。
-- `server.mjs` 很大，改后要特别注意 API、媒体代理、状态读写和内存风险。
+- `server.mjs` 很大，改后要特别注意 API、媒体代理、状态读写和内存风险；普通媒体响应应保持 stream，不要重新改回 `arrayBuffer()` 后 `res.send()`。
 - Render `starter` 内存有限，媒体代理、图片/视频 buffer、全量 JSON state 都可能造成内存尖峰。
 - UI 任务不要只改 CSS 后直接结束，必须验证实际画面。
 
@@ -82,4 +87,3 @@ git status --short --branch
 ```text
 先读 docs/codex-handoffs/current-state.md 和 AGENTS.md，然后检查 git status。接下来只处理我这次提出的目标，不要碰无关文件。完成后 build、验证、commit、push，并告诉我 commit hash。
 ```
-

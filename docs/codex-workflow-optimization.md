@@ -88,6 +88,18 @@ python3 /Users/zixian/.codex/skills/keep-codex-fast/scripts/keep_codex_fast.py -
 - 不要把 `dist/`、`node_modules/`、`output/` 提交。
 - 做完大 UI 任务后，可以把临时截图搬出 repo。
 
+## 服务端性能维护策略
+
+- Render `starter` 内存有限，优先避免内存尖峰，而不是第一时间升级机器。
+- 媒体代理接口应尽量 stream R2/外部媒体响应；只有缩略图生成、上传镜像、持久化存储时才允许读入 buffer。
+- 大型 API JSON 不要经过自写压缩中间件整包缓冲。
+- 如果 Render 再发 memory limit 邮件，优先检查：
+  - `/api/media/result/*`
+  - `/api/media/attachment/*`
+  - `/api/media/*`
+  - `/api/state`
+  - 生成任务并发和缩略图缓存
+
 ## 判断 Codex 是否“变笨”的信号
 
 - 忘记 AGENTS.md 的 commit/push 规则。
@@ -98,4 +110,3 @@ python3 /Users/zixian/.codex/skills/keep-codex-fast/scripts/keep_codex_fast.py -
 - 长回答但没有实际执行。
 
 出现以上情况时，优先开新 chat，并让它先读 `docs/codex-handoffs/current-state.md`。
-

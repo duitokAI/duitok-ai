@@ -21,6 +21,16 @@ services:
         value: "3"
       - key: USER_GENERATE_PER_DAY
         value: "50"
+      - key: MAX_CONCURRENT_GENERATION_JOBS
+        value: "2"
+      - key: USER_CONCURRENT_GENERATIONS
+        value: "1"
+      - key: THUMBNAIL_CACHE_MAX_ITEMS
+        value: "80"
+      - key: THUMBNAIL_CACHE_MAX_BYTES
+        value: "33554432"
+      - key: JSON_BODY_LIMIT
+        value: 32mb
       - key: PUBLIC_APP_URL
         sync: false
       - key: CORS_ORIGINS
