@@ -4527,19 +4527,39 @@ function studioPendingWallCard(job) {
   const aspectClass = aspectRatio === "16:9" ? "landscape" : "portrait";
   const mediaRatio = aspectRatio === "16:9" ? "1.7778" : "0.5625";
   const isFailed = job.status === "failed";
+  const isCancelled = job.status === "cancelled";
+  const statusKey = generationJobStatusKey(job);
   const statusLabel = generationJobStatusLabel(job);
   const promptPreview = String(job.promptSnapshot || job.prompt || "").replaceAll("\n", " ").trim();
-  const statusIcon = `<span class="studio-wall-pending-spinner" role="status" aria-label="${esc(statusLabel)}" title="${esc(statusLabel)}">${icon(isFailed ? "triangle-alert" : "loader-circle", 22)}</span>`;
+  const wait = generationJobWaitSeconds(job);
+  const statusIcon = `<span class="studio-wall-pending-spinner" role="status" aria-label="${esc(statusLabel)}" title="${esc(statusLabel)}">${icon(isFailed ? "triangle-alert" : isCancelled ? "circle-check" : "loader-circle", 22)}</span>`;
+  const detail = isFailed
+    ? generationJobFailureCopy(job)
+    : isCancelled
+      ? "这次生成已停止，可以重新生成或删除这张记录。"
+      : generationJobStageHelp(job, wait);
   const statusBody = `
-      ${statusIcon}
-      <b>${esc(statusLabel)}</b>
-      <small>${esc(isFailed ? (job.errorMessage || "Please adjust the prompt and try again.") : promptPreview ? promptPreview.slice(0, 110) : generationJobStageHelp(job))}</small>`;
-  return `<article class="studio-wall-card studio-wall-pending ${aspectClass} ${isFailed ? "failed" : ""}" data-generation-job-id="${esc(job.id)}" data-generation-job-status="${esc(job.status || "queued")}" style="--media-ratio:${mediaRatio};aspect-ratio:${esc(aspectRatio.replace(":", " / "))}">
+      <header class="studio-wall-pending-top">
+        <span>${esc(generationJobModelLabel(job))}</span>
+        <em>${esc(wait ? `${wait}s` : "Just now")}</em>
+      </header>
+      <div class="studio-wall-pending-preview" aria-hidden="true">
+        <i></i><i></i><i></i>
+        ${statusIcon}
+      </div>
+      <div class="studio-wall-pending-copy">
+        <b>${esc(statusLabel)}</b>
+        <small>${esc(detail)}</small>
+      </div>
+      ${promptPreview ? `<p class="studio-wall-pending-prompt">${esc(promptPreview.slice(0, 128))}</p>` : ""}`;
+  return `<article class="studio-wall-card studio-wall-pending ${aspectClass} ${isFailed ? "failed" : ""} ${isCancelled ? "cancelled" : ""} ${wait >= 45 && !isFailed && !isCancelled ? "is-long-wait" : ""}" data-generation-job-id="${esc(job.id)}" data-generation-job-status="${esc(job.status || "queued")}" data-generation-job-stage="${esc(statusKey)}" style="--media-ratio:${mediaRatio};aspect-ratio:${esc(aspectRatio.replace(":", " / "))}">
     <div class="studio-wall-pending-controls" aria-label="${esc(statusLabel)}">
       ${isFailed ? `<div class="studio-wall-failed-center">${statusBody}
         <p class="generation-credit-refund-note"><strong>Credits safe</strong><span>No charge.</span></p>
         <div class="studio-wall-failed-actions"><button type="button" data-generation-retry="${esc(job.id)}">${icon("refresh-cw", 14)} Retry</button><button type="button" data-generation-edit="${esc(job.id)}">${icon("pencil-line", 14)} Edit</button></div>
-      </div>` : `${statusBody}${job.optimistic ? "" : `<button type="button" data-generation-cancel="${esc(job.id)}" aria-label="Cancel generation" title="Cancel generation">${icon("ban", 22)}</button>`}`}
+      </div>` : isCancelled ? `<div class="studio-wall-failed-center">${statusBody}
+        <div class="studio-wall-failed-actions"><button type="button" data-generation-retry="${esc(job.id)}">${icon("refresh-cw", 14)} Retry</button><button type="button" data-generation-edit="${esc(job.id)}">${icon("pencil-line", 14)} Edit</button></div>
+      </div>` : `${statusBody}${job.optimistic ? "" : `<button class="studio-wall-cancel-generation" type="button" data-generation-cancel="${esc(job.id)}" aria-label="取消生成" title="取消生成">${icon("circle-x", 22)}<span>取消</span></button>`}`}
     </div>
   </article>`;
 }
@@ -5735,28 +5755,60 @@ function pendingResultJobs(projectItem, types) {
   const serverJobs = state.db?.generationJobs || [];
   const serverIds = new Set(serverJobs.map((job) => job.id));
   return [...optimistic.filter((job) => !serverIds.has(job.id)), ...serverJobs]
-    .filter((job) => job.projectId === projectItem.id && ["queued", "processing", "failed"].includes(job.status))
+    .filter((job) => job.projectId === projectItem.id && ["queued", "processing", "failed"].includes(job.status)
+      || (job.projectId === projectItem.id && job.status === "cancelled" && generationJobWaitSeconds(job, job.completedAt) < 8))
     .filter((job) => job.type === "video"
       ? step === videoStudioStep(job.step)
       : types.includes(job.type) || (job.action === "generate-image" && types.includes("image")))
     .slice(0, 4);
 }
 
+function generationJobStatusKey(job = {}) {
+  if (job.status === "failed") return "failed";
+  if (job.status === "cancelled") return "cancelled";
+  if (job.stage === "prompt_advanced") return "optimizing";
+  if (job.stage === "saving_asset") return "saving";
+  if (job.stage === "provider_submitted" || job.status === "processing") return "generating";
+  return "queued";
+}
+
 function generationJobStatusLabel(job = {}) {
-  if (job.status === "failed") return "Generation failed";
-  if (job.status === "queued") return job.stage === "prompt_advanced" ? "Optimizing prompt" : "Queued";
-  if (job.stage === "prompt_advanced") return "Optimizing prompt";
-  if (job.stage === "provider_submitted") return job.type === "video" ? "Generating video" : "Generating image";
-  if (job.stage === "saving_asset") return "Saving result";
-  if (job.status === "processing") return "Processing";
+  if (job.status === "failed") return "生成失败";
+  if (job.status === "cancelled") return "已取消";
+  if (job.status === "queued") return job.stage === "prompt_advanced" ? "正在优化 prompt" : "排队中";
+  if (job.stage === "prompt_advanced") return "正在优化 prompt";
+  if (job.stage === "provider_submitted") return job.type === "video" ? "视频生成中" : "图片生成中";
+  if (job.stage === "saving_asset") return "保存中";
+  if (job.status === "processing") return job.type === "video" ? "视频生成中" : "图片生成中";
   return job.status || "Queued";
 }
 
-function generationJobStageHelp(job = {}) {
-  if (job.stage === "prompt_advanced") return "Prompt Advanced is running in the background.";
-  if (job.stage === "provider_submitted") return "You can keep creating while this finishes.";
-  if (job.stage === "saving_asset") return "Final asset is being saved to this project.";
-  return "Task is queued. You can keep writing the next prompt.";
+function generationJobStageHelp(job = {}, waitSeconds = generationJobWaitSeconds(job)) {
+  if (waitSeconds >= 90) return "这次比较久。你可以继续做别的，完成后结果会自动出现在这里。";
+  if (waitSeconds >= 45) return "这次可能需要更久，系统仍在检查生成结果。";
+  if (waitSeconds >= 15) return "还在生成中，请稍等一下。";
+  if (job.stage === "prompt_advanced") return "正在整理更适合生成的 prompt。";
+  if (job.stage === "provider_submitted") return job.type === "video" ? "AI 正在处理视频画面。" : "AI 正在绘制画面。";
+  if (job.stage === "saving_asset") return "正在把最终结果写入当前项目。";
+  return "正在等待生成额度，你可以继续写下一条 prompt。";
+}
+
+function generationJobWaitSeconds(job = {}, fallbackTime = "") {
+  const raw = fallbackTime || job.createdAt || job.startedAt || job.updatedAt || "";
+  const time = Date.parse(raw);
+  if (!Number.isFinite(time)) return 0;
+  return Math.max(0, Math.round((Date.now() - time) / 1000));
+}
+
+function generationJobModelLabel(job = {}) {
+  return job.model || job.modelLabel || (job.type === "video" ? "Video model" : "Image model");
+}
+
+function generationJobFailureCopy(job = {}) {
+  const raw = String(job.errorMessage || job.error || "").trim();
+  if (/timeout|timed out|超时/i.test(raw)) return "模型响应超时。Credit 已保护，可以直接重试。";
+  if (/save|upload|asset|storage|r2/i.test(raw)) return "图片保存失败。Credit 已保护，请重试或编辑 prompt。";
+  return raw || "请调整 prompt 后重试，失败任务不会扣费。";
 }
 
 function generationJobCard(job) {
@@ -10496,6 +10548,7 @@ async function generate(name, event = null) {
 
 async function cancelGenerationJob(jobId) {
   if (!jobId || !state.db) return;
+  if (!window.confirm("确认取消这次生成？未完成的任务会停止，未开始扣费的任务会自动释放。")) return;
   const previousDb = state.db;
   const nextDb = {
     ...previousDb,
@@ -10510,7 +10563,7 @@ async function cancelGenerationJob(jobId) {
       body: JSON.stringify({})
     });
     set({ db });
-    notify("Generation cancelled.");
+    notify("已取消这次生成。");
   } catch (error) {
     set({ db: previousDb });
     notify(error.message || "Could not cancel generation.");
@@ -10688,11 +10741,25 @@ function updateGenerationStatusInDom(db = state.db) {
     if (!job) return;
     card.dataset.generationJobStatus = job.status || "queued";
     card.dataset.agentJobStatus = job.status || "queued";
-    card.dataset.generationJobStage = job.stage || "";
+    card.dataset.generationJobStage = generationJobStatusKey(job);
     const label = card.matches(".agent-generation-processing-frame")
       ? card.querySelector("strong")
       : card.querySelector(".agent-generation-processing-frame strong, b");
     if (label) label.textContent = generationJobStatusLabel(job);
+    const wallSummary = card.matches(".studio-wall-pending")
+      ? card.querySelector(".studio-wall-pending-copy small")
+      : null;
+    if (wallSummary && ["queued", "processing"].includes(job.status)) {
+      wallSummary.textContent = generationJobStageHelp(job);
+    }
+    const wallTimer = card.matches(".studio-wall-pending")
+      ? card.querySelector(".studio-wall-pending-top em")
+      : null;
+    if (wallTimer) {
+      const wait = generationJobWaitSeconds(job);
+      wallTimer.textContent = wait ? `${wait}s` : "Just now";
+      card.classList.toggle("is-long-wait", wait >= 45 && !["failed", "cancelled"].includes(job.status));
+    }
     const frameSummary = card.matches(".agent-generation-processing-frame")
       ? card.querySelector("span")
       : card.querySelector(".agent-generation-processing-frame span");
