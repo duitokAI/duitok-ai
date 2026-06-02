@@ -8639,8 +8639,8 @@ function agentChatToolbar() {
   const c = agentUiCopy();
   return `<div class="agent-chat-toolbar">
     <div>
-      <button class="icon-only" data-action="new-agent-chat" title="${esc(c.newChat)}" aria-label="${esc(c.newChat)}">${icon("message-square-plus", 17)}</button>
-      <button class="icon-only" data-action="toggle-agent-history" title="${esc(c.history)}" aria-label="${esc(c.history)}">${icon("history", 17)}${state.agentHistorySessions.length ? `<b>${state.agentHistorySessions.length}</b>` : ""}</button>
+      <button class="icon-only" data-action="new-agent-chat" title="${esc(c.newChat)}" aria-label="${esc(c.newChat)}">${icon("message-square-plus", 17)}<span>${esc(c.newChat)}</span></button>
+      <button class="icon-only" data-action="toggle-agent-history" title="${esc(c.history)}" aria-label="${esc(c.history)}">${icon("history", 17)}<span>${esc(c.history)}</span>${state.agentHistorySessions.length ? `<b>${state.agentHistorySessions.length}</b>` : ""}</button>
     </div>
   </div>`;
 }

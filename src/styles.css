@@ -37125,13 +37125,54 @@ body:has(.studio-shell .image-higgsfield-mode),
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-chat-toolbar,
 .studio-shell .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-chat-toolbar {
-  display: none !important;
+  position: fixed !important;
+  top: clamp(18px, 3vh, 34px) !important;
+  right: auto !important;
+  left: max(24px, calc(50vw - 936px)) !important;
+  z-index: 21 !important;
+  width: clamp(260px, calc(50vw - 620px), 320px) !important;
+  display: flex !important;
   grid-row: auto !important;
   min-height: 0 !important;
-  height: 0 !important;
+  height: auto !important;
   padding: 0 !important;
   margin: 0 !important;
+  overflow: visible !important;
+  pointer-events: auto !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-chat-toolbar > div,
+.studio-shell .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-chat-toolbar > div {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  width: 100% !important;
+  gap: 10px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-chat-toolbar .icon-only,
+.studio-shell .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-chat-toolbar .icon-only {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  border-radius: 14px !important;
+  padding: 0 12px !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-chat-toolbar .icon-only span,
+.studio-shell .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-chat-toolbar .icon-only span {
+  display: inline !important;
+  min-width: 0 !important;
   overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-thread,
@@ -37151,26 +37192,38 @@ body:has(.studio-shell .image-higgsfield-mode),
    instead of covering the conversation on the right. */
 .studio-shell .agent-chat-shell.agent-page-panel .agent-history-panel {
   position: fixed !important;
-  top: clamp(18px, 3vh, 34px) !important;
+  top: clamp(76px, calc(3vh + 58px), 92px) !important;
   right: auto !important;
-  left: max(18px, calc(50vw - 754px)) !important;
+  left: max(24px, calc(50vw - 936px)) !important;
   z-index: 20 !important;
-  width: clamp(280px, calc(50vw - 448px), 336px) !important;
+  width: clamp(260px, calc(50vw - 620px), 320px) !important;
   max-height: calc(100dvh - 132px) !important;
   overflow: auto !important;
   margin: 0 !important;
 }
 
 @media (max-width: 1320px) {
+  .studio-shell .agent-chat-shell.agent-page-panel .agent-chat-toolbar {
+    left: 18px !important;
+    width: 260px !important;
+  }
+
   .studio-shell .agent-chat-shell.agent-page-panel .agent-history-panel {
     left: 18px !important;
-    width: min(320px, calc(100vw - 36px)) !important;
+    width: 260px !important;
   }
 }
 
 @media (max-width: 980px) {
-  .studio-shell .agent-chat-shell.agent-page-panel .agent-history-panel {
+  .studio-shell .agent-chat-shell.agent-page-panel .agent-chat-toolbar {
     top: 14px !important;
+    right: 14px !important;
+    left: 14px !important;
+    width: auto !important;
+  }
+
+  .studio-shell .agent-chat-shell.agent-page-panel .agent-history-panel {
+    top: 72px !important;
     right: 14px !important;
     left: 14px !important;
     width: auto !important;
