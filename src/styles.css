@@ -38503,3 +38503,63 @@ body:has(.studio-shell .video-prompt-extractor-page),
     display: none !important;
   }
 }
+
+/* Image composer outer shell width lock: keep the current button layout, but stop the bar from eating the full viewport. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) {
+  width: min(1680px, calc(100% - clamp(96px, 9vw, 220px))) !important;
+  max-width: 1680px !important;
+  margin-inline: auto !important;
+  padding: 12px !important;
+  gap: 12px !important;
+  grid-template-columns: minmax(560px, 1fr) 218px 200px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-main {
+  min-width: 0 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references {
+  width: 218px !important;
+  min-width: 218px !important;
+  max-width: 218px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate {
+  width: 200px !important;
+  min-width: 200px !important;
+  max-width: 200px !important;
+}
+
+@media (max-width: 1500px) {
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) {
+    width: calc(100% - 48px) !important;
+    max-width: none !important;
+    grid-template-columns: minmax(0, 1fr) 198px 176px !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references {
+    width: 198px !important;
+    min-width: 198px !important;
+    max-width: 198px !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate {
+    width: 176px !important;
+    min-width: 176px !important;
+    max-width: 176px !important;
+  }
+}
+
+@media (max-width: 1180px) {
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) {
+    width: calc(100% - 24px) !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references,
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+}
