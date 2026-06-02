@@ -37244,6 +37244,47 @@ body:has(.studio-shell .image-higgsfield-mode),
   }
 }
 
+/* Agent desktop right-fill lock: the history panel is fixed, so the chat
+   surface must be anchored to the remaining right-side viewport. */
+@media (min-width: 981px) {
+  .studio-shell:has(.agent-page) {
+    --agent-chat-shell-left: calc(
+      var(--studio-sidebar-width, 304px) +
+      var(--agent-session-panel-width, 252px) +
+      clamp(38px, 3vw, 64px)
+    );
+    --agent-chat-shell-right: clamp(18px, 2vw, 40px);
+  }
+
+  .studio-shell .agent-chat-shell.agent-page-panel,
+  .studio-shell .agent-chat-shell.agent-page-panel.agent-layout-fixture-active {
+    position: fixed !important;
+    top: 0 !important;
+    right: var(--agent-chat-shell-right) !important;
+    bottom: 0 !important;
+    left: var(--agent-chat-shell-left) !important;
+    width: auto !important;
+    max-width: none !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    margin: 0 !important;
+  }
+
+  .studio-shell .agent-chat-shell.agent-page-panel .agent-thread,
+  .studio-shell .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-thread {
+    width: min(920px, calc(100% - 32px)) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  .studio-shell .agent-chat-shell.agent-page-panel .agent-form,
+  .studio-shell .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-form {
+    width: min(920px, calc(100% - 32px)) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+
 /* Agent generated result layout lock: status, media, and actions each own a
    row so images cannot cover labels and buttons cannot cover images. */
 .studio-shell .agent-chat-shell.agent-page-panel .agent-generation-card,
