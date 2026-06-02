@@ -14929,12 +14929,12 @@ label {
 .settings-modal {
   position: relative;
   z-index: 1;
-  width: min(1180px, calc(100vw - 36px));
-  height: min(780px, calc(100dvh - 48px));
+  width: min(820px, calc(100vw - 36px));
+  height: auto;
   max-height: calc(100dvh - 48px);
-  min-height: 520px;
+  min-height: 0;
   display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   overflow: hidden;
   border: 1px solid rgba(126, 61, 145, 0.16);
   border-radius: 26px;
@@ -14957,13 +14957,17 @@ label {
 }
 
 .settings-modal-close {
+  position: absolute;
+  left: 22px;
+  top: 22px;
+  z-index: 3;
   width: 62px;
   height: 62px;
   display: grid;
   place-items: center;
   border: 0;
   border-radius: 15px;
-  margin: 0 0 14px;
+  margin: 0;
   border: 1px solid rgba(118, 55, 138, 0.12);
   background: rgba(255, 255, 255, 0.86);
   color: #35113f;
@@ -15004,11 +15008,11 @@ label {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   overflow: hidden;
-  padding: 28px 34px 0;
+  padding: 34px 40px 0;
 }
 
 .settings-modal-head {
-  padding: 0 0 22px;
+  padding: 0 0 22px 82px;
   border-bottom: 1px solid rgba(82, 22, 98, 0.12);
 }
 
@@ -15033,7 +15037,7 @@ label {
   max-height: 100%;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 22px 6px 30px 0;
+  padding: 22px 6px 34px 0;
   scrollbar-color: rgba(126, 61, 145, 0.24) transparent;
   -webkit-overflow-scrolling: touch;
 }
@@ -15118,7 +15122,7 @@ label {
 
 @media (max-width: 860px) {
   .settings-modal {
-    height: min(760px, calc(100dvh - 28px));
+    height: auto;
     max-height: calc(100dvh - 28px);
     min-height: 0;
     grid-template-columns: 1fr;
@@ -15146,7 +15150,11 @@ label {
   }
 
   .settings-modal-main {
-    padding: 20px 20px 0;
+    padding: 18px 20px 0;
+  }
+
+  .settings-modal-head {
+    padding-left: 64px;
   }
 
   .settings-modal-head h2 {

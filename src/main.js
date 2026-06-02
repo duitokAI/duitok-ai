@@ -6628,33 +6628,13 @@ function settingsPage() {
       <form class="settings-card" id="settings-section-profile" data-form="account-profile">
         <header>
           <span>${icon("user-round", 30)}</span>
-          <div><h2>${t("profile")}</h2><p>${t("profileSubtitle")}</p></div>
+          <div><h2>Account</h2><p>${t("profileSubtitle")}</p></div>
         </header>
         <div class="settings-form-grid">
           <label>${t("displayName")}<input name="name" value="${esc(user.name || "")}" autocomplete="name" required></label>
           <label>${t("email")}<input name="email" value="${esc(user.email || "")}" disabled></label>
         </div>
-        <button class="gold-button" type="submit">${icon("save", 18)} ${t("saveProfile")}</button>
-      </form>
-      <form class="settings-card whatsapp-settings-card" id="settings-section-whatsapp" data-form="account-whatsapp">
-        <header>
-          <span>${icon("message-circle", 30)}</span>
-          <div><h2>${t("whatsappSupport")}</h2><p>${t("whatsappSettingsSubtitle")}</p></div>
-        </header>
-        <label>${t("whatsappNumber")}<input name="phone" value="${esc(user.phone || "")}" placeholder="+60123456789" autocomplete="tel"></label>
-        <button class="gold-button" type="submit">${t("saveWhatsapp")}</button>
-      </form>
-      <form class="settings-card password-settings-card" id="settings-section-password" data-form="account-password">
-        <header>
-          <span>${icon("lock-keyhole", 30)}</span>
-          <div><h2>${t("changePassword")}</h2><p>${t("changePasswordSubtitle")}</p></div>
-        </header>
-        <label>${t("oldPassword")}<input name="oldPassword" type="password" autocomplete="current-password" required></label>
-        <div class="settings-form-grid">
-          <label>${t("newPassword")}<input name="newPassword" type="password" autocomplete="new-password" required></label>
-          <label>${t("confirmNewPassword")}<input name="confirmPassword" type="password" autocomplete="new-password" required></label>
-        </div>
-        <button class="gold-button" type="submit">${t("changePassword")}</button>
+        <button class="gold-button" type="submit">${icon("save", 18)} Save Account</button>
       </form>
     </section>`;
 }
@@ -6857,15 +6837,10 @@ function modal() {
 function settingsModal() {
   return `<div class="modal-backdrop settings-modal-backdrop" data-action="close-modal">
     <section class="settings-modal" role="dialog" aria-modal="true" aria-label="${esc(t("settings"))}">
-      <aside class="settings-modal-nav" aria-label="${esc(t("settings"))}">
-        <button class="settings-modal-close" type="button" data-action="close-modal" aria-label="Close">${icon("x", 28)}</button>
-        <button class="active" type="button" data-settings-section="profile">${icon("user-round", 22)} <span>${t("profile")}</span></button>
-        <button type="button" data-settings-section="whatsapp">${icon("message-circle", 22)} <span>${t("whatsappSupport")}</span></button>
-        <button type="button" data-settings-section="password">${icon("lock-keyhole", 22)} <span>${t("changePassword")}</span></button>
-      </aside>
       <div class="settings-modal-main">
+        <button class="settings-modal-close" type="button" data-action="close-modal" aria-label="Close">${icon("x", 28)}</button>
         <header class="settings-modal-head">
-          <h2>${t("settings")}</h2>
+          <h2>Account</h2>
           <p>${t("accountSettingsSubtitle")}</p>
         </header>
         <div class="settings-modal-scroll">
