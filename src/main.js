@@ -171,6 +171,8 @@ const state = {
   attachmentPickerFilter: "avatar",
   ugcPromptBuilder: defaultUgcPromptBuilder(),
   activeResultId: null,
+  selectedResultIds: [],
+  bulkDeleteBusy: false,
   resultTitleSavedId: null,
   imageCanvasSelectedResultId: null,
   editImageBusy: false,
@@ -1773,7 +1775,7 @@ function handleDelegatedPointerDown(event) {
 }
 
 function handleDelegatedClick(event) {
-  const target = event.target.closest?.("[data-page],[data-step],[data-step-open],[data-project],[data-studio-wall-more],[data-result-action],[data-result-preview],[data-result-prompt],[data-image-canvas-result],[data-image-model-option],[data-generation-cancel],[data-generation-retry],[data-generation-edit]");
+  const target = event.target.closest?.("[data-page],[data-step],[data-step-open],[data-project],[data-studio-wall-more],[data-result-select],[data-bulk-result-action],[data-result-action],[data-result-preview],[data-result-prompt],[data-image-canvas-result],[data-image-model-option],[data-generation-cancel],[data-generation-retry],[data-generation-edit]");
   if (!target || !app.contains(target)) return;
 
   if (target.dataset.page) return scheduleNavigation({ page: target.dataset.page });
@@ -1781,6 +1783,8 @@ function handleDelegatedClick(event) {
   if (target.dataset.stepOpen) return scheduleNavigation({ page: "project", step: target.dataset.stepOpen });
   if (target.dataset.project) return scheduleNavigation({ projectId: target.dataset.project, page: "project", projectMenuId: null });
   if (target.dataset.studioWallMore) return showMoreStudioWall(target.dataset.studioWallMore);
+  if (target.dataset.resultSelect) return toggleResultSelection(target.dataset.resultSelect);
+  if (target.dataset.bulkResultAction) return bulkResultAction(target.dataset.bulkResultAction);
   if (target.dataset.resultAction) return resultAction(target);
   if (target.dataset.resultPreview) return set({ modal: "previewResult", activeResultId: target.dataset.resultPreview });
   if (target.dataset.resultPrompt) return set({ modal: "resultPrompt", activeResultId: target.dataset.resultPrompt });
@@ -1799,6 +1803,7 @@ function scheduleNavigation(patch = {}) {
   const sameStep = !nextStep || nextStep === state.step;
   const sameProject = !nextProjectId || nextProjectId === state.projectId;
   if (samePage && sameStep && sameProject && !patch.modal && !patch.projectMenuId) return;
+  if (!samePage || !sameStep || !sameProject) patch.selectedResultIds = [];
   document.documentElement.classList.add("is-route-changing");
   if (navigationFrame) window.cancelAnimationFrame(navigationFrame);
   navigationFrame = window.requestAnimationFrame(() => {
@@ -4357,6 +4362,7 @@ function studioResultWall(p, meta = {}) {
       ${cards.join("")}
     </div>
     ${hiddenCount ? `<button type="button" class="studio-wall-more" data-studio-wall-more="${esc(wallKey)}">${icon("chevrons-down", 18)} Load ${Math.min(studioWallPageSize, hiddenCount)} more · ${hiddenCount} hidden</button>` : ""}
+    ${studioBulkSelectionBar()}
   </section>`;
 }
 
@@ -4447,8 +4453,13 @@ function studioWallCard(item, index = 0) {
   const canSaveReference = Boolean(item.imageUrl || item.videoUrl);
   const mediaRatio = resultMediaRatio(item);
   const isNew = Date.now() - Date.parse(item.createdAt || 0) < 120000;
-  return `<article class="studio-wall-card ${isNew ? "is-new" : ""}" data-media-ratio="${esc(mediaRatio)}" style="--media-ratio:${esc(mediaRatio)}">
+  const selected = selectedResultIdSet().has(item.id);
+  const bulkSelecting = isBulkSelectingResults();
+  return `<article class="studio-wall-card ${isNew ? "is-new" : ""} ${selected ? "is-selected" : ""} ${bulkSelecting ? "is-bulk-selecting" : ""}" data-media-ratio="${esc(mediaRatio)}" data-result-id="${esc(item.id)}" style="--media-ratio:${esc(mediaRatio)}">
     ${isNew ? `<span class="studio-wall-new-badge">New</span>` : ""}
+    <button type="button" class="studio-wall-select-toggle" data-result-select="${esc(item.id)}" aria-label="${selected ? "Unselect result" : "Select result"}" aria-pressed="${selected ? "true" : "false"}">
+      ${selected ? icon("check", 17) : ""}
+    </button>
     ${resultPreview(item, { clickable: true, wall: true, priority: index < 6 })}
     <div class="studio-wall-actions" aria-label="Image actions">
       <button type="button" data-result-action="save-avatar" data-result-id="${esc(item.id)}" data-tooltip="Save as Avatar" aria-label="Save as Avatar" ${canSaveReference ? "" : "disabled"}>${icon("user-round-plus", 17)}</button>
@@ -4458,6 +4469,36 @@ function studioWallCard(item, index = 0) {
     </div>
     <footer><b>${esc(item.title || resultModelLabel(item))}</b><span>${esc(promptText ? promptText.slice(0, 92) : resultMediaLabel(item))}</span></footer>
   </article>`;
+}
+
+function selectedResultIdSet() {
+  return new Set(Array.isArray(state.selectedResultIds) ? state.selectedResultIds : []);
+}
+
+function selectedResults() {
+  const ids = selectedResultIdSet();
+  return allResults().filter((item) => ids.has(item.id));
+}
+
+function isBulkSelectingResults() {
+  return selectedResultIdSet().size > 0;
+}
+
+function studioBulkSelectionBar() {
+  const items = selectedResults();
+  if (!items.length) return "";
+  const downloadableCount = items.filter((item) => item.imageUrl || item.videoUrl).length;
+  return `<div class="studio-bulk-selection-bar" role="region" aria-label="Bulk selected results">
+    <div class="studio-bulk-selection-count">
+      <b>${items.length}</b>
+      <span>selected</span>
+    </div>
+    <div class="studio-bulk-selection-actions">
+      <button type="button" data-bulk-result-action="download" ${downloadableCount ? "" : "disabled"}>${icon("download", 17)} Download</button>
+      <button type="button" data-bulk-result-action="delete" class="danger">${icon("trash-2", 17)} Delete</button>
+      <button type="button" data-bulk-result-action="clear" class="ghost">${icon("x", 17)} Clear</button>
+    </div>
+  </div>`;
 }
 
 function studioGenerateDock(p, meta = {}) {
@@ -6403,6 +6444,7 @@ function modal() {
   if (state.modal === "saveResultReference") return saveResultReferenceModal();
   if (state.modal === "editResultImage") return editResultImageModal();
   if (state.modal === "deleteResult") return deleteResultModal();
+  if (state.modal === "bulkDeleteResults") return bulkDeleteResultModal();
   if (state.modal === "agentConfirm") return agentConfirmModal();
   const title = { newProject: t("createProject"), renameProject: t("renameProject"), deleteProject: t("deleteProject"), register: t("choosePlan"), sop: t("sopImage"), export: t("exportReady"), support: t("supportTitle") }[state.modal];
   const body = {
@@ -6669,6 +6711,19 @@ function editResultImageModal() {
           <button class="dark-button" type="button" data-action="close-modal">Cancel</button>
         </div>
       </form>
+    </section>
+  </div>`;
+}
+
+function bulkDeleteResultModal() {
+  const count = selectedResults().length;
+  return `<div class="modal-backdrop result-modal-backdrop" data-action="close-modal">
+    <section class="modal result-choice-modal" role="dialog" aria-modal="true" aria-label="Delete selected results">
+      <button class="icon-only close" data-action="close-modal" type="button">${icon("x")}</button>
+      <p class="folder-label">${icon("trash-2", 18)} Delete</p>
+      <h2>删除 ${count} 个生成结果？</h2>
+      <p class="result-modal-copy">只会删除当前项目里的生成结果。已经保存到 Attachments 的 Product / Avatar 会继续保留。</p>
+      <div class="delete-confirm"><div><button class="dark-button" data-action="close-modal">${icon("x")} 取消</button><button class="gold-button danger-button" data-action="confirm-bulk-delete-results" ${state.bulkDeleteBusy ? "disabled" : ""}>${icon(state.bulkDeleteBusy ? "loader-circle" : "trash-2")} ${state.bulkDeleteBusy ? "删除中" : "删除"}</button></div></div>
     </section>
   </div>`;
 }
@@ -9297,7 +9352,7 @@ function closeLangMenu(event) {
 
 async function action(event, name) {
   if (name === "close-modal" && event.target !== event.currentTarget && event.currentTarget.classList.contains("modal-backdrop")) return;
-  if (name === "close-modal") return set({ modal: null, activeResultId: null, activeAgentRunId: null, editImageBusy: false });
+  if (name === "close-modal") return set({ modal: null, activeResultId: null, activeAgentRunId: null, editImageBusy: false, bulkDeleteBusy: false });
   if (name === "new-project") return set({ modal: "newProject" });
   if (name === "wizard-back") return set({ wizardStep: Math.max(1, state.wizardStep - 1) });
   if (name === "wizard-next") return set({ wizardStep: Math.min(4, state.wizardStep + 1) });
@@ -9330,6 +9385,7 @@ async function action(event, name) {
   if (name === "save-ugc-prompt-template") return notify("Prompt template saved in this builder.");
   if (name === "confirm-delete-project") return deleteProject();
   if (name === "confirm-delete-result") return deleteResult();
+  if (name === "confirm-bulk-delete-results") return bulkDeleteSelectedResults();
   if (name === "refresh-payment-status") return refreshPaymentStatus(event.currentTarget.dataset.order);
   if (name === "open-home") {
     window.history.pushState({}, "", "/");
@@ -11275,17 +11331,18 @@ async function mutate(path, options, message) {
   notify(message);
 }
 
-async function download(url, filename) {
+async function download(url, filename, options = {}) {
   const res = await fetch(url.startsWith("/api") ? `${apiBaseUrl}${url}` : url, {
     headers: state.token ? { Authorization: `Bearer ${state.token}` } : {}
   });
+  if (!res.ok) throw new Error("Download failed.");
   const blob = await res.blob();
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
   link.download = filename;
   link.click();
   URL.revokeObjectURL(link.href);
-  set({ modal: "export" });
+  if (!options.keepModal) set({ modal: "export" });
 }
 
 function playResultVideo(button) {
@@ -11307,6 +11364,44 @@ function flashResultActionButton(button) {
   void button.offsetWidth;
   button.classList.add("is-pressed");
   window.setTimeout(() => button.classList.remove("is-pressed"), 180);
+}
+
+function toggleResultSelection(id) {
+  if (!id) return;
+  const ids = selectedResultIdSet();
+  if (ids.has(id)) ids.delete(id);
+  else ids.add(id);
+  set({ selectedResultIds: [...ids] });
+}
+
+function clearResultSelection() {
+  if (!isBulkSelectingResults()) return;
+  set({ selectedResultIds: [], bulkDeleteBusy: false });
+}
+
+async function bulkResultAction(actionName) {
+  if (actionName === "clear") return clearResultSelection();
+  if (actionName === "delete") {
+    if (!selectedResults().length) return clearResultSelection();
+    return set({ modal: "bulkDeleteResults" });
+  }
+  if (actionName === "download") return bulkDownloadSelectedResults();
+}
+
+async function bulkDownloadSelectedResults() {
+  const items = selectedResults().filter((item) => item.imageUrl || item.videoUrl);
+  if (!items.length) return notify("没有可下载的生成结果。");
+  notify(`正在下载 ${items.length} 张图片。`);
+  let failed = 0;
+  for (const item of items) {
+    const kind = item.videoUrl ? "video" : "image";
+    try {
+      await download(`/api/media/result/${item.id}/${kind}`, resultDownloadFilename(item, kind), { keepModal: true });
+    } catch {
+      failed += 1;
+    }
+  }
+  if (failed) notify(`已下载 ${items.length - failed} 张，${failed} 张失败。`);
 }
 
 function setResultActionBusy(button, busy) {
@@ -11449,11 +11544,31 @@ async function deleteResult() {
   if (!id) return;
   try {
     const db = await api(`/results/${id}`, { method: "DELETE" });
-    set({ db, modal: null, activeResultId: null });
+    const selectedIds = selectedResultIdSet();
+    selectedIds.delete(id);
+    set({ db, modal: null, activeResultId: null, selectedResultIds: [...selectedIds] });
     notify("已删除生成结果。");
   } catch (error) {
     notify(error.message);
   }
+}
+
+async function bulkDeleteSelectedResults() {
+  const ids = selectedResults().map((item) => item.id);
+  if (!ids.length) return set({ modal: null, selectedResultIds: [], bulkDeleteBusy: false });
+  set({ bulkDeleteBusy: true });
+  let nextDb = state.db;
+  let failed = 0;
+  for (const id of ids) {
+    try {
+      nextDb = await api(`/results/${id}`, { method: "DELETE" });
+    } catch {
+      failed += 1;
+    }
+  }
+  set({ db: nextDb, modal: null, selectedResultIds: [], bulkDeleteBusy: false });
+  if (failed) notify(`已删除 ${ids.length - failed} 个，${failed} 个失败。`);
+  else notify(`已删除 ${ids.length} 个生成结果。`);
 }
 
 async function showPaymentReturnNotice() {
