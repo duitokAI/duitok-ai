@@ -34337,3 +34337,35 @@ label {
     grid-template-columns: minmax(176px, 1fr) var(--image-toolbar-control-height) !important;
   }
 }
+
+/* Final image chatbox safe area: keep the bottom composer from covering the
+   last media row after every later density override. */
+.studio-shell .image-canvas-studio.image-higgsfield-mode,
+.studio-shell .image-higgsfield-mode {
+  --image-chatbox-safe-bottom: clamp(150px, 17vh, 238px);
+  padding-bottom: max(var(--image-chatbox-safe-bottom), env(safe-area-inset-bottom)) !important;
+  scroll-padding-bottom: max(var(--image-chatbox-safe-bottom), env(safe-area-inset-bottom)) !important;
+}
+
+.studio-shell .image-canvas-studio.image-higgsfield-mode.is-bulk-selecting-results,
+.studio-shell .image-higgsfield-mode.is-bulk-selecting-results {
+  --image-chatbox-safe-bottom: clamp(104px, 12vh, 150px);
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall {
+  padding-bottom: var(--image-chatbox-safe-bottom) !important;
+  scroll-padding-bottom: var(--image-chatbox-safe-bottom) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid {
+  padding: 0 0 var(--image-chatbox-safe-bottom) 0 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid::after {
+  content: "";
+  flex: 0 0 100%;
+  width: 100%;
+  height: 1px;
+  pointer-events: none;
+}
+
