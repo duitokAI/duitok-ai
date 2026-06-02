@@ -35770,3 +35770,141 @@ body:has(.studio-shell .image-higgsfield-mode),
     linear-gradient(135deg, #fff8fc 0%, #f6edf9 52%, #eee2f4 100%) !important;
   background-color: #eee2f4 !important;
 }
+
+/* Highest-specificity toolbar density lock: overrides older non-compact rules. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools {
+  grid-template-columns: 232px 44px 94px 94px 114px !important;
+  gap: 8px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker {
+  width: 232px !important;
+  min-width: 232px !important;
+  max-width: 232px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance {
+  width: 44px !important;
+  min-width: 44px !important;
+  max-width: 44px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu {
+  width: 94px !important;
+  min-width: 94px !important;
+  max-width: 94px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper {
+  width: 114px !important;
+  min-width: 114px !important;
+  max-width: 114px !important;
+  grid-template-columns: 32px minmax(0, 1fr) 32px !important;
+  padding: 0 4px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu summary {
+  height: 40px !important;
+  min-height: 40px !important;
+  max-height: 40px !important;
+  border-radius: 16px !important;
+  overflow: visible !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker summary {
+  grid-template-columns: 24px minmax(0, 1fr) 14px !important;
+  gap: 8px !important;
+  padding: 0 12px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-current-icon {
+  width: 24px !important;
+  min-width: 24px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  border: 1px solid rgba(181, 132, 218, 0.32) !important;
+  border-radius: 999px !important;
+  background: rgba(181, 132, 218, 0.12) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-current-icon .provider-logo {
+  width: 18px !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  min-height: 18px !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-current-text b {
+  font-size: 17px !important;
+  font-weight: 850 !important;
+  line-height: 1.2 !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu summary {
+  grid-template-columns: 18px minmax(0, 1fr) 13px !important;
+  gap: 6px !important;
+  padding: 0 10px !important;
+  align-items: center !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu summary b,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu summary b {
+  font-size: 18px !important;
+  font-weight: 850 !important;
+  line-height: 1.18 !important;
+  overflow: visible !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker summary > svg:last-child {
+  width: 13px !important;
+  min-width: 13px !important;
+  height: 13px !important;
+  min-height: 13px !important;
+  align-self: center !important;
+  justify-self: center !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper button {
+  width: 32px !important;
+  min-width: 32px !important;
+  max-width: 32px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  max-height: 32px !important;
+  border-radius: 12px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper span {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper span b {
+  font-size: 16px !important;
+  font-weight: 850 !important;
+  line-height: 1.18 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper span small {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  line-height: 1.18 !important;
+}
