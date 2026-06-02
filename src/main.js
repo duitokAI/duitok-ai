@@ -9629,7 +9629,11 @@ function bind() {
   document.querySelectorAll("[data-result]").forEach((el) => el.addEventListener("click", () => download(`/api/export/result/${el.dataset.result}`, `pokaya-result.txt`)));
   document.querySelectorAll("[data-video-play]").forEach((el) => el.addEventListener("click", () => playResultVideo(el)));
   document.querySelectorAll("[data-image-console-prompt]").forEach((el) => {
-    el.addEventListener("input", () => updateImagePromptLocal(el.value));
+    updateImagePromptEditorRows(el);
+    el.addEventListener("input", () => {
+      updateImagePromptLocal(el.value);
+      updateImagePromptEditorRows(el);
+    });
     el.addEventListener("keydown", (event) => {
       if (event.key !== "Enter" || (!event.metaKey && !event.ctrlKey) || event.shiftKey || event.altKey || event.isComposing) return;
       event.preventDefault();
@@ -9842,6 +9846,41 @@ function syncImagePromptDensityClass(value = project()?.image?.prompt || "") {
   document.querySelectorAll(".image-generate-console").forEach((el) => {
     el.classList.toggle("has-long-prompt", isLong);
   });
+  requestAnimationFrame(() => {
+    document.querySelectorAll("[data-image-console-prompt]").forEach((el) => updateImagePromptEditorRows(el));
+  });
+}
+
+function updateImagePromptEditorRows(input) {
+  const consoleEl = input?.closest?.(".image-generate-console");
+  if (!input || !consoleEl) return;
+  const styles = window.getComputedStyle(input);
+  const lineHeight = Number.parseFloat(styles.lineHeight) || 20;
+  const paddingTop = Number.parseFloat(styles.paddingTop) || 0;
+  const paddingBottom = Number.parseFloat(styles.paddingBottom) || 0;
+  const mirror = document.createElement("div");
+  mirror.style.position = "absolute";
+  mirror.style.visibility = "hidden";
+  mirror.style.pointerEvents = "none";
+  mirror.style.zIndex = "-1";
+  mirror.style.boxSizing = styles.boxSizing;
+  mirror.style.width = `${Math.max(1, input.clientWidth)}px`;
+  mirror.style.font = styles.font;
+  mirror.style.letterSpacing = styles.letterSpacing;
+  mirror.style.lineHeight = styles.lineHeight;
+  mirror.style.padding = `${styles.paddingTop} ${styles.paddingRight} ${styles.paddingBottom} ${styles.paddingLeft}`;
+  mirror.style.whiteSpace = "pre-wrap";
+  mirror.style.wordBreak = "normal";
+  mirror.style.overflowWrap = "break-word";
+  mirror.textContent = input.value || " ";
+  document.body.appendChild(mirror);
+  const contentHeight = Math.max(0, mirror.scrollHeight - paddingTop - paddingBottom);
+  mirror.remove();
+  const rawRows = Math.max(1, Math.ceil(contentHeight / lineHeight));
+  const visibleRows = Math.max(1, Math.min(6, rawRows));
+  consoleEl.style.setProperty("--image-prompt-lines", String(visibleRows));
+  consoleEl.classList.toggle("has-long-prompt", rawRows > 1);
+  consoleEl.classList.toggle("has-scroll-prompt", rawRows > 6);
 }
 
 function fillImagePrompt(value = "") {
@@ -9854,6 +9893,7 @@ function fillImagePrompt(value = "") {
     input.focus({ preventScroll: true });
     input.setSelectionRange(promptText.length, promptText.length);
     syncImagePromptDensityClass(promptText);
+    updateImagePromptEditorRows(input);
   } else if (state.projectId && state.db) {
     set({ db: dbWithProjectField(state.db, state.projectId, "image.prompt", promptText) });
   }

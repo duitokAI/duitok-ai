@@ -40247,27 +40247,27 @@ body:has(.studio-shell .video-prompt-extractor-page),
 .studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt,
 .studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt.is-hover-expanded,
 .studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt.has-open-menu {
-  height: 212px !important;
-  min-height: 212px !important;
+  height: calc((var(--image-prompt-lines, 2) * 20px) + 92px) !important;
+  min-height: 132px !important;
   max-height: 212px !important;
-  grid-template-rows: 192px !important;
+  grid-template-rows: calc((var(--image-prompt-lines, 2) * 20px) + 72px) !important;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt .image-console-main,
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt.is-hover-expanded .image-console-main,
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt.has-open-menu .image-console-main {
-  height: 192px !important;
-  min-height: 192px !important;
+  height: calc((var(--image-prompt-lines, 2) * 20px) + 72px) !important;
+  min-height: 112px !important;
   max-height: 192px !important;
-  grid-template-rows: 142px 42px !important;
+  grid-template-rows: calc((var(--image-prompt-lines, 2) * 20px) + 22px) 42px !important;
   gap: 8px !important;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt .image-console-prompt,
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt.is-hover-expanded .image-console-prompt,
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt.has-open-menu .image-console-prompt {
-  height: 142px !important;
-  min-height: 142px !important;
+  height: calc((var(--image-prompt-lines, 2) * 20px) + 22px) !important;
+  min-height: 62px !important;
   max-height: 142px !important;
   align-items: stretch !important;
 }
@@ -40275,8 +40275,8 @@ body:has(.studio-shell .video-prompt-extractor-page),
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt .image-console-prompt textarea,
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt.is-hover-expanded .image-console-prompt textarea,
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt.has-open-menu .image-console-prompt textarea {
-  height: 132px !important;
-  min-height: 132px !important;
+  height: calc((var(--image-prompt-lines, 2) * 20px) + 12px) !important;
+  min-height: 52px !important;
   max-height: 132px !important;
   padding-top: 6px !important;
   padding-bottom: 6px !important;
