@@ -157,6 +157,7 @@ const state = {
   agentExpandedMessages: {},
   agentHistoryOpen: false,
   agentHistorySessions: readStoredJson(agentHistoryStorageKey, []),
+  agentHistoryEditingId: null,
   activeAgentRunId: null,
   queuePolling: false,
   langOpen: false,
@@ -8782,12 +8783,17 @@ function agentHistorySidebarList(sessions = []) {
   return `<div class="agent-session-list">
     ${sessions.map((item, index) => {
       const title = item.title || "未命名对话";
+      const isEditing = state.agentHistoryEditingId === item.id;
       const searchText = `${title} ${agentHistoryMeta(item)}`.toLowerCase();
       return `<article class="agent-session-item ${index === 0 ? "is-latest" : ""}" data-agent-history-row data-agent-history-text="${esc(searchText)}">
-        <button type="button" class="agent-session-restore" data-agent-history-restore="${esc(item.id)}" title="${esc(title)}">
-          <span>${esc(title)}</span>
-          <small>${agentHistoryMeta(item)}</small>
-        </button>
+        ${isEditing ? `<label class="agent-session-edit" title="重命名对话">
+          <input data-agent-history-title-input data-agent-history-title-id="${esc(item.id)}" value="${esc(title)}" maxlength="64" autofocus>
+          <small>Enter 保存 · Esc 取消</small>
+        </label>` : `<button type="button" class="agent-session-restore" data-agent-history-restore="${esc(item.id)}" title="${esc(title)}">
+            <span>${esc(title)}</span>
+            <small>${agentHistoryMeta(item)}</small>
+          </button>`}
+        <button type="button" class="agent-session-rename" data-agent-history-rename="${esc(item.id)}" title="重命名对话" aria-label="重命名对话">${icon("pencil", 15)}</button>
         <button type="button" class="agent-session-delete" data-agent-history-delete="${esc(item.id)}" title="删除这条历史" aria-label="删除这条历史">${icon("trash-2", 15)}</button>
       </article>`;
     }).join("")}
@@ -9533,7 +9539,33 @@ function bind() {
     set({ modal: "deleteProject", editingProjectId: el.dataset.projectDelete, projectMenuId: null });
   }));
   document.querySelectorAll("[data-agent-history-restore]").forEach((el) => el.addEventListener("click", () => restoreAgentHistory(el.dataset.agentHistoryRestore)));
+  document.querySelectorAll("[data-agent-history-rename]").forEach((el) => el.addEventListener("click", (event) => {
+    event.stopPropagation();
+    set({ agentHistoryEditingId: el.dataset.agentHistoryRename });
+  }));
   document.querySelectorAll("[data-agent-history-delete]").forEach((el) => el.addEventListener("click", () => deleteAgentHistory(el.dataset.agentHistoryDelete)));
+  document.querySelectorAll("[data-agent-history-title-input]").forEach((el) => {
+    el.addEventListener("click", (event) => event.stopPropagation());
+    el.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        renameAgentHistory(el.dataset.agentHistoryTitleId, el.value);
+      }
+      if (event.key === "Escape") {
+        event.preventDefault();
+        el.dataset.agentHistorySkipRename = "true";
+        set({ agentHistoryEditingId: null });
+      }
+    });
+    el.addEventListener("blur", () => {
+      if (el.dataset.agentHistorySkipRename === "true") return;
+      renameAgentHistory(el.dataset.agentHistoryTitleId, el.value, { quiet: true });
+    });
+    requestAnimationFrame(() => {
+      el.focus();
+      el.select();
+    });
+  });
   document.querySelectorAll("[data-agent-history-search]").forEach((el) => el.addEventListener("input", (event) => {
     const query = String(event.currentTarget.value || "").trim().toLowerCase();
     const root = event.currentTarget.closest(".agent-session-sidebar");
@@ -11265,7 +11297,23 @@ function deleteAgentHistory(id) {
   const sessions = (state.agentHistorySessions || []).filter((item) => item.id !== id);
   rememberAgentHistorySessions(sessions);
   notify("已删除这条历史记录。");
-  set({ agentHistorySessions: sessions });
+  set({ agentHistorySessions: sessions, agentHistoryEditingId: null });
+}
+
+function renameAgentHistory(id, title, options = {}) {
+  const nextTitle = String(title || "").replace(/\s+/g, " ").trim().slice(0, 64);
+  const sessions = state.agentHistorySessions || [];
+  const session = sessions.find((item) => item.id === id);
+  if (!session) return set({ agentHistoryEditingId: null });
+  if (!nextTitle) {
+    if (!options.quiet) notify("对话名字不能为空。");
+    return set({ agentHistoryEditingId: null });
+  }
+  if (nextTitle === (session.title || "未命名对话")) return set({ agentHistoryEditingId: null });
+  const renamed = sessions.map((item) => item.id === id ? { ...item, title: nextTitle, updatedAt: item.updatedAt || new Date().toISOString() } : item);
+  rememberAgentHistorySessions(renamed);
+  if (!options.quiet) notify("已重命名对话。");
+  return set({ agentHistorySessions: renamed, agentHistoryEditingId: null });
 }
 
 function agentMessagesForStorage(messages = []) {
