@@ -39020,3 +39020,56 @@ body:has(.studio-shell .video-prompt-extractor-page),
   line-height: 1 !important;
   transform: translateY(-1px) !important;
 }
+
+/* Expanded image composer target size: one stable bar, matching the large prompt-toolbar version. */
+@media (min-width: 1181px) {
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) {
+    box-sizing: border-box !important;
+    height: 120px !important;
+    min-height: 120px !important;
+    max-height: 120px !important;
+    grid-template-columns: minmax(0, 1fr) 200px !important;
+    grid-template-rows: 100px !important;
+    align-items: center !important;
+    padding: 10px !important;
+    gap: 10px !important;
+    overflow: visible !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-main {
+    height: 100px !important;
+    min-height: 100px !important;
+    max-height: 100px !important;
+    grid-template-rows: 50px 42px !important;
+    align-self: center !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references {
+    align-self: center !important;
+    width: 168px !important;
+    min-width: 168px !important;
+    max-width: 168px !important;
+    height: 76px !important;
+    min-height: 76px !important;
+    max-height: 76px !important;
+    grid-template-columns: 80px 80px !important;
+    grid-template-rows: 76px !important;
+    margin: 0 8px 0 0 !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb {
+    width: 80px !important;
+    min-width: 80px !important;
+    max-width: 80px !important;
+    height: 76px !important;
+    min-height: 76px !important;
+    max-height: 76px !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate {
+    height: 100px !important;
+    min-height: 100px !important;
+    max-height: 100px !important;
+    align-self: center !important;
+  }
+}
