@@ -5914,7 +5914,7 @@ function generationJobStatusKey(job = {}) {
 }
 
 function generationJobStatusLabel(job = {}) {
-  if (job.status === "failed") return "Generation failed";
+  if (job.status === "failed") return "Failed";
   if (job.status === "queued") return job.stage === "prompt_advanced" ? "Optimizing prompt" : "Queued";
   if (job.stage === "prompt_advanced") return "Optimizing prompt";
   if (job.stage === "provider_submitted") return job.type === "video" ? "Generating video" : "Generating image";
@@ -9286,7 +9286,7 @@ function agentGenerationPendingFrame(entry = {}, options = {}) {
     : status === "processing" ? "模型正在生成，完成后会自动出现在这里。" : "任务已加入队列，马上开始生成。";
   return `<div class="agent-generation-pending agent-generation-processing-frame ${options.compact ? "is-compact" : ""}" ${jobId ? `data-generation-job-id="${esc(jobId)}"` : ""} data-agent-job-status="${esc(status)}" data-agent-ratio="${esc(aspectRatio)}" style="aspect-ratio:${esc(aspectStyle)}">
     ${icon(isFailed ? "triangle-alert" : "loader-circle", 28)}
-    <strong>${esc(isFailed ? "Generation failed" : status === "processing" ? "Processing" : "Queued")}</strong>
+    <strong>${esc(isFailed ? "Failed" : status === "processing" ? "Processing" : "Queued")}</strong>
     <span>${esc(summary)}</span>
     ${isFailed ? `<p class="agent-generation-refund-note">${icon("rotate-ccw", 13)} Credit refunded</p>${agentGenerationFailedActions(entry)}` : ""}
   </div>`;
