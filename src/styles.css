@@ -37358,3 +37358,31 @@ body:has(.studio-shell .image-higgsfield-mode),
     row-gap: 10px !important;
   }
 }
+
+/* Quality menu single-line lock: descriptions are removed from the DOM. */
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options {
+  gap: 6px !important;
+  padding-block: 14px !important;
+}
+
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option,
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option:hover,
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option:focus,
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option:focus-visible,
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option.active,
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option[aria-selected="true"] {
+  min-height: 54px !important;
+  height: 54px !important;
+  align-items: center !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option-copy {
+  gap: 0 !important;
+  align-content: center !important;
+}
+
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option-copy small {
+  display: none !important;
+}
