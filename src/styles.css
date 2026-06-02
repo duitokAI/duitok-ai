@@ -37244,6 +37244,51 @@ body:has(.studio-shell .image-higgsfield-mode),
   }
 }
 
+/* Agent expanded-sidebar layout: only when the main sidebar is open, pin the
+   chat surface to the right of the history column and use the free right side. */
+@media (min-width: 981px) {
+  .studio-shell:not(.sidebar-collapsed):has(.agent-page) {
+    --agent-chat-expanded-left: calc(
+      var(--studio-sidebar-width, 304px) +
+      var(--agent-session-panel-width, 252px) +
+      clamp(28px, 2.4vw, 52px)
+    );
+    --agent-chat-expanded-right: clamp(18px, 2vw, 40px);
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel,
+  .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel.agent-layout-fixture-active {
+    position: fixed !important;
+    top: 0 !important;
+    right: var(--agent-chat-expanded-right) !important;
+    bottom: 0 !important;
+    left: var(--agent-chat-expanded-left) !important;
+    width: auto !important;
+    max-width: none !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    margin: 0 !important;
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel .agent-thread,
+  .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-thread,
+  .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel .agent-form,
+  .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-form {
+    width: min(920px, calc(100% - 32px)) !important;
+    margin-left: 0 !important;
+    margin-right: auto !important;
+  }
+
+  .studio-shell.sidebar-collapsed .agent-chat-shell.agent-page-panel,
+  .studio-shell.sidebar-collapsed .agent-chat-shell.agent-page-panel.agent-layout-fixture-active {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+  }
+}
+
 /* Agent generated result layout lock: status, media, and actions each own a
    row so images cannot cover labels and buttons cannot cover images. */
 .studio-shell .agent-chat-shell.agent-page-panel .agent-generation-card,
