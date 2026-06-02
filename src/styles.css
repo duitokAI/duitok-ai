@@ -35253,9 +35253,13 @@ label {
   align-items: start !important;
   column-gap: 16px !important;
   row-gap: 10px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
   width: min(920px, 100%) !important;
   max-width: min(920px, 100%) !important;
   padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
   overflow: visible !important;
 }
 
@@ -35268,8 +35272,13 @@ label {
   width: 42px !important;
   min-width: 42px !important;
   height: 42px !important;
+  min-height: 42px !important;
+  overflow: hidden !important;
   margin: 0 !important;
   transform: none !important;
+  box-sizing: border-box !important;
+  line-height: 1 !important;
+  isolation: isolate !important;
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant > .agent-message,
