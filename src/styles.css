@@ -41026,3 +41026,88 @@ body:has(.studio-shell .video-prompt-extractor-page),
   width: 34px !important;
   height: 34px !important;
 }
+
+/* Agent expanded-sidebar right-safe lock: when the main sidebar is open, the
+   chat lane must be measured inside the remaining viewport, not centered
+   against the full browser width. */
+@media (min-width: 981px) {
+  .studio-shell:not(.sidebar-collapsed):has(.agent-page) {
+    --agent-expanded-chat-right-safe: clamp(72px, 5vw, 112px);
+    --agent-expanded-chat-left-safe: clamp(28px, 2.4vw, 52px);
+    --agent-expanded-lane-width: min(
+      1180px,
+      calc(100vw - var(--studio-sidebar-width, 304px) - var(--agent-session-panel-width, 252px) - var(--agent-expanded-chat-left-safe) - var(--agent-expanded-chat-right-safe))
+    );
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .agent-workspace-shell {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding-left: var(--agent-expanded-chat-left-safe) !important;
+    padding-right: var(--agent-expanded-chat-right-safe) !important;
+    box-sizing: border-box !important;
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel,
+  .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel.agent-layout-fixture-active {
+    left: calc(var(--studio-sidebar-width, 304px) + var(--agent-session-panel-width, 252px) + var(--agent-expanded-chat-left-safe)) !important;
+    right: var(--agent-expanded-chat-right-safe) !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel .agent-thread,
+  .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-thread {
+    width: var(--agent-expanded-lane-width) !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding-right: 0 !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel .agent-thread article,
+  .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-thread article {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel .agent-thread article.assistant,
+  .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-thread article.assistant {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel .agent-thread article.assistant > .agent-message,
+  .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-thread article.assistant > .agent-message {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel .agent-thread article.user,
+  .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-thread article.user {
+    max-width: min(520px, 78%, 100%) !important;
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel .agent-form,
+  .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-form {
+    width: var(--agent-expanded-lane-width) !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 auto max(18px, env(safe-area-inset-bottom)) !important;
+    box-sizing: border-box !important;
+  }
+}
