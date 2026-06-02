@@ -40502,3 +40502,21 @@ body:has(.studio-shell .video-prompt-extractor-page),
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu summary b {
   font-size: 18px !important;
 }
+
+/* Agent chat viewport safe area: messages must never sit flush against the
+   browser edge or disappear under the composer. Keep this final so it wins over
+   older density, scroll-lock, and expanded-sidebar rules. */
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread,
+.studio-shell .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-thread {
+  padding-top: max(56px, env(safe-area-inset-top)) !important;
+  padding-bottom: max(220px, calc(160px + env(safe-area-inset-bottom))) !important;
+  scroll-padding-top: max(56px, env(safe-area-inset-top)) !important;
+  scroll-padding-bottom: max(220px, calc(160px + env(safe-area-inset-bottom))) !important;
+}
+
+@media (min-width: 981px) {
+  .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel .agent-thread,
+  .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-thread {
+    padding-top: clamp(64px, 6vh, 88px) !important;
+  }
+}
