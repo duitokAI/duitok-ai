@@ -39066,6 +39066,146 @@ body:has(.studio-shell .video-prompt-extractor-page),
   transform: translateY(-1px) !important;
 }
 
+/* Narrow viewport studio wall lock: shrinking the browser must not squash tabs
+   or failed generation cards into unreadable half-columns. */
+@media (max-width: 1320px) {
+  .studio-shell .workspace:has(.step-tabs) .studio-top-step-tabs,
+  .studio-shell .workspace:has(.step-tabs) .step-tabs,
+  .studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .studio-top-step-tabs,
+  .studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .step-tabs,
+  .studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .studio-top-step-tabs,
+  .studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .step-tabs {
+    display: flex !important;
+    grid-template-columns: none !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x proximity !important;
+  }
+
+  .studio-shell .workspace:has(.step-tabs) .step-tabs button,
+  .studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .step-tabs button,
+  .studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .step-tabs button {
+    flex: 0 0 210px !important;
+    width: 210px !important;
+    min-width: 210px !important;
+    max-width: 210px !important;
+    scroll-snap-align: start !important;
+  }
+
+  .studio-shell .workspace:has(.step-tabs) .step-tabs button span,
+  .studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .step-tabs button span,
+  .studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .step-tabs button span {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+}
+
+@media (max-width: 1180px) {
+  .studio-shell .image-higgsfield-mode .studio-wall-grid,
+  .studio-shell .video-prompt-extractor-page .studio-wall-grid {
+    grid-template-columns: repeat(auto-fill, minmax(clamp(148px, 27vw, 240px), 1fr)) !important;
+    gap: clamp(8px, 1.2vw, 14px) !important;
+    align-items: start !important;
+  }
+
+  .studio-shell .image-higgsfield-mode .studio-wall-card,
+  .studio-shell .video-prompt-extractor-page .studio-wall-card {
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .studio-shell .image-higgsfield-mode .studio-wall-pending.failed > .studio-wall-pending-controls,
+  .studio-shell .video-prompt-extractor-page .studio-wall-pending.failed > .studio-wall-pending-controls {
+    padding: clamp(7px, 1.1vw, 12px) !important;
+  }
+
+  .studio-shell .image-higgsfield-mode .studio-wall-pending.failed .studio-wall-failed-center,
+  .studio-shell .video-prompt-extractor-page .studio-wall-pending.failed .studio-wall-failed-center {
+    width: calc(100% - 14px) !important;
+    max-width: calc(100% - 14px) !important;
+    gap: clamp(5px, 0.8vw, 8px) !important;
+  }
+
+  .studio-shell .image-higgsfield-mode .studio-wall-pending.failed .studio-wall-pending-spinner,
+  .studio-shell .video-prompt-extractor-page .studio-wall-pending.failed .studio-wall-pending-spinner {
+    width: 26px !important;
+    height: 26px !important;
+    border-radius: 9px !important;
+  }
+
+  .studio-shell .image-higgsfield-mode .studio-wall-pending.failed .studio-wall-pending-spinner svg,
+  .studio-shell .video-prompt-extractor-page .studio-wall-pending.failed .studio-wall-pending-spinner svg {
+    width: 17px !important;
+    height: 17px !important;
+  }
+
+  .studio-shell .image-higgsfield-mode .studio-wall-pending.failed b,
+  .studio-shell .video-prompt-extractor-page .studio-wall-pending.failed b {
+    width: 100% !important;
+    display: block !important;
+    overflow: hidden !important;
+    font-size: clamp(13px, 1.9vw, 18px) !important;
+    line-height: 1.08 !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .studio-shell .image-higgsfield-mode .studio-wall-pending.failed small,
+  .studio-shell .video-prompt-extractor-page .studio-wall-pending.failed small {
+    display: -webkit-box !important;
+    overflow: hidden !important;
+    font-size: clamp(10px, 1.45vw, 13px) !important;
+    line-height: 1.12 !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
+  }
+
+  .studio-shell .image-higgsfield-mode .studio-wall-pending.failed .generation-credit-refund-note,
+  .studio-shell .video-prompt-extractor-page .studio-wall-pending.failed .generation-credit-refund-note {
+    width: min(100%, 130px) !important;
+    min-width: 0 !important;
+    padding: 5px 8px !important;
+    border-radius: 999px !important;
+    overflow: hidden !important;
+  }
+
+  .studio-shell .image-higgsfield-mode .studio-wall-pending.failed .generation-credit-refund-note strong,
+  .studio-shell .video-prompt-extractor-page .studio-wall-pending.failed .generation-credit-refund-note strong,
+  .studio-shell .image-higgsfield-mode .studio-wall-pending.failed .generation-credit-refund-note span,
+  .studio-shell .video-prompt-extractor-page .studio-wall-pending.failed .generation-credit-refund-note span {
+    display: block !important;
+    overflow: hidden !important;
+    font-size: clamp(9px, 1.25vw, 11px) !important;
+    line-height: 1.05 !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .studio-shell .image-higgsfield-mode .studio-wall-pending.failed .studio-wall-failed-actions,
+  .studio-shell .video-prompt-extractor-page .studio-wall-pending.failed .studio-wall-failed-actions {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  .studio-shell .image-higgsfield-mode .studio-wall-pending.failed .studio-wall-failed-actions button,
+  .studio-shell .video-prompt-extractor-page .studio-wall-pending.failed .studio-wall-failed-actions button {
+    min-width: 0 !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    padding: 0 6px !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    font-size: 11px !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+  }
+}
+
 /* Expanded image composer target size: one stable bar, matching the large prompt-toolbar version. */
 @media (min-width: 1181px) {
   .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) {
