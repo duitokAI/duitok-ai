@@ -38699,3 +38699,54 @@ body:has(.studio-shell .video-prompt-extractor-page),
     0 10px 28px rgba(70, 16, 84, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.88) !important;
 }
+
+/* Compact composer color and prompt lock: keep the user's chatbox copy visible. */
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact {
+  border: 1px solid rgba(111, 28, 132, 0.16) !important;
+  background:
+    radial-gradient(circle at 14% 0%, rgba(255, 255, 255, 0.96), transparent 34%),
+    radial-gradient(circle at 88% 0%, rgba(255, 90, 145, 0.14), transparent 38%),
+    linear-gradient(135deg, rgba(255, 250, 253, 0.96), rgba(244, 232, 250, 0.95)) !important;
+  box-shadow:
+    0 18px 46px rgba(70, 16, 84, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-main {
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-compact-summary {
+  position: static !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 0 !important;
+  display: block !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  color: #2a0633 !important;
+  font-size: 15px !important;
+  font-weight: 760 !important;
+  line-height: 1.18 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-reference-thumb {
+  background: rgba(255, 255, 255, 0.58) !important;
+  box-shadow: inset 0 0 0 1px rgba(111, 28, 132, 0.08) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-reference-thumb svg,
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-reference-thumb i {
+  color: #b37be0 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-generate {
+  background: linear-gradient(135deg, #f55374 0%, #f57068 100%) !important;
+  color: #fff !important;
+  box-shadow:
+    0 12px 28px rgba(245, 82, 112, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24) !important;
+}
