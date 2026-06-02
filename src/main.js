@@ -1587,15 +1587,19 @@ function bindImageConsoleCompact() {
     consoleEl.classList.add("is-hover-expanded");
     consoleEl.classList.remove("is-compact");
   };
-  const restoreAfterHover = () => {
+  const releaseHoverExpansion = () => {
     hovering = false;
     updateMenuState();
     if (!menuOpen) consoleEl.classList.remove("is-hover-expanded");
     requestSync();
   };
+  const handleScroll = () => {
+    if (hovering) releaseHoverExpansion();
+    else requestSync();
+  };
   const restoreAfterFocus = (event) => {
     if (event.relatedTarget && consoleEl.contains(event.relatedTarget)) return;
-    restoreAfterHover();
+    releaseHoverExpansion();
   };
   const handleResize = () => {
     refreshThresholds();
@@ -1613,10 +1617,9 @@ function bindImageConsoleCompact() {
     closeImageConsoleMenus(menu);
     updateMenuState();
   };
-  uniqueScrollTargets.forEach((target) => target.addEventListener("scroll", requestSync, { passive: true }));
+  uniqueScrollTargets.forEach((target) => target.addEventListener("scroll", handleScroll, { passive: true }));
   window.addEventListener("resize", handleResize);
   consoleEl.addEventListener("mouseenter", expandForHover);
-  consoleEl.addEventListener("mouseleave", restoreAfterHover);
   consoleEl.addEventListener("focusin", expandForHover);
   consoleEl.addEventListener("focusout", restoreAfterFocus);
   allMenus.forEach((el) => el.addEventListener("toggle", handleMenuToggle));
@@ -1624,10 +1627,9 @@ function bindImageConsoleCompact() {
   refreshThresholds();
   sync();
   imageConsoleScrollCleanup = () => {
-    uniqueScrollTargets.forEach((target) => target.removeEventListener("scroll", requestSync));
+    uniqueScrollTargets.forEach((target) => target.removeEventListener("scroll", handleScroll));
     window.removeEventListener("resize", handleResize);
     consoleEl.removeEventListener("mouseenter", expandForHover);
-    consoleEl.removeEventListener("mouseleave", restoreAfterHover);
     consoleEl.removeEventListener("focusin", expandForHover);
     consoleEl.removeEventListener("focusout", restoreAfterFocus);
     allMenus.forEach((el) => el.removeEventListener("toggle", handleMenuToggle));
