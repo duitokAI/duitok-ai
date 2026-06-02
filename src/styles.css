@@ -37763,3 +37763,38 @@ body:has(.studio-shell .video-prompt-extractor-page),
     min-width: 124px !important;
   }
 }
+
+/* First-row containment lock: keep model and enhance controls inside the composer panel. */
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-enhance-group,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-model-enhance-group,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-enhance-group {
+  align-self: center !important;
+  height: var(--image-toolbar-control-height) !important;
+  min-height: var(--image-toolbar-control-height) !important;
+  max-height: var(--image-toolbar-control-height) !important;
+  grid-template-rows: var(--image-toolbar-control-height) !important;
+  margin-block: 0 !important;
+  overflow: visible !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-enhance-group .image-model-picker,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-model-enhance-group .image-model-picker,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-enhance-group .image-model-picker,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-enhance-group .image-prompt-enhance,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-model-enhance-group .image-prompt-enhance,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-enhance-group .image-prompt-enhance {
+  align-self: center !important;
+  height: var(--image-toolbar-control-height) !important;
+  min-height: var(--image-toolbar-control-height) !important;
+  max-height: var(--image-toolbar-control-height) !important;
+  margin-block: 0 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-enhance-group .image-model-picker summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-model-enhance-group .image-model-picker summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-enhance-group .image-model-picker summary {
+  height: var(--image-toolbar-control-height) !important;
+  min-height: var(--image-toolbar-control-height) !important;
+  max-height: var(--image-toolbar-control-height) !important;
+  margin: 0 !important;
+}
