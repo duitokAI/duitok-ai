@@ -2010,7 +2010,7 @@ function handleDelegatedClick(event) {
   if (target.dataset.imageModelOption) {
     stabilizeImageConsoleExpansion(1000);
     target.closest("details")?.removeAttribute("open");
-    return saveProjectField("image.model", target.dataset.imageModelOption);
+    return saveImageModelQuick(target.dataset.imageModelOption, target);
   }
   if (target.dataset.generationCancel) return cancelGenerationJob(target.dataset.generationCancel);
   if (target.dataset.generationRetry) return retryGenerationJob(target.dataset.generationRetry);
@@ -4801,15 +4801,7 @@ function studioDockCredit(meta = {}) {
 }
 
 function imagePanel(p) {
-  const imageModels = [
-    ["GPT Image 2", "GPT Image 2"],
-    ["Seedream 5.0 Lite", "Seedream 5.0 Lite"],
-    ["Seedream 4.5", "Seedream 4.5"],
-    ["Nano Banana Pro", "Nano Banana Pro"],
-    ["Nano Banana 2", "Nano Banana 2"],
-    ["Grok Imagine", "Grok Imagine"]
-  ];
-  const imageModelValues = imageModels.map(([value]) => value);
+  const imageModelValues = imageModelOptions().map((item) => item.value);
   const selectedModel = imageModelValues.includes(p.image.model) ? p.image.model : String(p.image.model || "").toLowerCase().includes("pro") ? "Nano Banana Pro" : "GPT Image 2";
   const modeOptions = ["Create Image", "Virtualize (Poster/Ad)"];
   const selectedMode = modeOptions.includes(p.image.mode) ? p.image.mode : "Create Image";
@@ -4929,7 +4921,7 @@ function imageGenerateConsole(p, selectedModel) {
   const selectedResolutionLabel = resolutionOptions.find((item) => item.value === selectedResolution)?.title || selectedResolution.toLowerCase();
   const promptSummary = String(p.image.prompt || "").trim();
   const compactSummary = promptSummary || `${selectedModel || "Model"} · ${selectedAspectRatio} · ${selectedResolutionLabel} · ${selectedCount} image${selectedCount > 1 ? "s" : ""}`;
-  return `<section class="image-generate-console ${longPromptClass}">
+  return `<section class="image-generate-console ${longPromptClass}" data-image-generate-console>
     <div class="image-console-main">
       <div class="image-console-prompt ${promptImage ? "has-prompt-image" : ""}" data-image-console-prompt-zone>
         <label class="image-prompt-insert" title="Insert image">
@@ -4938,7 +4930,7 @@ function imageGenerateConsole(p, selectedModel) {
         </label>
         ${promptImage ? imagePromptMediaPreview(promptImage) : `<textarea data-field="image.prompt" data-image-console-prompt rows="2" placeholder="Describe your image">${esc(p.image.prompt || "")}</textarea>`}
       </div>
-      <div class="image-console-compact-summary" aria-hidden="true">${esc(compactSummary)}</div>
+      <div class="image-console-compact-summary" data-image-compact-summary aria-hidden="true">${esc(compactSummary)}</div>
       <div class="image-console-tools">
         <div class="image-model-enhance-group">
           ${imageModelPicker(selectedModel)}
@@ -4960,7 +4952,7 @@ function imageGenerateConsole(p, selectedModel) {
     <button class="image-console-generate" type="button" data-action="generate-image" ${state.generating ? "aria-busy=\"true\"" : ""}>
       ${icon(state.generating ? "loader-circle" : "send", 20)}
       <b>${state.generating ? "Queuing" : t("generateImage")}</b>
-      <small>${state.generating ? "You can keep typing" : `${credit} Credit`}</small>
+      <small data-image-credit-label>${state.generating ? "You can keep typing" : `${credit} Credit`}</small>
     </button>
   </section>`;
 }
@@ -5131,19 +5123,8 @@ function imageModelCredit(model = "") {
   return model === "Nano Banana Pro" ? 0.2 : 0.15;
 }
 
-function imagePromptMediaPreview(item = {}) {
-  return `<div class="image-prompt-media-preview">
-    <img src="${esc(item.dataUrl || "")}" alt="${esc(item.name || "Prompt image")}" loading="lazy">
-    <span>
-      <b>${esc(item.name || "Pasted image")}</b>
-      <small>Image mode</small>
-    </span>
-    <button type="button" data-action="clear-image-prompt-media" aria-label="Remove prompt image">${icon("x", 14)}</button>
-  </div>`;
-}
-
-function imageModelPicker(selectedModel) {
-  const models = [
+function imageModelOptions() {
+  return [
     {
       value: "GPT Image 2",
       provider: "openai",
@@ -5187,10 +5168,25 @@ function imageModelPicker(selectedModel) {
       badge: ""
     }
   ];
+}
+
+function imagePromptMediaPreview(item = {}) {
+  return `<div class="image-prompt-media-preview">
+    <img src="${esc(item.dataUrl || "")}" alt="${esc(item.name || "Prompt image")}" loading="lazy">
+    <span>
+      <b>${esc(item.name || "Pasted image")}</b>
+      <small>Image mode</small>
+    </span>
+    <button type="button" data-action="clear-image-prompt-media" aria-label="Remove prompt image">${icon("x", 14)}</button>
+  </div>`;
+}
+
+function imageModelPicker(selectedModel) {
+  const models = imageModelOptions();
   const selected = models.find((item) => item.value === selectedModel) || models[0];
   return `<details class="image-model-picker">
     <summary aria-label="Select image model">
-      <span class="image-model-current-icon">${providerLogo(selected.provider)}</span>
+      <span class="image-model-current-icon" data-image-model-current-icon>${providerLogo(selected.provider)}</span>
       <span class="image-model-current-text"><b>${esc(selected.title)}</b></span>
       ${icon("chevron-down", 15)}
     </summary>
@@ -10241,6 +10237,64 @@ function saveProjectFieldQuick(field, value, source = null) {
     }
   }, 180);
   quickFieldSaveTimers.set(timerKey, { id, seq });
+}
+
+function updateImageModelDom(modelValue, source = null) {
+  const model = imageModelOptions().find((item) => item.value === modelValue) || imageModelOptions()[0];
+  const consoleEl = source?.closest?.("[data-image-generate-console]") || document.querySelector("[data-image-generate-console]");
+  if (!consoleEl) return;
+  const currentIcon = consoleEl.querySelector("[data-image-model-current-icon]");
+  const currentText = consoleEl.querySelector(".image-model-current-text b");
+  const creditLabel = consoleEl.querySelector("[data-image-credit-label]");
+  const compactSummary = consoleEl.querySelector("[data-image-compact-summary]");
+  if (currentIcon) currentIcon.innerHTML = providerLogo(model.provider);
+  if (currentText) currentText.textContent = model.title;
+  consoleEl.querySelectorAll("[data-image-model-option]").forEach((button) => {
+    const active = button.dataset.imageModelOption === model.value;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", active ? "true" : "false");
+    const check = button.querySelector(".image-model-option-check");
+    if (check) check.innerHTML = active ? icon("check", 18) : "";
+  });
+  if (creditLabel && !state.generating) {
+    creditLabel.textContent = `${(imageModelCredit(model.value) * imageBatchCount(project())).toFixed(2)} Credit`;
+  }
+  const promptSummary = String(project().image?.prompt || "").trim();
+  if (compactSummary && !promptSummary) {
+    const aspectRatio = project().image?.aspectRatio || "9:16";
+    const resolution = String(project().image?.resolution || "2K").toLowerCase();
+    const count = imageBatchCount(project());
+    compactSummary.textContent = `${model.title} · ${aspectRatio} · ${resolution} · ${count} image${count > 1 ? "s" : ""}`;
+  }
+  window.lucide?.createIcons();
+}
+
+async function saveImageModelQuick(value, source = null) {
+  const selected = imageModelOptions().find((item) => item.value === value);
+  if (!selected) return;
+  const projectId = state.projectId;
+  const previousDb = state.db;
+  state.db = dbWithProjectField(previousDb, projectId, "image.model", selected.value);
+  updateImageModelDom(selected.value, source);
+  const consoleEl = source?.closest?.("[data-image-generate-console]");
+  if (consoleEl) {
+    consoleEl.classList.add("is-hover-expanded");
+    consoleEl.classList.remove("is-compact");
+  }
+  try {
+    const db = await api(`/projects/${projectId}/field`, {
+      method: "PATCH",
+      body: JSON.stringify({ field: "image.model", value: selected.value })
+    });
+    if (state.projectId !== projectId) return;
+    state.db = db;
+  } catch (error) {
+    if (state.projectId === projectId) {
+      state.db = previousDb;
+      render();
+    }
+    notify(error.message || t("toastSaveFailed"));
+  }
 }
 
 function setFrameworkChipState(chip, checked) {
