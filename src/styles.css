@@ -30522,11 +30522,13 @@ label {
   display: grid !important;
   place-items: center !important;
   margin: 0 !important;
-  transform: translate(-50%, -50%) !important;
+  transform: translate(-50%, calc(-50% - 5px)) !important;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb:not(.has-ref) > span:not(.image-reference-clear) svg {
   display: block !important;
+  width: 34px !important;
+  height: 34px !important;
   margin: 0 !important;
 }
 
