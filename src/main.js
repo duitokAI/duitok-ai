@@ -4859,9 +4859,18 @@ function imageCanvasEmpty(p) {
 }
 
 function imagePendingThumb(job) {
-  return `<article class="image-history-thumb pending">
-    <span>${icon("loader-circle", 22)}</span>
-    <b>${esc(job.title || "Generating")}</b>
+  const statusLabel = generationJobStatusLabel(job);
+  const wait = generationJobWaitSeconds(job);
+  const promptPreview = String(job.promptSnapshot || job.prompt || "").replaceAll("\n", " ").trim();
+  return `<article class="image-history-thumb pending" data-generation-job-id="${esc(job.id)}" data-generation-job-status="${esc(job.status || "queued")}" data-generation-job-stage="${esc(generationJobStatusKey(job))}">
+    ${job.optimistic ? "" : `<button class="image-history-cancel-generation" type="button" data-generation-cancel="${esc(job.id)}" aria-label="取消生成" title="取消生成">${icon("circle-x", 17)}</button>`}
+    <div class="image-history-pending-preview" aria-hidden="true">
+      <i></i><i></i><i></i>
+      <span>${icon("loader-circle", 23)}</span>
+    </div>
+    <b>${esc(statusLabel)}</b>
+    <small>${esc(wait >= 45 ? "这次可能需要更久" : generationJobStageHelp(job, wait))}</small>
+    ${promptPreview ? `<em>${esc(promptPreview.slice(0, 72))}</em>` : ""}
   </article>`;
 }
 
