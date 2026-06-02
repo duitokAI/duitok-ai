@@ -38739,7 +38739,7 @@ body:has(.studio-shell .video-prompt-extractor-page),
   font-weight: 760 !important;
   line-height: 1.08 !important;
   text-overflow: ellipsis !important;
-  transform: none !important;
+  transform: translateY(-3px) !important;
   white-space: nowrap !important;
 }
 
