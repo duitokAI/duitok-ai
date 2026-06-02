@@ -30273,6 +30273,22 @@ label {
   background-color: #ffffff !important;
 }
 
+/* Keep media flush: the image wall used a white base plus a 3px flex gap,
+   which showed as a thin white stripe under generated images. */
+.studio-shell .image-higgsfield-mode .studio-result-wall,
+.studio-shell .image-higgsfield-mode .studio-wall-grid,
+.studio-shell .image-higgsfield-mode .studio-wall-card,
+.studio-shell .image-higgsfield-mode .studio-wall-card .result-image,
+.studio-shell .image-higgsfield-mode .studio-wall-card .result-video,
+.studio-shell .image-higgsfield-mode .studio-wall-card .result-video-shell {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-grid {
+  gap: 0 !important;
+}
+
 /* Image count control: keep the - / number / + cells inside the pill at every width. */
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools {
   grid-template-columns:
