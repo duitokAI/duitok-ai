@@ -34707,3 +34707,29 @@ label {
   grid-row: 2 !important;
   justify-self: center !important;
 }
+
+/* Image chatbox bottom lock: reserve composer space without drawing a white grid spacer. */
+.studio-shell .workspace:has(.image-higgsfield-mode),
+.studio-shell .canvas-card:has(.image-higgsfield-mode),
+.studio-shell .image-canvas-studio.image-higgsfield-mode,
+.studio-shell .image-higgsfield-mode,
+.studio-shell .image-higgsfield-mode > .studio-result-wall {
+  background:
+    radial-gradient(circle at 14% 0%, rgba(255, 255, 255, 0.98), transparent 34%),
+    radial-gradient(circle at 88% 4%, rgba(255, 90, 145, 0.08), transparent 32%),
+    linear-gradient(135deg, #fff8fc 0%, #f6edf9 52%, #eee2f4 100%) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid {
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+  background: transparent !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid::after {
+  display: none !important;
+  content: none !important;
+  flex: 0 0 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+}
