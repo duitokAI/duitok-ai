@@ -37496,6 +37496,249 @@ body:has(.studio-shell .image-higgsfield-mode),
     inset 0 1px 0 rgba(255, 255, 255, 0.88) !important;
 }
 
+
+/* Agent session sidebar: ChatGPT-like chat controls and recents list. */
+.studio-shell .agent-chat-shell.agent-page-panel .agent-chat-toolbar.agent-session-sidebar,
+.studio-shell .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-chat-toolbar.agent-session-sidebar {
+  position: fixed !important;
+  top: 16px !important;
+  right: auto !important;
+  bottom: 18px !important;
+  left: max(64px, calc(50vw - 936px)) !important;
+  z-index: 24 !important;
+  width: min(310px, calc(100vw - 92px)) !important;
+  height: auto !important;
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  align-content: stretch !important;
+  gap: 18px !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 0 !important;
+  padding: 14px 12px 18px !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  background: linear-gradient(180deg, rgba(24, 3, 28, 0.94), rgba(13, 0, 18, 0.96)) !important;
+  box-shadow: 18px 0 42px rgba(46, 0, 55, 0.18) !important;
+  color: #fff !important;
+  pointer-events: auto !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-actions {
+  display: grid !important;
+  gap: 4px !important;
+  padding-bottom: 14px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-action,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-search {
+  width: 100% !important;
+  min-height: 46px !important;
+  display: grid !important;
+  grid-template-columns: 28px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 12px !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  padding: 0 10px !important;
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.92) !important;
+  box-shadow: none !important;
+  font-size: 16px !important;
+  font-weight: 780 !important;
+  text-align: left !important;
+  cursor: pointer !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-action:hover,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-search:focus-within,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-search:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-action svg,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-search svg {
+  width: 24px !important;
+  height: 24px !important;
+  stroke-width: 2.25 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-search input {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  border: 0 !important;
+  outline: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  color: #fff !important;
+  font: inherit !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-search input::placeholder {
+  color: rgba(255, 255, 255, 0.86) !important;
+  opacity: 1 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-recents {
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  gap: 10px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-recents header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  padding: 0 2px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-recents strong {
+  color: rgba(255, 255, 255, 0.96) !important;
+  font-size: 15px !important;
+  font-weight: 860 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-recents small {
+  color: rgba(255, 255, 255, 0.48) !important;
+  font-size: 12px !important;
+  font-weight: 760 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-list {
+  min-height: 0 !important;
+  display: grid !important;
+  align-content: start !important;
+  gap: 3px !important;
+  overflow-y: auto !important;
+  padding-right: 4px !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-list::-webkit-scrollbar {
+  width: 8px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-list::-webkit-scrollbar-thumb {
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.16) !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-item {
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 34px !important;
+  align-items: center !important;
+  gap: 2px !important;
+  border-radius: 10px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-item[hidden] {
+  display: none !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-restore {
+  min-width: 0 !important;
+  min-height: 44px !important;
+  display: grid !important;
+  gap: 2px !important;
+  justify-items: start !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  padding: 7px 10px !important;
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.84) !important;
+  box-shadow: none !important;
+  text-align: left !important;
+  cursor: pointer !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-item.is-latest .agent-session-restore,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-item:hover .agent-session-restore,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-restore:focus-visible {
+  background: rgba(255, 255, 255, 0.14) !important;
+  color: #fff !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-restore span,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-restore small {
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-restore span {
+  font-size: 14px !important;
+  font-weight: 760 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-restore small {
+  color: rgba(255, 255, 255, 0.46) !important;
+  font-size: 11px !important;
+  font-weight: 650 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-delete {
+  width: 30px !important;
+  min-width: 30px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 0 !important;
+  border-radius: 9px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.38) !important;
+  box-shadow: none !important;
+  opacity: 0 !important;
+  cursor: pointer !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-item:hover .agent-session-delete,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-delete:focus-visible {
+  opacity: 1 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-delete:hover {
+  background: rgba(255, 91, 126, 0.18) !important;
+  color: #ffb4c4 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-empty {
+  margin: 0 !important;
+  border-radius: 10px !important;
+  padding: 10px !important;
+  color: rgba(255, 255, 255, 0.52) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+}
+
+@media (max-width: 1180px) {
+  .studio-shell .agent-chat-shell.agent-page-panel .agent-chat-toolbar.agent-session-sidebar {
+    width: 260px !important;
+    left: 56px !important;
+  }
+}
+
+@media (max-width: 980px) {
+  .studio-shell .agent-chat-shell.agent-page-panel .agent-chat-toolbar.agent-session-sidebar {
+    top: 12px !important;
+    right: 12px !important;
+    bottom: auto !important;
+    left: 12px !important;
+    width: auto !important;
+    max-height: 300px !important;
+    border-radius: 16px !important;
+    padding: 10px !important;
+  }
+}
 /* Studio tool tabs polish: keep the six creation modes readable over media. */
 .studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .project-step-topbar,
 .studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .project-step-topbar {

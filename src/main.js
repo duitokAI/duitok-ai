@@ -8665,11 +8665,48 @@ function agentAttachmentLabel(item = {}) {
 
 function agentChatToolbar() {
   const c = agentUiCopy();
-  return `<div class="agent-chat-toolbar">
-    <div>
-      <button class="icon-only" data-action="new-agent-chat" title="${esc(c.newChat)}" aria-label="${esc(c.newChat)}">${icon("message-square-plus", 17)}<span>${esc(c.newChat)}</span></button>
-      <button class="icon-only" data-action="toggle-agent-history" title="${esc(c.history)}" aria-label="${esc(c.history)}">${icon("history", 17)}<span>${esc(c.history)}</span>${state.agentHistorySessions.length ? `<b>${state.agentHistorySessions.length}</b>` : ""}</button>
-    </div>
+  const sessions = Array.isArray(state.agentHistorySessions) ? state.agentHistorySessions : [];
+  return `<aside class="agent-chat-toolbar agent-session-sidebar" aria-label="${esc(c.history)}">
+    <nav class="agent-session-actions" aria-label="Agent chats">
+      <button class="agent-session-action" type="button" data-action="new-agent-chat" title="${esc(c.newChat)}">${icon("square-pen", 20)}<span>${esc(c.newChat)}</span></button>
+      <label class="agent-session-search" title="${esc(c.history)}">
+        ${icon("search", 20)}
+        <input type="search" data-agent-history-search placeholder="${agentHistorySearchPlaceholder()}" aria-label="${agentHistorySearchPlaceholder()}">
+      </label>
+    </nav>
+    <section class="agent-session-recents">
+      <header><strong>${agentHistoryRecentsLabel()}</strong>${sessions.length ? `<small>${agentHistoryCountLabel(sessions.length)}</small>` : ""}</header>
+      ${agentHistorySidebarList(sessions)}
+    </section>
+  </aside>`;
+}
+
+function agentHistorySearchPlaceholder() {
+  if (state.lang === "zh") return "搜索对话";
+  if (state.lang === "ms") return "Cari chat";
+  return "Search chats";
+}
+
+function agentHistoryRecentsLabel() {
+  if (state.lang === "zh") return "最近";
+  if (state.lang === "ms") return "Terkini";
+  return "Recents";
+}
+
+function agentHistorySidebarList(sessions = []) {
+  if (!sessions.length) return `<p class="agent-session-empty">还没有历史记录</p>`;
+  return `<div class="agent-session-list">
+    ${sessions.map((item, index) => {
+      const title = item.title || "未命名对话";
+      const searchText = `${title} ${agentHistoryMeta(item)}`.toLowerCase();
+      return `<article class="agent-session-item ${index === 0 ? "is-latest" : ""}" data-agent-history-row data-agent-history-text="${esc(searchText)}">
+        <button type="button" class="agent-session-restore" data-agent-history-restore="${esc(item.id)}" title="${esc(title)}">
+          <span>${esc(title)}</span>
+          <small>${agentHistoryMeta(item)}</small>
+        </button>
+        <button type="button" class="agent-session-delete" data-agent-history-delete="${esc(item.id)}" title="删除这条历史" aria-label="删除这条历史">${icon("trash-2", 15)}</button>
+      </article>`;
+    }).join("")}
   </div>`;
 }
 
@@ -9405,6 +9442,14 @@ function bind() {
   }));
   document.querySelectorAll("[data-agent-history-restore]").forEach((el) => el.addEventListener("click", () => restoreAgentHistory(el.dataset.agentHistoryRestore)));
   document.querySelectorAll("[data-agent-history-delete]").forEach((el) => el.addEventListener("click", () => deleteAgentHistory(el.dataset.agentHistoryDelete)));
+  document.querySelectorAll("[data-agent-history-search]").forEach((el) => el.addEventListener("input", (event) => {
+    const query = String(event.currentTarget.value || "").trim().toLowerCase();
+    const root = event.currentTarget.closest(".agent-session-sidebar");
+    root?.querySelectorAll("[data-agent-history-row]").forEach((row) => {
+      const text = row.dataset.agentHistoryText || "";
+      row.hidden = Boolean(query && !text.includes(query));
+    });
+  }));
   bindAgentControls();
   document.querySelectorAll("[data-admin-user]").forEach((el) => el.addEventListener("click", () => set({ adminUserId: el.dataset.adminUser })));
   document.querySelectorAll("[data-admin-search]").forEach((el) => el.addEventListener("input", (event) => {
