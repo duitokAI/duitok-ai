@@ -35408,6 +35408,335 @@ label {
   line-height: 1.18 !important;
 }
 
+/* Image composer toolbar density PRD: one lightweight control system. */
+.studio-shell .image-higgsfield-mode > .image-generate-console {
+  --image-toolbar-control-height: 40px;
+  --image-toolbar-control-radius: 16px;
+  --image-toolbar-copy: #2a0633;
+  --image-toolbar-muted: rgba(112, 64, 146, 0.74);
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-tools {
+  width: fit-content !important;
+  max-width: 100% !important;
+  display: grid !important;
+  grid-template-columns: 232px 44px 94px 94px 114px !important;
+  align-items: center !important;
+  justify-content: start !important;
+  gap: 8px !important;
+  height: var(--image-toolbar-control-height) !important;
+  min-height: var(--image-toolbar-control-height) !important;
+  overflow: visible !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-enhance-group {
+  display: contents !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-picker {
+  grid-column: 1 !important;
+  width: 232px !important;
+  min-width: 232px !important;
+  max-width: 232px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-prompt-enhance {
+  grid-column: 2 !important;
+  width: 44px !important;
+  min-width: 44px !important;
+  max-width: 44px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu {
+  grid-column: 3 !important;
+  width: 94px !important;
+  min-width: 94px !important;
+  max-width: 94px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu {
+  grid-column: 4 !important;
+  width: 94px !important;
+  min-width: 94px !important;
+  max-width: 94px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-count-stepper {
+  grid-column: 5 !important;
+  width: 114px !important;
+  min-width: 114px !important;
+  max-width: 114px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-picker,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-prompt-enhance,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-count-stepper,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-picker summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu summary {
+  height: var(--image-toolbar-control-height) !important;
+  min-height: var(--image-toolbar-control-height) !important;
+  max-height: var(--image-toolbar-control-height) !important;
+  border-radius: var(--image-toolbar-control-radius) !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-picker summary {
+  display: grid !important;
+  grid-template-columns: 24px minmax(0, 1fr) 14px !important;
+  align-items: center !important;
+  justify-items: start !important;
+  gap: 8px !important;
+  padding: 0 12px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-current-icon {
+  width: 24px !important;
+  min-width: 24px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 1px solid rgba(181, 132, 218, 0.32) !important;
+  border-radius: 999px !important;
+  background: rgba(181, 132, 218, 0.12) !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-current-icon .provider-logo,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-current-icon .provider-logo-seedream,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-current-icon .provider-logo-google,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-current-icon .provider-logo-xai,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-current-icon .provider-logo-openai {
+  width: 18px !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  min-height: 18px !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #4a1457 !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-current-icon .provider-logo svg {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-current-text {
+  min-width: 0 !important;
+  display: block !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-current-text b {
+  display: block !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  color: var(--image-toolbar-copy) !important;
+  font-size: 17px !important;
+  font-weight: 850 !important;
+  line-height: 1.2 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-picker summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu summary > svg:last-child {
+  align-self: center !important;
+  justify-self: center !important;
+  width: 13px !important;
+  min-width: 13px !important;
+  height: 13px !important;
+  min-height: 13px !important;
+  color: var(--image-toolbar-muted) !important;
+  transform: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-picker[open] summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu[open] summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu[open] summary > svg:last-child {
+  transform: rotate(180deg) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-prompt-enhance {
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-prompt-enhance svg,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-prompt-enhance i {
+  width: 18px !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  min-height: 18px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu summary {
+  display: grid !important;
+  grid-template-columns: 18px minmax(0, 1fr) 13px !important;
+  align-items: center !important;
+  justify-items: center !important;
+  gap: 6px !important;
+  padding: 0 10px !important;
+  overflow: visible !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu summary .aspect-ratio-glyph {
+  width: var(--ratio-icon-width, 14px) !important;
+  min-width: var(--ratio-icon-width, 14px) !important;
+  max-width: 17px !important;
+  height: var(--ratio-icon-height, 17px) !important;
+  min-height: var(--ratio-icon-height, 17px) !important;
+  max-height: 17px !important;
+  border-width: 2px !important;
+  border-radius: 5px !important;
+  justify-self: center !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu summary svg:first-child {
+  width: 18px !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  min-height: 18px !important;
+  justify-self: center !important;
+  color: rgba(142, 91, 180, 0.9) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu summary b,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu summary b {
+  min-width: 0 !important;
+  display: block !important;
+  overflow: visible !important;
+  color: var(--image-toolbar-copy) !important;
+  font-size: 18px !important;
+  font-weight: 850 !important;
+  line-height: 1.18 !important;
+  text-align: center !important;
+  text-overflow: clip !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-count-stepper {
+  display: grid !important;
+  grid-template-columns: 32px minmax(0, 1fr) 32px !important;
+  align-items: center !important;
+  gap: 0 !important;
+  padding: 0 4px !important;
+  overflow: visible !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-count-stepper button {
+  width: 32px !important;
+  min-width: 32px !important;
+  max-width: 32px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  max-height: 32px !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  color: var(--image-toolbar-muted) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-count-stepper button:hover:not(:disabled) {
+  color: #4a1457 !important;
+  background: rgba(181, 132, 218, 0.14) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-count-stepper button:disabled {
+  opacity: 0.38 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-count-stepper span {
+  height: 100% !important;
+  min-width: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 1px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-count-stepper span b {
+  color: var(--image-toolbar-copy) !important;
+  font-size: 16px !important;
+  font-weight: 850 !important;
+  line-height: 1.18 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-count-stepper span small {
+  color: var(--image-toolbar-muted) !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  line-height: 1.18 !important;
+}
+
+@media (max-width: 760px) {
+  .studio-shell .image-higgsfield-mode > .image-generate-console .image-console-tools {
+    width: 100% !important;
+    grid-template-columns: minmax(0, 1fr) 44px !important;
+    grid-template-rows: var(--image-toolbar-control-height) var(--image-toolbar-control-height) !important;
+    gap: 8px !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console .image-model-picker {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console .image-prompt-enhance {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    width: 94px !important;
+    min-width: 94px !important;
+    max-width: 94px !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console .image-count-stepper {
+    grid-column: 1 / -1 !important;
+    grid-row: 3 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+}
+
 /* Image wall bottom color lock: when the scroll floor reaches the document
    edge, every ancestor should reveal the same canvas color instead of white. */
 html:has(.studio-shell .image-higgsfield-mode),
