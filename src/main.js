@@ -4409,7 +4409,7 @@ function studioPendingWallCard(job) {
       <span class="studio-wall-pending-spinner" role="status" aria-label="${esc(statusLabel)}" title="${esc(statusLabel)}">${icon(isFailed ? "triangle-alert" : "loader-circle", 22)}</span>
       <b>${esc(statusLabel)}</b>
       <small>${esc(isFailed ? (job.errorMessage || "Please adjust the prompt and try again.") : promptPreview ? promptPreview.slice(0, 110) : generationJobStageHelp(job))}</small>
-      ${isFailed ? `<p class="generation-credit-refund-note"><strong>Credit Refunds</strong><span>Failed generations are not charged. If a credit was reserved, it is returned automatically.</span></p>` : ""}
+      ${isFailed ? `<p class="generation-credit-refund-note"><strong>Credits safe</strong><span>Failed jobs are not charged. Reserved credits return automatically.</span></p>` : ""}
       ${isFailed ? `<div class="studio-wall-failed-actions"><button type="button" data-generation-retry="${esc(job.id)}">${icon("refresh-cw", 14)} Retry</button><button type="button" data-generation-edit="${esc(job.id)}">${icon("pencil-line", 14)} Edit</button></div>` : job.optimistic ? "" : `<button type="button" data-generation-cancel="${esc(job.id)}" aria-label="Cancel generation" title="Cancel generation">${icon("ban", 22)}</button>`}
     </div>
   </article>`;
@@ -5585,7 +5585,7 @@ function generationJobCard(job) {
       ${icon(isFailed ? "triangle-alert" : "loader-circle", 34)}
       <strong>${label}</strong>
       <span>${esc(isFailed ? (job.errorMessage || "Please adjust the prompt and try again.") : promptPreview ? promptPreview.slice(0, 110) : generationJobStageHelp(job))}</span>
-      ${isFailed ? `<p class="generation-credit-refund-note"><strong>Credit Refunds</strong><span>Failed generations are not charged. If a credit was reserved, it is returned automatically.</span></p>` : ""}
+      ${isFailed ? `<p class="generation-credit-refund-note"><strong>Credits safe</strong><span>Failed jobs are not charged. Reserved credits return automatically.</span></p>` : ""}
       ${isFailed ? `<div class="generation-job-actions"><button type="button" class="dark-button" data-generation-retry="${esc(job.id)}">${icon("refresh-cw", 14)} Retry</button><button type="button" class="dark-button" data-generation-edit="${esc(job.id)}">${icon("pencil-line", 14)} Edit prompt</button></div>` : ""}
     </div>
     <footer>

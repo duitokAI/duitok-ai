@@ -29865,11 +29865,11 @@ label {
   position: absolute !important;
   inset: 0 !important;
   display: grid !important;
-  grid-template-rows: auto auto auto !important;
+  grid-template-rows: auto auto auto auto !important;
   place-items: center !important;
   align-content: center !important;
-  gap: 8px !important;
-  padding: clamp(18px, 4vw, 34px) !important;
+  gap: clamp(5px, 1.1vw, 9px) !important;
+  padding: clamp(10px, 2.4vw, 20px) !important;
   background:
     radial-gradient(circle at 50% 38%, rgba(255, 255, 255, 0.12), transparent 28%),
     linear-gradient(145deg, rgba(83, 10, 32, 0.96), rgba(31, 4, 22, 0.98)) !important;
@@ -29892,28 +29892,28 @@ label {
 
 .studio-shell .image-higgsfield-mode .studio-wall-pending.failed .studio-wall-pending-spinner svg,
 .studio-shell .video-prompt-extractor-page .studio-wall-pending.failed .studio-wall-pending-spinner svg {
-  width: 28px !important;
-  height: 28px !important;
+  width: clamp(21px, 2.1vw, 28px) !important;
+  height: clamp(21px, 2.1vw, 28px) !important;
   animation: none !important;
   transform: none !important;
 }
 
 .studio-shell .image-higgsfield-mode .studio-wall-pending.failed b,
 .studio-shell .video-prompt-extractor-page .studio-wall-pending.failed b {
-  max-width: min(220px, 100%) !important;
+  max-width: 100% !important;
   padding: 0 !important;
   color: #fff !important;
-  font-size: clamp(13px, 1.05vw, 16px) !important;
-  line-height: 1.08 !important;
-  white-space: normal !important;
+  font-size: clamp(12px, 1vw, 15px) !important;
+  line-height: 1.05 !important;
+  white-space: nowrap !important;
 }
 
 .studio-shell .image-higgsfield-mode .studio-wall-pending.failed small,
 .studio-shell .video-prompt-extractor-page .studio-wall-pending.failed small {
-  max-width: min(260px, 100%) !important;
+  max-width: min(240px, 100%) !important;
   color: rgba(255, 239, 244, 0.76) !important;
-  font-size: 11px !important;
-  line-height: 1.35 !important;
+  font-size: clamp(9px, 0.86vw, 11px) !important;
+  line-height: 1.22 !important;
 }
 
 .studio-shell .image-higgsfield-mode .studio-wall-card:has(.studio-wall-actions button:hover),
@@ -32227,20 +32227,30 @@ label {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 8px !important;
-  max-width: calc(100% - 20px) !important;
+  gap: 7px !important;
+  max-width: 100% !important;
 }
 
 .studio-shell .image-higgsfield-mode .studio-wall-pending .studio-wall-failed-actions button,
 .studio-shell .video-prompt-extractor-page .studio-wall-pending .studio-wall-failed-actions button {
   position: static !important;
   inset: auto !important;
-  min-height: 28px !important;
+  min-height: 32px !important;
+  min-width: 54px !important;
   max-width: none !important;
-  padding: 6px 9px !important;
+  padding: 6px 10px !important;
   border-color: rgba(255, 255, 255, 0.24) !important;
+  border-radius: 11px !important;
   background: rgba(255, 255, 255, 0.14) !important;
   color: #fff !important;
+  font-size: 11px !important;
+  line-height: 1 !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-pending .studio-wall-failed-actions button svg,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending .studio-wall-failed-actions button svg {
+  width: 16px !important;
+  height: 16px !important;
 }
 
 .generation-job-actions .dark-button {
@@ -32250,30 +32260,31 @@ label {
 }
 
 .generation-credit-refund-note {
-  width: min(100%, 210px) !important;
+  width: min(100%, 190px) !important;
   display: grid !important;
-  gap: 3px !important;
+  gap: 2px !important;
   margin: 0 !important;
-  padding: 8px 10px !important;
+  padding: 7px 9px !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  border-radius: 12px !important;
-  background: rgba(255, 255, 255, 0.12) !important;
+  border-radius: 11px !important;
+  background: rgba(255, 255, 255, 0.1) !important;
   color: rgba(255, 255, 255, 0.88) !important;
   text-align: center !important;
 }
 
 .generation-credit-refund-note strong {
   color: #fff !important;
-  font-size: 12px !important;
+  font-size: 11px !important;
   font-weight: 950 !important;
-  line-height: 1.05 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
 }
 
 .generation-credit-refund-note span {
   color: rgba(255, 255, 255, 0.72) !important;
-  font-size: 10px !important;
+  font-size: 9px !important;
   font-weight: 750 !important;
-  line-height: 1.25 !important;
+  line-height: 1.18 !important;
 }
 
 .studio-wall-new-badge {
