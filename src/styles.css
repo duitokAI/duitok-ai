@@ -40291,3 +40291,69 @@ body:has(.studio-shell .video-prompt-extractor-page),
 .studio-shell .video-prompt-extractor-page .studio-wall-pending:not(.failed) small {
   display: none !important;
 }
+
+
+/* Aspect and quality selector geometry lock: keep icon, value, and chevron in
+   separate lanes so compact ratios like 9:16 never overlap the icon. */
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-aspect-ratio-menu summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-resolution-menu summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu summary {
+  box-sizing: border-box !important;
+  display: grid !important;
+  grid-template-columns: 24px minmax(46px, 1fr) 16px !important;
+  column-gap: 8px !important;
+  align-items: center !important;
+  justify-items: stretch !important;
+  min-width: 0 !important;
+  padding: 0 12px !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu summary > svg:first-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-aspect-ratio-menu summary > svg:first-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu summary > svg:first-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu summary > svg:first-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-resolution-menu summary > svg:first-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu summary > svg:first-child {
+  grid-column: 1 !important;
+  justify-self: center !important;
+  align-self: center !important;
+  width: 20px !important;
+  min-width: 20px !important;
+  height: 20px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu summary b,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-aspect-ratio-menu summary b,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu summary b,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu summary b,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-resolution-menu summary b,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu summary b {
+  grid-column: 2 !important;
+  justify-self: center !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  display: block !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  text-align: center !important;
+  text-overflow: clip !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-aspect-ratio-menu summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-resolution-menu summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu summary > svg:last-child {
+  grid-column: 3 !important;
+  justify-self: center !important;
+  align-self: center !important;
+  width: 16px !important;
+  min-width: 16px !important;
+  height: 16px !important;
+}
