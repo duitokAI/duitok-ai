@@ -36388,26 +36388,17 @@ body:has(.studio-shell .image-higgsfield-mode),
 
 .studio-shell .image-higgsfield-mode .studio-wall-pending:not(.failed) .studio-wall-pending-status,
 .studio-shell .video-prompt-extractor-page .studio-wall-pending:not(.failed) .studio-wall-pending-status {
-  position: absolute !important;
-  top: clamp(12px, 1.5vw, 18px) !important;
-  left: clamp(12px, 1.5vw, 18px) !important;
-  z-index: 3 !important;
-  max-width: calc(100% - 68px) !important;
-  overflow: hidden !important;
-  color: rgba(255, 246, 255, 0.9) !important;
-  font-size: clamp(14px, 1.1vw, 17px) !important;
-  font-weight: 850 !important;
-  line-height: 1.1 !important;
-  text-align: left !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
+  display: none !important;
 }
 
 .studio-shell .image-higgsfield-mode .studio-wall-pending:not(.failed) .studio-wall-pending-spinner,
 .studio-shell .video-prompt-extractor-page .studio-wall-pending:not(.failed) .studio-wall-pending-spinner {
-  position: static !important;
-  width: clamp(42px, 4vw, 54px) !important;
-  height: clamp(42px, 4vw, 54px) !important;
+  position: absolute !important;
+  top: clamp(12px, 1.5vw, 18px) !important;
+  left: clamp(12px, 1.5vw, 18px) !important;
+  z-index: 3 !important;
+  width: clamp(36px, 3.5vw, 46px) !important;
+  height: clamp(36px, 3.5vw, 46px) !important;
   display: inline-grid !important;
   place-items: center !important;
   border: 1px solid rgba(255, 255, 255, 0.18) !important;
@@ -36420,12 +36411,12 @@ body:has(.studio-shell .image-higgsfield-mode),
 
 .studio-shell .image-higgsfield-mode .studio-wall-pending:not(.failed) > .studio-wall-pending-controls > b,
 .studio-shell .video-prompt-extractor-page .studio-wall-pending:not(.failed) > .studio-wall-pending-controls > b {
-  max-width: calc(100% - 20px) !important;
+  max-width: calc(100% - 32px) !important;
   display: block !important;
   overflow: visible !important;
   padding: 0 !important;
   color: #fff !important;
-  font-size: clamp(20px, 2vw, 28px) !important;
+  font-size: clamp(18px, 1.65vw, 24px) !important;
   font-weight: 950 !important;
   line-height: 1.05 !important;
   text-align: center !important;

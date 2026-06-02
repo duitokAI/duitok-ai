@@ -4650,7 +4650,6 @@ function studioPendingWallCard(job) {
   const mediaRatio = aspectRatio === "16:9" ? "1.7778" : "0.5625";
   const isFailed = job.status === "failed";
   const statusLabel = generationJobStatusLabel(job);
-  const wallStatusLabel = generationJobWallStatusLabel(job);
   const promptPreview = String(job.promptSnapshot || job.prompt || "").replaceAll("\n", " ").trim();
   const statusIcon = `<span class="studio-wall-pending-spinner" role="status" aria-label="${esc(statusLabel)}" title="${esc(statusLabel)}">${icon(isFailed ? "triangle-alert" : "loader-circle", 22)}</span>`;
   const statusBody = `
@@ -4658,7 +4657,6 @@ function studioPendingWallCard(job) {
       <b>${esc(statusLabel)}</b>
       <small>${esc(isFailed ? (job.errorMessage || "Please adjust the prompt and try again.") : promptPreview ? promptPreview.slice(0, 110) : generationJobStageHelp(job))}</small>`;
   const processingBody = `
-      <span class="studio-wall-pending-status">${esc(wallStatusLabel)}</span>
       ${statusIcon}
       <b>${esc(generationJobCenterLabel(job))}</b>`;
   return `<article class="studio-wall-card studio-wall-pending ${aspectClass} ${isFailed ? "failed" : ""}" data-generation-job-id="${esc(job.id)}" data-generation-job-status="${esc(job.status || "queued")}" style="--media-ratio:${mediaRatio};aspect-ratio:${esc(aspectRatio.replace(":", " / "))}">
@@ -5897,14 +5895,6 @@ function generationJobStatusLabel(job = {}) {
   if (job.stage === "saving_asset") return "Saving result";
   if (job.status === "processing") return "Processing";
   return job.status || "Queued";
-}
-
-function generationJobWallStatusLabel(job = {}) {
-  if (job.status === "queued") return "Queued";
-  if (job.status === "processing") return "Processing";
-  if (job.stage === "prompt_advanced") return "Processing";
-  if (job.stage === "saving_asset") return "Processing";
-  return generationJobStatusLabel(job);
 }
 
 function generationJobStageHelp(job = {}) {
@@ -10865,12 +10855,6 @@ function updateGenerationStatusInDom(db = state.db) {
       ? card.querySelector("strong")
       : card.querySelector(".agent-generation-processing-frame strong, b");
     if (label) label.textContent = generationJobStatusLabel(job);
-    const wallStatus = card.matches(".studio-wall-pending")
-      ? card.querySelector(".studio-wall-pending-status")
-      : null;
-    if (wallStatus && ["queued", "processing"].includes(job.status)) {
-      wallStatus.textContent = generationJobWallStatusLabel(job);
-    }
     const wallCenterLabel = card.matches(".studio-wall-pending")
       ? card.querySelector(".studio-wall-pending-controls > b")
       : null;
