@@ -4940,7 +4940,7 @@ function imageGenerateConsole(p, selectedModel) {
         ${imageResolutionPicker(selectedResolution, resolutionOptions)}
         <div class="image-count-stepper" aria-label="Images to generate">
           <button type="button" data-action="image-count-down" aria-label="Generate fewer images" ${selectedCount <= 1 ? "disabled" : ""}>${icon("minus", 15)}</button>
-          <span><b>${selectedCount}</b><small>/4</small></span>
+          <span><b data-image-count-current>${selectedCount}</b><small>/4</small></span>
           <button type="button" data-action="image-count-up" aria-label="Generate more images" ${selectedCount >= 4 ? "disabled" : ""}>${icon("plus", 15)}</button>
         </div>
       </div>
@@ -10111,30 +10111,8 @@ function updateImageBatchCount(delta) {
   const nextCount = Math.min(4, Math.max(1, imageBatchCount(project()) + delta));
   if (nextCount === imageBatchCount(project())) return;
   imageConsoleExpandLockUntil = Date.now() + 700;
-  const scrollSnapshot = {
-    windowY: window.scrollY || 0,
-    windowX: window.scrollX || 0,
-    workspace: document.querySelector(".workspace")?.scrollTop || 0,
-    shell: document.querySelector(".studio-shell")?.scrollTop || 0
-  };
-  if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-  set({ db: dbWithProjectField(previousDb, projectId, "image.count", nextCount) });
-  const restoreComposerAfterCount = () => {
-    window.scrollTo(scrollSnapshot.windowX, scrollSnapshot.windowY);
-    const workspace = document.querySelector(".workspace");
-    const shell = document.querySelector(".studio-shell");
-    if (workspace) workspace.scrollTop = scrollSnapshot.workspace;
-    if (shell) shell.scrollTop = scrollSnapshot.shell;
-    document.querySelectorAll(".image-generate-console").forEach((el) => {
-      el.classList.add("is-hover-expanded");
-      el.classList.remove("is-compact");
-    });
-  };
-  requestAnimationFrame(() => {
-    restoreComposerAfterCount();
-    requestAnimationFrame(restoreComposerAfterCount);
-  });
-  [40, 120, 260, 600, 1000].forEach((delay) => window.setTimeout(restoreComposerAfterCount, delay));
+  state.db = dbWithProjectField(previousDb, projectId, "image.count", nextCount);
+  updateImageCountDom(nextCount);
   const seq = ++imageCountSaveSeq;
   clearTimeout(imageCountSaveTimer);
   imageCountSaveTimer = setTimeout(async () => {
@@ -10146,7 +10124,10 @@ function updateImageBatchCount(delta) {
       if (state.projectId !== projectId || seq !== imageCountSaveSeq) return;
       state.db = db;
     } catch (error) {
-      if (state.projectId === projectId && seq === imageCountSaveSeq) set({ db: previousDb });
+      if (state.projectId === projectId && seq === imageCountSaveSeq) {
+        state.db = previousDb;
+        updateImageCountDom(imageBatchCount(project()));
+      }
       notify(error.message || t("toastSaveFailed"));
     }
   }, 140);
@@ -10267,6 +10248,32 @@ function updateImageModelDom(modelValue, source = null) {
     compactSummary.textContent = `${model.title} · ${aspectRatio} · ${resolution} · ${count} image${count > 1 ? "s" : ""}`;
   }
   window.lucide?.createIcons();
+}
+
+function updateImageCountDom(count = imageBatchCount(project())) {
+  const consoleEl = document.querySelector("[data-image-generate-console]");
+  if (!consoleEl) return;
+  const safeCount = Math.min(4, Math.max(1, Number.parseInt(count, 10) || 1));
+  const countLabel = consoleEl.querySelector("[data-image-count-current]");
+  const downButton = consoleEl.querySelector('[data-action="image-count-down"]');
+  const upButton = consoleEl.querySelector('[data-action="image-count-up"]');
+  const creditLabel = consoleEl.querySelector("[data-image-credit-label]");
+  const compactSummary = consoleEl.querySelector("[data-image-compact-summary]");
+  if (countLabel) countLabel.textContent = String(safeCount);
+  if (downButton) downButton.disabled = safeCount <= 1;
+  if (upButton) upButton.disabled = safeCount >= 4;
+  if (creditLabel && !state.generating) {
+    creditLabel.textContent = `${(imageModelCredit(project().image?.model) * safeCount).toFixed(2)} Credit`;
+  }
+  const promptSummary = String(project().image?.prompt || "").trim();
+  if (compactSummary && !promptSummary) {
+    const model = project().image?.model || "Model";
+    const aspectRatio = project().image?.aspectRatio || "9:16";
+    const resolution = String(project().image?.resolution || "2K").toLowerCase();
+    compactSummary.textContent = `${model} · ${aspectRatio} · ${resolution} · ${safeCount} image${safeCount > 1 ? "s" : ""}`;
+  }
+  consoleEl.classList.add("is-hover-expanded");
+  consoleEl.classList.remove("is-compact");
 }
 
 async function saveImageModelQuick(value, source = null) {
