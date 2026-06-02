@@ -4747,8 +4747,8 @@ function openAspectRatioPopover(summary) {
   window.lucide?.createIcons();
   const place = () => {
     const rect = summary.getBoundingClientRect();
-    const width = Math.max(340, popover.offsetWidth || 340);
-    const height = popover.offsetHeight || 460;
+    const width = Math.max(188, popover.offsetWidth || 188);
+    const height = popover.offsetHeight || 520;
     const left = Math.min(window.innerWidth - width - 12, Math.max(12, rect.left + rect.width / 2 - width / 2));
     const top = rect.top - height - 10 > 12 ? rect.top - height - 10 : Math.min(window.innerHeight - height - 12, rect.bottom + 10);
     popover.style.left = `${left}px`;
