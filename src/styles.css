@@ -32760,6 +32760,34 @@ label {
   font-weight: 950 !important;
 }
 
+/* Quality menu text-only rows: remove option symbols and selection frames. */
+.studio-shell .image-higgsfield-mode .image-resolution-options button {
+  grid-template-columns: minmax(0, 1fr) !important;
+  min-height: 58px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 9px 12px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .image-higgsfield-mode .image-resolution-options button:hover,
+.studio-shell .image-higgsfield-mode .image-resolution-options button.active {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .image-higgsfield-mode .image-resolution-option-icon,
+.studio-shell .image-higgsfield-mode .image-resolution-option-check {
+  display: none !important;
+}
+
+.studio-shell .image-higgsfield-mode .image-resolution-options button.active .image-resolution-option-copy b {
+  color: #2a0633 !important;
+  font-weight: 950 !important;
+}
+
 /* Image composer refinements: calmer CTA, hover labels, compact summary. */
 .studio-shell .image-console-compact-summary {
   display: none;
