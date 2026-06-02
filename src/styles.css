@@ -37567,3 +37567,116 @@ body:has(.studio-shell .video-prompt-extractor-page),
   transform: none !important;
   transition: background-color 0.08s ease, border-color 0.08s ease, color 0.08s ease, opacity 0.08s ease !important;
 }
+
+/* Global studio tool tabs lock: every creation page uses the same dark pill bar. */
+.studio-shell {
+  --project-fixed-tabs-height: 58px;
+}
+
+.studio-shell .workspace:has(.step-tabs) .project-step-topbar {
+  height: var(--project-fixed-tabs-height) !important;
+  padding: 7px 16px !important;
+  background:
+    linear-gradient(180deg, rgba(79, 61, 81, 0.92), rgba(49, 33, 54, 0.9)) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 12px 28px rgba(25, 5, 34, 0.22) !important;
+  backdrop-filter: blur(18px) saturate(1.08) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .studio-top-step-tabs,
+.studio-shell .workspace:has(.step-tabs) .step-tabs {
+  display: grid !important;
+  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  height: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  scrollbar-width: none !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .studio-top-step-tabs::-webkit-scrollbar,
+.studio-shell .workspace:has(.step-tabs) .step-tabs::-webkit-scrollbar {
+  display: none !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .step-tabs button {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 0 14px !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+  color: rgba(255, 255, 255, 0.64) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+  font-size: clamp(13px, 0.84vw, 15px) !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  text-shadow: none !important;
+  letter-spacing: 0 !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .step-tabs button:not(:first-child) {
+  border-left: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .step-tabs button svg {
+  width: 17px !important;
+  height: 17px !important;
+  flex: 0 0 auto !important;
+  color: currentColor !important;
+  opacity: 0.92 !important;
+  filter: none !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .step-tabs button span {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .step-tabs button:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .step-tabs button.active {
+  background: rgba(255, 255, 255, 0.16) !important;
+  border-color: rgba(255, 255, 255, 0.28) !important;
+  color: #fff !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 8px 18px rgba(0, 0, 0, 0.18) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .step-tabs button.active svg {
+  color: #e6b8ff !important;
+  opacity: 1 !important;
+}
+
+@media (max-width: 900px) {
+  .studio-shell .workspace:has(.step-tabs) .studio-top-step-tabs,
+  .studio-shell .workspace:has(.step-tabs) .step-tabs {
+    display: flex !important;
+  }
+
+  .studio-shell .workspace:has(.step-tabs) .step-tabs button {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 124px !important;
+  }
+}
