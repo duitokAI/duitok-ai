@@ -37501,13 +37501,13 @@ body:has(.studio-shell .image-higgsfield-mode),
 .studio-shell .agent-chat-shell.agent-page-panel .agent-chat-toolbar.agent-session-sidebar,
 .studio-shell .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-chat-toolbar.agent-session-sidebar {
   position: fixed !important;
-  top: 16px !important;
+  top: 0 !important;
   right: auto !important;
-  bottom: 18px !important;
-  left: max(84px, calc(50vw - 936px)) !important;
+  bottom: 0 !important;
+  left: 70px !important;
   z-index: 24 !important;
   width: min(252px, calc(100vw - 118px)) !important;
-  height: auto !important;
+  height: 100dvh !important;
   min-height: 0 !important;
   display: grid !important;
   grid-template-rows: auto minmax(0, 1fr) !important;
@@ -37723,7 +37723,7 @@ body:has(.studio-shell .image-higgsfield-mode),
 @media (max-width: 1180px) {
   .studio-shell .agent-chat-shell.agent-page-panel .agent-chat-toolbar.agent-session-sidebar {
     width: 232px !important;
-    left: 82px !important;
+    left: 70px !important;
   }
 }
 
