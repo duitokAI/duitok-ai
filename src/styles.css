@@ -31343,28 +31343,6 @@ label {
   display: none !important;
 }
 
-/* Seam guard: keep the generated image wall and composer touching without a white strip. */
-.studio-shell .image-higgsfield-mode .studio-result-wall,
-.studio-shell .image-higgsfield-mode .studio-wall-grid,
-.studio-shell .image-higgsfield-mode .studio-wall-card,
-.studio-shell .image-higgsfield-mode .studio-wall-card .result-preview-trigger,
-.studio-shell .image-higgsfield-mode .studio-wall-card .result-image,
-.studio-shell .image-higgsfield-mode .studio-wall-card .result-video,
-.studio-shell .image-higgsfield-mode .studio-wall-card .result-video-shell {
-  background: transparent !important;
-  background-color: transparent !important;
-}
-
-.studio-shell .image-higgsfield-mode .studio-wall-grid {
-  gap: 0 !important;
-}
-
-.studio-shell .image-higgsfield-mode > .image-generate-console {
-  margin-top: 0 !important;
-  border-top: 0 !important;
-  box-shadow: none !important;
-}
-
 @media (hover: hover) and (pointer: fine) {
   .studio-shell .image-higgsfield-mode .studio-wall-actions button::after {
     display: block !important;
@@ -32318,9 +32296,9 @@ label {
 
 .generation-credit-refund-note span {
   color: rgba(255, 255, 255, 0.72) !important;
-  font-size: 10px !important;
+  font-size: 9px !important;
   font-weight: 750 !important;
-  line-height: 1 !important;
+  line-height: 1.18 !important;
 }
 
 /* Image composer control lock: align model, size, quality, and count controls. */
@@ -32514,183 +32492,6 @@ label {
   box-shadow: inset 0 0 0 2px rgba(255, 49, 95, 0.56) !important;
 }
 
-/* Final composer toolbar pass: compact, readable controls without clipped pills. */
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) {
-  --image-toolbar-height: 56px;
-  --image-toolbar-radius: 26px;
-  --image-toolbar-border: rgba(115, 54, 132, 0.13);
-  --image-toolbar-bg: rgba(255, 255, 255, 0.88);
-}
-
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools {
-  grid-template-columns:
-    minmax(260px, 1.35fr)
-    68px
-    minmax(112px, 0.48fr)
-    minmax(126px, 0.56fr)
-    minmax(128px, 0.5fr) !important;
-  align-items: center !important;
-  gap: 14px !important;
-}
-
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-enhance-group {
-  height: var(--image-toolbar-height) !important;
-  grid-template-columns: minmax(0, 1fr) 68px !important;
-  gap: 14px !important;
-}
-
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker,
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance,
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-select,
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-select,
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper {
-  height: var(--image-toolbar-height) !important;
-  min-height: var(--image-toolbar-height) !important;
-  max-height: var(--image-toolbar-height) !important;
-  border: 1px solid var(--image-toolbar-border) !important;
-  border-radius: var(--image-toolbar-radius) !important;
-  background: var(--image-toolbar-bg) !important;
-  box-shadow: 0 10px 24px rgba(66, 16, 76, 0.06) !important;
-  overflow: hidden !important;
-}
-
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker summary,
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu summary,
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu summary {
-  height: 100% !important;
-  min-height: 0 !important;
-  padding: 0 16px !important;
-  border: 0 !important;
-  border-radius: inherit !important;
-  background: transparent !important;
-}
-
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker summary {
-  grid-template-columns: 26px minmax(0, 1fr) 16px !important;
-  gap: 10px !important;
-}
-
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-current-icon {
-  width: 24px !important;
-  height: 24px !important;
-}
-
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-current-text b {
-  font-size: clamp(19px, 1.45vw, 28px) !important;
-  line-height: 1 !important;
-}
-
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance {
-  display: grid !important;
-  place-items: center !important;
-  padding: 0 !important;
-}
-
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance svg {
-  width: 23px !important;
-  height: 23px !important;
-}
-
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu summary,
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu summary {
-  grid-template-columns: 22px minmax(36px, 1fr) 16px !important;
-  gap: 8px !important;
-}
-
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu summary b,
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu summary b {
-  min-width: 0 !important;
-  display: block !important;
-  color: #2b0636 !important;
-  font-size: clamp(20px, 1.45vw, 29px) !important;
-  font-weight: 900 !important;
-  line-height: 1 !important;
-  text-align: center !important;
-  white-space: nowrap !important;
-}
-
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu summary .aspect-ratio-glyph,
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu summary svg:first-child {
-  justify-self: center !important;
-  width: 20px !important;
-  max-width: 20px !important;
-  height: 20px !important;
-  max-height: 22px !important;
-  color: #b67ad8 !important;
-}
-
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu summary > svg:last-child,
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu summary > svg:last-child {
-  width: 15px !important;
-  height: 15px !important;
-  color: #b67ad8 !important;
-}
-
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper {
-  grid-template-columns: 42px minmax(48px, 1fr) 42px !important;
-  align-items: center !important;
-  gap: 0 !important;
-  padding: 0 !important;
-}
-
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper button {
-  width: 42px !important;
-  min-width: 42px !important;
-  height: 100% !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  color: #b67ad8 !important;
-}
-
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper button:disabled {
-  color: rgba(182, 122, 216, 0.38) !important;
-  opacity: 1 !important;
-}
-
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper span {
-  height: 100% !important;
-  min-width: 0 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 2px !important;
-  padding: 0 !important;
-  border-inline: 1px solid rgba(115, 54, 132, 0.1) !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-}
-
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper span b {
-  font-size: clamp(24px, 1.7vw, 34px) !important;
-  font-weight: 900 !important;
-  line-height: 1 !important;
-}
-
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper span small {
-  font-size: clamp(14px, 0.9vw, 19px) !important;
-  font-weight: 850 !important;
-  line-height: 1 !important;
-  transform: translateY(2px) !important;
-}
-
-@media (max-width: 1500px) {
-  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools {
-    grid-template-columns:
-      minmax(220px, 1.25fr)
-      62px
-      minmax(96px, 0.44fr)
-      minmax(112px, 0.52fr)
-      minmax(118px, 0.5fr) !important;
-    gap: 10px !important;
-  }
-
-  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-enhance-group {
-    grid-template-columns: minmax(0, 1fr) 62px !important;
-    gap: 10px !important;
-  }
-}
-
 /* Absolute last pass: center empty Avatar/Product icons after every console override. */
 .studio-shell .image-generate-console .image-reference-thumb.is-empty-ref {
   position: relative !important;
@@ -32728,4 +32529,95 @@ label {
 
 .studio-shell .image-generate-console .image-reference-thumb.is-empty-ref > div {
   display: none !important;
+}
+
+/* Agent generated media should behave like Image Page result cards. */
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread .agent-generation-preview.agent-generation-result-preview,
+.studio-shell .agent-page-panel .agent-thread .agent-generation-preview.agent-generation-result-preview {
+  width: min(720px, 100%) !important;
+  aspect-ratio: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  display: grid !important;
+  gap: 12px !important;
+  overflow: visible !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-preview .result-preview-trigger,
+.studio-shell .agent-page-panel .agent-generation-result-preview .result-preview-trigger {
+  width: 100% !important;
+  display: block !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  cursor: zoom-in !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-preview .result-image,
+.studio-shell .agent-page-panel .agent-generation-result-preview .result-image,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-preview .result-video-shell,
+.studio-shell .agent-page-panel .agent-generation-result-preview .result-video-shell {
+  width: 100% !important;
+  min-height: 0 !important;
+  max-height: min(560px, 62vh) !important;
+  border-radius: 10px !important;
+  object-fit: contain !important;
+  background: #0f0a14 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-meta,
+.studio-shell .agent-page-panel .agent-generation-result-meta {
+  width: 100% !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  align-items: center !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-meta span,
+.studio-shell .agent-page-panel .agent-generation-result-meta span {
+  min-height: 28px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  border: 1px solid rgba(111, 28, 132, 0.12) !important;
+  border-radius: 999px !important;
+  padding: 0 10px !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  color: rgba(42, 6, 51, 0.74) !important;
+  font-size: 12px !important;
+  font-weight: 850 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-actions,
+.studio-shell .agent-page-panel .agent-generation-result-actions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-actions button,
+.studio-shell .agent-page-panel .agent-generation-result-actions button {
+  min-height: 34px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  border: 1px solid rgba(111, 28, 132, 0.14) !important;
+  border-radius: 999px !important;
+  padding: 0 13px !important;
+  background: rgba(255, 255, 255, 0.86) !important;
+  color: #4f055f !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-actions button:hover,
+.studio-shell .agent-page-panel .agent-generation-result-actions button:hover {
+  background: #ffffff !important;
+  border-color: rgba(255, 49, 95, 0.2) !important;
 }
