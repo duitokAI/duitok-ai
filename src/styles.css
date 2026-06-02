@@ -41052,9 +41052,11 @@ body:has(.studio-shell .video-prompt-extractor-page),
   .studio-shell:not(.sidebar-collapsed):has(.agent-page) {
     --agent-expanded-chat-right-safe: clamp(72px, 5vw, 112px);
     --agent-expanded-chat-left-safe: clamp(28px, 2.4vw, 52px);
+    --agent-expanded-chat-left-edge: calc(var(--studio-sidebar-width, 304px) + var(--agent-session-panel-width, 252px) + var(--agent-expanded-chat-left-safe));
+    --agent-expanded-chat-shell-width: max(320px, calc(100vw - var(--agent-expanded-chat-left-edge) - var(--agent-expanded-chat-right-safe)));
     --agent-expanded-lane-width: min(
       1180px,
-      calc(100vw - var(--studio-sidebar-width, 304px) - var(--agent-session-panel-width, 252px) - var(--agent-expanded-chat-left-safe) - var(--agent-expanded-chat-right-safe))
+      var(--agent-expanded-chat-shell-width)
     );
   }
 
@@ -41070,11 +41072,11 @@ body:has(.studio-shell .video-prompt-extractor-page),
 
   .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel,
   .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel.agent-layout-fixture-active {
-    left: calc(var(--studio-sidebar-width, 304px) + var(--agent-session-panel-width, 252px) + var(--agent-expanded-chat-left-safe)) !important;
-    right: var(--agent-expanded-chat-right-safe) !important;
-    width: auto !important;
+    left: var(--agent-expanded-chat-left-edge) !important;
+    right: auto !important;
+    width: var(--agent-expanded-chat-shell-width) !important;
     min-width: 0 !important;
-    max-width: none !important;
+    max-width: var(--agent-expanded-chat-shell-width) !important;
     overflow: hidden !important;
     box-sizing: border-box !important;
   }
