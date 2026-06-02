@@ -37697,9 +37697,9 @@ body:has(.studio-shell .image-higgsfield-mode),
   height: 100dvh !important;
   min-height: 0 !important;
   display: grid !important;
-  grid-template-rows: auto minmax(0, 1fr) !important;
-  align-content: stretch !important;
-  gap: 18px !important;
+  grid-template-rows: auto auto !important;
+  align-content: start !important;
+  gap: 12px !important;
   border-right: 1px solid rgba(111, 28, 132, 0.12) !important;
   border-radius: 0 !important;
   padding: 14px 12px 18px !important;
@@ -37776,9 +37776,11 @@ body:has(.studio-shell .image-higgsfield-mode),
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-recents {
   min-height: 0 !important;
+  align-self: start !important;
   display: grid !important;
-  grid-template-rows: auto minmax(0, 1fr) !important;
-  gap: 10px !important;
+  grid-template-rows: auto auto !important;
+  gap: 8px !important;
+  margin: 0 !important;
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-recents header {
@@ -37803,6 +37805,7 @@ body:has(.studio-shell .image-higgsfield-mode),
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-list {
   min-height: 0 !important;
+  max-height: calc(100dvh - 176px) !important;
   display: grid !important;
   align-content: start !important;
   gap: 3px !important;
