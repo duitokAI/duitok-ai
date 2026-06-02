@@ -27622,6 +27622,22 @@ label {
   stroke: currentColor !important;
 }
 
+.studio-boot-fallback {
+  flex-direction: column !important;
+  white-space: normal !important;
+}
+
+.studio-boot-fallback strong {
+  color: #33023f;
+  font-size: 18px;
+}
+
+.studio-boot-fallback span {
+  max-width: 560px;
+  color: rgba(51, 2, 63, 0.72);
+  font-weight: 750;
+}
+
 @media (max-width: 420px) {
   .loading {
     font-size: 14px !important;

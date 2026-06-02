@@ -115,6 +115,7 @@ const state = {
   adminKey: localStorage.getItem(storageKeys.adminKey) || "",
   lang: localStorage.getItem(storageKeys.lang) || "zh",
   db: null,
+  studioBootError: "",
   page: "project",
   step: "image",
   projectId: null,
@@ -1270,18 +1271,30 @@ function notify(message) {
 }
 
 async function api(path, options = {}) {
-  const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
+  const { timeoutMs = 0, headers: optionHeaders = {}, ...fetchOptions } = options;
+  const headers = { "Content-Type": "application/json", ...optionHeaders };
   if (state.token) headers.Authorization = `Bearer ${state.token}`;
   if (state.adminKey) headers["X-Admin-Key"] = state.adminKey;
+  const controller = timeoutMs ? new AbortController() : null;
+  const timeout = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
   const res = await fetch(`${apiBaseUrl}/api${path}`, {
     headers,
-    ...options
+    ...fetchOptions,
+    signal: controller?.signal || fetchOptions.signal
+  }).finally(() => {
+    if (timeout) clearTimeout(timeout);
   });
-  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "Request failed");
+  if (!res.ok) {
+    const error = new Error((await res.json().catch(() => ({}))).error || "Request failed");
+    error.status = res.status;
+    throw error;
+  }
   return res.headers.get("content-type")?.includes("application/json") ? res.json() : res;
 }
 
 async function boot() {
+  state.studioBootError = "";
+  render();
   const handledOAuth = await handleOAuthRedirect();
   if (handledOAuth) {
     state.loading = false;
@@ -1336,9 +1349,42 @@ async function ensureStudioData() {
     window.history.replaceState({}, "", "/login");
     return;
   }
-  state.db = await api("/state");
+  try {
+    state.db = await loadStudioState();
+  } catch (error) {
+    if (isAuthExpiredError(error)) {
+      clearStoredSession();
+      window.history.replaceState({}, "", "/login");
+      notify(agentUserSafeError(error));
+      return;
+    }
+    throw error;
+  }
   state.projectId = state.db.projects[0]?.id;
   if (state.page === "dashboard" && shouldShowFirstGenerationWizard()) state.page = "wizard";
+}
+
+async function loadStudioState() {
+  try {
+    return await api("/state", { timeoutMs: 12000 });
+  } catch (error) {
+    if (isAuthExpiredError(error)) throw error;
+    await new Promise((resolve) => setTimeout(resolve, 700));
+    return api("/state", { timeoutMs: 18000 });
+  }
+}
+
+function isAuthExpiredError(error = {}) {
+  return error.status === 401 || /login required|unauthorized|session/i.test(error.message || "");
+}
+
+function clearStoredSession() {
+  localStorage.removeItem(storageKeys.user);
+  localStorage.removeItem(storageKeys.token);
+  state.user = null;
+  state.token = "";
+  state.db = null;
+  state.studioBootError = "";
 }
 
 async function refreshState() {
@@ -3269,6 +3315,7 @@ function login() {
 }
 
 function studio() {
+  if (!state.db) return studioBootFallback();
   const collapsed = state.sidebarCollapsed;
   const collapseLabel = collapsed ? "Expand sidebar" : "Collapse sidebar";
   return `
@@ -3311,6 +3358,24 @@ function studio() {
       <main class="workspace">${page()}</main>
       <div id="modal-root">${modal()}</div>
     </div>`;
+}
+
+function studioBootFallback() {
+  const hasError = Boolean(state.studioBootError);
+  const message = hasError
+    ? state.studioBootError
+    : state.lang === "zh"
+      ? "正在打开 Studio..."
+      : state.lang === "ms"
+        ? "Sedang membuka Studio..."
+        : "Opening Studio...";
+  return `
+    <main class="loading studio-boot-fallback">
+      ${icon(hasError ? "circle-alert" : "loader-circle", 28)}
+      <strong>${hasError ? "Studio loading failed" : "Loading Studio"}</strong>
+      <span>${esc(message)}</span>
+      ${hasError ? `<button class="dark-button mini-button" data-action="reload-page" type="button">${icon("refresh-cw", 16)} Refresh</button>` : ""}
+    </main>`;
 }
 
 function brand(label = "") {
@@ -9574,6 +9639,7 @@ async function action(event, name) {
     window.history.pushState({}, "", "/studio");
     return render();
   }
+  if (name === "reload-page") return window.location.reload();
   if (name === "toggle-sidebar") {
     const sidebarCollapsed = !state.sidebarCollapsed;
     localStorage.setItem(storageKeys.sidebarCollapsed, sidebarCollapsed ? "true" : "false");
@@ -11819,7 +11885,13 @@ document.addEventListener("visibilitychange", () => {
 });
 
 boot().catch((error) => {
+  if (isStudioPath() && !state.db && isAuthExpiredError(error)) {
+    clearStoredSession();
+    window.history.replaceState({}, "", "/login");
+  } else if (isStudioPath() && !state.db) {
+    state.studioBootError = agentUserSafeError(error);
+  }
   state.loading = false;
   render();
-  notify(error.message);
+  notify(isStudioPath() ? agentUserSafeError(error) : error.message);
 });
