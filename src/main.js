@@ -8961,7 +8961,7 @@ function agentGenerationFailedActions(entry = {}) {
 }
 
 function agentGenerationPendingFrame(entry = {}, options = {}) {
-  const { job, jobId, status, card } = entry;
+  const { job, jobId, status, mediaType, card } = entry;
   const isFailed = status === "failed";
   const aspectRatioRaw = String(job?.aspectRatio || card?.aspectRatio || project().image?.aspectRatio || "");
   const aspectRatio = aspectRatioRaw.includes("16:9") ? "16:9" : aspectRatioRaw.includes("1:1") ? "1:1" : "9:16";
