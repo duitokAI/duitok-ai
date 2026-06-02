@@ -1746,6 +1746,7 @@ function bindImageConsoleCompact() {
   let ticking = false;
   let compact = consoleEl.classList.contains("is-compact");
   let hovering = false;
+  let expandedUntilScroll = false;
   let menuOpen = false;
   let compactAt = 1;
   let expandAt = 0;
@@ -1790,7 +1791,7 @@ function bindImageConsoleCompact() {
     const nextCompact = compact ? scrollY > expandAt : scrollY > compactAt;
     if (nextCompact !== compact) compact = nextCompact;
     updateMenuState();
-    const expandLocked = Date.now() < imageConsoleExpandLockUntil || consoleEl.contains(document.activeElement);
+    const expandLocked = expandedUntilScroll || Date.now() < imageConsoleExpandLockUntil || consoleEl.contains(document.activeElement);
     const shouldCompact = compact && !hovering && !menuOpen && !expandLocked;
     consoleEl.classList.toggle("is-compact", shouldCompact);
     if (shouldCompact) closeModelMenus();
@@ -1802,6 +1803,7 @@ function bindImageConsoleCompact() {
   };
   const expandForHover = () => {
     hovering = true;
+    expandedUntilScroll = true;
     consoleEl.classList.add("is-hover-expanded");
     consoleEl.classList.remove("is-compact");
   };
@@ -1812,15 +1814,15 @@ function bindImageConsoleCompact() {
   const releaseHoverExpansion = () => {
     hovering = false;
     updateMenuState();
-    if (!menuOpen) consoleEl.classList.remove("is-hover-expanded");
     requestSync();
   };
   const handleScroll = () => {
     imageConsoleExpandLockUntil = 0;
+    expandedUntilScroll = false;
     if (hovering) {
       hovering = false;
-      if (!menuOpen) consoleEl.classList.remove("is-hover-expanded");
     }
+    if (!menuOpen) consoleEl.classList.remove("is-hover-expanded");
     requestSync();
   };
   const restoreAfterFocus = (event) => {
