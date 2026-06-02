@@ -33407,3 +33407,66 @@ label {
   transform: none !important;
   max-width: calc(100vw - 24px) !important;
 }
+/* Pending generation tiles should be a small centered processing state. */
+.studio-shell .image-higgsfield-mode .studio-wall-pending:not(.failed) > .studio-wall-pending-controls,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending:not(.failed) > .studio-wall-pending-controls {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  text-align: center !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-pending:not(.failed) .studio-wall-pending-spinner,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending:not(.failed) .studio-wall-pending-spinner {
+  position: static !important;
+  width: clamp(36px, 4vw, 52px) !important;
+  height: clamp(36px, 4vw, 52px) !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-pending:not(.failed) .studio-wall-pending-spinner svg,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending:not(.failed) .studio-wall-pending-spinner svg {
+  width: clamp(18px, 2vw, 24px) !important;
+  height: clamp(18px, 2vw, 24px) !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-pending:not(.failed) b,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending:not(.failed) b,
+.studio-shell .image-higgsfield-mode .studio-wall-pending:not(.failed) small,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending:not(.failed) small {
+  display: none !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-pending:not(.failed) button[data-generation-cancel],
+.studio-shell .video-prompt-extractor-page .studio-wall-pending:not(.failed) button[data-generation-cancel] {
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  width: clamp(30px, 3vw, 40px) !important;
+  min-width: clamp(30px, 3vw, 40px) !important;
+  height: clamp(30px, 3vw, 40px) !important;
+  min-height: clamp(30px, 3vw, 40px) !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  border-radius: 12px !important;
+  color: rgba(255, 255, 255, 0.82) !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-pending:not(.failed) button[data-generation-cancel] svg,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending:not(.failed) button[data-generation-cancel] svg {
+  width: clamp(16px, 1.7vw, 22px) !important;
+  height: clamp(16px, 1.7vw, 22px) !important;
+}
