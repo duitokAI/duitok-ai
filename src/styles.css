@@ -35428,6 +35428,9 @@ label {
 .studio-shell .image-higgsfield-mode > .image-generate-console {
   --image-toolbar-control-height: 40px;
   --image-toolbar-control-radius: 16px;
+  --image-toolbar-text-size: 18px;
+  --image-toolbar-text-line-height: 1.24;
+  --image-toolbar-text-y-padding: 2px;
   --image-toolbar-copy: #2a0633;
   --image-toolbar-muted: rgba(112, 64, 146, 0.74);
 }
@@ -35550,18 +35553,21 @@ label {
 
 .studio-shell .image-higgsfield-mode > .image-generate-console .image-model-current-text {
   min-width: 0 !important;
-  display: block !important;
-  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  overflow: visible !important;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console .image-model-current-text b {
   display: block !important;
   min-width: 0 !important;
-  overflow: hidden !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+  padding-block: var(--image-toolbar-text-y-padding) !important;
   color: var(--image-toolbar-copy) !important;
-  font-size: 17px !important;
+  font-size: calc(var(--image-toolbar-text-size) - 1px) !important;
   font-weight: 850 !important;
-  line-height: 1.2 !important;
+  line-height: var(--image-toolbar-text-line-height) !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
 }
@@ -35636,10 +35642,11 @@ label {
   min-width: 0 !important;
   display: block !important;
   overflow: visible !important;
+  padding-block: var(--image-toolbar-text-y-padding) !important;
   color: var(--image-toolbar-copy) !important;
-  font-size: 18px !important;
+  font-size: var(--image-toolbar-text-size) !important;
   font-weight: 850 !important;
-  line-height: 1.18 !important;
+  line-height: var(--image-toolbar-text-line-height) !important;
   text-align: center !important;
   text-overflow: clip !important;
   white-space: nowrap !important;
@@ -35678,7 +35685,8 @@ label {
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console .image-count-stepper span {
-  height: 100% !important;
+  height: auto !important;
+  min-height: calc(var(--image-toolbar-text-size) * var(--image-toolbar-text-line-height) + var(--image-toolbar-text-y-padding) * 2) !important;
   min-width: 0 !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -35692,17 +35700,39 @@ label {
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console .image-count-stepper span b {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  padding-block: var(--image-toolbar-text-y-padding) !important;
   color: var(--image-toolbar-copy) !important;
   font-size: 16px !important;
   font-weight: 850 !important;
-  line-height: 1.18 !important;
+  line-height: var(--image-toolbar-text-line-height) !important;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console .image-count-stepper span small {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  padding-block: var(--image-toolbar-text-y-padding) !important;
   color: var(--image-toolbar-muted) !important;
   font-size: 13px !important;
   font-weight: 800 !important;
-  line-height: 1.18 !important;
+  line-height: var(--image-toolbar-text-line-height) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-compact-summary {
+  min-height: calc(15px * var(--image-toolbar-text-line-height) + var(--image-toolbar-text-y-padding) * 2) !important;
+  display: block !important;
+  overflow: visible !important;
+  padding-block: var(--image-toolbar-text-y-padding) !important;
+  line-height: var(--image-toolbar-text-line-height) !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-main {
+  overflow: visible !important;
 }
 
 @media (max-width: 760px) {
