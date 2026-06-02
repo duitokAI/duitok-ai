@@ -1519,7 +1519,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
   const apiCalls = isAdmin ? (db.apiCalls || []).filter(owns) : [];
   const payments = recentRows((db.payments || []).filter(owns));
   const supportTickets = recentRows((db.supportTickets || []).filter(owns));
-  const attachments = recentRows((db.attachments || []).filter(owns), publicStateAttachmentLimit);
+  const attachments = recentRows((db.attachments || []).filter(owns), publicStateAttachmentLimit).map(publicAttachment);
   const creditLedger = recentRows((db.creditLedger || []).filter(owns)).map(sanitizeCreditLedger);
   const tiktokConnections = (db.tiktok?.connections || []).filter(owns);
   const tiktokPublishes = (db.tiktok?.publishes || []).filter(owns).map(sanitizePublish);
@@ -1637,6 +1637,24 @@ function publicGenerationJob(job = {}) {
     createdAt: job.createdAt,
     startedAt: job.startedAt,
     completedAt: job.completedAt
+  };
+}
+
+function publicAttachmentPrompt(value = "", type = "image") {
+  const fallback = publicGenerationBody(type);
+  const text = String(value || "").trim();
+  if (!text) return "Saved reference";
+  if (/task\s*id\s*:/i.test(text) || /reference\s*id\s*hidden/i.test(text) || /generated\s+with/i.test(text) || /task\s+completed/i.test(text)) {
+    return fallback;
+  }
+  return redactProviderText(text, "Saved reference");
+}
+
+function publicAttachment(item = {}) {
+  return {
+    ...item,
+    name: redactProviderText(item.name || "", item.kind === "avatar" ? "Saved avatar reference" : "Saved product reference"),
+    prompt: publicAttachmentPrompt(item.prompt || "", item.mediaKind === "video" || item.type === "video" ? "video" : "image")
   };
 }
 
@@ -7043,7 +7061,7 @@ app.post("/api/results/:id/save-reference", async (req, res, next) => {
         type: result.videoUrl ? "video" : "image",
         mediaKind: result.videoUrl ? "video" : "image",
         sourceResultId: result.id,
-        prompt: result.providerBody || result.body || "",
+        prompt: publicAttachmentPrompt(result.providerBody || result.body || "", result.videoUrl ? "video" : "image"),
         createdAt: new Date().toISOString()
       });
       db.usage.unshift(usage(`Saved ${kind} reference`, 0, user.id));

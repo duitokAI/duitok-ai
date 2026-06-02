@@ -7101,12 +7101,33 @@ function attachmentPickerCard(item, targetKind) {
   const preview = attachmentPreview(item);
   const title = item.name || (item.kind === "avatar" ? "Avatar reference" : "Product reference");
   const isVideo = item.mediaKind === "video" || /^video\//i.test(item.type || "");
+  const metaText = attachmentPickerMetaText(item, isVideo);
   return `<button class="attachment-picker-card" type="button" data-attachment-pick="${esc(item.id)}" data-attachment-target="${esc(targetKind)}">
     <span class="attachment-kind-badge ${item.kind === "product" ? "product" : "avatar"}">${icon(item.kind === "avatar" ? "circle-user-round" : "box", 14)} ${esc(String(item.kind || "file").toUpperCase())}</span>
     ${preview}
     <b>${esc(title)}</b>
-    <small>${isVideo ? icon("video", 14) : icon("image", 14)} ${esc(item.prompt || item.type || "Saved reference")}</small>
+    <small>${isVideo ? icon("video", 14) : icon("image", 14)} ${esc(metaText)}</small>
   </button>`;
+}
+
+function attachmentPickerMetaText(item, isVideo = false) {
+  const fallback = isVideo ? "Video generated with Pokaya AI." : "Image generated with Pokaya AI.";
+  let text = String(item.prompt || item.type || "Saved reference").trim();
+  if (!text) return "Saved reference";
+  if (/task\s*id\s*:/i.test(text) || /reference\s*id\s*hidden/i.test(text) || /generated\s+with/i.test(text) || /task\s+completed/i.test(text)) {
+    text = fallback;
+  }
+  text = text
+    .replace(/task\s*id\s*:\s*[^\n]+/gi, "")
+    .replace(/reference\s*id\s*hidden/gi, "")
+    .replace(new RegExp("\\bAP" + "IMart\\b", "gi"), "Pokaya AI")
+    .replace(new RegExp("\\bGR" + "S\\s*AI\\b", "gi"), "Pokaya AI")
+    .replace(new RegExp("\\bGR" + "SAI\\b", "gi"), "Pokaya AI")
+    .replace(new RegExp("\\bWu" + "yin\\b", "gi"), "Pokaya AI")
+    .replace(/速创API/gi, "Pokaya AI")
+    .replace(/\n{2,}/g, " ")
+    .trim();
+  return text || fallback;
 }
 
 function attachmentPreview(item) {
