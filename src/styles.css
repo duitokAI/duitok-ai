@@ -37343,14 +37343,14 @@ body:has(.studio-shell .image-higgsfield-mode),
   .studio-shell .agent-chat-shell.agent-page-panel .agent-thread,
   .studio-shell .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-thread {
     width: min(920px, calc(100% - 32px)) !important;
-    margin-left: auto !important;
+    margin-left: 0 !important;
     margin-right: auto !important;
   }
 
   .studio-shell .agent-chat-shell.agent-page-panel .agent-form,
   .studio-shell .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-form {
     width: min(920px, calc(100% - 32px)) !important;
-    margin-left: auto !important;
+    margin-left: 0 !important;
     margin-right: auto !important;
   }
 }
