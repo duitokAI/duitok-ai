@@ -1774,10 +1774,7 @@ function handleDelegatedClick(event) {
   if (target.dataset.project) return scheduleNavigation({ projectId: target.dataset.project, page: "project", projectMenuId: null });
   if (target.dataset.studioWallMore) return showMoreStudioWall(target.dataset.studioWallMore);
   if (target.dataset.resultAction) return resultAction(target);
-  if (target.dataset.resultPreview) {
-    const fromAgent = Boolean(target.closest?.(".agent-generation-card, .agent-tool-cards"));
-    return set({ modal: "previewResult", activeResultId: target.dataset.resultPreview, resultDetailSource: fromAgent ? "agent" : "" });
-  }
+  if (target.dataset.resultPreview) return set({ modal: "previewResult", activeResultId: target.dataset.resultPreview });
   if (target.dataset.resultPrompt) return set({ modal: "resultPrompt", activeResultId: target.dataset.resultPrompt });
   if (target.dataset.imageCanvasResult) return set({ imageCanvasSelectedResultId: target.dataset.imageCanvasResult });
   if (target.dataset.imageModelOption) return saveProjectField("image.model", target.dataset.imageModelOption);
@@ -1794,7 +1791,6 @@ function scheduleNavigation(patch = {}) {
   const sameStep = !nextStep || nextStep === state.step;
   const sameProject = !nextProjectId || nextProjectId === state.projectId;
   if (samePage && sameStep && sameProject && !patch.modal && !patch.projectMenuId) return;
-  if (!samePage || !sameStep || !sameProject) patch.selectedResultIds = [];
   document.documentElement.classList.add("is-route-changing");
   if (navigationFrame) window.cancelAnimationFrame(navigationFrame);
   navigationFrame = window.requestAnimationFrame(() => {
