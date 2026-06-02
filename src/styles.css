@@ -37418,3 +37418,80 @@ body:has(.studio-shell .image-higgsfield-mode),
 .studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option-copy small {
   display: none !important;
 }
+
+/* Clone Prompt background lock: mirror Image Page so no white band appears behind or below the dock. */
+html:has(.studio-shell .video-prompt-extractor-page),
+body:has(.studio-shell .video-prompt-extractor-page),
+#app:has(.studio-shell .video-prompt-extractor-page),
+.studio-shell:has(.video-prompt-extractor-page),
+.studio-shell:has(.step-tabs):has(.video-prompt-extractor-page) .workspace,
+.studio-shell .workspace:has(.video-prompt-extractor-page),
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page),
+.studio-shell .canvas-card:has(.video-prompt-extractor-page),
+.studio-shell .studio-workbench-card:has(.video-prompt-extractor-page),
+.studio-shell .studio-step-panel:has(.video-prompt-extractor-page),
+.studio-shell .video-prompt-extractor-page,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall,
+.studio-shell .video-prompt-extractor-page > .video-prompt-empty-wall {
+  background:
+    radial-gradient(circle at 86% 4%, rgba(255, 90, 145, 0.1), transparent 30%),
+    linear-gradient(135deg, #f8edf9 0%, #f3e5f6 52%, #eadcf1 100%) !important;
+  background-color: #eadcf1 !important;
+  background-clip: border-box !important;
+}
+
+.studio-shell .workspace:has(.video-prompt-extractor-page),
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page),
+.studio-shell .canvas-card:has(.video-prompt-extractor-page),
+.studio-shell .studio-workbench-card:has(.video-prompt-extractor-page),
+.studio-shell .studio-step-panel:has(.video-prompt-extractor-page) {
+  min-height: 100dvh !important;
+  padding-bottom: 0 !important;
+  overflow: visible !important;
+}
+
+.studio-shell .video-prompt-extractor-page {
+  min-height: calc(100dvh - var(--project-fixed-tabs-height, 58px)) !important;
+  grid-template-rows: minmax(0, 1fr) auto !important;
+  align-content: stretch !important;
+  padding-bottom: 0 !important;
+  overflow: visible !important;
+}
+
+.studio-shell .video-prompt-extractor-page > .studio-wall-zoom-control {
+  position: absolute !important;
+  top: 10px !important;
+  right: clamp(18px, 2.2vw, 42px) !important;
+  z-index: 8 !important;
+  margin: 0 !important;
+}
+
+.studio-shell .video-prompt-extractor-page > .studio-result-wall,
+.studio-shell .video-prompt-extractor-page > .video-prompt-empty-wall {
+  grid-row: 1 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  margin: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .video-prompt-extractor-page > .video-prompt-dock {
+  grid-row: 2 !important;
+  align-self: end !important;
+  margin-bottom: 14px !important;
+  box-shadow:
+    0 18px 48px rgba(70, 16, 84, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88) !important;
+}
+
+.studio-shell .video-prompt-extractor-page > .video-prompt-dock::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(-1 * max(72px, env(safe-area-inset-bottom)));
+  height: max(72px, env(safe-area-inset-bottom));
+  background: #eadcf1;
+  pointer-events: none;
+}
