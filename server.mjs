@@ -3035,10 +3035,10 @@ async function saveFailedGeneration(projectId, action, step, error, user) {
       projectId,
       action,
       step,
-      type: action === "generate-image" && isVideoMediaModel(project.image?.model) ? "video" : action === "generate-image" ? "image" : "text",
+      type: action === "generate-ugc" ? "video" : action === "generate-image" && isVideoMediaModel(project.image?.model) ? "video" : action === "generate-image" ? "image" : "text",
       status: "failed",
       taskId: null,
-      prompt: project.image?.prompt || "",
+      prompt: action === "generate-ugc" ? project.ugc?.script || "" : project.image?.prompt || "",
       aspectRatio,
       creditsCharged: 0,
       errorMessage: publicGenerationError(),
@@ -3070,16 +3070,21 @@ async function saveFailedGeneration(projectId, action, step, error, user) {
 }
 
 async function enqueueGeneration(projectId, action, step, user, options = {}) {
-  const batchCount = action === "generate-image" ? imageBatchCount(options.count) : 1;
-  const promptValue = action === "generate-image" ? sanitizeAgentText(options.prompt ?? "").slice(0, 3000) : "";
+  const batchCount = action === "generate-image" || action === "generate-ugc" ? imageBatchCount(options.count) : 1;
+  const promptValue = action === "generate-image" || action === "generate-ugc" ? sanitizeAgentText(options.prompt ?? "").slice(0, 3000) : "";
   const promptOverride = action === "generate-image" ? sanitizeAgentText(options.promptOverride || "").slice(0, 3000) : "";
   const shouldAdvancePrompt = action === "generate-image" && options.advancePrompt === true;
   const jobIds = Array.from({ length: batchCount }, () => crypto.randomUUID());
   const state = await mutateDb(async (currentDb) => {
     const project = findProject(currentDb, projectId, user);
     if (promptValue) {
-      project.image ||= {};
-      project.image.prompt = promptValue;
+      if (action === "generate-ugc") {
+        project.ugc ||= {};
+        project.ugc.script = promptValue;
+      } else {
+        project.image ||= {};
+        project.image.prompt = promptValue;
+      }
     }
     const creditsToCharge = creditChargeFor(project, action, currentDb);
     assertGenerationAccess(currentDb, user, roundCredits(creditsToCharge * batchCount), batchCount);
@@ -3092,10 +3097,10 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
       projectId,
       action,
       step,
-      type: action === "generate-image" && isVideoMediaModel(project.image?.model) ? "video" : action === "generate-image" ? "image" : "text",
+      type: action === "generate-ugc" ? "video" : action === "generate-image" && isVideoMediaModel(project.image?.model) ? "video" : action === "generate-image" ? "image" : "text",
       status: "queued",
       stage: shouldAdvancePrompt ? "prompt_advanced" : "queued",
-      prompt: project.image?.prompt || "",
+      prompt: action === "generate-ugc" ? project.ugc?.script || "" : project.image?.prompt || "",
       creditsCharged: 0,
       creditsRequired: creditsToCharge,
       duration: videoDurationFor(project),

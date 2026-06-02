@@ -5409,37 +5409,108 @@ const ugcBuilderStyleOptions = {
 };
 
 function ugcPanel(p) {
-  const provider = p.ugc.provider || "Veo 3.1";
-  const imageMode = p.ugc.imageMode || "Product Reference (AI creates scene)";
-  const firstFrameMode = imageMode === "First Frame (animate from image)";
-  const textOnlyMode = imageMode === "Text to Video (no image needed)";
-  return studioImmersiveShell(p, "ugc", `
-    <div class="generator-box video-generator-box">
-      <h2>🎬 Video Generator</h2>
-      <p class="field-label">Provider</p>
-      <div class="video-provider-grid">
-        ${videoProviderButton("Veo 3.1", "🎬 Veo 3.1 · 8s", provider)}
-        ${videoProviderButton("Sora 2", "⚡ Sora 2 · 8 / 12s", provider)}
+  const meta = studioStepMeta("ugc");
+  const bulkSelecting = isBulkSelectingResults();
+  return `<section class="video-page-studio video-prompt-extractor-page studio-wall-zoomable ${bulkSelecting ? "is-bulk-selecting-results" : ""}" data-studio-mode="ugc" ${studioWallZoomStyleAttr()}>
+    ${studioWallZoomControl()}
+    ${studioResultWall(p, meta)}
+    ${bulkSelecting ? "" : videoGenerateConsole(p)}
+  </section>`;
+}
+
+function videoBatchCount(p = project()) {
+  const count = Number.parseInt(p?.ugc?.count, 10);
+  if (!Number.isFinite(count)) return 1;
+  return Math.min(4, Math.max(1, count));
+}
+
+function videoDurationValue(p = project()) {
+  const value = String(p?.ugc?.duration || "12s");
+  return ["5s", "8s", "12s"].includes(value) ? value : "12s";
+}
+
+function videoAspectRatioValue(p = project()) {
+  const value = String(p?.ugc?.aspectRatio || p?.image?.aspectRatio || "16:9");
+  return ["9:16", "16:9", "1:1", "4:3", "3:4"].includes(value) ? value : "16:9";
+}
+
+function videoQualityValue(p = project()) {
+  const value = String(p?.ugc?.quality || "720p").toLowerCase();
+  return ["480p", "720p", "1080p"].includes(value) ? value : "720p";
+}
+
+function videoAudioValue(p = project()) {
+  return String(p?.ugc?.audio || "On").toLowerCase() === "off" ? "Off" : "On";
+}
+
+function videoModelValue(p = project()) {
+  const value = String(p?.ugc?.provider || "Seedance 2.0 Fast");
+  if (/sora/i.test(value)) return "Sora 2";
+  if (/veo/i.test(value)) return "Veo 3.1";
+  if (/seedance/i.test(value)) return "Seedance 2.0 Fast";
+  return "Seedance 2.0 Fast";
+}
+
+function videoCreditEstimate(p = project()) {
+  const duration = Number.parseInt(videoDurationValue(p), 10) || 12;
+  const qualityMultiplier = videoQualityValue(p) === "1080p" ? 1.35 : videoQualityValue(p) === "480p" ? 0.78 : 1;
+  const audioMultiplier = videoAudioValue(p) === "Off" ? 0.92 : 1;
+  const unit = Math.max(0.15, (duration / 12) * 0.6 * qualityMultiplier * audioMultiplier);
+  return (unit * videoBatchCount(p)).toFixed(2);
+}
+
+function videoGenerateConsole(p) {
+  const promptText = String(p.ugc?.script || "");
+  const longPromptClass = promptText.length > 120 || promptText.includes("\n") ? "has-long-prompt" : "";
+  return `<section class="video-generate-console ${longPromptClass}" data-video-generate-console>
+    <div class="video-console-main">
+      <div class="video-console-prompt" data-video-console-prompt-zone>
+        <button class="video-prompt-insert" type="button" data-action="open-attachment-picker" data-attachment-kind="product" title="Add video reference" aria-label="Add video reference">
+          ${icon("plus", 24)}
+        </button>
+        <textarea data-field="ugc.script" data-video-console-prompt rows="2" placeholder="Describe the video you want to create...">${esc(p.ugc?.script || "")}</textarea>
       </div>
-      ${select("ugc.imageMode", "Image Mode", ["Product Reference (AI creates scene)", "First Frame (animate from image)", "Text to Video (no image needed)"], imageMode)}
+      <div class="video-console-tools">
+        ${videoOptionMenu("model", "ugc.provider", videoModelValue(p), [
+          ["Seedance 2.0 Fast", "Seedance 2.0 Fast"],
+          ["Veo 3.1", "Veo 3.1"],
+          ["Sora 2", "Sora 2"]
+        ], "audio-lines")}
+        ${videoOptionMenu("ratio", "ugc.aspectRatio", videoAspectRatioValue(p), ["16:9", "9:16", "1:1", "4:3", "3:4"].map((value) => [value, value]), "rectangle-horizontal")}
+        ${videoOptionMenu("quality", "ugc.quality", videoQualityValue(p), ["480p", "720p", "1080p"].map((value) => [value, value]), "gem")}
+        ${videoOptionMenu("duration", "ugc.duration", videoDurationValue(p), ["5s", "8s", "12s"].map((value) => [value, value]), "clock-3")}
+        ${videoCountStepper(p)}
+        ${videoOptionMenu("audio", "ugc.audio", videoAudioValue(p), [["On", "On"], ["Off", "Off"]], videoAudioValue(p) === "Off" ? "volume-x" : "volume-2")}
+      </div>
     </div>
-    <section class="ugc-scene-card">
-      <div class="ugc-scene-head">
-        <h2>🎞️ Scene</h2>
-        <button type="button" data-action="open-ugc-prompt-builder">${icon("sparkles", 18)} Prompt Builder</button>
-      </div>
-      ${textOnlyMode ? ugcTextOnlyNotice() : firstFrameMode ? ugcFrameReferences() : ugcProductReferences(provider)}
-      <div class="ugc-prompt-toolbar">
-        <button class="active" type="button">✍️ Prompt</button>
-        <button type="button">💡 Idea (AI expand)</button>
-      </div>
-      <textarea class="ugc-scene-textarea" data-field="ugc.script" placeholder="Scene description + spoken dialog 0-8s...">${esc(p.ugc.script)}</textarea>
-      <div class="ugc-scene-foot">
-        <span>Each shot = 8s · Sweet spot <b>18-22 words</b> of spoken dialog (split: 0-2s hook ≤6 words · 2-6s middle ≤14 words · 6-8s CTA ≤6 words) · <b>${wordCount(p.ugc.script)}</b> words · 0/1500</span>
-        <button class="gold-button" data-action="generate-ugc">${icon("video")} Generate Video</button>
-      </div>
-    </section>
-  `);
+    <button class="video-console-generate" type="button" data-action="generate-ugc" ${state.generating ? "aria-busy=\"true\" disabled" : ""}>
+      ${icon(state.generating ? "loader-circle" : "send", 22)}
+      <b>${state.generating ? "Queuing" : "Generate Video"}</b>
+      <small data-video-credit-label>${state.generating ? "You can keep typing" : `${videoCreditEstimate(p)} Credit`}</small>
+    </button>
+  </section>`;
+}
+
+function videoOptionMenu(kind, field, selectedValue, options = [], iconName = "circle") {
+  return `<details class="video-option-menu video-option-${esc(kind)}">
+    <summary aria-label="${esc(kind)}">
+      ${icon(iconName, 18)}
+      <b data-video-option-current="${esc(field)}">${esc(selectedValue)}</b>
+      ${icon("chevron-down", 16)}
+    </summary>
+    <div class="video-option-list" role="listbox" aria-label="${esc(kind)}">
+      ${options.map(([value, label]) => `<button type="button" class="${value === selectedValue ? "active" : ""}" data-field-set="${esc(field)}" data-value="${esc(value)}" role="option" aria-selected="${value === selectedValue ? "true" : "false"}">${esc(label)}</button>`).join("")}
+    </div>
+  </details>`;
+}
+
+function videoCountStepper(p = project()) {
+  const selectedCount = videoBatchCount(p);
+  return `<div class="video-count-stepper" aria-label="Videos to generate">
+    <button type="button" data-action="video-count-down" aria-label="Generate fewer videos" ${selectedCount <= 1 ? "disabled" : ""}>${icon("minus", 15)}</button>
+    <span><b data-video-count-current>${selectedCount}</b><small>/4</small></span>
+    <button type="button" data-action="video-count-up" aria-label="Generate more videos" ${selectedCount >= 4 ? "disabled" : ""}>${icon("plus", 15)}</button>
+  </div>`;
 }
 
 function ugcProductReferences(provider) {
@@ -9695,6 +9766,18 @@ function bind() {
       generate("generate-image", event);
     });
   });
+  document.querySelectorAll("[data-video-console-prompt]").forEach((el) => {
+    updateVideoPromptEditorRows(el);
+    el.addEventListener("input", () => {
+      updateVideoPromptLocal(el.value);
+      updateVideoPromptEditorRows(el);
+    });
+    el.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" || (!event.metaKey && !event.ctrlKey) || event.shiftKey || event.altKey || event.isComposing) return;
+      event.preventDefault();
+      generate("generate-ugc", event);
+    });
+  });
   document.querySelectorAll("[data-result-title]").forEach((el) => {
     el.addEventListener("input", () => {
       if (state.resultTitleSavedId === el.dataset.resultTitle) set({ resultTitleSavedId: null });
@@ -9887,6 +9970,12 @@ function updateImagePromptLocal(value = "") {
   });
 }
 
+function updateVideoPromptLocal(value = "") {
+  if (!state.projectId || !state.db) return;
+  state.db = dbWithProjectField(state.db, state.projectId, "ugc.script", value);
+  syncVideoPromptDensityClass(value);
+}
+
 function imageCompactPromptText(value = null) {
   const liveValue = document.querySelector("[data-image-console-prompt]")?.value;
   const text = String(value ?? liveValue ?? project()?.image?.prompt ?? "")
@@ -9906,8 +9995,27 @@ function syncImagePromptDensityClass(value = project()?.image?.prompt || "") {
   });
 }
 
+function syncVideoPromptDensityClass(value = project()?.ugc?.script || "") {
+  const promptText = String(value || "");
+  const isLong = promptText.length > 120 || promptText.includes("\n");
+  document.querySelectorAll(".video-generate-console").forEach((el) => {
+    el.classList.toggle("has-long-prompt", isLong);
+  });
+  requestAnimationFrame(() => {
+    document.querySelectorAll("[data-video-console-prompt]").forEach((el) => updateVideoPromptEditorRows(el));
+  });
+}
+
 function updateImagePromptEditorRows(input) {
-  const consoleEl = input?.closest?.(".image-generate-console");
+  updatePromptEditorRows(input, ".image-generate-console");
+}
+
+function updateVideoPromptEditorRows(input) {
+  updatePromptEditorRows(input, ".video-generate-console");
+}
+
+function updatePromptEditorRows(input, consoleSelector = ".image-generate-console") {
+  const consoleEl = input?.closest?.(consoleSelector);
   if (!input || !consoleEl) return;
   const styles = window.getComputedStyle(input);
   const lineHeight = Number.parseFloat(styles.lineHeight) || 20;
@@ -9934,6 +10042,7 @@ function updateImagePromptEditorRows(input) {
   const rawRows = Math.max(1, Math.ceil(contentHeight / lineHeight));
   const visibleRows = Math.max(1, Math.min(6, rawRows));
   consoleEl.style.setProperty("--image-prompt-lines", String(visibleRows));
+  consoleEl.style.setProperty("--video-prompt-lines", String(visibleRows));
   consoleEl.classList.toggle("has-long-prompt", rawRows > 1);
   consoleEl.classList.toggle("has-scroll-prompt", rawRows > 6);
 }
@@ -10125,6 +10234,8 @@ async function action(event, name) {
   if (name === "export-project") return download(`/api/export/project/${state.projectId}`, `${project().name}.json`);
   if (name === "image-count-down") return updateImageBatchCount(-1);
   if (name === "image-count-up") return updateImageBatchCount(1);
+  if (name === "video-count-down") return updateVideoBatchCount(-1);
+  if (name === "video-count-up") return updateVideoBatchCount(1);
   if (name === "toggle-prompt-advanced" || name === "optimize-image-prompt") return togglePromptAdvanced();
   if (name === "clear-image-prompt-media") return clearImagePromptMedia();
   if (name === "stop-agent-response") return stopAgentResponse();
@@ -10318,6 +10429,37 @@ function updateImageBatchCount(delta) {
   }, 140);
 }
 
+function updateVideoBatchCount(delta) {
+  const projectId = state.projectId;
+  const previousDb = state.db;
+  const nextCount = Math.min(4, Math.max(1, videoBatchCount(project()) + delta));
+  if (nextCount === videoBatchCount(project())) return;
+  state.db = dbWithProjectField(previousDb, projectId, "ugc.count", nextCount);
+  updateVideoCountDom(nextCount);
+  const timerKey = `${projectId}:ugc.count`;
+  const previousTimer = quickFieldSaveTimers.get(timerKey);
+  if (previousTimer) clearTimeout(previousTimer.id);
+  const seq = ++quickFieldSaveSeq;
+  const id = window.setTimeout(async () => {
+    try {
+      const db = await api(`/projects/${projectId}/field`, {
+        method: "PATCH",
+        body: JSON.stringify({ field: "ugc.count", value: videoBatchCount(project()) })
+      });
+      if (quickFieldSaveTimers.get(timerKey)?.seq !== seq || state.projectId !== projectId) return;
+      state.db = db;
+      quickFieldSaveTimers.delete(timerKey);
+    } catch (error) {
+      if (quickFieldSaveTimers.get(timerKey)?.seq !== seq || state.projectId !== projectId) return;
+      quickFieldSaveTimers.delete(timerKey);
+      state.db = previousDb;
+      updateVideoCountDom(videoBatchCount(project()));
+      notify(error.message || t("toastSaveFailed"));
+    }
+  }, 140);
+  quickFieldSaveTimers.set(timerKey, { id, seq });
+}
+
 async function saveProjectField(field, value) {
   const projectId = state.projectId;
   const previousDb = state.db;
@@ -10363,6 +10505,17 @@ function setFieldSetActive(field, value, source = null) {
       const active = el.dataset.value === value;
       el.setAttribute("aria-selected", active ? "true" : "false");
     });
+  }
+  if (field?.startsWith("ugc.")) {
+    document.querySelectorAll(`[data-video-option-current="${field}"]`).forEach((el) => {
+      el.textContent = value;
+    });
+    document.querySelectorAll(`[data-field-set="${field}"]`).forEach((el) => {
+      const active = el.dataset.value === value;
+      el.classList.toggle("active", active);
+      el.setAttribute("aria-selected", active ? "true" : "false");
+    });
+    updateVideoCountDom(videoBatchCount(project()));
   }
   if (field === "original.provider") {
     const provider = originalProviderValue(value);
@@ -10447,6 +10600,22 @@ function updateImageCountDom(count = imageBatchCount(project())) {
   if (compactSummary) compactSummary.textContent = imageCompactPromptText();
   consoleEl.classList.add("is-hover-expanded");
   consoleEl.classList.remove("is-compact");
+}
+
+function updateVideoCountDom(count = videoBatchCount(project())) {
+  const consoleEl = document.querySelector("[data-video-generate-console]");
+  if (!consoleEl) return;
+  const safeCount = Math.min(4, Math.max(1, Number.parseInt(count, 10) || 1));
+  const countLabel = consoleEl.querySelector("[data-video-count-current]");
+  const downButton = consoleEl.querySelector('[data-action="video-count-down"]');
+  const upButton = consoleEl.querySelector('[data-action="video-count-up"]');
+  const creditLabel = consoleEl.querySelector("[data-video-credit-label]");
+  if (countLabel) countLabel.textContent = String(safeCount);
+  if (downButton) downButton.disabled = safeCount <= 1;
+  if (upButton) upButton.disabled = safeCount >= 4;
+  if (creditLabel && !state.generating) {
+    creditLabel.textContent = `${videoCreditEstimate(project())} Credit`;
+  }
 }
 
 async function saveImageModelQuick(value, source = null) {
@@ -10966,6 +11135,25 @@ function markGenerateTriggerSubmitting(trigger) {
 }
 
 function optimisticGenerationJobs(name, count, options = {}) {
+  if (name === "generate-ugc") {
+    const current = project();
+    const aspectRatio = current.ugc?.aspectRatio || current.image?.aspectRatio || "16:9";
+    const createdAt = new Date().toISOString();
+    return Array.from({ length: count }, (_, index) => ({
+      id: `optimistic_${Date.now()}_${index}_${Math.random().toString(16).slice(2)}`,
+      projectId: state.projectId,
+      action: name,
+      step: state.step || "ugc",
+      type: "video",
+      status: "queued",
+      stage: "queued",
+      prompt: options.prompt || "",
+      promptSnapshot: options.prompt || "",
+      aspectRatio,
+      optimistic: true,
+      createdAt
+    }));
+  }
   if (name !== "generate-image") return [];
   const current = project();
   const aspectRatio = current.image?.aspectRatio || "9:16";
@@ -10993,7 +11181,7 @@ async function generate(name, event = null) {
     return;
   }
   const generationOptions = syncImageConsoleBeforeGenerate(name);
-  const count = name === "generate-image" ? imageBatchCount(project()) : 1;
+  const count = name === "generate-image" ? imageBatchCount(project()) : name === "generate-ugc" ? videoBatchCount(project()) : 1;
   const optimisticJobs = optimisticGenerationJobs(name, count, generationOptions);
   const optimisticIds = new Set(optimisticJobs.map((job) => job.id));
   try {
@@ -11046,6 +11234,12 @@ async function cancelGenerationJob(jobId) {
 }
 
 function syncImageConsoleBeforeGenerate(name) {
+  if (name === "generate-ugc") {
+    const promptInput = document.querySelector("[data-video-console-prompt]");
+    const value = promptInput?.value || project().ugc?.script || "";
+    updateVideoPromptLocal(value);
+    return { prompt: value };
+  }
   if (name !== "generate-image") return {};
   const promptInput = document.querySelector("[data-image-console-prompt]");
   const value = promptInput?.value || project().image?.prompt || "";
