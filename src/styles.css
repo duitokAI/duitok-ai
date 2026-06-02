@@ -40937,52 +40937,14 @@ body:has(.studio-shell .video-prompt-extractor-page),
   transform: none !important;
 }
 
-/* Open-sidebar empty reference labels: keep Avatar/Product readable inside the
-   tighter prompt-lane buttons without affecting selected-image thumbnails. */
-.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references .image-reference-thumb.is-empty-ref {
-  grid-template-rows: 46px 20px !important;
-  align-content: center !important;
-  justify-items: center !important;
-  row-gap: 2px !important;
-  padding: 5px 4px 4px !important;
-  overflow: hidden !important;
-}
-
-.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references .image-reference-thumb.is-empty-ref .image-reference-empty-icon,
-.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references .image-reference-thumb.is-empty-ref:hover .image-reference-empty-icon,
-.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references .image-reference-thumb.is-empty-ref:focus-visible .image-reference-empty-icon {
-  position: static !important;
-  grid-row: 1 !important;
-  width: 40px !important;
-  min-width: 40px !important;
-  max-width: 40px !important;
-  height: 40px !important;
-  min-height: 40px !important;
-  max-height: 40px !important;
-  transform: none !important;
-}
-
+/* Open-sidebar reference hover label: keep the original hover-only behavior,
+   just shrink the copy so Product fits inside the tighter tile. */
 .studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references .image-reference-thumb.is-empty-ref[data-reference-label]::after {
-  content: attr(data-reference-label) !important;
-  position: static !important;
-  grid-row: 2 !important;
-  display: block !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  height: 18px !important;
-  padding: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  color: #2a0633 !important;
-  font-size: 10px !important;
-  font-weight: 900 !important;
-  line-height: 18px !important;
-  opacity: 1 !important;
-  overflow: visible !important;
-  pointer-events: none !important;
-  text-align: center !important;
+  left: 3px !important;
+  right: 3px !important;
+  bottom: 6px !important;
+  font-size: 9px !important;
+  line-height: 11px !important;
+  letter-spacing: 0 !important;
   text-overflow: clip !important;
-  transform: none !important;
-  transition: none !important;
-  white-space: nowrap !important;
 }
