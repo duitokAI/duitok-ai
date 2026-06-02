@@ -37145,3 +37145,64 @@ body:has(.studio-shell .image-higgsfield-mode),
 .studio-shell .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-form {
   grid-row: 2 !important;
 }
+
+/* Toolbar summary symbol lock: dropdown chevrons always sit on the right. */
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-picker summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-model-picker summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker summary {
+  grid-template-columns: 24px minmax(0, 1fr) 18px !important;
+  justify-items: stretch !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-aspect-ratio-menu summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-resolution-menu summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu summary {
+  grid-template-columns: 24px minmax(0, 1fr) 18px !important;
+  justify-items: stretch !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-picker summary > :first-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-model-picker summary > :first-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker summary > :first-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu summary > :first-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-aspect-ratio-menu summary > :first-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu summary > :first-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu summary > :first-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-resolution-menu summary > :first-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu summary > :first-child {
+  grid-column: 1 !important;
+  justify-self: start !important;
+  align-self: center !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-picker summary b,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-model-picker summary b,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker summary b,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu summary b,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-aspect-ratio-menu summary b,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu summary b,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu summary b,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-resolution-menu summary b,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu summary b {
+  grid-column: 2 !important;
+  justify-self: center !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-picker summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-model-picker summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-aspect-ratio-menu summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-resolution-menu summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu summary > svg:last-child {
+  grid-column: 3 !important;
+  justify-self: end !important;
+  align-self: center !important;
+  margin: 0 !important;
+  transform-origin: center !important;
+}
