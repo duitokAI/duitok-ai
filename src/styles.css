@@ -39479,6 +39479,62 @@ body:has(.studio-shell .video-prompt-extractor-page),
   height: 17px !important;
 }
 
+/* Final responsive wall override: the wall grid itself must stop producing
+   skinny failed cards when the sidebar leaves a narrow content lane. */
+@media (max-width: 1180px) {
+  .studio-shell .image-higgsfield-mode > .studio-result-wall,
+  .studio-shell .video-prompt-extractor-page > .studio-result-wall {
+    width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: hidden !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid,
+  .studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)) !important;
+    grid-auto-flow: row dense !important;
+    gap: 10px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    align-items: start !important;
+    overflow: visible !important;
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid,
+  .studio-shell:not(.sidebar-collapsed) .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)) !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-card,
+  .studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-card {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    transform: none !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed,
+  .studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed {
+    aspect-ratio: 4 / 3 !important;
+    min-height: 170px !important;
+    max-height: 220px !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid,
+  .studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid,
+  .studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid,
+  .studio-shell:not(.sidebar-collapsed) .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed,
+  .studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed {
+    min-height: 180px !important;
+  }
+}
+
 /* Compact composer generate alignment: keep the right action group optically
    centered inside the collapsed bar instead of hugging the right edge. */
 @media (min-width: 761px) {
