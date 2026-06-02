@@ -25,7 +25,32 @@
 }
 
 html {
+  min-height: 100%;
   scrollbar-gutter: stable;
+  background: #fff3fa;
+}
+
+html,
+body,
+#app {
+  min-height: 100%;
+}
+
+#app {
+  background:
+    radial-gradient(circle at 18% 8%, rgba(255, 78, 122, 0.16), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(94, 8, 108, 0.1), transparent 28%),
+    linear-gradient(180deg, #fff3fa 0%, #fff8fc 48%, #f8efff 100%);
+}
+
+#app:empty::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 18% 8%, rgba(255, 78, 122, 0.16), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(94, 8, 108, 0.1), transparent 28%),
+    linear-gradient(180deg, #fff3fa 0%, #fff8fc 48%, #f8efff 100%);
 }
 
 /* Image Generator canvas studio */
