@@ -5055,7 +5055,7 @@ function openAspectRatioPopover(summary) {
   popover.dataset.sourceId = sourceId;
   popover.setAttribute("role", "listbox");
   popover.setAttribute("aria-label", "Aspect ratio");
-  popover.innerHTML = `<div class="image-aspect-ratio-menu-title">Aspect ratio</div>${options.map((item) => `<button type="button" class="${item.active ? "active" : ""}" data-value="${esc(item.value)}" role="option" aria-selected="${item.active ? "true" : "false"}">
+  popover.innerHTML = `<div class="image-aspect-ratio-menu-title">Aspect ratio</div>${options.map((item) => `<button type="button" class="${item.active ? "active" : ""}" data-field-set="image.aspectRatio" data-value="${esc(item.value)}" role="option" aria-selected="${item.active ? "true" : "false"}">
     ${aspectRatioGlyph(item.value)}
     <span class="image-aspect-ratio-option-copy">
       <b>${esc(item.value)}</b>
@@ -10098,10 +10098,21 @@ function setFieldSetActive(field, value, source = null) {
     const active = el.dataset.value === value;
     el.classList.toggle("active", active);
     el.setAttribute("aria-pressed", active ? "true" : "false");
+    if (el.getAttribute("role") === "option") {
+      el.setAttribute("aria-selected", active ? "true" : "false");
+    }
   });
   if (source && source.dataset.fieldSet === field) {
     source.classList.add("active");
     source.setAttribute("aria-pressed", "true");
+    if (source.getAttribute("role") === "option") {
+      source.setAttribute("aria-selected", "true");
+    }
+  }
+  if (field === "image.aspectRatio") {
+    document.querySelectorAll(".image-aspect-ratio-menu summary b").forEach((el) => {
+      el.textContent = value;
+    });
   }
   if (field === "image.resolution") {
     const label = source?.dataset.label || String(value || "").toLowerCase();
