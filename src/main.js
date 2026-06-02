@@ -4918,9 +4918,8 @@ function imageGenerateConsole(p, selectedModel) {
   const selectedResolution = ["1K", "2K", "4K"].includes(String(p.image.resolution || "").toUpperCase())
     ? String(p.image.resolution).toUpperCase()
     : "2K";
-  const selectedResolutionLabel = resolutionOptions.find((item) => item.value === selectedResolution)?.title || selectedResolution.toLowerCase();
   const promptSummary = String(p.image.prompt || "").trim();
-  const compactSummary = promptSummary || `${selectedModel || "Model"} · ${selectedAspectRatio} · ${selectedResolutionLabel} · ${selectedCount} image${selectedCount > 1 ? "s" : ""}`;
+  const compactSummary = imageCompactPromptText(promptSummary);
   return `<section class="image-generate-console ${longPromptClass}" data-image-generate-console>
     <div class="image-console-main">
       <div class="image-console-prompt ${promptImage ? "has-prompt-image" : ""}" data-image-console-prompt-zone>
@@ -9745,9 +9744,16 @@ function updateImagePromptLocal(value = "") {
   state.db = dbWithProjectField(state.db, state.projectId, "image.prompt", value);
   syncImagePromptDensityClass(value);
   document.querySelectorAll(".image-console-compact-summary").forEach((el) => {
-    const promptText = String(value || "").trim();
-    if (promptText) el.textContent = promptText;
+    el.textContent = imageCompactPromptText(value);
   });
+}
+
+function imageCompactPromptText(value = null) {
+  const liveValue = document.querySelector("[data-image-console-prompt]")?.value;
+  const text = String(value ?? liveValue ?? project()?.image?.prompt ?? "")
+    .replace(/\s+/g, " ")
+    .trim();
+  return text || "Describe your image";
 }
 
 function syncImagePromptDensityClass(value = project()?.image?.prompt || "") {
@@ -10240,13 +10246,7 @@ function updateImageModelDom(modelValue, source = null) {
   if (creditLabel && !state.generating) {
     creditLabel.textContent = `${(imageModelCredit(model.value) * imageBatchCount(project())).toFixed(2)} Credit`;
   }
-  const promptSummary = String(project().image?.prompt || "").trim();
-  if (compactSummary && !promptSummary) {
-    const aspectRatio = project().image?.aspectRatio || "9:16";
-    const resolution = String(project().image?.resolution || "2K").toLowerCase();
-    const count = imageBatchCount(project());
-    compactSummary.textContent = `${model.title} · ${aspectRatio} · ${resolution} · ${count} image${count > 1 ? "s" : ""}`;
-  }
+  if (compactSummary) compactSummary.textContent = imageCompactPromptText();
   window.lucide?.createIcons();
 }
 
@@ -10265,13 +10265,7 @@ function updateImageCountDom(count = imageBatchCount(project())) {
   if (creditLabel && !state.generating) {
     creditLabel.textContent = `${(imageModelCredit(project().image?.model) * safeCount).toFixed(2)} Credit`;
   }
-  const promptSummary = String(project().image?.prompt || "").trim();
-  if (compactSummary && !promptSummary) {
-    const model = project().image?.model || "Model";
-    const aspectRatio = project().image?.aspectRatio || "9:16";
-    const resolution = String(project().image?.resolution || "2K").toLowerCase();
-    compactSummary.textContent = `${model} · ${aspectRatio} · ${resolution} · ${safeCount} image${safeCount > 1 ? "s" : ""}`;
-  }
+  if (compactSummary) compactSummary.textContent = imageCompactPromptText();
   consoleEl.classList.add("is-hover-expanded");
   consoleEl.classList.remove("is-compact");
 }

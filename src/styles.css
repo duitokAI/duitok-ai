@@ -38726,19 +38726,20 @@ body:has(.studio-shell .video-prompt-extractor-page),
   position: static !important;
   width: 100% !important;
   max-width: 100% !important;
-  height: auto !important;
+  height: 100% !important;
   min-height: 0 !important;
-  max-height: none !important;
-  display: block !important;
+  max-height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
   align-self: center !important;
   overflow: hidden !important;
   padding: 0 !important;
   color: #2a0633 !important;
   font-size: 15px !important;
   font-weight: 760 !important;
-  line-height: 1.18 !important;
+  line-height: 1.08 !important;
   text-overflow: ellipsis !important;
-  transform: translateY(1px) !important;
+  transform: none !important;
   white-space: nowrap !important;
 }
 
