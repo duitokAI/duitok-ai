@@ -1,0 +1,40 @@
+{
+  "version": "1.0.0",
+  "primaryModel": "/models/agent/pokaya-agent.glb",
+  "format": "glb",
+  "target": "threejs-gltfloader",
+  "requiredAnimations": [
+    "idle_stand",
+    "idle_sleep",
+    "idle_run",
+    "walk",
+    "work_typing",
+    "work_image",
+    "work_video",
+    "thinking",
+    "success"
+  ],
+  "optionalAnimations": [
+    "error_confused",
+    "review_present",
+    "drag_asset",
+    "wave",
+    "low_energy"
+  ],
+  "stateMap": {
+    "idle": ["idle_stand", "idle_sleep", "idle_run"],
+    "image": ["work_image"],
+    "video": ["work_video"],
+    "copy": ["work_typing"],
+    "schedule": ["work_typing"],
+    "command": ["thinking"],
+    "done": ["success"],
+    "error": ["error_confused"]
+  },
+  "budgets": {
+    "characterTriangles": "5000-15000",
+    "sceneTriangles": "20000-40000",
+    "maxPrimaryGlbSizeMb": 8,
+    "textureSize": "1024 or 2048 PNG/WebP"
+  }
+}

@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Pokaya Auto Post</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main>
+      <header>
+        <span>🎬</span>
+        <div>
+          <h1>Pokaya Auto Post</h1>
+          <p>TikTok publishing assistant</p>
+        </div>
+      </header>
+
+      <label>
+        Pokaya API URL
+        <input id="apiBaseUrl" placeholder="http://localhost:4173">
+      </label>
+
+      <div class="actions">
+        <button id="saveSettings">Save</button>
+        <button id="refreshJobs">Refresh</button>
+      </div>
+
+      <section id="status"></section>
+      <section id="jobs" class="jobs"></section>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

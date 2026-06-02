@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Pokaya Auto Post",
+  "description": "Pull Pokaya scheduled posts into TikTok upload pages and assist with caption filling.",
+  "version": "0.1.0",
+  "action": {
+    "default_title": "Pokaya Auto Post",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.tiktok.com/*",
+        "https://www.tiktok.com/tiktokstudio/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": ["storage", "tabs", "activeTab", "scripting"],
+  "host_permissions": [
+    "http://localhost:*/*",
+    "https://*.pokaya.ai/*",
+    "https://www.tiktok.com/*"
+  ]
+}

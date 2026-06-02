@@ -1,0 +1,29 @@
+{
+  "name": "pokaya-ai",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.mjs",
+    "api": "node server.mjs",
+    "build": "vite build",
+    "check:agent3d": "node scripts/check-agent-3d-assets.mjs",
+    "check:agent-layout": "node scripts/check-agent-message-layout.mjs",
+    "check:agent-smoke": "node scripts/test-agent-smoke.mjs",
+    "check:chip": "node scripts/check-chip-config.mjs",
+    "check:provider-leaks": "node scripts/check-provider-leaks.mjs",
+    "generate:agent3d": "node scripts/generate-pokaya-agent-glb.mjs",
+    "start": "node server.mjs",
+    "preview": "NODE_ENV=production node server.mjs"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^5.0.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "pg": "^8.21.0",
+    "sharp": "^0.34.5",
+    "three": "^0.184.0",
+    "typescript": "^5.0.0",
+    "vite": "^7.0.0"
+  }
+}

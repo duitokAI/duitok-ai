@@ -1,0 +1,169 @@
+services:
+  - type: web
+    name: pokaya-ai
+    runtime: node
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SERVE_STATIC
+        value: "true"
+      - key: DATA_DIR
+        value: /var/data
+      - key: AUTH_SECRET
+        sync: false
+      - key: AUTH_TOKEN_TTL_MS
+        value: "604800000"
+      - key: USER_GENERATE_PER_MINUTE
+        value: "3"
+      - key: USER_GENERATE_PER_DAY
+        value: "50"
+      - key: MAX_CONCURRENT_GENERATION_JOBS
+        value: "2"
+      - key: USER_CONCURRENT_GENERATIONS
+        value: "1"
+      - key: THUMBNAIL_CACHE_MAX_ITEMS
+        value: "80"
+      - key: THUMBNAIL_CACHE_MAX_BYTES
+        value: "33554432"
+      - key: JSON_BODY_LIMIT
+        value: 32mb
+      - key: PUBLIC_APP_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://pokaya.ai,https://www.pokaya.ai
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        value: https://pokaya.ai/api/auth/google/callback
+      - key: CHIP_API_TOKEN
+        sync: false
+      - key: CHIP_BRAND_ID
+        sync: false
+      - key: CHIP_PUBLIC_KEY
+        sync: false
+      - key: APIMART_API_KEY
+        sync: false
+      - key: APIMART_BASE_URL
+        value: https://api.apimart.ai
+      - key: APIMART_CHAT_PATH
+        value: /v1/chat/completions
+      - key: APIMART_IMAGE_PATH
+        value: /v1/images/generations
+      - key: APIMART_VIDEO_PATH
+        value: /v1/videos/generations
+      - key: APIMART_TASK_PATH_PREFIX
+        value: /v1/tasks
+      - key: APIMART_POLL_ATTEMPTS
+        value: "60"
+      - key: APIMART_POLL_MS
+        value: "5000"
+      - key: APIMART_TEXT_MODEL
+        value: gpt-5-mini
+      - key: APIMART_IMAGE_MODEL
+        value: gpt-image-2
+      - key: APIMART_IMAGE_SIZE
+        value: 1:1
+      - key: APIMART_IMAGE_RESOLUTION
+        value: 1K
+      - key: APIMART_SEEDANCE_MODEL
+        value: doubao-seedance-2.0
+      - key: APIMART_SEEDANCE_DURATION
+        value: "5"
+      - key: APIMART_SEEDANCE_RESOLUTION
+        value: 1080p
+      - key: APIMART_SEEDANCE_GENERATE_AUDIO
+        value: "true"
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: DEEPSEEK_BASE_URL
+        value: https://api.deepseek.com
+      - key: DEEPSEEK_CHAT_PATH
+        value: /chat/completions
+      - key: DEEPSEEK_MODEL
+        value: deepseek-v4-pro
+      - key: WEB_SEARCH_BASE_URL
+        value: https://duckduckgo.com/html/
+      - key: WEB_SEARCH_TIMEOUT_MS
+        value: 12000
+      - key: GRSAI_API_KEY
+        sync: false
+      - key: GRSAI_BASE_URL
+        value: https://grsaiapi.com
+      - key: GRSAI_CHAT_PATH
+        value: /v1/chat/completions
+      - key: GRSAI_VISION_MODEL
+        value: gemini-2.5-flash
+      - key: GRSAI_DRAW_PATH
+        value: /v1/draw/nano-banana
+      - key: GRSAI_RESULT_PATH
+        value: /v1/draw/result
+      - key: GRSAI_NANO_MODEL
+        value: nano-banana-pro
+      - key: GRSAI_NANO_ASPECT_RATIO
+        value: 1:1
+      - key: GRSAI_NANO_IMAGE_SIZE
+        value: 1K
+      - key: GRSAI_IMAGE_POLL_ATTEMPTS
+        value: "36"
+      - key: GRSAI_IMAGE_POLL_MS
+        value: "3000"
+      - key: WUYIN_API_KEY
+        sync: false
+      - key: WUYIN_BASE_URL
+        value: https://api.wuyinkeji.com
+      - key: WUYIN_IMAGE_SIZE
+        value: 1K
+      - key: WUYIN_IMAGE_ASPECT_RATIO
+        value: 1:1
+      - key: WUYIN_VIDEO_MODEL
+        value: veo3.1-fast
+      - key: WUYIN_VIDEO_RATIO
+        value: 9:16
+      - key: WUYIN_VEO_SIZE
+        value: 720p
+      - key: WUYIN_SORA_ASPECT_RATIO
+        value: 9:16
+      - key: WUYIN_SORA_DURATION
+        value: "8"
+      - key: WUYIN_SORA_SIZE
+        value: small
+      - key: WUYIN_OMNI_DURATION
+        value: "10"
+      - key: WUYIN_OMNI_SIZE
+        value: 720x1280
+      - key: WUYIN_GROK_DURATION
+        value: "8"
+      - key: WUYIN_GROK_ASPECT_RATIO
+        value: 9:16
+      - key: ASSET_STORAGE_PROVIDER
+        value: r2
+      - key: REQUIRE_DURABLE_ASSETS
+        value: "true"
+      - key: ADMIN_USER_IDS
+        value: u_1
+      - key: ADMIN_EMAILS
+        value: admin@pokaya.ai
+      - key: ADMIN_API_KEY
+        sync: false
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ENDPOINT
+        sync: false
+      - key: R2_BUCKET
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_PUBLIC_BASE_URL
+        sync: false
+    disk:
+      name: pokaya-data
+      mountPath: /var/data
+      sizeGB: 1
