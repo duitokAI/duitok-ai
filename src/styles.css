@@ -37302,6 +37302,127 @@ body:has(.studio-shell .image-higgsfield-mode),
   min-height: 38px !important;
   margin: 0 !important;
 }
+
+/* Agent generated image actions mirror Image Page: hidden until the media is
+   hovered, then four icon buttons slide in from the right edge. */
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-preview,
+.studio-shell .agent-page-panel .agent-generation-result-preview,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-gallery-tile,
+.studio-shell .agent-page-panel .agent-generation-gallery-tile {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-preview .agent-generation-result-actions,
+.studio-shell .agent-page-panel .agent-generation-result-preview .agent-generation-result-actions,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-gallery-tile .agent-generation-result-actions,
+.studio-shell .agent-page-panel .agent-generation-gallery-tile .agent-generation-result-actions {
+  position: absolute !important;
+  top: 8px !important;
+  right: 0 !important;
+  z-index: 4 !important;
+  width: auto !important;
+  display: inline-flex !important;
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+  gap: 4px !important;
+  padding: 3px 3px 3px 4px !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-right: 0 !important;
+  border-radius: 12px 0 0 12px !important;
+  background: rgba(30, 8, 38, 0.12) !important;
+  box-shadow: 0 8px 18px rgba(28, 0, 36, 0.08) !important;
+  opacity: 0 !important;
+  transform: translateX(4px) !important;
+  transition: opacity 120ms ease, transform 120ms ease !important;
+  backdrop-filter: blur(14px) !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-preview:hover .agent-generation-result-actions,
+.studio-shell .agent-page-panel .agent-generation-result-preview:hover .agent-generation-result-actions,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-preview:focus-within .agent-generation-result-actions,
+.studio-shell .agent-page-panel .agent-generation-result-preview:focus-within .agent-generation-result-actions,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-gallery-tile:hover .agent-generation-result-actions,
+.studio-shell .agent-page-panel .agent-generation-gallery-tile:hover .agent-generation-result-actions,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-gallery-tile:focus-within .agent-generation-result-actions,
+.studio-shell .agent-page-panel .agent-generation-gallery-tile:focus-within .agent-generation-result-actions {
+  opacity: 1 !important;
+  transform: translateX(0) !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-actions button,
+.studio-shell .agent-page-panel .agent-generation-result-actions button {
+  position: relative !important;
+  width: 28px !important;
+  min-width: 28px !important;
+  max-width: 28px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 1px solid rgba(255, 255, 255, 0.24) !important;
+  border-radius: 9px !important;
+  padding: 0 !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  box-shadow: none !important;
+  touch-action: manipulation !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-actions button svg,
+.studio-shell .agent-page-panel .agent-generation-result-actions button svg {
+  width: 15px !important;
+  height: 15px !important;
+  stroke-width: 2.15 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-actions button:hover:not(:disabled),
+.studio-shell .agent-page-panel .agent-generation-result-actions button:hover:not(:disabled) {
+  transform: translateX(-2px) !important;
+  border-color: rgba(255, 255, 255, 0.48) !important;
+  background: rgba(255, 255, 255, 0.24) !important;
+  color: #fff !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-actions button::after,
+.studio-shell .agent-page-panel .agent-generation-result-actions button::after {
+  content: attr(data-tooltip) !important;
+  position: absolute !important;
+  top: 50% !important;
+  right: calc(100% + 8px) !important;
+  z-index: 10 !important;
+  max-width: 150px !important;
+  transform: translate(6px, -50%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 10px !important;
+  padding: 6px 9px !important;
+  background: rgba(20, 18, 22, 0.92) !important;
+  color: #fff !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  box-shadow: 0 8px 20px rgba(12, 0, 18, 0.24) !important;
+  transition: opacity 60ms ease, transform 60ms ease !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-actions button:hover::after,
+.studio-shell .agent-page-panel .agent-generation-result-actions button:hover::after,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-actions button:focus-visible::after,
+.studio-shell .agent-page-panel .agent-generation-result-actions button:focus-visible::after {
+  opacity: 1 !important;
+  transform: translate(0, -50%) !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-actions button:disabled,
+.studio-shell .agent-page-panel .agent-generation-result-actions button:disabled {
+  opacity: 0.42 !important;
+  cursor: not-allowed !important;
+}
 /* Toolbar summary symbol lock: dropdown chevrons always sit on the right. */
 .studio-shell .image-higgsfield-mode > .image-generate-console .image-model-picker summary,
 .studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-model-picker summary,

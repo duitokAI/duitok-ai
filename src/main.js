@@ -9176,11 +9176,11 @@ function agentGenerationResultMeta(result) {
 function agentGenerationResultActions(result) {
   if (!result) return "";
   const canSaveReference = Boolean(result.imageUrl || result.videoUrl);
-  return `<div class="agent-generation-result-actions">
-    <button type="button" data-result-action="save-avatar" data-result-id="${esc(result.id)}" ${canSaveReference ? "" : "disabled"}>${icon("user-round-plus", 15)} Save as Avatar</button>
-    <button type="button" data-result-action="save-product" data-result-id="${esc(result.id)}" ${canSaveReference ? "" : "disabled"}>${icon("package-plus", 15)} Save as Product</button>
-    <button type="button" data-result-action="download" data-result-id="${esc(result.id)}" data-result-kind="${result.videoUrl ? "video" : result.imageUrl ? "image" : "text"}">${icon("download", 15)} Download</button>
-    <button type="button" data-result-action="delete" data-result-id="${esc(result.id)}">${icon("trash-2", 15)} Delete</button>
+  return `<div class="studio-wall-actions agent-generation-result-actions" aria-label="Image actions">
+    <button type="button" data-result-action="save-avatar" data-result-id="${esc(result.id)}" data-tooltip="Save as Avatar" aria-label="Save as Avatar" ${canSaveReference ? "" : "disabled"}>${icon("user-round-plus", 17)}</button>
+    <button type="button" data-result-action="save-product" data-result-id="${esc(result.id)}" data-tooltip="Save as Product" aria-label="Save as Product" ${canSaveReference ? "" : "disabled"}>${icon("package-plus", 17)}</button>
+    <button type="button" data-result-action="download" data-result-id="${esc(result.id)}" data-result-kind="${result.videoUrl ? "video" : result.imageUrl ? "image" : "text"}" data-tooltip="Download" aria-label="Download">${icon("download", 18)}</button>
+    <button type="button" data-result-action="delete" data-result-id="${esc(result.id)}" data-tooltip="Delete" aria-label="Delete">${icon("trash-2", 18)}</button>
   </div>`;
 }
 
@@ -9228,6 +9228,7 @@ function agentGenerationGalleryCard(cards = []) {
       : "任务正在后台处理，你可以继续输入下一个 prompt。";
   const resultTiles = done.map((entry, index) => `<article class="agent-generation-gallery-tile" data-result-id="${esc(entry.result.id)}">
     ${resultPreview(entry.result, { clickable: true, full: mediaType === "video", priority: done.length <= 2 })}
+    ${agentGenerationResultActions(entry.result)}
     ${done.length > 1 ? `<span class="agent-generation-tile-count">${esc(index + 1)}/${esc(done.length)}</span>` : ""}
   </article>`).join("");
   const pendingTiles = [...running, ...failed].map((entry) => agentGenerationPendingFrame(entry, { compact: done.length > 0 })).join("");
@@ -9236,7 +9237,6 @@ function agentGenerationGalleryCard(cards = []) {
     ${agentGenerationStatusRail(entries)}
     ${done.length ? `<div class="agent-generation-gallery-grid" data-gallery-count="${esc(done.length)}">${resultTiles}</div>` : ""}
     ${pendingTiles ? `<div class="agent-generation-pending-list">${pendingTiles}</div>` : ""}
-    ${done[0]?.result ? agentGenerationResultActions(done[0].result) : ""}
   </section>`;
 }
 
