@@ -1527,9 +1527,18 @@ function bindImageConsoleCompact() {
   let compactAt = 48;
   let expandAt = 12;
   const modelPickers = [...consoleEl.querySelectorAll(".image-model-picker")];
-  const closeModelMenus = () => modelPickers.forEach((el) => el.removeAttribute("open"));
+  const aspectMenus = [...consoleEl.querySelectorAll(".image-aspect-ratio-menu")];
+  const resolutionMenus = [...consoleEl.querySelectorAll(".image-resolution-menu")];
+  const allMenus = [...modelPickers, ...aspectMenus, ...resolutionMenus];
+  const closeImageConsoleMenus = (except = null) => {
+    allMenus.forEach((el) => {
+      if (el !== except) el.removeAttribute("open");
+    });
+    if (!except?.classList?.contains("image-aspect-ratio-menu")) closeAspectRatioPopover();
+  };
+  const closeModelMenus = () => closeImageConsoleMenus();
   const updateMenuState = () => {
-    menuOpen = modelPickers.some((el) => el.hasAttribute("open"));
+    menuOpen = allMenus.some((el) => el.hasAttribute("open")) || Boolean(document.querySelector(".floating-aspect-ratio-options"));
     consoleEl.classList.toggle("has-open-menu", menuOpen);
     if (menuOpen) {
       consoleEl.classList.add("is-hover-expanded");
@@ -1592,9 +1601,17 @@ function bindImageConsoleCompact() {
     refreshThresholds();
     requestSync();
   };
-  const handleModelPickerToggle = () => {
+  const handleMenuToggle = (event) => {
+    const menu = event.currentTarget;
+    if (menu.hasAttribute("open")) closeImageConsoleMenus(menu);
     updateMenuState();
     requestSync();
+  };
+  const handleSummaryPointerDown = (event) => {
+    const menu = event.target.closest?.(".image-model-picker,.image-resolution-menu,.image-aspect-ratio-menu");
+    if (!menu) return;
+    closeImageConsoleMenus(menu);
+    updateMenuState();
   };
   uniqueScrollTargets.forEach((target) => target.addEventListener("scroll", requestSync, { passive: true }));
   window.addEventListener("resize", handleResize);
@@ -1602,7 +1619,8 @@ function bindImageConsoleCompact() {
   consoleEl.addEventListener("mouseleave", restoreAfterHover);
   consoleEl.addEventListener("focusin", expandForHover);
   consoleEl.addEventListener("focusout", restoreAfterFocus);
-  modelPickers.forEach((el) => el.addEventListener("toggle", handleModelPickerToggle));
+  allMenus.forEach((el) => el.addEventListener("toggle", handleMenuToggle));
+  consoleEl.querySelectorAll(".image-model-picker summary,.image-resolution-menu summary,.image-aspect-ratio-menu summary").forEach((el) => el.addEventListener("pointerdown", handleSummaryPointerDown));
   refreshThresholds();
   sync();
   imageConsoleScrollCleanup = () => {
@@ -1612,7 +1630,8 @@ function bindImageConsoleCompact() {
     consoleEl.removeEventListener("mouseleave", restoreAfterHover);
     consoleEl.removeEventListener("focusin", expandForHover);
     consoleEl.removeEventListener("focusout", restoreAfterFocus);
-    modelPickers.forEach((el) => el.removeEventListener("toggle", handleModelPickerToggle));
+    allMenus.forEach((el) => el.removeEventListener("toggle", handleMenuToggle));
+    consoleEl.querySelectorAll(".image-model-picker summary,.image-resolution-menu summary,.image-aspect-ratio-menu summary").forEach((el) => el.removeEventListener("pointerdown", handleSummaryPointerDown));
   };
 }
 
@@ -4711,6 +4730,10 @@ function closeAspectRatioPopover() {
   aspectRatioPopoverCleanup?.();
   aspectRatioPopoverCleanup = null;
   document.querySelector(".floating-aspect-ratio-options")?.remove();
+  document.querySelectorAll(".image-generate-console.has-open-menu").forEach((consoleEl) => {
+    const hasOpenDetails = consoleEl.querySelector(".image-model-picker[open],.image-resolution-menu[open],.image-aspect-ratio-menu[open]");
+    if (!hasOpenDetails) consoleEl.classList.remove("has-open-menu");
+  });
 }
 
 function openAspectRatioPopover(summary) {
@@ -4731,6 +4754,10 @@ function openAspectRatioPopover(summary) {
     return;
   }
   closeAspectRatioPopover();
+  const consoleEl = source.closest(".image-generate-console");
+  consoleEl?.querySelectorAll(".image-model-picker[open],.image-resolution-menu[open]").forEach((el) => el.removeAttribute("open"));
+  consoleEl?.classList.add("has-open-menu", "is-hover-expanded");
+  consoleEl?.classList.remove("is-compact");
   const popover = document.createElement("div");
   popover.className = "image-aspect-ratio-options floating-aspect-ratio-options";
   popover.dataset.sourceId = sourceId;
