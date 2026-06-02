@@ -37262,6 +37262,19 @@ body:has(.studio-shell .image-higgsfield-mode),
   overflow: visible !important;
 }
 
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread .agent-generation-preview.agent-generation-result-preview.is-portrait,
+.studio-shell .agent-page-panel .agent-thread .agent-generation-preview.agent-generation-result-preview.is-portrait {
+  width: min(320px, 100%) !important;
+  max-width: min(320px, 100%) !important;
+  justify-self: start !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-gallery-grid[data-gallery-count="1"] .agent-generation-gallery-tile.is-portrait,
+.studio-shell .agent-page-panel .agent-generation-gallery-grid[data-gallery-count="1"] .agent-generation-gallery-tile.is-portrait {
+  width: min(320px, 100%) !important;
+  justify-self: start !important;
+}
+
 .studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-preview .result-preview-trigger,
 .studio-shell .agent-page-panel .agent-generation-result-preview .result-preview-trigger {
   position: relative !important;
@@ -37270,6 +37283,13 @@ body:has(.studio-shell .image-higgsfield-mode),
   margin: 0 !important;
   transform: none !important;
   overflow: hidden !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-preview.is-portrait .result-preview-trigger,
+.studio-shell .agent-page-panel .agent-generation-result-preview.is-portrait .result-preview-trigger,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-gallery-tile.is-portrait .result-preview-trigger,
+.studio-shell .agent-page-panel .agent-generation-gallery-tile.is-portrait .result-preview-trigger {
+  max-height: min(560px, 62vh) !important;
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-preview .result-image,

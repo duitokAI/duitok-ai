@@ -9286,7 +9286,7 @@ function agentGenerationGalleryCard(cards = []) {
     : done.length === entries.length
       ? "结果已保存在当前项目，点击任意图片可进入详情。"
       : "任务正在后台处理，你可以继续输入下一个 prompt。";
-  const resultTiles = done.map((entry, index) => `<article class="agent-generation-gallery-tile" data-result-id="${esc(entry.result.id)}">
+  const resultTiles = done.map((entry, index) => `<article class="agent-generation-gallery-tile ${agentGenerationResultOrientationClass(entry.result)}" data-result-id="${esc(entry.result.id)}">
     ${resultPreview(entry.result, { clickable: true, full: mediaType === "video", priority: done.length <= 2 })}
     ${agentGenerationResultActions(entry.result)}
     ${done.length > 1 ? `<span class="agent-generation-tile-count">${esc(index + 1)}/${esc(done.length)}</span>` : ""}
@@ -9316,7 +9316,7 @@ function agentGenerationJobCard(card = {}) {
       ? `${job?.errorMessage || "生成失败，请调整 prompt 后再试一次。"} Credit refunded.`
       : status === "processing" ? "模型正在生成，完成后会自动出现在这里。" : "任务已加入队列，马上开始生成。";
   const preview = isDone && result
-    ? `<div class="agent-generation-preview agent-generation-result-preview" data-result-id="${esc(result.id)}">
+    ? `<div class="agent-generation-preview agent-generation-result-preview ${agentGenerationResultOrientationClass(result)}" data-result-id="${esc(result.id)}">
         ${resultPreview(result, { clickable: true, full: mediaType === "video" })}
         ${agentGenerationResultActions(result)}
       </div>`
@@ -9326,6 +9326,14 @@ function agentGenerationJobCard(card = {}) {
     ${agentGenerationStatusRail([entry])}
     ${preview}
   </section>`;
+}
+
+function agentGenerationResultOrientationClass(result) {
+  const ratio = Number(resultMediaRatio(result));
+  if (!Number.isFinite(ratio) || ratio <= 0) return "";
+  if (ratio < 0.8) return "is-portrait";
+  if (ratio > 1.25) return "is-landscape";
+  return "is-square";
 }
 
 function agentRecoveryCard(run) {
