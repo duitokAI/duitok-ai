@@ -40051,3 +40051,31 @@ body:has(.studio-shell .video-prompt-extractor-page),
     grid-template-rows: auto auto auto !important;
   }
 }
+
+/* Image composer viewport containment: the expanded dock lives inside the
+   studio content lane, not the full browser viewport. This keeps the Generate
+   button visible and prevents the bar from changing width on hover. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact),
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).is-hover-expanded,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-open-menu,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt {
+  box-sizing: border-box !important;
+  width: calc(100% - clamp(16px, 2vw, 28px)) !important;
+  max-width: calc(100% - clamp(16px, 2vw, 28px)) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  grid-template-columns: minmax(0, 1fr) 168px 188px !important;
+  overflow: visible !important;
+}
+
+.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact),
+.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact).is-hover-expanded,
+.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-open-menu,
+.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt {
+  grid-template-columns: minmax(0, 1fr) 124px 180px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate {
+  width: 100% !important;
+  max-width: 188px !important;
+}
