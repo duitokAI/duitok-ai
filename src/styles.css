@@ -35136,3 +35136,31 @@ label {
   font-size: 15px !important;
   line-height: 1 !important;
 }
+
+/* Quality menu options are div rows, not buttons, so no native/action frames. */
+.studio-shell .image-higgsfield-mode .image-resolution-option,
+.studio-shell .image-higgsfield-mode .image-resolution-option:hover,
+.studio-shell .image-higgsfield-mode .image-resolution-option:focus,
+.studio-shell .image-higgsfield-mode .image-resolution-option:focus-visible,
+.studio-shell .image-higgsfield-mode .image-resolution-option.active,
+.studio-shell .image-higgsfield-mode .image-resolution-option[aria-selected="true"] {
+  width: 100% !important;
+  min-height: 58px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  align-items: center !important;
+  border: 0 !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  padding: 10px 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+}
+
+.studio-shell .image-higgsfield-mode .image-resolution-option::before,
+.studio-shell .image-higgsfield-mode .image-resolution-option::after {
+  display: none !important;
+  content: none !important;
+}
