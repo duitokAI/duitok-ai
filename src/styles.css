@@ -39159,6 +39159,88 @@ body:has(.studio-shell .video-prompt-extractor-page),
   .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate:active:not(:disabled) {
     transform: none !important;
   }
+
+  .studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact),
+  .studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact).is-hover-expanded,
+  .studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-open-menu,
+  .studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt {
+    grid-template-columns: minmax(0, 1fr) 124px 180px !important;
+    grid-template-rows: 100px !important;
+    column-gap: 10px !important;
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-prompt {
+    padding-right: 14px !important;
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools {
+    width: 100% !important;
+    grid-template-columns: minmax(220px, 1fr) 92px 92px 106px !important;
+    gap: 8px !important;
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-current-text b {
+    font-size: 17px !important;
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu summary,
+  .studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu summary {
+    padding-inline: 9px !important;
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references,
+  .studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact).is-hover-expanded .image-console-references,
+  .studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-open-menu .image-console-references,
+  .studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt .image-console-references {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    justify-self: stretch !important;
+    align-self: center !important;
+    width: 124px !important;
+    min-width: 124px !important;
+    max-width: 124px !important;
+    height: 64px !important;
+    min-height: 64px !important;
+    max-height: 64px !important;
+    grid-template-columns: 58px 58px !important;
+    grid-template-rows: 64px !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    z-index: 4 !important;
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb {
+    width: 58px !important;
+    min-width: 58px !important;
+    max-width: 58px !important;
+    height: 64px !important;
+    min-height: 64px !important;
+    max-height: 64px !important;
+    grid-template-rows: 36px 14px !important;
+    border-radius: 14px !important;
+    padding: 6px 5px !important;
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb > span.image-reference-empty-icon,
+  .studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb img,
+  .studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb .attachment-placeholder {
+    width: 34px !important;
+    height: 34px !important;
+    max-width: 34px !important;
+    max-height: 34px !important;
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb b {
+    font-size: 10px !important;
+    line-height: 12px !important;
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate {
+    grid-column: 3 !important;
+    width: 180px !important;
+    min-width: 180px !important;
+    max-width: 180px !important;
+  }
 }
 
 
