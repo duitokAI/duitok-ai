@@ -40519,6 +40519,35 @@ body:has(.studio-shell .video-prompt-extractor-page),
   .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-thread {
     padding-top: clamp(64px, 6vh, 88px) !important;
   }
+
+  .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel .agent-form,
+  .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-form {
+    justify-self: stretch !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 clamp(24px, 2.2vw, 44px) max(18px, env(safe-area-inset-bottom)) clamp(24px, 2.2vw, 44px) !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+  }
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-form,
+.studio-shell .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-form {
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-form textarea,
+.studio-shell .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-form textarea {
+  min-width: 0 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-form button[type="submit"],
+.studio-shell .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-form button[type="submit"] {
+  justify-self: end !important;
+  min-width: 52px !important;
+  box-sizing: border-box !important;
 }
 
 /* Final empty-reference icon center lock: this applies in every console state,
