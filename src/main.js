@@ -1786,7 +1786,10 @@ function handleDelegatedClick(event) {
   if (target.dataset.resultSelect) return toggleResultSelection(target.dataset.resultSelect);
   if (target.dataset.bulkResultAction) return bulkResultAction(target.dataset.bulkResultAction);
   if (target.dataset.resultAction) return resultAction(target);
-  if (target.dataset.resultPreview) return set({ modal: "previewResult", activeResultId: target.dataset.resultPreview });
+  if (target.dataset.resultPreview) {
+    const fromAgent = Boolean(target.closest?.(".agent-generation-card, .agent-tool-cards"));
+    return set({ modal: "previewResult", activeResultId: target.dataset.resultPreview, resultDetailSource: fromAgent ? "agent" : "" });
+  }
   if (target.dataset.resultPrompt) return set({ modal: "resultPrompt", activeResultId: target.dataset.resultPrompt });
   if (target.dataset.imageCanvasResult) return set({ imageCanvasSelectedResultId: target.dataset.imageCanvasResult });
   if (target.dataset.imageModelOption) return saveProjectField("image.model", target.dataset.imageModelOption);
@@ -5833,8 +5836,24 @@ function resultReferenceButton(item, kind) {
 }
 
 function resultPromptText(item) {
-  const job = (state.db?.generationJobs || []).find((entry) => entry.resultId === item.id || entry.taskId === item.taskId || entry.providerTaskId === item.providerTaskId);
+  const job = resultOriginJob(item);
   return job?.prompt || item.prompt || item.providerBody || item.body || "";
+}
+
+function resultOriginJob(item) {
+  if (!item?.id) return null;
+  return (state.db?.generationJobs || []).find((entry) => entry.resultId === item.id || entry.taskId === item.taskId || entry.providerTaskId === item.providerTaskId) || null;
+}
+
+function resultOriginLabel(item) {
+  if (state.activeResultId === item?.id && state.resultDetailSource === "agent") return "Pokaya Agent";
+  const job = resultOriginJob(item);
+  if (!job) return "Image Page";
+  return job.action === "generate-image" ? "Image Page" : "Pokaya Agent";
+}
+
+function resultProjectName(item) {
+  return resultProject(item)?.name || "Current project";
 }
 
 function resultDownloadFilename(item, kind = "image") {
@@ -6610,6 +6629,8 @@ function resultPreviewModal() {
         <section class="result-detail-card">
           <div class="result-detail-section-title"><span>${icon("info", 18)} INFORMATION</span></div>
           <dl class="result-detail-info">
+            <div><dt>Source</dt><dd>${esc(resultOriginLabel(item))}</dd></div>
+            <div><dt>Project</dt><dd>${esc(resultProjectName(item))}</dd></div>
             <div><dt>Model</dt><dd>${esc(resultModelDisplay(item))}</dd></div>
             <div><dt>Resolution</dt><dd>${esc(resultResolutionLabel(item))}</dd></div>
             <div><dt>Aspect Ratio</dt><dd>${esc(resultAspectRatioLabel(item))}</dd></div>
@@ -8720,7 +8741,12 @@ function agentRunSummary(steps = []) {
 function agentToolCards(run) {
   const unique = agentUniqueRunCards(run);
   if (!unique.length) return "";
-  return `<div class="agent-tool-cards">${unique.map(agentToolCard).join("")}</div>`;
+  const generationCards = unique.filter((card) => card.type === "generation_job");
+  const otherCards = unique.filter((card) => card.type !== "generation_job");
+  return `<div class="agent-tool-cards">
+    ${generationCards.length ? agentGenerationRunCards({ ...run, cards: generationCards, toolResults: [] }) : ""}
+    ${otherCards.map(agentToolCard).join("")}
+  </div>`;
 }
 
 function agentRunCards(run) {
@@ -8739,7 +8765,7 @@ function agentUniqueRunCards(run) {
 function agentGenerationRunCards(run) {
   const cards = agentUniqueRunCards(run).filter((card) => card.type === "generation_job");
   if (!cards.length) return "";
-  return `<div class="agent-tool-cards agent-generation-run-cards">${cards.map(agentGenerationJobCard).join("")}</div>`;
+  return `<div class="agent-tool-cards agent-generation-run-cards">${cards.length > 1 ? agentGenerationGalleryCard(cards) : cards.map(agentGenerationJobCard).join("")}</div>`;
 }
 
 function agentToolCard(card = {}) {
@@ -8832,41 +8858,138 @@ function agentToolCard(card = {}) {
   return "";
 }
 
-function agentGenerationJobCard(card = {}) {
+function agentGenerationEntry(card = {}) {
   const job = (state.db?.generationJobs || []).find((item) => item.id === card.jobId)
     || (state.db?.generationJobs || []).find((item) => item.resultId && item.resultId === card.resultId);
   const resultId = job?.resultId || card.resultId || "";
   const result = resultId
-    ? (state.db?.projects || []).flatMap((project) => project.results || []).find((item) => item.id === resultId)
+    ? (state.db?.projects || []).flatMap((projectItem) => projectItem.results || []).find((item) => item.id === resultId)
     : null;
   const jobId = job?.id || card.jobId || "";
   const status = job?.status || (result ? "succeeded" : "queued");
-  const isDone = status === "succeeded" && result;
-  const isFailed = status === "failed";
   const mediaType = job?.type || card.resultType || resultMediaKind(result || {});
-  const aspectRatioRaw = String(job?.aspectRatio || card.aspectRatio || result?.aspectRatio || project().image?.aspectRatio || "");
+  return { card, job, result, jobId, status, mediaType };
+}
+
+function agentGenerationStatusStep(status = "") {
+  if (status === "failed") return "failed";
+  if (status === "succeeded") return "generated";
+  if (status === "processing") return "processing";
+  return "queued";
+}
+
+function agentGenerationStatusRail(entries = []) {
+  const statuses = entries.map((entry) => agentGenerationStatusStep(entry.status));
+  const order = ["queued", "processing", "generated"];
+  const failed = statuses.includes("failed");
+  const activeIndex = failed
+    ? Math.max(order.indexOf(statuses.find((item) => item !== "failed") || "queued"), 0)
+    : Math.max(...statuses.map((item) => order.indexOf(item)).filter((index) => index >= 0), 0);
+  const labels = { queued: "Queued", processing: "Processing", generated: "Generated" };
+  return `<div class="agent-generation-status-rail" data-agent-gallery-status="${esc(failed ? "failed" : order[activeIndex])}">
+    ${order.map((key, index) => `<span data-step-status="${esc(failed && index === activeIndex ? "failed" : index < activeIndex ? "done" : index === activeIndex ? "active" : "pending")}">${index < activeIndex ? icon("check", 12) : ""}${esc(labels[key])}</span>`).join("")}
+  </div>`;
+}
+
+function agentGenerationResultMeta(result) {
+  if (!result) return "";
+  return `<div class="agent-generation-result-meta">
+    <span>${icon("sparkles", 14)} ${esc(resultModelDisplay(result))}</span>
+    <span>${icon("maximize", 14)} ${esc(resultAspectRatioLabel(result))}</span>
+    <span>${icon("gem", 14)} ${esc(resultResolutionLabel(result))}</span>
+  </div>`;
+}
+
+function agentGenerationResultActions(result) {
+  if (!result) return "";
+  return `<div class="agent-generation-result-actions">
+    <button type="button" data-result-action="download" data-result-id="${esc(result.id)}" data-result-kind="${result.videoUrl ? "video" : result.imageUrl ? "image" : "text"}">${icon("download", 15)} Download</button>
+    <button type="button" data-result-action="save" data-result-id="${esc(result.id)}">${icon("bookmark-plus", 15)} Save ref</button>
+  </div>`;
+}
+
+function agentGenerationFailedActions(entry = {}) {
+  if (!entry.jobId) return "";
+  return `<div class="agent-generation-failed-actions">
+    <button type="button" data-generation-retry="${esc(entry.jobId)}">${icon("refresh-cw", 14)} Retry</button>
+    <button type="button" data-generation-edit="${esc(entry.jobId)}">${icon("pencil-line", 14)} Edit prompt</button>
+  </div>`;
+}
+
+function agentGenerationPendingFrame(entry = {}, options = {}) {
+  const { job, jobId, status, card } = entry;
+  const isFailed = status === "failed";
+  const aspectRatioRaw = String(job?.aspectRatio || card?.aspectRatio || project().image?.aspectRatio || "");
   const aspectRatio = aspectRatioRaw.includes("16:9") ? "16:9" : aspectRatioRaw.includes("1:1") ? "1:1" : "9:16";
   const aspectStyle = aspectRatio === "16:9" ? "16 / 9" : aspectRatio === "1:1" ? "1 / 1" : "9 / 16";
+  const summary = isFailed
+    ? (job?.errorMessage || "生成失败，请调整 prompt 后再试一次。")
+    : status === "processing" ? "模型正在生成，完成后会自动出现在这里。" : "任务已加入队列，马上开始生成。";
+  return `<div class="agent-generation-pending agent-generation-processing-frame ${options.compact ? "is-compact" : ""}" ${jobId ? `data-generation-job-id="${esc(jobId)}"` : ""} data-agent-job-status="${esc(status)}" data-agent-ratio="${esc(aspectRatio)}" style="aspect-ratio:${esc(aspectStyle)}">
+    ${icon(isFailed ? "triangle-alert" : "loader-circle", 28)}
+    <strong>${esc(isFailed ? "Generation failed" : status === "processing" ? "Processing" : "Queued")}</strong>
+    <span>${esc(summary)}</span>
+    ${isFailed ? `<p class="agent-generation-refund-note">${icon("rotate-ccw", 13)} Credit refunded</p>${agentGenerationFailedActions(entry)}` : ""}
+  </div>`;
+}
+
+function agentGenerationGalleryCard(cards = []) {
+  const entries = cards.map(agentGenerationEntry);
+  const done = entries.filter((entry) => entry.status === "succeeded" && entry.result);
+  const failed = entries.filter((entry) => entry.status === "failed");
+  const running = entries.filter((entry) => !["succeeded", "failed"].includes(entry.status));
+  const first = entries[0] || {};
+  const mediaType = first.mediaType || "image";
+  const title = failed.length
+    ? `${failed.length} generation failed`
+    : done.length
+      ? `${done.length} ${done.length === 1 ? "image" : "images"} generated`
+      : mediaType === "video" ? "视频生成中" : "图片生成中";
+  const summary = failed.length
+    ? "Some queued tasks failed. Credits were refunded for failed images."
+    : done.length === entries.length
+      ? "结果已保存在当前项目，点击任意图片可进入详情。"
+      : "任务正在后台处理，你可以继续输入下一个 prompt。";
+  const resultTiles = done.map((entry, index) => `<article class="agent-generation-gallery-tile" data-result-id="${esc(entry.result.id)}">
+    ${resultPreview(entry.result, { clickable: true, full: mediaType === "video", priority: done.length <= 2 })}
+    ${done.length > 1 ? `<span class="agent-generation-tile-count">${esc(index + 1)}/${esc(done.length)}</span>` : ""}
+  </article>`).join("");
+  const pendingTiles = [...running, ...failed].map((entry) => agentGenerationPendingFrame(entry, { compact: done.length > 0 })).join("");
+  return `<section class="agent-tool-card agent-generation-card agent-generation-gallery-card" data-agent-card-type="generation_job" data-agent-job-status="${esc(failed.length ? "failed" : running.length ? "processing" : "succeeded")}">
+    <header><strong>${icon(mediaType === "video" ? "video" : "image", 16)} ${esc(title)}</strong><span>${esc(summary)}</span></header>
+    ${agentGenerationStatusRail(entries)}
+    ${done.length ? `<div class="agent-generation-gallery-grid" data-gallery-count="${esc(done.length)}">${resultTiles}</div>` : ""}
+    ${pendingTiles ? `<div class="agent-generation-pending-list">${pendingTiles}</div>` : ""}
+    ${done[0]?.result ? agentGenerationResultMeta(done[0].result) : ""}
+    ${done[0]?.result ? agentGenerationResultActions(done[0].result) : ""}
+  </section>`;
+}
+
+function agentGenerationJobCard(card = {}) {
+  const entry = agentGenerationEntry(card);
+  const { job, result, jobId, status, mediaType } = entry;
+  const isDone = status === "succeeded" && result;
+  const isFailed = status === "failed";
   const title = isDone
     ? mediaType === "video" ? "视频已生成" : mediaType === "image" ? "图片已生成" : "内容已生成"
     : isFailed
       ? "生成失败"
       : mediaType === "video" ? "视频生成中" : mediaType === "image" ? "图片生成中" : "生成中";
   const summary = isDone
-    ? "结果已保存在当前项目，也可以直接在这里预览。"
+    ? "结果已保存在当前项目，点击图片可查看详情资料。"
     : isFailed
-      ? (job?.errorMessage || "生成失败，请调整 prompt 后再试一次。")
+      ? `${job?.errorMessage || "生成失败，请调整 prompt 后再试一次。"} Credit refunded.`
       : status === "processing" ? "模型正在生成，完成后会自动出现在这里。" : "任务已加入队列，马上开始生成。";
   const preview = isDone && result
-    ? `<div class="agent-generation-preview">${resultPreview(result, { full: mediaType === "video" })}</div>`
-    : `<div class="agent-generation-pending agent-generation-processing-frame" ${jobId ? `data-generation-job-id="${esc(jobId)}"` : ""} data-agent-job-status="${esc(status)}" data-agent-ratio="${esc(aspectRatio)}" style="aspect-ratio:${esc(aspectStyle)}">
-        ${icon(isFailed ? "triangle-alert" : "loader-circle", 28)}
-        <strong>${esc(isFailed ? title : status === "processing" ? "Processing" : "Queued")}</strong>
-        <span>${esc(summary)}</span>
-        ${isFailed ? `<button type="button" class="dark-button" data-agent-prompt="Try generating this image again with a clearer prompt.">Retry</button>` : ""}
-      </div>`;
+    ? `<div class="agent-generation-preview agent-generation-result-preview" data-result-id="${esc(result.id)}">
+        ${resultPreview(result, { clickable: true, full: mediaType === "video" })}
+        ${agentGenerationResultMeta(result)}
+        ${agentGenerationResultActions(result)}
+      </div>`
+    : agentGenerationPendingFrame(entry);
   return `<section class="agent-tool-card agent-generation-card" data-agent-card-type="generation_job" ${jobId ? `data-generation-job-id="${esc(jobId)}"` : ""} data-agent-job-status="${esc(status)}">
     <header><strong>${icon(mediaType === "video" ? "video" : mediaType === "image" ? "image" : "sparkles", 16)} ${esc(title)}</strong><span>${esc(summary)}</span></header>
+    ${agentGenerationStatusRail([entry])}
     ${preview}
   </section>`;
 }

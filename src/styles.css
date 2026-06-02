@@ -32963,3 +32963,249 @@ label {
     flex: 0 0 auto;
   }
 }
+
+/* Agent generated assets use the same clickable media behavior as Image Page. */
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread .agent-generation-preview.agent-generation-result-preview,
+.studio-shell .agent-page-panel .agent-thread .agent-generation-preview.agent-generation-result-preview {
+  width: min(720px, 100%) !important;
+  aspect-ratio: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  display: grid !important;
+  gap: 12px !important;
+  overflow: visible !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-preview .result-preview-trigger,
+.studio-shell .agent-page-panel .agent-generation-result-preview .result-preview-trigger {
+  width: 100% !important;
+  display: block !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  cursor: zoom-in !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-preview .result-image,
+.studio-shell .agent-page-panel .agent-generation-result-preview .result-image,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-preview .result-video-shell,
+.studio-shell .agent-page-panel .agent-generation-result-preview .result-video-shell {
+  width: 100% !important;
+  min-height: 0 !important;
+  max-height: min(560px, 62vh) !important;
+  border-radius: 10px !important;
+  object-fit: contain !important;
+  background: #0f0a14 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-status-rail,
+.studio-shell .agent-page-panel .agent-generation-status-rail {
+  width: min(520px, 100%) !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  align-items: center !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-status-rail span,
+.studio-shell .agent-page-panel .agent-generation-status-rail span {
+  min-height: 28px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  border: 1px solid rgba(111, 28, 132, 0.12) !important;
+  border-radius: 999px !important;
+  padding: 0 10px !important;
+  background: rgba(255, 255, 255, 0.68) !important;
+  color: rgba(42, 6, 51, 0.58) !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-status-rail span[data-step-status="done"],
+.studio-shell .agent-page-panel .agent-generation-status-rail span[data-step-status="done"] {
+  border-color: rgba(34, 197, 94, 0.2) !important;
+  background: rgba(236, 253, 245, 0.84) !important;
+  color: #166534 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-status-rail span[data-step-status="active"],
+.studio-shell .agent-page-panel .agent-generation-status-rail span[data-step-status="active"] {
+  border-color: rgba(255, 49, 95, 0.22) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #4f055f !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-status-rail span[data-step-status="failed"],
+.studio-shell .agent-page-panel .agent-generation-status-rail span[data-step-status="failed"] {
+  border-color: rgba(239, 68, 68, 0.22) !important;
+  background: rgba(254, 242, 242, 0.9) !important;
+  color: #b91c1c !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-gallery-card,
+.studio-shell .agent-page-panel .agent-generation-gallery-card {
+  width: min(720px, 100%) !important;
+  gap: 12px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-gallery-grid,
+.studio-shell .agent-page-panel .agent-generation-gallery-grid {
+  width: min(720px, 100%) !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-gallery-grid[data-gallery-count="1"],
+.studio-shell .agent-page-panel .agent-generation-gallery-grid[data-gallery-count="1"] {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-gallery-tile,
+.studio-shell .agent-page-panel .agent-generation-gallery-tile {
+  position: relative !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  border-radius: 10px !important;
+  background: #0f0a14 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-gallery-tile .result-preview-trigger,
+.studio-shell .agent-page-panel .agent-generation-gallery-tile .result-preview-trigger {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  display: block !important;
+  border: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  cursor: zoom-in !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-gallery-tile .result-image,
+.studio-shell .agent-page-panel .agent-generation-gallery-tile .result-image {
+  width: 100% !important;
+  min-height: 0 !important;
+  max-height: 360px !important;
+  display: block !important;
+  object-fit: contain !important;
+  background: #0f0a14 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-tile-count,
+.studio-shell .agent-page-panel .agent-generation-tile-count {
+  position: absolute !important;
+  right: 8px !important;
+  top: 8px !important;
+  min-height: 24px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  border-radius: 999px !important;
+  padding: 0 8px !important;
+  background: rgba(15, 10, 20, 0.68) !important;
+  color: #ffffff !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-meta,
+.studio-shell .agent-page-panel .agent-generation-result-meta {
+  width: 100% !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  align-items: center !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-meta span,
+.studio-shell .agent-page-panel .agent-generation-result-meta span {
+  min-height: 28px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  border: 1px solid rgba(111, 28, 132, 0.12) !important;
+  border-radius: 999px !important;
+  padding: 0 10px !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  color: rgba(42, 6, 51, 0.74) !important;
+  font-size: 12px !important;
+  font-weight: 850 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-actions,
+.studio-shell .agent-page-panel .agent-generation-result-actions,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-failed-actions,
+.studio-shell .agent-page-panel .agent-generation-failed-actions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-actions button,
+.studio-shell .agent-page-panel .agent-generation-result-actions button,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-failed-actions button,
+.studio-shell .agent-page-panel .agent-generation-failed-actions button {
+  min-height: 34px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  border: 1px solid rgba(111, 28, 132, 0.14) !important;
+  border-radius: 999px !important;
+  padding: 0 13px !important;
+  background: rgba(255, 255, 255, 0.86) !important;
+  color: #4f055f !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-actions button:hover,
+.studio-shell .agent-page-panel .agent-generation-result-actions button:hover,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-failed-actions button:hover,
+.studio-shell .agent-page-panel .agent-generation-failed-actions button:hover {
+  background: #ffffff !important;
+  border-color: rgba(255, 49, 95, 0.2) !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-pending-list,
+.studio-shell .agent-page-panel .agent-generation-pending-list {
+  width: min(720px, 100%) !important;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-processing-frame.is-compact,
+.studio-shell .agent-page-panel .agent-generation-processing-frame.is-compact {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 140px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-refund-note,
+.studio-shell .agent-page-panel .agent-generation-refund-note {
+  min-height: 26px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-self: center !important;
+  gap: 6px !important;
+  margin: 0 !important;
+  border-radius: 999px !important;
+  padding: 0 9px !important;
+  background: rgba(236, 253, 245, 0.86) !important;
+  color: #166534 !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+}
+
+@media (max-width: 640px) {
+  .studio-shell .agent-chat-shell.agent-page-panel .agent-generation-gallery-grid,
+  .studio-shell .agent-page-panel .agent-generation-gallery-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
