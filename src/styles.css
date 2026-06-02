@@ -37080,3 +37080,23 @@ body:has(.studio-shell .image-higgsfield-mode),
     transform: none !important;
   }
 }
+
+/* Image studio background ownership lock: draw the pink canvas once on the
+   workspace only. Nested panels must stay transparent, otherwise their
+   repeated gradients restart at different y positions and create horizontal
+   seams below the composer. */
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) {
+  background:
+    radial-gradient(circle at 86% 4%, rgba(255, 90, 145, 0.1), transparent 30%),
+    linear-gradient(135deg, #f8edf9 0%, #f3e5f6 52%, #eadcf1 100%) !important;
+  background-color: #eadcf1 !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .studio-workbench-card,
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .studio-step-panel,
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .canvas-card,
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .image-canvas-studio.image-higgsfield-mode,
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .image-higgsfield-mode > .studio-result-wall {
+  background: transparent !important;
+  background-color: transparent !important;
+}
