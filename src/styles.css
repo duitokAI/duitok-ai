@@ -33209,3 +33209,39 @@ label {
     grid-template-columns: minmax(0, 1fr) !important;
   }
 }
+
+/* Final lock: keep empty Avatar/Product icons optically centered after compact sizing. */
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-references .image-reference-thumb.is-empty-ref {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-references .image-reference-thumb.is-empty-ref .image-reference-empty-icon {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 0 !important;
+  transform: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-references .image-reference-thumb.is-empty-ref .image-reference-empty-icon svg {
+  position: static !important;
+  display: block !important;
+  flex: 0 0 auto !important;
+  width: 34px !important;
+  height: 34px !important;
+  margin: 0 !important;
+  transform: none !important;
+}
