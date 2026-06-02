@@ -14931,6 +14931,7 @@ label {
   z-index: 1;
   width: min(1180px, calc(100vw - 36px));
   height: min(780px, calc(100dvh - 48px));
+  max-height: calc(100dvh - 48px);
   min-height: 520px;
   display: grid;
   grid-template-columns: 300px minmax(0, 1fr);
@@ -14999,8 +15000,10 @@ label {
 
 .settings-modal-main {
   min-width: 0;
+  min-height: 0;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
   padding: 28px 34px 0;
 }
 
@@ -15025,14 +15028,19 @@ label {
 }
 
 .settings-modal-scroll {
+  height: 100%;
   min-height: 0;
+  max-height: 100%;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 22px 6px 30px 0;
   scrollbar-color: rgba(126, 61, 145, 0.24) transparent;
+  -webkit-overflow-scrolling: touch;
 }
 
 .settings-modal .settings-page {
-  gap: 0;
+  display: block;
+  min-height: 0;
 }
 
 .settings-modal .settings-card {
@@ -15111,8 +15119,10 @@ label {
 @media (max-width: 860px) {
   .settings-modal {
     height: min(760px, calc(100dvh - 28px));
+    max-height: calc(100dvh - 28px);
     min-height: 0;
     grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
   }
 
   .settings-modal-nav {
