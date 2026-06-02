@@ -39535,6 +39535,54 @@ body:has(.studio-shell .video-prompt-extractor-page),
   }
 }
 
+/* Sidebar-aware wall override: the visible content lane can be narrow even when
+   the viewport is still desktop-sized. Keep failed cards readable there too. */
+.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .studio-result-wall,
+.studio-shell:not(.sidebar-collapsed) .video-prompt-extractor-page > .studio-result-wall {
+  width: 100% !important;
+  min-width: 0 !important;
+  overflow-x: hidden !important;
+}
+
+.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid,
+.studio-shell:not(.sidebar-collapsed) .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)) !important;
+  grid-auto-flow: row dense !important;
+  gap: 10px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  align-items: start !important;
+  overflow: visible !important;
+}
+
+.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed,
+.studio-shell:not(.sidebar-collapsed) .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed {
+  aspect-ratio: 4 / 3 !important;
+  min-height: 190px !important;
+  max-height: 240px !important;
+}
+
+.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .studio-wall-failed-center,
+.studio-shell:not(.sidebar-collapsed) .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .studio-wall-failed-center {
+  width: calc(100% - 20px) !important;
+  max-width: calc(100% - 20px) !important;
+}
+
+@media (max-width: 1360px) {
+  .studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid,
+  .studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)) !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed,
+  .studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed {
+    aspect-ratio: 4 / 3 !important;
+    min-height: 185px !important;
+    max-height: 240px !important;
+  }
+}
+
 /* Compact composer generate alignment: keep the right action group optically
    centered inside the collapsed bar instead of hugging the right edge. */
 @media (min-width: 761px) {
