@@ -5757,6 +5757,14 @@ function resultModelDisplay(item) {
   return label === "VIDEO MODEL" ? "Video model" : label;
 }
 
+function resultModelProvider(item) {
+  const label = resultModelLabel(item || {});
+  if (label === "NANO BANANA PRO" || label === "NANO BANANA 2") return "google";
+  if (label.startsWith("SEEDREAM")) return "seedream";
+  if (label === "GROK IMAGINE") return "xai";
+  return "openai";
+}
+
 function resultProject(item) {
   return item?.projectId ? state.db?.projects?.find((project) => project.id === item.projectId) : null;
 }
@@ -8894,7 +8902,7 @@ function agentGenerationStatusRail(entries = []) {
 function agentGenerationResultMeta(result) {
   if (!result) return "";
   return `<div class="agent-generation-result-meta">
-    <span>${icon("sparkles", 14)} ${esc(resultModelDisplay(result))}</span>
+    <span class="agent-generation-model-chip">${providerLogo(resultModelProvider(result))} ${esc(resultModelDisplay(result))}</span>
     <span>${icon("maximize", 14)} ${esc(resultAspectRatioLabel(result))}</span>
     <span>${icon("gem", 14)} ${esc(resultResolutionLabel(result))}</span>
   </div>`;
