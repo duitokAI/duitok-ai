@@ -33399,3 +33399,11 @@ label {
     grid-template-columns: minmax(260px, 1fr) 118px 144px 150px !important;
   }
 }
+
+/* Quality menu should open to the right of its trigger, not grow leftward. */
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options {
+  right: auto !important;
+  left: 0 !important;
+  transform: none !important;
+  max-width: calc(100vw - 24px) !important;
+}
