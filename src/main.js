@@ -5604,8 +5604,9 @@ function resultCard(item) {
   const isLegacyVisual = Boolean(item.visualCard);
   const modelLabel = resultModelLabel(item);
   const safeTitle = esc(title);
+  const mediaRatio = resultMediaRatio(item);
   return `
-    <article class="result-card ${isLegacyVisual ? "legacy-visual-result" : ""}">
+    <article class="result-card ${isLegacyVisual ? "legacy-visual-result" : ""}" data-media-ratio="${esc(mediaRatio)}" style="--media-ratio:${esc(mediaRatio)}">
       <header class="result-card-head">
         <span>${icon("circle-check", 18)}</span>
         <b>${esc(modelLabel)}</b>
@@ -5718,13 +5719,12 @@ function resultMediaRatio(item = {}) {
 
 function mediaRatioSyncScript() {
   return [
-    "const card=this.closest('.studio-wall-card')",
+    "const card=this.closest('.studio-wall-card,.result-card')",
     "if(card){",
-    "const current=parseFloat(card.dataset.mediaRatio||getComputedStyle(card).getPropertyValue('--media-ratio'))||1",
     "const width=this.naturalWidth||this.videoWidth||1",
     "const height=this.naturalHeight||this.videoHeight||1",
     "const next=Math.min(2.4,Math.max(0.35,width/height))",
-    "if(Math.abs(next-current)<=0.18){card.dataset.mediaRatio=next.toFixed(4);card.style.setProperty('--media-ratio',next.toFixed(4))}",
+    "if(Number.isFinite(next)&&next>0){card.dataset.mediaRatio=next.toFixed(4);card.style.setProperty('--media-ratio',next.toFixed(4))}",
     "card.dataset.mediaReady='true'",
     "}"
   ].join(";");
@@ -5778,7 +5778,7 @@ function resultPreview(item, options = {}) {
   const imageSrc = item.imageUrl ? `/api/media/result/${encodeURIComponent(item.id)}/image?token=${token}${imageVariant}` : "";
   const videoSrc = item.videoUrl ? `/api/media/result/${encodeURIComponent(item.id)}/video?token=${token}` : "";
   const imageError = "this.replaceWith(Object.assign(document.createElement('div'),{className:'result-media-error',textContent:'图片保存失败，请联系客服处理'}))";
-  const ratioSync = options.wall ? "this.closest('.studio-wall-card')?.setAttribute('data-media-ready','true')" : mediaRatioSyncScript();
+  const ratioSync = mediaRatioSyncScript();
   const eagerMedia = Boolean(options.full || options.priority);
   const imagePriority = options.full || options.priority ? "high" : options.wall ? "auto" : "low";
   const imageDecoding = options.full ? "sync" : "async";

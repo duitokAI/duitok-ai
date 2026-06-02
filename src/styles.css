@@ -25320,7 +25320,7 @@ label {
 .studio-shell .result-card .result-text-preview,
 .studio-shell .result-card .result-media-error {
   width: 100% !important;
-  aspect-ratio: 9 / 16 !important;
+  aspect-ratio: var(--media-ratio, 0.5625) / 1 !important;
   margin: 0 !important;
   border-radius: 18px 18px 0 0 !important;
 }
