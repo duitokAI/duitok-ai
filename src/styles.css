@@ -35089,3 +35089,73 @@ label {
   box-shadow: none !important;
 }
 
+
+/* Keep failed wall-card messaging pinned to the exact visual center of each tile. */
+.studio-shell .image-higgsfield-mode .studio-wall-pending.failed > .studio-wall-pending-controls,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending.failed > .studio-wall-pending-controls {
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: grid !important;
+  grid-template-rows: minmax(0, 1fr) repeat(5, auto) minmax(0, 1fr) !important;
+  justify-items: center !important;
+  align-items: center !important;
+  align-content: stretch !important;
+  gap: clamp(7px, 1vw, 11px) !important;
+  padding: clamp(10px, 2.4vw, 20px) !important;
+  overflow: hidden !important;
+  transform: none !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-pending.failed .studio-wall-pending-spinner,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending.failed .studio-wall-pending-spinner {
+  grid-row: 2 !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-pending.failed b,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending.failed b {
+  grid-row: 3 !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-pending.failed small,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending.failed small {
+  grid-row: 4 !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-pending.failed .generation-credit-refund-note,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending.failed .generation-credit-refund-note {
+  grid-row: 5 !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-pending.failed .studio-wall-failed-actions,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending.failed .studio-wall-failed-actions {
+  grid-row: 6 !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-pending.failed b,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending.failed b,
+.studio-shell .image-higgsfield-mode .studio-wall-pending.failed small,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending.failed small,
+.studio-shell .image-higgsfield-mode .studio-wall-pending.failed .generation-credit-refund-note,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending.failed .generation-credit-refund-note,
+.studio-shell .image-higgsfield-mode .studio-wall-pending.failed .studio-wall-failed-actions,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending.failed .studio-wall-failed-actions {
+  justify-self: center !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-pending.failed small,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending.failed small {
+  width: 100% !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-pending.failed .studio-wall-failed-actions,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending.failed .studio-wall-failed-actions {
+  width: 100% !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-pending.failed .studio-wall-failed-actions button,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending.failed .studio-wall-failed-actions button {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  max-width: 82px !important;
+}
