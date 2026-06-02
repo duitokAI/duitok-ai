@@ -55,6 +55,7 @@ let navigationFrame = null;
 let aspectRatioPopoverCleanup = null;
 let imageCountSaveTimer = null;
 let imageCountSaveSeq = 0;
+let imageConsoleExpandLockUntil = 0;
 let resultTitleSaveTimer = null;
 let generationPollTimer = null;
 const generationStateEtags = new Map();
@@ -1768,7 +1769,8 @@ function bindImageConsoleCompact() {
     const nextCompact = compact ? scrollY > expandAt : scrollY > compactAt;
     if (nextCompact !== compact) compact = nextCompact;
     updateMenuState();
-    const shouldCompact = compact && !hovering && !menuOpen;
+    const expandLocked = Date.now() < imageConsoleExpandLockUntil || consoleEl.contains(document.activeElement);
+    const shouldCompact = compact && !hovering && !menuOpen && !expandLocked;
     consoleEl.classList.toggle("is-compact", shouldCompact);
     if (shouldCompact) closeModelMenus();
   };
@@ -10034,7 +10036,31 @@ function updateImageBatchCount(delta) {
   const previousDb = state.db;
   const nextCount = Math.min(4, Math.max(1, imageBatchCount(project()) + delta));
   if (nextCount === imageBatchCount(project())) return;
+  imageConsoleExpandLockUntil = Date.now() + 700;
+  const scrollSnapshot = {
+    windowY: window.scrollY || 0,
+    windowX: window.scrollX || 0,
+    workspace: document.querySelector(".workspace")?.scrollTop || 0,
+    shell: document.querySelector(".studio-shell")?.scrollTop || 0
+  };
+  if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
   set({ db: dbWithProjectField(previousDb, projectId, "image.count", nextCount) });
+  const restoreComposerAfterCount = () => {
+    window.scrollTo(scrollSnapshot.windowX, scrollSnapshot.windowY);
+    const workspace = document.querySelector(".workspace");
+    const shell = document.querySelector(".studio-shell");
+    if (workspace) workspace.scrollTop = scrollSnapshot.workspace;
+    if (shell) shell.scrollTop = scrollSnapshot.shell;
+    document.querySelectorAll(".image-generate-console").forEach((el) => {
+      el.classList.add("is-hover-expanded");
+      el.classList.remove("is-compact");
+    });
+  };
+  requestAnimationFrame(() => {
+    restoreComposerAfterCount();
+    requestAnimationFrame(restoreComposerAfterCount);
+  });
+  [40, 120, 260, 600, 1000].forEach((delay) => window.setTimeout(restoreComposerAfterCount, delay));
   const seq = ++imageCountSaveSeq;
   clearTimeout(imageCountSaveTimer);
   imageCountSaveTimer = setTimeout(async () => {

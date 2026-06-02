@@ -37548,3 +37548,22 @@ body:has(.studio-shell .video-prompt-extractor-page),
   background: #eadcf1;
   pointer-events: none;
 }
+
+/* Count stepper stability lock: clicking +/- must not resize the composer. */
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-count-stepper,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-count-stepper,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper {
+  contain: layout paint !important;
+  transform: none !important;
+  transition: background-color 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-count-stepper button,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-count-stepper button,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper button,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-count-stepper span,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-count-stepper span,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper span {
+  transform: none !important;
+  transition: background-color 0.08s ease, border-color 0.08s ease, color 0.08s ease, opacity 0.08s ease !important;
+}
