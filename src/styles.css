@@ -37539,6 +37539,18 @@ body:has(.studio-shell .image-higgsfield-mode),
   align-content: center !important;
 }
 
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option-copy b {
+  gap: 6px !important;
+  font-size: 24px !important;
+  line-height: 1 !important;
+}
+
+.studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option-copy em {
+  font-size: 12px !important;
+  line-height: 1 !important;
+  letter-spacing: 0.03em !important;
+}
+
 .studio-shell .image-higgsfield-mode .image-resolution-menu > .image-resolution-options .image-resolution-option-copy small {
   display: none !important;
 }
