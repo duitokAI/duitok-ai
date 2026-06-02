@@ -40098,3 +40098,22 @@ body:has(.studio-shell .video-prompt-extractor-page),
 .studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .studio-wall-zoom-control {
   right: clamp(16px, 1.8vw, 32px) !important;
 }
+
+/* Result wall zoom control row: keep the preview-size slider in its original
+   space above the image wall instead of overlaying it on top of images. */
+.studio-shell .image-higgsfield-mode {
+  grid-template-rows: 46px auto auto !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-wall-zoom-control,
+.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .studio-wall-zoom-control {
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  grid-row: 1 !important;
+  justify-self: end !important;
+  align-self: center !important;
+  z-index: 12 !important;
+  width: clamp(132px, 12vw, 210px) !important;
+  margin: 0 clamp(18px, 2.2vw, 42px) 0 0 !important;
+}
