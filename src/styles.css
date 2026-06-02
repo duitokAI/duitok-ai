@@ -37325,3 +37325,36 @@ body:has(.studio-shell .image-higgsfield-mode),
     min-width: 116px !important;
   }
 }
+
+/* Composer containment lock: parent rows must grow with the toolbar. */
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-main,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-console-main,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-main {
+  overflow: visible !important;
+}
+
+@media (min-width: 761px) {
+  .studio-shell .image-higgsfield-mode > .image-generate-console .image-console-main,
+  .studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-console-main,
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-main {
+    min-height: calc(var(--image-toolbar-control-height) + 16px) !important;
+    align-items: center !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .studio-shell .image-higgsfield-mode > .image-generate-console,
+  .studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt,
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) {
+    grid-template-rows: auto auto auto !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console .image-console-main,
+  .studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-console-main,
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-main {
+    min-height: calc(42px + 10px + var(--image-toolbar-control-height) * 3 + 20px) !important;
+    grid-template-rows: 42px auto !important;
+    align-content: start !important;
+    row-gap: 10px !important;
+  }
+}
