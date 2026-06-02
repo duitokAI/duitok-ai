@@ -35626,7 +35626,24 @@ label {
 .studio-shell .agent-chat-shell.agent-page-panel .agent-thread,
 .studio-shell .agent-page-panel .agent-thread {
   padding-top: max(28px, env(safe-area-inset-top)) !important;
+  padding-left: 16px !important;
+  background: transparent !important;
   overflow-x: hidden !important;
+}
+
+/* Agent avatar edge cleanup: keep the avatar and its shadow away from the
+   chat-surface boundary so it does not create a visible vertical seam. */
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread > article.assistant,
+.studio-shell .agent-page-panel .agent-thread > article.assistant {
+  padding-left: 2px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread > article.assistant > .agent-avatar-badge,
+.studio-shell .agent-page-panel .agent-thread > article.assistant > .agent-avatar-badge {
+  box-shadow:
+    0 10px 24px rgba(93, 8, 108, 0.16),
+    0 18px 34px rgba(255, 90, 145, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-thread {
