@@ -6635,14 +6635,12 @@ function editResultImageModal() {
 }
 
 function deleteResultModal() {
-  const item = activeResult();
   return `<div class="modal-backdrop result-modal-backdrop" data-action="close-modal">
     <section class="modal result-choice-modal" role="dialog" aria-modal="true" aria-label="Delete result">
       <button class="icon-only close" data-action="close-modal" type="button">${icon("x")}</button>
       <p class="folder-label">${icon("trash-2", 18)} Delete</p>
       <h2>删除这个生成结果？</h2>
       <p class="result-modal-copy">只删除当前结果卡片；已经保存到 Attachments 的 Product / Avatar 会继续保留。</p>
-      ${item ? `<div class="result-modal-preview">${resultPreview(item)}</div>` : ""}
       <div class="delete-confirm"><div><button class="dark-button" data-action="close-modal">${icon("x")} 取消</button><button class="gold-button danger-button" data-action="confirm-delete-result">${icon("trash-2")} 删除</button></div></div>
     </section>
   </div>`;

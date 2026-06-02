@@ -5567,26 +5567,6 @@ textarea {
   display: block;
 }
 
-.result-choice-modal[aria-label="Delete result"] .result-modal-preview {
-  width: min(220px, 58vw);
-  aspect-ratio: 4 / 3;
-  border-color: rgba(40, 0, 60, 0.2);
-  background: #0f0a14;
-}
-
-.result-choice-modal[aria-label="Delete result"] .result-modal-preview img,
-.result-choice-modal[aria-label="Delete result"] .result-modal-preview video,
-.result-choice-modal[aria-label="Delete result"] .result-modal-preview .result-image,
-.result-choice-modal[aria-label="Delete result"] .result-modal-preview .result-video {
-  width: 100%;
-  height: 100%;
-  max-height: none;
-  aspect-ratio: auto;
-  border-radius: 0;
-  object-fit: cover;
-  background: #0f0a14;
-}
-
 .result-save-options {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
