@@ -38813,3 +38813,33 @@ body:has(.studio-shell .video-prompt-extractor-page),
   max-width: 40px !important;
   max-height: 40px !important;
 }
+
+/* Clone Prompt empty dock position: mirror Image Page by keeping the uploader at
+   the bottom of the studio canvas, not directly under the fixed top tabs. */
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page.is-empty) {
+  min-height: 100dvh !important;
+  padding: var(--project-fixed-tabs-height) 0 56px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+.studio-shell .canvas-card:has(.video-prompt-extractor-page.is-empty),
+.studio-shell .studio-workbench-card:has(.video-prompt-extractor-page.is-empty),
+.studio-shell .studio-step-panel:has(.video-prompt-extractor-page.is-empty) {
+  min-height: calc(100dvh - var(--project-fixed-tabs-height)) !important;
+  overflow: visible !important;
+}
+
+.studio-shell .video-prompt-extractor-page.is-empty {
+  min-height: calc(100dvh - var(--project-fixed-tabs-height) - 56px) !important;
+  display: grid !important;
+  grid-template-rows: minmax(0, 1fr) auto !important;
+  align-content: stretch !important;
+  padding: 0 0 clamp(14px, 2vh, 22px) !important;
+}
+
+.studio-shell .video-prompt-extractor-page.is-empty > .video-prompt-dock {
+  grid-row: 2 !important;
+  align-self: end !important;
+  margin: 0 auto !important;
+}
