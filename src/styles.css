@@ -38114,3 +38114,23 @@ body:has(.studio-shell .video-prompt-extractor-page),
     grid-row: 3 !important;
   }
 }
+
+/* Image composer instant compact lock: scrolling should shrink the bar with no delay. */
+.studio-shell .image-higgsfield-mode > .image-generate-console,
+.studio-shell .image-higgsfield-mode > .image-generate-console *,
+.studio-shell .image-higgsfield-mode > .image-generate-console::before,
+.studio-shell .image-higgsfield-mode > .image-generate-console::after {
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact,
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-main,
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-tools,
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-references,
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-generate,
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-compact-summary {
+  transition: none !important;
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+}

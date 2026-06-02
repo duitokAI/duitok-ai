@@ -1719,9 +1719,8 @@ function bindImageConsoleCompact() {
   let compact = consoleEl.classList.contains("is-compact");
   let hovering = false;
   let menuOpen = false;
-  let scrollReleaseTimer = null;
-  let compactAt = 48;
-  let expandAt = 12;
+  let compactAt = 1;
+  let expandAt = 0;
   const modelPickers = [...consoleEl.querySelectorAll(".image-model-picker")];
   const aspectMenus = [...consoleEl.querySelectorAll(".image-aspect-ratio-menu")];
   const resolutionMenus = [...consoleEl.querySelectorAll(".image-resolution-menu")];
@@ -1754,14 +1753,8 @@ function bindImageConsoleCompact() {
       .map((target) => target.scrollTop || 0)
   );
   const refreshThresholds = () => {
-    const range = Math.max(
-    Math.max(0, (document.scrollingElement?.scrollHeight || 0) - window.innerHeight),
-      ...uniqueScrollTargets
-        .filter((target) => target !== window)
-        .map((target) => Math.max(0, (target.scrollHeight || 0) - (target.clientHeight || 0)))
-    );
-    compactAt = Math.max(18, Math.min(140, range * 0.28));
-    expandAt = Math.max(6, Math.min(42, compactAt * 0.32));
+    compactAt = 1;
+    expandAt = 0;
   };
   const sync = () => {
     ticking = false;
@@ -1781,7 +1774,6 @@ function bindImageConsoleCompact() {
   };
   const expandForHover = () => {
     hovering = true;
-    if (scrollReleaseTimer) window.clearTimeout(scrollReleaseTimer);
     consoleEl.classList.add("is-hover-expanded");
     consoleEl.classList.remove("is-compact");
   };
@@ -1792,11 +1784,12 @@ function bindImageConsoleCompact() {
     requestSync();
   };
   const handleScroll = () => {
-    if (scrollReleaseTimer) window.clearTimeout(scrollReleaseTimer);
-    scrollReleaseTimer = window.setTimeout(() => {
-      if (hovering) releaseHoverExpansion();
-      else requestSync();
-    }, 240);
+    imageConsoleExpandLockUntil = 0;
+    if (hovering) {
+      hovering = false;
+      if (!menuOpen) consoleEl.classList.remove("is-hover-expanded");
+    }
+    requestSync();
   };
   const restoreAfterFocus = (event) => {
     if (event.relatedTarget && consoleEl.contains(event.relatedTarget)) return;
@@ -1828,7 +1821,6 @@ function bindImageConsoleCompact() {
   refreshThresholds();
   sync();
   imageConsoleScrollCleanup = () => {
-    if (scrollReleaseTimer) window.clearTimeout(scrollReleaseTimer);
     uniqueScrollTargets.forEach((target) => target.removeEventListener("scroll", handleScroll));
     window.removeEventListener("resize", handleResize);
     consoleEl.removeEventListener("mouseenter", expandForHover);
