@@ -38843,3 +38843,60 @@ body:has(.studio-shell .video-prompt-extractor-page),
   align-self: end !important;
   margin: 0 auto !important;
 }
+
+/* Prompt-lane reference placement: borrow the prompt row's right side so
+   Avatar/Product do not fight the Generate button. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) {
+  grid-template-columns: minmax(0, 1fr) 200px !important;
+  grid-template-rows: 100px !important;
+  column-gap: 10px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-main {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-prompt {
+  padding-right: 176px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  justify-self: end !important;
+  align-self: start !important;
+  width: 146px !important;
+  min-width: 146px !important;
+  max-width: 146px !important;
+  height: 60px !important;
+  min-height: 60px !important;
+  max-height: 60px !important;
+  grid-template-columns: 60px 60px !important;
+  grid-template-rows: 60px !important;
+  gap: 8px !important;
+  margin: 4px 8px 0 0 !important;
+  z-index: 4 !important;
+  pointer-events: auto !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb {
+  width: 60px !important;
+  min-width: 60px !important;
+  max-width: 60px !important;
+  height: 60px !important;
+  min-height: 60px !important;
+  max-height: 60px !important;
+  border-radius: 15px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  justify-self: stretch !important;
+  align-self: stretch !important;
+  width: 200px !important;
+  min-width: 200px !important;
+  max-width: 200px !important;
+  z-index: 5 !important;
+}
