@@ -7580,6 +7580,8 @@ app.get("/api/media/result/:id/:kind", async (req, res, next) => {
       throw error;
     }
     const isVideo = req.params.kind === "video";
+    const downloadFilename = req.query.download === "1" ? safeDownloadFilename(req.query.filename || `pokaya-result.${isVideo ? "mp4" : "png"}`) : "";
+    const downloadHeaders = downloadFilename ? { "Content-Disposition": `attachment; filename="${downloadFilename}"` } : {};
     const wantsThumb = !isVideo && req.query.thumb === "1";
     const thumbWidth = Math.max(160, Math.min(1280, Number(req.query.w || 720) || 720));
     const thumbCacheKey = wantsThumb ? resultThumbnailCacheKey(result, thumbWidth) : "";
@@ -7598,7 +7600,8 @@ app.get("/api/media/result/:id/:kind", async (req, res, next) => {
       if (!wantsThumb) {
         return pipeFetchBody(r2Response, res, {
           contentType,
-          cacheControl: "private, max-age=86400"
+          cacheControl: "private, max-age=86400",
+          headers: downloadHeaders
         });
       }
       const bytes = Buffer.from(await r2Response.arrayBuffer());
@@ -7633,7 +7636,8 @@ app.get("/api/media/result/:id/:kind", async (req, res, next) => {
     if (!wantsThumb) {
       return pipeFetchBody(response, res, {
         contentType,
-        cacheControl: "private, max-age=300"
+        cacheControl: "private, max-age=300",
+        headers: downloadHeaders
       });
     }
     const bytes = Buffer.from(await response.arrayBuffer());
@@ -7692,6 +7696,14 @@ function sendThumbnail(res, bytes, cacheKey = "") {
   res.setHeader("Cache-Control", "private, max-age=86400");
   res.setHeader("ETag", weakEtag(`${cacheKey}:${bytes.length}`));
   return res.send(bytes);
+}
+
+function safeDownloadFilename(value = "pokaya-result") {
+  return String(value || "pokaya-result")
+    .replace(/[/\\?%*:|"<>]/g, "-")
+    .replace(/[\r\n]+/g, " ")
+    .trim()
+    .slice(0, 180) || "pokaya-result";
 }
 
 function pipeFetchBody(response, res, { contentType = "application/octet-stream", cacheControl = "", headers = {} } = {}) {

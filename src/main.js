@@ -11932,6 +11932,21 @@ async function download(url, filename, options = {}) {
   if (!options.keepModal) set({ modal: "export" });
 }
 
+function downloadDirect(url, filename, options = {}) {
+  const href = new URL(url.startsWith("/api") ? `${apiBaseUrl}${url}` : url, window.location.origin);
+  if (state.token && !href.searchParams.has("token")) href.searchParams.set("token", state.token);
+  href.searchParams.set("download", "1");
+  if (filename) href.searchParams.set("filename", filename);
+  const link = document.createElement("a");
+  link.href = href.toString();
+  link.download = filename || "";
+  link.rel = "noopener";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  if (!options.keepModal) setTimeout(() => set({ modal: "export" }), 0);
+}
+
 function playResultVideo(button) {
   const shell = button?.closest(".result-video-shell");
   const video = shell?.querySelector("video");
@@ -11985,7 +12000,7 @@ async function bulkDownloadSelectedResults() {
   for (const item of items) {
     const kind = item.videoUrl ? "video" : "image";
     try {
-      await download(`/api/media/result/${item.id}/${kind}`, resultDownloadFilename(item, kind), { keepModal: true });
+      downloadDirect(`/api/media/result/${item.id}/${kind}`, resultDownloadFilename(item, kind), { keepModal: true });
     } catch {
       failed += 1;
     }
@@ -12062,6 +12077,7 @@ async function resultAction(button) {
       const kind = button.dataset.resultKind || "text";
       const filename = resultDownloadFilename(item, kind);
       const path = kind === "text" ? `/api/export/result/${id}` : `/api/media/result/${id}/${kind}`;
+      if (kind !== "text") return downloadDirect(path, filename);
       return download(path, filename);
     }
     if (actionName === "delete") {
