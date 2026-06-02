@@ -33803,3 +33803,163 @@ label {
     width: 58px !important;
   }
 }
+/* Image composer density pass: the dock should leave more canvas visible. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) {
+  width: calc(100% - clamp(72px, 7vw, 168px)) !important;
+  max-width: min(1760px, calc(100% - clamp(72px, 7vw, 168px))) !important;
+  min-height: 0 !important;
+  margin: 10px auto 14px !important;
+  bottom: 12px !important;
+  grid-template-columns: minmax(0, 1fr) clamp(156px, 10vw, 190px) clamp(160px, 9.6vw, 188px) !important;
+  gap: 8px !important;
+  padding: 9px !important;
+  border-radius: 22px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-main {
+  height: 98px !important;
+  max-height: 98px !important;
+  grid-template-rows: 48px 42px !important;
+  gap: 8px !important;
+  align-self: start !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt {
+  min-height: 0 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt .image-console-main {
+  height: 116px !important;
+  max-height: 116px !important;
+  grid-template-rows: 66px 42px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-prompt {
+  height: 48px !important;
+  min-height: 48px !important;
+  max-height: 48px !important;
+  grid-template-columns: 40px minmax(0, 1fr) !important;
+  gap: 10px !important;
+  padding: 0 12px 0 6px !important;
+  border-radius: 16px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt .image-console-prompt {
+  height: 66px !important;
+  min-height: 66px !important;
+  max-height: 66px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-insert {
+  width: 34px !important;
+  min-width: 34px !important;
+  height: 34px !important;
+  border-radius: 12px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-insert svg {
+  width: 19px !important;
+  height: 19px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-prompt textarea {
+  height: 46px !important;
+  min-height: 46px !important;
+  max-height: 46px !important;
+  padding: 7px 0 !important;
+  font-size: 13px !important;
+  line-height: 1.28 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt .image-console-prompt textarea {
+  height: 64px !important;
+  min-height: 64px !important;
+  max-height: 64px !important;
+  padding-top: 8px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools {
+  grid-template-columns: minmax(210px, 340px) 86px 108px 118px !important;
+  gap: 7px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-enhance-group {
+  grid-template-columns: minmax(0, 1fr) 42px !important;
+  height: 42px !important;
+  gap: 7px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper {
+  height: 42px !important;
+  min-height: 42px !important;
+  max-height: 42px !important;
+  border-radius: 18px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu summary {
+  border-radius: 18px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 7px !important;
+  align-self: start !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb {
+  height: 74px !important;
+  min-height: 74px !important;
+  max-height: 74px !important;
+  grid-template-columns: 1fr !important;
+  place-items: center !important;
+  padding: 0 !important;
+  border-radius: 18px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb img,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb .attachment-placeholder,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb > span:not(.image-reference-clear) {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 12px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb b,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb small {
+  display: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: 104px !important;
+  min-height: 104px !important;
+  max-height: 104px !important;
+  grid-template-rows: 28px auto auto !important;
+  row-gap: 5px !important;
+  padding: 13px 12px 14px !important;
+  border-radius: 20px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate svg {
+  width: 26px !important;
+  height: 26px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate b {
+  font-size: clamp(17px, 1.05vw, 22px) !important;
+  line-height: 1.05 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate small {
+  font-size: 12.5px !important;
+  line-height: 1 !important;
+}
