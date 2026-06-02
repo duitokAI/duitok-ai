@@ -5647,9 +5647,10 @@ function originalChoiceButton(field, value, label, active) {
 
 function clonePanel(p) {
   const meta = studioStepMeta("clone");
-  return `<section class="studio-immersive-page studio-wall-zoomable video-prompt-extractor-page" data-studio-mode="clone" ${studioWallZoomStyleAttr()}>
+  const wall = studioResultWall(p, meta);
+  return `<section class="studio-immersive-page studio-wall-zoomable video-prompt-extractor-page ${wall ? "" : "is-empty"}" data-studio-mode="clone" ${studioWallZoomStyleAttr()}>
     ${studioWallZoomControl()}
-    ${studioResultWall(p, meta) || videoPromptExtractorEmpty()}
+    ${wall || ""}
     ${videoPromptExtractorDock(p)}
   </section>`;
 }

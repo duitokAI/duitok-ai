@@ -38663,3 +38663,39 @@ body:has(.studio-shell .video-prompt-extractor-page),
 .studio-shell .video-prompt-extractor-page > .video-prompt-dock {
   margin-top: clamp(18px, 2.4vw, 48px) !important;
 }
+
+/* Clone Prompt empty mode follows Image Page composer logic: no hidden result wall,
+   no full-height placeholder, and no colored floor under the upload bar. */
+.studio-shell .workspace:has(.video-prompt-extractor-page.is-empty),
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page.is-empty),
+.studio-shell .canvas-card:has(.video-prompt-extractor-page.is-empty),
+.studio-shell .studio-workbench-card:has(.video-prompt-extractor-page.is-empty),
+.studio-shell .studio-step-panel:has(.video-prompt-extractor-page.is-empty) {
+  min-height: 0 !important;
+  padding-bottom: 0 !important;
+  overflow: visible !important;
+}
+
+.studio-shell .video-prompt-extractor-page.is-empty {
+  min-height: 0 !important;
+  height: auto !important;
+  display: block !important;
+  padding: clamp(22px, 2.2vw, 42px) 0 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.studio-shell .video-prompt-extractor-page.is-empty > .studio-wall-zoom-control,
+.studio-shell .video-prompt-extractor-page.is-empty > .video-prompt-empty-wall {
+  display: none !important;
+}
+
+.studio-shell .video-prompt-extractor-page.is-empty > .video-prompt-dock {
+  position: relative !important;
+  bottom: auto !important;
+  grid-row: auto !important;
+  margin: 0 auto !important;
+  box-shadow:
+    0 10px 28px rgba(70, 16, 84, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88) !important;
+}
