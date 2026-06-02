@@ -22165,8 +22165,14 @@ label {
 }
 
 /* Agent Chat UX v2: one clean chat surface, hidden background memory, mobile-first behavior. */
+.studio-shell:has(.agent-page) {
+  --agent-session-panel-width: min(252px, calc(100vw - 118px));
+  --agent-session-panel-gap: clamp(24px, 2vw, 36px);
+}
+
 .studio-shell .workspace:has(.agent-page) {
   padding-top: clamp(18px, 2vw, 30px) !important;
+  padding-left: calc(var(--agent-session-panel-width) + var(--agent-session-panel-gap)) !important;
   padding-bottom: clamp(18px, 2vw, 30px) !important;
 }
 
@@ -22610,6 +22616,12 @@ label {
   .studio-shell .agent-chat-shell.agent-page-panel {
     height: calc(100dvh - 24px) !important;
     min-height: 0 !important;
+  }
+}
+
+@media (max-width: 980px) {
+  .studio-shell .workspace:has(.agent-page) {
+    padding-left: 14px !important;
   }
 }
 
@@ -37526,7 +37538,7 @@ body:has(.studio-shell .image-higgsfield-mode),
   bottom: 0 !important;
   left: var(--studio-sidebar-width, 70px) !important;
   z-index: 24 !important;
-  width: min(252px, calc(100vw - 118px)) !important;
+  width: var(--agent-session-panel-width, min(252px, calc(100vw - 118px))) !important;
   height: 100dvh !important;
   min-height: 0 !important;
   display: grid !important;
@@ -37746,8 +37758,12 @@ body:has(.studio-shell .image-higgsfield-mode),
 }
 
 @media (max-width: 1180px) {
+  .studio-shell:has(.agent-page) {
+    --agent-session-panel-width: 232px;
+  }
+
   .studio-shell .agent-chat-shell.agent-page-panel .agent-chat-toolbar.agent-session-sidebar {
-    width: 232px !important;
+    width: var(--agent-session-panel-width, 232px) !important;
     left: 70px !important;
   }
 
