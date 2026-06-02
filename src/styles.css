@@ -36420,3 +36420,221 @@ body:has(.studio-shell .image-higgsfield-mode),
   background: #eadcf1;
   pointer-events: none;
 }
+
+/* Final visible toolbar diet: make the composer controls read as a compact
+   parameter strip, not a row of oversized hero buttons. */
+.studio-shell .image-higgsfield-mode > .image-generate-console,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) {
+  --image-toolbar-control-height: 36px !important;
+  --image-toolbar-control-radius: 14px !important;
+  --image-toolbar-copy: #2a0633 !important;
+  --image-toolbar-muted: rgba(112, 64, 146, 0.68) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-tools,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-console-tools,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools {
+  width: fit-content !important;
+  max-width: 100% !important;
+  grid-template-columns: 220px 38px 84px 84px 100px !important;
+  align-items: center !important;
+  gap: 7px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-picker,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-model-picker,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker {
+  width: 220px !important;
+  min-width: 220px !important;
+  max-width: 220px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-prompt-enhance,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-prompt-enhance,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance {
+  width: 38px !important;
+  min-width: 38px !important;
+  max-width: 38px !important;
+  padding: 0 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-aspect-ratio-menu,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-resolution-menu,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu {
+  width: 84px !important;
+  min-width: 84px !important;
+  max-width: 84px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-count-stepper,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-count-stepper,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper {
+  width: 100px !important;
+  min-width: 100px !important;
+  max-width: 100px !important;
+  grid-template-columns: 28px minmax(0, 1fr) 28px !important;
+  padding: 0 3px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-picker,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-prompt-enhance,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-count-stepper,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-picker summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-model-picker,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-prompt-enhance,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-aspect-ratio-menu,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-resolution-menu,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-count-stepper,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-model-picker summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-aspect-ratio-menu summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-resolution-menu summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu summary {
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  border-radius: 14px !important;
+  overflow: visible !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-picker summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-model-picker summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker summary {
+  grid-template-columns: 22px minmax(0, 1fr) 12px !important;
+  gap: 7px !important;
+  padding: 0 10px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-current-icon,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-model-current-icon,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-current-icon {
+  width: 22px !important;
+  min-width: 22px !important;
+  height: 22px !important;
+  min-height: 22px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-current-icon .provider-logo,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-model-current-icon .provider-logo,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-current-icon .provider-logo {
+  width: 16px !important;
+  min-width: 16px !important;
+  height: 16px !important;
+  min-height: 16px !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-current-text b,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-model-current-text b,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-current-text b {
+  font-size: 15px !important;
+  font-weight: 850 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-prompt-enhance svg,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-prompt-enhance i,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-prompt-enhance svg,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-prompt-enhance i,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance svg,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance i {
+  width: 16px !important;
+  min-width: 16px !important;
+  height: 16px !important;
+  min-height: 16px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-aspect-ratio-menu summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-resolution-menu summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu summary {
+  grid-template-columns: 16px minmax(0, 1fr) 12px !important;
+  gap: 5px !important;
+  padding: 0 8px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu summary b,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu summary b,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-aspect-ratio-menu summary b,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-resolution-menu summary b,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu summary b,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu summary b {
+  font-size: 16px !important;
+  font-weight: 850 !important;
+  line-height: 1.18 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu summary .aspect-ratio-glyph,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu summary svg:first-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-aspect-ratio-menu summary .aspect-ratio-glyph,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-resolution-menu summary svg:first-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu summary .aspect-ratio-glyph,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu summary svg:first-child {
+  width: 16px !important;
+  min-width: 16px !important;
+  height: 16px !important;
+  min-height: 16px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-model-picker summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-model-picker summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-aspect-ratio-menu summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-resolution-menu summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu summary > svg:last-child,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu summary > svg:last-child {
+  width: 11px !important;
+  min-width: 11px !important;
+  height: 11px !important;
+  min-height: 11px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-count-stepper button,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-count-stepper button,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper button {
+  width: 28px !important;
+  min-width: 28px !important;
+  max-width: 28px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  border-radius: 10px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-count-stepper span b,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-count-stepper span b,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper span b {
+  font-size: 15px !important;
+  font-weight: 850 !important;
+  line-height: 1.18 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-count-stepper span small,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-count-stepper span small,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper span small {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  line-height: 1.18 !important;
+}
