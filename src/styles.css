@@ -40948,3 +40948,56 @@ body:has(.studio-shell .video-prompt-extractor-page),
   letter-spacing: 0 !important;
   text-overflow: clip !important;
 }
+
+/* Open-sidebar reference grid lock: the expanded sidebar gives this lane 124px,
+   so keep both tiles at 58px instead of inheriting the wider 80px global lock. */
+.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references,
+.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact).is-hover-expanded .image-console-references,
+.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-open-menu .image-console-references,
+.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt .image-console-references {
+  box-sizing: border-box !important;
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  justify-self: stretch !important;
+  align-self: center !important;
+  width: 124px !important;
+  min-width: 124px !important;
+  max-width: 124px !important;
+  height: 64px !important;
+  min-height: 64px !important;
+  max-height: 64px !important;
+  grid-auto-columns: 58px !important;
+  grid-template-columns: 58px 58px !important;
+  grid-template-rows: 64px !important;
+  gap: 8px !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+}
+
+.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references .image-reference-thumb,
+.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references .image-reference-thumb.is-empty-ref,
+.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references .image-reference-thumb.has-ref {
+  width: 58px !important;
+  min-width: 58px !important;
+  max-width: 58px !important;
+  height: 64px !important;
+  min-height: 64px !important;
+  max-height: 64px !important;
+  border-radius: 14px !important;
+}
+
+.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references .image-reference-thumb.is-empty-ref .image-reference-empty-icon,
+.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references .image-reference-thumb.is-empty-ref:hover .image-reference-empty-icon,
+.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references .image-reference-thumb.is-empty-ref:focus-visible .image-reference-empty-icon {
+  width: 36px !important;
+  min-width: 36px !important;
+  max-width: 36px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+}
+
+.studio-shell:not(.sidebar-collapsed) .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references .image-reference-thumb.is-empty-ref .image-reference-empty-icon svg {
+  width: 34px !important;
+  height: 34px !important;
+}
