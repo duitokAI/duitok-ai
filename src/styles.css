@@ -40146,6 +40146,33 @@ body:has(.studio-shell .video-prompt-extractor-page),
   max-width: 188px !important;
 }
 
+/* Prompt row clipping lock: long textarea content must stay inside the prompt
+   capsule and never paint over the controls row below it. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-prompt,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).is-hover-expanded .image-console-prompt,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-open-menu .image-console-prompt,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt .image-console-prompt {
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  align-items: center !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-prompt textarea,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).is-hover-expanded .image-console-prompt textarea,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-open-menu .image-console-prompt textarea,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt .image-console-prompt textarea {
+  box-sizing: border-box !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  max-height: 42px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  overflow: hidden !important;
+  resize: none !important;
+  line-height: 42px !important;
+  overscroll-behavior: contain !important;
+}
+
 /* Result wall zoom control lock: keep the preview-size control visible when the
    sidebar is expanded. It belongs to the canvas edge, not the tab row. */
 .studio-shell .image-higgsfield-mode > .studio-wall-zoom-control {
