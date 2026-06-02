@@ -37504,9 +37504,9 @@ body:has(.studio-shell .image-higgsfield-mode),
   top: 16px !important;
   right: auto !important;
   bottom: 18px !important;
-  left: max(64px, calc(50vw - 936px)) !important;
+  left: max(84px, calc(50vw - 936px)) !important;
   z-index: 24 !important;
-  width: min(310px, calc(100vw - 92px)) !important;
+  width: min(252px, calc(100vw - 118px)) !important;
   height: auto !important;
   min-height: 0 !important;
   display: grid !important;
@@ -37722,8 +37722,8 @@ body:has(.studio-shell .image-higgsfield-mode),
 
 @media (max-width: 1180px) {
   .studio-shell .agent-chat-shell.agent-page-panel .agent-chat-toolbar.agent-session-sidebar {
-    width: 260px !important;
-    left: 56px !important;
+    width: 232px !important;
+    left: 82px !important;
   }
 }
 
@@ -38749,4 +38749,25 @@ body:has(.studio-shell .video-prompt-extractor-page),
   box-shadow:
     0 12px 28px rgba(245, 82, 112, 0.24),
     inset 0 1px 0 rgba(255, 255, 255, 0.24) !important;
+}
+
+/* Clone Prompt empty scroll lock: keep the full Image Page canvas height so the
+   fixed topbar does not cover the dock and the page remains scrollable. */
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page.is-empty) {
+  min-height: 100dvh !important;
+  padding: var(--project-fixed-tabs-height) 0 56px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+.studio-shell .canvas-card:has(.video-prompt-extractor-page.is-empty),
+.studio-shell .studio-workbench-card:has(.video-prompt-extractor-page.is-empty),
+.studio-shell .studio-step-panel:has(.video-prompt-extractor-page.is-empty) {
+  min-height: calc(100dvh - var(--project-fixed-tabs-height)) !important;
+  overflow: visible !important;
+}
+
+.studio-shell .video-prompt-extractor-page.is-empty {
+  min-height: calc(100dvh - var(--project-fixed-tabs-height) - 56px) !important;
+  padding: clamp(18px, 2vw, 34px) 0 72px !important;
 }
