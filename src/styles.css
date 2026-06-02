@@ -6516,14 +6516,16 @@ button:disabled [data-lucide="loader-circle"] {
 }
 
 .attachment-picker-backdrop {
+  --attachment-picker-top-gap: clamp(18px, 4vh, 42px);
+  --attachment-picker-bottom-clearance: clamp(18px, 4vh, 42px);
   background: rgba(0, 0, 0, 0.68);
-  padding: clamp(18px, 4vh, 42px) clamp(18px, 4vw, 56px);
+  padding: var(--attachment-picker-top-gap) clamp(18px, 4vw, 56px) var(--attachment-picker-bottom-clearance);
   overflow: hidden;
 }
 
 .attachment-picker-modal {
   width: min(72vw, 960px);
-  max-height: min(74vh, 620px);
+  max-height: min(74vh, 620px, calc(100dvh - var(--attachment-picker-top-gap) - var(--attachment-picker-bottom-clearance)));
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   overflow: hidden;
@@ -6532,6 +6534,21 @@ button:disabled [data-lucide="loader-circle"] {
   background: #050505;
   color: #f8f8f8;
   box-shadow: 0 22px 70px rgba(0, 0, 0, 0.42);
+}
+
+.studio-shell:has(.image-higgsfield-mode) .attachment-picker-backdrop {
+  --attachment-picker-top-gap: clamp(44px, 7vh, 86px);
+  --attachment-picker-bottom-clearance: 168px;
+  align-items: start;
+  justify-items: center;
+}
+
+.studio-shell:has(.image-higgsfield-mode > .image-generate-console.has-long-prompt) .attachment-picker-backdrop {
+  --attachment-picker-bottom-clearance: 260px;
+}
+
+.studio-shell:has(.image-higgsfield-mode) .attachment-picker-modal {
+  max-height: min(620px, calc(100dvh - var(--attachment-picker-top-gap) - var(--attachment-picker-bottom-clearance)));
 }
 
 .attachment-picker-body {
