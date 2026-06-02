@@ -35052,6 +35052,33 @@ label {
   line-height: 1 !important;
 }
 
+/* Image wall scroll floor: the sticky composer is already in normal flow, so
+   only the grid needs a small end gutter. Larger stacked safe areas create an
+   empty lavender screen after the last media row. */
+.studio-shell .image-canvas-studio.image-higgsfield-mode,
+.studio-shell .image-higgsfield-mode {
+  --image-chatbox-safe-bottom: clamp(18px, 2.4vh, 34px) !important;
+  padding-bottom: max(env(safe-area-inset-bottom), 0px) !important;
+  scroll-padding-bottom: var(--image-chatbox-safe-bottom) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall {
+  padding-bottom: 0 !important;
+  scroll-padding-bottom: var(--image-chatbox-safe-bottom) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid {
+  padding-bottom: var(--image-chatbox-safe-bottom) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid::after {
+  display: none !important;
+  content: none !important;
+  flex-basis: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 /* Final quality dropdown: text rows only, no option frames. */
 .studio-shell .image-higgsfield-mode .image-resolution-options .image-resolution-option,
 .studio-shell .image-higgsfield-mode .image-resolution-options .image-resolution-option:hover,
