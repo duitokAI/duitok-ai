@@ -38714,6 +38714,9 @@ body:has(.studio-shell .video-prompt-extractor-page),
 
 .studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-main {
   min-width: 0 !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
   overflow: hidden !important;
 }
 
@@ -38721,14 +38724,17 @@ body:has(.studio-shell .video-prompt-extractor-page),
   position: static !important;
   width: 100% !important;
   max-width: 100% !important;
-  min-height: 0 !important;
-  display: block !important;
+  height: 22px !important;
+  min-height: 22px !important;
+  max-height: 22px !important;
+  display: flex !important;
+  align-items: center !important;
   overflow: hidden !important;
   padding: 0 !important;
   color: #2a0633 !important;
   font-size: 15px !important;
   font-weight: 760 !important;
-  line-height: 1.18 !important;
+  line-height: 22px !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
 }
