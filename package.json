@@ -8,6 +8,7 @@
     "api": "node server.mjs",
     "build": "vite build",
     "check:agent3d": "node scripts/check-agent-3d-assets.mjs",
+    "check:agent-layout": "node scripts/check-agent-message-layout.mjs",
     "check:agent-smoke": "node scripts/test-agent-smoke.mjs",
     "check:chip": "node scripts/check-chip-config.mjs",
     "check:provider-leaks": "node scripts/check-provider-leaks.mjs",

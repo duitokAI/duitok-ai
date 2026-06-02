@@ -191,6 +191,13 @@ const state = {
   wizardBusy: false
 };
 
+const agentLayoutFixtureParam = "assistant-layout";
+const agentLayoutFixtureEnabled = () => {
+  const params = new URLSearchParams(window.location.search);
+  const localHost = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+  return params.get("agentFixture") === agentLayoutFixtureParam && (localHost || import.meta.env.MODE !== "production");
+};
+
 const creditsPerUsd = 1000;
 const usdPerRm = 0.21;
 
@@ -1345,6 +1352,10 @@ async function handleOAuthRedirect() {
 
 async function ensureStudioData() {
   if (state.db) return;
+  if (agentLayoutFixtureEnabled()) {
+    applyAgentLayoutFixture();
+    return;
+  }
   if (!state.user || !state.token) {
     window.history.replaceState({}, "", "/login");
     return;
@@ -1362,6 +1373,117 @@ async function ensureStudioData() {
   }
   state.projectId = state.db.projects[0]?.id;
   if (state.page === "dashboard" && shouldShowFirstGenerationWizard()) state.page = "wizard";
+}
+
+function applyAgentLayoutFixture() {
+  const now = new Date().toISOString();
+  const project = {
+    id: "fixture-project",
+    name: "Agent Layout Fixture",
+    niche: "TikTok Shop beauty",
+    product: "Bleu de Chanel 洁面啫喱",
+    audience: "想快速做 TikTok Shop 内容的新手卖家",
+    language: "中文",
+    tone: "清楚、直接、能执行",
+    results: [
+      {
+        id: "fixture-result-1",
+        type: "image",
+        title: "洁面啫喱产品图",
+        prompt: "Clean studio product hero image",
+        createdAt: now
+      }
+    ],
+    resultCount: 1,
+    createdAt: now,
+    updatedAt: now
+  };
+  state.user = {
+    id: "fixture-user",
+    email: "fixture@pokaya.local",
+    name: "Agent Fixture",
+    role: "admin",
+    billing: { credits: 83 }
+  };
+  state.db = {
+    currentUser: state.user,
+    projects: [project],
+    results: project.results,
+    attachments: [],
+    billing: {
+      plan: "Pokaya AI Pro",
+      status: "Active",
+      credits: 83,
+      nextBill: "2026-06-26",
+      invoices: []
+    },
+    usage: [],
+    creditLedger: [],
+    schedule: [
+      { id: "fixture-schedule-1", title: "洁面啫喱开箱", platform: "TikTok", time: "Tonight 8:00 PM", status: "Ready", caption: "测试固定 fixture 排期", hashtags: "#pokaya" },
+      { id: "fixture-schedule-2", title: "雪花秀卖点卡", platform: "TikTok", time: "Tomorrow 12:00 PM", status: "Draft", caption: "测试固定 fixture 排期", hashtags: "#beauty" },
+      { id: "fixture-schedule-3", title: "Chanel 对比内容", platform: "TikTok", time: "Friday 9:00 PM", status: "Draft", caption: "测试固定 fixture 排期", hashtags: "#skincare" }
+    ],
+    payments: [],
+    affiliate: {},
+    admin: { users: [], payments: [], projects: [project], apiCalls: [], totals: {} },
+    tiktok: { connections: [], publishes: [] }
+  };
+  state.projectId = project.id;
+  state.page = "agent";
+  state.lang = "zh";
+  state.agentBusy = false;
+  state.agentTyping = false;
+  state.agentQueue = [];
+  state.agentAttachments = [];
+  state.agentHistoryOpen = false;
+  state.agentDebugOpen = false;
+  state.agentMessages = agentLayoutFixtureMessages();
+}
+
+function agentLayoutFixtureMessages() {
+  return [
+    {
+      role: "assistant",
+      content: "你好！我是 Pokaya Agent，你在 Pokaya AI Studio 里的智能助手。\n\n我可以帮你做这些事情：研究趋势、创建内容方案、生成产品图和视频、制作周内容计划。\n\n目前你的工作区里有几个内容方向，像是 Bleu de Chanel 洁面啫喱、雪花秀等。你可以直接告诉我：今天先做哪一个产品，我会帮你整理下一步。",
+      agentRun: {
+        id: "fixture-run-completed",
+        status: "completed",
+        plan: [
+          { id: "understand", label: "理解需求", status: "completed", detail: "识别当前 workspace 的内容方向。" },
+          { id: "reply", label: "回复建议", status: "completed", detail: "整理用户可以直接执行的下一步。" }
+        ],
+        toolCards: []
+      }
+    },
+    {
+      role: "user",
+      content: "帮我看看今天该做什么"
+    },
+    {
+      role: "assistant",
+      content: "可以。我会先看当前项目、生成结果和排期，再给你一个最短可执行计划。\n\n建议今天先做：\n- 选一个主产品\n- 生成 1 张产品图\n- 写 3 个短视频开头\n- 把最好的结果排到今晚发布",
+      agentRun: {
+        id: "fixture-run-waiting",
+        status: "waiting_confirmation",
+        plan: [
+          { id: "understand", label: "理解需求", status: "completed" },
+          { id: "inspect", label: "检查 workspace", status: "completed" },
+          { id: "confirm", label: "等待确认", status: "waiting_confirmation", detail: "涉及生成素材前需要确认。" }
+        ],
+        confirmation: {
+          token: "fixture-confirm-token",
+          title: "确认生成产品图",
+          message: "这个动作会使用测试 fixture 的确认卡布局，不会真的扣 credit。",
+          impact: "生成 1 张产品图",
+          creditsRequired: 0.2,
+          creditBalance: 83,
+          toolName: "generate_project_output",
+          args: { model: "Fixture Image" }
+        }
+      }
+    }
+  ];
 }
 
 async function loadStudioState() {
@@ -8439,8 +8561,9 @@ function agentPage() {
 }
 
 function chatPanel() {
+  const fixtureActive = agentLayoutFixtureEnabled();
   return `
-    <section class="agent-panel agent-page-panel agent-chat-shell">
+    <section class="agent-panel agent-page-panel agent-chat-shell ${fixtureActive ? "agent-layout-fixture-active" : ""}" ${fixtureActive ? `data-agent-layout-fixture="${agentLayoutFixtureParam}"` : ""}>
       ${agentChatToolbar()}
       ${agentHistoryPanel()}
       ${agentDebugPanel()}
