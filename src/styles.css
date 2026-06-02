@@ -35159,3 +35159,52 @@ label {
   min-width: 0 !important;
   max-width: 82px !important;
 }
+
+/* Agent assistant row lock: keep the avatar in its own column so replies
+   cannot slide underneath it when the reply card frame is removed. */
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant,
+.studio-shell .agent-page-panel .agent-thread article.assistant {
+  display: grid !important;
+  grid-template-columns: 42px minmax(0, 1fr) !important;
+  align-items: start !important;
+  column-gap: 16px !important;
+  row-gap: 10px !important;
+  width: min(920px, 100%) !important;
+  max-width: min(920px, 100%) !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant > .agent-avatar-badge,
+.studio-shell .agent-page-panel .agent-thread article.assistant > .agent-avatar-badge {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  position: static !important;
+  flex: 0 0 42px !important;
+  width: 42px !important;
+  min-width: 42px !important;
+  height: 42px !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant > .agent-message,
+.studio-shell .agent-page-panel .agent-thread article.assistant > .agent-message,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant > .agent-run-card,
+.studio-shell .agent-page-panel .agent-thread article.assistant > .agent-run-card,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant > .agent-tool-cards,
+.studio-shell .agent-page-panel .agent-thread article.assistant > .agent-tool-cards,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant > .agent-generation-run-cards,
+.studio-shell .agent-page-panel .agent-thread article.assistant > .agent-generation-run-cards,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant > .agent-feedback-row,
+.studio-shell .agent-page-panel .agent-thread article.assistant > .agent-feedback-row {
+  grid-column: 2 !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.assistant > .agent-message,
+.studio-shell .agent-page-panel .agent-thread article.assistant > .agent-message {
+  padding-top: 2px !important;
+}
