@@ -37218,3 +37218,110 @@ body:has(.studio-shell .image-higgsfield-mode),
     0 18px 48px rgba(70, 16, 84, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.88) !important;
 }
+
+/* Studio tool tabs polish: keep the six creation modes readable over media. */
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .project-step-topbar,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .project-step-topbar {
+  height: 52px !important;
+  padding: 7px 12px !important;
+  background: linear-gradient(180deg, rgba(23, 7, 24, 0.78), rgba(23, 7, 24, 0.58)) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18) !important;
+  backdrop-filter: blur(16px) saturate(1.05) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .studio-top-step-tabs,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .studio-top-step-tabs {
+  display: grid !important;
+  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  align-items: center !important;
+  gap: 6px !important;
+  height: 100% !important;
+  padding: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: none !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .studio-top-step-tabs::-webkit-scrollbar,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .studio-top-step-tabs::-webkit-scrollbar {
+  display: none !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .step-tabs button,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .step-tabs button {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 36px !important;
+  height: 36px !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  padding: 0 10px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.045) !important;
+  box-shadow: none !important;
+  color: rgba(255, 255, 255, 0.68) !important;
+  font-size: 13px !important;
+  font-weight: 760 !important;
+  line-height: 1 !important;
+  text-shadow: none !important;
+  transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.16s ease !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .step-tabs button:not(:first-child),
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .step-tabs button:not(:first-child) {
+  border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .step-tabs button svg,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .step-tabs button svg {
+  width: 16px !important;
+  height: 16px !important;
+  flex: 0 0 auto !important;
+  opacity: 0.9 !important;
+  filter: none !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .step-tabs button span,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .step-tabs button span {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .step-tabs button:hover,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .step-tabs button:hover {
+  background: rgba(255, 255, 255, 0.09) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .step-tabs button.active,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .step-tabs button.active {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.24) !important;
+  color: #fff !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 8px 20px rgba(0, 0, 0, 0.14) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .step-tabs button.active svg,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .step-tabs button.active svg {
+  color: #e8b7ff !important;
+  opacity: 1 !important;
+}
+
+@media (max-width: 900px) {
+  .studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .studio-top-step-tabs,
+  .studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .studio-top-step-tabs {
+    display: flex !important;
+  }
+
+  .studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .step-tabs button,
+  .studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .step-tabs button {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 116px !important;
+  }
+}
