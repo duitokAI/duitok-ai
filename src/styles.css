@@ -31722,10 +31722,10 @@ label {
   right: 0;
   bottom: calc(100% + 10px);
   z-index: 6001;
-  width: min(390px, calc(100vw - 28px));
+  width: min(360px, calc(100vw - 28px));
   display: grid;
-  gap: 8px;
-  padding: 10px;
+  gap: 6px;
+  padding: 12px;
   border: 1px solid rgba(111, 28, 132, 0.12);
   border-radius: 22px;
   background:
@@ -31739,7 +31739,7 @@ label {
 }
 
 .studio-shell .image-resolution-menu-title {
-  padding: 0 2px 4px;
+  padding: 0 2px 6px;
   color: #2a0633;
   font-size: 13px;
   font-weight: 900;
@@ -31748,13 +31748,13 @@ label {
 
 .studio-shell .image-resolution-options button {
   width: 100%;
-  min-height: 70px;
+  min-height: 76px;
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr) 28px;
+  grid-template-columns: 34px minmax(0, 1fr) 22px;
   align-items: center;
-  gap: 12px;
-  border: 0;
-  border-radius: 18px;
+  gap: 11px;
+  border: 1px solid transparent;
+  border-radius: 16px;
   padding: 12px 14px;
   background: transparent;
   color: #2a0633;
@@ -31763,18 +31763,27 @@ label {
   cursor: pointer;
 }
 
-.studio-shell .image-resolution-options button:hover,
+.studio-shell .image-resolution-options button:hover {
+  border-color: rgba(111, 28, 132, 0.08);
+  background: rgba(255, 255, 255, 0.48);
+}
+
 .studio-shell .image-resolution-options button.active {
-  background: rgba(255, 255, 255, 0.78);
-  box-shadow: inset 0 0 0 1px rgba(111, 28, 132, 0.08);
+  border-color: rgba(111, 28, 132, 0.14);
+  background: rgba(255, 255, 255, 0.64);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.64),
+    0 10px 24px rgba(70, 16, 84, 0.06);
 }
 
 .studio-shell .image-resolution-option-icon {
-  width: 34px;
-  height: 34px;
+  width: 28px;
+  height: 28px;
   display: inline-grid;
   place-items: center;
   color: #b988dc;
+  background: transparent;
+  box-shadow: none;
 }
 
 .studio-shell .image-resolution-option-copy {
@@ -31787,19 +31796,19 @@ label {
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   color: #2a0633;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 950;
-  line-height: 1;
+  line-height: 1.05;
 }
 
 .studio-shell .image-resolution-option-copy em {
   border-radius: 999px;
-  padding: 3px 8px;
+  padding: 3px 7px;
   background: rgba(255, 49, 95, 0.1);
   color: #2a0633;
-  font-size: 12px;
+  font-size: 11px;
   font-style: normal;
   font-weight: 950;
   line-height: 1;
@@ -31807,22 +31816,29 @@ label {
 
 .studio-shell .image-resolution-option-copy small {
   min-width: 0;
-  overflow: hidden;
   color: rgba(42, 6, 51, 0.58);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 750;
-  line-height: 1.2;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.25;
+  white-space: normal;
 }
 
 .studio-shell .image-resolution-option-check {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
   opacity: 0;
   color: #b988dc;
 }
 
 .studio-shell .image-resolution-options button.active .image-resolution-option-check {
   opacity: 1;
+}
+
+.studio-shell .image-resolution-options button.active .image-resolution-option-icon,
+.studio-shell .image-resolution-options button.active .image-resolution-option-check {
+  color: #9c65cf;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper {

@@ -4585,9 +4585,9 @@ function imageGenerateConsole(p, selectedModel) {
   const aspectRatioOptions = ["9:16", "3:4", "2:3", "1:1", "4:3", "16:9", "3:2"];
   const selectedAspectRatio = aspectRatioOptions.includes(p.image.aspectRatio) ? p.image.aspectRatio : "9:16";
   const resolutionOptions = [
-    { value: "1K", title: "1k", description: "Fast preview for quick drafts", badge: "FAST" },
-    { value: "2K", title: "2k", description: "Balanced quality for daily creative work", badge: "DEFAULT" },
-    { value: "4K", title: "4k", description: "Best detail for polished final images", badge: "PRO" }
+    { value: "1K", title: "1k", description: "Fast draft preview", badge: "FAST" },
+    { value: "2K", title: "2k", description: "Balanced daily quality", badge: "DEFAULT" },
+    { value: "4K", title: "4k", description: "Best detail for final output", badge: "PRO" }
   ];
   const selectedResolution = ["1K", "2K", "4K"].includes(String(p.image.resolution || "").toUpperCase())
     ? String(p.image.resolution).toUpperCase()
