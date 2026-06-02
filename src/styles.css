@@ -35407,3 +35407,21 @@ label {
   box-shadow: none !important;
   line-height: 1.18 !important;
 }
+
+/* Image wall bottom color lock: when the scroll floor reaches the document
+   edge, every ancestor should reveal the same canvas color instead of white. */
+html:has(.studio-shell .image-higgsfield-mode),
+body:has(.studio-shell .image-higgsfield-mode),
+#app:has(.studio-shell .image-higgsfield-mode),
+.studio-shell:has(.image-higgsfield-mode),
+.studio-shell .workspace:has(.image-higgsfield-mode),
+.studio-shell .canvas-card:has(.image-higgsfield-mode),
+.studio-shell .image-canvas-studio.image-higgsfield-mode,
+.studio-shell .image-higgsfield-mode,
+.studio-shell .image-higgsfield-mode > .studio-result-wall {
+  background:
+    radial-gradient(circle at 14% 0%, rgba(255, 255, 255, 0.98), transparent 34%),
+    radial-gradient(circle at 88% 4%, rgba(255, 90, 145, 0.08), transparent 32%),
+    linear-gradient(135deg, #fff8fc 0%, #f6edf9 52%, #eee2f4 100%) !important;
+  background-color: #eee2f4 !important;
+}
