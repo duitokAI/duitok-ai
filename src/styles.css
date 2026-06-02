@@ -38900,3 +38900,72 @@ body:has(.studio-shell .video-prompt-extractor-page),
   max-width: 200px !important;
   z-index: 5 !important;
 }
+
+/* Reference labels: show Avatar/Product text inside the boxes instead of a
+   clipped hover bubble. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb[data-reference-label]::after {
+  display: none !important;
+  content: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-prompt {
+  padding-right: 194px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references {
+  width: 168px !important;
+  min-width: 168px !important;
+  max-width: 168px !important;
+  height: 76px !important;
+  min-height: 76px !important;
+  max-height: 76px !important;
+  grid-template-columns: 80px 80px !important;
+  grid-template-rows: 76px !important;
+  gap: 8px !important;
+  margin: 0 8px 0 0 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb {
+  width: 80px !important;
+  min-width: 80px !important;
+  max-width: 80px !important;
+  height: 76px !important;
+  min-height: 76px !important;
+  max-height: 76px !important;
+  grid-template-rows: 42px 16px !important;
+  align-content: center !important;
+  gap: 4px !important;
+  padding: 7px 6px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb > span.image-reference-empty-icon,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb img,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb .attachment-placeholder {
+  grid-row: 1 !important;
+  justify-self: center !important;
+  align-self: center !important;
+  width: 38px !important;
+  height: 38px !important;
+  max-width: 38px !important;
+  max-height: 38px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb > div {
+  grid-row: 2 !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  display: block !important;
+  overflow: hidden !important;
+  text-align: center !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb b {
+  display: block !important;
+  overflow: hidden !important;
+  color: #2a0633 !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  line-height: 14px !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
