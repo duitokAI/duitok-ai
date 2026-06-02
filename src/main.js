@@ -2041,7 +2041,7 @@ function handleDelegatedPointerDown(event) {
 }
 
 function handleDelegatedClick(event) {
-  const target = event.target.closest?.("[data-page],[data-step],[data-step-open],[data-project],[data-studio-wall-more],[data-result-select],[data-bulk-result-action],[data-result-action],[data-result-preview],[data-result-prompt],[data-image-canvas-result],[data-image-model-option],[data-generation-cancel],[data-generation-retry],[data-generation-edit]");
+  const target = event.target.closest?.("[data-page],[data-step],[data-step-open],[data-project],[data-studio-wall-more],[data-result-select],[data-bulk-result-action],[data-result-action],[data-result-preview],[data-result-prompt],[data-image-canvas-result],[data-image-model-option],[data-generation-cancel],[data-generation-retry],[data-generation-edit],[data-settings-section]");
   if (!target || !app.contains(target)) return;
 
   if (target.dataset.page) return scheduleNavigation({ page: target.dataset.page });
@@ -2062,6 +2062,11 @@ function handleDelegatedClick(event) {
     stabilizeImageConsoleExpansion(1000);
     target.closest("details")?.removeAttribute("open");
     return saveImageModelQuick(target.dataset.imageModelOption, target);
+  }
+  if (target.dataset.settingsSection) {
+    const section = document.getElementById(`settings-section-${target.dataset.settingsSection}`);
+    target.closest(".settings-modal-nav")?.querySelectorAll("button[data-settings-section]").forEach((button) => button.classList.toggle("active", button === target));
+    return section?.scrollIntoView({ block: "start", behavior: "smooth" });
   }
   if (target.dataset.generationCancel) return cancelGenerationJob(target.dataset.generationCancel);
   if (target.dataset.generationRetry) return retryGenerationJob(target.dataset.generationRetry);
@@ -3651,7 +3656,7 @@ function sidebarAccountPanel() {
         <div><b>${esc(user.name || "Pokaya User")}</b><small>${esc(user.email || "")}</small></div>
       </div>
       <div class="sidebar-account-actions">
-        <button type="button" class="${state.page === "settings" ? "active" : ""}" data-page="settings">${icon("settings", 18)} ${t("settings")}</button>
+        <button type="button" class="${state.modal === "settings" ? "active" : ""}" data-action="open-settings">${icon("settings", 18)} ${t("settings")}</button>
         <button type="button" data-action="logout">${icon("log-out", 18)} ${t("logout")}</button>
       </div>
     </section>`;
@@ -6284,10 +6289,9 @@ function accountPage() {
     affiliate: [t("affiliate"), t("accountAffiliateSubtitle"), affiliateDashboard()],
     usage: [t("usage"), t("accountUsageSubtitle"), usagePage()],
     autopost: [t("autopost"), t("accountAutopostSubtitle"), autoPostPage()],
-    whatsapp: [t("whatsapp"), t("accountWhatsappSubtitle"), `<button class="gold-button" data-action="open-whatsapp">${icon("message-circle")} ${t("openWhatsappGroup")}</button>`],
-    settings: [t("settings"), t("accountSettingsSubtitle"), settingsPage()]
+    whatsapp: [t("whatsapp"), t("accountWhatsappSubtitle"), `<button class="gold-button" data-action="open-whatsapp">${icon("message-circle")} ${t("openWhatsappGroup")}</button>`]
   };
-  const [title, subtitle, body] = map[state.page];
+  const [title, subtitle, body] = map[state.page] || map.usage;
   return `<header class="project-head"><div><p class="folder-label">${icon("folder", 18)} ${t("publicTools")}</p><h1>${title}</h1><p class="subtitle">${subtitle}</p></div></header><section class="canvas-card slim">${body}</section>`;
 }
 
@@ -6615,7 +6619,7 @@ function settingsPage() {
   const user = currentAccountUser();
   return `
     <section class="settings-page">
-      <form class="settings-card" data-form="account-profile">
+      <form class="settings-card" id="settings-section-profile" data-form="account-profile">
         <header>
           <span>${icon("user-round", 30)}</span>
           <div><h2>${t("profile")}</h2><p>${t("profileSubtitle")}</p></div>
@@ -6626,7 +6630,7 @@ function settingsPage() {
         </div>
         <button class="gold-button" type="submit">${icon("save", 18)} ${t("saveProfile")}</button>
       </form>
-      <form class="settings-card whatsapp-settings-card" data-form="account-whatsapp">
+      <form class="settings-card whatsapp-settings-card" id="settings-section-whatsapp" data-form="account-whatsapp">
         <header>
           <span>${icon("message-circle", 30)}</span>
           <div><h2>${t("whatsappSupport")}</h2><p>${t("whatsappSettingsSubtitle")}</p></div>
@@ -6634,7 +6638,7 @@ function settingsPage() {
         <label>${t("whatsappNumber")}<input name="phone" value="${esc(user.phone || "")}" placeholder="+60123456789" autocomplete="tel"></label>
         <button class="gold-button" type="submit">${t("saveWhatsapp")}</button>
       </form>
-      <form class="settings-card password-settings-card" data-form="account-password">
+      <form class="settings-card password-settings-card" id="settings-section-password" data-form="account-password">
         <header>
           <span>${icon("lock-keyhole", 30)}</span>
           <div><h2>${t("changePassword")}</h2><p>${t("changePasswordSubtitle")}</p></div>
@@ -6830,6 +6834,7 @@ function modal() {
   if (state.modal === "deleteResult") return deleteResultModal();
   if (state.modal === "bulkDeleteResults") return bulkDeleteResultModal();
   if (state.modal === "agentConfirm") return agentConfirmModal();
+  if (state.modal === "settings") return settingsModal();
   const title = { newProject: t("createProject"), renameProject: t("renameProject"), deleteProject: t("deleteProject"), register: t("choosePlan"), sop: t("sopImage"), export: t("exportReady"), support: t("supportTitle") }[state.modal];
   const body = {
     newProject: `<form data-form="project"><label>${t("project")}<input name="name" placeholder="Project ${(state.db?.projects.length || 0) + 1}" required></label><button class="gold-button" type="submit">${icon("plus")} ${t("newProject")}</button></form>`,
@@ -6841,6 +6846,28 @@ function modal() {
     support: `<form data-form="support" class="support-form"><label>${t("supportMessage")}<textarea name="message" placeholder="${esc(t("supportPlaceholder"))}" required></textarea></label><button class="gold-button" type="submit">${icon("send")} ${t("supportTicket")}</button></form>`
   }[state.modal];
   return `<div class="modal-backdrop" data-action="close-modal"><section class="modal"><button class="icon-only close" data-action="close-modal">${icon("x")}</button><p class="folder-label">${mascotIcon("label-mascot-icon")} Pokaya AI</p><h2>${title}</h2>${body}</section></div>`;
+}
+
+function settingsModal() {
+  return `<div class="modal-backdrop settings-modal-backdrop" data-action="close-modal">
+    <section class="settings-modal" role="dialog" aria-modal="true" aria-label="${esc(t("settings"))}">
+      <aside class="settings-modal-nav" aria-label="${esc(t("settings"))}">
+        <button class="settings-modal-close" type="button" data-action="close-modal" aria-label="Close">${icon("x", 28)}</button>
+        <button class="active" type="button" data-settings-section="profile">${icon("user-round", 22)} <span>${t("profile")}</span></button>
+        <button type="button" data-settings-section="whatsapp">${icon("message-circle", 22)} <span>${t("whatsappSupport")}</span></button>
+        <button type="button" data-settings-section="password">${icon("lock-keyhole", 22)} <span>${t("changePassword")}</span></button>
+      </aside>
+      <div class="settings-modal-main">
+        <header class="settings-modal-head">
+          <h2>${t("settings")}</h2>
+          <p>${t("accountSettingsSubtitle")}</p>
+        </header>
+        <div class="settings-modal-scroll">
+          ${settingsPage()}
+        </div>
+      </div>
+    </section>
+  </div>`;
 }
 
 function ugcPromptBuilderModal() {
@@ -10011,6 +10038,7 @@ async function action(event, name) {
   if (name === "sop") return set({ page: "sop", sopTopic: state.page === "project" ? state.step : "dashboard", modal: null });
   if (name === "register") return set({ modal: "register" });
   if (name === "support") return window.open(supportWhatsappUrl, "_blank", "noopener,noreferrer");
+  if (name === "open-settings") return set({ modal: "settings" });
   if (name === "clear-image-reference") {
     event.preventDefault();
     event.stopPropagation();
