@@ -37113,3 +37113,35 @@ body:has(.studio-shell .image-higgsfield-mode),
   background: transparent !important;
   background-color: transparent !important;
 }
+
+/* Final Agent top white-band lock: the hidden toolbar must not reserve space.
+   Keep this at the end so older Agent and density overrides cannot restore the
+   64px toolbar row or large thread top padding. */
+.studio-shell .agent-chat-shell.agent-page-panel,
+.studio-shell .agent-chat-shell.agent-page-panel.agent-layout-fixture-active {
+  grid-template-rows: minmax(0, 1fr) auto !important;
+  background: transparent !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-chat-toolbar,
+.studio-shell .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-chat-toolbar {
+  display: none !important;
+  grid-row: auto !important;
+  min-height: 0 !important;
+  height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread,
+.studio-shell .agent-page-panel .agent-thread,
+.studio-shell .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-thread {
+  grid-row: 1 !important;
+  padding-top: max(8px, env(safe-area-inset-top)) !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-form,
+.studio-shell .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-form {
+  grid-row: 2 !important;
+}
