@@ -34942,3 +34942,39 @@ label {
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper span small {
   font-size: clamp(13px, 0.9vw, 17px) !important;
 }
+
+/* Absolute final quality menu reset: text only, no row frames. */
+.studio-shell .image-higgsfield-mode .image-resolution-options button,
+.studio-shell .image-higgsfield-mode .image-resolution-options button:hover,
+.studio-shell .image-higgsfield-mode .image-resolution-options button:focus,
+.studio-shell .image-higgsfield-mode .image-resolution-options button:focus-visible,
+.studio-shell .image-higgsfield-mode .image-resolution-options button.active,
+.studio-shell .image-higgsfield-mode .image-resolution-options button[aria-selected="true"] {
+  grid-template-columns: minmax(0, 1fr) !important;
+  border: 0 !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  padding: 10px 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .image-higgsfield-mode .image-resolution-options button::before,
+.studio-shell .image-higgsfield-mode .image-resolution-options button::after,
+.studio-shell .image-higgsfield-mode .image-resolution-option-icon,
+.studio-shell .image-higgsfield-mode .image-resolution-option-check {
+  display: none !important;
+  content: none !important;
+}
+
+.studio-shell .image-higgsfield-mode .image-resolution-option-copy,
+.studio-shell .image-higgsfield-mode .image-resolution-option-copy b,
+.studio-shell .image-higgsfield-mode .image-resolution-option-copy small,
+.studio-shell .image-higgsfield-mode .image-resolution-option-copy em {
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
