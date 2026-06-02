@@ -4688,7 +4688,7 @@ function imageGenerateConsole(p, selectedModel) {
       <div class="image-console-tools">
         <div class="image-model-enhance-group">
           ${imageModelPicker(selectedModel)}
-        <button class="image-prompt-enhance ${state.promptAdvancedEnabled ? "is-active" : ""}" type="button" data-action="toggle-prompt-advanced" aria-label="${esc(enhanceLabel)}" aria-pressed="${state.promptAdvancedEnabled ? "true" : "false"}" title="${esc(enhanceLabel)}" ${state.promptAdvancedBusy ? "disabled" : ""}>${icon("wand-sparkles", 18)}</button>
+        <button class="image-prompt-enhance ${state.promptAdvancedEnabled ? "is-active" : ""}" type="button" data-action="toggle-prompt-advanced" aria-label="${esc(enhanceLabel)}" aria-pressed="${state.promptAdvancedEnabled ? "true" : "false"}" title="${esc(enhanceLabel)}" ${state.promptAdvancedBusy ? "disabled" : ""}>${icon("wand", 17)}</button>
         </div>
         ${imageAspectRatioPicker(selectedAspectRatio, aspectRatioOptions)}
         ${imageResolutionPicker(selectedResolution, resolutionOptions)}
