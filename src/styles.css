@@ -30289,6 +30289,10 @@ label {
   gap: 0 !important;
 }
 
+.studio-shell .image-higgsfield-mode > .image-generate-console {
+  margin-top: 0 !important;
+}
+
 /* Image count control: keep the - / number / + cells inside the pill at every width. */
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools {
   grid-template-columns:
