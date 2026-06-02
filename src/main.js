@@ -6239,14 +6239,16 @@ function resultPreview(item, options = {}) {
     if (options.clickable) return `<button type="button" class="result-preview-trigger" data-result-preview="${esc(item.id)}" aria-label="Open full preview">${visual}</button>`;
     return visual;
   }
-  const imageSrc = item.imageUrl ? `/api/media/result/${encodeURIComponent(item.id)}/image?token=${token}` : "";
+  const imageBase = item.imageUrl ? `/api/media/result/${encodeURIComponent(item.id)}/image?token=${token}` : "";
+  const imageSrc = imageBase ? (options.wall ? `${imageBase}&thumb=1&w=${studioWallThumbnailWidth()}` : imageBase) : "";
+  const imageSrcset = options.wall && imageBase ? ` srcset="${[640, 960, 1280].map((width) => `${imageBase}&thumb=1&w=${width} ${width}w`).join(", ")}" sizes="${studioWallImageSizes()}"` : "";
   const videoSrc = item.videoUrl ? `/api/media/result/${encodeURIComponent(item.id)}/video?token=${token}` : "";
   const imageError = "this.replaceWith(Object.assign(document.createElement('div'),{className:'result-media-error',textContent:'图片保存失败，请联系客服处理'}))";
   const ratioSync = mediaRatioSyncScript();
   const eagerMedia = Boolean(options.full || options.priority);
   const imagePriority = options.full || options.priority ? "high" : options.wall ? "auto" : "low";
   const imageDecoding = options.full ? "sync" : "async";
-  const image = imageSrc ? `<img class="result-image" src="${imageSrc}" alt="${esc(item.title)}" loading="${eagerMedia ? "eager" : "lazy"}" decoding="${imageDecoding}" fetchpriority="${imagePriority}" draggable="false" onload="${esc(ratioSync)}" onerror="${esc(imageError)}">` : "";
+  const image = imageSrc ? `<img class="result-image" src="${imageSrc}"${imageSrcset} alt="${esc(item.title)}" loading="${eagerMedia ? "eager" : "lazy"}" decoding="${imageDecoding}" fetchpriority="${imagePriority}" draggable="false" onload="${esc(ratioSync)}" onerror="${esc(imageError)}">` : "";
   const videoPreload = eagerMedia ? "metadata" : "none";
   const video = videoSrc ? `<div class="result-video-shell"><video class="result-video" src="${videoSrc}" preload="${videoPreload}" playsinline onloadedmetadata="${esc(ratioSync)}"></video><button type="button" class="result-play-button" data-video-play="${esc(item.id)}">${icon("play", 26)}<span>点击播放</span></button></div>` : "";
   const videoPoster = videoSrc ? `<div class="result-video-shell result-video-poster" aria-hidden="true"><span class="result-video-poster-icon">${icon("video", 30)}</span><span class="result-play-button">${icon("play", 26)}<span>点击查看</span></span></div>` : "";
@@ -6260,9 +6262,14 @@ function resultPreview(item, options = {}) {
 
 function studioWallThumbnailWidth() {
   const column = studioWallZoomColumn();
-  if (column <= 220) return 360;
-  if (column <= 460) return 640;
-  return 960;
+  if (column <= 220) return 640;
+  if (column <= 460) return 960;
+  return 1280;
+}
+
+function studioWallImageSizes() {
+  const column = studioWallZoomColumn();
+  return `(max-width: 760px) 100vw, ${Math.min(1280, Math.max(320, column))}px`;
 }
 
 function visualCardPreview(card = {}) {
