@@ -39231,3 +39231,28 @@ body:has(.studio-shell .video-prompt-extractor-page),
   animation: download-action-spin 680ms linear infinite !important;
   pointer-events: none !important;
 }
+
+/* Download spinner center lock: keep the loading ring visually centered inside
+   every action button, including focused vertical toolbars. */
+.studio-shell button[data-result-action="download"].is-working {
+  display: grid !important;
+  place-items: center !important;
+  overflow: hidden !important;
+}
+
+.studio-shell button[data-result-action="download"].is-working::before {
+  left: 0 !important;
+  right: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  width: 18px !important;
+  height: 18px !important;
+  margin: auto !important;
+  transform-origin: center center !important;
+}
+
+.studio-shell .studio-wall-actions button[data-result-action="download"].is-working::before,
+.studio-shell .agent-generation-result-actions button[data-result-action="download"].is-working::before {
+  width: 17px !important;
+  height: 17px !important;
+}
