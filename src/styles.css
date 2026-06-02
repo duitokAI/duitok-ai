@@ -37798,3 +37798,64 @@ body:has(.studio-shell .video-prompt-extractor-page),
   max-height: var(--image-toolbar-control-height) !important;
   margin: 0 !important;
 }
+
+/* Studio topbar size lock: tab active state must never resize the bar. */
+.studio-shell .workspace:has(.step-tabs) .project-step-topbar,
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .project-step-topbar,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .project-step-topbar {
+  box-sizing: border-box !important;
+  height: 58px !important;
+  min-height: 58px !important;
+  max-height: 58px !important;
+  padding: 7px 16px !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .studio-top-step-tabs,
+.studio-shell .workspace:has(.step-tabs) .step-tabs,
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .studio-top-step-tabs,
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .step-tabs,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .studio-top-step-tabs,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .step-tabs {
+  box-sizing: border-box !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  align-items: center !important;
+  overflow-y: hidden !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .step-tabs button,
+.studio-shell .workspace:has(.step-tabs) .step-tabs button:hover,
+.studio-shell .workspace:has(.step-tabs) .step-tabs button.active,
+.studio-shell .workspace:has(.step-tabs) .step-tabs button:focus,
+.studio-shell .workspace:has(.step-tabs) .step-tabs button:focus-visible,
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .step-tabs button,
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .step-tabs button:hover,
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .step-tabs button.active,
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .step-tabs button:focus,
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .step-tabs button:focus-visible,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .step-tabs button,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .step-tabs button:hover,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .step-tabs button.active,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .step-tabs button:focus,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .step-tabs button:focus-visible {
+  box-sizing: border-box !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  max-height: 42px !important;
+  padding: 0 14px !important;
+  border-width: 1px !important;
+  border-style: solid !important;
+  border-radius: 14px !important;
+  font-size: clamp(13px, 0.84vw, 15px) !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+  outline-offset: -2px !important;
+  transform: none !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .step-tabs button.active {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+}
