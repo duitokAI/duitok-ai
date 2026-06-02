@@ -33988,3 +33988,39 @@ label {
   font-size: 12.5px !important;
   line-height: 1 !important;
 }
+
+/* Compact composer summary mask fix: keep hidden prompt controls from drawing
+   over the one-line summary text. */
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-main {
+  isolation: isolate !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-compact-summary {
+  z-index: 3 !important;
+  right: 20px !important;
+  left: 32px !important;
+  width: auto !important;
+  display: block !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-prompt,
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-prompt-insert,
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-prompt textarea {
+  z-index: 1 !important;
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-prompt-insert {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-compact .image-console-prompt textarea {
+  color: transparent !important;
+  caret-color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+}
