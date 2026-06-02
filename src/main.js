@@ -4630,7 +4630,7 @@ function imageGenerateConsole(p, selectedModel) {
 
 function imageResolutionPicker(selectedResolution, options = []) {
   const selected = options.find((item) => item.value === selectedResolution) || options[1] || options[0];
-  return `<details class="image-resolution-select image-resolution-menu" title="Select image resolution">
+  return `<details class="image-resolution-select image-resolution-menu">
     <summary aria-label="Select quality">
       ${icon("gem", 15)}
       <b data-resolution-current>${esc(selected?.title || "2k")}</b>
