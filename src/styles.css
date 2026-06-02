@@ -37206,3 +37206,15 @@ body:has(.studio-shell .image-higgsfield-mode),
   margin: 0 !important;
   transform-origin: center !important;
 }
+
+/* Image composer shadow polish: keep the control floating, but avoid a hard
+   horizontal band under the rounded panel on pale backgrounds. */
+.studio-shell .image-higgsfield-mode > .image-generate-console,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) {
+  border-color: rgba(111, 28, 132, 0.1) !important;
+  border-bottom-color: rgba(111, 28, 132, 0.05) !important;
+  box-shadow:
+    0 18px 48px rgba(70, 16, 84, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88) !important;
+}
