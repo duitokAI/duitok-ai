@@ -14911,7 +14911,24 @@ label {
   background: rgba(0, 0, 0, 0.72) !important;
 }
 
+.studio-shell:has(.settings-modal-backdrop) > #modal-root {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483000 !important;
+  display: block !important;
+  pointer-events: none !important;
+}
+
+.studio-shell:has(.settings-modal-backdrop) > #modal-root .settings-modal-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483000 !important;
+  pointer-events: auto !important;
+}
+
 .settings-modal {
+  position: relative;
+  z-index: 1;
   width: min(1180px, calc(100vw - 36px));
   height: min(780px, calc(100dvh - 48px));
   min-height: 520px;
