@@ -4747,12 +4747,10 @@ function imageResolutionPicker(selectedResolution, options = []) {
       ${options.map((item) => {
         const active = item.value === selectedResolution;
         return `<button type="button" class="${active ? "active" : ""}" data-field-set="image.resolution" data-value="${esc(item.value)}" data-label="${esc(item.title)}" role="option" aria-selected="${active ? "true" : "false"}">
-          <span class="image-resolution-option-icon">${icon("gem", 18)}</span>
           <span class="image-resolution-option-copy">
             <b>${esc(item.title)} <em>${esc(item.badge)}</em></b>
             <small>${esc(item.description)}</small>
           </span>
-          <span class="image-resolution-option-check">${icon("check", 20)}</span>
         </button>`;
       }).join("")}
     </div>
