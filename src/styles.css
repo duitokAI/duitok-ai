@@ -31343,6 +31343,28 @@ label {
   display: none !important;
 }
 
+/* Seam guard: keep the generated image wall and composer touching without a white strip. */
+.studio-shell .image-higgsfield-mode .studio-result-wall,
+.studio-shell .image-higgsfield-mode .studio-wall-grid,
+.studio-shell .image-higgsfield-mode .studio-wall-card,
+.studio-shell .image-higgsfield-mode .studio-wall-card .result-preview-trigger,
+.studio-shell .image-higgsfield-mode .studio-wall-card .result-image,
+.studio-shell .image-higgsfield-mode .studio-wall-card .result-video,
+.studio-shell .image-higgsfield-mode .studio-wall-card .result-video-shell {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-grid {
+  gap: 0 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console {
+  margin-top: 0 !important;
+  border-top: 0 !important;
+  box-shadow: none !important;
+}
+
 @media (hover: hover) and (pointer: fine) {
   .studio-shell .image-higgsfield-mode .studio-wall-actions button::after {
     display: block !important;
