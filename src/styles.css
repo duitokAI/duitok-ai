@@ -34982,8 +34982,8 @@ label {
 
 .studio-shell .image-higgsfield-mode > .image-generate-console .image-model-current-text b {
   font-size: 20px !important;
-  line-height: 1 !important;
-  overflow: hidden !important;
+  line-height: 1.18 !important;
+  overflow: visible !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
 }
@@ -35031,7 +35031,7 @@ label {
   display: grid !important;
   grid-template-columns: 34px minmax(0, 1fr) 34px !important;
   padding: 0 !important;
-  overflow: hidden !important;
+  overflow: visible !important;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console .image-count-stepper button {
@@ -35087,6 +35087,53 @@ label {
   outline: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
+}
+
+/* Quality dropdown rows live inside .image-console-tools, so the broad
+   toolbar span pill rules must not paint frames around the option copy. */
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-tools .image-resolution-options .image-resolution-option,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-tools .image-resolution-options .image-resolution-option:hover,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-tools .image-resolution-options .image-resolution-option:focus,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-tools .image-resolution-options .image-resolution-option:focus-visible,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-tools .image-resolution-options .image-resolution-option.active,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-tools .image-resolution-options .image-resolution-option[aria-selected="true"] {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  display: block !important;
+  border: 0 !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  padding: 8px 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-tools .image-resolution-options span.image-resolution-option-copy,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-tools .image-resolution-options span.image-resolution-option-copy:hover,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-tools .image-resolution-options span.image-resolution-option-copy:focus,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-tools .image-resolution-options span.image-resolution-option-copy b,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-tools .image-resolution-options span.image-resolution-option-copy small,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-tools .image-resolution-options span.image-resolution-option-copy em {
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  display: revert !important;
+  border: 0 !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-console-tools .image-resolution-options span.image-resolution-option-copy {
+  display: grid !important;
+  gap: 5px !important;
 }
 
 
@@ -35239,7 +35286,7 @@ label {
   justify-items: center !important;
   gap: 6px !important;
   padding: 0 10px !important;
-  overflow: hidden !important;
+  overflow: visible !important;
 }
 
 .studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu summary .aspect-ratio-glyph {
@@ -35267,7 +35314,7 @@ label {
   max-height: none !important;
   display: block !important;
   justify-self: center !important;
-  overflow: hidden !important;
+  overflow: visible !important;
   border: 0 !important;
   border-radius: 0 !important;
   padding: 0 !important;
@@ -35275,7 +35322,7 @@ label {
   color: #2a0633 !important;
   font-size: 21px !important;
   font-weight: 950 !important;
-  line-height: 1 !important;
+  line-height: 1.14 !important;
   text-align: center !important;
   text-overflow: clip !important;
   white-space: nowrap !important;
@@ -35303,7 +35350,7 @@ label {
   max-height: none !important;
   min-width: 0 !important;
   display: inline-flex !important;
-  align-items: baseline !important;
+  align-items: center !important;
   justify-content: center !important;
   gap: 1px !important;
   border: 0 !important;
@@ -35322,4 +35369,5 @@ label {
   padding: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
+  line-height: 1.18 !important;
 }
