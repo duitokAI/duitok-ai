@@ -4927,7 +4927,8 @@ function imageGenerateConsole(p, selectedModel) {
     ? String(p.image.resolution).toUpperCase()
     : "2K";
   const selectedResolutionLabel = resolutionOptions.find((item) => item.value === selectedResolution)?.title || selectedResolution.toLowerCase();
-  const compactSummary = `${selectedModel || "Model"} · ${selectedAspectRatio} · ${selectedResolutionLabel} · ${selectedCount} image${selectedCount > 1 ? "s" : ""}`;
+  const promptSummary = String(p.image.prompt || "").trim();
+  const compactSummary = promptSummary || `${selectedModel || "Model"} · ${selectedAspectRatio} · ${selectedResolutionLabel} · ${selectedCount} image${selectedCount > 1 ? "s" : ""}`;
   return `<section class="image-generate-console ${longPromptClass}">
     <div class="image-console-main">
       <div class="image-console-prompt ${promptImage ? "has-prompt-image" : ""}" data-image-console-prompt-zone>
@@ -9746,6 +9747,10 @@ function updateImagePromptLocal(value = "") {
   if (!state.projectId || !state.db) return;
   state.db = dbWithProjectField(state.db, state.projectId, "image.prompt", value);
   syncImagePromptDensityClass(value);
+  document.querySelectorAll(".image-console-compact-summary").forEach((el) => {
+    const promptText = String(value || "").trim();
+    if (promptText) el.textContent = promptText;
+  });
 }
 
 function syncImagePromptDensityClass(value = project()?.image?.prompt || "") {
