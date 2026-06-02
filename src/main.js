@@ -8791,7 +8791,19 @@ function agentGenerationJobCard(card = {}) {
       ? (job?.errorMessage || "生成失败，请调整 prompt 后再试一次。")
       : status === "processing" ? "模型正在生成，完成后会自动出现在这里。" : "任务已加入队列，马上开始生成。";
   const preview = isDone && result
-    ? `<div class="agent-generation-preview">${resultPreview(result, { full: mediaType === "video" })}</div>`
+    ? `<div class="agent-generation-preview agent-generation-result-preview" data-result-id="${esc(result.id)}">
+        ${resultPreview(result, { clickable: true, full: mediaType === "video" })}
+        <div class="agent-generation-result-meta">
+          <span>${icon("sparkles", 14)} ${esc(resultModelDisplay(result))}</span>
+          <span>${icon("maximize", 14)} ${esc(resultAspectRatioLabel(result))}</span>
+          <span>${icon("gem", 14)} ${esc(resultResolutionLabel(result))}</span>
+        </div>
+        <div class="agent-generation-result-actions">
+          <button type="button" data-result-preview="${esc(result.id)}">${icon("scan-eye", 15)} View details</button>
+          <button type="button" data-result-action="download" data-result-id="${esc(result.id)}" data-result-kind="${result.videoUrl ? "video" : result.imageUrl ? "image" : "text"}">${icon("download", 15)} Download</button>
+          <button type="button" data-result-action="save" data-result-id="${esc(result.id)}">${icon("bookmark-plus", 15)} Save ref</button>
+        </div>
+      </div>`
     : `<div class="agent-generation-pending agent-generation-processing-frame" ${jobId ? `data-generation-job-id="${esc(jobId)}"` : ""} data-agent-job-status="${esc(status)}" data-agent-ratio="${esc(aspectRatio)}" style="aspect-ratio:${esc(aspectStyle)}">
         ${icon(isFailed ? "triangle-alert" : "loader-circle", 28)}
         <strong>${esc(isFailed ? title : status === "processing" ? "Processing" : "Queued")}</strong>
