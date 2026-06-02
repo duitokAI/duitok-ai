@@ -39081,4 +39081,46 @@ body:has(.studio-shell .video-prompt-extractor-page),
     max-height: 100px !important;
     align-self: center !important;
   }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).is-hover-expanded,
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-open-menu,
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt {
+    height: 120px !important;
+    min-height: 120px !important;
+    max-height: 120px !important;
+    grid-template-columns: minmax(0, 1fr) 200px !important;
+    grid-template-rows: 100px !important;
+    padding: 10px !important;
+    gap: 10px !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).is-hover-expanded .image-console-main,
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-open-menu .image-console-main,
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt .image-console-main {
+    height: 100px !important;
+    min-height: 100px !important;
+    max-height: 100px !important;
+    grid-template-rows: 50px 42px !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).is-hover-expanded .image-console-references,
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-open-menu .image-console-references,
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt .image-console-references {
+    align-self: center !important;
+    width: 168px !important;
+    min-width: 168px !important;
+    max-width: 168px !important;
+    height: 76px !important;
+    min-height: 76px !important;
+    max-height: 76px !important;
+    grid-template-columns: 80px 80px !important;
+    grid-template-rows: 76px !important;
+    margin: 0 8px 0 0 !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-reference-thumb:hover,
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate:hover:not(:disabled),
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate:active:not(:disabled) {
+    transform: none !important;
+  }
 }
