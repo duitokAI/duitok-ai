@@ -5,3 +5,11 @@ output/
 .DS_Store
 .env
 data/
+test-results/
+demo-assets/
+/*-qa.png
+/*-after.png
+/*-frame.jpg
+/*-preview.png
+/*.mp4
+/*.webm
