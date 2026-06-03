@@ -8952,7 +8952,7 @@ function agentChatToolbar() {
       </label>
     </nav>
     <section class="agent-session-recents">
-      <header><strong>${agentHistoryRecentsLabel()}</strong>${sessions.length ? `<small>${agentHistoryCountLabel(sessions.length)}</small>` : ""}</header>
+      <header><strong>${agentHistoryRecentsLabel()}</strong></header>
       ${agentHistorySidebarList(sessions)}
     </section>
   </aside>`;
@@ -8974,7 +8974,7 @@ function agentHistorySidebarList(sessions = []) {
   if (!sessions.length) return `<p class="agent-session-empty">还没有历史记录</p>`;
   return `<div class="agent-session-list">
     ${sessions.map((item) => {
-      const title = item.title || "Untitled chat";
+      const title = agentHistoryDisplayTitle(item);
       const isEditing = state.agentHistoryEditingId === item.id;
       const isActive = state.activeAgentHistoryId === item.id;
       const searchText = `${title} ${agentHistoryMeta(item)}`.toLowerCase();
@@ -9018,12 +9018,11 @@ function agentHistoryPanel() {
   return `<section class="agent-history-panel">
     <header>
       <strong>${icon("history", 16)} ${c.history}</strong>
-      ${sessions.length ? `<small>${agentHistoryCountLabel(sessions.length)}</small>` : ""}
       <button class="agent-history-close" data-action="toggle-agent-history" title="关闭" aria-label="关闭">${icon("x", 16)}</button>
     </header>
     ${sessions.length
       ? `<div class="agent-history-list">${sessions.map((item) => `<article>
-          <div class="agent-history-item-main"><b>${esc(item.title || "Untitled chat")}</b><small>${agentHistoryMeta(item)}</small></div>
+          <div class="agent-history-item-main"><b>${esc(agentHistoryDisplayTitle(item))}</b><small>${agentHistoryMeta(item)}</small></div>
           <div class="agent-history-actions">
             <button class="agent-history-action primary" data-agent-history-restore="${esc(item.id)}" title="恢复这条对话" aria-label="恢复这条对话">${icon("rotate-ccw", 15)}</button>
             <button class="agent-history-action danger" data-agent-history-delete="${esc(item.id)}" title="删除这条历史" aria-label="删除这条历史">${icon("trash-2", 15)}</button>
@@ -11606,18 +11605,53 @@ function saveCurrentAgentHistory() {
 }
 
 function agentHistoryTitleFromMessages(messages = []) {
+  return agentHistoryTaskTitleFromMessages(messages);
+}
+
+function agentHistoryDisplayTitle(item = {}) {
+  const messages = Array.isArray(item.messages) ? item.messages : [];
+  const generated = agentHistoryTaskTitleFromMessages(messages.length ? messages : [{ role: "user", content: item.title || "" }]);
+  return generated || normalizeAgentHistoryTitle(item.title || "Agent chat");
+}
+
+function agentHistoryTaskTitleFromMessages(messages = []) {
   const firstUser = messages.find((item) => item.role === "user" && String(item.content || "").trim());
   const firstAssistant = messages.find((item) => item.role === "assistant" && String(item.content || "").trim());
   return normalizeAgentHistoryTitle(firstUser?.content || firstAssistant?.content || "Agent chat");
 }
 
 function normalizeAgentHistoryTitle(value = "") {
-  const title = String(value || "")
+  const raw = String(value || "")
+    .replace(/<[^>]*>/g, " ")
     .replace(/\s+/g, " ")
-    .replace(/^(帮我|请你|请帮我|我要|我想|can you|please)\s*/i, "")
-    .trim()
-    .slice(0, 42);
-  return title || "Agent chat";
+    .trim();
+  const text = raw
+    .replace(/^(帮我|请你|请帮我|我要|我想|可以|能不能|麻烦你|can you|could you|please|pls|i want to|i need to)\s*/i, "")
+    .replace(/[。！？!?]+$/g, "")
+    .trim();
+  const lower = text.toLowerCase();
+  const rules = [
+    [/你能做什么|能做什么|what can you do|capabilit|功能|能力/, "Explore Agent Capabilities"],
+    [/usage|用量|账单|billing|credit|ledger/, "Optimize Usage Billing Layout"],
+    [/download|下载/, "Fix Download Feedback"],
+    [/语言|英文|中文|language|sidebar|面板|new chat|search chats/, "Fix Agent Sidebar Language"],
+    [/空白|空隙|空间|gap|preview gap|预览|下方/, "Remove Image Preview Gap"],
+    [/动漫|anime|cartoon|二次元/, "Create Anime Style Image"],
+    [/nano|banana|香蕉/, "Generate Nano Banana Concept"],
+    [/product|产品|picker|scanner/, "Optimize Product Workflow"],
+    [/prompt|提示词/, "Refine Prompt Workflow"],
+    [/video|视频|ugc|original/, "Generate Video Concept"],
+    [/image|图片|图像|生成图|照片/, "Generate Image Concept"]
+  ];
+  const matched = rules.find(([pattern]) => pattern.test(lower));
+  if (matched) return matched[1];
+  if (/^[a-z0-9][a-z0-9\s:._/-]{2,}$/i.test(text)) {
+    const words = text.split(/\s+/).filter(Boolean).slice(0, 7);
+    const title = words.map((word) => /^(ai|ui|ux|api|ugc|prd)$/i.test(word) ? word.toUpperCase() : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(" ");
+    return title || "Agent Task";
+  }
+  if (/[㐀-鿿]/.test(text)) return "Handle Agent Request";
+  return text.slice(0, 42) || "Agent Task";
 }
 
 function restoreAgentHistory(id) {
