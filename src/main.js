@@ -6909,8 +6909,11 @@ function modal() {
 function settingsModal() {
   return `<div class="modal-backdrop settings-modal-backdrop" data-action="close-modal">
     <section class="settings-modal" role="dialog" aria-modal="true" aria-label="${esc(t("settings"))}">
-      <div class="settings-modal-main">
+      <aside class="settings-modal-nav" aria-label="Account settings">
         <button class="settings-modal-close" type="button" data-action="close-modal" aria-label="Close">${icon("x", 28)}</button>
+        <button class="active" type="button" data-settings-section="profile">${icon("user-round", 22)} <span>Account</span></button>
+      </aside>
+      <div class="settings-modal-main">
         <header class="settings-modal-head">
           <h2>Account</h2>
           <p>${t("accountSettingsSubtitle")}</p>

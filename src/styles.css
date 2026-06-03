@@ -15372,12 +15372,12 @@ label {
 .settings-modal {
   position: relative;
   z-index: 1;
-  width: min(820px, calc(100vw - 36px));
+  width: min(980px, calc(100vw - 36px));
   height: auto;
   max-height: calc(100dvh - 48px);
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: 260px minmax(0, 1fr);
   overflow: hidden;
   border: 1px solid rgba(126, 61, 145, 0.16);
   border-radius: 26px;
@@ -15400,10 +15400,6 @@ label {
 }
 
 .settings-modal-close {
-  position: absolute;
-  left: 22px;
-  top: 22px;
-  z-index: 3;
   width: 62px;
   height: 62px;
   display: grid;
@@ -15455,7 +15451,7 @@ label {
 }
 
 .settings-modal-head {
-  padding: 0 0 22px 82px;
+  padding: 0 0 22px;
   border-bottom: 1px solid rgba(82, 22, 98, 0.12);
 }
 
@@ -15574,7 +15570,7 @@ label {
 
   .settings-modal-nav {
     display: grid;
-    grid-template-columns: 56px repeat(3, minmax(0, 1fr));
+    grid-template-columns: 56px minmax(0, 1fr);
     padding: 12px;
   }
 
@@ -15597,7 +15593,7 @@ label {
   }
 
   .settings-modal-head {
-    padding-left: 64px;
+    padding-left: 0;
   }
 
   .settings-modal-head h2 {
