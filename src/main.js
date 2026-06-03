@@ -4148,7 +4148,19 @@ function usageRowsFromLedger() {
 function usagePage() {
   const rows = usageRowsFromLedger();
   const generatedResults = allResults();
-  const totalSpend = rows.filter((item) => item.credits < 0).reduce((sum, item) => sum + Math.abs(item.credits), 0);
+  const currentBalance = Number(state.db.billing?.credits || 0);
+  const now = new Date();
+  const todayKey = now.toISOString().slice(0, 10);
+  const monthKey = now.toISOString().slice(0, 7);
+  const spendRows = rows.filter((item) => item.credits < 0);
+  const totalSpend = spendRows.reduce((sum, item) => sum + Math.abs(item.credits), 0);
+  const todaySpend = spendRows
+    .filter((item) => item.createdAt && new Date(item.createdAt).toISOString().slice(0, 10) === todayKey)
+    .reduce((sum, item) => sum + Math.abs(item.credits), 0);
+  const monthSpend = spendRows
+    .filter((item) => item.createdAt && new Date(item.createdAt).toISOString().slice(0, 7) === monthKey)
+    .reduce((sum, item) => sum + Math.abs(item.credits), 0);
+  const lastCharge = spendRows[0];
   const imageCount = generatedResults.filter((item) => item.type === "image").length;
   const videoCount = generatedResults.filter((item) => ["ugc", "original"].includes(item.type)).length;
   const autoCount = generatedResults.filter((item) => item.type === "auto").length;
@@ -4161,39 +4173,54 @@ function usagePage() {
     ["post", "send", "Post"]
   ];
   const visibleRows = rows.filter((row) => state.usageFilter === "all" || row.category === state.usageFilter);
+  const summaryCards = [
+    ["Current Balance", formatCreditNumber(currentBalance), "credits available", "balance", "wallet-cards"],
+    ["Today Used", formatCreditNumber(todaySpend), "credits spent today", "today", "calendar-clock"],
+    ["This Month", formatCreditNumber(monthSpend), "monthly spend", "month", "bar-chart-3"],
+    ["Last Charge", lastCharge ? formatCreditNumber(Math.abs(lastCharge.credits)) : "0", lastCharge ? usageCategoryLabel(lastCharge.category) : "no usage yet", "last", lastCharge ? usageCategoryIcon(lastCharge.category) : "activity"]
+  ];
 
   return `
     <section class="usage-experience">
       <div class="usage-summary-grid">
-        ${[
-          ["Total Spend", formatCreditNumber(totalSpend), "credits", "spend"],
-          ["Images", imageCount, "generated", "image"],
-          ["Videos", videoCount, "generated", "video"],
-          ["Auto Plans", autoCount, "batches", "auto"]
-        ].map(([label, value, helper, tone]) => `<article class="usage-summary-card ${tone}"><span>${label}</span><b>${value}</b><small>${helper}</small></article>`).join("")}
+        ${summaryCards.map(([label, value, helper, tone, ic]) => `<article class="usage-summary-card ${tone}"><span>${icon(ic, 17)} ${label}</span><b>${value}</b><small>${helper}</small></article>`).join("")}
       </div>
       <section class="usage-ledger-panel">
-        <div class="usage-filter-row">
-          <span>${icon("filter", 18)} Filter</span>
+        <div class="usage-panel-head">
           <div>
-            ${filters.map(([id, ic, label]) => `<button class="${state.usageFilter === id ? "active" : ""}" data-usage-filter="${id}">${icon(ic, 16)} ${label}</button>`).join("")}
+            <h2>${icon("receipt-text", 22)} Usage activity</h2>
+            <p>${formatCreditNumber(totalSpend)} credits used · ${imageCount} images · ${videoCount} videos · ${autoCount} auto plans</p>
           </div>
           <small>${icon("calendar-days", 16)} All time</small>
         </div>
-        <div class="usage-ledger-table">
-          <div class="usage-ledger-head"><span>${t("usageAction")}</span><span>${t("usagePrompt")}</span><span>${t("usagePreview")}</span><span>${t("date")}</span><span>${t("usageCredit")}</span><span>${t("usageBalance")}</span></div>
-          ${visibleRows.map((row) => `
-            <article>
-              <strong>${esc(row.action)}</strong>
-              <p>${esc(row.detail || row.action)}</p>
-              <em class="${row.category}">${icon(usageCategoryIcon(row.category), 15)} ${usageCategoryLabel(row.category)}</em>
-              <time>${row.createdAt ? new Date(row.createdAt).toLocaleString(state.lang === "zh" ? "zh-CN" : "en-GB", { day: "2-digit", month: "short", year: "2-digit", hour: "2-digit", minute: "2-digit" }) : ""}</time>
-              <b class="${row.credits < 0 ? "debit" : "credit"}">${row.credits > 0 ? "+" : ""}${formatCreditNumber(row.credits)}</b>
-              <span>${formatCreditNumber(row.balanceAfter)}</span>
-            </article>`).join("") || `<p class="empty-text">${t("noUsageRecords")}</p>`}
+        <div class="usage-filter-row" aria-label="Usage filters">
+          ${filters.map(([id, ic, label]) => `<button class="${state.usageFilter === id ? "active" : ""}" data-usage-filter="${id}" aria-pressed="${state.usageFilter === id ? "true" : "false"}">${icon(ic, 16)} ${label}</button>`).join("")}
+        </div>
+        <div class="usage-ledger-table" aria-label="Usage ledger">
+          <div class="usage-ledger-head"><span>Activity</span><span>${t("date")}</span><span>${t("usageCredit")}</span><span>${t("usageBalance")}</span></div>
+          ${visibleRows.map(usageLedgerRow).join("") || `<p class="empty-text">${t("noUsageRecords")}</p>`}
         </div>
       </section>
     </section>`;
+}
+
+function usageLedgerRow(row = {}) {
+  const date = row.createdAt ? new Date(row.createdAt) : null;
+  const dateText = date ? date.toLocaleDateString(state.lang === "zh" ? "zh-CN" : "en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "";
+  const timeText = date ? date.toLocaleTimeString(state.lang === "zh" ? "zh-CN" : "en-GB", { hour: "2-digit", minute: "2-digit" }) : "";
+  const creditClass = row.credits < 0 ? "debit" : "credit";
+  return `<article class="usage-ledger-item">
+    <div class="usage-ledger-activity">
+      <em class="${row.category}">${icon(usageCategoryIcon(row.category), 16)}</em>
+      <div>
+        <strong>${esc(row.action)}</strong>
+        <p>${esc(row.detail || row.action)}</p>
+      </div>
+    </div>
+    <time><span>${esc(dateText)}</span><small>${esc(timeText)}</small></time>
+    <b class="${creditClass}">${row.credits > 0 ? "+" : ""}${formatCreditNumber(row.credits)}</b>
+    <span>${formatCreditNumber(row.balanceAfter)}</span>
+  </article>`;
 }
 
 function generationQueueTable(jobs) {

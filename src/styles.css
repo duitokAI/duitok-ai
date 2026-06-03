@@ -42298,3 +42298,318 @@ body:has(.studio-shell .video-page-studio),
     --studio-wall-visible-columns: 2;
   }
 }
+
+/* Usage ledger redesign: make billing activity readable inside the settings modal. */
+.studio-shell .settings-modal .usage-experience {
+  gap: 16px !important;
+}
+
+.studio-shell .settings-modal .usage-summary-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  overflow: visible !important;
+  padding: 0 !important;
+}
+
+.studio-shell .settings-modal .usage-summary-card {
+  min-width: 0 !important;
+  min-height: 104px !important;
+  align-content: start !important;
+  gap: 8px !important;
+  border: 1px solid rgba(93, 8, 108, 0.1) !important;
+  border-radius: 16px !important;
+  padding: 16px !important;
+  background:
+    radial-gradient(circle at 86% 0%, rgba(255, 96, 139, 0.12), transparent 42%),
+    rgba(255, 255, 255, 0.82) !important;
+  box-shadow: 0 12px 28px rgba(65, 18, 80, 0.055) !important;
+}
+
+.studio-shell .settings-modal .usage-summary-card span {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  min-width: 0 !important;
+  color: rgba(43, 6, 51, 0.58) !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .settings-modal .usage-summary-card b {
+  color: #2a0633 !important;
+  font-size: clamp(24px, 2.3vw, 34px) !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+}
+
+.studio-shell .settings-modal .usage-summary-card small {
+  overflow: hidden !important;
+  color: rgba(43, 6, 51, 0.48) !important;
+  font-size: 11px !important;
+  font-weight: 720 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .settings-modal .usage-summary-card.balance b { color: #5d086c !important; }
+.studio-shell .settings-modal .usage-summary-card.today b { color: #e0496a !important; }
+.studio-shell .settings-modal .usage-summary-card.month b { color: #6d4cff !important; }
+.studio-shell .settings-modal .usage-summary-card.last b { color: #111827 !important; }
+
+.studio-shell .settings-modal .usage-ledger-panel {
+  gap: 14px !important;
+  border: 1px solid rgba(255, 132, 168, 0.2) !important;
+  border-radius: 18px !important;
+  padding: 18px !important;
+  background:
+    radial-gradient(circle at 96% 0%, rgba(255, 94, 123, 0.11), transparent 34%),
+    rgba(255, 255, 255, 0.72) !important;
+  color: #2a0633 !important;
+  box-shadow: 0 14px 34px rgba(65, 18, 80, 0.075) !important;
+}
+
+.studio-shell .settings-modal .usage-panel-head {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+}
+
+.studio-shell .settings-modal .usage-panel-head h2 {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+  margin: 0 !important;
+  color: #2a0633 !important;
+  font-size: 18px !important;
+  font-weight: 950 !important;
+  line-height: 1.15 !important;
+}
+
+.studio-shell .settings-modal .usage-panel-head p {
+  margin: 5px 0 0 !important;
+  color: rgba(43, 6, 51, 0.5) !important;
+  font-size: 12px !important;
+  font-weight: 720 !important;
+}
+
+.studio-shell .settings-modal .usage-panel-head small {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  flex: 0 0 auto !important;
+  color: rgba(43, 6, 51, 0.52) !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .settings-modal .usage-filter-row {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 7px !important;
+  align-items: center !important;
+  padding: 4px !important;
+  border: 1px solid rgba(93, 8, 108, 0.08) !important;
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, 0.56) !important;
+}
+
+.studio-shell .settings-modal .usage-filter-row button {
+  min-height: 34px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  border: 1px solid transparent !important;
+  border-radius: 11px !important;
+  padding: 0 12px !important;
+  background: transparent !important;
+  color: rgba(43, 6, 51, 0.64) !important;
+  font-size: 12px !important;
+  font-weight: 850 !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .settings-modal .usage-filter-row button.active {
+  border-color: rgba(255, 82, 128, 0.28) !important;
+  background: #fff !important;
+  color: #5d086c !important;
+  box-shadow: 0 8px 18px rgba(65, 18, 80, 0.08) !important;
+}
+
+.studio-shell .settings-modal .usage-ledger-table {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(93, 8, 108, 0.08) !important;
+  border-radius: 16px !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+}
+
+.studio-shell .settings-modal .usage-ledger-head,
+.studio-shell .settings-modal .usage-ledger-item {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(220px, 1fr) minmax(112px, 0.42fr) minmax(76px, 0.26fr) minmax(78px, 0.26fr) !important;
+  align-items: center !important;
+  gap: 12px !important;
+  box-sizing: border-box !important;
+}
+
+.studio-shell .settings-modal .usage-ledger-head {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1 !important;
+  padding: 11px 14px !important;
+  background: rgba(255, 249, 252, 0.96) !important;
+  color: rgba(43, 6, 51, 0.46) !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+.studio-shell .settings-modal .usage-ledger-head span:nth-child(3),
+.studio-shell .settings-modal .usage-ledger-head span:nth-child(4),
+.studio-shell .settings-modal .usage-ledger-item > b,
+.studio-shell .settings-modal .usage-ledger-item > span {
+  text-align: right !important;
+  justify-self: end !important;
+}
+
+.studio-shell .settings-modal .usage-ledger-item {
+  min-height: 68px !important;
+  padding: 12px 14px !important;
+  border-top: 1px solid rgba(93, 8, 108, 0.08) !important;
+  background: rgba(255, 255, 255, 0.42) !important;
+}
+
+.studio-shell .settings-modal .usage-ledger-activity {
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: 34px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.studio-shell .settings-modal .usage-ledger-activity em {
+  width: 34px !important;
+  height: 34px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border: 1px solid rgba(93, 8, 108, 0.1) !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  color: #5d086c !important;
+  font-style: normal !important;
+}
+
+.studio-shell .settings-modal .usage-ledger-activity strong,
+.studio-shell .settings-modal .usage-ledger-activity p,
+.studio-shell .settings-modal .usage-ledger-item time span,
+.studio-shell .settings-modal .usage-ledger-item time small {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .settings-modal .usage-ledger-activity strong {
+  display: block !important;
+  color: #2a0633 !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+}
+
+.studio-shell .settings-modal .usage-ledger-activity p {
+  margin: 3px 0 0 !important;
+  color: rgba(43, 6, 51, 0.48) !important;
+  font-size: 12px !important;
+  font-weight: 650 !important;
+}
+
+.studio-shell .settings-modal .usage-ledger-item time {
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 2px !important;
+  color: rgba(43, 6, 51, 0.62) !important;
+  font-size: 12px !important;
+  font-weight: 760 !important;
+}
+
+.studio-shell .settings-modal .usage-ledger-item time small {
+  color: rgba(43, 6, 51, 0.4) !important;
+  font-size: 11px !important;
+  font-weight: 650 !important;
+}
+
+.studio-shell .settings-modal .usage-ledger-item > b {
+  color: #2a0633 !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .settings-modal .usage-ledger-item > b.debit {
+  color: #d83c61 !important;
+}
+
+.studio-shell .settings-modal .usage-ledger-item > b.credit {
+  color: #16834a !important;
+}
+
+.studio-shell .settings-modal .usage-ledger-item > span {
+  color: rgba(43, 6, 51, 0.82) !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 980px) {
+  .studio-shell .settings-modal .usage-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .studio-shell .settings-modal .usage-ledger-head,
+  .studio-shell .settings-modal .usage-ledger-item {
+    grid-template-columns: minmax(180px, 1fr) minmax(96px, 0.42fr) minmax(68px, 0.28fr) minmax(68px, 0.28fr) !important;
+    gap: 8px !important;
+  }
+}
+
+@media (max-width: 680px) {
+  .studio-shell .settings-modal .usage-summary-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .studio-shell .settings-modal .usage-panel-head {
+    display: grid !important;
+  }
+
+  .studio-shell .settings-modal .usage-ledger-head {
+    display: none !important;
+  }
+
+  .studio-shell .settings-modal .usage-ledger-item {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: 8px 12px !important;
+  }
+
+  .studio-shell .settings-modal .usage-ledger-item time {
+    grid-column: 1 / 2 !important;
+    padding-left: 44px !important;
+  }
+
+  .studio-shell .settings-modal .usage-ledger-item > b,
+  .studio-shell .settings-modal .usage-ledger-item > span {
+    grid-column: 2 / 3 !important;
+  }
+}
