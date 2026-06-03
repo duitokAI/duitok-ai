@@ -2302,7 +2302,7 @@ function studioChineseDictionary() {
     "Working": "工作中",
     "Needs confirmation": "需要确认",
     "Completed": "已完成",
-    "New thread": "新工作线程",
+    "New Chat": "新对话",
     "History": "历史",
     "More": "更多",
     "Debug": "调试",
@@ -8484,10 +8484,10 @@ function agentUiCopy() {
       abilityConfirm: "扣费或发布前，一定先确认",
       debug: "调试",
       close: "关闭",
-      newChat: "新工作线程",
-      history: "工作历史",
+      newChat: "新对话",
+      history: "历史",
       more: "更多",
-      clearContext: "清空当前线程",
+      clearContext: "清空本次聊天",
       statusIdle: "待命中",
       statusBusy: "工作中",
       statusConfirm: "需要确认",
@@ -8537,10 +8537,10 @@ function agentUiCopy() {
       abilityConfirm: "Credits atau publish mesti confirm dulu",
       debug: "Debug",
       close: "Tutup",
-      newChat: "Thread baru",
-      history: "Sejarah kerja",
+      newChat: "Chat baru",
+      history: "Sejarah",
       more: "Lagi",
-      clearContext: "Kosongkan thread ini",
+      clearContext: "Kosongkan chat ini",
       statusIdle: "Standby",
       statusBusy: "Sedang kerja",
       statusConfirm: "Perlu confirm",
@@ -8590,10 +8590,10 @@ function agentUiCopy() {
       abilityConfirm: "Credits or publishing always require confirmation",
       debug: "Debug",
       close: "Close",
-      newChat: "New thread",
-      history: "Work history",
+      newChat: "New Chat",
+      history: "History",
       more: "More",
-      clearContext: "Clear this thread",
+      clearContext: "Clear this chat",
       statusIdle: "Standby",
       statusBusy: "Working",
       statusConfirm: "Needs confirmation",
@@ -8626,7 +8626,7 @@ function agentUiCopy() {
       ]
     }
   };
-  return copy[agentDisplayLang()] || copy.en;
+  return copy[state.lang] || copy.en;
 }
 
 function agentDisplayLang() {
@@ -8944,7 +8944,7 @@ function agentChatToolbar() {
   const c = agentUiCopy();
   const sessions = Array.isArray(state.agentHistorySessions) ? state.agentHistorySessions : [];
   return `<aside class="agent-chat-toolbar agent-session-sidebar" aria-label="${esc(c.history)}">
-    <nav class="agent-session-actions" aria-label="Agent work threads">
+    <nav class="agent-session-actions" aria-label="Agent chats">
       <button class="agent-session-action" type="button" data-action="new-agent-chat" title="${esc(c.newChat)}">${icon("square-pen", 20)}<span>${esc(c.newChat)}</span></button>
       <label class="agent-session-search" title="${esc(c.history)}">
         ${icon("search", 20)}
@@ -8959,35 +8959,35 @@ function agentChatToolbar() {
 }
 
 function agentHistorySearchPlaceholder() {
-  if (state.lang === "zh") return "搜索工作线程";
-  if (state.lang === "ms") return "Cari thread kerja";
-  return "Search work threads";
+  if (state.lang === "zh") return "搜索对话";
+  if (state.lang === "ms") return "Cari chat";
+  return "Search chats";
 }
 
 function agentHistoryRecentsLabel() {
-  if (state.lang === "zh") return "最近工作";
-  if (state.lang === "ms") return "Kerja terkini";
-  return "Recent work";
+  if (state.lang === "zh") return "最近";
+  if (state.lang === "ms") return "Terkini";
+  return "Recents";
 }
 
 function agentHistorySidebarList(sessions = []) {
-  if (!sessions.length) return `<p class="agent-session-empty">还没有工作记录</p>`;
+  if (!sessions.length) return `<p class="agent-session-empty">还没有历史记录</p>`;
   return `<div class="agent-session-list">
     ${sessions.map((item) => {
-      const title = item.title || "Untitled work thread";
+      const title = item.title || "Untitled chat";
       const isEditing = state.agentHistoryEditingId === item.id;
       const isActive = state.activeAgentHistoryId === item.id;
       const searchText = `${title} ${agentHistoryMeta(item)}`.toLowerCase();
       return `<article class="agent-session-item ${isActive ? "is-active" : ""}" data-agent-history-row data-agent-history-text="${esc(searchText)}">
-        ${isEditing ? `<label class="agent-session-edit" title="重命名工作线程">
+        ${isEditing ? `<label class="agent-session-edit" title="重命名对话">
           <input data-agent-history-title-input data-agent-history-title-id="${esc(item.id)}" value="${esc(title)}" maxlength="64" autofocus>
           <small>Enter 保存 · Esc 取消</small>
         </label>` : `<button type="button" class="agent-session-restore" data-agent-history-restore="${esc(item.id)}" title="${esc(title)}">
             <span>${esc(title)}</span>
             <small>${agentHistoryMeta(item)}</small>
           </button>`}
-        <button type="button" class="agent-session-rename" data-agent-history-rename="${esc(item.id)}" title="重命名工作线程" aria-label="重命名工作线程">${icon("pencil", 15)}</button>
-        <button type="button" class="agent-session-delete" data-agent-history-delete="${esc(item.id)}" title="删除这条工作记录" aria-label="删除这条工作记录">${icon("trash-2", 15)}</button>
+        <button type="button" class="agent-session-rename" data-agent-history-rename="${esc(item.id)}" title="重命名对话" aria-label="重命名对话">${icon("pencil", 15)}</button>
+        <button type="button" class="agent-session-delete" data-agent-history-delete="${esc(item.id)}" title="删除这条历史" aria-label="删除这条历史">${icon("trash-2", 15)}</button>
       </article>`;
     }).join("")}
   </div>`;
@@ -9023,13 +9023,13 @@ function agentHistoryPanel() {
     </header>
     ${sessions.length
       ? `<div class="agent-history-list">${sessions.map((item) => `<article>
-          <div class="agent-history-item-main"><b>${esc(item.title || "Untitled work thread")}</b><small>${agentHistoryMeta(item)}</small></div>
+          <div class="agent-history-item-main"><b>${esc(item.title || "Untitled chat")}</b><small>${agentHistoryMeta(item)}</small></div>
           <div class="agent-history-actions">
-            <button class="agent-history-action primary" data-agent-history-restore="${esc(item.id)}" title="恢复这条工作线程" aria-label="恢复这条工作线程">${icon("rotate-ccw", 15)}</button>
-            <button class="agent-history-action danger" data-agent-history-delete="${esc(item.id)}" title="删除这条工作记录" aria-label="删除这条工作记录">${icon("trash-2", 15)}</button>
+            <button class="agent-history-action primary" data-agent-history-restore="${esc(item.id)}" title="恢复这条对话" aria-label="恢复这条对话">${icon("rotate-ccw", 15)}</button>
+            <button class="agent-history-action danger" data-agent-history-delete="${esc(item.id)}" title="删除这条历史" aria-label="删除这条历史">${icon("trash-2", 15)}</button>
           </div>
         </article>`).join("")}</div>`
-      : `<p class="agent-history-empty">还没有工作记录。点「新工作线程」时，当前任务会自动保存到这里。</p>`}
+      : `<p class="agent-history-empty">还没有历史记录。点「新对话」时，当前对话会自动保存到这里。</p>`}
     <div class="agent-history-footer">
       <button class="agent-history-footer-action" data-action="new-agent-chat">${icon("message-square-plus", 14)} ${c.newChat}</button>
       <button class="agent-history-footer-action danger" data-action="clear-agent-context">${icon("trash-2", 14)} ${c.clearContext}</button>
@@ -9038,9 +9038,9 @@ function agentHistoryPanel() {
 }
 
 function agentHistoryCountLabel(count = 0) {
-  if (state.lang === "zh") return `${count} 个线程`;
-  if (state.lang === "ms") return `${count} thread`;
-  return `${count} threads`;
+  if (state.lang === "zh") return `${count} 个对话`;
+  if (state.lang === "ms") return `${count} chat`;
+  return `${count} chats`;
 }
 
 function agentHistoryMeta(item = {}) {
@@ -11608,7 +11608,7 @@ function saveCurrentAgentHistory() {
 function agentHistoryTitleFromMessages(messages = []) {
   const firstUser = messages.find((item) => item.role === "user" && String(item.content || "").trim());
   const firstAssistant = messages.find((item) => item.role === "assistant" && String(item.content || "").trim());
-  return normalizeAgentHistoryTitle(firstUser?.content || firstAssistant?.content || "Agent work thread");
+  return normalizeAgentHistoryTitle(firstUser?.content || firstAssistant?.content || "Agent chat");
 }
 
 function normalizeAgentHistoryTitle(value = "") {
@@ -11617,22 +11617,22 @@ function normalizeAgentHistoryTitle(value = "") {
     .replace(/^(帮我|请你|请帮我|我要|我想|can you|please)\s*/i, "")
     .trim()
     .slice(0, 42);
-  return title || "Agent work thread";
+  return title || "Agent chat";
 }
 
 function restoreAgentHistory(id) {
   const session = (state.agentHistorySessions || []).find((item) => item.id === id);
-  if (!session) return notify("找不到这条工作记录。");
+  if (!session) return notify("找不到这条历史记录。");
   const messages = agentMessagesForStorage(session.messages);
   localStorage.setItem(storageKeys.agentMessages, JSON.stringify(messages));
-  notify("已恢复工作线程。");
+  notify("已恢复历史对话。");
   set({ agentMessages: messages, agentInput: "", agentExpandedMessages: {}, activeAgentHistoryId: id, agentHistoryOpen: false });
 }
 
 function deleteAgentHistory(id) {
   const sessions = (state.agentHistorySessions || []).filter((item) => item.id !== id);
   rememberAgentHistorySessions(sessions);
-  notify("已删除这条工作记录。");
+  notify("已删除这条历史记录。");
   set({ agentHistorySessions: sessions, activeAgentHistoryId: state.activeAgentHistoryId === id ? null : state.activeAgentHistoryId, agentHistoryEditingId: null });
 }
 
@@ -11642,13 +11642,13 @@ function renameAgentHistory(id, title, options = {}) {
   const session = sessions.find((item) => item.id === id);
   if (!session) return set({ agentHistoryEditingId: null });
   if (!nextTitle) {
-    if (!options.quiet) notify("工作线程名字不能为空。");
+    if (!options.quiet) notify("对话名字不能为空。");
     return set({ agentHistoryEditingId: null });
   }
-  if (nextTitle === (session.title || "Untitled work thread")) return set({ agentHistoryEditingId: null });
+  if (nextTitle === (session.title || "Untitled chat")) return set({ agentHistoryEditingId: null });
   const renamed = sessions.map((item) => item.id === id ? { ...item, title: nextTitle, updatedAt: item.updatedAt || new Date().toISOString() } : item);
   rememberAgentHistorySessions(renamed);
-  if (!options.quiet) notify("已重命名工作线程。");
+  if (!options.quiet) notify("已重命名对话。");
   return set({ agentHistorySessions: renamed, agentHistoryEditingId: null });
 }
 
