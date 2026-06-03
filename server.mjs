@@ -2635,6 +2635,11 @@ function parseJsonishPayload(text) {
   }
 }
 
+function isGrsaiSuccessCode(code) {
+  if (code === undefined || code === null || code === "") return true;
+  return ["0", "1", "200", "ok", "success"].includes(String(code).trim().toLowerCase());
+}
+
 async function grsaiRequest(pathname, { method = "POST", body } = {}) {
   const apiKey = requireGrsaiConfig();
   const response = await fetch(`${grsaiBaseUrl}${pathname}`, {
@@ -2647,7 +2652,7 @@ async function grsaiRequest(pathname, { method = "POST", body } = {}) {
     signal: AbortSignal.timeout(Number(process.env.GRSAI_TIMEOUT_MS || 120000))
   });
   const payload = parseJsonishPayload(await response.text());
-  if (!response.ok || (payload.code && payload.code !== 0)) {
+  if (!response.ok || !isGrsaiSuccessCode(payload.code)) {
     const error = new Error(payload.msg || payload.message || payload.error || `GRS AI request failed (${response.status})`);
     error.status = response.status || 502;
     throw error;
@@ -2667,7 +2672,7 @@ async function grsaiChatRequest(body) {
     signal: AbortSignal.timeout(Number(process.env.GRSAI_TIMEOUT_MS || 120000))
   });
   const payload = parseJsonishPayload(await response.text());
-  if (!response.ok || (payload.code && payload.code !== 0)) {
+  if (!response.ok || !isGrsaiSuccessCode(payload.code)) {
     const error = new Error(payload.msg || payload.message || payload.error?.message || payload.error || `GRS AI chat request failed (${response.status})`);
     error.status = response.status || 502;
     throw error;
