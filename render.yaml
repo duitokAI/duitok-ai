@@ -133,6 +133,10 @@ services:
         value: /302/submit/elevenlabs/tts-multilingual-v2-sync
       - key: AI302_ELEVEN_TTS_MULTILINGUAL_VOICE
         value: Aria
+      - key: AI302_DOUBAO_TTS_HD_PATH
+        value: /doubao/tts_hd
+      - key: AI302_DOUBAO_TTS_HD_VOICE
+        value: zh_male_M392_conversation_wvae_bigtts
       - key: AI302_SUNO_SUBMIT_PATH
         value: /suno/submit/music
       - key: AI302_SUNO_FETCH_PATH_PREFIX

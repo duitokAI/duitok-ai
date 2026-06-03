@@ -72,6 +72,8 @@ const ai302BaseUrl = (process.env.AI302_BASE_URL || "https://api.302.ai").replac
 const ai302MinimaxSpeechPath = process.env.AI302_MINIMAX_SPEECH_PATH || "/minimaxi/v1/t2a_v2";
 const ai302MinimaxSpeechModel = process.env.AI302_MINIMAX_SPEECH_MODEL || "speech-2.8-hd";
 const ai302ElevenTtsMultilingualPath = process.env.AI302_ELEVEN_TTS_MULTILINGUAL_PATH || "/302/submit/elevenlabs/tts-multilingual-v2-sync";
+const ai302DoubaoTtsHdPath = process.env.AI302_DOUBAO_TTS_HD_PATH || "/doubao/tts_hd";
+const ai302DoubaoTtsHdVoice = process.env.AI302_DOUBAO_TTS_HD_VOICE || "zh_male_M392_conversation_wvae_bigtts";
 const ai302SunoSubmitPath = process.env.AI302_SUNO_SUBMIT_PATH || "/suno/submit/music";
 const ai302SunoFetchPathPrefix = process.env.AI302_SUNO_FETCH_PATH_PREFIX || "/suno/fetch";
 const ai302SunoModel = process.env.AI302_SUNO_MODEL || "chirp-crow";
@@ -2122,6 +2124,63 @@ async function synthesizeTtsMultilingualWithAi302(body = {}) {
     })
   });
   return normalizeAi302TtsMultilingual(payload, text);
+}
+
+function normalizeAi302DoubaoTtsHd(payload = {}, text = "", encoding = "mp3") {
+  const data = payload.data || payload;
+  const audioBase64 = String(data.data || data.audio || data.audio_base64 || data.audioBase64 || "");
+  const contentTypeMap = {
+    mp3: "audio/mpeg",
+    wav: "audio/wav",
+    pcm: "audio/L16",
+    ogg_opus: "audio/ogg"
+  };
+  const contentType = contentTypeMap[encoding] || "audio/mpeg";
+  return {
+    provider: "302ai",
+    model: "doubao-tts-hd",
+    textCharacters: Array.from(text).length,
+    audioBase64,
+    audioDataUrl: audioBase64 ? `data:${contentType};base64,${audioBase64}` : "",
+    contentType,
+    durationMs: Number(data.addition?.duration || data.duration || 0),
+    reqid: String(data.reqid || ""),
+    code: data.code,
+    message: String(data.message || ""),
+    raw: process.env.NODE_ENV === "production" ? undefined : payload
+  };
+}
+
+async function synthesizeDoubaoTtsHdWithAi302(body = {}) {
+  const text = String(body.text || "").trim();
+  if (!text) {
+    const error = new Error("Doubao TTS text is required.");
+    error.status = 400;
+    throw error;
+  }
+  if (Array.from(text).length > 10000) {
+    const error = new Error("Doubao TTS text must be under 10,000 characters for synchronous generation.");
+    error.status = 400;
+    throw error;
+  }
+  const encoding = ["mp3", "wav", "pcm", "ogg_opus"].includes(String(body.encoding || "").toLowerCase()) ? String(body.encoding).toLowerCase() : "mp3";
+  const speedRatio = Number(body.speedRatio ?? body.speed_ratio ?? 1);
+  const payload = await ai302Request(ai302DoubaoTtsHdPath, {
+    method: "POST",
+    body: JSON.stringify({
+      audio: {
+        voice_type: String(body.voiceType || body.voice_type || ai302DoubaoTtsHdVoice),
+        encoding,
+        speed_ratio: Number.isFinite(speedRatio) ? Math.min(3, Math.max(0.2, speedRatio)) : 1
+      },
+      request: {
+        reqid: String(body.reqid || crypto.randomUUID()),
+        text,
+        operation: "query"
+      }
+    })
+  });
+  return normalizeAi302DoubaoTtsHd(payload, text, encoding);
 }
 
 function normalizeAi302SunoTrack(item = {}) {
@@ -7366,6 +7425,20 @@ app.post("/api/tts/multilingual", async (req, res, next) => {
     const speech = await synthesizeTtsMultilingualWithAi302(req.body || {});
     await mutateDb(async (db) => {
       db.usage.unshift(usage(`Generated TTS-Multilingual-v2 audio (${speech.textCharacters} chars)`, 0, user.id));
+      await saveDb(db);
+    });
+    res.json(speech);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/tts/doubao-hd", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    const speech = await synthesizeDoubaoTtsHdWithAi302(req.body || {});
+    await mutateDb(async (db) => {
+      db.usage.unshift(usage(`Generated Doubao tts_hd audio (${speech.textCharacters} chars)`, 0, user.id));
       await saveDb(db);
     });
     res.json(speech);
