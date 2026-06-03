@@ -581,6 +581,7 @@ const copy = {
     oldPassword: "Old Password",
     newPassword: "New Password",
     confirmNewPassword: "Confirm New",
+    confirmNewPassword: "Confirm New",
     renameProject: "Rename project",
     deleteProject: "Delete project",
     saveName: "Save name",
@@ -871,6 +872,7 @@ const copy = {
     oldPassword: "旧密码",
     newPassword: "新密码",
     confirmNewPassword: "确认新密码",
+    confirmNewPassword: "确认新密码",
     renameProject: "重命名项目",
     deleteProject: "删除项目",
     saveName: "保存名称",
@@ -1159,6 +1161,7 @@ const copy = {
     changePasswordSubtitle: "Change the password sent via WhatsApp",
     oldPassword: "Old Password",
     newPassword: "New Password",
+    confirmNewPassword: "Confirm New",
     confirmNewPassword: "Confirm New",
     renameProject: "Rename project",
     deleteProject: "Delete project",
@@ -6729,6 +6732,26 @@ function settingsPage() {
           <label>${t("email")}<input name="email" value="${esc(user.email || "")}" disabled></label>
         </div>
         <button class="gold-button" type="submit">${icon("save", 18)} Save Account</button>
+      </form>
+      <form class="settings-card" data-form="account-whatsapp">
+        <header>
+          <span>${icon("message-circle", 30)}</span>
+          <div><h2>WhatsApp</h2><p>${t("whatsappSettingsSubtitle")}</p></div>
+        </header>
+        <label>${t("whatsappNumber")}<input name="phone" value="${esc(user.phone || "")}" placeholder="+60123456789" autocomplete="tel"></label>
+        <button class="gold-button" type="submit">${icon("save", 18)} ${t("saveWhatsapp")}</button>
+      </form>
+      <form class="settings-card" data-form="account-password">
+        <header>
+          <span>${icon("lock-keyhole", 30)}</span>
+          <div><h2>${t("changePassword")}</h2><p>${t("changePasswordSubtitle")}</p></div>
+        </header>
+        <label>${t("oldPassword")}<input name="oldPassword" type="password" autocomplete="current-password" required></label>
+        <div class="settings-form-grid">
+          <label>${t("newPassword")}<input name="newPassword" type="password" autocomplete="new-password" minlength="6" required></label>
+          <label>${t("confirmNewPassword")}<input name="confirmPassword" type="password" autocomplete="new-password" minlength="6" required></label>
+        </div>
+        <button class="gold-button" type="submit">${icon("key-round", 18)} ${t("changePassword")}</button>
       </form>
     </section>`;
 }
