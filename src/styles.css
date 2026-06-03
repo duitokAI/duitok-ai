@@ -42801,7 +42801,7 @@ body:has(.studio-shell .video-page-studio),
 .studio-shell .video-prompt-extractor-page {
   --studio-wall-visible-columns: 5;
   --studio-wall-gap: clamp(2px, 0.16vw, 4px);
-  --studio-wall-separator-color: #07070a;
+  --studio-wall-separator-color: #efe2f5;
 }
 
 .studio-shell .image-higgsfield-mode[data-studio-wall-zoom-level="0"],
@@ -43218,11 +43218,11 @@ body:has(.studio-shell .video-page-studio),
 }
 
 /* Final studio wall packing guard: keep the Higgsfield-style wall stable on
-   auto-height pages, with thin dark gutters and media filling every tile. */
+   auto-height pages, with thin background-colored gutters and media filling every tile. */
 .studio-shell .image-higgsfield-mode > .studio-result-wall,
 .studio-shell .video-page-studio > .studio-result-wall,
 .studio-shell .video-prompt-extractor-page > .studio-result-wall {
-  background: #07070a !important;
+  background: #efe2f5 !important;
 }
 
 .studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid,
@@ -43241,7 +43241,7 @@ body:has(.studio-shell .video-page-studio),
   margin: 0 !important;
   padding: 0 !important;
   overflow: visible !important;
-  background: #07070a !important;
+  background: #efe2f5 !important;
 }
 
 .studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-card,
@@ -43260,7 +43260,7 @@ body:has(.studio-shell .video-page-studio),
   border: 0 !important;
   border-radius: 0 !important;
   overflow: hidden !important;
-  background: #07070a !important;
+  background: #efe2f5 !important;
   line-height: 0 !important;
 }
 
