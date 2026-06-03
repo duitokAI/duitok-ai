@@ -32,6 +32,7 @@ const apimartImageModel = process.env.APIMART_IMAGE_MODEL || "gpt-image-2";
 const apimartSeedream50LiteModel = process.env.APIMART_SEEDREAM_5_LITE_MODEL || "seedream-5.0-lite";
 const apimartSeedream45Model = process.env.APIMART_SEEDREAM_4_5_MODEL || "seedream-4.5";
 const apimartGrokImageModel = process.env.APIMART_GROK_IMAGE_MODEL || "grok-imagine-1.0-apimart";
+const apimartGrokVideoModel = process.env.APIMART_GROK_VIDEO_MODEL || "grok-imagine-1.0-video-apimart";
 const apimartSeedanceModel = process.env.APIMART_SEEDANCE_MODEL || "doubao-seedance-2.0";
 const geminiBaseUrl = (process.env.GEMINI_BASE_URL || "https://generativelanguage.googleapis.com").replace(/\/$/, "");
 const geminiGeneratePathPrefix = process.env.GEMINI_GENERATE_PATH_PREFIX || "/v1beta/models";
@@ -1871,8 +1872,8 @@ function providerForMediaModel(model) {
   model = internalMediaModel(model);
   if (model === "GPT Image 2" || model === "Seedream 5.0 Lite" || model === "Seedream 4.5" || model === "Grok Imagine") return process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Nano Banana Pro" || model === "Nano Banana 2") return process.env.GRSAI_API_KEY ? "grsai" : "mock";
-  if (model === "Seedance 2.0") return process.env.APIMART_API_KEY ? "apimart" : "mock";
-  if (model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni" || model === "Grok Imagine Video") return process.env.WUYIN_API_KEY ? "wuyin" : "mock";
+  if (model === "Seedance 2.0" || model === "Grok Imagine Video") return process.env.APIMART_API_KEY ? "apimart" : "mock";
+  if (model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni") return process.env.WUYIN_API_KEY ? "wuyin" : "mock";
   return "unsupported";
 }
 
@@ -1890,7 +1891,7 @@ function videoDurationFor(project, model = project.image?.model) {
   if (model === "Seedance 2.0") return Number(project.image?.duration || process.env.APIMART_SEEDANCE_DURATION || 5);
   if (model === "Sora 2") return Number(project.image?.duration || process.env.WUYIN_SORA_DURATION || 8);
   if (model === "Gemini Omni") return 10;
-  if (model === "Grok Imagine Video") return Number(project.image?.duration || process.env.WUYIN_GROK_DURATION || 8);
+  if (model === "Grok Imagine Video") return Number(project.image?.duration || process.env.APIMART_GROK_VIDEO_DURATION || 6);
   if (model === "Veo 3.1") return 8;
   return 0;
 }
@@ -3196,7 +3197,7 @@ function generationAspectRatioForProject(project, action = "generate-image", ste
 function generationEndpointFor(provider, project) {
   if (provider === "gemini") return `${geminiGeneratePathPrefix}/${geminiVisionModel}:generateContent`;
   if (provider === "grsai" && project?.clone?.referenceVideo) return grsaiChatPath;
-  if (provider === "apimart" && internalMediaModel(project?.image?.model) === "Seedance 2.0") return apimartVideoPath;
+  if (provider === "apimart" && (internalMediaModel(project?.image?.model) === "Seedance 2.0" || internalMediaModel(project?.image?.model) === "Grok Imagine Video")) return apimartVideoPath;
   if (provider === "grsai") return grsaiDrawPath;
   if (provider === "wuyin") return wuyinPathFromProject(project);
   return apimartImagePath;
@@ -3266,6 +3267,20 @@ function apimartSeedanceBody(project, prompt) {
     size,
     duration,
     generate_audio: process.env.APIMART_SEEDANCE_GENERATE_AUDIO !== "false"
+  };
+}
+
+function apimartGrokVideoBody(project, prompt) {
+  const allowedSizes = ["16:9", "9:16", "1:1", "3:2", "2:3"];
+  const size = String(project.image?.aspectRatio || process.env.APIMART_GROK_VIDEO_SIZE || "16:9").trim();
+  const quality = String(project.image?.resolution || process.env.APIMART_GROK_VIDEO_QUALITY || "480p").trim().toLowerCase();
+  const duration = Math.min(30, Math.max(6, Number(videoDurationFor(project, "Grok Imagine Video")) || 6));
+  return {
+    model: apimartGrokVideoModel,
+    prompt,
+    size: allowedSizes.includes(size) ? size : "16:9",
+    duration,
+    quality: ["480p", "720p"].includes(quality) ? quality : "480p"
   };
 }
 
@@ -3410,6 +3425,28 @@ async function generateVideoWithApimartSeedance(project) {
   };
 }
 
+async function generateVideoWithApimartGrok(project) {
+  const prompt = [
+    project.image?.prompt || "Create a high-converting TikTok Shop product video.",
+    `Mode: ${project.image?.mode || "Create Video"}.`,
+    "Style: cinematic short-form video, clear subject focus, smooth motion, no fake brand claims."
+  ].join("\n");
+  const data = await apimartRequest(apimartVideoPath, {
+    method: "POST",
+    body: JSON.stringify(apimartGrokVideoBody(project, prompt))
+  });
+  const task = Array.isArray(data) ? data[0] : data;
+  const taskId = task?.task_id || task?.id;
+  if (!taskId) return { text: JSON.stringify(data, null, 2), urls: extractVideoUrls(data) };
+  const taskData = await pollApimartTask(taskId);
+  const urls = extractVideoUrls(taskData);
+  return {
+    text: urls.length ? `Video generated with Grok Imagine Video.\n\nTask ID: ${taskId}` : `Grok Imagine Video task completed.\n\nTask ID: ${taskId}`,
+    urls,
+    taskId
+  };
+}
+
 async function generateWithApimart(project, action, step) {
   if (action === "generate-image") {
     const image = await generateImageWithApimart(project);
@@ -3434,7 +3471,11 @@ async function generateWithProvider(project, action, step) {
       const video = await generateVideoWithApimartSeedance(project);
       return { title: "Seedance 2.0", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" };
     }
-    if (provider === "wuyin" && (model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni" || model === "Grok Imagine Video")) {
+    if (provider === "apimart" && model === "Grok Imagine Video") {
+      const video = await generateVideoWithApimartGrok(project);
+      return { title: "Grok Imagine Video", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" };
+    }
+    if (provider === "wuyin" && (model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni")) {
       const video = await generateVideoWithWuyin(project);
       return { title: `速创API ${model}`, body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "wuyin" };
     }
