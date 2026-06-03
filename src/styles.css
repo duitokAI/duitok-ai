@@ -42820,3 +42820,21 @@ body:has(.studio-shell .video-page-studio),
     min-width: 0 !important;
   }
 }
+
+/* Agent chat bottom stop: the lowest scroll position should end just above the
+   composer, not leave a large blank runway below the last assistant message. */
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread,
+.studio-shell .agent-page-panel .agent-thread,
+.studio-shell .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-thread {
+  padding-bottom: clamp(104px, 10vh, 132px) !important;
+  scroll-padding-bottom: clamp(104px, 10vh, 132px) !important;
+}
+
+@media (max-width: 680px) {
+  .studio-shell .agent-chat-shell.agent-page-panel .agent-thread,
+  .studio-shell .agent-page-panel .agent-thread,
+  .studio-shell .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-thread {
+    padding-bottom: clamp(112px, 13vh, 148px) !important;
+    scroll-padding-bottom: clamp(112px, 13vh, 148px) !important;
+  }
+}
