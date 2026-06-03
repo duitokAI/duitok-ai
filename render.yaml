@@ -151,6 +151,8 @@ services:
         sync: false
       - key: WUYIN_BASE_URL
         value: https://api.wuyinkeji.com
+      - key: WUYIN_VOICE_CLONE_PATH
+        value: /api/voice/clone
       - key: WUYIN_IMAGE_SIZE
         value: 1K
       - key: WUYIN_IMAGE_ASPECT_RATIO

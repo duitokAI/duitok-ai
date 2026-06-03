@@ -52,6 +52,7 @@ const googleClientId = process.env.GOOGLE_CLIENT_ID || "";
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET || "";
 const googleRedirectPath = process.env.GOOGLE_REDIRECT_PATH || "/api/auth/google/callback";
 const wuyinBaseUrl = (process.env.WUYIN_BASE_URL || "https://api.wuyinkeji.com").replace(/\/$/, "");
+const wuyinVoiceClonePath = process.env.WUYIN_VOICE_CLONE_PATH || "/api/voice/clone";
 const wuyinImagePaths = {
   "Grok Imagine": process.env.WUYIN_GROK_IMAGE_PATH || "/api/async/image_grok_imagine",
   "Veo 3.1": "/api/async/video_veo3.1_fast",
@@ -2385,6 +2386,47 @@ async function fetchAudioTranslationWithAi302(taskId = "") {
     method: "GET"
   });
   return normalizeAi302AudioTranslationTask(payload);
+}
+
+function normalizeWuyinVoiceClone(payload = {}, text = "") {
+  const data = payload.data || payload;
+  return {
+    provider: "wuyin",
+    model: "voice-clone-sync",
+    textCharacters: Array.from(text).length,
+    demoAudioUrl: data.demo_audio || data.demoAudio || data.audio_url || data.audioUrl || "",
+    voiceId: String(data.voice_id || data.voiceId || ""),
+    raw: process.env.NODE_ENV === "production" ? undefined : payload
+  };
+}
+
+async function cloneVoiceWithWuyin(body = {}) {
+  const audioUrl = String(body.audioUrl || body.audio_url || "").trim();
+  const text = String(body.text || "").trim();
+  if (!audioUrl || !/^https?:\/\//i.test(audioUrl)) {
+    const error = new Error("Voice clone audio URL is required.");
+    error.status = 400;
+    throw error;
+  }
+  if (!text) {
+    const error = new Error("Voice clone text is required.");
+    error.status = 400;
+    throw error;
+  }
+  if (Array.from(text).length > 5000) {
+    const error = new Error("Voice clone text must be under 5,000 characters for synchronous generation.");
+    error.status = 400;
+    throw error;
+  }
+  const payload = await wuyinRequest(wuyinVoiceClonePath, {
+    method: "POST",
+    body: {
+      audio_url: audioUrl,
+      text,
+      ...(body.name ? { name: String(body.name).slice(0, 120) } : {})
+    }
+  });
+  return normalizeWuyinVoiceClone(payload, text);
 }
 
 async function deepseekRequest(body) {
@@ -7541,6 +7583,20 @@ app.post("/api/audio/translation", async (req, res, next) => {
       await saveDb(db);
     });
     res.json(task);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/voice/clone-sync", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    const cloned = await cloneVoiceWithWuyin(req.body || {});
+    await mutateDb(async (db) => {
+      db.usage.unshift(usage(`Generated voice clone demo (${cloned.textCharacters} chars)`, 0, user.id));
+      await saveDb(db);
+    });
+    res.json(cloned);
   } catch (error) {
     next(error);
   }
