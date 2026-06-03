@@ -44545,3 +44545,54 @@ body:has(.studio-shell .video-page-studio),
   width: clamp(76px, 22cqw, 160px) !important;
   flex: 0 1 clamp(76px, 22cqw, 160px) !important;
 }
+
+/* Final landscape density pass: wide failed tiles should read like a composed
+   status panel, not four tiny chips floating in empty space. */
+.studio-shell .studio-wall-pending.failed.landscape .studio-wall-failed-center {
+  width: min(74%, 520px) !important;
+  max-width: min(74%, 520px) !important;
+  gap: clamp(7px, 1.35cqw, 14px) !important;
+}
+
+.studio-shell .studio-wall-pending.failed.landscape .studio-wall-failed-center > b,
+.studio-shell .studio-wall-pending.failed.landscape .studio-wall-failed-center > .generation-credit-refund-note {
+  width: min(100%, clamp(210px, 56cqw, 390px)) !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  justify-content: center !important;
+}
+
+.studio-shell .studio-wall-pending.failed.landscape .studio-wall-failed-center > b {
+  min-height: clamp(30px, 6.2cqw, 50px) !important;
+  height: clamp(30px, 6.2cqw, 50px) !important;
+  font-size: clamp(17px, 4.1cqw, 32px) !important;
+}
+
+.studio-shell .studio-wall-pending.failed.landscape .studio-wall-failed-center > small {
+  width: min(100%, clamp(260px, 68cqw, 520px)) !important;
+  max-width: 100% !important;
+  font-size: clamp(13px, 3.1cqw, 21px) !important;
+  line-height: 1.16 !important;
+}
+
+.studio-shell .studio-wall-pending.failed.landscape .studio-wall-failed-center > .generation-credit-refund-note {
+  min-height: clamp(30px, 6.2cqw, 50px) !important;
+  height: clamp(30px, 6.2cqw, 50px) !important;
+}
+
+.studio-shell .studio-wall-pending.failed.landscape .studio-wall-failed-center > .generation-credit-refund-note strong {
+  font-size: clamp(15px, 3.7cqw, 26px) !important;
+}
+
+.studio-shell .studio-wall-pending.failed.landscape .studio-wall-failed-center > .studio-wall-failed-actions {
+  width: min(100%, clamp(250px, 66cqw, 430px)) !important;
+  gap: clamp(12px, 7cqw, 160px) !important;
+}
+
+.studio-shell .studio-wall-pending.failed.landscape .studio-wall-failed-center > .studio-wall-failed-actions button {
+  width: clamp(92px, 24cqw, 150px) !important;
+  flex-basis: clamp(92px, 24cqw, 150px) !important;
+  height: clamp(30px, 6.5cqw, 46px) !important;
+  min-height: clamp(30px, 6.5cqw, 46px) !important;
+  font-size: clamp(12px, 3cqw, 18px) !important;
+}
