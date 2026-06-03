@@ -30,6 +30,7 @@ function migrateStorageKey(key) {
 }
 Object.values(storageKeys).forEach(migrateStorageKey);
 const agentHistoryStorageKey = storageKeys.agentHistory;
+const agentDraftHistoryId = "__agent_new_chat_draft__";
 function readStoredJson(key, fallback) {
   const raw = localStorage.getItem(key);
   if (!raw) return fallback;
@@ -9169,12 +9170,22 @@ function agentHistoryRecentsLabel() {
 }
 
 function agentHistorySidebarList(sessions = []) {
-  if (!sessions.length) return `<p class="agent-session-empty">还没有历史记录</p>`;
+  const showDraft = !state.activeAgentHistoryId && !state.agentMessages.length && !String(state.agentInput || "").trim();
+  const draftSession = {
+    id: agentDraftHistoryId,
+    title: state.lang === "zh" ? "新对话" : "New Chat",
+    updatedAt: "",
+    messages: [],
+    isDraft: true
+  };
+  const displaySessions = showDraft ? [draftSession, ...sessions] : sessions;
+  if (!displaySessions.length) return `<p class="agent-session-empty">还没有历史记录</p>`;
   return `<div class="agent-session-list">
-    ${sessions.map((item) => {
+    ${displaySessions.map((item) => {
       const title = agentHistoryDisplayTitle(item);
       const isEditing = state.agentHistoryEditingId === item.id;
-      const isActive = state.activeAgentHistoryId === item.id;
+      const isDraft = item.id === agentDraftHistoryId || item.isDraft;
+      const isActive = isDraft || state.activeAgentHistoryId === item.id;
       const searchText = `${title} ${agentHistoryMeta(item)}`.toLowerCase();
       return `<article class="agent-session-item ${isActive ? "is-active" : ""}" data-agent-history-row data-agent-history-restore-row="${esc(item.id)}" data-agent-history-text="${esc(searchText)}">
         ${isEditing ? `<label class="agent-session-edit" title="重命名对话">
@@ -9184,8 +9195,8 @@ function agentHistorySidebarList(sessions = []) {
             <span>${esc(title)}</span>
             <small>${agentHistoryMeta(item)}</small>
           </button>`}
-        <button type="button" class="agent-session-rename" data-agent-history-rename="${esc(item.id)}" title="重命名对话" aria-label="重命名对话">${icon("pencil", 15)}</button>
-        <button type="button" class="agent-session-delete" data-agent-history-delete="${esc(item.id)}" title="删除这条历史" aria-label="删除这条历史">${icon("trash-2", 15)}</button>
+        ${isDraft ? "" : `<button type="button" class="agent-session-rename" data-agent-history-rename="${esc(item.id)}" title="重命名对话" aria-label="重命名对话">${icon("pencil", 15)}</button>
+        <button type="button" class="agent-session-delete" data-agent-history-delete="${esc(item.id)}" title="删除这条历史" aria-label="删除这条历史">${icon("trash-2", 15)}</button>`}
       </article>`;
     }).join("")}
   </div>`;
@@ -9241,6 +9252,7 @@ function agentHistoryCountLabel(count = 0) {
 }
 
 function agentHistoryMeta(item = {}) {
+  if (item.id === agentDraftHistoryId || item.isDraft) return state.lang === "zh" ? "空白" : "Empty";
   const date = item.updatedAt ? new Date(item.updatedAt).toLocaleString(state.lang === "zh" ? "zh-CN" : "en-GB", { month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit" }) : "";
   return date;
 }
@@ -11873,6 +11885,23 @@ function normalizeAgentHistoryTitle(value = "") {
 }
 
 function restoreAgentHistory(id) {
+  if (id === agentDraftHistoryId) {
+    clearAgentTypingTimer();
+    localStorage.removeItem(storageKeys.agentMessages);
+    localStorage.removeItem(storageKeys.agentContextSummary);
+    return set({
+      page: "agent",
+      agentMessages: [],
+      agentInput: "",
+      agentAttachments: [],
+      agentQueue: [],
+      agentBusy: false,
+      agentTyping: false,
+      agentExpandedMessages: {},
+      activeAgentHistoryId: null,
+      agentHistoryOpen: false
+    });
+  }
   const session = (state.agentHistorySessions || []).find((item) => item.id === id);
   if (!session) return notify("找不到这条历史记录。");
   const messages = agentMessagesForStorage(session.messages);
