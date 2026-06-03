@@ -31494,7 +31494,7 @@ label {
   width: 112px !important;
   min-width: 112px !important;
   height: 112px !important;
-  min-height: 112px !important;
+  min-height: 98px !important;
   max-height: 112px !important;
   aspect-ratio: 1 / 1 !important;
   display: grid !important;
@@ -43879,7 +43879,7 @@ body:has(.studio-shell .video-page-studio),
   align-items: end !important;
   border: 1px solid rgba(93, 8, 108, 0.07) !important;
   border-radius: 0 0 22px 22px !important;
-  padding: 18px clamp(18px, 2.4vw, 28px) 20px !important;
+  padding: 16px clamp(18px, 2.4vw, 28px) 18px !important;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 248, 253, 0.9)) !important;
   box-shadow: 0 14px 38px rgba(93, 8, 108, 0.06) !important;

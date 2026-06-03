@@ -4322,7 +4322,6 @@ function contentLibraryPage() {
     <section class="asset-library-main">
       <header class="asset-library-command">
         <div>
-          <p>${icon("folder-open", 17)} Content Library</p>
           <h1>Content Library</h1>
         </div>
         <span>${filtered.length} / ${all.length} assets</span>
