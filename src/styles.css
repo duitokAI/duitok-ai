@@ -44413,3 +44413,79 @@ body:has(.studio-shell .video-page-studio),
   width: clamp(12px, 3.2cqw, 22px) !important;
   height: clamp(12px, 3.2cqw, 22px) !important;
 }
+
+/* Absolute final lock: failed wall cards can appear under different studio
+   shells, so target the state directly and center the stack with flex instead
+   of inheriting older landscape grid alignment. */
+.studio-shell .studio-wall-pending.failed > .studio-wall-pending-controls {
+  position: absolute !important;
+  inset: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: clamp(10px, 2.2cqw, 18px) !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .studio-wall-pending.failed .studio-wall-failed-center {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  width: min(78%, 520px) !important;
+  max-width: min(78%, 520px) !important;
+  max-height: calc(100% - 12px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: clamp(5px, 1.12cqw, 12px) !important;
+  text-align: center !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+.studio-shell .studio-wall-pending.failed .studio-wall-failed-center > b,
+.studio-shell .studio-wall-pending.failed .studio-wall-failed-center > small,
+.studio-shell .studio-wall-pending.failed .studio-wall-failed-center > .generation-credit-refund-note,
+.studio-shell .studio-wall-pending.failed .studio-wall-failed-center > .studio-wall-failed-actions {
+  align-self: center !important;
+  justify-self: center !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  text-align: center !important;
+}
+
+.studio-shell .studio-wall-pending.failed .studio-wall-failed-center > b {
+  width: fit-content !important;
+  max-width: 100% !important;
+  min-height: clamp(22px, 5.2cqw, 42px) !important;
+  height: clamp(22px, 5.2cqw, 42px) !important;
+  padding: 0 clamp(10px, 3cqw, 22px) !important;
+  font-size: clamp(14px, 4.2cqw, 30px) !important;
+  line-height: 1 !important;
+}
+
+.studio-shell .studio-wall-pending.failed .studio-wall-failed-center > small {
+  width: min(100%, 520px) !important;
+  max-width: 520px !important;
+  font-size: clamp(11px, 3cqw, 19px) !important;
+  line-height: 1.14 !important;
+}
+
+.studio-shell .studio-wall-pending.failed .studio-wall-failed-center > .generation-credit-refund-note {
+  width: fit-content !important;
+  max-width: 100% !important;
+  min-width: clamp(126px, 32cqw, 240px) !important;
+}
+
+.studio-shell .studio-wall-pending.failed .studio-wall-failed-center > .studio-wall-failed-actions {
+  width: min(100%, 360px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: clamp(5px, 1.8cqw, 14px) !important;
+}
+
+.studio-shell .studio-wall-pending.failed .studio-wall-failed-center > .studio-wall-failed-actions button {
+  width: clamp(76px, 22cqw, 160px) !important;
+  flex: 0 1 clamp(76px, 22cqw, 160px) !important;
+}
