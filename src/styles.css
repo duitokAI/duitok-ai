@@ -42112,8 +42112,9 @@ body:has(.studio-shell .video-page-studio),
 }
 
 /* Higgsfield-style zoom density: the five slider stops map to predictable
-   visible columns. Cards never grow to fill a sparse row, so the largest stop
-   still shows three portrait cards instead of one oversized tile. */
+   row heights. Cards keep one shared row height, then use aspect ratio to
+   choose their width. This avoids masonry holes and prevents sparse rows from
+   stretching a single tile across the wall. */
 .studio-shell .image-higgsfield-mode,
 .studio-shell .video-page-studio,
 .studio-shell .video-prompt-extractor-page {
@@ -42153,7 +42154,7 @@ body:has(.studio-shell .video-page-studio),
 .studio-shell .image-higgsfield-mode .studio-wall-grid,
 .studio-shell .video-page-studio .studio-wall-grid,
 .studio-shell .video-prompt-extractor-page .studio-wall-grid {
-  --studio-wall-card-width: calc(
+  --studio-wall-row-height: calc(
     (100% - ((var(--studio-wall-visible-columns) - 1) * var(--studio-wall-gap, 3px)))
     / var(--studio-wall-visible-columns)
   );
@@ -42162,10 +42163,13 @@ body:has(.studio-shell .video-page-studio),
 .studio-shell .image-higgsfield-mode .studio-wall-card,
 .studio-shell .video-page-studio .studio-wall-card,
 .studio-shell .video-prompt-extractor-page .studio-wall-card {
-  flex: 0 0 var(--studio-wall-card-width) !important;
-  width: var(--studio-wall-card-width) !important;
+  flex: 0 0 calc(var(--studio-wall-row-height) * var(--media-ratio, 1)) !important;
+  width: calc(var(--studio-wall-row-height) * var(--media-ratio, 1)) !important;
   min-width: 0 !important;
-  max-width: var(--studio-wall-card-width) !important;
+  max-width: min(100%, calc(var(--studio-wall-row-height) * var(--media-ratio, 1))) !important;
+  height: var(--studio-wall-row-height) !important;
+  min-height: var(--studio-wall-row-height) !important;
+  max-height: var(--studio-wall-row-height) !important;
 }
 
 @media (max-width: 760px) {
