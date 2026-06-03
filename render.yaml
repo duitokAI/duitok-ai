@@ -135,6 +135,8 @@ services:
         value: /suno/fetch
       - key: AI302_SUNO_MODEL
         value: chirp-crow
+      - key: AI302_AUDIO_TRANSLATE_PATH
+        value: /302/audio/translate/task
       - key: WUYIN_API_KEY
         sync: false
       - key: WUYIN_BASE_URL

@@ -74,6 +74,7 @@ const ai302MinimaxSpeechModel = process.env.AI302_MINIMAX_SPEECH_MODEL || "speec
 const ai302SunoSubmitPath = process.env.AI302_SUNO_SUBMIT_PATH || "/suno/submit/music";
 const ai302SunoFetchPathPrefix = process.env.AI302_SUNO_FETCH_PATH_PREFIX || "/suno/fetch";
 const ai302SunoModel = process.env.AI302_SUNO_MODEL || "chirp-crow";
+const ai302AudioTranslatePath = process.env.AI302_AUDIO_TRANSLATE_PATH || "/302/audio/translate/task";
 const webSearchBaseUrl = process.env.WEB_SEARCH_BASE_URL || "https://duckduckgo.com/html/";
 const allowedMediaModels = new Set(["GPT Image 2", "Seedream 5.0 Lite", "Seedream 4.5", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"]);
 const thumbnailCache = new Map();
@@ -2164,6 +2165,68 @@ async function fetchSunoWithAi302(taskId = "") {
     headers: { Accept: "application/json" }
   });
   return normalizeAi302SunoTask(payload);
+}
+
+function normalizeAi302AudioTranslationTask(payload = {}) {
+  const data = payload.data || payload;
+  const outputData = data.output_data || data.outputData || data.steps?.text_to_speech?.output_data || {};
+  return {
+    provider: "302ai",
+    model: "audio-translation",
+    taskId: String(data.task_id || data.taskId || data.id || ""),
+    status: String(data.status || ""),
+    message: String(data.message || ""),
+    currentStep: String(data.current_step || data.currentStep || ""),
+    nextStep: data.next_step || data.nextStep || null,
+    sourceLanguage: String(data.source_language || data.sourceLanguage || ""),
+    targetLanguage: String(data.target_language || data.targetLanguage || ""),
+    voiceCloneProvider: String(data.voice_clone_provider || data.voiceCloneProvider || ""),
+    audioUrl: outputData.audio_path || outputData.audio_url || outputData.audioUrl || data.output_audio_url || data.outputAudioUrl || "",
+    sourceAudioUrl: data.audio_file_url || data.audioFileUrl || "",
+    totalDuration: data.total_duration || data.totalDuration || null,
+    failReason: data.error_message || data.fail_reason || data.failReason || "",
+    steps: data.steps || {},
+    raw: process.env.NODE_ENV === "production" ? undefined : payload
+  };
+}
+
+async function submitAudioTranslationWithAi302(body = {}) {
+  const audioFileUrl = String(body.audioFileUrl || body.audio_file_url || "").trim();
+  const targetLanguage = String(body.targetLanguage || body.target_language || "").trim();
+  if (!audioFileUrl || !/^https?:\/\//i.test(audioFileUrl)) {
+    const error = new Error("Audio file URL is required for audio translation.");
+    error.status = 400;
+    throw error;
+  }
+  if (!targetLanguage) {
+    const error = new Error("Target language is required for audio translation.");
+    error.status = 400;
+    throw error;
+  }
+  const payload = await ai302Request(ai302AudioTranslatePath, {
+    method: "POST",
+    body: JSON.stringify({
+      audio_file_url: audioFileUrl,
+      clone_audio_file_url: String(body.cloneAudioFileUrl || body.clone_audio_file_url || ""),
+      target_language: targetLanguage,
+      source_language: String(body.sourceLanguage || body.source_language || ""),
+      voice_clone_provider: String(body.voiceCloneProvider || body.voice_clone_provider || "")
+    })
+  });
+  return normalizeAi302AudioTranslationTask(payload);
+}
+
+async function fetchAudioTranslationWithAi302(taskId = "") {
+  const id = String(taskId || "").trim();
+  if (!id) {
+    const error = new Error("Audio translation task id is required.");
+    error.status = 400;
+    throw error;
+  }
+  const payload = await ai302Request(`${ai302AudioTranslatePath}?task_id=${encodeURIComponent(id)}`, {
+    method: "GET"
+  });
+  return normalizeAi302AudioTranslationTask(payload);
 }
 
 async function deepseekRequest(body) {
@@ -7278,6 +7341,34 @@ app.get("/api/music/suno/:taskId", async (req, res, next) => {
       await saveDb(db);
     });
     res.json(music);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/audio/translation", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    const task = await submitAudioTranslationWithAi302(req.body || {});
+    await mutateDb(async (db) => {
+      db.usage.unshift(usage(`Submitted 302.AI audio translation task: ${task.targetLanguage || "target"}`, 0, user.id));
+      await saveDb(db);
+    });
+    res.json(task);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/audio/translation/:taskId", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    const task = await fetchAudioTranslationWithAi302(req.params.taskId);
+    await mutateDb(async (db) => {
+      db.usage.unshift(usage(`Checked 302.AI audio translation task: ${task.taskId || req.params.taskId}`, 0, user.id));
+      await saveDb(db);
+    });
+    res.json(task);
   } catch (error) {
     next(error);
   }
