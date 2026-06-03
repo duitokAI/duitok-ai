@@ -11576,16 +11576,28 @@ function rememberAgentHistorySessions(sessions = []) {
 function saveCurrentAgentHistory() {
   const messages = agentMessagesForStorage(state.agentMessages);
   if (!messages.length) return state.agentHistorySessions;
-  const latestUser = [...messages].reverse().find((item) => item.role === "user" && item.content);
-  const latestAssistant = [...messages].reverse().find((item) => item.role === "assistant" && item.content);
-  const titleSource = latestUser?.content || latestAssistant?.content || "Agent work thread";
   const session = {
     id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-    title: titleSource.replace(/\s+/g, " ").slice(0, 42),
+    title: agentHistoryTitleFromMessages(messages),
     updatedAt: new Date().toISOString(),
     messages
   };
   return rememberAgentHistorySessions([session, ...(state.agentHistorySessions || [])]);
+}
+
+function agentHistoryTitleFromMessages(messages = []) {
+  const firstUser = messages.find((item) => item.role === "user" && String(item.content || "").trim());
+  const firstAssistant = messages.find((item) => item.role === "assistant" && String(item.content || "").trim());
+  return normalizeAgentHistoryTitle(firstUser?.content || firstAssistant?.content || "Agent work thread");
+}
+
+function normalizeAgentHistoryTitle(value = "") {
+  const title = String(value || "")
+    .replace(/\s+/g, " ")
+    .replace(/^(帮我|请你|请帮我|我要|我想|can you|please)\s*/i, "")
+    .trim()
+    .slice(0, 42);
+  return title || "Agent work thread";
 }
 
 function restoreAgentHistory(id) {
