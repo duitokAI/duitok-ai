@@ -4439,26 +4439,26 @@ function assetLibraryDateLabel(key) {
 function assetLibraryDateSection(group) {
   return `<section class="asset-date-group">
     <header><label><input type="checkbox" aria-label="Select ${esc(group.label)} assets"><span></span></label><h2>${esc(group.label)}</h2><small>${group.entries.length} assets</small></header>
-    <div class="asset-timeline-grid">${group.entries.map(assetLibraryCard).join("")}</div>
+    <div class="asset-timeline-grid">${group.entries.map((item, index) => assetLibraryCard(item, index)).join("")}</div>
   </section>`;
 }
 
-function assetLibraryCard(item) {
+function assetLibraryCard(item, index = 0) {
   const kind = assetMediaKind(item);
   const title = item.title || item.providerTitle || resultMediaLabel(item);
   return `<article class="asset-tile asset-tile-${esc(kind)}" data-result-id="${esc(item.id)}">
     <button type="button" class="asset-tile-preview" data-result-preview="${esc(item.id)}" aria-label="Preview ${esc(title)}">
-      ${assetLibraryPreview(item, kind)}
+      ${assetLibraryPreview(item, kind, index)}
     </button>
   </article>`;
 }
 
-function assetLibraryPreview(item, kind) {
+function assetLibraryPreview(item, kind, index = 0) {
   if (kind === "text") {
     const body = resultPromptText(item).replaceAll("\n", " ").trim() || item.providerBody || item.body || "Text result";
     return `<div class="asset-text-thumb">${icon("file-text", 28)}<strong>${esc(item.title || "Text result")}</strong><p>${esc(body)}</p></div>`;
   }
-  return resultPreview(item, { clickable: false, wall: true });
+  return resultPreview(item, { clickable: false, wall: true, priority: index < 10, thumbWidth: 384, sizes: "(max-width: 760px) 42vw, 180px" });
 }
 
 function assetLibraryEmptyState(query) {
@@ -6661,8 +6661,10 @@ function resultPreview(item, options = {}) {
     return visual;
   }
   const imageBase = item.imageUrl ? `/api/media/result/${encodeURIComponent(item.id)}/image?token=${token}` : "";
-  const imageSrc = imageBase ? (options.wall ? `${imageBase}&thumb=1&w=${studioWallThumbnailWidth()}` : imageBase) : "";
-  const imageSrcset = options.wall && imageBase ? ` srcset="${[640, 960, 1280].map((width) => `${imageBase}&thumb=1&w=${width} ${width}w`).join(", ")}" sizes="${studioWallImageSizes()}"` : "";
+  const thumbWidth = Number(options.thumbWidth) || studioWallThumbnailWidth();
+  const imageSrc = imageBase ? (options.wall ? `${imageBase}&thumb=1&w=${thumbWidth}` : imageBase) : "";
+  const imageSizes = options.sizes || studioWallImageSizes();
+  const imageSrcset = options.wall && imageBase ? ` srcset="${[384, 640, 960].map((width) => `${imageBase}&thumb=1&w=${width} ${width}w`).join(", ")}" sizes="${esc(imageSizes)}"` : "";
   const videoSrc = item.videoUrl ? `/api/media/result/${encodeURIComponent(item.id)}/video?token=${token}` : "";
   const imageError = "this.replaceWith(Object.assign(document.createElement('div'),{className:'result-media-error',textContent:'图片保存失败，请联系客服处理'}))";
   const ratioSync = mediaRatioSyncScript();
@@ -6683,14 +6685,14 @@ function resultPreview(item, options = {}) {
 
 function studioWallThumbnailWidth() {
   const column = studioWallZoomColumn();
-  if (column <= 220) return 640;
-  if (column <= 460) return 960;
-  return 1280;
+  if (column <= 180) return 384;
+  if (column <= 360) return 640;
+  return 960;
 }
 
 function studioWallImageSizes() {
   const column = studioWallZoomColumn();
-  return `(max-width: 760px) 100vw, ${Math.min(1280, Math.max(320, column))}px`;
+  return `(max-width: 760px) 100vw, ${Math.min(960, Math.max(240, column))}px`;
 }
 
 function visualCardPreview(card = {}) {
