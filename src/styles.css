@@ -44005,6 +44005,57 @@ body:has(.studio-shell .video-page-studio),
   vertical-align: top !important;
 }
 
+/* Agent completed image result shrink-wrap: avoid preserving an old 9:16
+   placeholder after the real media is rendered, which created a large blank gap
+   before the feedback row. */
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-card:has(.agent-generation-result-preview:has(.result-image)),
+.studio-shell .agent-page-panel .agent-generation-card:has(.agent-generation-result-preview:has(.result-image)) {
+  min-height: 0 !important;
+  align-content: start !important;
+  grid-auto-rows: max-content !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread .agent-generation-preview.agent-generation-result-preview:has(.result-image),
+.studio-shell .agent-page-panel .agent-thread .agent-generation-preview.agent-generation-result-preview:has(.result-image) {
+  width: fit-content !important;
+  max-width: min(720px, 100%) !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  aspect-ratio: auto !important;
+  display: inline-grid !important;
+  grid-template-rows: max-content !important;
+  align-content: start !important;
+  justify-self: start !important;
+  gap: 0 !important;
+  line-height: 0 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread .agent-generation-preview.agent-generation-result-preview:has(.result-image) .result-preview-trigger,
+.studio-shell .agent-page-panel .agent-thread .agent-generation-preview.agent-generation-result-preview:has(.result-image) .result-preview-trigger {
+  width: fit-content !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  aspect-ratio: auto !important;
+  display: inline-block !important;
+  line-height: 0 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread .agent-generation-preview.agent-generation-result-preview:has(.result-image) .result-image,
+.studio-shell .agent-page-panel .agent-thread .agent-generation-preview.agent-generation-result-preview:has(.result-image) .result-image {
+  width: auto !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: min(620px, 68dvh) !important;
+  aspect-ratio: auto !important;
+  display: block !important;
+  object-fit: contain !important;
+  vertical-align: top !important;
+}
+
 /* Content Library shell lock: the internal library rail must begin exactly at
    the workspace edge, so it stays attached to the main sidebar in both expanded
    and collapsed sidebar states. Keep this late in the cascade to override the
