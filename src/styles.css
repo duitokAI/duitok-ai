@@ -41721,3 +41721,68 @@ body:has(.studio-shell .video-page-studio),
   aspect-ratio: auto !important;
   object-fit: cover !important;
 }
+
+/* Higgsfield-style zoom density: the five slider stops map to predictable
+   visible columns. Cards never grow to fill a sparse row, so the largest stop
+   still shows three portrait cards instead of one oversized tile. */
+.studio-shell .image-higgsfield-mode,
+.studio-shell .video-page-studio,
+.studio-shell .video-prompt-extractor-page {
+  --studio-wall-visible-columns: 5;
+}
+
+.studio-shell .image-higgsfield-mode[data-studio-wall-zoom-level="0"],
+.studio-shell .video-page-studio[data-studio-wall-zoom-level="0"],
+.studio-shell .video-prompt-extractor-page[data-studio-wall-zoom-level="0"] {
+  --studio-wall-visible-columns: 7;
+}
+
+.studio-shell .image-higgsfield-mode[data-studio-wall-zoom-level="1"],
+.studio-shell .video-page-studio[data-studio-wall-zoom-level="1"],
+.studio-shell .video-prompt-extractor-page[data-studio-wall-zoom-level="1"] {
+  --studio-wall-visible-columns: 6;
+}
+
+.studio-shell .image-higgsfield-mode[data-studio-wall-zoom-level="2"],
+.studio-shell .video-page-studio[data-studio-wall-zoom-level="2"],
+.studio-shell .video-prompt-extractor-page[data-studio-wall-zoom-level="2"] {
+  --studio-wall-visible-columns: 5;
+}
+
+.studio-shell .image-higgsfield-mode[data-studio-wall-zoom-level="3"],
+.studio-shell .video-page-studio[data-studio-wall-zoom-level="3"],
+.studio-shell .video-prompt-extractor-page[data-studio-wall-zoom-level="3"] {
+  --studio-wall-visible-columns: 4;
+}
+
+.studio-shell .image-higgsfield-mode[data-studio-wall-zoom-level="4"],
+.studio-shell .video-page-studio[data-studio-wall-zoom-level="4"],
+.studio-shell .video-prompt-extractor-page[data-studio-wall-zoom-level="4"] {
+  --studio-wall-visible-columns: 3;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-grid,
+.studio-shell .video-page-studio .studio-wall-grid,
+.studio-shell .video-prompt-extractor-page .studio-wall-grid {
+  --studio-wall-card-width: calc(
+    (100% - ((var(--studio-wall-visible-columns) - 1) * var(--studio-wall-gap, 3px)))
+    / var(--studio-wall-visible-columns)
+  );
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-card,
+.studio-shell .video-page-studio .studio-wall-card,
+.studio-shell .video-prompt-extractor-page .studio-wall-card {
+  flex: 0 0 var(--studio-wall-card-width) !important;
+  width: var(--studio-wall-card-width) !important;
+  min-width: 0 !important;
+  max-width: var(--studio-wall-card-width) !important;
+}
+
+@media (max-width: 760px) {
+  .studio-shell .image-higgsfield-mode,
+  .studio-shell .video-page-studio,
+  .studio-shell .video-prompt-extractor-page {
+    --studio-wall-visible-columns: 2;
+  }
+}
