@@ -38124,6 +38124,28 @@ body:has(.studio-shell .image-higgsfield-mode),
   }
 }
 
+/* Agent collapsed-sidebar left-safe lock: the history rail stays fixed next to
+   the icon sidebar, so the chat lane needs a small extra left gutter to keep
+   bot avatars and the composer attach button clear of that rail. */
+@media (min-width: 981px) {
+  .studio-shell.sidebar-collapsed:has(.agent-page) {
+    --agent-collapsed-history-clearance: clamp(26px, 3.8vw, 56px);
+    --agent-collapsed-chat-lane-shift: calc(var(--studio-sidebar-width, 76px) + var(--agent-session-panel-width, 252px) - var(--agent-chat-shell-offset, 168px) + var(--agent-collapsed-history-clearance));
+  }
+
+  .studio-shell.sidebar-collapsed .agent-chat-shell.agent-page-panel .agent-thread,
+  .studio-shell.sidebar-collapsed .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-thread {
+    margin-left: max(0px, var(--agent-collapsed-chat-lane-shift)) !important;
+    margin-right: auto !important;
+  }
+
+  .studio-shell.sidebar-collapsed .agent-chat-shell.agent-page-panel .agent-form,
+  .studio-shell.sidebar-collapsed .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-form {
+    margin-left: max(0px, var(--agent-collapsed-chat-lane-shift)) !important;
+    margin-right: auto !important;
+  }
+}
+
 .studio-shell .agent-chat-shell.agent-page-panel .agent-thread,
 .studio-shell .agent-chat-shell.agent-page-panel .agent-form {
   min-width: 0 !important;
