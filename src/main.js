@@ -2002,6 +2002,13 @@ function dbWithProjectField(db, projectId, field, value) {
   };
 }
 
+function dbWithPreservedAttachments(nextDb, previousDb, attachmentIds = []) {
+  if (!nextDb || !previousDb || !attachmentIds.length) return nextDb;
+  const existingIds = new Set((nextDb.attachments || []).map((item) => item.id));
+  const preserved = (previousDb.attachments || []).filter((item) => attachmentIds.includes(item.id) && !existingIds.has(item.id));
+  return preserved.length ? { ...nextDb, attachments: [...preserved, ...(nextDb.attachments || [])] } : nextDb;
+}
+
 function dbWithoutResult(db, resultId) {
   if (!db || !resultId) return db;
   return {
@@ -5307,9 +5314,30 @@ function providerLogo(provider) {
   </span>`;
 }
 
+function imageReferenceField(kind) {
+  return kind === "product" ? "image.productAttachmentId" : "image.avatarAttachmentId";
+}
+
+function setPendingImageReference(field, id, attachment = null) {
+  state.imageReferencePending = {
+    ...(state.imageReferencePending || {}),
+    [field]: { projectId: state.projectId, id, attachment }
+  };
+}
+
+function clearPendingImageReference(field, projectId = state.projectId) {
+  const pending = { ...(state.imageReferencePending || {}) };
+  if (pending[field]?.projectId === projectId) delete pending[field];
+  state.imageReferencePending = pending;
+}
+
 function selectedImageReference(kind) {
-  const selectedId = kind === "avatar" ? project().image?.avatarAttachmentId : project().image?.productAttachmentId;
-  return selectedId ? (state.db.attachments || []).find((item) => item.id === selectedId) : null;
+  const field = imageReferenceField(kind);
+  const pending = state.imageReferencePending?.[field];
+  const hasPending = pending?.projectId === state.projectId;
+  const selectedId = hasPending ? pending.id : kind === "avatar" ? project().image?.avatarAttachmentId : project().image?.productAttachmentId;
+  if (!selectedId) return null;
+  return hasPending && pending.attachment ? pending.attachment : (state.db.attachments || []).find((item) => item.id === selectedId) || null;
 }
 
 function imageReferenceThumb(kind, item, emptyLabel) {
@@ -11127,11 +11155,13 @@ async function uploadAttachmentFile(file, kind = state.attachmentPickerKind || "
 
 async function pickAttachment(id, targetKind = state.attachmentPickerKind) {
   if (!id) return;
-  const field = targetKind === "product" ? "image.productAttachmentId" : "image.avatarAttachmentId";
+  const field = imageReferenceField(targetKind);
   const projectId = state.projectId;
   const previousDb = state.db;
+  const selectedAttachment = (previousDb.attachments || []).find((item) => item.id === id) || null;
   const requestSeq = (imageReferenceSaveSeq.get(field) || 0) + 1;
   imageReferenceSaveSeq.set(field, requestSeq);
+  setPendingImageReference(field, id, selectedAttachment);
   state.db = dbWithProjectField(previousDb, projectId, field, id);
   closeModalDom();
   patchImageReferencesDom();
@@ -11141,11 +11171,13 @@ async function pickAttachment(id, targetKind = state.attachmentPickerKind) {
       body: JSON.stringify({ field, value: id })
     });
     if (state.projectId === projectId && imageReferenceSaveSeq.get(field) === requestSeq) {
-      state.db = db;
+      clearPendingImageReference(field, projectId);
+      state.db = dbWithPreservedAttachments(db, previousDb, [id]);
       patchImageReferencesDom();
     }
   } catch (error) {
     if (imageReferenceSaveSeq.get(field) === requestSeq) {
+      clearPendingImageReference(field, projectId);
       state.db = previousDb;
       patchImageReferencesDom();
     }
@@ -11155,11 +11187,12 @@ async function pickAttachment(id, targetKind = state.attachmentPickerKind) {
 
 async function clearImageReference(kind = "avatar") {
   const targetKind = kind === "product" ? "product" : "avatar";
-  const field = targetKind === "product" ? "image.productAttachmentId" : "image.avatarAttachmentId";
+  const field = imageReferenceField(targetKind);
   const projectId = state.projectId;
   const previousDb = state.db;
   const requestSeq = (imageReferenceSaveSeq.get(field) || 0) + 1;
   imageReferenceSaveSeq.set(field, requestSeq);
+  setPendingImageReference(field, "", null);
   state.db = dbWithProjectField(previousDb, projectId, field, "");
   patchImageReferencesDom();
   try {
@@ -11168,11 +11201,13 @@ async function clearImageReference(kind = "avatar") {
       body: JSON.stringify({ field, value: "" })
     });
     if (state.projectId === projectId && imageReferenceSaveSeq.get(field) === requestSeq) {
+      clearPendingImageReference(field, projectId);
       state.db = db;
       patchImageReferencesDom();
     }
   } catch (error) {
     if (imageReferenceSaveSeq.get(field) === requestSeq) {
+      clearPendingImageReference(field, projectId);
       state.db = previousDb;
       patchImageReferencesDom();
     }

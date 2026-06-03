@@ -1533,7 +1533,21 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
   const apiCalls = isAdmin ? (db.apiCalls || []).filter(owns) : [];
   const payments = recentRows((db.payments || []).filter(owns));
   const supportTickets = recentRows((db.supportTickets || []).filter(owns));
-  const attachments = recentRows((db.attachments || []).filter(owns), publicStateAttachmentLimit).map(publicAttachment);
+  const ownedAttachments = (db.attachments || []).filter(owns);
+  const referencedAttachmentIds = new Set();
+  for (const project of projects) {
+    [
+      project.image?.avatarAttachmentId,
+      project.image?.productAttachmentId
+    ].filter(Boolean).forEach((id) => referencedAttachmentIds.add(id));
+  }
+  const attachmentRows = recentRows(ownedAttachments, publicStateAttachmentLimit);
+  for (const attachment of ownedAttachments) {
+    if (referencedAttachmentIds.has(attachment.id) && !attachmentRows.some((item) => item.id === attachment.id)) {
+      attachmentRows.push(attachment);
+    }
+  }
+  const attachments = attachmentRows.map(publicAttachment);
   const creditLedger = recentRows((db.creditLedger || []).filter(owns)).map(sanitizeCreditLedger);
   const tiktokConnections = (db.tiktok?.connections || []).filter(owns);
   const tiktokPublishes = (db.tiktok?.publishes || []).filter(owns).map(sanitizePublish);
