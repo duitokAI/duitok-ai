@@ -5719,6 +5719,7 @@ function videoModelValue(p = project()) {
   const value = String(p?.ugc?.provider || "Seedance 2.0 Fast");
   if (/sora/i.test(value)) return "Sora 2";
   if (/veo/i.test(value)) return "Veo 3.1";
+  if (/wan/i.test(value)) return "Wan 2.7";
   if (/seedance/i.test(value)) return "Seedance 2.0 Fast";
   return "Seedance 2.0 Fast";
 }
@@ -5746,7 +5747,8 @@ function videoGenerateConsole(p) {
         ${videoOptionMenu("model", "ugc.provider", videoModelValue(p), [
           ["Seedance 2.0 Fast", "Seedance 2.0 Fast"],
           ["Veo 3.1", "Veo 3.1"],
-          ["Sora 2", "Sora 2"]
+          ["Sora 2", "Sora 2"],
+          ["Wan 2.7", "Wan 2.7"]
         ], "audio-lines")}
         ${videoOptionMenu("ratio", "ugc.aspectRatio", videoAspectRatioValue(p), ["16:9", "9:16", "1:1", "4:3", "3:4"].map((value) => [value, value]), "rectangle-horizontal")}
         ${videoOptionMenu("quality", "ugc.quality", videoQualityValue(p), ["480p", "720p", "1080p"].map((value) => [value, value]), "gem")}
@@ -5982,6 +5984,7 @@ function autoHistoryPanel(p) {
 function originalProviderValue(provider) {
   const aliases = {
     Grok: "Grok Imagine Video",
+    Wan: "Wan 2.7",
     GeminiOmni: "Gemini Omni"
   };
   return aliases[provider] || provider || "Veo 3.1";
@@ -5993,6 +5996,7 @@ function originalProviderLabel(provider) {
     "Veo 3.1": "Veo",
     "Grok Imagine Video": "Grok",
     "Sora 2": "Sora",
+    "Wan 2.7": "Wan",
     "Gemini Omni": "Pokaya AI"
   };
   return labels[provider] || String(provider || "Video").split(" ")[0];
@@ -6004,6 +6008,7 @@ function originalProviderCredits(provider) {
     "Veo 3.1": "0.40",
     "Grok Imagine Video": "0.48",
     "Sora 2": "0.48",
+    "Wan 2.7": "0.53",
     "Gemini Omni": "1.30"
   };
   return credits[provider] || "0.40";
@@ -6025,6 +6030,7 @@ function originalPanel(p) {
         ${originalChoiceButton("original.provider", "Veo 3.1", "🎬 Veo 3.1", provider)}
         ${originalChoiceButton("original.provider", "Grok Imagine Video", "⚡ Grok", provider)}
         ${originalChoiceButton("original.provider", "Sora 2", "✨ Sora 2", provider)}
+        ${originalChoiceButton("original.provider", "Wan 2.7", "🌊 Wan 2.7", provider)}
         ${originalChoiceButton("original.provider", "Gemini Omni", "🔷 Pokaya AI", provider)}
       </div>
       <p class="original-field-label">Image Mode</p>
@@ -11675,7 +11681,14 @@ function syncImageConsoleBeforeGenerate(name) {
     const promptInput = document.querySelector("[data-video-console-prompt]");
     const value = promptInput?.value || project().ugc?.script || "";
     updateVideoPromptLocal(value);
-    return { prompt: value };
+    const current = project();
+    return {
+      prompt: value,
+      model: videoModelValue(current),
+      aspectRatio: videoAspectRatioValue(current),
+      resolution: videoQualityValue(current),
+      duration: videoDurationValue(current).match(/\d+/)?.[0] || "8"
+    };
   }
   if (name !== "generate-image") return {};
   const promptInput = document.querySelector("[data-image-console-prompt]");

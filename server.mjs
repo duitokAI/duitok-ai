@@ -33,6 +33,7 @@ const apimartSeedream50LiteModel = process.env.APIMART_SEEDREAM_5_LITE_MODEL || 
 const apimartSeedream45Model = process.env.APIMART_SEEDREAM_4_5_MODEL || "seedream-4.5";
 const apimartGrokImageModel = process.env.APIMART_GROK_IMAGE_MODEL || "grok-imagine-1.0-apimart";
 const apimartGrokVideoModel = process.env.APIMART_GROK_VIDEO_MODEL || "grok-imagine-1.0-video-apimart";
+const apimartWanVideoModel = process.env.APIMART_WAN_VIDEO_MODEL || "wan2.7";
 const apimartSeedanceModel = process.env.APIMART_SEEDANCE_MODEL || "doubao-seedance-2.0";
 const geminiBaseUrl = (process.env.GEMINI_BASE_URL || "https://generativelanguage.googleapis.com").replace(/\/$/, "");
 const geminiGeneratePathPrefix = process.env.GEMINI_GENERATE_PATH_PREFIX || "/v1beta/models";
@@ -83,7 +84,7 @@ const ai302SunoFetchPathPrefix = process.env.AI302_SUNO_FETCH_PATH_PREFIX || "/s
 const ai302SunoModel = process.env.AI302_SUNO_MODEL || "chirp-crow";
 const ai302AudioTranslatePath = process.env.AI302_AUDIO_TRANSLATE_PATH || "/302/audio/translate/task";
 const webSearchBaseUrl = process.env.WEB_SEARCH_BASE_URL || "https://duckduckgo.com/html/";
-const allowedMediaModels = new Set(["GPT Image 2", "Seedream 5.0 Lite", "Seedream 4.5", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"]);
+const allowedMediaModels = new Set(["GPT Image 2", "Seedream 5.0 Lite", "Seedream 4.5", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video", "Wan 2.7"]);
 const thumbnailCache = new Map();
 const thumbnailInflight = new Map();
 const thumbnailCacheMaxItems = Number(process.env.THUMBNAIL_CACHE_MAX_ITEMS || 160);
@@ -125,6 +126,9 @@ const publicMediaModelMap = {
   "Pokaya Story Video": "Sora 2",
   "Pokaya Omni Video": "Gemini Omni",
   "Pokaya Motion Video": "Grok Imagine Video",
+  "Pokaya Wan Video": "Wan 2.7",
+  "Wan 2.7": "Wan 2.7",
+  Wan: "Wan 2.7",
   GeminiOmni: "Gemini Omni",
   Grok: "Grok Imagine Video"
 };
@@ -447,7 +451,8 @@ function defaultModelCosts() {
     "Veo 3.1": { costRm: 0.234, costRmb: 0.4, unit: "8s video" },
     "Sora 2": { costRm: 0.093, costRmb: 0.16, unit: "8s video" },
     "Gemini Omni": { costRm: 0.584, costRmb: 1, unit: "10s video" },
-    "Grok Imagine Video": { costRm: 0.292, costRmb: 0.5, unit: "10s video" }
+    "Grok Imagine Video": { costRm: 0.292, costRmb: 0.5, unit: "10s video" },
+    "Wan 2.7": { costUsd: 0.528, unit: "8s video" }
   };
 }
 
@@ -1336,7 +1341,7 @@ function publicMediaModel(model) {
 }
 
 function isVideoMediaModel(model) {
-  return ["Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"].includes(internalMediaModel(model));
+  return ["Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video", "Wan 2.7"].includes(internalMediaModel(model));
 }
 
 function imageCreditForModel(model = "") {
@@ -1374,6 +1379,7 @@ function requestedMediaModelFromText(content = "") {
   if (/gpt\s*image|gpt-image|image\s*2/i.test(text)) return "GPT Image 2";
   if (/gemini\s*omni/i.test(text)) return "Gemini Omni";
   if (/grok.*video|video.*grok|grok.*视频|imagine.*video/i.test(text)) return "Grok Imagine Video";
+  if (/wan\s*2(?:\.7)?|wan2\.7|万相\s*2(?:\.7)?/i.test(text)) return "Wan 2.7";
   if (/grok|imagine/i.test(text)) return "Grok Imagine";
   return "";
 }
@@ -1381,8 +1387,8 @@ function requestedMediaModelFromText(content = "") {
 function generationModelOptionsText(kind = "auto") {
   const estimate = (model) => formatCreditValue(creditChargeFor({ image: { model } }, "generate-image"));
   if (kind === "image") return `GPT Image 2（${estimate("GPT Image 2")} credits/张）、Seedream 5.0 Lite（${estimate("Seedream 5.0 Lite")} credits/张）、Seedream 4.5（${estimate("Seedream 4.5")} credits/张）、Nano Banana Pro（${estimate("Nano Banana Pro")} credits/张）、Nano Banana 2（${estimate("Nano Banana 2")} credits/张）或 Grok Imagine（${estimate("Grok Imagine")} credits/张）`;
-  if (kind === "video") return `Veo 3.1（${estimate("Veo 3.1")} credits/8秒）、Seedance 2.0（${estimate("Seedance 2.0")} credits/5秒）、Sora 2（${estimate("Sora 2")} credits/8秒）`;
-  return `图片：GPT Image 2（${estimate("GPT Image 2")}）/ Seedream 5.0 Lite（${estimate("Seedream 5.0 Lite")}）/ Seedream 4.5（${estimate("Seedream 4.5")}）/ Nano Banana Pro（${estimate("Nano Banana Pro")}）/ Nano Banana 2（${estimate("Nano Banana 2")}）/ Grok Imagine（${estimate("Grok Imagine")}）；视频：Veo 3.1（${estimate("Veo 3.1")}）/ Seedance 2.0（${estimate("Seedance 2.0")}）/ Sora 2（${estimate("Sora 2")}）`;
+  if (kind === "video") return `Veo 3.1（${estimate("Veo 3.1")} credits/8秒）、Seedance 2.0（${estimate("Seedance 2.0")} credits/5秒）、Sora 2（${estimate("Sora 2")} credits/8秒）、Wan 2.7（${estimate("Wan 2.7")} credits/8秒）`;
+  return `图片：GPT Image 2（${estimate("GPT Image 2")}）/ Seedream 5.0 Lite（${estimate("Seedream 5.0 Lite")}）/ Seedream 4.5（${estimate("Seedream 4.5")}）/ Nano Banana Pro（${estimate("Nano Banana Pro")}）/ Nano Banana 2（${estimate("Nano Banana 2")}）/ Grok Imagine（${estimate("Grok Imagine")}）；视频：Veo 3.1（${estimate("Veo 3.1")}）/ Seedance 2.0（${estimate("Seedance 2.0")}）/ Sora 2（${estimate("Sora 2")}）/ Wan 2.7（${estimate("Wan 2.7")}）`;
 }
 
 function redactProviderText(value, fallback = "") {
@@ -1872,7 +1878,7 @@ function providerForMediaModel(model) {
   model = internalMediaModel(model);
   if (model === "GPT Image 2" || model === "Seedream 5.0 Lite" || model === "Seedream 4.5" || model === "Grok Imagine") return process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Nano Banana Pro" || model === "Nano Banana 2") return process.env.GRSAI_API_KEY ? "grsai" : "mock";
-  if (model === "Seedance 2.0" || model === "Grok Imagine Video") return process.env.APIMART_API_KEY ? "apimart" : "mock";
+  if (model === "Seedance 2.0" || model === "Grok Imagine Video" || model === "Wan 2.7") return process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni") return process.env.WUYIN_API_KEY ? "wuyin" : "mock";
   return "unsupported";
 }
@@ -1892,6 +1898,7 @@ function videoDurationFor(project, model = project.image?.model) {
   if (model === "Sora 2") return Number(project.image?.duration || process.env.WUYIN_SORA_DURATION || 8);
   if (model === "Gemini Omni") return 10;
   if (model === "Grok Imagine Video") return Number(project.image?.duration || process.env.APIMART_GROK_VIDEO_DURATION || 6);
+  if (model === "Wan 2.7") return Number(project.image?.duration || process.env.APIMART_WAN_VIDEO_DURATION || 8);
   if (model === "Veo 3.1") return 8;
   return 0;
 }
@@ -1918,6 +1925,7 @@ function creditChargeFor(project, action, db = null) {
   if (model === "Sora 2") return creditsFromProviderCost(cost, roundCredits(duration * 0.06));
   if (model === "Gemini Omni") return creditsFromProviderCost(cost, 1.3);
   if (model === "Grok Imagine Video") return creditsFromProviderCost(cost, roundCredits(duration * 0.06));
+  if (model === "Wan 2.7") return creditsFromProviderCost(cost, roundCredits(duration * 0.066));
   return creditsFromProviderCost(cost, 0.1);
 }
 
@@ -3197,7 +3205,7 @@ function generationAspectRatioForProject(project, action = "generate-image", ste
 function generationEndpointFor(provider, project) {
   if (provider === "gemini") return `${geminiGeneratePathPrefix}/${geminiVisionModel}:generateContent`;
   if (provider === "grsai" && project?.clone?.referenceVideo) return grsaiChatPath;
-  if (provider === "apimart" && (internalMediaModel(project?.image?.model) === "Seedance 2.0" || internalMediaModel(project?.image?.model) === "Grok Imagine Video")) return apimartVideoPath;
+  if (provider === "apimart" && ["Seedance 2.0", "Grok Imagine Video", "Wan 2.7"].includes(internalMediaModel(project?.image?.model))) return apimartVideoPath;
   if (provider === "grsai") return grsaiDrawPath;
   if (provider === "wuyin") return wuyinPathFromProject(project);
   return apimartImagePath;
@@ -3281,6 +3289,20 @@ function apimartGrokVideoBody(project, prompt) {
     size: allowedSizes.includes(size) ? size : "16:9",
     duration,
     quality: ["480p", "720p"].includes(quality) ? quality : "480p"
+  };
+}
+
+function apimartWanVideoBody(project, prompt) {
+  const allowedSizes = ["16:9", "9:16", "1:1", "4:3", "3:4"];
+  const size = String(project.image?.aspectRatio || process.env.APIMART_WAN_VIDEO_SIZE || "16:9").trim();
+  const resolution = String(project.image?.resolution || process.env.APIMART_WAN_VIDEO_RESOLUTION || "1080P").trim().toUpperCase();
+  const duration = Math.min(15, Math.max(2, Number(videoDurationFor(project, "Wan 2.7")) || 8));
+  return {
+    model: apimartWanVideoModel,
+    prompt,
+    resolution: ["720P", "1080P"].includes(resolution) ? resolution : "1080P",
+    duration,
+    size: allowedSizes.includes(size) ? size : "16:9"
   };
 }
 
@@ -3447,6 +3469,28 @@ async function generateVideoWithApimartGrok(project) {
   };
 }
 
+async function generateVideoWithApimartWan(project) {
+  const prompt = [
+    project.image?.prompt || "Create a high-converting TikTok Shop product video.",
+    `Mode: ${project.image?.mode || "Create Video"}.`,
+    "Style: polished ecommerce short video, coherent motion, cinematic product focus, no fake brand claims."
+  ].join("\n");
+  const data = await apimartRequest(apimartVideoPath, {
+    method: "POST",
+    body: JSON.stringify(apimartWanVideoBody(project, prompt))
+  });
+  const task = Array.isArray(data) ? data[0] : data;
+  const taskId = task?.task_id || task?.id;
+  if (!taskId) return { text: JSON.stringify(data, null, 2), urls: extractVideoUrls(data) };
+  const taskData = await pollApimartTask(taskId);
+  const urls = extractVideoUrls(taskData);
+  return {
+    text: urls.length ? `Video generated with Wan 2.7.\n\nTask ID: ${taskId}` : `Wan 2.7 task completed.\n\nTask ID: ${taskId}`,
+    urls,
+    taskId
+  };
+}
+
 async function generateWithApimart(project, action, step) {
   if (action === "generate-image") {
     const image = await generateImageWithApimart(project);
@@ -3474,6 +3518,10 @@ async function generateWithProvider(project, action, step) {
     if (provider === "apimart" && model === "Grok Imagine Video") {
       const video = await generateVideoWithApimartGrok(project);
       return { title: "Grok Imagine Video", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" };
+    }
+    if (provider === "apimart" && model === "Wan 2.7") {
+      const video = await generateVideoWithApimartWan(project);
+      return { title: "Wan 2.7", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" };
     }
     if (provider === "wuyin" && (model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni")) {
       const video = await generateVideoWithWuyin(project);
@@ -3663,6 +3711,20 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
         project.image ||= {};
         project.image.prompt = promptValue;
       }
+    }
+    if (action === "generate-ugc") {
+      const providerLabel = String(options.model || project.ugc?.provider || project.image?.model || "Seedance 2.0");
+      const selectedModel = /seedance/i.test(providerLabel) ? "Seedance 2.0" : internalMediaModel(providerLabel);
+      if (!isVideoMediaModel(selectedModel)) {
+        const error = new Error(`请选择视频模型：${generationModelOptionsText("video")}。`);
+        error.status = 400;
+        throw error;
+      }
+      project.image ||= {};
+      project.image.model = selectedModel;
+      project.image.aspectRatio = String(options.aspectRatio || project.ugc?.aspectRatio || project.image.aspectRatio || "16:9").replace(/\s*\(.+\)\s*$/, "");
+      project.image.resolution = String(options.resolution || project.ugc?.quality || project.image.resolution || "720p");
+      project.image.duration = String(options.duration || project.ugc?.duration || project.image.duration || "8").match(/\d+/)?.[0] || "8";
     }
     const creditsToCharge = creditChargeFor(project, action, currentDb);
     assertGenerationAccess(currentDb, user, roundCredits(creditsToCharge * batchCount), batchCount);
@@ -4495,7 +4557,7 @@ const agentTools = [
           style: { type: "string", description: "POV, product demo, unboxing, before-after, cinematic, UGC." },
           model: {
             type: "string",
-            enum: ["Seedance 2.0", "Veo 3.1", "Sora 2"],
+            enum: ["Seedance 2.0", "Veo 3.1", "Sora 2", "Wan 2.7"],
             description: "The video model the user chose. Do not invent a model. If the user has not chosen, ask first."
           },
           keyMessage: { type: "string" }
@@ -4572,7 +4634,7 @@ const agentTools = [
           },
           model: {
             type: "string",
-            enum: ["GPT Image 2", "Seedream 5.0 Lite", "Seedream 4.5", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"],
+            enum: ["GPT Image 2", "Seedream 5.0 Lite", "Seedream 4.5", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video", "Wan 2.7"],
             description: "User-selected generation model. Ask the user to choose before passing this when the requested media type is unclear."
           }
         },
@@ -6868,6 +6930,10 @@ app.post("/api/projects/:id/generate", async (req, res) => {
     const result = await enqueueGeneration(req.params.id, req.body.action, req.body.step, user, {
       count: req.body.count,
       prompt: req.body.prompt,
+      model: req.body.model,
+      aspectRatio: req.body.aspectRatio,
+      resolution: req.body.resolution,
+      duration: req.body.duration,
       promptOverride: req.body.promptOverride,
       advancePrompt: req.body.advancePrompt === true
     });
@@ -6998,8 +7064,8 @@ app.post("/api/agent", async (req, res, next) => {
           "Use trend_research before answering about fresh trends, unfamiliar aesthetic names, product-market fit, what to sell, content angles, competitors, recent demand, or terms that may have a changing meaning. Use raw web_search only for simple fact lookup. After research, answer naturally with practical guidance for the user's goal and cite source URLs briefly when useful.",
           "Act like a capable assistant: when the user asks for an output, fill the relevant content settings and run the matching tool if enough information is available.",
           "Pokaya AI is the platform, not a generation model. Never present Pokaya AI as a model option.",
-          "User-facing model names are allowed and should be shown when relevant: GPT Image 2, Seedream 5.0 Lite, Seedream 4.5, Nano Banana Pro, Nano Banana 2, and Grok Imagine for images; Veo 3.1, Seedance 2.0, and Sora 2 for videos. Do not mention provider names, base URLs, routes, keys, or infrastructure.",
-          "User-facing model names are allowed and should be shown when relevant: GPT Image 2, Seedream 5.0 Lite, Seedream 4.5, Nano Banana Pro, Nano Banana 2, and Grok Imagine for images; Veo 3.1, Seedance 2.0, and Sora 2 for videos. Do not mention provider names, base URLs, routes, keys, or infrastructure.",
+          "User-facing model names are allowed and should be shown when relevant: GPT Image 2, Seedream 5.0 Lite, Seedream 4.5, Nano Banana Pro, Nano Banana 2, and Grok Imagine for images; Veo 3.1, Seedance 2.0, Sora 2, and Wan 2.7 for videos. Do not mention provider names, base URLs, routes, keys, or infrastructure.",
+          "User-facing model names are allowed and should be shown when relevant: GPT Image 2, Seedream 5.0 Lite, Seedream 4.5, Nano Banana Pro, Nano Banana 2, and Grok Imagine for images; Veo 3.1, Seedance 2.0, Sora 2, and Wan 2.7 for videos. Do not mention provider names, base URLs, routes, keys, or infrastructure.",
           "Before generating a video, make sure the user has selected a video model. If no model is selected or the request is ambiguous, ask one short question with the video model choices and estimated credits instead of generating. Credits are USD-denominated: USD 1 = 1000 credits. Use backend estimates from the selected model instead of old RM-based credit values.",
           "If the user already says a model name such as Veo, Seedance, or Sora, save that model to the current content settings before creating the prompt or queuing generation.",
           "Common workflows: product/content request = inspect_workspace_state -> create_project or update fields internally -> generate_project_output when the user needs an image, poster, cover, carousel asset, video, or other rendered media through Pokaya's platform models. Weekly content plan = inspect_workspace_state -> remember_agent_context when useful -> create_content_plan, and only create schedule drafts when the user asks for drafts. Video prompt request = create_seedance_prompt; video generation request = create_seedance_prompt -> generate_project_output after confirmation. In user-facing replies, say video prompt or generate video instead of naming the internal video model.",
