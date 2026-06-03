@@ -3105,7 +3105,7 @@ async function generateImageWithApimart(project) {
     n: 1,
     size: aspectRatio
   };
-  if (resolution) requestBody.resolution = resolution;
+  if (resolution && internalMediaModel(project.image?.model) !== "Grok Imagine") requestBody.resolution = resolution;
   const data = await apimartRequest(apimartImagePath, {
     method: "POST",
     body: JSON.stringify(requestBody)
@@ -3157,7 +3157,7 @@ function imageCapabilitiesForModel(model = "GPT Image 2") {
     },
     "Grok Imagine": {
       aspectRatios: ["1:1", "16:9", "9:16", "3:2", "2:3"],
-      resolutions: []
+      resolutions: ["1K"]
     }
   };
   return capabilities[model] || capabilities["GPT Image 2"];
