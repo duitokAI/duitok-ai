@@ -42838,3 +42838,231 @@ body:has(.studio-shell .video-page-studio),
     scroll-padding-bottom: clamp(112px, 13vh, 148px) !important;
   }
 }
+
+/* Studio wall failed-card compact mode: failed jobs share the same fixed row
+   height as media tiles, so their internal controls must fit inside the tile. */
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed {
+  container-type: inline-size !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed > .studio-wall-pending-controls,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed > .studio-wall-pending-controls,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed > .studio-wall-pending-controls {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: clamp(8px, 2.8cqw, 14px) !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .studio-wall-failed-center,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .studio-wall-failed-center,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .studio-wall-failed-center {
+  position: static !important;
+  left: auto !important;
+  top: auto !important;
+  width: min(92%, 280px) !important;
+  max-width: min(92%, 280px) !important;
+  display: grid !important;
+  justify-items: center !important;
+  align-content: center !important;
+  gap: clamp(3px, 1.1cqw, 7px) !important;
+  transform: none !important;
+  text-align: center !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .studio-wall-pending-spinner,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .studio-wall-pending-spinner,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .studio-wall-pending-spinner {
+  width: clamp(18px, 5.5cqw, 26px) !important;
+  height: clamp(18px, 5.5cqw, 26px) !important;
+  display: grid !important;
+  place-items: center !important;
+  margin: 0 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .studio-wall-pending-spinner svg,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .studio-wall-pending-spinner svg,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .studio-wall-pending-spinner svg {
+  width: clamp(15px, 4.8cqw, 22px) !important;
+  height: clamp(15px, 4.8cqw, 22px) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed b,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed b,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed b {
+  width: 100% !important;
+  overflow: hidden !important;
+  font-size: clamp(18px, 6.2cqw, 30px) !important;
+  line-height: 1 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed small,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed small,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed small {
+  width: 100% !important;
+  display: block !important;
+  overflow: hidden !important;
+  font-size: clamp(11px, 3.9cqw, 17px) !important;
+  line-height: 1.08 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .generation-credit-refund-note,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .generation-credit-refund-note,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .generation-credit-refund-note {
+  width: min(86%, 190px) !important;
+  min-width: 0 !important;
+  padding: clamp(5px, 1.4cqw, 8px) clamp(10px, 2.4cqw, 14px) !important;
+  border-radius: 999px !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .generation-credit-refund-note strong,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .generation-credit-refund-note strong,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .generation-credit-refund-note strong,
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .generation-credit-refund-note span,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .generation-credit-refund-note span,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .generation-credit-refund-note span {
+  overflow: hidden !important;
+  font-size: clamp(9px, 3.1cqw, 14px) !important;
+  line-height: 1.02 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .studio-wall-failed-actions,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .studio-wall-failed-actions,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .studio-wall-failed-actions {
+  width: min(92%, 214px) !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: clamp(6px, 1.8cqw, 10px) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .studio-wall-failed-actions button,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .studio-wall-failed-actions button,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .studio-wall-failed-actions button {
+  height: clamp(27px, 8.6cqw, 36px) !important;
+  min-height: clamp(27px, 8.6cqw, 36px) !important;
+  padding: 0 clamp(6px, 1.8cqw, 10px) !important;
+  border-radius: clamp(9px, 3.2cqw, 14px) !important;
+  font-size: clamp(10px, 3.3cqw, 14px) !important;
+  line-height: 1 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape > .studio-wall-pending-controls,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape > .studio-wall-pending-controls,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape > .studio-wall-pending-controls {
+  place-items: center stretch !important;
+  padding: clamp(16px, 4cqw, 28px) clamp(18px, 5cqw, 34px) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center {
+  width: min(100%, 560px) !important;
+  max-width: min(100%, 560px) !important;
+  grid-template-columns: auto auto;
+  justify-content: start !important;
+  justify-items: start !important;
+  align-content: center !important;
+  gap: clamp(10px, 2.8cqw, 20px) clamp(10px, 2.8cqw, 18px) !important;
+  text-align: left !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-pending-spinner,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-pending-spinner,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-pending-spinner {
+  display: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape b,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape b,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape b {
+  width: auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: clamp(34px, 7.4cqw, 48px) !important;
+  padding: 0 clamp(14px, 3.6cqw, 24px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  font-size: clamp(18px, 4.2cqw, 28px) !important;
+  line-height: 1 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .generation-credit-refund-note,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .generation-credit-refund-note,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .generation-credit-refund-note {
+  width: auto !important;
+  min-height: clamp(34px, 7.4cqw, 48px) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 0 clamp(14px, 3.6cqw, 24px) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .generation-credit-refund-note strong,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .generation-credit-refund-note strong,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .generation-credit-refund-note strong {
+  font-size: clamp(15px, 3.5cqw, 22px) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .generation-credit-refund-note span,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .generation-credit-refund-note span,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .generation-credit-refund-note span {
+  display: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape small,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape small,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape small {
+  grid-column: 1 / -1 !important;
+  width: min(100%, 520px) !important;
+  display: -webkit-box !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: clamp(15px, 3.5cqw, 26px) !important;
+  line-height: 1.28 !important;
+  text-align: left !important;
+  white-space: normal !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-actions,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-actions,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-actions {
+  grid-column: 1 / -1 !important;
+  width: min(100%, 360px) !important;
+  justify-self: start !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait small,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait small,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait small {
+  display: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait .generation-credit-refund-note,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait .generation-credit-refund-note,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait .generation-credit-refund-note {
+  width: min(88%, 150px) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait .studio-wall-failed-actions,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait .studio-wall-failed-actions,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait .studio-wall-failed-actions {
+  width: min(92%, 156px) !important;
+}
