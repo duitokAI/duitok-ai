@@ -44656,6 +44656,8 @@ body:has(.studio-shell .video-page-studio),
 .studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center {
   width: min(74%, 520px) !important;
   max-width: min(74%, 520px) !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: auto auto auto auto !important;
   justify-content: center !important;
   justify-items: center !important;
   text-align: center !important;
@@ -44668,6 +44670,7 @@ body:has(.studio-shell .video-page-studio),
 .studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > .generation-credit-refund-note,
 .studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > .generation-credit-refund-note,
 .studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > .generation-credit-refund-note {
+  grid-column: 1 !important;
   width: clamp(210px, 56cqw, 390px) !important;
   max-width: 100% !important;
   min-width: 0 !important;
@@ -44686,6 +44689,7 @@ body:has(.studio-shell .video-page-studio),
 .studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > small,
 .studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > small,
 .studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > small {
+  grid-column: 1 !important;
   width: clamp(260px, 68cqw, 520px) !important;
   max-width: 100% !important;
   justify-self: center !important;
@@ -44710,6 +44714,7 @@ body:has(.studio-shell .video-page-studio),
 .studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > .studio-wall-failed-actions,
 .studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > .studio-wall-failed-actions,
 .studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > .studio-wall-failed-actions {
+  grid-column: 1 !important;
   width: clamp(250px, 66cqw, 430px) !important;
   max-width: 100% !important;
   justify-self: center !important;
