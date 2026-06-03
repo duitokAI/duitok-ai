@@ -4272,7 +4272,7 @@ function paymentRow(payment, adminActions = false) {
 }
 
 function contentLibraryPage() {
-  const all = allResults().slice().reverse();
+  const all = allResults().slice().sort(assetLibraryNewestFirst);
   const filterOptions = ["all", "image", "video", "text", "visual_card"];
   const activeFilter = filterOptions.includes(state.assetTypeFilter) ? state.assetTypeFilter : "all";
   const activeProject = state.assetProjectFilter || "all";
@@ -4387,7 +4387,28 @@ function assetLibraryDateGroups(items = []) {
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(item);
   });
-  return [...groups.entries()].map(([key, entries]) => ({ key, label: assetLibraryDateLabel(key), entries }));
+  return [...groups.entries()]
+    .map(([key, entries]) => ({
+      key,
+      label: assetLibraryDateLabel(key),
+      entries: entries.slice().sort(assetLibraryNewestFirst)
+    }))
+    .sort((a, b) => assetLibraryDateSortValue(b.key) - assetLibraryDateSortValue(a.key));
+}
+
+function assetLibraryNewestFirst(a = {}, b = {}) {
+  return assetLibraryItemSortValue(b) - assetLibraryItemSortValue(a);
+}
+
+function assetLibraryItemSortValue(item = {}) {
+  const value = Date.parse(item.createdAt || item.updatedAt || "");
+  return Number.isFinite(value) ? value : -Infinity;
+}
+
+function assetLibraryDateSortValue(key = "") {
+  if (key === "unknown") return -Infinity;
+  const value = Date.parse(`${key}T00:00:00`);
+  return Number.isFinite(value) ? value : -Infinity;
 }
 
 function assetLibraryDateKey(item = {}) {
