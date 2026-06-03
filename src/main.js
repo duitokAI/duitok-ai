@@ -5163,7 +5163,7 @@ function imageModelCapabilities(model = "GPT Image 2") {
     },
     "Seedream 5.0 Lite": {
       aspectRatios: [...commonRatios, "21:9"],
-      resolutions: ["2K", "3K", "4K"]
+      resolutions: ["2K", "3K"]
     },
     "Seedream 4.5": {
       aspectRatios: [...commonRatios, "9:21", "21:9"],
