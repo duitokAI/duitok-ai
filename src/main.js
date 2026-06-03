@@ -4795,14 +4795,22 @@ function studioImmersiveShell(p, step) {
   </section>`;
 }
 
+const studioWallZoomMin = 2;
+const studioWallZoomMax = 4;
+
 function studioWallZoomValue() {
   const value = Number(state.studioWallZoom);
   if (!Number.isFinite(value)) return 2;
-  return Math.max(0, Math.min(4, Math.round(value)));
+  return Math.max(studioWallZoomMin, Math.min(studioWallZoomMax, Math.round(value)));
 }
 
 function studioWallZoomColumn(value = studioWallZoomValue()) {
-  return [140, 220, 320, 460, 640][value] || 320;
+  return [320, 460, 640][value - studioWallZoomMin] || 320;
+}
+
+function studioWallZoomProgress(value = studioWallZoomValue()) {
+  const range = studioWallZoomMax - studioWallZoomMin;
+  return range > 0 ? ((value - studioWallZoomMin) / range) * 100 : 0;
 }
 
 function studioWallZoomStyleAttr() {
@@ -4812,8 +4820,10 @@ function studioWallZoomStyleAttr() {
 
 function studioWallZoomControl() {
   const value = studioWallZoomValue();
-  return `<div class="studio-wall-zoom-control" aria-label="Preview size" style="--studio-wall-zoom-progress:${(value / 4) * 100}%">
-    <input type="range" min="0" max="4" step="1" value="${value}" data-studio-wall-zoom aria-label="Adjust preview size">
+  return `<div class="studio-wall-zoom-control" aria-label="Preview size" style="--studio-wall-zoom-progress:${studioWallZoomProgress(value)}%">
+    <span class="studio-wall-zoom-icon" aria-hidden="true">${icon("minimize-2", 13)}</span>
+    <input type="range" min="${studioWallZoomMin}" max="${studioWallZoomMax}" step="1" value="${value}" data-studio-wall-zoom aria-label="Adjust preview size">
+    <span class="studio-wall-zoom-icon" aria-hidden="true">${icon("maximize-2", 13)}</span>
   </div>`;
 }
 
@@ -10382,7 +10392,7 @@ function togglePromptAdvanced() {
 }
 
 function updateStudioWallZoom(value) {
-  const zoom = Math.max(0, Math.min(4, Math.round(Number(value) || 0)));
+  const zoom = Math.max(studioWallZoomMin, Math.min(studioWallZoomMax, Math.round(Number(value) || studioWallZoomMin)));
   state.studioWallZoom = zoom;
   localStorage.setItem(storageKeys.studioWallZoom, String(zoom));
   const column = `${studioWallZoomColumn(zoom)}px`;
@@ -10392,7 +10402,7 @@ function updateStudioWallZoom(value) {
   });
   document.querySelectorAll("[data-studio-wall-zoom]").forEach((el) => {
     if (Number(el.value) !== zoom) el.value = zoom;
-    el.closest(".studio-wall-zoom-control")?.style.setProperty("--studio-wall-zoom-progress", `${(zoom / 4) * 100}%`);
+    el.closest(".studio-wall-zoom-control")?.style.setProperty("--studio-wall-zoom-progress", `${studioWallZoomProgress(zoom)}%`);
   });
 }
 
