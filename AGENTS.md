@@ -26,3 +26,9 @@ These rules apply to every agent working inside this project, including new chat
 - The user wants Chinese PRDs.
 - The user wants all executed changes automatically pushed to cloud.
 - The user prefers checking the final version on the cloud deployment.
+
+## Pokaya UI Stability Skill
+
+- For any Pokaya Studio, sidebar, settings modal, composer, media wall, billing, usage, image/video result, or responsive layout change, follow the project-local skill at `.codex/skills/pokaya-ui-stability/SKILL.md`.
+- This skill is required for UI bug fixes, visual polish, responsive adaptation, performance-sensitive media work, and any change driven by screenshots.
+- Do not introduce a new frontend framework, UI kit, animation library, or routing architecture for these tasks unless the user explicitly asks for that migration.
