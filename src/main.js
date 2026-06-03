@@ -3563,7 +3563,7 @@ function studio() {
           ${sidebarAccountPanel()}
         </div>
       </aside>
-      <main class="workspace">${page()}</main>
+      <main class="workspace ${state.page === "library" ? "workspace-library" : ""}">${page()}</main>
       <div id="modal-root">${modal()}</div>
     </div>`;
 }
