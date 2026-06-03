@@ -31,6 +31,7 @@ const agentVisionModel = process.env.AGENT_VISION_MODEL || process.env.APIMART_V
 const apimartImageModel = process.env.APIMART_IMAGE_MODEL || "gpt-image-2";
 const apimartSeedream50LiteModel = process.env.APIMART_SEEDREAM_5_LITE_MODEL || "seedream-5.0-lite";
 const apimartSeedream45Model = process.env.APIMART_SEEDREAM_4_5_MODEL || "seedream-4.5";
+const apimartGrokImageModel = process.env.APIMART_GROK_IMAGE_MODEL || "grok-imagine-1.0-apimart";
 const apimartSeedanceModel = process.env.APIMART_SEEDANCE_MODEL || "doubao-seedance-2.0";
 const geminiBaseUrl = (process.env.GEMINI_BASE_URL || "https://generativelanguage.googleapis.com").replace(/\/$/, "");
 const geminiGeneratePathPrefix = process.env.GEMINI_GENERATE_PATH_PREFIX || "/v1beta/models";
@@ -1868,10 +1869,10 @@ function requireAi302Config() {
 
 function providerForMediaModel(model) {
   model = internalMediaModel(model);
-  if (model === "GPT Image 2" || model === "Seedream 5.0 Lite" || model === "Seedream 4.5") return process.env.APIMART_API_KEY ? "apimart" : "mock";
+  if (model === "GPT Image 2" || model === "Seedream 5.0 Lite" || model === "Seedream 4.5" || model === "Grok Imagine") return process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Nano Banana Pro" || model === "Nano Banana 2") return process.env.GRSAI_API_KEY ? "grsai" : "mock";
   if (model === "Seedance 2.0") return process.env.APIMART_API_KEY ? "apimart" : "mock";
-  if (model === "Grok Imagine" || model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni" || model === "Grok Imagine Video") return process.env.WUYIN_API_KEY ? "wuyin" : "mock";
+  if (model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni" || model === "Grok Imagine Video") return process.env.WUYIN_API_KEY ? "wuyin" : "mock";
   return "unsupported";
 }
 
@@ -3009,7 +3010,8 @@ function imageModelFromProject(project) {
   const modelMap = {
     "GPT Image 2": process.env.APIMART_IMAGE_MODEL || "gpt-image-2",
     "Seedream 5.0 Lite": apimartSeedream50LiteModel,
-    "Seedream 4.5": apimartSeedream45Model
+    "Seedream 4.5": apimartSeedream45Model,
+    "Grok Imagine": apimartGrokImageModel
   };
   return modelMap[model] || apimartImageModel;
 }
@@ -3096,15 +3098,16 @@ async function generateImageWithApimart(project) {
     `Mode: ${project.image?.mode || "Create Image"}.`,
     "Style: realistic commercial product scene, clear product focus, vertical-social friendly, no fake brand claims."
   ].join("\n");
+  const requestBody = {
+    model: imageModelFromProject(project),
+    prompt,
+    n: 1,
+    size: aspectRatio
+  };
+  if (resolution) requestBody.resolution = resolution;
   const data = await apimartRequest(apimartImagePath, {
     method: "POST",
-    body: JSON.stringify({
-      model: imageModelFromProject(project),
-      prompt,
-      n: 1,
-      size: aspectRatio,
-      resolution
-    })
+    body: JSON.stringify(requestBody)
   });
   const task = Array.isArray(data) ? data[0] : data;
   const taskId = task?.task_id || task?.id;
@@ -3152,7 +3155,7 @@ function imageCapabilitiesForModel(model = "GPT Image 2") {
       resolutions: ["512", "1K", "2K", "4K"]
     },
     "Grok Imagine": {
-      aspectRatios: ["9:16", "2:3", "1:1", "16:9", "3:2"],
+      aspectRatios: ["1:1", "16:9", "9:16", "3:2", "2:3"],
       resolutions: []
     }
   };

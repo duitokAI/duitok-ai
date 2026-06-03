@@ -5175,7 +5175,7 @@ function imageModelCapabilities(model = "GPT Image 2") {
       resolutions: ["512", "1K", "2K", "4K"]
     },
     "Grok Imagine": {
-      aspectRatios: ["9:16", "2:3", "1:1", "16:9", "3:2"],
+      aspectRatios: ["1:1", "16:9", "9:16", "3:2", "2:3"],
       resolutions: []
     }
   };
