@@ -4780,7 +4780,7 @@ function studioWallCard(item, index = 0) {
   const promptText = resultPromptText(item).replaceAll("\n", " ").trim();
   const canSaveReference = Boolean(item.imageUrl || item.videoUrl);
   const aspectRatio = wallAspectRatioForItem(item);
-  const mediaRatio = aspectRatioToMediaRatio(aspectRatio);
+  const mediaRatio = intrinsicMediaRatioForItem(item) || aspectRatioToMediaRatio(aspectRatio);
   const isNew = Date.now() - Date.parse(item.createdAt || 0) < 120000;
   const selected = selectedResultIdSet().has(item.id);
   const bulkSelecting = isBulkSelectingResults();
@@ -6267,6 +6267,27 @@ function aspectRatioToCss(value = "9:16") {
   return normalizeAspectRatio(value).replace(":", " / ");
 }
 
+function intrinsicMediaRatioForItem(item = {}) {
+  const resolutionText = typeof item.resolution === "string" ? item.resolution : "";
+  const resolutionMatch = resolutionText.match(/(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)/i);
+  const width = Number(
+    item.width ||
+    item.imageWidth ||
+    item.videoWidth ||
+    item.resolution?.width ||
+    (resolutionMatch ? resolutionMatch[1] : 0)
+  );
+  const height = Number(
+    item.height ||
+    item.imageHeight ||
+    item.videoHeight ||
+    item.resolution?.height ||
+    (resolutionMatch ? resolutionMatch[2] : 0)
+  );
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) return "";
+  return Math.min(2.4, Math.max(0.35, width / height)).toFixed(4);
+}
+
 function projectWallAspectRatio(projectItem = project(), type = "image") {
   if (type === "video" || type === "ugc") return normalizeAspectRatio(projectItem?.ugc?.aspectRatio || projectItem?.image?.aspectRatio || "16:9", "16:9");
   if (type === "text" || type === "story") return normalizeAspectRatio(projectItem?.image?.aspectRatio || "1:1", "1:1");
@@ -6288,11 +6309,10 @@ function mediaRatioSyncScript() {
   return [
     "const card=this.closest('.studio-wall-card,.result-card,.agent-generation-preview,.agent-generation-gallery-tile')",
     "if(card){",
-    "if(card.classList.contains('studio-wall-card')&&card.dataset.aspectRatio){card.dataset.mediaReady='true';return}",
     "const width=this.naturalWidth||this.videoWidth||1",
     "const height=this.naturalHeight||this.videoHeight||1",
     "const next=Math.min(2.4,Math.max(0.35,width/height))",
-    "if(Number.isFinite(next)&&next>0){card.dataset.mediaRatio=next.toFixed(4);card.style.setProperty('--media-ratio',next.toFixed(4))}",
+    "if(Number.isFinite(next)&&next>0){const ratio=next.toFixed(4);card.dataset.mediaRatio=ratio;card.dataset.intrinsicMediaRatio=ratio;card.style.setProperty('--media-ratio',ratio)}",
     "card.dataset.mediaReady='true'",
     "}"
   ].join(";");
