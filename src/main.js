@@ -5274,7 +5274,7 @@ function imageResolutionPicker(selectedResolution, options = []) {
           <span class="image-resolution-option-copy">
             <b>${esc(item.title)} <em>${esc(item.badge)}</em></b>
           </span>
-          <span class="image-resolution-option-check" aria-hidden="true">${active ? icon("check", 18) : ""}</span>
+          <span class="image-resolution-option-check" aria-hidden="true">${icon("check", 18)}</span>
         </div>`;
       }).join("")}
     </div>
