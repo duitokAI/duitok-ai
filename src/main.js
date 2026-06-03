@@ -4264,37 +4264,184 @@ function paymentRow(payment, adminActions = false) {
 
 function contentLibraryPage() {
   const all = allResults().slice().reverse();
-  const availableKinds = [...new Set(all.map(assetMediaKind).filter((kind) => ["image", "video"].includes(kind)))];
-  const filterOptions = ["all", ...["image", "video"].filter((kind) => availableKinds.includes(kind))];
+  const filterOptions = ["all", "image", "video", "text", "visual_card"];
   const activeFilter = filterOptions.includes(state.assetTypeFilter) ? state.assetTypeFilter : "all";
+  const activeProject = state.assetProjectFilter || "all";
+  const query = String(state.assetSearch || "").trim().toLowerCase();
   const filtered = all.filter((item) => {
     const kind = assetMediaKind(item);
-    return activeFilter === "all" || activeFilter === kind || activeFilter === item.type;
+    const projectMatch = activeProject === "all" || item.projectId === activeProject;
+    const kindMatch = activeFilter === "all" || activeFilter === kind || activeFilter === item.type;
+    const searchText = [
+      item.title,
+      item.providerTitle,
+      item.prompt,
+      item.providerBody,
+      item.body,
+      item.model,
+      item.provider,
+      item.projectName,
+      item.id,
+      item.taskId,
+      item.providerTaskId
+    ].filter(Boolean).join(" ").toLowerCase();
+    const searchMatch = !query || searchText.includes(query);
+    return projectMatch && kindMatch && searchMatch;
   });
-  return `<header class="project-head asset-library-head">
-    <div><h1>Generated Assets</h1></div>
-  </header>
-  <section class="asset-toolbar">
-    <div class="asset-filter-row">
-      ${filterOptions.map((kind) => `<button type="button" class="${activeFilter === kind ? "active" : ""}" data-asset-type="${kind}">${assetTypeLabel(kind)}</button>`).join("")}
-    </div>
-  </section>
-  ${filtered.length ? `<section class="result-grid asset-library-grid">${filtered.map(resultCard).join("")}</section>` : `<section class="empty-result">${icon("folder-search")} No assets match this filter.</section>`}`;
+  const counts = assetLibraryCounts(all);
+  const groups = assetLibraryDateGroups(filtered);
+  const activeProjectName = activeProject === "all" ? "All assets" : state.db.projects.find((item) => item.id === activeProject)?.name || "Project assets";
+  return `<section class="asset-library-experience">
+    <aside class="asset-library-panel" aria-label="Content Library filters">
+      <label class="asset-library-search">
+        ${icon("search", 18)}
+        <input data-asset-search value="${esc(state.assetSearch || "")}" placeholder="Search assets">
+      </label>
+      <nav class="asset-library-nav">
+        ${assetLibraryNavButton("all", "box", "All Assets", counts.all, activeFilter)}
+        ${assetLibraryNavButton("image", "image", "Image", counts.image, activeFilter)}
+        ${assetLibraryNavButton("video", "video", "Video", counts.video, activeFilter)}
+        ${assetLibraryNavButton("text", "file-text", "Text", counts.text, activeFilter)}
+        ${assetLibraryNavButton("visual_card", "panels-top-left", "Visual Card", counts.visual_card, activeFilter)}
+      </nav>
+      <div class="asset-library-section-title"><span>Projects</span><button type="button" data-asset-project="all">${icon("rotate-ccw", 14)}</button></div>
+      <nav class="asset-library-projects">
+        ${assetLibraryProjectButton("all", "All projects", all.length, activeProject)}
+        ${state.db.projects.map((projectItem) => assetLibraryProjectButton(projectItem.id, projectItem.name, all.filter((item) => item.projectId === projectItem.id).length, activeProject)).join("")}
+      </nav>
+    </aside>
+    <section class="asset-library-main">
+      <header class="asset-library-command">
+        <div>
+          <p>${icon("folder-open", 17)} Content Library</p>
+          <h1>${esc(activeProjectName)}</h1>
+        </div>
+        <span>${filtered.length} / ${all.length} assets</span>
+      </header>
+      <div class="asset-library-filter-strip" aria-label="Asset type filters">
+        ${filterOptions.map((kind) => `<button type="button" class="${activeFilter === kind ? "active" : ""}" data-asset-type="${kind}" aria-pressed="${activeFilter === kind ? "true" : "false"}">${icon(assetTypeIcon(kind), 16)} ${assetTypeLabel(kind)}<small>${counts[kind] || 0}</small></button>`).join("")}
+      </div>
+      ${groups.length ? groups.map(assetLibraryDateSection).join("") : assetLibraryEmptyState(query)}
+    </section>
+  </section>`;
 }
 
 function assetMediaKind(item = {}) {
   if (item.videoUrl) return "video";
-  if (item.imageUrl || item.visualCard || item.type === "visual_card") return "image";
-  return item.type || "text";
+  if (item.visualCard || item.type === "visual_card") return "visual_card";
+  if (item.imageUrl) return "image";
+  return "text";
 }
 
 function assetTypeLabel(kind = "all") {
   const labels = {
     all: t("All"),
     image: t("Image"),
-    video: t("Video")
+    video: t("Video"),
+    text: "Text",
+    visual_card: "Visual Card"
   };
   return labels[kind] || kind;
+}
+
+function assetTypeIcon(kind = "all") {
+  return {
+    all: "box",
+    image: "image",
+    video: "video",
+    text: "file-text",
+    visual_card: "panels-top-left"
+  }[kind] || "box";
+}
+
+function assetLibraryCounts(items = []) {
+  return items.reduce((counts, item) => {
+    const kind = assetMediaKind(item);
+    counts.all += 1;
+    counts[kind] = (counts[kind] || 0) + 1;
+    return counts;
+  }, { all: 0, image: 0, video: 0, text: 0, visual_card: 0 });
+}
+
+function assetLibraryNavButton(kind, ic, label, count, activeFilter) {
+  return `<button type="button" class="${activeFilter === kind ? "active" : ""}" data-asset-type="${esc(kind)}">${icon(ic, 18)} <span>${esc(label)}</span><small>${count || 0}</small></button>`;
+}
+
+function assetLibraryProjectButton(id, label, count, activeProject) {
+  return `<button type="button" class="${activeProject === id ? "active" : ""}" data-asset-project="${esc(id)}">${icon(id === "all" ? "folder-open" : "folder", 17)} <span>${esc(label)}</span><small>${count || 0}</small></button>`;
+}
+
+function assetLibraryDateGroups(items = []) {
+  const groups = new Map();
+  items.forEach((item) => {
+    const key = assetLibraryDateKey(item);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(item);
+  });
+  return [...groups.entries()].map(([key, entries]) => ({ key, label: assetLibraryDateLabel(key), entries }));
+}
+
+function assetLibraryDateKey(item = {}) {
+  const date = item.createdAt ? new Date(item.createdAt) : null;
+  if (!date || Number.isNaN(date.getTime())) return "unknown";
+  return localDateKey(date);
+}
+
+function assetLibraryDateLabel(key) {
+  if (key === "unknown") return "Unknown date";
+  const today = localDateKey(new Date());
+  const yesterdayDate = new Date();
+  yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+  if (key === today) return "Today";
+  if (key === localDateKey(yesterdayDate)) return "Yesterday";
+  const date = new Date(`${key}T00:00:00`);
+  return date.toLocaleDateString(state.lang === "zh" ? "zh-CN" : "en-US", { month: "long", day: "numeric", year: "numeric" });
+}
+
+function assetLibraryDateSection(group) {
+  return `<section class="asset-date-group">
+    <header><label><input type="checkbox" aria-label="Select ${esc(group.label)} assets"><span></span></label><h2>${esc(group.label)}</h2><small>${group.entries.length} assets</small></header>
+    <div class="asset-timeline-grid">${group.entries.map(assetLibraryCard).join("")}</div>
+  </section>`;
+}
+
+function assetLibraryCard(item) {
+  const kind = assetMediaKind(item);
+  const title = item.title || item.providerTitle || resultMediaLabel(item);
+  const promptText = resultPromptText(item).replaceAll("\n", " ").trim();
+  const canSaveReference = Boolean(item.imageUrl || item.videoUrl || item.visualCard);
+  return `<article class="asset-tile asset-tile-${esc(kind)}" data-result-id="${esc(item.id)}">
+    <button type="button" class="asset-tile-preview" data-result-preview="${esc(item.id)}" aria-label="Preview ${esc(title)}">
+      ${assetLibraryPreview(item, kind)}
+      <span class="asset-type-pill">${icon(assetTypeIcon(kind), 14)} ${esc(assetTypeLabel(kind))}</span>
+      ${kind === "video" ? `<span class="asset-play-pill">${icon("play", 18)}</span>` : ""}
+    </button>
+    <div class="asset-tile-overlay">
+      <div>
+        <b>${esc(title)}</b>
+        <p>${esc(promptText || item.projectName || "Generated asset")}</p>
+        <small>${esc(resultModelLabel(item))} · ${esc(item.projectName || "Project")}</small>
+      </div>
+      <div class="asset-tile-actions">
+        <button type="button" data-result-preview="${esc(item.id)}" data-tooltip="Preview" aria-label="Preview">${icon("expand", 16)}</button>
+        <button type="button" data-result-prompt="${esc(item.id)}" data-tooltip="Prompt" aria-label="Prompt" ${promptText ? "" : "disabled"}>${icon("copy", 16)}</button>
+        <button type="button" data-result-action="download" data-result-id="${esc(item.id)}" data-result-kind="${item.videoUrl ? "video" : item.imageUrl || item.visualCard ? "image" : "text"}" data-tooltip="Download" aria-label="Download">${icon("download", 16)}</button>
+        <button type="button" data-result-action="save-product" data-result-id="${esc(item.id)}" data-tooltip="Product" aria-label="Use as Product" ${canSaveReference ? "" : "disabled"}>${icon("box", 16)}</button>
+      </div>
+    </div>
+  </article>`;
+}
+
+function assetLibraryPreview(item, kind) {
+  if (kind === "text") {
+    const body = resultPromptText(item).replaceAll("\n", " ").trim() || item.providerBody || item.body || "Text result";
+    return `<div class="asset-text-thumb">${icon("file-text", 28)}<strong>${esc(item.title || "Text result")}</strong><p>${esc(body)}</p></div>`;
+  }
+  return resultPreview(item, { clickable: false, wall: true });
+}
+
+function assetLibraryEmptyState(query) {
+  return `<section class="empty-result asset-library-empty">${icon("folder-search", 34)}<b>No assets match this ${query ? "search" : "filter"}.</b><p>Try clearing search or switching back to All Assets.</p></section>`;
 }
 
 function isOwnerAdminAccount() {
