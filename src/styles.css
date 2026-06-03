@@ -6306,11 +6306,18 @@ textarea {
 
 .asset-library-experience {
   --asset-thumb: clamp(112px, 8.8vw, 154px);
+  position: relative;
   display: grid;
   grid-template-columns: minmax(208px, 248px) minmax(0, 1fr);
   gap: 22px;
   min-height: calc(100dvh - 120px);
   color: #2a1033;
+}
+
+.asset-library-experience > .studio-wall-zoom-control {
+  top: 10px;
+  right: 12px;
+  z-index: 12;
 }
 
 .asset-library-experience[data-studio-wall-zoom-level="0"] {

@@ -4301,6 +4301,7 @@ function contentLibraryPage() {
   const counts = assetLibraryCounts(all);
   const groups = assetLibraryDateGroups(filtered);
   return `<section class="asset-library-experience studio-wall-zoomable" ${studioWallZoomStyleAttr()}>
+    ${studioWallZoomControl()}
     <aside class="asset-library-panel" aria-label="Content Library filters">
       <label class="asset-library-search">
         ${icon("search", 18)}
