@@ -2054,9 +2054,18 @@ function handleDelegatedPointerDown(event) {
 }
 
 function handleDelegatedClick(event) {
-  const target = event.target.closest?.("[data-page],[data-step],[data-step-open],[data-project],[data-studio-wall-more],[data-result-select],[data-bulk-result-action],[data-result-action],[data-result-preview],[data-result-prompt],[data-image-canvas-result],[data-image-model-option],[data-generation-cancel],[data-generation-retry],[data-generation-edit],[data-settings-section]");
+  const target = event.target.closest?.("[data-page],[data-step],[data-step-open],[data-project],[data-studio-wall-more],[data-result-select],[data-bulk-result-action],[data-result-action],[data-result-preview],[data-result-prompt],[data-image-canvas-result],[data-image-model-option],[data-generation-cancel],[data-generation-retry],[data-generation-edit],[data-settings-section],[data-agent-history-restore],[data-agent-history-restore-row]");
   if (!target || !app.contains(target)) return;
 
+  if (target.dataset.agentHistoryRestore) {
+    event.preventDefault();
+    return restoreAgentHistory(target.dataset.agentHistoryRestore);
+  }
+  if (target.dataset.agentHistoryRestoreRow) {
+    if (event.target.closest("[data-agent-history-rename], [data-agent-history-delete], [data-agent-history-title-input]")) return;
+    event.preventDefault();
+    return restoreAgentHistory(target.dataset.agentHistoryRestoreRow);
+  }
   if (target.dataset.page) return scheduleNavigation({ page: target.dataset.page });
   if (target.dataset.step) return scheduleNavigation({ step: target.dataset.step });
   if (target.dataset.stepOpen) return scheduleNavigation({ page: "project", step: target.dataset.stepOpen });
@@ -9915,11 +9924,13 @@ function bind() {
     set({ modal: "deleteProject", editingProjectId: el.dataset.projectDelete, projectMenuId: null });
   }));
   document.querySelectorAll("[data-agent-history-restore]").forEach((el) => el.addEventListener("click", (event) => {
+    event.preventDefault();
     event.stopPropagation();
     restoreAgentHistory(el.dataset.agentHistoryRestore);
   }));
   document.querySelectorAll("[data-agent-history-restore-row]").forEach((el) => el.addEventListener("click", (event) => {
     if (event.target.closest("[data-agent-history-rename], [data-agent-history-delete], [data-agent-history-title-input]")) return;
+    event.preventDefault();
     restoreAgentHistory(el.dataset.agentHistoryRestoreRow);
   }));
   document.querySelectorAll("[data-agent-history-rename]").forEach((el) => el.addEventListener("click", (event) => {
@@ -11860,9 +11871,25 @@ function restoreAgentHistory(id) {
   const session = (state.agentHistorySessions || []).find((item) => item.id === id);
   if (!session) return notify("找不到这条历史记录。");
   const messages = agentMessagesForStorage(session.messages);
+  clearAgentTypingTimer();
   localStorage.setItem(storageKeys.agentMessages, JSON.stringify(messages));
+  localStorage.removeItem(storageKeys.agentContextSummary);
+  Object.assign(state, {
+    page: "agent",
+    agentMessages: messages,
+    agentInput: "",
+    agentAttachments: [],
+    agentQueue: [],
+    agentBusy: false,
+    agentTyping: false,
+    agentExpandedMessages: {},
+    agentContextSummary: "",
+    activeAgentHistoryId: id,
+    agentHistoryOpen: false,
+    agentDebugOpen: false
+  });
+  render();
   notify("已恢复历史对话。");
-  set({ page: "agent", agentMessages: messages, agentInput: "", agentExpandedMessages: {}, activeAgentHistoryId: id, agentHistoryOpen: false, agentDebugOpen: false });
   scrollAgentThreadToBottom();
 }
 
