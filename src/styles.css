@@ -33584,6 +33584,35 @@ label {
   }
 }
 
+/* Dense result-wall controls must stay inside narrow portrait tiles. */
+.studio-shell .image-higgsfield-mode.studio-wall-zoomable {
+  --studio-wall-action-size: clamp(28px, calc(var(--studio-wall-column, 320px) * 0.075), 36px);
+  --studio-wall-action-icon: clamp(14px, calc(var(--studio-wall-column, 320px) * 0.035), 18px);
+  --studio-wall-action-gap: clamp(3px, calc(var(--studio-wall-column, 320px) * 0.01), 5px);
+  --studio-wall-action-pad: 4px;
+  --studio-wall-action-inset: clamp(4px, calc(var(--studio-wall-column, 320px) * 0.018), 8px);
+  --studio-wall-action-radius: clamp(9px, calc(var(--studio-wall-column, 320px) * 0.028), 12px);
+  --studio-wall-select-size: clamp(24px, calc(var(--studio-wall-column, 320px) * 0.066), 32px);
+  --studio-wall-select-icon: clamp(13px, calc(var(--studio-wall-column, 320px) * 0.034), 17px);
+  --studio-wall-select-inset: clamp(5px, calc(var(--studio-wall-column, 320px) * 0.018), 8px);
+}
+
+.studio-shell .image-higgsfield-mode.studio-wall-zoomable .studio-wall-card:has(.studio-wall-actions button:hover),
+.studio-shell .image-higgsfield-mode.studio-wall-zoomable .studio-wall-card:has(.studio-wall-actions button:focus-visible) {
+  overflow: hidden !important;
+}
+
+.studio-shell .image-higgsfield-mode.studio-wall-zoomable .studio-wall-actions {
+  max-height: calc(100% - (var(--studio-wall-action-inset) * 2)) !important;
+  overflow: hidden !important;
+  background: rgba(34, 24, 40, 0.34) !important;
+  box-shadow: 0 8px 18px rgba(18, 0, 28, 0.14) !important;
+}
+
+.studio-shell .image-higgsfield-mode.studio-wall-zoomable .studio-wall-actions button::after {
+  display: none !important;
+}
+
 /* Agent composer stability lock: message rendering must move only the thread,
    never the bottom input bar. */
 .studio-shell:has(.agent-page),
