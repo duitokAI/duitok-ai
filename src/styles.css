@@ -6657,6 +6657,12 @@ textarea {
   display: none;
 }
 
+.asset-tile .asset-type-pill,
+.asset-tile .asset-play-pill,
+.asset-tile .asset-tile-overlay {
+  display: none !important;
+}
+
 .asset-text-thumb {
   width: 100%;
   height: 100%;

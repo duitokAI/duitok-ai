@@ -4438,27 +4438,10 @@ function assetLibraryDateSection(group) {
 function assetLibraryCard(item) {
   const kind = assetMediaKind(item);
   const title = item.title || item.providerTitle || resultMediaLabel(item);
-  const promptText = resultPromptText(item).replaceAll("\n", " ").trim();
-  const canSaveReference = Boolean(item.imageUrl || item.videoUrl || item.visualCard);
   return `<article class="asset-tile asset-tile-${esc(kind)}" data-result-id="${esc(item.id)}">
     <button type="button" class="asset-tile-preview" data-result-preview="${esc(item.id)}" aria-label="Preview ${esc(title)}">
       ${assetLibraryPreview(item, kind)}
-      <span class="asset-type-pill">${icon(assetTypeIcon(kind), 14)} ${esc(assetTypeLabel(kind))}</span>
-      ${kind === "video" ? `<span class="asset-play-pill">${icon("play", 18)}</span>` : ""}
     </button>
-    <div class="asset-tile-overlay">
-      <div>
-        <b>${esc(title)}</b>
-        <p>${esc(promptText || item.projectName || "Generated asset")}</p>
-        <small>${esc(resultModelLabel(item))} · ${esc(item.projectName || "Project")}</small>
-      </div>
-      <div class="asset-tile-actions">
-        <button type="button" data-result-preview="${esc(item.id)}" data-tooltip="Preview" aria-label="Preview">${icon("expand", 16)}</button>
-        <button type="button" data-result-prompt="${esc(item.id)}" data-tooltip="Prompt" aria-label="Prompt" ${promptText ? "" : "disabled"}>${icon("copy", 16)}</button>
-        <button type="button" data-result-action="download" data-result-id="${esc(item.id)}" data-result-kind="${item.videoUrl ? "video" : item.imageUrl || item.visualCard ? "image" : "text"}" data-tooltip="Download" aria-label="Download">${icon("download", 16)}</button>
-        <button type="button" data-result-action="save-product" data-result-id="${esc(item.id)}" data-tooltip="Product" aria-label="Use as Product" ${canSaveReference ? "" : "disabled"}>${icon("box", 16)}</button>
-      </div>
-    </div>
   </article>`;
 }
 
