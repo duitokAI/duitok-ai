@@ -1197,20 +1197,34 @@ let postgresReady;
 
 async function ensurePostgresSchema() {
   if (!postgresPool) return;
-  postgresReady ||= postgresPool.query(`
-    create table if not exists app_state (
-      id text primary key,
-      data jsonb not null,
-      updated_at timestamptz not null default now()
-    )
-  `);
+  postgresReady ||= (async () => {
+    await postgresPool.query(`
+      create table if not exists public.app_state (
+        id text primary key,
+        data jsonb not null,
+        updated_at timestamptz not null default now()
+      )
+    `);
+    await postgresPool.query(`alter table public.app_state enable row level security`);
+    await postgresPool.query(`
+      do $$
+      begin
+        if exists (select 1 from pg_roles where rolname = 'anon') then
+          revoke all on table public.app_state from anon;
+        end if;
+        if exists (select 1 from pg_roles where rolname = 'authenticated') then
+          revoke all on table public.app_state from authenticated;
+        end if;
+      end $$;
+    `);
+  })();
   await postgresReady;
 }
 
 async function ensureDb() {
   if (postgresPool) {
     await ensurePostgresSchema();
-    const result = await postgresPool.query("select data from app_state where id = $1", [postgresStateId]);
+    const result = await postgresPool.query("select data from public.app_state where id = $1", [postgresStateId]);
     if (result.rows[0]?.data) {
       const rawDb = result.rows[0].data;
       const shouldBackfill = !rawDb.users || !rawDb.projects || !rawDb.billing || !rawDb.usage || !rawDb.schedule;
@@ -1241,7 +1255,7 @@ async function saveDb(db) {
   if (postgresPool) {
     await ensurePostgresSchema();
     await postgresPool.query(
-      `insert into app_state (id, data, updated_at)
+      `insert into public.app_state (id, data, updated_at)
        values ($1, $2::jsonb, now())
        on conflict (id) do update set data = excluded.data, updated_at = now()`,
       [postgresStateId, JSON.stringify(db)]
