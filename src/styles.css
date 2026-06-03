@@ -43865,6 +43865,100 @@ body:has(.studio-shell .video-page-studio),
   margin-right: 0 !important;
 }
 
+/* Content Library header polish: keep the command area compact so the first
+   screen prioritizes asset scanning instead of oversized navigation chrome. */
+.studio-shell .workspace.workspace-library .asset-library-main,
+.studio-shell .workspace:has(.asset-library-experience) .asset-library-main {
+  gap: 12px !important;
+}
+
+.studio-shell .workspace.workspace-library .asset-library-command,
+.studio-shell .workspace:has(.asset-library-experience) .asset-library-command {
+  top: 0 !important;
+  min-height: 112px !important;
+  align-items: end !important;
+  border: 1px solid rgba(93, 8, 108, 0.07) !important;
+  border-radius: 0 0 22px 22px !important;
+  padding: 18px clamp(18px, 2.4vw, 28px) 20px !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 248, 253, 0.9)) !important;
+  box-shadow: 0 14px 38px rgba(93, 8, 108, 0.06) !important;
+}
+
+.studio-shell .workspace.workspace-library .asset-library-command p,
+.studio-shell .workspace:has(.asset-library-experience) .asset-library-command p {
+  margin-bottom: 6px !important;
+  font-size: 11px !important;
+  letter-spacing: 0.13em !important;
+}
+
+.studio-shell .workspace.workspace-library .asset-library-command h1,
+.studio-shell .workspace:has(.asset-library-experience) .asset-library-command h1 {
+  font-size: clamp(46px, 5vw, 76px) !important;
+  line-height: 0.9 !important;
+  letter-spacing: 0 !important;
+}
+
+.studio-shell .workspace.workspace-library .asset-library-command > span,
+.studio-shell .workspace:has(.asset-library-experience) .asset-library-command > span {
+  min-height: 38px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  border-color: rgba(93, 8, 108, 0.1) !important;
+  padding: 0 16px !important;
+  background: rgba(255, 255, 255, 0.78) !important;
+  color: rgba(42, 16, 51, 0.62) !important;
+  font-size: 13px !important;
+}
+
+.studio-shell .workspace.workspace-library .asset-library-filter-strip,
+.studio-shell .workspace:has(.asset-library-experience) .asset-library-filter-strip {
+  top: 112px !important;
+  min-height: 66px !important;
+  align-items: center !important;
+  border-radius: 22px !important;
+  padding: 9px !important;
+  background: rgba(255, 255, 255, 0.86) !important;
+  box-shadow:
+    0 14px 34px rgba(93, 8, 108, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.74) !important;
+}
+
+.studio-shell .workspace.workspace-library .asset-library-filter-strip button,
+.studio-shell .workspace:has(.asset-library-experience) .asset-library-filter-strip button {
+  min-height: 46px !important;
+  border-radius: 16px !important;
+  padding: 0 18px !important;
+  gap: 9px !important;
+  font-size: 15px !important;
+  line-height: 1 !important;
+}
+
+.studio-shell .workspace.workspace-library .asset-library-filter-strip button small,
+.studio-shell .workspace:has(.asset-library-experience) .asset-library-filter-strip button small {
+  min-width: 18px !important;
+  font-size: 12px !important;
+  text-align: center !important;
+}
+
+@media (max-width: 680px) {
+  .studio-shell .workspace.workspace-library .asset-library-command,
+  .studio-shell .workspace:has(.asset-library-experience) .asset-library-command {
+    min-height: 98px !important;
+    padding: 16px !important;
+  }
+
+  .studio-shell .workspace.workspace-library .asset-library-command h1,
+  .studio-shell .workspace:has(.asset-library-experience) .asset-library-command h1 {
+    font-size: 40px !important;
+  }
+
+  .studio-shell .workspace.workspace-library .asset-library-filter-strip,
+  .studio-shell .workspace:has(.asset-library-experience) .asset-library-filter-strip {
+    top: 0 !important;
+  }
+}
+
 /* Final failed-wall polish: center failed content in every tile and prevent
    Retry/Edit labels from being clipped by older button styles. */
 .studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed > .studio-wall-pending-controls,
