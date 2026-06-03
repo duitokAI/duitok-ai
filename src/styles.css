@@ -6313,6 +6313,26 @@ textarea {
   color: #2a1033;
 }
 
+.asset-library-experience[data-studio-wall-zoom-level="0"] {
+  --asset-thumb: 96px;
+}
+
+.asset-library-experience[data-studio-wall-zoom-level="1"] {
+  --asset-thumb: 124px;
+}
+
+.asset-library-experience[data-studio-wall-zoom-level="2"] {
+  --asset-thumb: 154px;
+}
+
+.asset-library-experience[data-studio-wall-zoom-level="3"] {
+  --asset-thumb: 204px;
+}
+
+.asset-library-experience[data-studio-wall-zoom-level="4"] {
+  --asset-thumb: 272px;
+}
+
 .studio-shell .workspace:has(.asset-library-experience) {
   padding-top: 0 !important;
   padding-left: 0 !important;
@@ -6545,6 +6565,31 @@ textarea {
   color: rgba(42, 16, 51, 0.58);
   font-size: 12px;
   font-weight: 880;
+}
+
+.asset-library-command-actions {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.asset-library-command-actions > span {
+  flex: 0 0 auto;
+  border: 1px solid rgba(93, 8, 108, 0.09);
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.72);
+  color: rgba(42, 16, 51, 0.58);
+  font-size: 12px;
+  font-weight: 880;
+}
+
+.asset-library-command-actions .studio-wall-zoom-control {
+  position: relative;
+  top: auto;
+  right: auto;
+  flex: 0 0 auto;
 }
 
 .asset-library-filter-strip {
@@ -43957,7 +44002,9 @@ body:has(.studio-shell .video-page-studio),
 }
 
 .studio-shell .workspace.workspace-library .asset-library-command > span,
-.studio-shell .workspace:has(.asset-library-experience) .asset-library-command > span {
+.studio-shell .workspace:has(.asset-library-experience) .asset-library-command > span,
+.studio-shell .workspace.workspace-library .asset-library-command-actions > span,
+.studio-shell .workspace:has(.asset-library-experience) .asset-library-command-actions > span {
   min-height: 38px !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -43966,6 +44013,25 @@ body:has(.studio-shell .video-page-studio),
   background: rgba(255, 255, 255, 0.78) !important;
   color: rgba(42, 16, 51, 0.62) !important;
   font-size: 13px !important;
+}
+
+.studio-shell .workspace.workspace-library .asset-library-command-actions,
+.studio-shell .workspace:has(.asset-library-experience) .asset-library-command-actions {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.studio-shell .workspace.workspace-library .asset-library-command-actions .studio-wall-zoom-control,
+.studio-shell .workspace:has(.asset-library-experience) .asset-library-command-actions .studio-wall-zoom-control {
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  margin: 0 !important;
+  transform: none !important;
+  flex: 0 0 auto !important;
 }
 
 .studio-shell .workspace.workspace-library .asset-library-filter-strip,
