@@ -44082,21 +44082,23 @@ body:has(.studio-shell .video-page-studio),
   transform: translate(-50%, -50%) !important;
 }
 
-/* Dense failed-card composition for oversized wall tiles. The content should
-   still sit centered, but read as a compact status module instead of a small
-   label floating in an empty tile. */
+/* Dense failed-card composition for oversized wall tiles. Keep the whole status
+   module on the center axis at every zoom level. */
 @container (min-width: 520px) {
   .studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center,
   .studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center,
   .studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center {
-    width: min(56cqw, 640px) !important;
-    max-width: min(56cqw, 640px) !important;
-    grid-template-columns: auto minmax(160px, 1fr) !important;
-    grid-template-rows: auto auto auto !important;
-    column-gap: clamp(12px, 2.4cqw, 24px) !important;
-    row-gap: clamp(8px, 1.4cqw, 12px) !important;
+    width: min(62cqw, 560px) !important;
+    max-width: min(62cqw, 560px) !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto auto auto auto !important;
+    column-gap: 0 !important;
+    row-gap: clamp(8px, 1.2cqw, 12px) !important;
     justify-content: center !important;
     justify-items: center !important;
+    align-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
   }
 
   .studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape b,
@@ -44105,23 +44107,30 @@ body:has(.studio-shell .video-page-studio),
   .studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .generation-credit-refund-note,
   .studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .generation-credit-refund-note,
   .studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .generation-credit-refund-note {
-    width: 100% !important;
+    grid-column: 1 !important;
+    width: min(100%, 230px) !important;
     max-width: 230px !important;
+    justify-self: center !important;
   }
 
   .studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape small,
   .studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape small,
   .studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape small {
+    grid-column: 1 !important;
     width: min(100%, 520px) !important;
     max-width: 520px !important;
     font-size: clamp(14px, 2.2cqw, 18px) !important;
     line-height: 1.18 !important;
+    justify-self: center !important;
+    text-align: center !important;
   }
 
   .studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-actions,
   .studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-actions,
   .studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-actions {
+    grid-column: 1 !important;
     width: min(100%, 340px) !important;
+    justify-self: center !important;
   }
 
   .studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-actions button,
