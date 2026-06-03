@@ -42839,6 +42839,38 @@ body:has(.studio-shell .video-page-studio),
   }
 }
 
+/* Agent recents readability: titles should not be eaten by a single-line
+   ellipsis in the narrow history sidebar. */
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-item {
+  align-items: stretch !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-restore {
+  min-height: 56px !important;
+  align-content: center !important;
+  padding-block: 7px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-restore span {
+  display: -webkit-box !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: anywhere !important;
+  text-overflow: clip !important;
+  line-height: 1.16 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-restore small {
+  display: block !important;
+  white-space: nowrap !important;
+  line-height: 1.1 !important;
+}
+
 /* Studio wall failed-card compact mode: failed jobs share the same fixed row
    height as media tiles, so their internal controls must fit inside the tile. */
 .studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed,
