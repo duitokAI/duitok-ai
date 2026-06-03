@@ -5190,7 +5190,7 @@ function imageModelCapabilities(model = "GPT Image 2") {
 
 function imageResolutionOptionsForModel(model = "GPT Image 2") {
   const descriptions = {
-    "512": { title: "512", description: "Small fast preview", badge: "FAST" },
+    "512": { title: "512", description: "Small preview output", badge: "PREVIEW" },
     "1K": { title: "1k", description: "Fast draft preview", badge: "FAST" },
     "2K": { title: "2k", description: "Balanced daily quality", badge: "DEFAULT" },
     "3K": { title: "3k", description: "High-detail creative output", badge: "HD" },
