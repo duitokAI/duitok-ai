@@ -36,6 +36,7 @@ const apimartGrokVideoModel = process.env.APIMART_GROK_VIDEO_MODEL || "grok-imag
 const apimartWanVideoModel = process.env.APIMART_WAN_VIDEO_MODEL || "wan2.7";
 const apimartKlingOmniModel = process.env.APIMART_KLING_OMNI_MODEL || "kling-v3-omni";
 const apimartKlingMotionModel = process.env.APIMART_KLING_MOTION_MODEL || "kling-v3-motion-control";
+const apimartHailuo23Model = process.env.APIMART_HAILUO_2_3_MODEL || "MiniMax-Hailuo-2.3";
 const apimartSeedanceModel = process.env.APIMART_SEEDANCE_MODEL || "doubao-seedance-2.0";
 const geminiBaseUrl = (process.env.GEMINI_BASE_URL || "https://generativelanguage.googleapis.com").replace(/\/$/, "");
 const geminiGeneratePathPrefix = process.env.GEMINI_GENERATE_PATH_PREFIX || "/v1beta/models";
@@ -86,7 +87,7 @@ const ai302SunoFetchPathPrefix = process.env.AI302_SUNO_FETCH_PATH_PREFIX || "/s
 const ai302SunoModel = process.env.AI302_SUNO_MODEL || "chirp-crow";
 const ai302AudioTranslatePath = process.env.AI302_AUDIO_TRANSLATE_PATH || "/302/audio/translate/task";
 const webSearchBaseUrl = process.env.WEB_SEARCH_BASE_URL || "https://duckduckgo.com/html/";
-const allowedMediaModels = new Set(["GPT Image 2", "Seedream 5.0 Lite", "Seedream 4.5", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control"]);
+const allowedMediaModels = new Set(["GPT Image 2", "Seedream 5.0 Lite", "Seedream 4.5", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control", "MiniMax Hailuo 2.3"]);
 const thumbnailCache = new Map();
 const thumbnailInflight = new Map();
 const thumbnailCacheMaxItems = Number(process.env.THUMBNAIL_CACHE_MAX_ITEMS || 160);
@@ -131,12 +132,16 @@ const publicMediaModelMap = {
   "Pokaya Wan Video": "Wan 2.7",
   "Pokaya Kling Omni": "Kling V3 Omni",
   "Pokaya Kling Motion": "Kling V3 Motion Control",
+  "Pokaya Hailuo": "MiniMax Hailuo 2.3",
   "Wan 2.7": "Wan 2.7",
   "Kling V3 Omni": "Kling V3 Omni",
   "Kling V3 Motion Control": "Kling V3 Motion Control",
+  "MiniMax Hailuo 2.3": "MiniMax Hailuo 2.3",
   Wan: "Wan 2.7",
   KlingOmni: "Kling V3 Omni",
   KlingMotion: "Kling V3 Motion Control",
+  Hailuo: "MiniMax Hailuo 2.3",
+  MiniMaxHailuo: "MiniMax Hailuo 2.3",
   GeminiOmni: "Gemini Omni",
   Grok: "Grok Imagine Video"
 };
@@ -462,7 +467,8 @@ function defaultModelCosts() {
     "Grok Imagine Video": { costRm: 0.292, costRmb: 0.5, unit: "10s video" },
     "Wan 2.7": { costUsd: 0.528, unit: "8s video" },
     "Kling V3 Omni": { costUsd: 0.335, unit: "5s video" },
-    "Kling V3 Motion Control": { costUsd: 0.515, unit: "5s video" }
+    "Kling V3 Motion Control": { costUsd: 0.515, unit: "5s video" },
+    "MiniMax Hailuo 2.3": { costUsd: 0.294, unit: "6s video" }
   };
 }
 
@@ -1351,7 +1357,7 @@ function publicMediaModel(model) {
 }
 
 function isVideoMediaModel(model) {
-  return ["Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control"].includes(internalMediaModel(model));
+  return ["Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control", "MiniMax Hailuo 2.3"].includes(internalMediaModel(model));
 }
 
 function imageCreditForModel(model = "") {
@@ -1392,6 +1398,7 @@ function requestedMediaModelFromText(content = "") {
   if (/wan\s*2(?:\.7)?|wan2\.7|万相\s*2(?:\.7)?/i.test(text)) return "Wan 2.7";
   if (/kling.*motion|motion.*kling|可灵.*motion|运动控制/i.test(text)) return "Kling V3 Motion Control";
   if (/kling.*omni|omni.*kling|可灵.*omni/i.test(text)) return "Kling V3 Omni";
+  if (/hailuo\s*2(?:\.3)?|minimax.*hailuo|hailuo.*minimax|海螺\s*2(?:\.3)?/i.test(text)) return "MiniMax Hailuo 2.3";
   if (/grok|imagine/i.test(text)) return "Grok Imagine";
   return "";
 }
@@ -1399,8 +1406,8 @@ function requestedMediaModelFromText(content = "") {
 function generationModelOptionsText(kind = "auto") {
   const estimate = (model) => formatCreditValue(creditChargeFor({ image: { model } }, "generate-image"));
   if (kind === "image") return `GPT Image 2（${estimate("GPT Image 2")} credits/张）、Seedream 5.0 Lite（${estimate("Seedream 5.0 Lite")} credits/张）、Seedream 4.5（${estimate("Seedream 4.5")} credits/张）、Nano Banana Pro（${estimate("Nano Banana Pro")} credits/张）、Nano Banana 2（${estimate("Nano Banana 2")} credits/张）或 Grok Imagine（${estimate("Grok Imagine")} credits/张）`;
-  if (kind === "video") return `Veo 3.1（${estimate("Veo 3.1")} credits/8秒）、Seedance 2.0（${estimate("Seedance 2.0")} credits/5秒）、Sora 2（${estimate("Sora 2")} credits/8秒）、Wan 2.7（${estimate("Wan 2.7")} credits/8秒）、Kling V3 Omni（${estimate("Kling V3 Omni")} credits/5秒）、Kling V3 Motion Control（${estimate("Kling V3 Motion Control")} credits/5秒）`;
-  return `图片：GPT Image 2（${estimate("GPT Image 2")}）/ Seedream 5.0 Lite（${estimate("Seedream 5.0 Lite")}）/ Seedream 4.5（${estimate("Seedream 4.5")}）/ Nano Banana Pro（${estimate("Nano Banana Pro")}）/ Nano Banana 2（${estimate("Nano Banana 2")}）/ Grok Imagine（${estimate("Grok Imagine")}）；视频：Veo 3.1（${estimate("Veo 3.1")}）/ Seedance 2.0（${estimate("Seedance 2.0")}）/ Sora 2（${estimate("Sora 2")}）/ Wan 2.7（${estimate("Wan 2.7")}）/ Kling V3 Omni（${estimate("Kling V3 Omni")}）/ Kling V3 Motion Control（${estimate("Kling V3 Motion Control")}）`;
+  if (kind === "video") return `Veo 3.1（${estimate("Veo 3.1")} credits/8秒）、Seedance 2.0（${estimate("Seedance 2.0")} credits/5秒）、Sora 2（${estimate("Sora 2")} credits/8秒）、Wan 2.7（${estimate("Wan 2.7")} credits/8秒）、Kling V3 Omni（${estimate("Kling V3 Omni")} credits/5秒）、Kling V3 Motion Control（${estimate("Kling V3 Motion Control")} credits/5秒）、MiniMax Hailuo 2.3（${estimate("MiniMax Hailuo 2.3")} credits/6秒）`;
+  return `图片：GPT Image 2（${estimate("GPT Image 2")}）/ Seedream 5.0 Lite（${estimate("Seedream 5.0 Lite")}）/ Seedream 4.5（${estimate("Seedream 4.5")}）/ Nano Banana Pro（${estimate("Nano Banana Pro")}）/ Nano Banana 2（${estimate("Nano Banana 2")}）/ Grok Imagine（${estimate("Grok Imagine")}）；视频：Veo 3.1（${estimate("Veo 3.1")}）/ Seedance 2.0（${estimate("Seedance 2.0")}）/ Sora 2（${estimate("Sora 2")}）/ Wan 2.7（${estimate("Wan 2.7")}）/ Kling V3 Omni（${estimate("Kling V3 Omni")}）/ Kling V3 Motion Control（${estimate("Kling V3 Motion Control")}）/ MiniMax Hailuo 2.3（${estimate("MiniMax Hailuo 2.3")}）`;
 }
 
 function redactProviderText(value, fallback = "") {
@@ -1890,7 +1897,7 @@ function providerForMediaModel(model) {
   model = internalMediaModel(model);
   if (model === "GPT Image 2" || model === "Seedream 5.0 Lite" || model === "Seedream 4.5" || model === "Grok Imagine") return process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Nano Banana Pro" || model === "Nano Banana 2") return process.env.GRSAI_API_KEY ? "grsai" : "mock";
-  if (model === "Seedance 2.0" || model === "Grok Imagine Video" || model === "Wan 2.7" || model === "Kling V3 Omni" || model === "Kling V3 Motion Control") return process.env.APIMART_API_KEY ? "apimart" : "mock";
+  if (model === "Seedance 2.0" || model === "Grok Imagine Video" || model === "Wan 2.7" || model === "Kling V3 Omni" || model === "Kling V3 Motion Control" || model === "MiniMax Hailuo 2.3") return process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni") return process.env.WUYIN_API_KEY ? "wuyin" : "mock";
   return "unsupported";
 }
@@ -1913,6 +1920,7 @@ function videoDurationFor(project, model = project.image?.model) {
   if (model === "Wan 2.7") return Number(project.image?.duration || process.env.APIMART_WAN_VIDEO_DURATION || 8);
   if (model === "Kling V3 Omni") return Number(project.image?.duration || process.env.APIMART_KLING_OMNI_DURATION || 5);
   if (model === "Kling V3 Motion Control") return Number(project.image?.duration || process.env.APIMART_KLING_MOTION_DURATION || 5);
+  if (model === "MiniMax Hailuo 2.3") return Number(project.image?.duration || process.env.APIMART_HAILUO_2_3_DURATION || 6);
   if (model === "Veo 3.1") return 8;
   return 0;
 }
@@ -1942,6 +1950,7 @@ function creditChargeFor(project, action, db = null) {
   if (model === "Wan 2.7") return creditsFromProviderCost(cost, roundCredits(duration * 0.066));
   if (model === "Kling V3 Omni") return creditsFromProviderCost(cost, roundCredits(duration * 0.067));
   if (model === "Kling V3 Motion Control") return creditsFromProviderCost(cost, roundCredits(duration * 0.103));
+  if (model === "MiniMax Hailuo 2.3") return creditsFromProviderCost(cost, roundCredits(duration * 0.049));
   return creditsFromProviderCost(cost, 0.1);
 }
 
@@ -3221,7 +3230,7 @@ function generationAspectRatioForProject(project, action = "generate-image", ste
 function generationEndpointFor(provider, project) {
   if (provider === "gemini") return `${geminiGeneratePathPrefix}/${geminiVisionModel}:generateContent`;
   if (provider === "grsai" && project?.clone?.referenceVideo) return grsaiChatPath;
-  if (provider === "apimart" && ["Seedance 2.0", "Grok Imagine Video", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control"].includes(internalMediaModel(project?.image?.model))) return apimartVideoPath;
+  if (provider === "apimart" && ["Seedance 2.0", "Grok Imagine Video", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control", "MiniMax Hailuo 2.3"].includes(internalMediaModel(project?.image?.model))) return apimartVideoPath;
   if (provider === "grsai") return grsaiDrawPath;
   if (provider === "wuyin") return wuyinPathFromProject(project);
   return apimartImagePath;
@@ -3357,6 +3366,25 @@ function apimartKlingMotionBody(project, prompt) {
     mode: ["std", "pro"].includes(mode) ? mode : "std",
     watermark_info: { enabled: process.env.APIMART_KLING_MOTION_WATERMARK === "true" }
   };
+}
+
+function apimartHailuo23Body(project, prompt) {
+  const requestedDuration = Number(videoDurationFor(project, "MiniMax Hailuo 2.3")) || 6;
+  const duration = requestedDuration > 6 ? 10 : 6;
+  const requestedResolution = String(project.image?.resolution || process.env.APIMART_HAILUO_2_3_RESOLUTION || "768p").trim().toLowerCase();
+  const resolution = requestedResolution === "1080p" ? "1080p" : "768p";
+  const body = {
+    model: apimartHailuo23Model,
+    prompt,
+    duration: resolution === "1080p" ? 6 : duration,
+    resolution,
+    prompt_optimizer: process.env.APIMART_HAILUO_2_3_PROMPT_OPTIMIZER !== "false",
+    fast_pretreatment: process.env.APIMART_HAILUO_2_3_FAST_PRETREATMENT === "true",
+    watermark: process.env.APIMART_HAILUO_2_3_WATERMARK === "true"
+  };
+  const firstFrameImage = String(project.image?.firstFrameImage || project.image?.referenceImageUrl || process.env.APIMART_HAILUO_2_3_FIRST_FRAME_IMAGE || "").trim();
+  if (firstFrameImage) body.first_frame_image = firstFrameImage;
+  return body;
 }
 
 async function pollWuyinTask(taskId) {
@@ -3588,6 +3616,28 @@ async function generateVideoWithApimartKlingMotion(project) {
   };
 }
 
+async function generateVideoWithApimartHailuo23(project) {
+  const prompt = [
+    project.image?.prompt || "Create a high-quality ecommerce product video.",
+    `Mode: ${project.image?.mode || "Create Video"}.`,
+    "Style: smooth cinematic motion, realistic lighting, strong product or subject focus, no fake brand claims."
+  ].join("\n");
+  const data = await apimartRequest(apimartVideoPath, {
+    method: "POST",
+    body: JSON.stringify(apimartHailuo23Body(project, prompt))
+  });
+  const task = Array.isArray(data) ? data[0] : data;
+  const taskId = task?.task_id || task?.id;
+  if (!taskId) return { text: JSON.stringify(data, null, 2), urls: extractVideoUrls(data) };
+  const taskData = await pollApimartTask(taskId);
+  const urls = extractVideoUrls(taskData);
+  return {
+    text: urls.length ? `Video generated with MiniMax Hailuo 2.3.\n\nTask ID: ${taskId}` : `MiniMax Hailuo 2.3 task completed.\n\nTask ID: ${taskId}`,
+    urls,
+    taskId
+  };
+}
+
 async function generateWithApimart(project, action, step) {
   if (action === "generate-image") {
     const image = await generateImageWithApimart(project);
@@ -3627,6 +3677,10 @@ async function generateWithProvider(project, action, step) {
     if (provider === "apimart" && model === "Kling V3 Motion Control") {
       const video = await generateVideoWithApimartKlingMotion(project);
       return { title: "Kling V3 Motion Control", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" };
+    }
+    if (provider === "apimart" && model === "MiniMax Hailuo 2.3") {
+      const video = await generateVideoWithApimartHailuo23(project);
+      return { title: "MiniMax Hailuo 2.3", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" };
     }
     if (provider === "wuyin" && (model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni")) {
       const video = await generateVideoWithWuyin(project);
@@ -4662,7 +4716,7 @@ const agentTools = [
           style: { type: "string", description: "POV, product demo, unboxing, before-after, cinematic, UGC." },
           model: {
             type: "string",
-            enum: ["Seedance 2.0", "Veo 3.1", "Sora 2", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control"],
+            enum: ["Seedance 2.0", "Veo 3.1", "Sora 2", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control", "MiniMax Hailuo 2.3"],
             description: "The video model the user chose. Do not invent a model. If the user has not chosen, ask first."
           },
           keyMessage: { type: "string" }
@@ -4739,7 +4793,7 @@ const agentTools = [
           },
           model: {
             type: "string",
-            enum: ["GPT Image 2", "Seedream 5.0 Lite", "Seedream 4.5", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control"],
+            enum: ["GPT Image 2", "Seedream 5.0 Lite", "Seedream 4.5", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control", "MiniMax Hailuo 2.3"],
             description: "User-selected generation model. Ask the user to choose before passing this when the requested media type is unclear."
           }
         },
@@ -7169,8 +7223,8 @@ app.post("/api/agent", async (req, res, next) => {
           "Use trend_research before answering about fresh trends, unfamiliar aesthetic names, product-market fit, what to sell, content angles, competitors, recent demand, or terms that may have a changing meaning. Use raw web_search only for simple fact lookup. After research, answer naturally with practical guidance for the user's goal and cite source URLs briefly when useful.",
           "Act like a capable assistant: when the user asks for an output, fill the relevant content settings and run the matching tool if enough information is available.",
           "Pokaya AI is the platform, not a generation model. Never present Pokaya AI as a model option.",
-          "User-facing model names are allowed and should be shown when relevant: GPT Image 2, Seedream 5.0 Lite, Seedream 4.5, Nano Banana Pro, Nano Banana 2, and Grok Imagine for images; Veo 3.1, Seedance 2.0, Sora 2, and Wan 2.7 for videos. Do not mention provider names, base URLs, routes, keys, or infrastructure.",
-          "User-facing model names are allowed and should be shown when relevant: GPT Image 2, Seedream 5.0 Lite, Seedream 4.5, Nano Banana Pro, Nano Banana 2, and Grok Imagine for images; Veo 3.1, Seedance 2.0, Sora 2, and Wan 2.7 for videos. Do not mention provider names, base URLs, routes, keys, or infrastructure.",
+          "User-facing model names are allowed and should be shown when relevant: GPT Image 2, Seedream 5.0 Lite, Seedream 4.5, Nano Banana Pro, Nano Banana 2, and Grok Imagine for images; Veo 3.1, Seedance 2.0, Sora 2, Wan 2.7, Kling V3 Omni, Kling V3 Motion Control, and MiniMax Hailuo 2.3 for videos. Do not mention provider names, base URLs, routes, keys, or infrastructure.",
+          "User-facing model names are allowed and should be shown when relevant: GPT Image 2, Seedream 5.0 Lite, Seedream 4.5, Nano Banana Pro, Nano Banana 2, and Grok Imagine for images; Veo 3.1, Seedance 2.0, Sora 2, Wan 2.7, Kling V3 Omni, Kling V3 Motion Control, and MiniMax Hailuo 2.3 for videos. Do not mention provider names, base URLs, routes, keys, or infrastructure.",
           "Before generating a video, make sure the user has selected a video model. If no model is selected or the request is ambiguous, ask one short question with the video model choices and estimated credits instead of generating. Credits are USD-denominated: USD 1 = 1000 credits. Use backend estimates from the selected model instead of old RM-based credit values.",
           "If the user already says a model name such as Veo, Seedance, or Sora, save that model to the current content settings before creating the prompt or queuing generation.",
           "Common workflows: product/content request = inspect_workspace_state -> create_project or update fields internally -> generate_project_output when the user needs an image, poster, cover, carousel asset, video, or other rendered media through Pokaya's platform models. Weekly content plan = inspect_workspace_state -> remember_agent_context when useful -> create_content_plan, and only create schedule drafts when the user asks for drafts. Video prompt request = create_seedance_prompt; video generation request = create_seedance_prompt -> generate_project_output after confirmation. In user-facing replies, say video prompt or generate video instead of naming the internal video model.",

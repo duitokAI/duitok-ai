@@ -5722,6 +5722,7 @@ function videoModelValue(p = project()) {
   if (/wan/i.test(value)) return "Wan 2.7";
   if (/kling.*motion|motion.*kling/i.test(value)) return "Kling V3 Motion Control";
   if (/kling.*omni|omni.*kling/i.test(value)) return "Kling V3 Omni";
+  if (/hailuo|minimax/i.test(value)) return "MiniMax Hailuo 2.3";
   if (/seedance/i.test(value)) return "Seedance 2.0 Fast";
   return "Seedance 2.0 Fast";
 }
@@ -5752,7 +5753,8 @@ function videoGenerateConsole(p) {
           ["Sora 2", "Sora 2"],
           ["Wan 2.7", "Wan 2.7"],
           ["Kling V3 Omni", "Kling Omni"],
-          ["Kling V3 Motion Control", "Kling Motion"]
+          ["Kling V3 Motion Control", "Kling Motion"],
+          ["MiniMax Hailuo 2.3", "Hailuo 2.3"]
         ], "audio-lines")}
         ${videoOptionMenu("ratio", "ugc.aspectRatio", videoAspectRatioValue(p), ["16:9", "9:16", "1:1", "4:3", "3:4"].map((value) => [value, value]), "rectangle-horizontal")}
         ${videoOptionMenu("quality", "ugc.quality", videoQualityValue(p), ["480p", "720p", "1080p"].map((value) => [value, value]), "gem")}
@@ -5991,6 +5993,8 @@ function originalProviderValue(provider) {
     Wan: "Wan 2.7",
     KlingOmni: "Kling V3 Omni",
     KlingMotion: "Kling V3 Motion Control",
+    Hailuo: "MiniMax Hailuo 2.3",
+    MiniMaxHailuo: "MiniMax Hailuo 2.3",
     GeminiOmni: "Gemini Omni"
   };
   return aliases[provider] || provider || "Veo 3.1";
@@ -6005,6 +6009,7 @@ function originalProviderLabel(provider) {
     "Wan 2.7": "Wan",
     "Kling V3 Omni": "Kling Omni",
     "Kling V3 Motion Control": "Kling Motion",
+    "MiniMax Hailuo 2.3": "Hailuo",
     "Gemini Omni": "Pokaya AI"
   };
   return labels[provider] || String(provider || "Video").split(" ")[0];
@@ -6019,6 +6024,7 @@ function originalProviderCredits(provider) {
     "Wan 2.7": "0.53",
     "Kling V3 Omni": "0.34",
     "Kling V3 Motion Control": "0.52",
+    "MiniMax Hailuo 2.3": "0.29",
     "Gemini Omni": "1.30"
   };
   return credits[provider] || "0.40";
@@ -6043,6 +6049,7 @@ function originalPanel(p) {
         ${originalChoiceButton("original.provider", "Wan 2.7", "🌊 Wan 2.7", provider)}
         ${originalChoiceButton("original.provider", "Kling V3 Omni", "🎥 Kling Omni", provider)}
         ${originalChoiceButton("original.provider", "Kling V3 Motion Control", "🕹️ Kling Motion", provider)}
+        ${originalChoiceButton("original.provider", "MiniMax Hailuo 2.3", "🎞️ Hailuo 2.3", provider)}
         ${originalChoiceButton("original.provider", "Gemini Omni", "🔷 Pokaya AI", provider)}
       </div>
       <p class="original-field-label">Image Mode</p>
