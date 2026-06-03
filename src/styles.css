@@ -42275,10 +42275,7 @@ body:has(.studio-shell .video-page-studio),
 .studio-shell .image-higgsfield-mode .studio-wall-grid,
 .studio-shell .video-page-studio .studio-wall-grid,
 .studio-shell .video-prompt-extractor-page .studio-wall-grid {
-  --studio-wall-row-height: calc(
-    (100% - ((var(--studio-wall-visible-columns) - 1) * var(--studio-wall-gap, 3px)))
-    / var(--studio-wall-visible-columns)
-  );
+  --studio-wall-row-height: clamp(126px, calc(var(--studio-wall-column, 260px) * 0.74), 440px);
   gap: var(--studio-wall-gap) !important;
   background: var(--studio-wall-separator-color) !important;
 }
@@ -42286,13 +42283,16 @@ body:has(.studio-shell .video-page-studio),
 .studio-shell .image-higgsfield-mode .studio-wall-card,
 .studio-shell .video-page-studio .studio-wall-card,
 .studio-shell .video-prompt-extractor-page .studio-wall-card {
-  flex: var(--media-ratio, 1) 1 auto !important;
+  flex: var(--media-ratio, 1) 1 calc(var(--studio-wall-row-height) * var(--media-ratio, 1)) !important;
+  aspect-ratio: auto !important;
   width: auto !important;
   min-width: 0 !important;
   max-width: none !important;
   height: var(--studio-wall-row-height) !important;
   min-height: var(--studio-wall-row-height) !important;
   max-height: var(--studio-wall-row-height) !important;
+  background: var(--studio-wall-separator-color) !important;
+  line-height: 0 !important;
 }
 
 .studio-shell .image-higgsfield-mode .studio-wall-grid::after,
@@ -42653,4 +42653,87 @@ body:has(.studio-shell .video-page-studio),
   aspect-ratio: auto !important;
   object-fit: contain !important;
   vertical-align: top !important;
+}
+
+/* Final studio wall packing guard: keep the Higgsfield-style wall stable on
+   auto-height pages, with thin dark gutters and media filling every tile. */
+.studio-shell .image-higgsfield-mode > .studio-result-wall,
+.studio-shell .video-page-studio > .studio-result-wall,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall {
+  background: #07070a !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid {
+  --studio-wall-gap: clamp(2px, 0.16vw, 4px);
+  --studio-wall-row-height: clamp(126px, calc(var(--studio-wall-column, 260px) * 0.74), 440px);
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: flex-start !important;
+  align-content: flex-start !important;
+  justify-content: flex-start !important;
+  gap: var(--studio-wall-gap) !important;
+  width: 100% !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  background: #07070a !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-card,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-card,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-card {
+  flex: var(--media-ratio, 1) 1 calc(var(--studio-wall-row-height) * var(--media-ratio, 1)) !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: var(--studio-wall-row-height) !important;
+  min-height: var(--studio-wall-row-height) !important;
+  max-height: var(--studio-wall-row-height) !important;
+  aspect-ratio: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+  background: #07070a !important;
+  line-height: 0 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-card .result-preview-trigger,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-card .result-preview-trigger,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-card .result-preview-trigger {
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-card .result-image,
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-card .result-video,
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-card .result-video-shell,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-card .result-image,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-card .result-video,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-card .result-video-shell,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-card .result-image,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-card .result-video,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-card .result-video-shell {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  max-height: 100% !important;
+  aspect-ratio: auto !important;
+  object-fit: cover !important;
+  border-radius: 0 !important;
 }
