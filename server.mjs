@@ -68,6 +68,9 @@ const grsaiNanoModel = process.env.GRSAI_NANO_MODEL || "nano-banana-pro";
 const grsaiNanoBanana2Model = process.env.GRSAI_NANO_BANANA_2_MODEL || "nano-banana-2";
 const grsaiVisionModel = process.env.GRSAI_VISION_MODEL || "gemini-2.5-flash";
 const grsaiCloneModel = process.env.GRSAI_CLONE_MODEL || "gemini-3-pro";
+const ai302BaseUrl = (process.env.AI302_BASE_URL || "https://api.302.ai").replace(/\/$/, "");
+const ai302MinimaxSpeechPath = process.env.AI302_MINIMAX_SPEECH_PATH || "/minimaxi/v1/t2a_v2";
+const ai302MinimaxSpeechModel = process.env.AI302_MINIMAX_SPEECH_MODEL || "speech-2.8-hd";
 const webSearchBaseUrl = process.env.WEB_SEARCH_BASE_URL || "https://duckduckgo.com/html/";
 const allowedMediaModels = new Set(["GPT Image 2", "Seedream 5.0 Lite", "Seedream 4.5", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"]);
 const thumbnailCache = new Map();
@@ -1844,6 +1847,16 @@ function hasOpenAiConfig() {
   return Boolean(process.env.OPENAI_API_KEY && !process.env.OPENAI_API_KEY.includes("replace_with"));
 }
 
+function requireAi302Config() {
+  const apiKey = process.env.AI302_API_KEY;
+  if (!apiKey || apiKey.includes("replace_with")) {
+    const error = new Error("302.AI belum configure. Isi AI302_API_KEY dalam Render Environment Variables dulu.");
+    error.status = 503;
+    throw error;
+  }
+  return apiKey;
+}
+
 function providerForMediaModel(model) {
   model = internalMediaModel(model);
   if (model === "GPT Image 2" || model === "Seedream 5.0 Lite" || model === "Seedream 4.5") return process.env.APIMART_API_KEY ? "apimart" : "mock";
@@ -1981,6 +1994,88 @@ async function apimartRequest(pathname, options = {}) {
     throw error;
   }
   return payload.data || payload;
+}
+
+async function ai302Request(pathname, options = {}) {
+  const apiKey = requireAi302Config();
+  const response = await fetch(`${ai302BaseUrl}${pathname}`, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      ...(options.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
+      ...(options.headers || {})
+    },
+    signal: AbortSignal.timeout(Number(process.env.AI302_TIMEOUT_MS || 120000))
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || (payload.code && Number(payload.code) >= 400) || (payload.base_resp?.status_code && Number(payload.base_resp.status_code) !== 0)) {
+    const message = payload.message || payload.detail || payload.error?.message || payload.error || payload.base_resp?.status_msg || `302.AI request failed (${response.status})`;
+    const error = new Error(message);
+    error.status = response.status || 502;
+    throw error;
+  }
+  return payload.data || payload;
+}
+
+function extractAi302SpeechAudio(payload = {}) {
+  const data = payload.data || payload;
+  const directUrl = data.audio_url || data.audioUrl || data.url || data.file_url || data.fileUrl || data.output_audio_url || data.outputAudioUrl;
+  if (directUrl && /^https?:\/\//i.test(String(directUrl))) return { audioUrl: String(directUrl) };
+  if (typeof data.audio === "string" && /^https?:\/\//i.test(data.audio)) return { audioUrl: data.audio };
+  if (typeof data.audio === "string" && data.audio) return { audioHex: data.audio };
+  const nestedUrls = extractUrlsDeep(payload).filter((url) => /\.(mp3|wav|flac|m4a|aac|ogg)(\?|$)/i.test(url) || /audio|file/i.test(url));
+  return nestedUrls[0] ? { audioUrl: nestedUrls[0] } : {};
+}
+
+async function synthesizeSpeechWithAi302(body = {}) {
+  const text = String(body.text || "").trim();
+  if (!text) {
+    const error = new Error("Speech text is required.");
+    error.status = 400;
+    throw error;
+  }
+  if (Array.from(text).length > 10000) {
+    const error = new Error("Speech text must be under 10,000 characters for synchronous generation.");
+    error.status = 400;
+    throw error;
+  }
+  const format = ["mp3", "wav", "flac", "pcm"].includes(String(body.format || "").toLowerCase()) ? String(body.format).toLowerCase() : "mp3";
+  const speed = Number(body.speed || 1);
+  const pitch = Number(body.pitch || 0);
+  const volume = Number(body.volume || body.vol || 1);
+  const payload = await ai302Request(ai302MinimaxSpeechPath, {
+    method: "POST",
+    body: JSON.stringify({
+      model: String(body.model || ai302MinimaxSpeechModel),
+      text,
+      stream: false,
+      voice_setting: {
+        voice_id: String(body.voiceId || process.env.AI302_MINIMAX_SPEECH_VOICE_ID || "male-qn-qingse"),
+        speed: Number.isFinite(speed) ? Math.min(2, Math.max(0.5, speed)) : 1,
+        vol: Number.isFinite(volume) ? Math.min(10, Math.max(0.1, volume)) : 1,
+        pitch: Number.isFinite(pitch) ? Math.min(12, Math.max(-12, pitch)) : 0,
+        ...(body.emotion ? { emotion: String(body.emotion) } : {})
+      },
+      audio_setting: {
+        sample_rate: Number(body.sampleRate || process.env.AI302_MINIMAX_SPEECH_SAMPLE_RATE || 32000),
+        bitrate: Number(body.bitrate || process.env.AI302_MINIMAX_SPEECH_BITRATE || 128000),
+        format,
+        channel: Number(body.channel || 1)
+      },
+      language_boost: body.languageBoost || process.env.AI302_MINIMAX_SPEECH_LANGUAGE_BOOST || "auto",
+      text_normalization: body.textNormalization !== false,
+      output_format: body.outputFormat === "hex" ? "hex" : "url",
+      aigc_watermark: body.aigcWatermark === true
+    })
+  });
+  return {
+    provider: "302ai",
+    model: String(body.model || ai302MinimaxSpeechModel),
+    textCharacters: Array.from(text).length,
+    format,
+    ...extractAi302SpeechAudio(payload),
+    raw: process.env.NODE_ENV === "production" ? undefined : payload
+  };
 }
 
 async function deepseekRequest(body) {
@@ -7056,6 +7151,20 @@ app.post("/api/attachments", async (req, res) => {
     await saveDb(db);
     return publicState(db, user);
   }));
+});
+
+app.post("/api/speech/minimax", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    const speech = await synthesizeSpeechWithAi302(req.body || {});
+    await mutateDb(async (db) => {
+      db.usage.unshift(usage(`Generated MiniMax Speech audio (${speech.textCharacters} chars)`, 0, user.id));
+      await saveDb(db);
+    });
+    res.json(speech);
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.get("/api/media/attachment/:id/:kind", async (req, res, next) => {

@@ -113,6 +113,22 @@ services:
         value: "36"
       - key: GRSAI_IMAGE_POLL_MS
         value: "3000"
+      - key: AI302_API_KEY
+        sync: false
+      - key: AI302_BASE_URL
+        value: https://api.302.ai
+      - key: AI302_MINIMAX_SPEECH_PATH
+        value: /minimaxi/v1/t2a_v2
+      - key: AI302_MINIMAX_SPEECH_MODEL
+        value: speech-2.8-hd
+      - key: AI302_MINIMAX_SPEECH_VOICE_ID
+        value: male-qn-qingse
+      - key: AI302_MINIMAX_SPEECH_LANGUAGE_BOOST
+        value: auto
+      - key: AI302_MINIMAX_SPEECH_SAMPLE_RATE
+        value: "32000"
+      - key: AI302_MINIMAX_SPEECH_BITRATE
+        value: "128000"
       - key: WUYIN_API_KEY
         sync: false
       - key: WUYIN_BASE_URL
