@@ -34,6 +34,8 @@ const apimartSeedream45Model = process.env.APIMART_SEEDREAM_4_5_MODEL || "seedre
 const apimartGrokImageModel = process.env.APIMART_GROK_IMAGE_MODEL || "grok-imagine-1.0-apimart";
 const apimartGrokVideoModel = process.env.APIMART_GROK_VIDEO_MODEL || "grok-imagine-1.0-video-apimart";
 const apimartWanVideoModel = process.env.APIMART_WAN_VIDEO_MODEL || "wan2.7";
+const apimartKlingOmniModel = process.env.APIMART_KLING_OMNI_MODEL || "kling-v3-omni";
+const apimartKlingMotionModel = process.env.APIMART_KLING_MOTION_MODEL || "kling-v3-motion-control";
 const apimartSeedanceModel = process.env.APIMART_SEEDANCE_MODEL || "doubao-seedance-2.0";
 const geminiBaseUrl = (process.env.GEMINI_BASE_URL || "https://generativelanguage.googleapis.com").replace(/\/$/, "");
 const geminiGeneratePathPrefix = process.env.GEMINI_GENERATE_PATH_PREFIX || "/v1beta/models";
@@ -84,7 +86,7 @@ const ai302SunoFetchPathPrefix = process.env.AI302_SUNO_FETCH_PATH_PREFIX || "/s
 const ai302SunoModel = process.env.AI302_SUNO_MODEL || "chirp-crow";
 const ai302AudioTranslatePath = process.env.AI302_AUDIO_TRANSLATE_PATH || "/302/audio/translate/task";
 const webSearchBaseUrl = process.env.WEB_SEARCH_BASE_URL || "https://duckduckgo.com/html/";
-const allowedMediaModels = new Set(["GPT Image 2", "Seedream 5.0 Lite", "Seedream 4.5", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video", "Wan 2.7"]);
+const allowedMediaModels = new Set(["GPT Image 2", "Seedream 5.0 Lite", "Seedream 4.5", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control"]);
 const thumbnailCache = new Map();
 const thumbnailInflight = new Map();
 const thumbnailCacheMaxItems = Number(process.env.THUMBNAIL_CACHE_MAX_ITEMS || 160);
@@ -127,8 +129,14 @@ const publicMediaModelMap = {
   "Pokaya Omni Video": "Gemini Omni",
   "Pokaya Motion Video": "Grok Imagine Video",
   "Pokaya Wan Video": "Wan 2.7",
+  "Pokaya Kling Omni": "Kling V3 Omni",
+  "Pokaya Kling Motion": "Kling V3 Motion Control",
   "Wan 2.7": "Wan 2.7",
+  "Kling V3 Omni": "Kling V3 Omni",
+  "Kling V3 Motion Control": "Kling V3 Motion Control",
   Wan: "Wan 2.7",
+  KlingOmni: "Kling V3 Omni",
+  KlingMotion: "Kling V3 Motion Control",
   GeminiOmni: "Gemini Omni",
   Grok: "Grok Imagine Video"
 };
@@ -452,7 +460,9 @@ function defaultModelCosts() {
     "Sora 2": { costRm: 0.093, costRmb: 0.16, unit: "8s video" },
     "Gemini Omni": { costRm: 0.584, costRmb: 1, unit: "10s video" },
     "Grok Imagine Video": { costRm: 0.292, costRmb: 0.5, unit: "10s video" },
-    "Wan 2.7": { costUsd: 0.528, unit: "8s video" }
+    "Wan 2.7": { costUsd: 0.528, unit: "8s video" },
+    "Kling V3 Omni": { costUsd: 0.335, unit: "5s video" },
+    "Kling V3 Motion Control": { costUsd: 0.515, unit: "5s video" }
   };
 }
 
@@ -1341,7 +1351,7 @@ function publicMediaModel(model) {
 }
 
 function isVideoMediaModel(model) {
-  return ["Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video", "Wan 2.7"].includes(internalMediaModel(model));
+  return ["Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control"].includes(internalMediaModel(model));
 }
 
 function imageCreditForModel(model = "") {
@@ -1380,6 +1390,8 @@ function requestedMediaModelFromText(content = "") {
   if (/gemini\s*omni/i.test(text)) return "Gemini Omni";
   if (/grok.*video|video.*grok|grok.*视频|imagine.*video/i.test(text)) return "Grok Imagine Video";
   if (/wan\s*2(?:\.7)?|wan2\.7|万相\s*2(?:\.7)?/i.test(text)) return "Wan 2.7";
+  if (/kling.*motion|motion.*kling|可灵.*motion|运动控制/i.test(text)) return "Kling V3 Motion Control";
+  if (/kling.*omni|omni.*kling|可灵.*omni/i.test(text)) return "Kling V3 Omni";
   if (/grok|imagine/i.test(text)) return "Grok Imagine";
   return "";
 }
@@ -1387,8 +1399,8 @@ function requestedMediaModelFromText(content = "") {
 function generationModelOptionsText(kind = "auto") {
   const estimate = (model) => formatCreditValue(creditChargeFor({ image: { model } }, "generate-image"));
   if (kind === "image") return `GPT Image 2（${estimate("GPT Image 2")} credits/张）、Seedream 5.0 Lite（${estimate("Seedream 5.0 Lite")} credits/张）、Seedream 4.5（${estimate("Seedream 4.5")} credits/张）、Nano Banana Pro（${estimate("Nano Banana Pro")} credits/张）、Nano Banana 2（${estimate("Nano Banana 2")} credits/张）或 Grok Imagine（${estimate("Grok Imagine")} credits/张）`;
-  if (kind === "video") return `Veo 3.1（${estimate("Veo 3.1")} credits/8秒）、Seedance 2.0（${estimate("Seedance 2.0")} credits/5秒）、Sora 2（${estimate("Sora 2")} credits/8秒）、Wan 2.7（${estimate("Wan 2.7")} credits/8秒）`;
-  return `图片：GPT Image 2（${estimate("GPT Image 2")}）/ Seedream 5.0 Lite（${estimate("Seedream 5.0 Lite")}）/ Seedream 4.5（${estimate("Seedream 4.5")}）/ Nano Banana Pro（${estimate("Nano Banana Pro")}）/ Nano Banana 2（${estimate("Nano Banana 2")}）/ Grok Imagine（${estimate("Grok Imagine")}）；视频：Veo 3.1（${estimate("Veo 3.1")}）/ Seedance 2.0（${estimate("Seedance 2.0")}）/ Sora 2（${estimate("Sora 2")}）/ Wan 2.7（${estimate("Wan 2.7")}）`;
+  if (kind === "video") return `Veo 3.1（${estimate("Veo 3.1")} credits/8秒）、Seedance 2.0（${estimate("Seedance 2.0")} credits/5秒）、Sora 2（${estimate("Sora 2")} credits/8秒）、Wan 2.7（${estimate("Wan 2.7")} credits/8秒）、Kling V3 Omni（${estimate("Kling V3 Omni")} credits/5秒）、Kling V3 Motion Control（${estimate("Kling V3 Motion Control")} credits/5秒）`;
+  return `图片：GPT Image 2（${estimate("GPT Image 2")}）/ Seedream 5.0 Lite（${estimate("Seedream 5.0 Lite")}）/ Seedream 4.5（${estimate("Seedream 4.5")}）/ Nano Banana Pro（${estimate("Nano Banana Pro")}）/ Nano Banana 2（${estimate("Nano Banana 2")}）/ Grok Imagine（${estimate("Grok Imagine")}）；视频：Veo 3.1（${estimate("Veo 3.1")}）/ Seedance 2.0（${estimate("Seedance 2.0")}）/ Sora 2（${estimate("Sora 2")}）/ Wan 2.7（${estimate("Wan 2.7")}）/ Kling V3 Omni（${estimate("Kling V3 Omni")}）/ Kling V3 Motion Control（${estimate("Kling V3 Motion Control")}）`;
 }
 
 function redactProviderText(value, fallback = "") {
@@ -1878,7 +1890,7 @@ function providerForMediaModel(model) {
   model = internalMediaModel(model);
   if (model === "GPT Image 2" || model === "Seedream 5.0 Lite" || model === "Seedream 4.5" || model === "Grok Imagine") return process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Nano Banana Pro" || model === "Nano Banana 2") return process.env.GRSAI_API_KEY ? "grsai" : "mock";
-  if (model === "Seedance 2.0" || model === "Grok Imagine Video" || model === "Wan 2.7") return process.env.APIMART_API_KEY ? "apimart" : "mock";
+  if (model === "Seedance 2.0" || model === "Grok Imagine Video" || model === "Wan 2.7" || model === "Kling V3 Omni" || model === "Kling V3 Motion Control") return process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni") return process.env.WUYIN_API_KEY ? "wuyin" : "mock";
   return "unsupported";
 }
@@ -1899,6 +1911,8 @@ function videoDurationFor(project, model = project.image?.model) {
   if (model === "Gemini Omni") return 10;
   if (model === "Grok Imagine Video") return Number(project.image?.duration || process.env.APIMART_GROK_VIDEO_DURATION || 6);
   if (model === "Wan 2.7") return Number(project.image?.duration || process.env.APIMART_WAN_VIDEO_DURATION || 8);
+  if (model === "Kling V3 Omni") return Number(project.image?.duration || process.env.APIMART_KLING_OMNI_DURATION || 5);
+  if (model === "Kling V3 Motion Control") return Number(project.image?.duration || process.env.APIMART_KLING_MOTION_DURATION || 5);
   if (model === "Veo 3.1") return 8;
   return 0;
 }
@@ -1926,6 +1940,8 @@ function creditChargeFor(project, action, db = null) {
   if (model === "Gemini Omni") return creditsFromProviderCost(cost, 1.3);
   if (model === "Grok Imagine Video") return creditsFromProviderCost(cost, roundCredits(duration * 0.06));
   if (model === "Wan 2.7") return creditsFromProviderCost(cost, roundCredits(duration * 0.066));
+  if (model === "Kling V3 Omni") return creditsFromProviderCost(cost, roundCredits(duration * 0.067));
+  if (model === "Kling V3 Motion Control") return creditsFromProviderCost(cost, roundCredits(duration * 0.103));
   return creditsFromProviderCost(cost, 0.1);
 }
 
@@ -3205,7 +3221,7 @@ function generationAspectRatioForProject(project, action = "generate-image", ste
 function generationEndpointFor(provider, project) {
   if (provider === "gemini") return `${geminiGeneratePathPrefix}/${geminiVisionModel}:generateContent`;
   if (provider === "grsai" && project?.clone?.referenceVideo) return grsaiChatPath;
-  if (provider === "apimart" && ["Seedance 2.0", "Grok Imagine Video", "Wan 2.7"].includes(internalMediaModel(project?.image?.model))) return apimartVideoPath;
+  if (provider === "apimart" && ["Seedance 2.0", "Grok Imagine Video", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control"].includes(internalMediaModel(project?.image?.model))) return apimartVideoPath;
   if (provider === "grsai") return grsaiDrawPath;
   if (provider === "wuyin") return wuyinPathFromProject(project);
   return apimartImagePath;
@@ -3303,6 +3319,43 @@ function apimartWanVideoBody(project, prompt) {
     resolution: ["720P", "1080P"].includes(resolution) ? resolution : "1080P",
     duration,
     size: allowedSizes.includes(size) ? size : "16:9"
+  };
+}
+
+function apimartKlingOmniBody(project, prompt) {
+  const allowedRatios = ["16:9", "9:16", "1:1"];
+  const aspectRatio = String(project.image?.aspectRatio || process.env.APIMART_KLING_OMNI_ASPECT_RATIO || "16:9").trim();
+  const mode = String(project.image?.resolution || process.env.APIMART_KLING_OMNI_MODE || "std").trim().toLowerCase();
+  const duration = Math.min(15, Math.max(3, Number(videoDurationFor(project, "Kling V3 Omni")) || 5));
+  return {
+    model: apimartKlingOmniModel,
+    prompt,
+    mode: ["std", "pro", "4k"].includes(mode) ? mode : "std",
+    duration,
+    aspect_ratio: allowedRatios.includes(aspectRatio) ? aspectRatio : "16:9",
+    audio: process.env.APIMART_KLING_OMNI_AUDIO === "true"
+  };
+}
+
+function apimartKlingMotionBody(project, prompt) {
+  const imageUrl = String(project.image?.referenceImageUrl || process.env.APIMART_KLING_MOTION_IMAGE_URL || "").trim();
+  const videoUrl = String(project.image?.referenceVideoUrl || process.env.APIMART_KLING_MOTION_VIDEO_URL || "").trim();
+  if (!imageUrl || !videoUrl) {
+    const error = new Error("Kling V3 Motion Control 需要公开可访问的 reference image_url 和 video_url。请先配置参考图/参考视频 URL。");
+    error.status = 400;
+    throw error;
+  }
+  const mode = String(project.image?.resolution || process.env.APIMART_KLING_MOTION_MODE || "std").trim().toLowerCase();
+  const characterOrientation = String(process.env.APIMART_KLING_MOTION_CHARACTER_ORIENTATION || project.image?.characterOrientation || "image").trim().toLowerCase();
+  return {
+    model: apimartKlingMotionModel,
+    prompt,
+    image_url: imageUrl,
+    video_url: videoUrl,
+    keep_original_sound: process.env.APIMART_KLING_MOTION_KEEP_ORIGINAL_SOUND || "yes",
+    character_orientation: ["image", "video"].includes(characterOrientation) ? characterOrientation : "image",
+    mode: ["std", "pro"].includes(mode) ? mode : "std",
+    watermark_info: { enabled: process.env.APIMART_KLING_MOTION_WATERMARK === "true" }
   };
 }
 
@@ -3491,6 +3544,50 @@ async function generateVideoWithApimartWan(project) {
   };
 }
 
+async function generateVideoWithApimartKlingOmni(project) {
+  const prompt = [
+    project.image?.prompt || "Create a cinematic ecommerce product video.",
+    `Mode: ${project.image?.mode || "Create Video"}.`,
+    "Style: cinematic short-form motion, coherent scene, clear product or subject focus, no fake brand claims."
+  ].join("\n");
+  const data = await apimartRequest(apimartVideoPath, {
+    method: "POST",
+    body: JSON.stringify(apimartKlingOmniBody(project, prompt))
+  });
+  const task = Array.isArray(data) ? data[0] : data;
+  const taskId = task?.task_id || task?.id;
+  if (!taskId) return { text: JSON.stringify(data, null, 2), urls: extractVideoUrls(data) };
+  const taskData = await pollApimartTask(taskId);
+  const urls = extractVideoUrls(taskData);
+  return {
+    text: urls.length ? `Video generated with Kling V3 Omni.\n\nTask ID: ${taskId}` : `Kling V3 Omni task completed.\n\nTask ID: ${taskId}`,
+    urls,
+    taskId
+  };
+}
+
+async function generateVideoWithApimartKlingMotion(project) {
+  const prompt = [
+    project.image?.prompt || "Make the subject follow the reference motion.",
+    `Mode: ${project.image?.mode || "Motion Control"}.`,
+    "Style: smooth motion transfer, stable character identity, cinematic lighting, no fake brand claims."
+  ].join("\n");
+  const data = await apimartRequest(apimartVideoPath, {
+    method: "POST",
+    body: JSON.stringify(apimartKlingMotionBody(project, prompt))
+  });
+  const task = Array.isArray(data) ? data[0] : data;
+  const taskId = task?.task_id || task?.id;
+  if (!taskId) return { text: JSON.stringify(data, null, 2), urls: extractVideoUrls(data) };
+  const taskData = await pollApimartTask(taskId);
+  const urls = extractVideoUrls(taskData);
+  return {
+    text: urls.length ? `Video generated with Kling V3 Motion Control.\n\nTask ID: ${taskId}` : `Kling V3 Motion Control task completed.\n\nTask ID: ${taskId}`,
+    urls,
+    taskId
+  };
+}
+
 async function generateWithApimart(project, action, step) {
   if (action === "generate-image") {
     const image = await generateImageWithApimart(project);
@@ -3522,6 +3619,14 @@ async function generateWithProvider(project, action, step) {
     if (provider === "apimart" && model === "Wan 2.7") {
       const video = await generateVideoWithApimartWan(project);
       return { title: "Wan 2.7", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" };
+    }
+    if (provider === "apimart" && model === "Kling V3 Omni") {
+      const video = await generateVideoWithApimartKlingOmni(project);
+      return { title: "Kling V3 Omni", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" };
+    }
+    if (provider === "apimart" && model === "Kling V3 Motion Control") {
+      const video = await generateVideoWithApimartKlingMotion(project);
+      return { title: "Kling V3 Motion Control", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" };
     }
     if (provider === "wuyin" && (model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni")) {
       const video = await generateVideoWithWuyin(project);
@@ -4557,7 +4662,7 @@ const agentTools = [
           style: { type: "string", description: "POV, product demo, unboxing, before-after, cinematic, UGC." },
           model: {
             type: "string",
-            enum: ["Seedance 2.0", "Veo 3.1", "Sora 2", "Wan 2.7"],
+            enum: ["Seedance 2.0", "Veo 3.1", "Sora 2", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control"],
             description: "The video model the user chose. Do not invent a model. If the user has not chosen, ask first."
           },
           keyMessage: { type: "string" }
@@ -4634,7 +4739,7 @@ const agentTools = [
           },
           model: {
             type: "string",
-            enum: ["GPT Image 2", "Seedream 5.0 Lite", "Seedream 4.5", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video", "Wan 2.7"],
+            enum: ["GPT Image 2", "Seedream 5.0 Lite", "Seedream 4.5", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control"],
             description: "User-selected generation model. Ask the user to choose before passing this when the requested media type is unclear."
           }
         },

@@ -5720,6 +5720,8 @@ function videoModelValue(p = project()) {
   if (/sora/i.test(value)) return "Sora 2";
   if (/veo/i.test(value)) return "Veo 3.1";
   if (/wan/i.test(value)) return "Wan 2.7";
+  if (/kling.*motion|motion.*kling/i.test(value)) return "Kling V3 Motion Control";
+  if (/kling.*omni|omni.*kling/i.test(value)) return "Kling V3 Omni";
   if (/seedance/i.test(value)) return "Seedance 2.0 Fast";
   return "Seedance 2.0 Fast";
 }
@@ -5748,7 +5750,9 @@ function videoGenerateConsole(p) {
           ["Seedance 2.0 Fast", "Seedance 2.0 Fast"],
           ["Veo 3.1", "Veo 3.1"],
           ["Sora 2", "Sora 2"],
-          ["Wan 2.7", "Wan 2.7"]
+          ["Wan 2.7", "Wan 2.7"],
+          ["Kling V3 Omni", "Kling Omni"],
+          ["Kling V3 Motion Control", "Kling Motion"]
         ], "audio-lines")}
         ${videoOptionMenu("ratio", "ugc.aspectRatio", videoAspectRatioValue(p), ["16:9", "9:16", "1:1", "4:3", "3:4"].map((value) => [value, value]), "rectangle-horizontal")}
         ${videoOptionMenu("quality", "ugc.quality", videoQualityValue(p), ["480p", "720p", "1080p"].map((value) => [value, value]), "gem")}
@@ -5985,6 +5989,8 @@ function originalProviderValue(provider) {
   const aliases = {
     Grok: "Grok Imagine Video",
     Wan: "Wan 2.7",
+    KlingOmni: "Kling V3 Omni",
+    KlingMotion: "Kling V3 Motion Control",
     GeminiOmni: "Gemini Omni"
   };
   return aliases[provider] || provider || "Veo 3.1";
@@ -5997,6 +6003,8 @@ function originalProviderLabel(provider) {
     "Grok Imagine Video": "Grok",
     "Sora 2": "Sora",
     "Wan 2.7": "Wan",
+    "Kling V3 Omni": "Kling Omni",
+    "Kling V3 Motion Control": "Kling Motion",
     "Gemini Omni": "Pokaya AI"
   };
   return labels[provider] || String(provider || "Video").split(" ")[0];
@@ -6009,6 +6017,8 @@ function originalProviderCredits(provider) {
     "Grok Imagine Video": "0.48",
     "Sora 2": "0.48",
     "Wan 2.7": "0.53",
+    "Kling V3 Omni": "0.34",
+    "Kling V3 Motion Control": "0.52",
     "Gemini Omni": "1.30"
   };
   return credits[provider] || "0.40";
@@ -6031,6 +6041,8 @@ function originalPanel(p) {
         ${originalChoiceButton("original.provider", "Grok Imagine Video", "⚡ Grok", provider)}
         ${originalChoiceButton("original.provider", "Sora 2", "✨ Sora 2", provider)}
         ${originalChoiceButton("original.provider", "Wan 2.7", "🌊 Wan 2.7", provider)}
+        ${originalChoiceButton("original.provider", "Kling V3 Omni", "🎥 Kling Omni", provider)}
+        ${originalChoiceButton("original.provider", "Kling V3 Motion Control", "🕹️ Kling Motion", provider)}
         ${originalChoiceButton("original.provider", "Gemini Omni", "🔷 Pokaya AI", provider)}
       </div>
       <p class="original-field-label">Image Mode</p>
