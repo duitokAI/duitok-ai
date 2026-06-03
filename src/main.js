@@ -5182,7 +5182,7 @@ function imageModelCapabilities(model = "GPT Image 2") {
     },
     "Grok Imagine": {
       aspectRatios: ["9:16", "2:3", "1:1", "16:9", "3:2"],
-      resolutions: ["1K"]
+      resolutions: []
     }
   };
   return capabilities[model] || capabilities["GPT Image 2"];
@@ -5206,6 +5206,7 @@ function normalizedImageSettingForModel(model, field, value) {
   }
   if (field === "image.resolution") {
     const normalized = String(value || "").trim().toUpperCase();
+    if (!capabilities.resolutions.length) return "";
     return capabilities.resolutions.includes(normalized) ? normalized : capabilities.resolutions[0] || "2K";
   }
   return value;
@@ -5243,7 +5244,7 @@ function imageGenerateConsole(p, selectedModel) {
         <button class="image-prompt-enhance ${state.promptAdvancedEnabled ? "is-active" : ""}" type="button" data-action="toggle-prompt-advanced" aria-label="${esc(enhanceLabel)}" aria-pressed="${state.promptAdvancedEnabled ? "true" : "false"}" title="${esc(enhanceLabel)}" ${state.promptAdvancedBusy ? "disabled" : ""}>${icon("wand", 17)}</button>
         </div>
         ${imageAspectRatioPicker(selectedAspectRatio, aspectRatioOptions)}
-        ${imageResolutionPicker(selectedResolution, resolutionOptions)}
+        ${resolutionOptions.length ? imageResolutionPicker(selectedResolution, resolutionOptions) : ""}
         <div class="image-count-stepper" aria-label="Images to generate">
           <button type="button" data-action="image-count-down" aria-label="Generate fewer images" ${selectedCount <= 1 ? "disabled" : ""}>${icon("minus", 15)}</button>
           <span><b data-image-count-current>${selectedCount}</b><small>/4</small></span>

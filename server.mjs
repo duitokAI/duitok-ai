@@ -3148,7 +3148,7 @@ function imageCapabilitiesForModel(model = "GPT Image 2") {
     },
     "Grok Imagine": {
       aspectRatios: ["9:16", "2:3", "1:1", "16:9", "3:2"],
-      resolutions: ["1K"]
+      resolutions: []
     }
   };
   return capabilities[model] || capabilities["GPT Image 2"];
@@ -3157,6 +3157,7 @@ function imageCapabilitiesForModel(model = "GPT Image 2") {
 function imageResolutionFromProject(project) {
   const model = internalMediaModel(project?.image?.model);
   const resolutions = imageCapabilitiesForModel(model).resolutions;
+  if (!resolutions.length) return "";
   const value = String(project?.image?.resolution || "").trim().toUpperCase();
   const fallback = String(process.env.APIMART_IMAGE_RESOLUTION || process.env.GRSAI_NANO_IMAGE_SIZE || "2K").trim().toUpperCase();
   return resolutions.includes(value) ? value : resolutions.includes(fallback) ? fallback : resolutions[0] || "2K";
@@ -3240,9 +3241,7 @@ function wuyinImageBody(project, prompt) {
   if (model === "Grok Imagine") {
     return {
       prompt,
-      size: process.env.WUYIN_GROK_IMAGE_SIZE || imageSize,
-      aspectRatio,
-      model: process.env.WUYIN_GROK_IMAGE_MODEL || "grok-imagine"
+      aspect_ratio: aspectRatio
     };
   }
   return { prompt, size: imageSize, aspectRatio };
