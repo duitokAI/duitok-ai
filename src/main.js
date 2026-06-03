@@ -4313,7 +4313,7 @@ function contentLibraryPage() {
         ${assetLibraryNavButton("text", "file-text", "Text", counts.text, activeFilter)}
         ${assetLibraryNavButton("visual_card", "panels-top-left", "Visual Card", counts.visual_card, activeFilter)}
       </nav>
-      <div class="asset-library-section-title"><span>Projects</span><button type="button" data-asset-project="all">${icon("rotate-ccw", 14)}</button></div>
+      <div class="asset-library-section-title"><span>Projects</span><button type="button" data-action="new-project" title="${esc(t("createProject"))}" aria-label="${esc(t("createProject"))}">${icon("plus", 14)}</button></div>
       <nav class="asset-library-projects">
         ${assetLibraryProjectButton("all", "All projects", all.length, activeProject)}
         ${state.db.projects.map((projectItem) => assetLibraryProjectButton(projectItem.id, projectItem.name, all.filter((item) => item.projectId === projectItem.id).length, activeProject)).join("")}
@@ -4376,7 +4376,16 @@ function assetLibraryNavButton(kind, ic, label, count, activeFilter) {
 }
 
 function assetLibraryProjectButton(id, label, count, activeProject) {
-  return `<button type="button" class="${activeProject === id ? "active" : ""}" data-asset-project="${esc(id)}">${icon(id === "all" ? "folder-open" : "folder", 17)} <span>${esc(label)}</span><small>${count || 0}</small></button>`;
+  const active = activeProject === id;
+  const filterButton = `<button type="button" class="${active ? "active" : ""}" data-asset-project="${esc(id)}">${icon(id === "all" ? "folder-open" : "folder", 17)} <span>${esc(label)}</span><small>${count || 0}</small></button>`;
+  if (id === "all") return filterButton;
+  return `<div class="asset-library-project-row ${active ? "active" : ""}">
+    ${filterButton}
+    <span class="asset-library-project-actions">
+      <button type="button" data-project-rename="${esc(id)}" title="${esc(t("renameProject"))}" aria-label="${esc(t("renameProject"))}">${icon("pencil", 14)}</button>
+      <button type="button" data-project-delete="${esc(id)}" title="${esc(t("deleteProject"))}" aria-label="${esc(t("deleteProject"))}">${icon("trash-2", 14)}</button>
+    </span>
+  </div>`;
 }
 
 function assetLibraryDateGroups(items = []) {
@@ -10712,7 +10721,14 @@ async function submit(event) {
     if (submitButton) submitButton.disabled = true;
     try {
       const db = await api("/projects", { method: "POST", body: JSON.stringify(data) });
-      return set({ db, projectId: db.projects.at(-1).id, modal: null, page: "project" });
+      const nextProjectId = db.projects.at(-1).id;
+      return set({
+        db,
+        projectId: nextProjectId,
+        modal: null,
+        page: state.page === "library" ? "library" : "project",
+        assetProjectFilter: state.page === "library" ? nextProjectId : state.assetProjectFilter
+      });
     } catch (error) {
       notify(error.message);
     } finally {
@@ -11501,6 +11517,7 @@ async function deleteProject() {
     generationJobs: (previousDb.generationJobs || []).filter((item) => item.projectId !== deletedId)
   };
   const nextProjectId = deletedId === state.projectId ? optimisticDb.projects[0]?.id || null : state.projectId;
+  const nextAssetProjectFilter = state.assetProjectFilter === deletedId ? "all" : state.assetProjectFilter;
 
   notify(t("toastDeletingProject"));
   set({
@@ -11508,7 +11525,8 @@ async function deleteProject() {
     modal: null,
     editingProjectId: null,
     projectId: nextProjectId,
-    page: nextProjectId ? state.page : "dashboard"
+    page: nextProjectId ? state.page : "dashboard",
+    assetProjectFilter: nextAssetProjectFilter
   });
 
   try {

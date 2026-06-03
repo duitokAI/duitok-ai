@@ -6376,6 +6376,15 @@ textarea {
   gap: 7px;
 }
 
+.asset-library-project-row {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  border-radius: 13px;
+}
+
 .asset-library-nav button,
 .asset-library-projects button {
   min-height: 42px;
@@ -6392,6 +6401,46 @@ textarea {
   font-weight: 860;
   text-align: left;
   box-shadow: none;
+}
+
+.asset-library-project-row > button {
+  min-width: 0;
+}
+
+.asset-library-project-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  transform: translateX(4px);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.asset-library-project-row:hover .asset-library-project-actions,
+.asset-library-project-row:focus-within .asset-library-project-actions,
+.asset-library-project-row.active .asset-library-project-actions {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.asset-library-project-actions button {
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  min-height: 30px;
+  display: grid;
+  grid-template-columns: 1fr;
+  place-items: center;
+  gap: 0;
+  border-radius: 10px;
+  padding: 0;
+  color: rgba(42, 16, 51, 0.54);
+}
+
+.asset-library-project-actions button:hover {
+  border-color: rgba(255, 80, 123, 0.2);
+  background: rgba(255, 255, 255, 0.9);
+  color: #ff4f7c;
 }
 
 .asset-library-nav button span,
@@ -6859,6 +6908,14 @@ textarea {
   .asset-library-nav button,
   .asset-library-projects button {
     flex: 0 0 176px;
+  }
+
+  .asset-library-project-row {
+    flex: 0 0 222px;
+  }
+
+  .asset-library-project-row > button {
+    flex: 1 1 auto;
   }
 }
 
