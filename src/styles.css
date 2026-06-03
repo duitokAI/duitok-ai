@@ -44048,7 +44048,7 @@ body:has(.studio-shell .video-page-studio),
 
 .studio-shell .workspace.workspace-library .asset-library-filter-strip,
 .studio-shell .workspace:has(.asset-library-experience) .asset-library-filter-strip {
-  top: 112px !important;
+  top: 0 !important;
   min-height: 66px !important;
   align-items: center !important;
   border-radius: 22px !important;

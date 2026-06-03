@@ -4320,15 +4320,6 @@ function contentLibraryPage() {
       </nav>
     </aside>
     <section class="asset-library-main">
-      <header class="asset-library-command">
-        <div>
-          <h1>Content Library</h1>
-        </div>
-        <div class="asset-library-command-actions">
-          <span>${filtered.length} / ${all.length} assets</span>
-          ${studioWallZoomControl()}
-        </div>
-      </header>
       <div class="asset-library-filter-strip" aria-label="Asset type filters">
         ${filterOptions.map((kind) => `<button type="button" class="${activeFilter === kind ? "active" : ""}" data-asset-type="${kind}" aria-pressed="${activeFilter === kind ? "true" : "false"}">${icon(assetTypeIcon(kind), 16)} ${assetTypeLabel(kind)}<small>${counts[kind] || 0}</small></button>`).join("")}
       </div>
