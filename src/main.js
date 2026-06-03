@@ -172,6 +172,7 @@ const state = {
   paymentReturn: null,
   topupAmount: 10,
   usageFilter: "all",
+  settingsSection: "account",
   affiliateTab: "overview",
   attachmentPickerKind: "avatar",
   attachmentPickerFilter: "avatar",
@@ -2065,9 +2066,7 @@ function handleDelegatedClick(event) {
     return saveImageModelQuick(target.dataset.imageModelOption, target);
   }
   if (target.dataset.settingsSection) {
-    const section = document.getElementById(`settings-section-${target.dataset.settingsSection}`);
-    target.closest(".settings-modal-nav")?.querySelectorAll("button[data-settings-section]").forEach((button) => button.classList.toggle("active", button === target));
-    return section?.scrollIntoView({ block: "start", behavior: "smooth" });
+    return set({ settingsSection: normalizeSettingsSection(target.dataset.settingsSection) });
   }
   if (target.dataset.generationCancel) return cancelGenerationJob(target.dataset.generationCancel);
   if (target.dataset.generationRetry) return retryGenerationJob(target.dataset.generationRetry);
@@ -3546,9 +3545,6 @@ function studio() {
           <button class="side-link ${state.page === "library" ? "active" : ""}" data-page="library" aria-label="${esc(t("contentLibrary"))}">${icon("folder")} <span>${t("contentLibrary")}</span></button>
         <div class="side-section account">${icon("wallet-cards", 18)} ${t("business")}</div>
         ${[
-          ["billing", "credit-card", "billing"],
-          ["topup", "wallet-cards", "topup"],
-          ["usage", "activity", "usage"],
           ["affiliate", "users", "affiliate"]
           ].map(([id, ic, key]) => `<button class="side-link ${state.page === id ? "active" : ""}" data-page="${id}" aria-label="${esc(t(key))}">${icon(ic)} <span>${t(key)}</span></button>`).join("")}
           <button class="side-link ${state.page === "sop" ? "active" : ""}" data-sop-target="dashboard" aria-label="SOP">${icon("book-open")} <span>SOP</span></button>
@@ -3646,7 +3642,7 @@ function sidebarAccountPanel() {
       <article class="sidebar-credit-card">
         <span>${icon("wallet-cards", 18)} ${t("creditBalance")}</span>
         <b>${formatCreditBalance(billing.credits || 0)}</b>
-        <button type="button" data-page="topup">${icon("plus", 18)} ${t("topUpShort")}</button>
+        <button type="button" data-action="open-settings" data-settings-open="topup">${icon("plus", 18)} ${t("topUpShort")}</button>
       </article>
       <article class="sidebar-subscription-card ${subscription.expired ? "expired" : ""}">
         <strong><i></i>${subscription.expired ? t("expired") : t("pro")} <em>·</em> ${subscription.label}</strong>
@@ -3975,7 +3971,7 @@ function dashboardOverview() {
         <p class="subtitle">${t("dashboardSubtitle")}</p>
       </div>
       <div class="head-actions">
-        <button class="dark-button" data-page="topup">${icon("plus")} ${t("topup")}</button>
+        <button class="dark-button" data-action="open-settings" data-settings-open="topup">${icon("plus")} ${t("topup")}</button>
         <button class="sop-button" data-sop-target="dashboard">${icon("book-open", 24)} ${t("sopDashboard")}</button>
       </div>
     </header>
@@ -6904,6 +6900,26 @@ function projectNameForSchedule(item = {}) {
   return state.db.projects.find((project) => project.id === item.projectId)?.name || "No project";
 }
 
+const settingsSectionIds = ["account", "billing", "topup", "usage"];
+
+function normalizeSettingsSection(value = state.settingsSection) {
+  return settingsSectionIds.includes(value) ? value : "account";
+}
+
+function settingsSectionItems() {
+  return [
+    ["account", "user-round", "Account", t("accountSettingsSubtitle"), settingsPage()],
+    ["billing", "credit-card", t("billing"), t("accountBillingSubtitle"), billingPage()],
+    ["topup", "wallet-cards", t("topup"), t("accountTopupSubtitle"), topupPage()],
+    ["usage", "activity", t("usage"), t("accountUsageSubtitle"), usagePage()]
+  ];
+}
+
+function activeSettingsSection() {
+  const activeId = normalizeSettingsSection();
+  return settingsSectionItems().find(([id]) => id === activeId) || settingsSectionItems()[0];
+}
+
 function modal() {
   if (!state.modal) return "";
   const editProject = state.db?.projects?.find((item) => item.id === state.editingProjectId);
@@ -6932,19 +6948,21 @@ function modal() {
 }
 
 function settingsModal() {
+  const activeId = normalizeSettingsSection();
+  const [, , title, subtitle, body] = activeSettingsSection();
   return `<div class="modal-backdrop settings-modal-backdrop" data-action="close-modal">
     <section class="settings-modal" role="dialog" aria-modal="true" aria-label="${esc(t("settings"))}">
       <aside class="settings-modal-nav" aria-label="Account settings">
         <button class="settings-modal-close" type="button" data-action="close-modal" aria-label="Close">${icon("x", 28)}</button>
-        <button class="active" type="button" data-settings-section="profile">${icon("user-round", 22)} <span>Account</span></button>
+        ${settingsSectionItems().map(([id, ic, label]) => `<button class="${activeId === id ? "active" : ""}" type="button" data-settings-section="${esc(id)}" aria-selected="${activeId === id ? "true" : "false"}">${icon(ic, 22)} <span>${esc(label)}</span></button>`).join("")}
       </aside>
       <div class="settings-modal-main">
         <header class="settings-modal-head">
-          <h2>Account</h2>
-          <p>${t("accountSettingsSubtitle")}</p>
+          <h2>${esc(title)}</h2>
+          <p>${esc(subtitle)}</p>
         </header>
         <div class="settings-modal-scroll">
-          ${settingsPage()}
+          ${body}
         </div>
       </div>
     </section>
@@ -10158,7 +10176,7 @@ async function action(event, name) {
   if (name === "sop") return set({ page: "sop", sopTopic: state.page === "project" ? state.step : "dashboard", modal: null });
   if (name === "register") return set({ modal: "register" });
   if (name === "support") return window.open(supportWhatsappUrl, "_blank", "noopener,noreferrer");
-  if (name === "open-settings") return set({ modal: "settings" });
+  if (name === "open-settings") return set({ modal: "settings", settingsSection: normalizeSettingsSection(event.currentTarget.dataset.settingsOpen || "account") });
   if (name === "clear-image-reference") {
     event.preventDefault();
     event.stopPropagation();

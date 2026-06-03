@@ -15559,6 +15559,231 @@ label {
   font-size: 15px;
 }
 
+.settings-modal .billing-experience,
+.settings-modal .topup-experience,
+.settings-modal .usage-experience {
+  gap: 18px;
+}
+
+.settings-modal .billing-plan-hero,
+.settings-modal .credit-balance-panel {
+  grid-template-columns: 1fr;
+  gap: 18px;
+  min-height: 0;
+  border-color: rgba(126, 61, 145, 0.13);
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 14px 34px rgba(65, 18, 80, 0.08);
+}
+
+.settings-modal .billing-plan-copy h2 {
+  margin: 18px 0 10px;
+  font-size: clamp(42px, 6vw, 58px);
+}
+
+.settings-modal .billing-plan-copy p {
+  font-size: 15px;
+}
+
+.settings-modal .billing-cancel-button {
+  min-height: 40px;
+  margin-top: 18px;
+  padding: 0 18px;
+  font-size: 13px;
+}
+
+.settings-modal .billing-plan-metrics {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.settings-modal .billing-plan-metrics article {
+  min-height: 72px;
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.settings-modal .billing-plan-metrics strong {
+  font-size: 18px;
+}
+
+.settings-modal .billing-history-section {
+  gap: 12px;
+}
+
+.settings-modal .billing-history-section h2,
+.settings-modal .topup-panel-head h2,
+.settings-modal .topup-history-panel h2 {
+  font-size: 22px;
+}
+
+.settings-modal .billing-history-table {
+  overflow-x: auto;
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 12px 28px rgba(65, 18, 80, 0.07);
+}
+
+.settings-modal .billing-history-head,
+.settings-modal .billing-history-row {
+  min-width: 680px;
+  grid-template-columns: 108px minmax(210px, 1fr) 100px minmax(180px, 0.9fr);
+  gap: 12px;
+  padding-inline: 12px;
+}
+
+.settings-modal .billing-history-row {
+  min-height: 60px;
+}
+
+.settings-modal .credit-balance-panel::before {
+  width: 96px;
+  height: 96px;
+}
+
+.settings-modal .credit-balance-main {
+  gap: 12px;
+}
+
+.settings-modal .credit-balance-main b {
+  font-size: clamp(42px, 7vw, 64px);
+}
+
+.settings-modal .credit-balance-main em {
+  font-size: 18px;
+}
+
+.settings-modal .credit-usage-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.settings-modal .credit-usage-grid article,
+.settings-modal .credit-usage-grid article:last-child {
+  grid-column: auto;
+  min-height: 84px;
+  border-radius: 13px;
+  padding: 15px;
+}
+
+.settings-modal .credit-usage-grid b {
+  font-size: 24px;
+}
+
+.settings-modal .credit-balance-main small,
+.settings-modal .credit-usage-grid small,
+.settings-modal .topup-secure-note {
+  font-size: 12px;
+}
+
+.settings-modal .topup-purchase-panel,
+.settings-modal .topup-history-panel,
+.settings-modal .usage-ledger-panel {
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 14px 34px rgba(65, 18, 80, 0.08);
+}
+
+.settings-modal .topup-panel-head {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.settings-modal .topup-panel-head p {
+  font-size: 14px;
+}
+
+.settings-modal .topup-package-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.settings-modal .topup-package {
+  min-height: 98px;
+  border-radius: 13px;
+  padding: 16px;
+}
+
+.settings-modal .topup-package strong {
+  font-size: 30px;
+}
+
+.settings-modal .topup-package b {
+  font-size: 17px;
+}
+
+.settings-modal .topup-package small {
+  font-size: 12px;
+}
+
+.settings-modal .topup-pay-button {
+  min-height: 54px;
+  border-radius: 14px;
+  font-size: 16px;
+}
+
+.settings-modal .topup-history-list > div {
+  grid-template-columns: 1fr;
+  gap: 6px;
+  min-height: 0;
+  padding: 14px 0;
+}
+
+.settings-modal .topup-history-list time,
+.settings-modal .topup-history-list b,
+.settings-modal .topup-history-list strong {
+  font-size: 14px;
+}
+
+.settings-modal .usage-summary-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.settings-modal .usage-summary-card {
+  min-height: 92px;
+  border-radius: 15px;
+  padding: 16px;
+}
+
+.settings-modal .usage-summary-card b {
+  font-size: 28px;
+}
+
+.settings-modal .usage-summary-card small {
+  font-size: 12px;
+}
+
+.settings-modal .usage-filter-row {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.settings-modal .usage-filter-row button {
+  min-height: 32px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.settings-modal .usage-ledger-table {
+  overflow-x: auto;
+}
+
+.settings-modal .usage-ledger-head,
+.settings-modal .usage-ledger-table article,
+.studio-shell .settings-modal .usage-ledger-head,
+.studio-shell .settings-modal .usage-ledger-table article {
+  min-width: 720px;
+  grid-template-columns: minmax(150px, 1fr) minmax(220px, 1.3fr) 90px 120px 70px 76px;
+}
+
+.settings-modal .usage-ledger-table article {
+  min-height: 58px;
+  padding: 12px;
+}
+
 @media (max-width: 860px) {
   .settings-modal {
     height: auto;
@@ -15570,7 +15795,7 @@ label {
 
   .settings-modal-nav {
     display: grid;
-    grid-template-columns: 56px minmax(0, 1fr);
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     padding: 12px;
   }
 
@@ -15598,6 +15823,16 @@ label {
 
   .settings-modal-head h2 {
     font-size: 26px;
+  }
+
+  .settings-modal .credit-usage-grid,
+  .settings-modal .topup-package-grid,
+  .settings-modal .usage-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-modal .billing-plan-metrics {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -16861,6 +17096,160 @@ label {
 
   .credit-balance-main em {
     padding-bottom: 0;
+  }
+}
+
+.studio-shell .settings-modal .billing-experience,
+.studio-shell .settings-modal .topup-experience,
+.studio-shell .settings-modal .usage-experience {
+  gap: 18px;
+}
+
+.studio-shell .settings-modal .billing-plan-hero,
+.studio-shell .settings-modal .credit-balance-panel {
+  grid-template-columns: 1fr;
+  gap: 18px;
+  min-height: 0;
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 14px 34px rgba(65, 18, 80, 0.08);
+}
+
+.studio-shell .settings-modal .billing-plan-copy h2 {
+  margin: 18px 0 10px;
+  font-size: clamp(42px, 6vw, 58px);
+}
+
+.studio-shell .settings-modal .billing-plan-copy p,
+.studio-shell .settings-modal .topup-panel-head p {
+  font-size: 14px;
+}
+
+.studio-shell .settings-modal .billing-cancel-button {
+  min-height: 40px;
+  margin-top: 18px;
+  padding: 0 18px;
+  font-size: 13px;
+}
+
+.studio-shell .settings-modal .billing-plan-metrics {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.studio-shell .settings-modal .billing-plan-metrics article {
+  min-height: 72px;
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.studio-shell .settings-modal .billing-plan-metrics strong {
+  font-size: 18px;
+}
+
+.studio-shell .settings-modal .billing-history-section h2,
+.studio-shell .settings-modal .topup-panel-head h2,
+.studio-shell .settings-modal .topup-history-panel h2 {
+  font-size: 22px;
+}
+
+.studio-shell .settings-modal .billing-history-table,
+.studio-shell .settings-modal .usage-ledger-table {
+  overflow-x: auto;
+}
+
+.studio-shell .settings-modal .billing-history-head,
+.studio-shell .settings-modal .billing-history-row {
+  min-width: 680px;
+  grid-template-columns: 108px minmax(210px, 1fr) 100px minmax(180px, 0.9fr);
+}
+
+.studio-shell .settings-modal .credit-balance-main b {
+  font-size: clamp(42px, 7vw, 64px);
+}
+
+.studio-shell .settings-modal .credit-balance-main em {
+  font-size: 18px;
+}
+
+.studio-shell .settings-modal .credit-usage-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.studio-shell .settings-modal .credit-usage-grid article,
+.studio-shell .settings-modal .credit-usage-grid article:last-child {
+  grid-column: auto;
+  min-height: 84px;
+  border-radius: 13px;
+  padding: 15px;
+}
+
+.studio-shell .settings-modal .credit-usage-grid b {
+  font-size: 24px;
+}
+
+.studio-shell .settings-modal .topup-purchase-panel,
+.studio-shell .settings-modal .topup-history-panel,
+.studio-shell .settings-modal .usage-ledger-panel {
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 14px 34px rgba(65, 18, 80, 0.08);
+}
+
+.studio-shell .settings-modal .topup-panel-head {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.studio-shell .settings-modal .topup-package-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.studio-shell .settings-modal .topup-package {
+  min-height: 98px;
+  border-radius: 13px;
+  padding: 16px;
+}
+
+.studio-shell .settings-modal .topup-package strong {
+  font-size: 30px;
+}
+
+.studio-shell .settings-modal .topup-pay-button {
+  min-height: 54px;
+  border-radius: 14px;
+  font-size: 16px;
+}
+
+.studio-shell .settings-modal .topup-history-list > div,
+.studio-shell .settings-modal .usage-filter-row {
+  grid-template-columns: 1fr;
+}
+
+.studio-shell .settings-modal .usage-summary-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.studio-shell .settings-modal .usage-summary-card {
+  min-height: 92px;
+  border-radius: 15px;
+  padding: 16px;
+}
+
+.studio-shell .settings-modal .usage-summary-card b {
+  font-size: 28px;
+}
+
+@media (max-width: 860px) {
+  .studio-shell .settings-modal .credit-usage-grid,
+  .studio-shell .settings-modal .topup-package-grid,
+  .studio-shell .settings-modal .usage-summary-grid,
+  .studio-shell .settings-modal .billing-plan-metrics {
+    grid-template-columns: 1fr;
   }
 }
 
