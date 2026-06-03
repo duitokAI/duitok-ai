@@ -4836,19 +4836,19 @@ function studioResultWall(p, meta = {}) {
   const types = Array.isArray(meta.types) ? meta.types : [state.step];
   const step = state.step || "image";
   const pending = pendingResultJobs(p, types);
-  const activePending = pending.filter((job) => ["queued", "processing"].includes(job.status));
-  const terminalPending = pending.filter((job) => !["queued", "processing"].includes(job.status));
   const items = p.results.filter((item) => studioResultBelongsToStep(item, step, types)).slice().reverse();
   const wallKey = studioWallKey(p, step, types);
   const limit = studioWallLimit(wallKey);
   const visibleItems = items.slice(0, limit);
   const unloadedCount = Math.max(0, Number(p.resultCount || 0) - (p.results || []).length);
   const hiddenCount = Math.max(0, items.length - visibleItems.length) + unloadedCount;
-  const cards = [
-    ...activePending.map(studioPendingWallCard),
-    ...visibleItems.map((item, index) => studioWallCard(item, index)),
-    ...terminalPending.map(studioPendingWallCard)
-  ];
+  const timeline = [
+    ...pending.map((job) => ({ kind: "pending", item: job, time: Date.parse(job.completedAt || job.updatedAt || job.createdAt || 0) || 0 })),
+    ...visibleItems.map((item, index) => ({ kind: "result", item, index, time: Date.parse(item.createdAt || 0) || 0 }))
+  ].sort((a, b) => b.time - a.time);
+  const cards = timeline.map((entry) => entry.kind === "pending"
+    ? studioPendingWallCard(entry.item)
+    : studioWallCard(entry.item, entry.index));
   if (!cards.length) return "";
   return `<section class="studio-result-wall">
     <div class="studio-wall-grid">
