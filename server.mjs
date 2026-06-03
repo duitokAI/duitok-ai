@@ -105,7 +105,7 @@ const storedGenerationJobLimit = Math.max(0, Number(process.env.STORED_GENERATIO
 const storedApiCallLimit = Math.max(0, Number(process.env.STORED_API_CALL_LIMIT || 6000));
 const storedUsageLimit = Math.max(0, Number(process.env.STORED_USAGE_LIMIT || 6000));
 const storedAdminAuditLimit = Math.max(0, Number(process.env.STORED_ADMIN_AUDIT_LIMIT || 6000));
-const supportedImageAspectRatios = ["9:16", "3:4", "2:3", "1:1", "4:3", "16:9", "3:2"];
+const supportedImageAspectRatios = ["9:16", "3:4", "2:3", "1:1", "4:3", "16:9", "3:2", "4:5", "5:4", "1:2", "2:1", "1:3", "3:1", "9:21", "21:9", "1:4", "4:1", "1:8", "8:1"];
 const publicMediaModelMap = {
   "GPT Image 2": "GPT Image 2",
   "Seedream 5.0 Lite": "Seedream 5.0 Lite",
@@ -3122,16 +3122,52 @@ function wuyinPathFromProject(project) {
   return wuyinImagePaths[internalMediaModel(project.image?.model)] || process.env.WUYIN_IMAGE_PATH || "/api/async/image_nanoBanana_pro";
 }
 
+function imageCapabilitiesForModel(model = "GPT Image 2") {
+  model = internalMediaModel(model);
+  const commonRatios = ["9:16", "3:4", "2:3", "1:1", "4:3", "16:9", "3:2"];
+  const capabilities = {
+    "GPT Image 2": {
+      aspectRatios: ["9:16", "3:4", "2:3", "1:1", "4:3", "16:9", "3:2", "4:5", "5:4", "1:2", "2:1", "1:3", "3:1", "9:21", "21:9"],
+      resolutions: ["1K", "2K", "4K"]
+    },
+    "Seedream 5.0 Lite": {
+      aspectRatios: [...commonRatios, "21:9"],
+      resolutions: ["2K", "3K", "4K"]
+    },
+    "Seedream 4.5": {
+      aspectRatios: [...commonRatios, "9:21", "21:9"],
+      resolutions: ["2K", "4K"]
+    },
+    "Nano Banana Pro": {
+      aspectRatios: [...commonRatios, "4:5", "5:4", "21:9"],
+      resolutions: ["1K", "2K", "4K"]
+    },
+    "Nano Banana 2": {
+      aspectRatios: ["9:16", "3:4", "2:3", "1:1", "4:3", "16:9", "3:2", "4:5", "5:4", "1:4", "4:1", "1:8", "8:1", "21:9"],
+      resolutions: ["512", "1K", "2K", "4K"]
+    },
+    "Grok Imagine": {
+      aspectRatios: ["9:16", "2:3", "1:1", "16:9", "3:2"],
+      resolutions: ["1K"]
+    }
+  };
+  return capabilities[model] || capabilities["GPT Image 2"];
+}
+
 function imageResolutionFromProject(project) {
+  const model = internalMediaModel(project?.image?.model);
+  const resolutions = imageCapabilitiesForModel(model).resolutions;
   const value = String(project?.image?.resolution || "").trim().toUpperCase();
   const fallback = String(process.env.APIMART_IMAGE_RESOLUTION || process.env.GRSAI_NANO_IMAGE_SIZE || "2K").trim().toUpperCase();
-  return ["1K", "2K", "4K"].includes(value) ? value : ["1K", "2K", "4K"].includes(fallback) ? fallback : "2K";
+  return resolutions.includes(value) ? value : resolutions.includes(fallback) ? fallback : resolutions[0] || "2K";
 }
 
 function imageAspectRatioFromProject(project) {
+  const model = internalMediaModel(project?.image?.model);
+  const ratios = imageCapabilitiesForModel(model).aspectRatios;
   const value = String(project?.image?.aspectRatio || "").trim();
   const fallback = String(process.env.APIMART_IMAGE_SIZE || process.env.GRSAI_NANO_ASPECT_RATIO || "9:16").trim();
-  return supportedImageAspectRatios.includes(value) ? value : supportedImageAspectRatios.includes(fallback) ? fallback : "9:16";
+  return ratios.includes(value) ? value : ratios.includes(fallback) ? fallback : ratios[0] || "9:16";
 }
 
 function generationAspectRatioForProject(project, action = "generate-image", step = "") {

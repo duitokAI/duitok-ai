@@ -5147,6 +5147,60 @@ function imageBatchCount(p = project()) {
   return Math.min(4, Math.max(1, count));
 }
 
+function imageModelCapabilities(model = "GPT Image 2") {
+  const commonRatios = ["9:16", "3:4", "2:3", "1:1", "4:3", "16:9", "3:2"];
+  const capabilities = {
+    "GPT Image 2": {
+      aspectRatios: ["9:16", "3:4", "2:3", "1:1", "4:3", "16:9", "3:2", "4:5", "5:4", "1:2", "2:1", "1:3", "3:1", "9:21", "21:9"],
+      resolutions: ["1K", "2K", "4K"]
+    },
+    "Seedream 5.0 Lite": {
+      aspectRatios: [...commonRatios, "21:9"],
+      resolutions: ["2K", "3K", "4K"]
+    },
+    "Seedream 4.5": {
+      aspectRatios: [...commonRatios, "9:21", "21:9"],
+      resolutions: ["2K", "4K"]
+    },
+    "Nano Banana Pro": {
+      aspectRatios: [...commonRatios, "4:5", "5:4", "21:9"],
+      resolutions: ["1K", "2K", "4K"]
+    },
+    "Nano Banana 2": {
+      aspectRatios: ["9:16", "3:4", "2:3", "1:1", "4:3", "16:9", "3:2", "4:5", "5:4", "1:4", "4:1", "1:8", "8:1", "21:9"],
+      resolutions: ["512", "1K", "2K", "4K"]
+    },
+    "Grok Imagine": {
+      aspectRatios: ["9:16", "2:3", "1:1", "16:9", "3:2"],
+      resolutions: ["1K"]
+    }
+  };
+  return capabilities[model] || capabilities["GPT Image 2"];
+}
+
+function imageResolutionOptionsForModel(model = "GPT Image 2") {
+  const descriptions = {
+    "512": { title: "512", description: "Small fast preview", badge: "FAST" },
+    "1K": { title: "1k", description: "Fast draft preview", badge: "FAST" },
+    "2K": { title: "2k", description: "Balanced daily quality", badge: "DEFAULT" },
+    "3K": { title: "3k", description: "High-detail creative output", badge: "HD" },
+    "4K": { title: "4k", description: "Best detail for final output", badge: "PRO" }
+  };
+  return imageModelCapabilities(model).resolutions.map((value) => ({ value, ...(descriptions[value] || descriptions["2K"]) }));
+}
+
+function normalizedImageSettingForModel(model, field, value) {
+  const capabilities = imageModelCapabilities(model);
+  if (field === "image.aspectRatio") {
+    return capabilities.aspectRatios.includes(value) ? value : capabilities.aspectRatios[0] || "9:16";
+  }
+  if (field === "image.resolution") {
+    const normalized = String(value || "").trim().toUpperCase();
+    return capabilities.resolutions.includes(normalized) ? normalized : capabilities.resolutions[0] || "2K";
+  }
+  return value;
+}
+
 function imageGenerateConsole(p, selectedModel) {
   const avatar = selectedImageReference("avatar");
   const product = selectedImageReference("product");
@@ -5157,16 +5211,10 @@ function imageGenerateConsole(p, selectedModel) {
   const promptText = String(p.image?.prompt || "");
   const longPromptClass = promptText.length > 120 || promptText.includes("\n") ? "has-long-prompt" : "";
   const enhanceLabel = state.promptAdvancedEnabled ? "Enhance on" : "Enhance off";
-  const aspectRatioOptions = ["9:16", "3:4", "2:3", "1:1", "4:3", "16:9", "3:2"];
-  const selectedAspectRatio = aspectRatioOptions.includes(p.image.aspectRatio) ? p.image.aspectRatio : "9:16";
-  const resolutionOptions = [
-    { value: "1K", title: "1k", description: "Fast draft preview", badge: "FAST" },
-    { value: "2K", title: "2k", description: "Balanced daily quality", badge: "DEFAULT" },
-    { value: "4K", title: "4k", description: "Best detail for final output", badge: "PRO" }
-  ];
-  const selectedResolution = ["1K", "2K", "4K"].includes(String(p.image.resolution || "").toUpperCase())
-    ? String(p.image.resolution).toUpperCase()
-    : "2K";
+  const aspectRatioOptions = imageModelCapabilities(selectedModel).aspectRatios;
+  const selectedAspectRatio = normalizedImageSettingForModel(selectedModel, "image.aspectRatio", p.image.aspectRatio);
+  const resolutionOptions = imageResolutionOptionsForModel(selectedModel);
+  const selectedResolution = normalizedImageSettingForModel(selectedModel, "image.resolution", p.image.resolution);
   const promptSummary = String(p.image.prompt || "").trim();
   const compactSummary = imageCompactPromptText(promptSummary);
   return `<section class="image-generate-console ${longPromptClass}" data-image-generate-console>
@@ -10957,18 +11005,37 @@ async function saveImageModelQuick(value, source = null) {
   if (!selected) return;
   const projectId = state.projectId;
   const previousDb = state.db;
-  state.db = dbWithProjectField(previousDb, projectId, "image.model", selected.value);
-  updateImageModelDom(selected.value, source);
+  const currentProject = project();
+  const nextAspectRatio = normalizedImageSettingForModel(selected.value, "image.aspectRatio", currentProject?.image?.aspectRatio);
+  const nextResolution = normalizedImageSettingForModel(selected.value, "image.resolution", currentProject?.image?.resolution);
+  let nextDb = dbWithProjectField(previousDb, projectId, "image.model", selected.value);
+  nextDb = dbWithProjectField(nextDb, projectId, "image.aspectRatio", nextAspectRatio);
+  nextDb = dbWithProjectField(nextDb, projectId, "image.resolution", nextResolution);
+  state.db = nextDb;
+  stabilizeImageConsoleExpansion(1000);
+  render();
   const consoleEl = source?.closest?.("[data-image-generate-console]");
   if (consoleEl) {
     consoleEl.classList.add("is-hover-expanded");
     consoleEl.classList.remove("is-compact");
   }
   try {
-    const db = await api(`/projects/${projectId}/field`, {
+    let db = await api(`/projects/${projectId}/field`, {
       method: "PATCH",
       body: JSON.stringify({ field: "image.model", value: selected.value })
     });
+    if (currentProject?.image?.aspectRatio !== nextAspectRatio) {
+      db = await api(`/projects/${projectId}/field`, {
+        method: "PATCH",
+        body: JSON.stringify({ field: "image.aspectRatio", value: nextAspectRatio })
+      });
+    }
+    if (String(currentProject?.image?.resolution || "").toUpperCase() !== nextResolution) {
+      db = await api(`/projects/${projectId}/field`, {
+        method: "PATCH",
+        body: JSON.stringify({ field: "image.resolution", value: nextResolution })
+      });
+    }
     if (state.projectId !== projectId) return;
     state.db = db;
   } catch (error) {
