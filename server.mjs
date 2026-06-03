@@ -71,6 +71,9 @@ const grsaiCloneModel = process.env.GRSAI_CLONE_MODEL || "gemini-3-pro";
 const ai302BaseUrl = (process.env.AI302_BASE_URL || "https://api.302.ai").replace(/\/$/, "");
 const ai302MinimaxSpeechPath = process.env.AI302_MINIMAX_SPEECH_PATH || "/minimaxi/v1/t2a_v2";
 const ai302MinimaxSpeechModel = process.env.AI302_MINIMAX_SPEECH_MODEL || "speech-2.8-hd";
+const ai302SunoSubmitPath = process.env.AI302_SUNO_SUBMIT_PATH || "/suno/submit/music";
+const ai302SunoFetchPathPrefix = process.env.AI302_SUNO_FETCH_PATH_PREFIX || "/suno/fetch";
+const ai302SunoModel = process.env.AI302_SUNO_MODEL || "chirp-crow";
 const webSearchBaseUrl = process.env.WEB_SEARCH_BASE_URL || "https://duckduckgo.com/html/";
 const allowedMediaModels = new Set(["GPT Image 2", "Seedream 5.0 Lite", "Seedream 4.5", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video"]);
 const thumbnailCache = new Map();
@@ -2076,6 +2079,91 @@ async function synthesizeSpeechWithAi302(body = {}) {
     ...extractAi302SpeechAudio(payload),
     raw: process.env.NODE_ENV === "production" ? undefined : payload
   };
+}
+
+function normalizeAi302SunoTrack(item = {}) {
+  return {
+    id: String(item.id || ""),
+    title: String(item.title || ""),
+    status: String(item.status || ""),
+    audioUrl: item.audio_url || item.audioUrl || "",
+    videoUrl: item.video_url || item.videoUrl || "",
+    imageUrl: item.image_url || item.imageUrl || "",
+    duration: item.metadata?.duration ?? null,
+    tags: item.metadata?.tags || "",
+    prompt: item.metadata?.prompt || "",
+    modelName: item.model_name || item.modelName || "",
+    majorModelVersion: item.major_model_version || item.majorModelVersion || ""
+  };
+}
+
+function normalizeAi302SunoTask(payload = {}) {
+  const data = payload.data || payload;
+  const tracks = Array.isArray(data.data) ? data.data.map(normalizeAi302SunoTrack) : [];
+  return {
+    provider: "302ai",
+    model: "suno-v5.5",
+    taskId: String(data.task_id || data.taskId || data.id || ""),
+    status: String(data.status || ""),
+    progress: String(data.progress || ""),
+    failReason: String(data.fail_reason || data.failReason || ""),
+    tracks,
+    raw: process.env.NODE_ENV === "production" ? undefined : payload
+  };
+}
+
+async function submitSunoWithAi302(body = {}) {
+  const title = String(body.title || "Pokaya Suno Track").trim().slice(0, 80);
+  const tags = String(body.tags || body.style || "").trim();
+  const prompt = String(body.prompt || body.lyrics || "").trim();
+  const description = String(body.description || body.gptDescriptionPrompt || body.gpt_description_prompt || "").trim();
+  const makeInstrumental = body.makeInstrumental === true || body.make_instrumental === true || body.instrumental === true;
+  const isCustom = Boolean(prompt || tags || body.custom === true);
+  const payload = isCustom
+    ? {
+        title,
+        tags: tags || "pop, catchy, commercial",
+        mv: String(body.mv || ai302SunoModel),
+        make_instrumental: makeInstrumental,
+        ...(makeInstrumental ? {} : { prompt: prompt || description || "Create a catchy short song for social media." }),
+        ...(body.negativeTags || body.negative_tags ? { negative_tags: String(body.negativeTags || body.negative_tags) } : {}),
+        metadata: {
+          create_mode: "custom",
+          ...(body.vocalGender ? { vocal_gender: String(body.vocalGender) } : {}),
+          ...(body.metadata && typeof body.metadata === "object" ? body.metadata : {})
+        }
+      }
+    : {
+        gpt_description_prompt: description || "Create a catchy commercial song for a short social media video.",
+        mv: String(body.mv || ai302SunoModel),
+        make_instrumental: makeInstrumental
+      };
+  const taskId = await ai302Request(ai302SunoSubmitPath, {
+    method: "POST",
+    headers: { Accept: "application/json" },
+    body: JSON.stringify(payload)
+  });
+  return {
+    provider: "302ai",
+    model: "suno-v5.5",
+    taskId: String(taskId?.task_id || taskId?.taskId || taskId?.id || taskId),
+    status: "submitted",
+    mode: isCustom ? "custom" : "auto"
+  };
+}
+
+async function fetchSunoWithAi302(taskId = "") {
+  const id = String(taskId || "").trim();
+  if (!id) {
+    const error = new Error("Suno task id is required.");
+    error.status = 400;
+    throw error;
+  }
+  const payload = await ai302Request(`${ai302SunoFetchPathPrefix}/${encodeURIComponent(id)}`, {
+    method: "GET",
+    headers: { Accept: "application/json" }
+  });
+  return normalizeAi302SunoTask(payload);
 }
 
 async function deepseekRequest(body) {
@@ -7162,6 +7250,34 @@ app.post("/api/speech/minimax", async (req, res, next) => {
       await saveDb(db);
     });
     res.json(speech);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/music/suno", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    const music = await submitSunoWithAi302(req.body || {});
+    await mutateDb(async (db) => {
+      db.usage.unshift(usage(`Submitted Suno V5.5 music task (${music.mode})`, 0, user.id));
+      await saveDb(db);
+    });
+    res.json(music);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/music/suno/:taskId", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    const music = await fetchSunoWithAi302(req.params.taskId);
+    await mutateDb(async (db) => {
+      db.usage.unshift(usage(`Checked Suno V5.5 music task: ${music.taskId || req.params.taskId}`, 0, user.id));
+      await saveDb(db);
+    });
+    res.json(music);
   } catch (error) {
     next(error);
   }

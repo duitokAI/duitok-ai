@@ -129,6 +129,12 @@ services:
         value: "32000"
       - key: AI302_MINIMAX_SPEECH_BITRATE
         value: "128000"
+      - key: AI302_SUNO_SUBMIT_PATH
+        value: /suno/submit/music
+      - key: AI302_SUNO_FETCH_PATH_PREFIX
+        value: /suno/fetch
+      - key: AI302_SUNO_MODEL
+        value: chirp-crow
       - key: WUYIN_API_KEY
         sync: false
       - key: WUYIN_BASE_URL
