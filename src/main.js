@@ -7282,16 +7282,16 @@ function attachmentPreview(item) {
   const token = encodeURIComponent(state.token || "");
   const inlinePreview = item.dataUrl || item.previewUrl || "";
   if (inlinePreview && /^data:image\//i.test(inlinePreview)) {
-    return `<img src="${esc(inlinePreview)}" alt="${esc(item.name || "Attachment")}" loading="lazy">`;
+    return `<img src="${esc(inlinePreview)}" alt="${esc(item.name || "Attachment")}" loading="lazy" decoding="async" fetchpriority="low">`;
   }
   if ((item.assetStorageKey || item.mediaUrl) && item.mediaKind !== "video") {
-    return `<img src="/api/media/attachment/${encodeURIComponent(item.id)}/image?token=${token}" alt="${esc(item.name || "Attachment")}" loading="lazy">`;
+    return `<img src="/api/media/attachment/${encodeURIComponent(item.id)}/image?token=${token}" alt="${esc(item.name || "Attachment")}" loading="lazy" decoding="async" fetchpriority="low">`;
   }
   if ((item.assetStorageKey || item.mediaUrl) && item.mediaKind === "video") {
     return `<div class="attachment-placeholder">${icon("video", 44)}</div>`;
   }
   if (item.sourceResultId && item.mediaKind !== "video") {
-    return `<img src="/api/media/result/${encodeURIComponent(item.sourceResultId)}/image?token=${token}" alt="${esc(item.name || "Attachment")}" loading="lazy">`;
+    return `<img src="/api/media/result/${encodeURIComponent(item.sourceResultId)}/image?token=${token}&thumb=1&w=640" alt="${esc(item.name || "Attachment")}" loading="lazy" decoding="async" fetchpriority="low">`;
   }
   if (item.sourceResultId && item.mediaKind === "video") {
     return `<div class="attachment-placeholder">${icon("video", 44)}</div>`;

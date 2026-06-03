@@ -41632,3 +41632,30 @@ body:has(.studio-shell .video-page-studio),
   grid-row: 3 !important;
   align-self: end !important;
 }
+
+
+/* Attachment picker performance lock: picker cards should not repaint the whole
+   modal while the pointer moves across saved products. */
+.studio-shell .attachment-picker-grid {
+  align-items: start !important;
+}
+
+.studio-shell .attachment-picker-card {
+  contain: layout paint style !important;
+  content-visibility: auto !important;
+  contain-intrinsic-size: 220px 290px !important;
+  transform: none !important;
+  transition: border-color 120ms ease, background-color 120ms ease, box-shadow 120ms ease !important;
+  will-change: auto !important;
+}
+
+.studio-shell .attachment-picker-card:hover,
+.studio-shell .attachment-picker-card:focus-visible {
+  transform: none !important;
+}
+
+.studio-shell .attachment-picker-card img,
+.studio-shell .attachment-placeholder {
+  contain: paint !important;
+  backface-visibility: hidden !important;
+}
