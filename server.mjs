@@ -2655,6 +2655,20 @@ function imageAspectRatioFromProject(project) {
   return supportedImageAspectRatios.includes(value) ? value : supportedImageAspectRatios.includes(fallback) ? fallback : "9:16";
 }
 
+function generationAspectRatioForProject(project, action = "generate-image", step = "") {
+  if (action === "generate-image") return imageAspectRatioFromProject(project);
+  if (action === "generate-ugc" || step === "ugc") {
+    const ugcRatio = String(project?.ugc?.aspectRatio || "").trim();
+    return supportedImageAspectRatios.includes(ugcRatio) ? ugcRatio : "16:9";
+  }
+  const originalRatio = String(project?.original?.aspectRatio || "").match(/(\d+)\s*[:/]\s*(\d+)/);
+  if (originalRatio) {
+    const value = `${originalRatio[1]}:${originalRatio[2]}`;
+    if (supportedImageAspectRatios.includes(value)) return value;
+  }
+  return imageAspectRatioFromProject(project);
+}
+
 function generationEndpointFor(provider, project) {
   if (provider === "gemini") return `${geminiGeneratePathPrefix}/${geminiVisionModel}:generateContent`;
   if (provider === "grsai" && project?.clone?.referenceVideo) return grsaiChatPath;
@@ -2961,7 +2975,7 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
       provider: generated.provider,
       model: generated.model || internalMediaModel(project.image?.model),
       resolution: project.image?.resolution || imageResolutionFromProject(project),
-      aspectRatio: project.image?.aspectRatio || imageAspectRatioFromProject(project),
+      aspectRatio: generationAspectRatioForProject(project, action, step),
       costRm: cost.costRm,
       costUsd: cost.costUsd,
       createdAt: new Date().toISOString()
@@ -2982,6 +2996,7 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
       taskId: generated.taskId,
       providerTaskId: generated.taskId,
       prompt: generated.prompt || project.image?.prompt || "",
+      aspectRatio: result.aspectRatio,
       imageUrl: result.imageUrl,
       videoUrl: result.videoUrl,
       originalImageUrl: result.originalImageUrl,
@@ -3027,7 +3042,7 @@ async function saveFailedGeneration(projectId, action, step, error, user) {
   return mutateDb(async (currentDb) => {
     const project = findProject(currentDb, projectId, user);
     const cost = generationCostFor(currentDb, project, action, { provider: providerForMediaModel(project.image?.model) });
-    const aspectRatio = action === "generate-image" ? imageAspectRatioFromProject(project) : project.original?.aspectRatio || project.image?.aspectRatio || "9:16";
+    const aspectRatio = generationAspectRatioForProject(project, action, step);
     const createdAt = new Date().toISOString();
     const job = {
       id: crypto.randomUUID(),
@@ -3089,7 +3104,7 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
     const creditsToCharge = creditChargeFor(project, action, currentDb);
     assertGenerationAccess(currentDb, user, roundCredits(creditsToCharge * batchCount), batchCount);
     const cost = generationCostFor(currentDb, project, action, { provider: providerForMediaModel(project.image?.model) });
-    const aspectRatio = action === "generate-image" ? imageAspectRatioFromProject(project) : project.original?.aspectRatio || project.image?.aspectRatio || "9:16";
+    const aspectRatio = generationAspectRatioForProject(project, action, step);
     const createdAt = new Date().toISOString();
     const jobs = jobIds.map((jobId, index) => ({
       id: jobId,
@@ -3247,7 +3262,7 @@ async function completeQueuedGeneration(jobId, generated) {
       provider: generated.provider,
       model: generated.model || internalMediaModel(project.image?.model),
       resolution: project.image?.resolution || imageResolutionFromProject(project),
-      aspectRatio: project.image?.aspectRatio || imageAspectRatioFromProject(project),
+      aspectRatio: job.aspectRatio || generationAspectRatioForProject(project, job.action, job.step),
       costRm: cost.costRm,
       costUsd: cost.costUsd,
       createdAt: completedAt
@@ -3274,6 +3289,7 @@ async function completeQueuedGeneration(jobId, generated) {
       textOutput: publicBody,
       providerTextOutput: generated.body,
       prompt: generated.prompt || job.prompt || "",
+      aspectRatio: job.aspectRatio || generationAspectRatioForProject(project, job.action, job.step),
       creditsCharged: creditsToCharge,
       creditsRequired: creditsToCharge,
       duration: videoDurationFor(project),

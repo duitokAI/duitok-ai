@@ -41681,3 +41681,43 @@ body:has(.studio-shell .video-page-studio),
   contain: paint !important;
   backface-visibility: hidden !important;
 }
+
+/* Studio wall aspect-ratio lock: pending, failed, and finished cards use the
+   selected aspect ratio as the only layout source. Media natural dimensions are
+   allowed to crop inside the frame, never to resize the frame itself. */
+.studio-shell .image-higgsfield-mode .studio-wall-card,
+.studio-shell .video-page-studio .studio-wall-card,
+.studio-shell .video-prompt-extractor-page .studio-wall-card {
+  aspect-ratio: var(--wall-aspect-ratio, var(--media-ratio, 0.5625) / 1) !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-pending,
+.studio-shell .video-page-studio .studio-wall-pending,
+.studio-shell .video-prompt-extractor-page .studio-wall-pending {
+  aspect-ratio: var(--wall-aspect-ratio, var(--media-ratio, 0.5625) / 1) !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-card .result-preview-trigger,
+.studio-shell .video-page-studio .studio-wall-card .result-preview-trigger,
+.studio-shell .video-prompt-extractor-page .studio-wall-card .result-preview-trigger {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  display: block !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-card .result-image,
+.studio-shell .image-higgsfield-mode .studio-wall-card .result-video,
+.studio-shell .image-higgsfield-mode .studio-wall-card .result-video-shell,
+.studio-shell .video-page-studio .studio-wall-card .result-image,
+.studio-shell .video-page-studio .studio-wall-card .result-video,
+.studio-shell .video-page-studio .studio-wall-card .result-video-shell,
+.studio-shell .video-prompt-extractor-page .studio-wall-card .result-image,
+.studio-shell .video-prompt-extractor-page .studio-wall-card .result-video,
+.studio-shell .video-prompt-extractor-page .studio-wall-card .result-video-shell {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  aspect-ratio: auto !important;
+  object-fit: cover !important;
+}

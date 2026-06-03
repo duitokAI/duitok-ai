@@ -4730,9 +4730,9 @@ function studioResultBelongsToStep(item = {}, step = state.step, types = []) {
 }
 
 function studioPendingWallCard(job) {
-  const aspectRatio = String(job.aspectRatio || project().image?.aspectRatio || "").includes("16:9") ? "16:9" : "9:16";
-  const aspectClass = aspectRatio === "16:9" ? "landscape" : "portrait";
-  const mediaRatio = aspectRatio === "16:9" ? "1.7778" : "0.5625";
+  const aspectRatio = wallAspectRatioForItem(job, project());
+  const mediaRatio = aspectRatioToMediaRatio(aspectRatio);
+  const aspectClass = Number(mediaRatio) >= 1 ? "landscape" : "portrait";
   const isFailed = job.status === "failed";
   const statusLabel = generationJobStatusLabel(job);
   const promptPreview = String(job.promptSnapshot || job.prompt || "").replaceAll("\n", " ").trim();
@@ -4744,7 +4744,7 @@ function studioPendingWallCard(job) {
   const processingBody = `
       ${statusIcon}
       <b>${esc(generationJobCenterLabel(job))}</b>`;
-  return `<article class="studio-wall-card studio-wall-pending ${aspectClass} ${isFailed ? "failed" : ""}" data-generation-job-id="${esc(job.id)}" data-generation-job-status="${esc(job.status || "queued")}" style="--media-ratio:${mediaRatio};aspect-ratio:${esc(aspectRatio.replace(":", " / "))}">
+  return `<article class="studio-wall-card studio-wall-pending ${aspectClass} ${isFailed ? "failed" : ""}" data-aspect-ratio="${esc(aspectRatio)}" data-media-ratio="${esc(mediaRatio)}" data-generation-job-id="${esc(job.id)}" data-generation-job-status="${esc(job.status || "queued")}" style="--media-ratio:${esc(mediaRatio)};--wall-aspect-ratio:${esc(aspectRatioToCss(aspectRatio))};aspect-ratio:var(--wall-aspect-ratio)">
     <div class="studio-wall-pending-controls" aria-label="${esc(statusLabel)}">
       ${isFailed ? `<div class="studio-wall-failed-center">${statusBody}
         <p class="generation-credit-refund-note"><strong>Credits safe</strong><span>No charge.</span></p>
@@ -4757,11 +4757,12 @@ function studioPendingWallCard(job) {
 function studioWallCard(item, index = 0) {
   const promptText = resultPromptText(item).replaceAll("\n", " ").trim();
   const canSaveReference = Boolean(item.imageUrl || item.videoUrl);
-  const mediaRatio = resultMediaRatio(item);
+  const aspectRatio = wallAspectRatioForItem(item);
+  const mediaRatio = aspectRatioToMediaRatio(aspectRatio);
   const isNew = Date.now() - Date.parse(item.createdAt || 0) < 120000;
   const selected = selectedResultIdSet().has(item.id);
   const bulkSelecting = isBulkSelectingResults();
-  return `<article class="studio-wall-card ${isNew ? "is-new" : ""} ${selected ? "is-selected" : ""} ${bulkSelecting ? "is-bulk-selecting" : ""}" data-media-ratio="${esc(mediaRatio)}" data-result-id="${esc(item.id)}" style="--media-ratio:${esc(mediaRatio)}">
+  return `<article class="studio-wall-card ${isNew ? "is-new" : ""} ${selected ? "is-selected" : ""} ${bulkSelecting ? "is-bulk-selecting" : ""}" data-aspect-ratio="${esc(aspectRatio)}" data-media-ratio="${esc(mediaRatio)}" data-result-id="${esc(item.id)}" style="--media-ratio:${esc(mediaRatio)};--wall-aspect-ratio:${esc(aspectRatioToCss(aspectRatio))}">
     ${isNew ? `<span class="studio-wall-new-badge">New</span>` : ""}
     <button type="button" class="studio-wall-select-toggle" data-result-select="${esc(item.id)}" aria-label="${selected ? "Unselect result" : "Select result"}" aria-pressed="${selected ? "true" : "false"}">
       ${selected ? icon("check", 17) : ""}
@@ -6218,30 +6219,54 @@ function resultResolutionLabel(item) {
 
 function resultAspectRatioLabel(item) {
   if (!item) return "Unknown";
-  if (item.aspectRatio) return String(item.aspectRatio);
-  const projectRatio = resultProject(item)?.image?.aspectRatio;
-  return projectRatio || "Unknown";
+  return wallAspectRatioForItem(item, resultProject(item), "Unknown");
+}
+
+const supportedWallAspectRatios = ["9:16", "3:4", "2:3", "1:1", "4:3", "3:2", "16:9"];
+
+function normalizeAspectRatio(value, fallback = "9:16") {
+  const raw = String(value || "").trim();
+  const normalized = raw.match(/(\d+(?:\.\d+)?)\s*[:/]\s*(\d+(?:\.\d+)?)/);
+  if (normalized) {
+    const ratio = `${Number(normalized[1])}:${Number(normalized[2])}`;
+    if (supportedWallAspectRatios.includes(ratio)) return ratio;
+  }
+  return supportedWallAspectRatios.includes(fallback) ? fallback : "9:16";
+}
+
+function aspectRatioToMediaRatio(value = "9:16") {
+  const aspectRatio = normalizeAspectRatio(value);
+  const [width, height] = aspectRatio.split(":").map(Number);
+  const ratio = width / height;
+  return Number.isFinite(ratio) && ratio > 0 ? ratio.toFixed(4) : "0.5625";
+}
+
+function aspectRatioToCss(value = "9:16") {
+  return normalizeAspectRatio(value).replace(":", " / ");
+}
+
+function projectWallAspectRatio(projectItem = project(), type = "image") {
+  if (type === "video" || type === "ugc") return normalizeAspectRatio(projectItem?.ugc?.aspectRatio || projectItem?.image?.aspectRatio || "16:9", "16:9");
+  if (type === "text" || type === "story") return normalizeAspectRatio(projectItem?.image?.aspectRatio || "1:1", "1:1");
+  return normalizeAspectRatio(projectItem?.image?.aspectRatio || "9:16", "9:16");
+}
+
+function wallAspectRatioForItem(item = {}, projectItem = resultProject(item), fallback = "") {
+  if (item?.aspectRatio) return normalizeAspectRatio(item.aspectRatio, fallback || projectWallAspectRatio(projectItem, item.type));
+  if (item?.type === "video" || item?.action === "generate-ugc") return projectWallAspectRatio(projectItem, "video");
+  if (item?.type === "text" || item?.type === "story") return projectWallAspectRatio(projectItem, "text");
+  return fallback && fallback !== "Unknown" ? normalizeAspectRatio(fallback) : projectWallAspectRatio(projectItem, "image");
 }
 
 function resultMediaRatio(item = {}) {
-  const width = Number(item.resolution?.width || item.width || 0);
-  const height = Number(item.resolution?.height || item.height || 0);
-  if (width > 0 && height > 0) return Math.min(2.4, Math.max(0.35, width / height)).toFixed(4);
-  const ratioText = String(item.aspectRatio || resultProject(item)?.image?.aspectRatio || "");
-  const match = ratioText.match(/(\d+(?:\.\d+)?)\s*[:/]\s*(\d+(?:\.\d+)?)/);
-  if (match) {
-    const ratio = Number(match[1]) / Number(match[2]);
-    if (Number.isFinite(ratio) && ratio > 0) return Math.min(2.4, Math.max(0.35, ratio)).toFixed(4);
-  }
-  if (/16\s*[:/]\s*9/.test(ratioText)) return "1.7778";
-  if (/9\s*[:/]\s*16/.test(ratioText)) return "0.5625";
-  return "1";
+  return aspectRatioToMediaRatio(wallAspectRatioForItem(item));
 }
 
 function mediaRatioSyncScript() {
   return [
     "const card=this.closest('.studio-wall-card,.result-card,.agent-generation-preview,.agent-generation-gallery-tile')",
     "if(card){",
+    "if(card.classList.contains('studio-wall-card')&&card.dataset.aspectRatio){card.dataset.mediaReady='true';return}",
     "const width=this.naturalWidth||this.videoWidth||1",
     "const height=this.naturalHeight||this.videoHeight||1",
     "const next=Math.min(2.4,Math.max(0.35,width/height))",
