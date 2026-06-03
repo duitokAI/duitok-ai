@@ -2049,9 +2049,14 @@ function initDelegatedEvents() {
 
 function handleDelegatedPointerDown(event) {
   const resultActionButton = event.target.closest?.("[data-result-action]");
-  if (!resultActionButton || !app.contains(resultActionButton)) return;
-  flashResultActionButton(resultActionButton);
-  if (resultActionButton.dataset.resultAction === "download") setResultActionBusy(resultActionButton, true);
+  if (resultActionButton && app.contains(resultActionButton)) {
+    flashResultActionButton(resultActionButton);
+    if (resultActionButton.dataset.resultAction === "download") setResultActionBusy(resultActionButton, true);
+  }
+  const historyTarget = event.target.closest?.("[data-agent-history-restore],[data-agent-history-restore-row]");
+  if (historyTarget && app.contains(historyTarget) && !event.target.closest("[data-agent-history-rename], [data-agent-history-delete], [data-agent-history-title-input]")) {
+    markAgentHistorySelection(historyTarget.dataset.agentHistoryRestore || historyTarget.dataset.agentHistoryRestoreRow || "");
+  }
 }
 
 function handleDelegatedClick(event) {
@@ -10001,6 +10006,7 @@ function bind() {
   document.querySelectorAll("[data-agent-history-restore-row]").forEach((el) => el.addEventListener("click", (event) => {
     if (event.target.closest("[data-agent-history-rename], [data-agent-history-delete], [data-agent-history-title-input]")) return;
     event.preventDefault();
+    event.stopPropagation();
     restoreAgentHistory(el.dataset.agentHistoryRestoreRow);
   }));
   document.querySelectorAll("[data-agent-history-rename]").forEach((el) => el.addEventListener("click", (event) => {
@@ -11966,7 +11972,18 @@ function normalizeAgentHistoryTitle(value = "") {
   return text.slice(0, 42) || "Agent Task";
 }
 
+function markAgentHistorySelection(id = "") {
+  const selectedId = String(id || "");
+  if (!selectedId) return;
+  state.activeAgentHistoryId = selectedId === agentDraftHistoryId ? null : selectedId;
+  document.querySelectorAll("[data-agent-history-row]").forEach((row) => {
+    const rowId = row.dataset.agentHistoryRestoreRow || "";
+    row.classList.toggle("is-active", rowId === selectedId);
+  });
+}
+
 function restoreAgentHistory(id) {
+  markAgentHistorySelection(id);
   if (id === agentDraftHistoryId) {
     clearAgentTypingTimer();
     localStorage.removeItem(storageKeys.agentMessages);
