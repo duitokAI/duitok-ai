@@ -3553,11 +3553,6 @@ function studio() {
           ].map(([id, ic, key]) => `<button class="side-link ${state.page === id ? "active" : ""}" data-page="${id}" aria-label="${esc(t(key))}">${icon(ic)} <span>${t(key)}</span></button>`).join("")}
           <button class="side-link ${state.page === "sop" ? "active" : ""}" data-sop-target="dashboard" aria-label="SOP">${icon("book-open")} <span>SOP</span></button>
           <button class="side-link ${state.page === "autopost" ? "active" : ""}" data-page="autopost" aria-label="${esc(t("autopost"))}">${icon("send")} <span>${t("autopost")}</span></button>
-          <button class="side-link" data-action="open-whatsapp" aria-label="${esc(t("whatsapp"))}">${icon("message-circle")} <span>${t("whatsapp")}</span>${icon("arrow-up-right", 14)}</button>
-          <button class="side-support-button" data-action="support" aria-label="${esc(t("humanSupport"))}">
-          <span class="support-bubble-icon">${icon("message-circle", 24)}</span>
-          <span class="support-bubble-copy"><b>${t("humanSupport")}</b></span>
-        </button>
           ${sidebarAccountPanel()}
         </div>
       </aside>
