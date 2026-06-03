@@ -5176,7 +5176,7 @@ function imageModelCapabilities(model = "GPT Image 2") {
       resolutions: ["2K", "4K"]
     },
     "Nano Banana Pro": {
-      aspectRatios: [...commonRatios, "4:5", "5:4", "21:9"],
+      aspectRatios: ["9:16", "3:4", "2:3", "1:1", "16:9", "3:2", "4:5", "5:4", "21:9"],
       resolutions: ["1K", "2K", "4K"]
     },
     "Nano Banana 2": {
