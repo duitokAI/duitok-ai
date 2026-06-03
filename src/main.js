@@ -9163,7 +9163,7 @@ function agentHistorySidebarList(sessions = []) {
       const isEditing = state.agentHistoryEditingId === item.id;
       const isActive = state.activeAgentHistoryId === item.id;
       const searchText = `${title} ${agentHistoryMeta(item)}`.toLowerCase();
-      return `<article class="agent-session-item ${isActive ? "is-active" : ""}" data-agent-history-row data-agent-history-text="${esc(searchText)}">
+      return `<article class="agent-session-item ${isActive ? "is-active" : ""}" data-agent-history-row data-agent-history-restore-row="${esc(item.id)}" data-agent-history-text="${esc(searchText)}">
         ${isEditing ? `<label class="agent-session-edit" title="重命名对话">
           <input data-agent-history-title-input data-agent-history-title-id="${esc(item.id)}" value="${esc(title)}" maxlength="64" autofocus>
           <small>Enter 保存 · Esc 取消</small>
@@ -9914,12 +9914,22 @@ function bind() {
     event.stopPropagation();
     set({ modal: "deleteProject", editingProjectId: el.dataset.projectDelete, projectMenuId: null });
   }));
-  document.querySelectorAll("[data-agent-history-restore]").forEach((el) => el.addEventListener("click", () => restoreAgentHistory(el.dataset.agentHistoryRestore)));
+  document.querySelectorAll("[data-agent-history-restore]").forEach((el) => el.addEventListener("click", (event) => {
+    event.stopPropagation();
+    restoreAgentHistory(el.dataset.agentHistoryRestore);
+  }));
+  document.querySelectorAll("[data-agent-history-restore-row]").forEach((el) => el.addEventListener("click", (event) => {
+    if (event.target.closest("[data-agent-history-rename], [data-agent-history-delete], [data-agent-history-title-input]")) return;
+    restoreAgentHistory(el.dataset.agentHistoryRestoreRow);
+  }));
   document.querySelectorAll("[data-agent-history-rename]").forEach((el) => el.addEventListener("click", (event) => {
     event.stopPropagation();
     set({ agentHistoryEditingId: el.dataset.agentHistoryRename });
   }));
-  document.querySelectorAll("[data-agent-history-delete]").forEach((el) => el.addEventListener("click", () => deleteAgentHistory(el.dataset.agentHistoryDelete)));
+  document.querySelectorAll("[data-agent-history-delete]").forEach((el) => el.addEventListener("click", (event) => {
+    event.stopPropagation();
+    deleteAgentHistory(el.dataset.agentHistoryDelete);
+  }));
   document.querySelectorAll("[data-agent-history-title-input]").forEach((el) => {
     el.addEventListener("click", (event) => event.stopPropagation());
     el.addEventListener("keydown", (event) => {
@@ -11852,7 +11862,8 @@ function restoreAgentHistory(id) {
   const messages = agentMessagesForStorage(session.messages);
   localStorage.setItem(storageKeys.agentMessages, JSON.stringify(messages));
   notify("已恢复历史对话。");
-  set({ agentMessages: messages, agentInput: "", agentExpandedMessages: {}, activeAgentHistoryId: id, agentHistoryOpen: false });
+  set({ page: "agent", agentMessages: messages, agentInput: "", agentExpandedMessages: {}, activeAgentHistoryId: id, agentHistoryOpen: false, agentDebugOpen: false });
+  scrollAgentThreadToBottom();
 }
 
 function deleteAgentHistory(id) {

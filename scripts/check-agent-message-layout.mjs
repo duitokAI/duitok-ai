@@ -66,6 +66,21 @@ const checks = [
   {
     label: "Mobile contract keeps avatar fixed",
     ok: /@media \(max-width:\s*560px\)[\s\S]*grid-template-columns:\s*38px minmax\(0,\s*1fr\)/.test(css)
+  },
+  {
+    label: "Agent history rows restore when the card body is clicked",
+    ok: main.includes("data-agent-history-restore-row")
+      && /data-agent-history-restore-row[\s\S]*restoreAgentHistory\(el\.dataset\.agentHistoryRestoreRow\)/.test(main)
+  },
+  {
+    label: "Agent history icon actions do not trigger row restore",
+    ok: /data-agent-history-restore[\s\S]*event\.stopPropagation\(\)/.test(main)
+      && /data-agent-history-rename[\s\S]*event\.stopPropagation\(\)/.test(main)
+      && /data-agent-history-delete[\s\S]*event\.stopPropagation\(\)/.test(main)
+  },
+  {
+    label: "Restoring a history session jumps the thread into view",
+    ok: /function restoreAgentHistory\(id\)[\s\S]*set\(\{[\s\S]*page:\s*"agent"[\s\S]*activeAgentHistoryId:\s*id[\s\S]*agentHistoryOpen:\s*false[\s\S]*\}\);[\s\S]*scrollAgentThreadToBottom\(\)/.test(main)
   }
 ];
 
