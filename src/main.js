@@ -11822,6 +11822,7 @@ function agentHistoryTitleFromMessages(messages = []) {
 }
 
 function agentHistoryDisplayTitle(item = {}) {
+  if (item.manualTitle && String(item.title || "").trim()) return String(item.title).trim();
   const messages = Array.isArray(item.messages) ? item.messages : [];
   const generated = agentHistoryTaskTitleFromMessages(messages.length ? messages : [{ role: "user", content: item.title || "" }]);
   return generated || normalizeAgentHistoryTitle(item.title || "Agent chat");
@@ -11909,8 +11910,8 @@ function renameAgentHistory(id, title, options = {}) {
     if (!options.quiet) notify("对话名字不能为空。");
     return set({ agentHistoryEditingId: null });
   }
-  if (nextTitle === (session.title || "Untitled chat")) return set({ agentHistoryEditingId: null });
-  const renamed = sessions.map((item) => item.id === id ? { ...item, title: nextTitle, updatedAt: item.updatedAt || new Date().toISOString() } : item);
+  if (nextTitle === (session.title || "Untitled chat") && session.manualTitle) return set({ agentHistoryEditingId: null });
+  const renamed = sessions.map((item) => item.id === id ? { ...item, title: nextTitle, manualTitle: true, updatedAt: new Date().toISOString() } : item);
   rememberAgentHistorySessions(renamed);
   if (!options.quiet) notify("已重命名对话。");
   return set({ agentHistorySessions: renamed, agentHistoryEditingId: null });
