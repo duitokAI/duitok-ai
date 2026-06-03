@@ -58,6 +58,7 @@ let imageCountSaveSeq = 0;
 let imageConsoleExpandLockUntil = 0;
 let imageConsoleExpandedUntilUserScroll = false;
 let imageConsoleUserScrollIntentUntil = 0;
+const imageReferenceSaveSeq = new Map();
 let resultTitleSaveTimer = null;
 let generationPollTimer = null;
 const generationStateEtags = new Map();
@@ -11065,6 +11066,8 @@ async function pickAttachment(id, targetKind = state.attachmentPickerKind) {
   const field = targetKind === "product" ? "image.productAttachmentId" : "image.avatarAttachmentId";
   const projectId = state.projectId;
   const previousDb = state.db;
+  const requestSeq = (imageReferenceSaveSeq.get(field) || 0) + 1;
+  imageReferenceSaveSeq.set(field, requestSeq);
   state.db = dbWithProjectField(previousDb, projectId, field, id);
   closeModalDom();
   patchImageReferencesDom();
@@ -11073,13 +11076,15 @@ async function pickAttachment(id, targetKind = state.attachmentPickerKind) {
       method: "PATCH",
       body: JSON.stringify({ field, value: id })
     });
-    if (state.projectId === projectId) {
+    if (state.projectId === projectId && imageReferenceSaveSeq.get(field) === requestSeq) {
       state.db = db;
       patchImageReferencesDom();
     }
   } catch (error) {
-    state.db = previousDb;
-    patchImageReferencesDom();
+    if (imageReferenceSaveSeq.get(field) === requestSeq) {
+      state.db = previousDb;
+      patchImageReferencesDom();
+    }
     notify(error.message || t("toastSaveFailed"));
   }
 }
@@ -11089,6 +11094,8 @@ async function clearImageReference(kind = "avatar") {
   const field = targetKind === "product" ? "image.productAttachmentId" : "image.avatarAttachmentId";
   const projectId = state.projectId;
   const previousDb = state.db;
+  const requestSeq = (imageReferenceSaveSeq.get(field) || 0) + 1;
+  imageReferenceSaveSeq.set(field, requestSeq);
   state.db = dbWithProjectField(previousDb, projectId, field, "");
   patchImageReferencesDom();
   try {
@@ -11096,13 +11103,15 @@ async function clearImageReference(kind = "avatar") {
       method: "PATCH",
       body: JSON.stringify({ field, value: "" })
     });
-    if (state.projectId === projectId) {
+    if (state.projectId === projectId && imageReferenceSaveSeq.get(field) === requestSeq) {
       state.db = db;
       patchImageReferencesDom();
     }
   } catch (error) {
-    state.db = previousDb;
-    patchImageReferencesDom();
+    if (imageReferenceSaveSeq.get(field) === requestSeq) {
+      state.db = previousDb;
+      patchImageReferencesDom();
+    }
     notify(error.message || t("toastSaveFailed"));
   }
 }
