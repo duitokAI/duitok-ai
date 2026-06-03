@@ -129,6 +129,10 @@ services:
         value: "32000"
       - key: AI302_MINIMAX_SPEECH_BITRATE
         value: "128000"
+      - key: AI302_ELEVEN_TTS_MULTILINGUAL_PATH
+        value: /302/submit/elevenlabs/tts-multilingual-v2-sync
+      - key: AI302_ELEVEN_TTS_MULTILINGUAL_VOICE
+        value: Aria
       - key: AI302_SUNO_SUBMIT_PATH
         value: /suno/submit/music
       - key: AI302_SUNO_FETCH_PATH_PREFIX

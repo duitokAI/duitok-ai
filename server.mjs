@@ -71,6 +71,7 @@ const grsaiCloneModel = process.env.GRSAI_CLONE_MODEL || "gemini-3-pro";
 const ai302BaseUrl = (process.env.AI302_BASE_URL || "https://api.302.ai").replace(/\/$/, "");
 const ai302MinimaxSpeechPath = process.env.AI302_MINIMAX_SPEECH_PATH || "/minimaxi/v1/t2a_v2";
 const ai302MinimaxSpeechModel = process.env.AI302_MINIMAX_SPEECH_MODEL || "speech-2.8-hd";
+const ai302ElevenTtsMultilingualPath = process.env.AI302_ELEVEN_TTS_MULTILINGUAL_PATH || "/302/submit/elevenlabs/tts-multilingual-v2-sync";
 const ai302SunoSubmitPath = process.env.AI302_SUNO_SUBMIT_PATH || "/suno/submit/music";
 const ai302SunoFetchPathPrefix = process.env.AI302_SUNO_FETCH_PATH_PREFIX || "/suno/fetch";
 const ai302SunoModel = process.env.AI302_SUNO_MODEL || "chirp-crow";
@@ -2080,6 +2081,47 @@ async function synthesizeSpeechWithAi302(body = {}) {
     ...extractAi302SpeechAudio(payload),
     raw: process.env.NODE_ENV === "production" ? undefined : payload
   };
+}
+
+function normalizeAi302TtsMultilingual(payload = {}, text = "") {
+  const data = payload.data || payload;
+  const audio = data.audio && typeof data.audio === "object" ? data.audio : {};
+  return {
+    provider: "302ai",
+    model: "tts-multilingual-v2",
+    textCharacters: Array.from(text).length,
+    audioUrl: audio.url || data.audio_url || data.audioUrl || data.url || "",
+    contentType: audio.content_type || data.content_type || data.contentType || "audio/mpeg",
+    fileSize: audio.file_size || data.file_size || data.fileSize || 0,
+    timestamps: data.timestamps || null,
+    raw: process.env.NODE_ENV === "production" ? undefined : payload
+  };
+}
+
+async function synthesizeTtsMultilingualWithAi302(body = {}) {
+  const text = String(body.text || "").trim();
+  if (!text) {
+    const error = new Error("TTS text is required.");
+    error.status = 400;
+    throw error;
+  }
+  if (Array.from(text).length > 10000) {
+    const error = new Error("TTS text must be under 10,000 characters for synchronous generation.");
+    error.status = 400;
+    throw error;
+  }
+  const stability = Number(body.stability ?? 0.5);
+  const similarityBoost = Number(body.similarityBoost ?? body.similarity_boost ?? 0.75);
+  const payload = await ai302Request(ai302ElevenTtsMultilingualPath, {
+    method: "POST",
+    body: JSON.stringify({
+      text,
+      voice: String(body.voice || process.env.AI302_ELEVEN_TTS_MULTILINGUAL_VOICE || "Aria"),
+      stability: Number.isFinite(stability) ? Math.min(1, Math.max(0, stability)) : 0.5,
+      similarity_boost: Number.isFinite(similarityBoost) ? Math.min(1, Math.max(0, similarityBoost)) : 0.75
+    })
+  });
+  return normalizeAi302TtsMultilingual(payload, text);
 }
 
 function normalizeAi302SunoTrack(item = {}) {
@@ -7310,6 +7352,20 @@ app.post("/api/speech/minimax", async (req, res, next) => {
     const speech = await synthesizeSpeechWithAi302(req.body || {});
     await mutateDb(async (db) => {
       db.usage.unshift(usage(`Generated MiniMax Speech audio (${speech.textCharacters} chars)`, 0, user.id));
+      await saveDb(db);
+    });
+    res.json(speech);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/tts/multilingual", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    const speech = await synthesizeTtsMultilingualWithAi302(req.body || {});
+    await mutateDb(async (db) => {
+      db.usage.unshift(usage(`Generated TTS-Multilingual-v2 audio (${speech.textCharacters} chars)`, 0, user.id));
       await saveDb(db);
     });
     res.json(speech);
