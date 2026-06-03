@@ -43736,3 +43736,58 @@ body:has(.studio-shell .video-page-studio),
   min-height: clamp(26px, 5.4cqw, 34px) !important;
   font-size: clamp(10px, 2.7cqw, 13px) !important;
 }
+
+/* Agent portrait result final lock: the preview should shrink-wrap the rendered
+   media so the assistant feedback row stays directly below the image. */
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-run-cards:has(.agent-generation-result-preview.is-portrait),
+.studio-shell .agent-page-panel .agent-generation-run-cards:has(.agent-generation-result-preview.is-portrait) {
+  align-items: start !important;
+  align-content: start !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-card:has(.agent-generation-result-preview.is-portrait),
+.studio-shell .agent-page-panel .agent-generation-card:has(.agent-generation-result-preview.is-portrait) {
+  align-content: start !important;
+  row-gap: 12px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-preview.is-portrait,
+.studio-shell .agent-page-panel .agent-generation-result-preview.is-portrait {
+  width: fit-content !important;
+  max-width: min(360px, 100%) !important;
+  height: fit-content !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  aspect-ratio: auto !important;
+  display: inline-grid !important;
+  grid-template-rows: auto !important;
+  align-content: start !important;
+  justify-self: start !important;
+  gap: 0 !important;
+  line-height: 0 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-preview.is-portrait .result-preview-trigger,
+.studio-shell .agent-page-panel .agent-generation-result-preview.is-portrait .result-preview-trigger {
+  width: fit-content !important;
+  max-width: 100% !important;
+  height: fit-content !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  aspect-ratio: auto !important;
+  display: inline-block !important;
+  line-height: 0 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-preview.is-portrait .result-image,
+.studio-shell .agent-page-panel .agent-generation-result-preview.is-portrait .result-image {
+  width: auto !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: min(620px, 68dvh) !important;
+  aspect-ratio: auto !important;
+  display: block !important;
+  object-fit: contain !important;
+  vertical-align: top !important;
+}
