@@ -43883,19 +43883,19 @@ body:has(.studio-shell .video-page-studio),
 .studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center,
 .studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center,
 .studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center {
-  width: min(94%, 520px) !important;
-  max-width: min(94%, 520px) !important;
+  width: min(86%, 520px) !important;
+  max-width: min(86%, 520px) !important;
   max-height: calc(100% - 4px) !important;
   display: grid !important;
   grid-template-columns: auto auto !important;
   grid-template-rows: auto auto auto !important;
-  justify-content: start !important;
-  justify-items: start !important;
+  justify-content: center !important;
+  justify-items: center !important;
   align-content: center !important;
   align-items: center !important;
   gap: clamp(7px, 1.6cqw, 12px) clamp(8px, 2cqw, 14px) !important;
   overflow: hidden !important;
-  text-align: left !important;
+  text-align: center !important;
 }
 
 .studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape b,
@@ -43926,8 +43926,10 @@ body:has(.studio-shell .video-page-studio),
 .studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape small {
   grid-column: 1 / -1 !important;
   width: min(100%, 500px) !important;
+  justify-self: center !important;
   font-size: clamp(12px, 2.8cqw, 18px) !important;
   line-height: 1.18 !important;
+  text-align: center !important;
   -webkit-line-clamp: 2 !important;
 }
 
@@ -43936,6 +43938,7 @@ body:has(.studio-shell .video-page-studio),
 .studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-actions {
   grid-column: 1 / -1 !important;
   width: min(100%, 300px) !important;
+  justify-self: center !important;
   gap: clamp(6px, 1.4cqw, 9px) !important;
 }
 
