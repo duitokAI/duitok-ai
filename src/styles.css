@@ -42232,12 +42232,14 @@ body:has(.studio-shell .video-page-studio),
 
 /* Higgsfield-style zoom density: the five slider stops map to predictable
    row heights. Cards keep one shared row height, then use aspect ratio to
-   choose their width. This avoids masonry holes and prevents sparse rows from
-   stretching a single tile across the wall. */
+   choose their width. Completed rows grow proportionally to fill the wall,
+   while the invisible final spacer keeps sparse last rows from stretching. */
 .studio-shell .image-higgsfield-mode,
 .studio-shell .video-page-studio,
 .studio-shell .video-prompt-extractor-page {
   --studio-wall-visible-columns: 5;
+  --studio-wall-gap: clamp(2px, 0.16vw, 4px);
+  --studio-wall-separator-color: #07070a;
 }
 
 .studio-shell .image-higgsfield-mode[data-studio-wall-zoom-level="0"],
@@ -42277,18 +42279,30 @@ body:has(.studio-shell .video-page-studio),
     (100% - ((var(--studio-wall-visible-columns) - 1) * var(--studio-wall-gap, 3px)))
     / var(--studio-wall-visible-columns)
   );
+  gap: var(--studio-wall-gap) !important;
+  background: var(--studio-wall-separator-color) !important;
 }
 
 .studio-shell .image-higgsfield-mode .studio-wall-card,
 .studio-shell .video-page-studio .studio-wall-card,
 .studio-shell .video-prompt-extractor-page .studio-wall-card {
-  flex: 0 0 calc(var(--studio-wall-row-height) * var(--media-ratio, 1)) !important;
-  width: calc(var(--studio-wall-row-height) * var(--media-ratio, 1)) !important;
+  flex: var(--media-ratio, 1) 1 auto !important;
+  width: auto !important;
   min-width: 0 !important;
-  max-width: min(100%, calc(var(--studio-wall-row-height) * var(--media-ratio, 1))) !important;
+  max-width: none !important;
   height: var(--studio-wall-row-height) !important;
   min-height: var(--studio-wall-row-height) !important;
   max-height: var(--studio-wall-row-height) !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-grid::after,
+.studio-shell .video-page-studio .studio-wall-grid::after,
+.studio-shell .video-prompt-extractor-page .studio-wall-grid::after {
+  content: "";
+  flex: 999 1 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
 }
 
 @media (max-width: 760px) {
@@ -42296,6 +42310,7 @@ body:has(.studio-shell .video-page-studio),
   .studio-shell .video-page-studio,
   .studio-shell .video-prompt-extractor-page {
     --studio-wall-visible-columns: 2;
+    --studio-wall-gap: 2px;
   }
 }
 
