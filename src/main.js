@@ -4380,7 +4380,7 @@ function assetLibraryNavButton(kind, ic, label, count, activeFilter) {
 
 function assetLibraryProjectButton(id, label, count, activeProject) {
   const active = activeProject === id;
-  const filterButton = `<button type="button" class="${active ? "active" : ""}" data-asset-project="${esc(id)}">${icon(id === "all" ? "folder-open" : "folder", 17)} <span>${esc(label)}</span><small>${count || 0}</small></button>`;
+  const filterButton = `<button type="button" class="${active ? "active" : ""}" data-asset-project="${esc(id)}" title="${esc(label)}">${icon(id === "all" ? "folder-open" : "folder", 17)} <span>${esc(label)}</span><small>${count || 0}</small></button>`;
   if (id === "all") return filterButton;
   return `<div class="asset-library-project-row ${active ? "active" : ""}">
     ${filterButton}

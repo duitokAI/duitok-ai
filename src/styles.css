@@ -6397,11 +6397,9 @@ textarea {
 }
 
 .asset-library-project-row {
+  position: relative;
   min-width: 0;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 6px;
+  display: block;
   border-radius: 13px;
 }
 
@@ -6424,15 +6422,21 @@ textarea {
 }
 
 .asset-library-project-row > button {
+  width: 100%;
   min-width: 0;
+  padding-right: 48px;
 }
 
 .asset-library-project-actions {
+  position: absolute;
+  top: 50%;
+  right: 7px;
+  z-index: 2;
   display: inline-flex;
   align-items: center;
   gap: 4px;
   opacity: 0;
-  transform: translateX(4px);
+  transform: translate(6px, -50%);
   transition: opacity 120ms ease, transform 120ms ease;
 }
 
@@ -6440,27 +6444,35 @@ textarea {
 .asset-library-project-row:focus-within .asset-library-project-actions,
 .asset-library-project-row.active .asset-library-project-actions {
   opacity: 1;
-  transform: translateX(0);
+  transform: translate(0, -50%);
 }
 
 .asset-library-project-actions button {
-  width: 30px;
-  min-width: 30px;
-  height: 30px;
-  min-height: 30px;
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  min-height: 28px;
   display: grid;
   grid-template-columns: 1fr;
   place-items: center;
   gap: 0;
   border-radius: 10px;
   padding: 0;
+  background: rgba(255, 255, 255, 0.76);
   color: rgba(42, 16, 51, 0.54);
+  backdrop-filter: blur(10px);
 }
 
 .asset-library-project-actions button:hover {
   border-color: rgba(255, 80, 123, 0.2);
   background: rgba(255, 255, 255, 0.9);
   color: #ff4f7c;
+}
+
+.asset-library-project-row.active > button small,
+.asset-library-project-row:hover > button small,
+.asset-library-project-row:focus-within > button small {
+  opacity: 0;
 }
 
 .asset-library-nav button span,
@@ -6473,9 +6485,9 @@ textarea {
 
 .asset-library-nav button small,
 .asset-library-projects button small {
-  min-width: 26px;
+  min-width: 24px;
   border-radius: 999px;
-  padding: 3px 7px;
+  padding: 3px 6px;
   background: rgba(93, 8, 108, 0.08);
   color: rgba(42, 16, 51, 0.58);
   font-size: 11px;
