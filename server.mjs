@@ -75,6 +75,7 @@ const ai302ElevenTtsMultilingualPath = process.env.AI302_ELEVEN_TTS_MULTILINGUAL
 const ai302DoubaoTtsHdPath = process.env.AI302_DOUBAO_TTS_HD_PATH || "/doubao/tts_hd";
 const ai302DoubaoTtsHdVoice = process.env.AI302_DOUBAO_TTS_HD_VOICE || "zh_male_M392_conversation_wvae_bigtts";
 const ai302SunoSubmitPath = process.env.AI302_SUNO_SUBMIT_PATH || "/suno/submit/music";
+const ai302SunoLyricsPath = process.env.AI302_SUNO_LYRICS_PATH || "/suno/submit/lyrics";
 const ai302SunoFetchPathPrefix = process.env.AI302_SUNO_FETCH_PATH_PREFIX || "/suno/fetch";
 const ai302SunoModel = process.env.AI302_SUNO_MODEL || "chirp-crow";
 const ai302AudioTranslatePath = process.env.AI302_AUDIO_TRANSLATE_PATH || "/302/audio/translate/task";
@@ -2220,7 +2221,8 @@ async function submitSunoWithAi302(body = {}) {
   const prompt = String(body.prompt || body.lyrics || "").trim();
   const description = String(body.description || body.gptDescriptionPrompt || body.gpt_description_prompt || "").trim();
   const makeInstrumental = body.makeInstrumental === true || body.make_instrumental === true || body.instrumental === true;
-  const isCustom = Boolean(prompt || tags || body.custom === true);
+  const mode = String(body.mode || body.createMode || body.create_mode || "").trim().toLowerCase();
+  const isCustom = mode === "custom" || Boolean(prompt || tags || body.custom === true);
   const payload = isCustom
     ? {
         title,
@@ -2250,7 +2252,62 @@ async function submitSunoWithAi302(body = {}) {
     model: "suno-v5.5",
     taskId: String(taskId?.task_id || taskId?.taskId || taskId?.id || taskId),
     status: "submitted",
-    mode: isCustom ? "custom" : "auto"
+    mode: isCustom ? "custom" : "automation"
+  };
+}
+
+async function submitSunoContinuationWithAi302(body = {}) {
+  const audioId = String(body.audioId || body.audio_id || body.id || "").trim();
+  if (!audioId) {
+    const error = new Error("Suno audio id is required for continuation.");
+    error.status = 400;
+    throw error;
+  }
+  const continueAt = Number(body.continueAt ?? body.continue_at ?? 60);
+  const payload = {
+    audio_id: audioId,
+    continue_at: Number.isFinite(continueAt) ? Math.max(0, continueAt) : 60,
+    mv: String(body.mv || ai302SunoModel),
+    ...(body.prompt || body.lyrics ? { prompt: String(body.prompt || body.lyrics) } : {}),
+    ...(body.tags || body.style ? { tags: String(body.tags || body.style) } : {}),
+    ...(body.title ? { title: String(body.title).slice(0, 80) } : {})
+  };
+  const taskId = await ai302Request(ai302SunoSubmitPath, {
+    method: "POST",
+    headers: { Accept: "application/json" },
+    body: JSON.stringify(payload)
+  });
+  return {
+    provider: "302ai",
+    model: "suno-v5.5",
+    taskId: String(taskId?.task_id || taskId?.taskId || taskId?.id || taskId),
+    status: "submitted",
+    mode: "continuation",
+    audioId
+  };
+}
+
+async function submitSunoLyricsWithAi302(body = {}) {
+  const prompt = String(body.prompt || body.description || body.topic || "").trim();
+  if (!prompt) {
+    const error = new Error("Lyrics prompt is required.");
+    error.status = 400;
+    throw error;
+  }
+  const taskId = await ai302Request(ai302SunoLyricsPath, {
+    method: "POST",
+    headers: { Accept: "application/json" },
+    body: JSON.stringify({
+      prompt,
+      ...(body.callBackUrl || body.callback_url ? { callBackUrl: String(body.callBackUrl || body.callback_url) } : {})
+    })
+  });
+  return {
+    provider: "302ai",
+    model: "suno-generate-lyrics",
+    taskId: String(taskId?.task_id || taskId?.taskId || taskId?.id || taskId),
+    status: "submitted",
+    mode: "lyrics"
   };
 }
 

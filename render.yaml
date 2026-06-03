@@ -139,6 +139,8 @@ services:
         value: zh_male_M392_conversation_wvae_bigtts
       - key: AI302_SUNO_SUBMIT_PATH
         value: /suno/submit/music
+      - key: AI302_SUNO_LYRICS_PATH
+        value: /suno/submit/lyrics
       - key: AI302_SUNO_FETCH_PATH_PREFIX
         value: /suno/fetch
       - key: AI302_SUNO_MODEL
