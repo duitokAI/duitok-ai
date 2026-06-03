@@ -1679,9 +1679,14 @@ function publicAttachmentPrompt(value = "", type = "image") {
 }
 
 function publicAttachment(item = {}) {
+  const fallbackName = item.kind === "avatar"
+    ? "Saved avatar reference"
+    : item.kind === "product"
+      ? "Saved product reference"
+      : "Saved project media";
   return {
     ...item,
-    name: redactProviderText(item.name || "", item.kind === "avatar" ? "Saved avatar reference" : "Saved product reference"),
+    name: redactProviderText(item.name || "", fallbackName),
     prompt: publicAttachmentPrompt(item.prompt || "", item.mediaKind === "video" || item.type === "video" ? "video" : "image")
   };
 }
@@ -7088,8 +7093,8 @@ app.post("/api/results/:id/save-reference", async (req, res, next) => {
   try {
     const { user } = await requireAuth(req);
     const kind = String(req.body.kind || "").trim();
-    if (!["avatar", "product"].includes(kind)) {
-      const error = new Error("Reference kind must be avatar or product.");
+    if (!["avatar", "product", "file"].includes(kind)) {
+      const error = new Error("Reference kind must be avatar, product, or file.");
       error.status = 400;
       throw error;
     }
@@ -7106,14 +7111,14 @@ app.post("/api/results/:id/save-reference", async (req, res, next) => {
         userId: user.id,
         projectId: project.id,
         kind,
-        name: String(req.body.name || result.title || (kind === "avatar" ? "Saved avatar reference" : "Saved product reference")).slice(0, 120),
+        name: String(req.body.name || result.title || (kind === "avatar" ? "Saved avatar reference" : kind === "product" ? "Saved product reference" : "Saved project media")).slice(0, 120),
         type: result.videoUrl ? "video" : "image",
         mediaKind: result.videoUrl ? "video" : "image",
         sourceResultId: result.id,
         prompt: publicAttachmentPrompt(result.providerBody || result.body || "", result.videoUrl ? "video" : "image"),
         createdAt: new Date().toISOString()
       });
-      db.usage.unshift(usage(`Saved ${kind} reference`, 0, user.id));
+      db.usage.unshift(usage(kind === "file" ? "Saved project media" : `Saved ${kind} reference`, 0, user.id));
       await saveDb(db);
       return publicState(db, user);
     }));

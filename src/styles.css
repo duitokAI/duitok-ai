@@ -25736,6 +25736,29 @@ label {
   opacity: 0.82;
 }
 
+.result-detail-project-button {
+  width: 100%;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+  border: 1px solid rgba(116, 69, 143, 0.14);
+  border-radius: 14px;
+  padding: 0 12px;
+  background: linear-gradient(135deg, #ffffff, #f4e9ff);
+  color: #2b0634;
+  font-weight: 950;
+  box-shadow: 0 12px 24px rgba(75, 0, 94, 0.08);
+}
+
+.result-detail-project-button.is-saved,
+.result-detail-project-button:disabled {
+  cursor: default;
+  opacity: 0.78;
+}
+
 .result-detail-file-button {
   display: inline-flex;
   align-items: center;

@@ -6515,6 +6515,15 @@ function resultReferenceButton(item, kind) {
   </button>`;
 }
 
+function resultProjectSaveButton(item) {
+  const saved = resultSavedAsReference(item, "file");
+  const label = saved ? "Saved to project" : "Save to project";
+  return `<button type="button" class="result-detail-project-button ${saved ? "is-saved" : ""}" data-result-action="save-project" data-result-id="${esc(item?.id || "")}" ${item?.imageUrl || item?.videoUrl ? "" : "disabled"} ${saved ? "disabled" : ""}>
+    ${icon(saved ? "check-circle-2" : "folder-plus", 20)}
+    <span>${esc(label)}</span>
+  </button>`;
+}
+
 function resultPromptText(item) {
   const job = resultOriginJob(item);
   return job?.prompt || item.prompt || item.providerBody || item.body || "";
@@ -7375,6 +7384,7 @@ function resultPreviewModal() {
             ${resultReferenceButton(item, "avatar")}
             ${resultReferenceButton(item, "product")}
           </div>
+          ${resultProjectSaveButton(item)}
           <div class="result-detail-file-actions">
             <button type="button" class="result-detail-file-button download" data-result-action="download" data-result-id="${esc(item?.id || "")}" data-result-kind="${item?.videoUrl ? "video" : item?.imageUrl ? "image" : "text"}">
               ${icon("download", 20)}
@@ -12826,7 +12836,7 @@ async function resultAction(button) {
   const actionName = button?.dataset.resultAction;
   if (!id || !actionName) return;
   const item = findAssetResult(id);
-  const busyActions = new Set(["download", "schedule", "variant", "avatar", "product", "save-avatar", "save-product"]);
+  const busyActions = new Set(["download", "schedule", "variant", "avatar", "product", "save-avatar", "save-product", "save-project"]);
   const shouldShowBusy = busyActions.has(actionName);
   if (shouldShowBusy) setResultActionBusy(button, true);
   try {
@@ -12886,6 +12896,15 @@ async function resultAction(button) {
       if (state.modal === "previewResult") set({ db, modal: "previewResult", activeResultId: id });
       else set({ db, modal: null, activeResultId: null });
       return notify(kind === "avatar" ? "已保存为人物参考。" : "已保存为产品图参考。");
+    }
+    if (actionName === "save-project") {
+      const db = await api(`/results/${id}/save-reference`, {
+        method: "POST",
+        body: JSON.stringify({ kind: "file" })
+      });
+      if (state.modal === "previewResult") set({ db, modal: "previewResult", activeResultId: id });
+      else set({ db, modal: null, activeResultId: null });
+      return notify("已保存到当前项目。");
     }
   } catch (error) {
     notify(error.message);
