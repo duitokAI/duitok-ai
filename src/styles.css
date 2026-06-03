@@ -39002,6 +39002,55 @@ body:has(.studio-shell .video-prompt-extractor-page),
   pointer-events: none;
 }
 
+/* Video page scroll restoration: UGC Video reuses the Clone Prompt page class
+   for the result wall, but unlike Clone Prompt it needs a naturally scrollable
+   canvas with a sticky composer. */
+.studio-shell .workspace:has(.video-page-studio),
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio) {
+  height: 100dvh !important;
+  max-height: 100dvh !important;
+  min-height: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior-y: contain;
+}
+
+.studio-shell .canvas-card:has(.video-page-studio),
+.studio-shell .studio-workbench-card:has(.video-page-studio),
+.studio-shell .studio-step-panel:has(.video-page-studio) {
+  min-height: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.studio-shell .video-page-studio {
+  min-height: calc(100dvh - var(--project-fixed-tabs-height, 58px)) !important;
+  height: auto !important;
+  grid-template-rows: 46px minmax(420px, auto) auto !important;
+  align-content: start !important;
+  overflow: visible !important;
+}
+
+.studio-shell .video-page-studio > .studio-wall-zoom-control {
+  position: sticky !important;
+  top: 10px !important;
+  grid-row: 1 !important;
+  justify-self: end !important;
+}
+
+.studio-shell .video-page-studio > .studio-result-wall {
+  grid-row: 2 !important;
+  min-height: 420px !important;
+  height: auto !important;
+  overflow: visible !important;
+  padding-bottom: clamp(156px, 18vh, 280px) !important;
+}
+
+.studio-shell .video-page-studio > .video-generate-console {
+  grid-row: 3 !important;
+  align-self: end !important;
+}
+
 /* Count stepper stability lock: clicking +/- must not resize the composer. */
 .studio-shell .image-higgsfield-mode > .image-generate-console .image-count-stepper,
 .studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-count-stepper,
