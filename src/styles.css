@@ -6431,7 +6431,12 @@ textarea {
 .asset-library-project-row > button {
   width: 100%;
   min-width: 0;
-  padding-right: 48px;
+  padding-right: 11px;
+}
+
+.asset-library-project-row:hover > button,
+.asset-library-project-row:focus-within > button {
+  padding-right: 72px;
 }
 
 .asset-library-project-actions {
@@ -6448,8 +6453,7 @@ textarea {
 }
 
 .asset-library-project-row:hover .asset-library-project-actions,
-.asset-library-project-row:focus-within .asset-library-project-actions,
-.asset-library-project-row.active .asset-library-project-actions {
+.asset-library-project-row:focus-within .asset-library-project-actions {
   opacity: 1;
   transform: translate(0, -50%);
 }
@@ -6476,7 +6480,6 @@ textarea {
   color: #ff4f7c;
 }
 
-.asset-library-project-row.active > button small,
 .asset-library-project-row:hover > button small,
 .asset-library-project-row:focus-within > button small {
   opacity: 0;
@@ -6488,6 +6491,20 @@ textarea {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.asset-library-projects button {
+  min-height: 52px;
+}
+
+.asset-library-projects button span {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  line-height: 1.14;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .asset-library-nav button small,
