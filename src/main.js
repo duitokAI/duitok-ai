@@ -4300,7 +4300,6 @@ function contentLibraryPage() {
   });
   const counts = assetLibraryCounts(all);
   const groups = assetLibraryDateGroups(filtered);
-  const activeProjectName = activeProject === "all" ? "All assets" : state.db.projects.find((item) => item.id === activeProject)?.name || "Project assets";
   return `<section class="asset-library-experience">
     <aside class="asset-library-panel" aria-label="Content Library filters">
       <label class="asset-library-search">
@@ -4324,7 +4323,7 @@ function contentLibraryPage() {
       <header class="asset-library-command">
         <div>
           <p>${icon("folder-open", 17)} Content Library</p>
-          <h1>${esc(activeProjectName)}</h1>
+          <h1>Content Library</h1>
         </div>
         <span>${filtered.length} / ${all.length} assets</span>
       </header>
