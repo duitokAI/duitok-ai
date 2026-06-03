@@ -42628,3 +42628,29 @@ body:has(.studio-shell .video-page-studio),
     grid-column: 2 / 3 !important;
   }
 }
+
+/* Agent result preview ratio lock: use the generated media's real intrinsic
+   height instead of reserving a generic 9:16 slot below the image. */
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-preview .result-preview-trigger,
+.studio-shell .agent-page-panel .agent-generation-result-preview .result-preview-trigger,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-gallery-tile .result-preview-trigger,
+.studio-shell .agent-page-panel .agent-generation-gallery-tile .result-preview-trigger {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  aspect-ratio: auto !important;
+  line-height: 0 !important;
+  display: block !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-result-preview .result-image,
+.studio-shell .agent-page-panel .agent-generation-result-preview .result-image,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-generation-gallery-tile .result-image,
+.studio-shell .agent-page-panel .agent-generation-gallery-tile .result-image {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: min(620px, 68dvh) !important;
+  aspect-ratio: auto !important;
+  object-fit: contain !important;
+  vertical-align: top !important;
+}
