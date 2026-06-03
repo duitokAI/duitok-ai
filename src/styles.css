@@ -43098,3 +43098,79 @@ body:has(.studio-shell .video-page-studio),
 .studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait .studio-wall-failed-actions {
   width: min(92%, 156px) !important;
 }
+
+/* Landscape failed tiles need a low-height composition because they sit in the
+   same row rhythm as media. Keep every control inside the visible tile. */
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape > .studio-wall-pending-controls,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape > .studio-wall-pending-controls,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape > .studio-wall-pending-controls {
+  padding: clamp(10px, 2.4cqw, 16px) clamp(14px, 3.2cqw, 22px) !important;
+  place-items: center !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center {
+  width: min(94%, 520px) !important;
+  max-width: min(94%, 520px) !important;
+  max-height: calc(100% - 4px) !important;
+  display: grid !important;
+  grid-template-columns: auto auto !important;
+  grid-template-rows: auto auto auto !important;
+  justify-content: start !important;
+  justify-items: start !important;
+  align-content: center !important;
+  align-items: center !important;
+  gap: clamp(7px, 1.6cqw, 12px) clamp(8px, 2cqw, 14px) !important;
+  overflow: hidden !important;
+  text-align: left !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape b,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape b,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape b {
+  min-height: clamp(28px, 6cqw, 38px) !important;
+  height: clamp(28px, 6cqw, 38px) !important;
+  padding: 0 clamp(10px, 2.6cqw, 16px) !important;
+  font-size: clamp(15px, 3.6cqw, 23px) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .generation-credit-refund-note,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .generation-credit-refund-note,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .generation-credit-refund-note {
+  min-height: clamp(28px, 6cqw, 38px) !important;
+  height: clamp(28px, 6cqw, 38px) !important;
+  padding: 0 clamp(10px, 2.6cqw, 16px) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .generation-credit-refund-note strong,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .generation-credit-refund-note strong,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .generation-credit-refund-note strong {
+  font-size: clamp(13px, 3.1cqw, 18px) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape small,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape small,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape small {
+  grid-column: 1 / -1 !important;
+  width: min(100%, 500px) !important;
+  font-size: clamp(12px, 2.8cqw, 18px) !important;
+  line-height: 1.18 !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-actions,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-actions,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-actions {
+  grid-column: 1 / -1 !important;
+  width: min(100%, 300px) !important;
+  gap: clamp(6px, 1.4cqw, 9px) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-actions button,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-actions button,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-actions button {
+  height: clamp(26px, 5.4cqw, 34px) !important;
+  min-height: clamp(26px, 5.4cqw, 34px) !important;
+  font-size: clamp(10px, 2.7cqw, 13px) !important;
+}
