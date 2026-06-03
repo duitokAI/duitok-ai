@@ -6314,6 +6314,7 @@ textarea {
 }
 
 .studio-shell .workspace:has(.asset-library-experience) {
+  padding-top: 0 !important;
   padding-left: 0 !important;
   padding-right: clamp(18px, 2.4vw, 42px) !important;
   overflow-x: hidden !important;
@@ -6328,11 +6329,11 @@ textarea {
 
 .asset-library-panel {
   position: sticky;
-  top: 18px;
+  top: 0;
   align-self: start;
   display: grid;
   gap: 14px;
-  max-height: calc(100dvh - 36px);
+  max-height: 100dvh;
   overflow: auto;
   border: 1px solid rgba(93, 8, 108, 0.08);
   border-radius: 24px;
@@ -43836,9 +43837,16 @@ body:has(.studio-shell .video-page-studio),
 .studio-shell.sidebar-collapsed .workspace:has(.asset-library-experience),
 .studio-shell .workspace.workspace-library,
 .studio-shell.sidebar-collapsed .workspace.workspace-library {
+  padding-top: 0 !important;
   padding-left: 0 !important;
   padding-right: clamp(18px, 2.4vw, 42px) !important;
   overflow-x: hidden !important;
+}
+
+.studio-shell .workspace.workspace-library .asset-library-panel,
+.studio-shell.sidebar-collapsed .workspace.workspace-library .asset-library-panel {
+  top: 0 !important;
+  max-height: 100dvh !important;
 }
 
 .studio-shell .workspace:has(.asset-library-experience) > .asset-library-experience,
