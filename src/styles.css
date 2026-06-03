@@ -42737,3 +42737,86 @@ body:has(.studio-shell .video-page-studio),
   object-fit: cover !important;
   border-radius: 0 !important;
 }
+
+/* Agent thinking layout guard: keep the waiting card horizontal and readable
+   when the page/sidebar width changes. */
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.agent-thinking,
+.studio-shell .agent-page-panel .agent-thread article.agent-thinking {
+  box-sizing: border-box !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 10px !important;
+  width: fit-content !important;
+  min-width: min(520px, calc(100% - 32px)) !important;
+  max-width: min(720px, calc(100% - 32px)) !important;
+  padding: 14px 16px !important;
+  align-self: flex-start !important;
+  justify-self: start !important;
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thinking > span,
+.studio-shell .agent-page-panel .agent-thinking > span,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thinking-row,
+.studio-shell .agent-page-panel .agent-thinking-row,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thinking-row *,
+.studio-shell .agent-page-panel .agent-thinking-row *,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thinking-steps,
+.studio-shell .agent-page-panel .agent-thinking-steps,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thinking-steps span,
+.studio-shell .agent-page-panel .agent-thinking-steps span {
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thinking-row,
+.studio-shell .agent-page-panel .agent-thinking-row {
+  display: grid !important;
+  grid-template-columns: 32px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thinking-row b,
+.studio-shell .agent-page-panel .agent-thinking-row b {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thinking-steps,
+.studio-shell .agent-page-panel .agent-thinking-steps {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  gap: 7px !important;
+  min-width: 0 !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel .agent-thinking-steps span,
+.studio-shell .agent-page-panel .agent-thinking-steps span {
+  width: auto !important;
+  min-width: max-content !important;
+  max-width: none !important;
+  min-height: 26px !important;
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+  overflow-wrap: normal !important;
+}
+
+@media (max-width: 640px) {
+  .studio-shell .agent-chat-shell.agent-page-panel .agent-thread article.agent-thinking,
+  .studio-shell .agent-page-panel .agent-thread article.agent-thinking {
+    width: calc(100% - 24px) !important;
+    min-width: 0 !important;
+    max-width: calc(100% - 24px) !important;
+  }
+
+  .studio-shell .agent-chat-shell.agent-page-panel .agent-thinking-steps span,
+  .studio-shell .agent-page-panel .agent-thinking-steps span {
+    min-width: 0 !important;
+  }
+}
