@@ -9257,6 +9257,7 @@ function agentHistoryRecentsLabel() {
 
 function agentHistorySidebarList(sessions = []) {
   const showDraft = !state.activeAgentHistoryId && !state.agentMessages.length && !String(state.agentInput || "").trim();
+  const normalizedSessions = normalizeAgentHistorySessions(sessions);
   const draftSession = {
     id: agentDraftHistoryId,
     title: state.lang === "zh" ? "新对话" : "New Chat",
@@ -9264,7 +9265,7 @@ function agentHistorySidebarList(sessions = []) {
     messages: [],
     isDraft: true
   };
-  const displaySessions = showDraft ? [draftSession, ...sessions] : sessions;
+  const displaySessions = showDraft ? [draftSession, ...normalizedSessions] : normalizedSessions;
   if (!displaySessions.length) return `<p class="agent-session-empty">还没有历史记录</p>`;
   return `<div class="agent-session-list">
     ${displaySessions.map((item) => {
@@ -9309,7 +9310,7 @@ function agentDebugPanel() {
 function agentHistoryPanel() {
   if (!state.agentHistoryOpen) return "";
   const c = agentUiCopy();
-  const sessions = Array.isArray(state.agentHistorySessions) ? state.agentHistorySessions : [];
+  const sessions = normalizeAgentHistorySessions(state.agentHistorySessions);
   return `<section class="agent-history-panel">
     <header>
       <strong>${icon("history", 16)} ${c.history}</strong>
@@ -11935,12 +11936,36 @@ function rememberAgentMessages(messages) {
 }
 
 function rememberAgentHistorySessions(sessions = []) {
-  const safeSessions = (Array.isArray(sessions) ? sessions : [])
-    .filter((item) => item?.id && Array.isArray(item.messages) && item.messages.length)
-    .slice(0, agentHistoryLimit);
+  const safeSessions = normalizeAgentHistorySessions(sessions);
   localStorage.setItem(agentHistoryStorageKey, JSON.stringify(safeSessions));
   state.agentHistorySessions = safeSessions;
   return safeSessions;
+}
+
+function normalizeAgentHistorySessions(sessions = []) {
+  const seenIds = new Set();
+  const seenMessages = new Set();
+  const safeSessions = [];
+  for (const item of Array.isArray(sessions) ? sessions : []) {
+    if (!item?.id || !Array.isArray(item.messages) || !item.messages.length || seenIds.has(item.id)) continue;
+    const signature = agentHistoryMessagesSignature(item.messages);
+    if (signature && seenMessages.has(signature)) continue;
+    seenIds.add(item.id);
+    if (signature) seenMessages.add(signature);
+    safeSessions.push(item);
+    if (safeSessions.length >= agentHistoryLimit) break;
+  }
+  return safeSessions;
+}
+
+function agentHistoryMessagesSignature(messages = []) {
+  const compact = agentMessagesForStorage(messages).map((item) => ({
+    role: item.role,
+    content: String(item.content || "").replace(/\s+/g, " ").trim(),
+    attachments: Array.isArray(item.attachments) ? item.attachments.map((attachment) => `${attachment.kind || ""}:${attachment.name || ""}:${attachment.size || ""}`) : [],
+    run: item.agentRun?.id || item.agentRun?.status || ""
+  }));
+  return compact.length ? JSON.stringify(compact) : "";
 }
 
 function createAgentHistorySessionId() {
@@ -11951,9 +11976,10 @@ function saveCurrentAgentHistory(messagesOverride = null) {
   const messages = agentMessagesForStorage(Array.isArray(messagesOverride) ? messagesOverride : state.agentMessages);
   if (!messages.length) return state.agentHistorySessions;
   const sessions = state.agentHistorySessions || [];
+  const signature = agentHistoryMessagesSignature(messages);
   const existing = state.activeAgentHistoryId
     ? sessions.find((item) => item.id === state.activeAgentHistoryId)
-    : null;
+    : sessions.find((item) => agentHistoryMessagesSignature(item.messages) === signature) || null;
   const session = {
     ...(existing || {}),
     id: existing?.id || createAgentHistorySessionId(),
