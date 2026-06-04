@@ -10211,11 +10211,7 @@ function bind() {
   document.querySelectorAll("[data-action]").forEach((el) => el.addEventListener("click", (e) => action(e, el.dataset.action)));
   document.querySelectorAll("[data-studio-wall-zoom]").forEach((el) => el.addEventListener("input", () => updateStudioWallZoom(el.value)));
   bindAspectRatioFloatingMenus();
-  document.querySelectorAll("[data-field-set]").forEach((el) => el.addEventListener("click", () => {
-    if (el.dataset.fieldSet?.startsWith("image.")) stabilizeImageConsoleExpansion(1000);
-    el.closest("details")?.removeAttribute("open");
-    saveProjectFieldQuick(el.dataset.fieldSet, el.dataset.value, el);
-  }));
+  bindProjectFieldSetControls();
   document.querySelectorAll("[data-field]").forEach((el) => el.addEventListener("change", fieldChange));
   document.querySelectorAll("[data-ugc-builder-option]").forEach((el) => el.addEventListener("click", () => updateUgcBuilderOption(el)));
   document.querySelectorAll("[data-ugc-builder-field]").forEach((el) => el.addEventListener("click", () => updateUgcBuilderField(el.dataset.ugcBuilderField, el.dataset.ugcBuilderValue, true)));
@@ -11037,6 +11033,24 @@ function setFieldSetActive(field, value, source = null) {
   }
 }
 
+function bindProjectFieldSetControls(root = document) {
+  root.querySelectorAll("[data-field-set]").forEach((el) => {
+    if (el.dataset.fieldSetBound === "true") return;
+    el.dataset.fieldSetBound = "true";
+    const save = () => {
+      if (el.dataset.fieldSet?.startsWith("image.")) stabilizeImageConsoleExpansion(1000);
+      el.closest("details")?.removeAttribute("open");
+      saveProjectFieldQuick(el.dataset.fieldSet, el.dataset.value, el);
+    };
+    el.addEventListener("click", save);
+    el.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      save();
+    });
+  });
+}
+
 function saveProjectFieldQuick(field, value, source = null) {
   if (!field) return;
   const projectId = state.projectId;
@@ -11108,6 +11122,7 @@ function updateImageModelDom(modelValue, source = null) {
   window.lucide?.createIcons();
   bindImageConsoleCompact();
   bindAspectRatioFloatingMenus();
+  bindProjectFieldSetControls(consoleEl);
 }
 
 function updateImageCountDom(count = imageBatchCount(project())) {
