@@ -11747,7 +11747,7 @@ async function pollGenerationQueue(attempt = 0) {
     }
     const db = nextDb;
     const hasRunning = db.generationJobs.some((job) => ["queued", "processing"].includes(job.status));
-    if (hasRunning && attempt < 120) {
+    if (hasRunning && attempt < 240) {
       scheduleGenerationPoll(attempt + 1, db);
       return;
     }

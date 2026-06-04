@@ -112,6 +112,9 @@ const promptAdvancedCache = new Map();
 const httpCompressionMinBytes = Number(process.env.HTTP_COMPRESSION_MIN_BYTES || 1024);
 const maxConcurrentGenerationJobs = Math.max(1, Number(process.env.MAX_CONCURRENT_GENERATION_JOBS || 4));
 const userConcurrentGenerationLimit = Math.max(1, Number(process.env.USER_CONCURRENT_GENERATIONS || 2));
+const staleQueuedGenerationMs = Number(process.env.STALE_QUEUED_GENERATION_MS || 10 * 60 * 1000);
+const staleImageGenerationMs = Number(process.env.STALE_IMAGE_GENERATION_MS || 12 * 60 * 1000);
+const staleVideoGenerationMs = Number(process.env.STALE_VIDEO_GENERATION_MS || 45 * 60 * 1000);
 const projectResultStorageLimit = Math.max(0, Number(process.env.PROJECT_RESULT_STORAGE_LIMIT || 1500));
 const storedGenerationJobLimit = Math.max(0, Number(process.env.STORED_GENERATION_JOB_LIMIT || 6000));
 const storedApiCallLimit = Math.max(0, Number(process.env.STORED_API_CALL_LIMIT || 6000));
@@ -1439,6 +1442,68 @@ function mutateDb(handler) {
   });
   dbMutationQueue = run.catch(() => {});
   return run;
+}
+
+function generationJobTimeoutMs(job = {}) {
+  if (job.status === "queued") return staleQueuedGenerationMs;
+  return job.type === "video" || job.action === "generate-ugc" ? staleVideoGenerationMs : staleImageGenerationMs;
+}
+
+function generationJobAgeMs(job = {}, now = Date.now()) {
+  const base = Date.parse(job.status === "queued" ? job.createdAt : job.startedAt || job.createdAt);
+  return Number.isFinite(base) ? now - base : 0;
+}
+
+async function reconcileStaleGenerationJobs(user, projectId = "") {
+  let shouldKickQueue = false;
+  const nextDb = await mutateDb(async (db) => {
+    const isAdmin = hasAdminPrivileges(user);
+    const now = Date.now();
+    let changed = false;
+    for (const job of db.generationJobs || []) {
+      if (!["queued", "processing"].includes(job.status)) continue;
+      if (projectId && job.projectId !== projectId) continue;
+      if (!isAdmin && job.userId !== user.id) continue;
+      const age = generationJobAgeMs(job, now);
+      const timeout = generationJobTimeoutMs(job);
+      if (age < timeout) {
+        if (job.status === "queued") shouldKickQueue = true;
+        continue;
+      }
+      const completedAt = new Date(now).toISOString();
+      activeGenerationJobs.delete(job.id);
+      Object.assign(job, {
+        status: "failed",
+        stage: "failed",
+        errorMessage: publicGenerationError(),
+        providerErrorMessage: `Generation timed out after ${Math.round(age / 60000)} minutes.`,
+        creditsCharged: 0,
+        completedAt,
+        timedOutAt: completedAt
+      });
+      db.apiCalls ||= [];
+      db.apiCalls.unshift({
+        id: crypto.randomUUID(),
+        userId: job.userId,
+        projectId: job.projectId,
+        generationJobId: job.id,
+        provider: job.provider,
+        model: job.model,
+        endpoint: "",
+        status: "failed",
+        errorMessage: job.providerErrorMessage,
+        costRm: 0,
+        createdAt: completedAt
+      });
+      db.usage ||= [];
+      db.usage.unshift(usage("Generation timed out", 0, job.userId));
+      changed = true;
+    }
+    if (changed) await saveDb(db);
+    return db;
+  });
+  if (shouldKickQueue) kickGenerationQueue();
+  return nextDb;
 }
 
 const providerLeakPatterns = [
@@ -4337,7 +4402,7 @@ async function completeQueuedGeneration(jobId, generated) {
   await mutateDb(async (currentDb) => {
     const job = currentDb.generationJobs.find((item) => item.id === jobId);
     if (!job) return saveDb(currentDb);
-    if (job.status === "cancelled") return saveDb(currentDb);
+    if (job.status !== "processing") return saveDb(currentDb);
     const project = currentDb.projects.find((item) => item.id === job.projectId);
     if (!project) throw Object.assign(new Error("Project not found"), { status: 404 });
     const owner = currentDb.users.find((item) => item.id === project.userId);
@@ -4443,7 +4508,7 @@ async function failQueuedGeneration(jobId, error) {
   await mutateDb(async (currentDb) => {
     const job = currentDb.generationJobs.find((item) => item.id === jobId);
     if (!job) return saveDb(currentDb);
-    if (job.status === "cancelled") return saveDb(currentDb);
+    if (!["queued", "processing"].includes(job.status)) return saveDb(currentDb);
     const project = currentDb.projects.find((item) => item.id === job.projectId);
     const completedAt = new Date().toISOString();
     Object.assign(job, {
@@ -6801,7 +6866,8 @@ function publicPaymentStatus(payment) {
 
 app.get("/api/state", async (req, res, next) => {
   try {
-    const { db, user } = await requireAuth(req);
+    const { user } = await requireAuth(req);
+    const db = await reconcileStaleGenerationJobs(user);
     res.json(publicState(db, user));
   } catch (error) {
     next(error);
@@ -7363,7 +7429,8 @@ app.patch("/api/projects/:id/field", async (req, res) => {
 
 app.get("/api/projects/:id/generation-state", async (req, res, next) => {
   try {
-    const { db, user } = await requireAuth(req);
+    const { user } = await requireAuth(req);
+    const db = await reconcileStaleGenerationJobs(user, req.params.id);
     const payload = publicProjectGenerationState(db, user, req.params.id);
     const etag = generationStateEtag(payload);
     res.setHeader("ETag", etag);
