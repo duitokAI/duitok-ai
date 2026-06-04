@@ -9263,16 +9263,8 @@ function agentHistoryRecentsLabel() {
 }
 
 function agentHistorySidebarList(sessions = []) {
-  const showDraft = !state.activeAgentHistoryId && !state.agentMessages.length && !String(state.agentInput || "").trim();
   const normalizedSessions = normalizeAgentHistorySessions(sessions);
-  const draftSession = {
-    id: agentDraftHistoryId,
-    title: state.lang === "zh" ? "新对话" : "New Chat",
-    updatedAt: "",
-    messages: [],
-    isDraft: true
-  };
-  const displaySessions = showDraft ? [draftSession, ...normalizedSessions] : normalizedSessions;
+  const displaySessions = normalizedSessions;
   if (!displaySessions.length) return `<p class="agent-session-empty">还没有历史记录</p>`;
   return `<div class="agent-session-list">
     ${displaySessions.map((item) => {
@@ -11990,7 +11982,7 @@ function saveCurrentAgentHistory(messagesOverride = null) {
   const session = {
     ...(existing || {}),
     id: existing?.id || createAgentHistorySessionId(),
-    title: existing?.manualTitle && String(existing.title || "").trim()
+    title: String(existing?.title || "").trim()
       ? existing.title
       : agentHistoryTitleFromMessages(messages),
     updatedAt: new Date().toISOString(),
@@ -12007,7 +11999,7 @@ function agentHistoryTitleFromMessages(messages = []) {
 }
 
 function agentHistoryDisplayTitle(item = {}) {
-  if (item.manualTitle && String(item.title || "").trim()) return String(item.title).trim();
+  if (String(item.title || "").trim()) return String(item.title).trim();
   const messages = Array.isArray(item.messages) ? item.messages : [];
   const generated = agentHistoryTaskTitleFromMessages(messages.length ? messages : [{ role: "user", content: item.title || "" }]);
   return generated || normalizeAgentHistoryTitle(item.title || "Agent chat");
