@@ -44749,3 +44749,47 @@ body:has(.studio-shell .video-page-studio),
   min-height: clamp(30px, 6.5cqw, 46px) !important;
   font-size: clamp(12px, 3cqw, 18px) !important;
 }
+
+/* Compact typography pass for failed wall cards. Keep the wider centered
+   composition, but lower the type scale so dense rows do not feel cropped. */
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center {
+  gap: clamp(5px, 1.1cqw, 10px) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > b,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > b,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > b {
+  min-height: clamp(26px, 5.2cqw, 38px) !important;
+  height: clamp(26px, 5.2cqw, 38px) !important;
+  font-size: clamp(15px, 3.2cqw, 24px) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > small,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > small,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > small {
+  font-size: clamp(11px, 2.45cqw, 16px) !important;
+  line-height: 1.12 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > .generation-credit-refund-note,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > .generation-credit-refund-note,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > .generation-credit-refund-note {
+  min-height: clamp(26px, 5.2cqw, 38px) !important;
+  height: clamp(26px, 5.2cqw, 38px) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > .generation-credit-refund-note strong,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > .generation-credit-refund-note strong,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > .generation-credit-refund-note strong {
+  font-size: clamp(13px, 2.9cqw, 20px) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > .studio-wall-failed-actions button,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > .studio-wall-failed-actions button,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > .studio-wall-failed-actions button {
+  height: clamp(26px, 5.4cqw, 34px) !important;
+  min-height: clamp(26px, 5.4cqw, 34px) !important;
+  font-size: clamp(11px, 2.45cqw, 14px) !important;
+}
