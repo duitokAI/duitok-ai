@@ -10850,7 +10850,7 @@ function updateImageBatchCount(delta) {
         body: JSON.stringify({ field: "image.count", value: imageBatchCount(project()) })
       });
       if (state.projectId !== projectId || seq !== imageCountSaveSeq) return;
-      state.db = db;
+      state.db = preserveActiveGenerationState(db, state.db, projectId);
     } catch (error) {
       if (state.projectId === projectId && seq === imageCountSaveSeq) {
         state.db = previousDb;
@@ -10977,7 +10977,7 @@ function saveProjectFieldQuick(field, value, source = null) {
         body: JSON.stringify({ field, value })
       });
       if (quickFieldSaveTimers.get(timerKey)?.seq !== seq || state.projectId !== projectId) return;
-      state.db = db;
+      state.db = preserveActiveGenerationState(db, state.db, projectId);
       quickFieldSaveTimers.delete(timerKey);
     } catch (error) {
       if (quickFieldSaveTimers.get(timerKey)?.seq !== seq || state.projectId !== projectId) return;
@@ -11087,7 +11087,7 @@ async function saveImageModelQuick(value, source = null) {
       });
     }
     if (state.projectId !== projectId) return;
-    state.db = db;
+    state.db = preserveActiveGenerationState(db, state.db, projectId);
   } catch (error) {
     if (state.projectId === projectId) {
       state.db = previousDb;
@@ -11152,7 +11152,7 @@ async function applyImagePreset(promptText) {
         method: "PATCH",
         body: JSON.stringify({ field: "image.prompt", value: promptText })
       });
-      if (state.projectId === projectId && project()?.image?.prompt === promptText) set({ db });
+      if (state.projectId === projectId && project()?.image?.prompt === promptText) set({ db: preserveActiveGenerationState(db, state.db, projectId) });
     } catch (error) {
       if (state.projectId === projectId && project()?.image?.prompt === promptText) set({ db: previousDb });
       notify(error.message || t("toastSaveFailed"));
@@ -11719,8 +11719,13 @@ function syncImageConsoleBeforeGenerate(name) {
   const promptInput = document.querySelector("[data-image-console-prompt]");
   const value = promptInput?.value || project().image?.prompt || "";
   updateImagePromptLocal(value);
+  const current = project();
   return {
     prompt: value,
+    model: current.image?.model || "GPT Image 2",
+    aspectRatio: current.image?.aspectRatio || "9:16",
+    resolution: current.image?.resolution || "1K",
+    count: imageBatchCount(current),
     advancePrompt: Boolean(state.promptAdvancedEnabled)
   };
 }
@@ -11796,6 +11801,30 @@ function mergeGenerationRefreshState(previousDb, payload = {}) {
       ...(previousDb.generationJobs || []).filter((job) => job.projectId !== projectId),
       ...projectJobs
     ]
+  };
+}
+
+function preserveActiveGenerationState(incomingDb, currentDb = state.db, projectId = state.projectId) {
+  if (!incomingDb || !currentDb || !projectId) return incomingDb || currentDb;
+  const currentJobs = (currentDb.generationJobs || []).filter((job) => job.projectId === projectId);
+  const incomingJobs = (incomingDb.generationJobs || []).filter((job) => job.projectId === projectId);
+  const hasActiveLocalJobs = currentJobs.some((job) => ["queued", "processing"].includes(job.status));
+  if (!hasActiveLocalJobs || incomingJobs.length >= currentJobs.length) return incomingDb;
+  const currentProject = (currentDb.projects || []).find((item) => item.id === projectId);
+  return {
+    ...incomingDb,
+    projects: (incomingDb.projects || []).map((item) => item.id === projectId && currentProject
+      ? {
+          ...item,
+          results: mergeProjectResults(item.results || [], currentProject.results || []),
+          resultCount: Math.max(Number(item.resultCount || 0), Number(currentProject.resultCount || 0))
+        }
+      : item),
+    generationJobs: [
+      ...(incomingDb.generationJobs || []).filter((job) => job.projectId !== projectId),
+      ...currentJobs
+    ],
+    billing: incomingDb.billing || currentDb.billing
   };
 }
 

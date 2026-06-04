@@ -4281,6 +4281,18 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
       project.image.resolution = String(options.resolution || project.ugc?.quality || project.image.resolution || "720p");
       project.image.duration = String(options.duration || project.ugc?.duration || project.image.duration || "8").match(/\d+/)?.[0] || "8";
     }
+    if (action === "generate-image") {
+      project.image ||= {};
+      const selectedModel = internalMediaModel(options.model || project.image.model || "GPT Image 2");
+      if (!allowedMediaModels.has(selectedModel)) {
+        const error = new Error(`请选择支持的模型：${generationModelOptionsText("auto")}。`);
+        error.status = 400;
+        throw error;
+      }
+      project.image.model = selectedModel;
+      if (options.aspectRatio) project.image.aspectRatio = String(options.aspectRatio).replace(/\s*\(.+\)\s*$/, "");
+      if (options.resolution) project.image.resolution = String(options.resolution);
+    }
     const creditsToCharge = creditChargeFor(project, action, currentDb);
     assertGenerationAccess(currentDb, user, roundCredits(creditsToCharge * batchCount), batchCount);
     const cost = generationCostFor(currentDb, project, action, { provider: providerForMediaModel(project.image?.model) });
