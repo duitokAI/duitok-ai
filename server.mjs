@@ -3303,6 +3303,7 @@ function wuyinImageBody(project, prompt) {
   const imageSize = process.env.WUYIN_IMAGE_SIZE || "1K";
   if (model === "Veo 3.1") {
     return {
+      model: wuyinVideoModel,
       prompt,
       aspectRatio: process.env.WUYIN_VIDEO_RATIO || "9:16",
       duration: String(videoDurationFor(project, model)),
