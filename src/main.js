@@ -4876,8 +4876,8 @@ function studioResultWall(p, meta = {}) {
   const unloadedCount = Math.max(0, Number(p.resultCount || 0) - (p.results || []).length);
   const hiddenCount = Math.max(0, items.length - visibleItems.length) + unloadedCount;
   const timeline = [
-    ...pending.map((job) => ({ kind: "pending", item: job, time: Date.parse(job.completedAt || job.updatedAt || job.createdAt || 0) || 0 })),
-    ...visibleItems.map((item, index) => ({ kind: "result", item, index, time: Date.parse(item.createdAt || 0) || 0 }))
+    ...pending.map((job) => ({ kind: "pending", item: job, time: studioWallTimelineTime(job) })),
+    ...visibleItems.map((item, index) => ({ kind: "result", item, index, time: studioWallTimelineTime(item) }))
   ].sort((a, b) => b.time - a.time);
   const cards = timeline.map((entry) => entry.kind === "pending"
     ? studioPendingWallCard(entry.item)
@@ -4893,6 +4893,12 @@ function studioResultWall(p, meta = {}) {
 }
 
 const studioWallPageSize = 24;
+
+function studioWallTimelineTime(item = {}) {
+  const originJob = resultOriginJob(item);
+  const raw = originJob?.createdAt || item.createdAt || item.startedAt || item.updatedAt || item.completedAt || "";
+  return Date.parse(raw || 0) || 0;
+}
 
 function studioWallKey(projectItem, step = state.step, types = []) {
   return [projectItem?.id || "project", step || "image", ...types].join(":");
