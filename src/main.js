@@ -11816,6 +11816,7 @@ async function pollGenerationQueue(attempt = 0) {
     }
     else {
       state.db = nextDb;
+      patchStudioGenerationCardsFromDb(nextDb);
       updateGenerationStatusInDom(nextDb);
     }
     const db = nextDb;
@@ -11950,8 +11951,25 @@ function shouldRenderGenerationRefresh(previousDb, nextDb) {
     const previous = previousJobs.get(job.id);
     if (!previous) return true;
     if (previous.status === job.status) return false;
+    if (job.status === "failed" || previous.status === "failed") return false;
     return generationJobTerminal(previous.status) || generationJobTerminal(job.status);
   });
+}
+
+function patchStudioGenerationCardsFromDb(nextDb) {
+  if (state.page !== "project" || !state.projectId || !nextDb) return false;
+  let patched = false;
+  const jobs = new Map((nextDb.generationJobs || []).map((job) => [job.id, job]));
+  document.querySelectorAll(".studio-wall-pending[data-generation-job-id]").forEach((card) => {
+    const job = jobs.get(card.dataset.generationJobId);
+    if (!job) return;
+    const currentStatus = card.dataset.generationJobStatus || "";
+    if (currentStatus === (job.status || "queued")) return;
+    card.outerHTML = studioPendingWallCard(job);
+    patched = true;
+  });
+  if (patched) window.lucide?.createIcons();
+  return patched;
 }
 
 function patchStudioResultWallFromDb(nextDb) {
