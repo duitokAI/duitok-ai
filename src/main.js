@@ -11943,16 +11943,30 @@ function rememberAgentHistorySessions(sessions = []) {
   return safeSessions;
 }
 
-function saveCurrentAgentHistory() {
-  const messages = agentMessagesForStorage(state.agentMessages);
+function createAgentHistorySessionId() {
+  return `agent_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+}
+
+function saveCurrentAgentHistory(messagesOverride = null) {
+  const messages = agentMessagesForStorage(Array.isArray(messagesOverride) ? messagesOverride : state.agentMessages);
   if (!messages.length) return state.agentHistorySessions;
+  const sessions = state.agentHistorySessions || [];
+  const existing = state.activeAgentHistoryId
+    ? sessions.find((item) => item.id === state.activeAgentHistoryId)
+    : null;
   const session = {
-    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-    title: agentHistoryTitleFromMessages(messages),
+    ...(existing || {}),
+    id: existing?.id || createAgentHistorySessionId(),
+    title: existing?.manualTitle && String(existing.title || "").trim()
+      ? existing.title
+      : agentHistoryTitleFromMessages(messages),
     updatedAt: new Date().toISOString(),
     messages
   };
-  return rememberAgentHistorySessions([session, ...(state.agentHistorySessions || [])]);
+  const nextSessions = [session, ...sessions.filter((item) => item.id !== session.id)];
+  const remembered = rememberAgentHistorySessions(nextSessions);
+  state.activeAgentHistoryId = session.id;
+  return remembered;
 }
 
 function agentHistoryTitleFromMessages(messages = []) {
@@ -12002,7 +12016,7 @@ function normalizeAgentHistoryTitle(value = "") {
     const title = words.map((word) => /^(ai|ui|ux|api|ugc|prd)$/i.test(word) ? word.toUpperCase() : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(" ");
     return title || "Agent Task";
   }
-  if (/[㐀-鿿]/.test(text)) return "Handle Agent Request";
+  if (/[㐀-鿿]/.test(text)) return text.slice(0, 18) || "Agent Task";
   return text.slice(0, 42) || "Agent Task";
 }
 
@@ -12017,6 +12031,7 @@ function markAgentHistorySelection(id = "") {
 }
 
 function restoreAgentHistory(id) {
+  if (id !== agentDraftHistoryId) saveCurrentAgentHistory();
   markAgentHistorySelection(id);
   if (id === agentDraftHistoryId) {
     clearAgentTypingTimer();
@@ -12232,6 +12247,7 @@ function stopAgentResponse() {
   agentWorkingTimer = null;
   const messages = (state.agentMessages || []).filter((item) => !item.isTyping);
   rememberAgentMessages(messages);
+  saveCurrentAgentHistory(messages);
   set({
     agentMessages: messages,
     agentBusy: false,
@@ -12277,6 +12293,7 @@ function typeAgentReply({ baseMessages, assistantMessage, fullContent, finalPatc
     if (runId !== agentTypingRunId) return;
     const messages = [...baseMessages, finalAssistantMessage];
     rememberAgentMessages(messages);
+    saveCurrentAgentHistory(messages);
     set({ ...finalPatch, agentMessages: messages, agentBusy: false, agentTyping: false });
     agentTypingTimer = null;
     onDone(messages);
@@ -12523,7 +12540,8 @@ async function runAgentMessage(message, attachments = [], queuedApiAttachments =
   const apiAttachments = Array.isArray(queuedApiAttachments) ? queuedApiAttachments : attachments.map(agentAttachmentForApi);
   const nextMessages = [...state.agentMessages, { role: "user", content: userContent, attachments: messageAttachments }];
   rememberAgentMessages(nextMessages);
-  set({ agentMessages: nextMessages, agentInput: "", agentAttachments: [], agentBusy: true, agentTyping: false });
+  saveCurrentAgentHistory(nextMessages);
+  set({ agentMessages: nextMessages, agentInput: "", agentAttachments: [], agentBusy: true, agentTyping: false, activeAgentHistoryId: state.activeAgentHistoryId });
   startAgentWorkingTimer();
   startAgentVisual(userContent);
   try {
@@ -12667,6 +12685,7 @@ async function confirmAgentAction(runId, token) {
       ? { ...item, content: res.reply || item.content, agentRun: res.agentRun || item.agentRun }
       : item);
     rememberAgentMessages(messages);
+    saveCurrentAgentHistory(messages);
     set({
       db,
       agentMessages: messages,
@@ -12681,6 +12700,7 @@ async function confirmAgentAction(runId, token) {
       ? { ...item, agentRun: { ...item.agentRun, status: "failed", confirmation: null } }
       : item);
     rememberAgentMessages(messages);
+    saveCurrentAgentHistory(messages);
     set({ agentMessages: messages, agentBusy: false });
     stopAgentWorkingTimer();
     notify(error.message);
@@ -12698,6 +12718,7 @@ async function undoAgentRun(runId) {
       ? { ...item, agentRun: { ...(res.agentRun || item.agentRun), undoedAt: new Date().toISOString() } }
       : item);
     rememberAgentMessages(messages);
+    saveCurrentAgentHistory(messages);
     set({ db, agentMessages: messages, agentBusy: false });
     stopAgentWorkingTimer();
     notify(t("toastAgentChangesUndone"));
