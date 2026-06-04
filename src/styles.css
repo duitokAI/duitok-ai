@@ -44793,3 +44793,20 @@ body:has(.studio-shell .video-page-studio),
   min-height: clamp(26px, 5.4cqw, 34px) !important;
   font-size: clamp(11px, 2.45cqw, 14px) !important;
 }
+
+/* Keep Retry/Edit strokes inside the visible tile at dense zoom levels. */
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > .studio-wall-failed-actions,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > .studio-wall-failed-actions,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > .studio-wall-failed-actions {
+  box-sizing: border-box !important;
+  overflow: visible !important;
+  padding: 2px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > .studio-wall-failed-actions button,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > .studio-wall-failed-actions button,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > .studio-wall-failed-actions button {
+  box-sizing: border-box !important;
+  height: clamp(24px, 5.2cqw, 32px) !important;
+  min-height: clamp(24px, 5.2cqw, 32px) !important;
+}
