@@ -1515,6 +1515,101 @@ function generationJobAgeMs(job = {}, now = Date.now()) {
   return Number.isFinite(base) ? now - base : 0;
 }
 
+function timeoutPromise(promise, timeoutMs, message) {
+  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) return promise;
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      const error = new Error(message);
+      error.status = 504;
+      error.code = "GENERATION_PROVIDER_TIMEOUT";
+      reject(error);
+    }, timeoutMs);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
+async function updateGenerationJobDebug(jobId, patch = {}) {
+  if (!jobId) return;
+  await mutateDb(async (db) => {
+    const job = (db.generationJobs || []).find((item) => item.id === jobId);
+    if (!job || !["queued", "processing"].includes(job.status)) return db;
+    Object.assign(job, patch);
+    await saveDb(db);
+    return db;
+  });
+}
+
+function generationJobTracker(jobId) {
+  return async (patch = {}) => updateGenerationJobDebug(jobId, patch);
+}
+
+async function recoverInterruptedGenerationJobs() {
+  let recoveredCount = 0;
+  let failedCount = 0;
+  await mutateDb(async (db) => {
+    const now = Date.now();
+    const recoveredAt = new Date(now).toISOString();
+    let changed = false;
+    for (const job of db.generationJobs || []) {
+      if (job.status !== "processing") continue;
+      const age = generationJobAgeMs(job, now);
+      const timeout = generationJobTimeoutMs(job);
+      if (age >= timeout) {
+        Object.assign(job, {
+          status: "failed",
+          stage: "failed",
+          providerStatus: "timeout",
+          errorMessage: publicGenerationError(),
+          providerErrorMessage: `Generation timed out after ${Math.round(age / 60000)} minutes during server restart recovery.`,
+          creditsCharged: 0,
+          completedAt: recoveredAt,
+          timedOutAt: recoveredAt,
+          recoveredAt,
+          recoveryReason: "server_restart_timeout"
+        });
+        db.apiCalls ||= [];
+        db.apiCalls.unshift({
+          id: crypto.randomUUID(),
+          userId: job.userId,
+          projectId: job.projectId,
+          generationJobId: job.id,
+          provider: job.provider,
+          model: job.model,
+          endpoint: "",
+          status: "failed",
+          errorMessage: job.providerErrorMessage,
+          costRm: 0,
+          createdAt: recoveredAt
+        });
+        db.usage ||= [];
+        db.usage.unshift(usage("Generation timed out", 0, job.userId));
+        failedCount += 1;
+      } else {
+        Object.assign(job, {
+          status: "queued",
+          stage: "queued",
+          previousStartedAt: job.startedAt,
+          startedAt: undefined,
+          lastPolledAt: undefined,
+          providerStatus: "recovered",
+          recoveredAt,
+          recoveryReason: "server_restart"
+        });
+        activeGenerationJobs.delete(job.id);
+        recoveredCount += 1;
+      }
+      changed = true;
+    }
+    if (changed) await saveDb(db);
+    return db;
+  });
+  if (recoveredCount || failedCount) {
+    console.log(`Recovered generation queue after restart: ${recoveredCount} requeued, ${failedCount} failed.`);
+  }
+  return { recoveredCount, failedCount };
+}
+
 async function reconcileStaleGenerationJobs(user, projectId = "") {
   let shouldKickQueue = false;
   const nextDb = await mutateDb(async (db) => {
@@ -1536,6 +1631,7 @@ async function reconcileStaleGenerationJobs(user, projectId = "") {
       Object.assign(job, {
         status: "failed",
         stage: "failed",
+        providerStatus: "timeout",
         errorMessage: publicGenerationError(),
         providerErrorMessage: `Generation timed out after ${Math.round(age / 60000)} minutes.`,
         creditsCharged: 0,
@@ -3382,12 +3478,19 @@ function imageModelFromProject(project) {
   return modelMap[model] || apimartImageModel;
 }
 
-async function pollApimartTask(taskId) {
+async function pollApimartTask(taskId, tracker = null) {
   const maxAttempts = Number(process.env.APIMART_POLL_ATTEMPTS || process.env.APIMART_IMAGE_POLL_ATTEMPTS || 60);
   const delayMs = Number(process.env.APIMART_POLL_MS || process.env.APIMART_IMAGE_POLL_MS || 5000);
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, delayMs));
     const data = await apimartRequest(`${apimartTaskPathPrefix}/${encodeURIComponent(taskId)}?language=en`);
+    await tracker?.({
+      providerTaskId: taskId,
+      taskId,
+      lastPolledAt: new Date().toISOString(),
+      pollCount: attempt + 1,
+      providerStatus: data.status || "unknown"
+    });
     if (data.status === "completed") return data;
     if (["failed", "cancelled"].includes(data.status)) {
       const error = new Error(data.fail_reason || data.error || `APIMart image task ${data.status}`);
@@ -3456,7 +3559,7 @@ function flattenUrlValues(value) {
   return urls;
 }
 
-async function generateImageWithApimart(project) {
+async function generateImageWithApimart(project, tracker = null) {
   const aspectRatio = imageAspectRatioFromProject(project);
   const resolution = imageResolutionFromProject(project);
   const prompt = [
@@ -3478,7 +3581,8 @@ async function generateImageWithApimart(project) {
   const task = Array.isArray(data) ? data[0] : data;
   const taskId = task?.task_id || task?.id;
   if (!taskId) return { text: JSON.stringify(data, null, 2), urls: [] };
-  const taskData = await pollApimartTask(taskId);
+  await tracker?.({ providerTaskId: taskId, taskId, providerStatus: "submitted", lastPolledAt: new Date().toISOString(), pollCount: 0 });
+  const taskData = await pollApimartTask(taskId, tracker);
   const urls = extractImageUrls(taskData);
   if (!urls.length) {
     const error = new Error("Image generation completed, but no image file was returned. Please try again.");
@@ -3739,12 +3843,19 @@ function apimartHailuo23Body(project, prompt) {
   return body;
 }
 
-async function pollWuyinTask(taskId) {
+async function pollWuyinTask(taskId, tracker = null) {
   const maxAttempts = Number(process.env.WUYIN_IMAGE_POLL_ATTEMPTS || 36);
   const delayMs = Number(process.env.WUYIN_IMAGE_POLL_MS || 3000);
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, delayMs));
     const data = await wuyinRequest("/api/async/detail", { query: { id: taskId } });
+    await tracker?.({
+      providerTaskId: taskId,
+      taskId,
+      lastPolledAt: new Date().toISOString(),
+      pollCount: attempt + 1,
+      providerStatus: data.status ?? "unknown"
+    });
     if (data.status === 2 || data.status === "success" || data.status === "completed") return data;
     if (data.status === 3 || data.status === "failed") {
       const error = new Error(data.message || data.msg || `速创API image task ${data.status}`);
@@ -3757,7 +3868,7 @@ async function pollWuyinTask(taskId) {
   throw error;
 }
 
-async function pollCrunTask(taskId) {
+async function pollCrunTask(taskId, tracker = null) {
   const maxAttempts = Number(process.env.CRUN_POLL_ATTEMPTS || 60);
   const delayMs = Number(process.env.CRUN_POLL_MS || 5000);
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
@@ -3765,6 +3876,13 @@ async function pollCrunTask(taskId) {
     const payload = await crunRequest(crunTaskInfoPath, { query: { task_id: taskId } });
     const data = payload.data || payload;
     const status = String(data.status || payload.status || "").toLowerCase();
+    await tracker?.({
+      providerTaskId: taskId,
+      taskId,
+      lastPolledAt: new Date().toISOString(),
+      pollCount: attempt + 1,
+      providerStatus: status || "unknown"
+    });
     if (["succeeded", "success", "completed", "complete", "done"].includes(status)) return data;
     if (["failed", "error", "cancelled", "canceled"].includes(status)) {
       const error = new Error(data.error || data.message || data.fail_reason || `Crun AI video task ${status}`);
@@ -3777,7 +3895,7 @@ async function pollCrunTask(taskId) {
   throw error;
 }
 
-async function pollGrsaiTask(taskId) {
+async function pollGrsaiTask(taskId, tracker = null) {
   const maxAttempts = Number(process.env.GRSAI_IMAGE_POLL_ATTEMPTS || 36);
   const delayMs = Number(process.env.GRSAI_IMAGE_POLL_MS || 3000);
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
@@ -3785,6 +3903,13 @@ async function pollGrsaiTask(taskId) {
     const payload = await grsaiRequest(grsaiResultPath, { body: { id: taskId } });
     const data = payload.data || payload;
     const status = String(data.status || payload.status || "").toLowerCase();
+    await tracker?.({
+      providerTaskId: taskId,
+      taskId,
+      lastPolledAt: new Date().toISOString(),
+      pollCount: attempt + 1,
+      providerStatus: status || (Number.isFinite(data.progress) ? `progress_${data.progress}` : "unknown")
+    });
     if (data.progress >= 100 || ["succeeded", "success", "completed"].includes(status)) return payload;
     if (["failed", "error", "cancelled"].includes(status) || data.failure_reason || data.error) {
       const error = new Error(data.failure_reason || data.error || payload.msg || `GRS AI image task ${status || "failed"}`);
@@ -3805,7 +3930,7 @@ function extractGrsaiUrls(taskData) {
   return [...new Set([...resultUrls, ...extractUrlsDeep(taskData)])];
 }
 
-async function generateImageWithGrsai(project) {
+async function generateImageWithGrsai(project, tracker = null) {
   const prompt = [
     project.image?.prompt || "Create a high-converting TikTok Shop product image.",
     `Mode: ${project.image?.mode || "Create Image"}.`,
@@ -3817,7 +3942,8 @@ async function generateImageWithGrsai(project) {
   const data = payload.data || payload;
   const taskId = data.id || data.task_id || payload.id || payload.task_id;
   if (!taskId) return { text: JSON.stringify(payload, null, 2), urls: extractGrsaiUrls(payload) };
-  const taskData = await pollGrsaiTask(taskId);
+  await tracker?.({ providerTaskId: taskId, taskId, providerStatus: "submitted", lastPolledAt: new Date().toISOString(), pollCount: 0 });
+  const taskData = await pollGrsaiTask(taskId, tracker);
   const urls = extractGrsaiUrls(taskData);
   if (!urls.length) {
     const error = new Error("Image generation completed, but no image file was returned. Please try again.");
@@ -3831,7 +3957,7 @@ async function generateImageWithGrsai(project) {
   };
 }
 
-async function generateImageWithWuyin(project) {
+async function generateImageWithWuyin(project, tracker = null) {
   const prompt = [
     project.image?.prompt || "Create a high-converting TikTok Shop product image.",
     `Mode: ${project.image?.mode || "Create Image"}.`,
@@ -3843,7 +3969,8 @@ async function generateImageWithWuyin(project) {
   });
   const taskId = data.id || data.task_id;
   if (!taskId) return { text: JSON.stringify(data, null, 2), urls: [] };
-  const taskData = await pollWuyinTask(taskId);
+  await tracker?.({ providerTaskId: taskId, taskId, providerStatus: "submitted", lastPolledAt: new Date().toISOString(), pollCount: 0 });
+  const taskData = await pollWuyinTask(taskId, tracker);
   const urls = extractUrlsDeep(taskData);
   if (!urls.length) {
     const error = new Error("Image generation completed, but no image file was returned. Please try again.");
@@ -3857,7 +3984,7 @@ async function generateImageWithWuyin(project) {
   };
 }
 
-async function generateVideoWithCrunVeo31(project) {
+async function generateVideoWithCrunVeo31(project, tracker = null) {
   const prompt = [
     project.image?.prompt || "Create a high-converting TikTok Shop product video.",
     `Mode: ${project.image?.mode || "Create Video"}.`,
@@ -3869,7 +3996,8 @@ async function generateVideoWithCrunVeo31(project) {
   });
   const taskId = data.task_id || data.taskId || data.id || data.data?.task_id;
   if (!taskId) return { text: JSON.stringify(data, null, 2), urls: extractVideoUrls(data) };
-  const taskData = await pollCrunTask(taskId);
+  await tracker?.({ providerTaskId: taskId, taskId, providerStatus: "submitted", lastPolledAt: new Date().toISOString(), pollCount: 0 });
+  const taskData = await pollCrunTask(taskId, tracker);
   const urls = extractVideoUrls(taskData);
   return {
     text: urls.length ? `Video generated with Pokaya AI.\n\nTask ID: ${taskId}` : `Video task completed with Pokaya AI.\n\nTask ID: ${taskId}`,
@@ -3878,7 +4006,7 @@ async function generateVideoWithCrunVeo31(project) {
   };
 }
 
-async function generateVideoWithWuyin(project) {
+async function generateVideoWithWuyin(project, tracker = null) {
   const prompt = [
     project.image?.prompt || "Create a high-converting TikTok Shop product video.",
     `Mode: ${project.image?.mode || "Create Video"}.`,
@@ -3890,7 +4018,8 @@ async function generateVideoWithWuyin(project) {
   });
   const taskId = data.id || data.task_id;
   if (!taskId) return { text: JSON.stringify(data, null, 2), urls: [] };
-  const taskData = await pollWuyinTask(taskId);
+  await tracker?.({ providerTaskId: taskId, taskId, providerStatus: "submitted", lastPolledAt: new Date().toISOString(), pollCount: 0 });
+  const taskData = await pollWuyinTask(taskId, tracker);
   const urls = extractUrlsDeep(taskData);
   return {
     text: urls.length ? `Video generated with Pokaya AI.\n\nTask ID: ${taskId}` : `Video task completed with Pokaya AI.\n\nTask ID: ${taskId}`,
@@ -3919,29 +4048,30 @@ function publicProviderFailureMessage(error) {
   return sanitizeAgentText(error?.message || "Provider failed").slice(0, 180);
 }
 
-async function generateImageThroughProvider(provider, model, project) {
+async function generateImageThroughProvider(provider, model, project, tracker = null) {
+  await tracker?.({ provider, providerStatus: "provider_selected" });
   if (provider === "grsai") {
-    const image = await generateImageWithGrsai(project);
+    const image = await generateImageWithGrsai(project, tracker);
     return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "grsai" };
   }
   if (provider === "wuyin") {
-    const image = await generateImageWithWuyin(project);
+    const image = await generateImageWithWuyin(project, tracker);
     return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "wuyin" };
   }
   if (provider === "apimart") {
-    const image = await generateImageWithApimart(project);
+    const image = await generateImageWithApimart(project, tracker);
     return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "apimart" };
   }
   return null;
 }
 
-async function generateImageWithFallbacks(project, model) {
+async function generateImageWithFallbacks(project, model, tracker = null) {
   const attempts = [];
   const providers = imageProviderOrderForModel(model).filter((provider) => providerConfigured(provider));
   if (!providers.length) return null;
   for (const provider of providers) {
     try {
-      const generated = await generateImageThroughProvider(provider, model, project);
+      const generated = await generateImageThroughProvider(provider, model, project, tracker);
       if (!generated?.imageUrl) {
         const error = new Error(`${provider} did not return an image URL.`);
         error.status = 502;
@@ -3951,13 +4081,14 @@ async function generateImageWithFallbacks(project, model) {
       return generated;
     } catch (error) {
       attempts.push({ provider, error: publicProviderFailureMessage(error) });
+      await tracker?.({ providerFallbacks: attempts, providerStatus: "provider_failed", providerErrorMessage: publicProviderFailureMessage(error) });
       if (provider === providers[providers.length - 1]) throw error;
     }
   }
   return null;
 }
 
-async function generateVideoWithApimartSeedance(project) {
+async function generateVideoWithApimartSeedance(project, tracker = null) {
   const prompt = [
     project.image?.prompt || "Create a high-converting TikTok Shop product video.",
     `Mode: ${project.image?.mode || "Create Video"}.`,
@@ -3970,7 +4101,8 @@ async function generateVideoWithApimartSeedance(project) {
   const task = Array.isArray(data) ? data[0] : data;
   const taskId = task?.task_id || task?.id;
   if (!taskId) return { text: JSON.stringify(data, null, 2), urls: extractVideoUrls(data) };
-  const taskData = await pollApimartTask(taskId);
+  await tracker?.({ providerTaskId: taskId, taskId, providerStatus: "submitted", lastPolledAt: new Date().toISOString(), pollCount: 0 });
+  const taskData = await pollApimartTask(taskId, tracker);
   const urls = extractVideoUrls(taskData);
   return {
     text: urls.length ? `Video generated with Seedance 2.0.\n\nTask ID: ${taskId}` : `Seedance 2.0 task completed.\n\nTask ID: ${taskId}`,
@@ -3979,7 +4111,7 @@ async function generateVideoWithApimartSeedance(project) {
   };
 }
 
-async function generateVideoWithApimartGrok(project) {
+async function generateVideoWithApimartGrok(project, tracker = null) {
   const prompt = [
     project.image?.prompt || "Create a high-converting TikTok Shop product video.",
     `Mode: ${project.image?.mode || "Create Video"}.`,
@@ -3992,7 +4124,8 @@ async function generateVideoWithApimartGrok(project) {
   const task = Array.isArray(data) ? data[0] : data;
   const taskId = task?.task_id || task?.id;
   if (!taskId) return { text: JSON.stringify(data, null, 2), urls: extractVideoUrls(data) };
-  const taskData = await pollApimartTask(taskId);
+  await tracker?.({ providerTaskId: taskId, taskId, providerStatus: "submitted", lastPolledAt: new Date().toISOString(), pollCount: 0 });
+  const taskData = await pollApimartTask(taskId, tracker);
   const urls = extractVideoUrls(taskData);
   return {
     text: urls.length ? `Video generated with Grok Imagine Video.\n\nTask ID: ${taskId}` : `Grok Imagine Video task completed.\n\nTask ID: ${taskId}`,
@@ -4001,7 +4134,7 @@ async function generateVideoWithApimartGrok(project) {
   };
 }
 
-async function generateVideoWithApimartWan(project) {
+async function generateVideoWithApimartWan(project, tracker = null) {
   const prompt = [
     project.image?.prompt || "Create a high-converting TikTok Shop product video.",
     `Mode: ${project.image?.mode || "Create Video"}.`,
@@ -4014,7 +4147,8 @@ async function generateVideoWithApimartWan(project) {
   const task = Array.isArray(data) ? data[0] : data;
   const taskId = task?.task_id || task?.id;
   if (!taskId) return { text: JSON.stringify(data, null, 2), urls: extractVideoUrls(data) };
-  const taskData = await pollApimartTask(taskId);
+  await tracker?.({ providerTaskId: taskId, taskId, providerStatus: "submitted", lastPolledAt: new Date().toISOString(), pollCount: 0 });
+  const taskData = await pollApimartTask(taskId, tracker);
   const urls = extractVideoUrls(taskData);
   return {
     text: urls.length ? `Video generated with Wan 2.7.\n\nTask ID: ${taskId}` : `Wan 2.7 task completed.\n\nTask ID: ${taskId}`,
@@ -4023,7 +4157,7 @@ async function generateVideoWithApimartWan(project) {
   };
 }
 
-async function generateVideoWithApimartKlingOmni(project) {
+async function generateVideoWithApimartKlingOmni(project, tracker = null) {
   const prompt = [
     project.image?.prompt || "Create a cinematic ecommerce product video.",
     `Mode: ${project.image?.mode || "Create Video"}.`,
@@ -4036,7 +4170,8 @@ async function generateVideoWithApimartKlingOmni(project) {
   const task = Array.isArray(data) ? data[0] : data;
   const taskId = task?.task_id || task?.id;
   if (!taskId) return { text: JSON.stringify(data, null, 2), urls: extractVideoUrls(data) };
-  const taskData = await pollApimartTask(taskId);
+  await tracker?.({ providerTaskId: taskId, taskId, providerStatus: "submitted", lastPolledAt: new Date().toISOString(), pollCount: 0 });
+  const taskData = await pollApimartTask(taskId, tracker);
   const urls = extractVideoUrls(taskData);
   return {
     text: urls.length ? `Video generated with Kling V3 Omni.\n\nTask ID: ${taskId}` : `Kling V3 Omni task completed.\n\nTask ID: ${taskId}`,
@@ -4045,7 +4180,7 @@ async function generateVideoWithApimartKlingOmni(project) {
   };
 }
 
-async function generateVideoWithApimartKlingMotion(project) {
+async function generateVideoWithApimartKlingMotion(project, tracker = null) {
   const prompt = [
     project.image?.prompt || "Make the subject follow the reference motion.",
     `Mode: ${project.image?.mode || "Motion Control"}.`,
@@ -4058,7 +4193,8 @@ async function generateVideoWithApimartKlingMotion(project) {
   const task = Array.isArray(data) ? data[0] : data;
   const taskId = task?.task_id || task?.id;
   if (!taskId) return { text: JSON.stringify(data, null, 2), urls: extractVideoUrls(data) };
-  const taskData = await pollApimartTask(taskId);
+  await tracker?.({ providerTaskId: taskId, taskId, providerStatus: "submitted", lastPolledAt: new Date().toISOString(), pollCount: 0 });
+  const taskData = await pollApimartTask(taskId, tracker);
   const urls = extractVideoUrls(taskData);
   return {
     text: urls.length ? `Video generated with Kling V3 Motion Control.\n\nTask ID: ${taskId}` : `Kling V3 Motion Control task completed.\n\nTask ID: ${taskId}`,
@@ -4067,7 +4203,7 @@ async function generateVideoWithApimartKlingMotion(project) {
   };
 }
 
-async function generateVideoWithApimartHailuo23(project) {
+async function generateVideoWithApimartHailuo23(project, tracker = null) {
   const prompt = [
     project.image?.prompt || "Create a high-quality ecommerce product video.",
     `Mode: ${project.image?.mode || "Create Video"}.`,
@@ -4080,7 +4216,8 @@ async function generateVideoWithApimartHailuo23(project) {
   const task = Array.isArray(data) ? data[0] : data;
   const taskId = task?.task_id || task?.id;
   if (!taskId) return { text: JSON.stringify(data, null, 2), urls: extractVideoUrls(data) };
-  const taskData = await pollApimartTask(taskId);
+  await tracker?.({ providerTaskId: taskId, taskId, providerStatus: "submitted", lastPolledAt: new Date().toISOString(), pollCount: 0 });
+  const taskData = await pollApimartTask(taskId, tracker);
   const urls = extractVideoUrls(taskData);
   return {
     text: urls.length ? `Video generated with MiniMax Hailuo 2.3.\n\nTask ID: ${taskId}` : `MiniMax Hailuo 2.3 task completed.\n\nTask ID: ${taskId}`,
@@ -4099,7 +4236,7 @@ async function generateWithApimart(project, action, step) {
   return { title: fallbackTitle.replace(/^(Image|UGC|Auto|Original|Clone|Story|Viral)/, "APIMart $1"), body };
 }
 
-async function generateWithProvider(project, action, step) {
+async function generateWithProvider(project, action, step, tracker = null) {
   if (action === "clone-prompt") return generateVideoPromptWithGrsai(project);
   if (action === "generate-image") {
     const model = internalMediaModel(project.image?.model);
@@ -4110,51 +4247,62 @@ async function generateWithProvider(project, action, step) {
     }
     const provider = providerForMediaModel(model);
     if (!isVideoMediaModel(model)) {
-      const image = await generateImageWithFallbacks(project, model);
+      const image = await generateImageWithFallbacks(project, model, tracker);
       if (image) return image;
     }
     if (provider === "apimart" && model === "Seedance 2.0") {
-      const video = await generateVideoWithApimartSeedance(project);
+      await tracker?.({ provider: "apimart", providerStatus: "provider_selected" });
+      const video = await generateVideoWithApimartSeedance(project, tracker);
       return { title: "Seedance 2.0", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" };
     }
     if (provider === "apimart" && model === "Grok Imagine Video") {
-      const video = await generateVideoWithApimartGrok(project);
+      await tracker?.({ provider: "apimart", providerStatus: "provider_selected" });
+      const video = await generateVideoWithApimartGrok(project, tracker);
       return { title: "Grok Imagine Video", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" };
     }
     if (provider === "apimart" && model === "Wan 2.7") {
-      const video = await generateVideoWithApimartWan(project);
+      await tracker?.({ provider: "apimart", providerStatus: "provider_selected" });
+      const video = await generateVideoWithApimartWan(project, tracker);
       return { title: "Wan 2.7", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" };
     }
     if (provider === "apimart" && model === "Kling V3 Omni") {
-      const video = await generateVideoWithApimartKlingOmni(project);
+      await tracker?.({ provider: "apimart", providerStatus: "provider_selected" });
+      const video = await generateVideoWithApimartKlingOmni(project, tracker);
       return { title: "Kling V3 Omni", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" };
     }
     if (provider === "apimart" && model === "Kling V3 Motion Control") {
-      const video = await generateVideoWithApimartKlingMotion(project);
+      await tracker?.({ provider: "apimart", providerStatus: "provider_selected" });
+      const video = await generateVideoWithApimartKlingMotion(project, tracker);
       return { title: "Kling V3 Motion Control", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" };
     }
     if (provider === "apimart" && model === "MiniMax Hailuo 2.3") {
-      const video = await generateVideoWithApimartHailuo23(project);
+      await tracker?.({ provider: "apimart", providerStatus: "provider_selected" });
+      const video = await generateVideoWithApimartHailuo23(project, tracker);
       return { title: "MiniMax Hailuo 2.3", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" };
     }
     if (provider === "crun" && model === "Veo 3.1") {
-      const video = await generateVideoWithCrunVeo31(project);
+      await tracker?.({ provider: "crun", providerStatus: "provider_selected" });
+      const video = await generateVideoWithCrunVeo31(project, tracker);
       return { title: model, body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "crun" };
     }
     if (provider === "wuyin" && (model === "Sora 2" || model === "Gemini Omni")) {
-      const video = await generateVideoWithWuyin(project);
+      await tracker?.({ provider: "wuyin", providerStatus: "provider_selected" });
+      const video = await generateVideoWithWuyin(project, tracker);
       return { title: model, body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "wuyin" };
     }
     if (provider === "wuyin" && model === "Grok Imagine") {
-      const image = await generateImageWithWuyin(project);
+      await tracker?.({ provider: "wuyin", providerStatus: "provider_selected" });
+      const image = await generateImageWithWuyin(project, tracker);
       return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "wuyin" };
     }
     if (provider === "grsai") {
-      const image = await generateImageWithGrsai(project);
+      await tracker?.({ provider: "grsai", providerStatus: "provider_selected" });
+      const image = await generateImageWithGrsai(project, tracker);
       return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "grsai" };
     }
     if (provider === "apimart") {
-      const image = await generateImageWithApimart(project);
+      await tracker?.({ provider: "apimart", providerStatus: "provider_selected" });
+      const image = await generateImageWithApimart(project, tracker);
       return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "apimart" };
     }
   }
@@ -4370,6 +4518,8 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
       type: action === "generate-ugc" ? "video" : action === "generate-image" && isVideoMediaModel(project.image?.model) ? "video" : action === "generate-image" ? "image" : "text",
       status: "queued",
       stage: shouldAdvancePrompt ? "prompt_advanced" : "queued",
+      providerStatus: "queued",
+      pollCount: 0,
       prompt: action === "generate-ugc" ? project.ugc?.script || "" : project.image?.prompt || "",
       creditsCharged: 0,
       creditsRequired: creditsToCharge,
@@ -4421,6 +4571,8 @@ async function processGenerationJob(jobId) {
       job.status = "processing";
       job.stage = job.internalPromptAdvanced ? "prompt_advanced" : "provider_submitted";
       job.startedAt = new Date().toISOString();
+      job.providerStatus = job.internalPromptAdvanced ? "prompt_advanced" : "provider_submitted";
+      job.pollCount = 0;
       await saveDb(db);
       return { job: structuredClone(job), project: structuredClone(project) };
     });
@@ -4444,6 +4596,7 @@ async function processGenerationJob(jobId) {
               job.promptAdvancedCached = Boolean(enhanced.cached);
               job.promptAdvancedNotes = enhanced.notes || [];
               job.stage = "provider_submitted";
+              job.providerStatus = "provider_submitted";
             }
             await saveDb(db);
           });
@@ -4458,10 +4611,24 @@ async function processGenerationJob(jobId) {
       }
     }
 
-    const generated = await generateWithProvider(snapshot.project, snapshot.job.action, snapshot.job.step);
+    const providerStartedAt = new Date().toISOString();
+    await updateGenerationJobDebug(jobId, {
+      stage: "provider_submitted",
+      providerStatus: "provider_submitted",
+      providerStartedAt,
+      lastPolledAt: providerStartedAt
+    });
+    const generated = await timeoutPromise(
+      generateWithProvider(snapshot.project, snapshot.job.action, snapshot.job.step, generationJobTracker(jobId)),
+      generationJobTimeoutMs(snapshot.job),
+      `Generation provider request timed out after ${Math.round(generationJobTimeoutMs(snapshot.job) / 60000)} minutes.`
+    );
     await mutateDb(async (db) => {
       const job = db.generationJobs.find((item) => item.id === jobId);
-      if (job && job.status === "processing") job.stage = "saving_asset";
+      if (job && job.status === "processing") {
+        job.stage = "saving_asset";
+        job.providerStatus = "saving_asset";
+      }
       await saveDb(db);
     });
     await completeQueuedGeneration(jobId, generated);
@@ -4531,6 +4698,8 @@ async function completeQueuedGeneration(jobId, generated) {
       resultId: result.id,
       status: "succeeded",
       stage: "succeeded",
+      providerStatus: "succeeded",
+      lastPolledAt: completedAt,
       taskId: generated.taskId,
       providerTaskId: generated.taskId,
       imageUrl: result.imageUrl,
@@ -4544,6 +4713,8 @@ async function completeQueuedGeneration(jobId, generated) {
       textOutput: publicBody,
       providerTextOutput: generated.body,
       prompt: generated.prompt || job.prompt || "",
+      providerErrorMessage: undefined,
+      providerFallbacks: generated.providerFallbacks,
       aspectRatio: job.aspectRatio || generationAspectRatioForProject(project, job.action, job.step),
       provider: cost.provider,
       model: cost.model,
@@ -4589,6 +4760,8 @@ async function failQueuedGeneration(jobId, error) {
     Object.assign(job, {
       status: "failed",
       stage: "failed",
+      providerStatus: error.code === "GENERATION_PROVIDER_TIMEOUT" ? "timeout" : "failed",
+      lastPolledAt: completedAt,
       errorMessage: publicGenerationError(),
       providerErrorMessage: error.message || "Generation failed",
       creditsCharged: 0,
@@ -9363,5 +9536,7 @@ if (process.env.NODE_ENV === "production" && serveStatic) {
 
 app.listen(port, "0.0.0.0", () => {
   console.log(`Pokaya AI running on http://localhost:${port}`);
-  kickGenerationQueue();
+  recoverInterruptedGenerationJobs()
+    .catch((error) => console.error("Generation startup recovery failed", error))
+    .finally(() => kickGenerationQueue());
 });
