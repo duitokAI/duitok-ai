@@ -73,6 +73,8 @@ const grsaiDrawPath = process.env.GRSAI_DRAW_PATH || "/v1/draw/nano-banana";
 const grsaiResultPath = process.env.GRSAI_RESULT_PATH || "/v1/draw/result";
 const grsaiNanoModel = process.env.GRSAI_NANO_MODEL || "nano-banana-pro";
 const grsaiNanoBanana2Model = process.env.GRSAI_NANO_BANANA_2_MODEL || "nano-banana-2";
+const grsaiGptImage2Model = process.env.GRSAI_GPT_IMAGE_2_MODEL || "gpt-image-2";
+const grsaiGptImage2VipModel = process.env.GRSAI_GPT_IMAGE_2_VIP_MODEL || "gpt-image-2-vip";
 const grsaiVisionModel = process.env.GRSAI_VISION_MODEL || "gemini-2.5-flash";
 const grsaiCloneModel = process.env.GRSAI_CLONE_MODEL || "gemini-3-pro";
 const ai302BaseUrl = (process.env.AI302_BASE_URL || "https://api.302.ai").replace(/\/$/, "");
@@ -1945,11 +1947,47 @@ function requireAi302Config() {
 
 function providerForMediaModel(model) {
   model = internalMediaModel(model);
-  if (model === "GPT Image 2" || model === "Seedream 5.0 Lite" || model === "Seedream 4.5" || model === "Grok Imagine") return process.env.APIMART_API_KEY ? "apimart" : "mock";
-  if (model === "Nano Banana Pro" || model === "Nano Banana 2") return process.env.GRSAI_API_KEY ? "grsai" : "mock";
+  if (model === "GPT Image 2" || model === "Nano Banana Pro" || model === "Nano Banana 2") return process.env.GRSAI_API_KEY ? "grsai" : process.env.APIMART_API_KEY ? "apimart" : "mock";
+  if (model === "Seedream 5.0 Lite" || model === "Seedream 4.5") return process.env.APIMART_API_KEY ? "apimart" : "mock";
+  if (model === "Grok Imagine") return process.env.APIMART_API_KEY ? "apimart" : process.env.WUYIN_API_KEY ? "wuyin" : "mock";
   if (model === "Seedance 2.0" || model === "Grok Imagine Video" || model === "Wan 2.7" || model === "Kling V3 Omni" || model === "Kling V3 Motion Control" || model === "MiniMax Hailuo 2.3") return process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni") return process.env.WUYIN_API_KEY ? "wuyin" : "mock";
   return "unsupported";
+}
+
+function rmFromRmb(value) {
+  return Math.round(Number(value || 0) * 0.586 * 1000) / 1000;
+}
+
+function imageProviderCostFor(project, model, provider) {
+  const resolution = imageResolutionFromProject(project);
+  if (provider === "grsai") {
+    if (model === "GPT Image 2") {
+      const costRmb = resolution === "1K" ? 0.03 : 0.065;
+      return { costRm: rmFromRmb(costRmb), costRmb, unit: `${resolution} image` };
+    }
+    if (model === "Nano Banana Pro") return { costRm: rmFromRmb(0.09), costRmb: 0.09, unit: `${resolution} image` };
+    if (model === "Nano Banana 2") return { costRm: rmFromRmb(0.06), costRmb: 0.06, unit: `${resolution} image` };
+  }
+  if (provider === "apimart") {
+    if (model === "GPT Image 2") {
+      const costUsd = resolution === "4K" ? 0.018 : resolution === "2K" ? 0.012 : 0.006;
+      return { costRm: Math.round((costUsd / usdPerRm) * 1000) / 1000, costUsd, unit: `${resolution} image` };
+    }
+    if (model === "Seedream 5.0 Lite") return { costRm: Math.round((0.028 / usdPerRm) * 1000) / 1000, costUsd: 0.028, unit: `${resolution} image` };
+    if (model === "Seedream 4.5") return { costRm: Math.round((0.025 / usdPerRm) * 1000) / 1000, costUsd: 0.025, unit: `${resolution} image` };
+    if (model === "Nano Banana Pro") {
+      const costUsd = resolution === "4K" ? 0.05 : 0.04;
+      return { costRm: Math.round((costUsd / usdPerRm) * 1000) / 1000, costUsd, unit: `${resolution} image` };
+    }
+    if (model === "Nano Banana 2") {
+      const costUsd = resolution === "4K" ? 0.06 : resolution === "2K" ? 0.04 : 0.03;
+      return { costRm: Math.round((costUsd / usdPerRm) * 1000) / 1000, costUsd, unit: `${resolution} image` };
+    }
+    if (model === "Grok Imagine") return { costRm: Math.round((0.015 / usdPerRm) * 1000) / 1000, costUsd: 0.015, unit: `${resolution} image` };
+  }
+  if (provider === "wuyin" && model === "Grok Imagine") return { costRm: rmFromRmb(0.1), costRmb: 0.1, unit: `${resolution} image` };
+  return null;
 }
 
 function generationCostFor(db, project, action, generated) {
@@ -1957,6 +1995,8 @@ function generationCostFor(db, project, action, generated) {
   const provider = generated.provider || providerForMediaModel(model);
   if (action === "clone-prompt") return { costRm: 0.01, costRmb: 0, costUsd: 0, model: generated.model || grsaiCloneModel, provider: "grsai", unit: "vision" };
   if (action !== "generate-image") return { costRm: 0.01, costRmb: 0, costUsd: 0, model: "APIMart Text", provider: "apimart", unit: "text" };
+  const providerCost = !isVideoMediaModel(model) ? imageProviderCostFor(project, model, provider) : null;
+  if (providerCost) return { model, provider, ...providerCost };
   const costs = { ...defaultModelCosts(), ...(db.modelCosts || {}) };
   return { model, provider, ...(costs[model] || { costRm: 0, costRmb: 0, unit: "unknown" }) };
 }
@@ -3095,6 +3135,8 @@ function imageModelFromProject(project) {
     "GPT Image 2": process.env.APIMART_IMAGE_MODEL || "gpt-image-2",
     "Seedream 5.0 Lite": apimartSeedream50LiteModel,
     "Seedream 4.5": apimartSeedream45Model,
+    "Nano Banana Pro": process.env.APIMART_NANO_BANANA_PRO_MODEL || "gemini-3-pro-image-preview",
+    "Nano Banana 2": process.env.APIMART_NANO_BANANA_2_MODEL || "gemini-3.1-flash-image-preview",
     "Grok Imagine": apimartGrokImageModel
   };
   return modelMap[model] || apimartImageModel;
@@ -3288,11 +3330,17 @@ function generationEndpointFor(provider, project) {
 
 function grsaiImageBody(project, prompt) {
   const model = internalMediaModel(project.image?.model);
+  const resolution = imageResolutionFromProject(project);
+  const grsaiModelMap = {
+    "GPT Image 2": resolution === "1K" ? grsaiGptImage2Model : grsaiGptImage2VipModel,
+    "Nano Banana Pro": grsaiNanoModel,
+    "Nano Banana 2": grsaiNanoBanana2Model
+  };
   return {
-    model: model === "Nano Banana 2" ? grsaiNanoBanana2Model : grsaiNanoModel,
+    model: grsaiModelMap[model] || grsaiNanoModel,
     prompt,
     aspectRatio: imageAspectRatioFromProject(project),
-    imageSize: imageResolutionFromProject(project),
+    imageSize: resolution,
     shutProgress: true
   };
 }
@@ -3558,6 +3606,63 @@ async function generateVideoWithWuyin(project) {
   };
 }
 
+function providerConfigured(provider) {
+  if (provider === "grsai") return Boolean(process.env.GRSAI_API_KEY && !process.env.GRSAI_API_KEY.includes("replace_with"));
+  if (provider === "apimart") return Boolean(process.env.APIMART_API_KEY && !process.env.APIMART_API_KEY.includes("replace_with"));
+  if (provider === "wuyin") return Boolean(process.env.WUYIN_API_KEY && !process.env.WUYIN_API_KEY.includes("replace_with"));
+  return false;
+}
+
+function imageProviderOrderForModel(model) {
+  model = internalMediaModel(model);
+  if (model === "GPT Image 2" || model === "Nano Banana Pro" || model === "Nano Banana 2") return ["grsai", "apimart"];
+  if (model === "Grok Imagine") return ["apimart", "wuyin"];
+  if (model === "Seedream 5.0 Lite" || model === "Seedream 4.5") return ["apimart"];
+  return [providerForMediaModel(model)];
+}
+
+function publicProviderFailureMessage(error) {
+  return sanitizeAgentText(error?.message || "Provider failed").slice(0, 180);
+}
+
+async function generateImageThroughProvider(provider, model, project) {
+  if (provider === "grsai") {
+    const image = await generateImageWithGrsai(project);
+    return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "grsai" };
+  }
+  if (provider === "wuyin") {
+    const image = await generateImageWithWuyin(project);
+    return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "wuyin" };
+  }
+  if (provider === "apimart") {
+    const image = await generateImageWithApimart(project);
+    return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "apimart" };
+  }
+  return null;
+}
+
+async function generateImageWithFallbacks(project, model) {
+  const attempts = [];
+  const providers = imageProviderOrderForModel(model).filter((provider) => providerConfigured(provider));
+  if (!providers.length) return null;
+  for (const provider of providers) {
+    try {
+      const generated = await generateImageThroughProvider(provider, model, project);
+      if (!generated?.imageUrl) {
+        const error = new Error(`${provider} did not return an image URL.`);
+        error.status = 502;
+        throw error;
+      }
+      if (attempts.length) generated.providerFallbacks = attempts;
+      return generated;
+    } catch (error) {
+      attempts.push({ provider, error: publicProviderFailureMessage(error) });
+      if (provider === providers[providers.length - 1]) throw error;
+    }
+  }
+  return null;
+}
+
 async function generateVideoWithApimartSeedance(project) {
   const prompt = [
     project.image?.prompt || "Create a high-converting TikTok Shop product video.",
@@ -3710,6 +3815,10 @@ async function generateWithProvider(project, action, step) {
       throw error;
     }
     const provider = providerForMediaModel(model);
+    if (!isVideoMediaModel(model)) {
+      const image = await generateImageWithFallbacks(project, model);
+      if (image) return image;
+    }
     if (provider === "apimart" && model === "Seedance 2.0") {
       const video = await generateVideoWithApimartSeedance(project);
       return { title: "Seedance 2.0", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" };
@@ -4126,6 +4235,9 @@ async function completeQueuedGeneration(jobId, generated) {
       providerTextOutput: generated.body,
       prompt: generated.prompt || job.prompt || "",
       aspectRatio: job.aspectRatio || generationAspectRatioForProject(project, job.action, job.step),
+      provider: cost.provider,
+      model: cost.model,
+      unit: cost.unit,
       creditsCharged: creditsToCharge,
       creditsRequired: creditsToCharge,
       duration: videoDurationFor(project),
