@@ -44865,3 +44865,16 @@ body:has(.studio-shell .video-page-studio),
   height: clamp(22px, 4.7cqw, 28px) !important;
   min-height: clamp(22px, 4.7cqw, 28px) !important;
 }
+
+/* Draw Retry/Edit outlines inside the button box so tile clipping cannot eat
+   the visible stroke at tight wall zoom levels. */
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > .studio-wall-failed-actions button,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > .studio-wall-failed-actions button,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .studio-wall-failed-center > .studio-wall-failed-actions button {
+  border: 0 !important;
+  border-radius: 999px !important;
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.28) !important;
+  height: clamp(24px, 5cqw, 30px) !important;
+  min-height: clamp(24px, 5cqw, 30px) !important;
+  overflow: visible !important;
+}
