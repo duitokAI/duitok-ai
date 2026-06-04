@@ -452,6 +452,60 @@ app.get("/api/admin/diagnostics/deepseek", async (req, res, next) => {
   }
 });
 
+app.get("/api/admin/diagnostics/generation-failures", async (req, res, next) => {
+  try {
+    requireAdminDiagnosticAccess(req);
+    const db = await ensureDb();
+    const limit = Math.min(80, Math.max(1, Number.parseInt(req.query.limit || "30", 10) || 30));
+    const apiCallsByJob = new Map((db.apiCalls || [])
+      .filter((call) => call.generationJobId)
+      .map((call) => [call.generationJobId, call]));
+    const failures = (db.generationJobs || [])
+      .filter((job) => job.status === "failed")
+      .sort((a, b) => {
+        const aTime = Date.parse(a.completedAt || a.updatedAt || a.startedAt || a.createdAt || 0) || 0;
+        const bTime = Date.parse(b.completedAt || b.updatedAt || b.startedAt || b.createdAt || 0) || 0;
+        return bTime - aTime;
+      })
+      .slice(0, limit)
+      .map((job) => {
+        const call = apiCallsByJob.get(job.id) || {};
+        return {
+          id: job.id,
+          projectId: job.projectId,
+          userId: job.userId,
+          action: job.action,
+          step: job.step,
+          type: job.type,
+          status: job.status,
+          stage: job.stage || "",
+          model: job.model,
+          provider: job.provider,
+          aspectRatio: job.aspectRatio,
+          resolution: job.resolution,
+          count: job.count,
+          createdAt: job.createdAt,
+          startedAt: job.startedAt,
+          completedAt: job.completedAt,
+          timedOutAt: job.timedOutAt || "",
+          errorMessage: redactProviderText(job.errorMessage || publicGenerationError()),
+          providerErrorMessage: redactProviderText(job.providerErrorMessage || ""),
+          apiErrorMessage: redactProviderText(call.errorMessage || ""),
+          apiEndpoint: redactProviderText(call.endpoint || ""),
+          apiCreatedAt: call.createdAt || ""
+        };
+      });
+    res.json({
+      ok: true,
+      totalFailed: (db.generationJobs || []).filter((job) => job.status === "failed").length,
+      returned: failures.length,
+      failures
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.get("/api/admin/diagnostics/veo31", async (req, res, next) => {
   try {
     requireAdminDiagnosticAccess(req);
