@@ -7696,7 +7696,6 @@ function attachmentPickerCard(item, targetKind) {
   const preview = attachmentPreview(item);
   const title = item.name || (item.kind === "avatar" ? "Avatar reference" : "Product reference");
   return `<button class="attachment-picker-card" type="button" data-attachment-pick="${esc(item.id)}" data-attachment-target="${esc(targetKind)}">
-    <span class="attachment-kind-badge ${item.kind === "product" ? "product" : "avatar"}">${icon(item.kind === "avatar" ? "circle-user-round" : "box", 14)} ${esc(String(item.kind || "file").toUpperCase())}</span>
     ${preview}
     <b>${esc(title)}</b>
   </button>`;
