@@ -19,7 +19,8 @@ const storageKeys = {
   studioWallZoom: "pokaya-studio-wall-zoom",
   agentMessages: "pokaya-agent-messages",
   agentContextSummary: "pokaya-agent-context-summary",
-  agentHistory: "pokaya-agent-history"
+  agentHistory: "pokaya-agent-history",
+  agentDraftId: "pokaya-agent-draft-id"
 };
 function migrateStorageKey(key) {
   const legacyKey = `${legacyBrandPrefix}-${key.replace(/^pokaya-/, "")}`;
@@ -161,6 +162,7 @@ const state = {
   agentHistorySessions: readStoredJson(agentHistoryStorageKey, []),
   agentHistoryEditingId: null,
   activeAgentHistoryId: null,
+  activeAgentDraftId: localStorage.getItem(storageKeys.agentDraftId) || "",
   activeAgentRunId: null,
   queuePolling: false,
   langOpen: false,
@@ -10604,9 +10606,11 @@ async function action(event, name) {
   if (name === "toggle-agent-debug" && isOwnerAdminAccount()) return set({ agentDebugOpen: !state.agentDebugOpen, agentHistoryOpen: false });
   if (name === "new-agent-chat") {
     clearAgentTypingTimer();
-    saveCurrentAgentHistory();
+    saveCurrentAgentHistory(null, { onlyIfChanged: true });
     localStorage.removeItem(storageKeys.agentMessages);
-    return set({ agentMessages: [], agentInput: "", agentAttachments: [], agentQueue: [], agentTyping: false, agentExpandedMessages: {}, activeAgentHistoryId: null, agentHistoryOpen: false, agentDebugOpen: false });
+    localStorage.removeItem(storageKeys.agentContextSummary);
+    const activeAgentDraftId = createAgentDraftId();
+    return set({ agentMessages: [], agentInput: "", agentAttachments: [], agentQueue: [], agentTyping: false, agentExpandedMessages: {}, agentContextSummary: "", activeAgentHistoryId: null, activeAgentDraftId, agentHistoryOpen: false, agentDebugOpen: false });
   }
   if (name === "clear-agent-context" || name === "clear-agent") {
     clearAgentTypingTimer();
@@ -11941,6 +11945,32 @@ function rememberAgentHistorySessions(sessions = []) {
   return safeSessions;
 }
 
+function migrateAgentHistorySessions() {
+  const current = Array.isArray(state.agentHistorySessions) ? state.agentHistorySessions : [];
+  const normalized = normalizeAgentHistorySessions(current);
+  if (normalized.length !== current.length || JSON.stringify(normalized) !== JSON.stringify(current)) {
+    rememberAgentHistorySessions(normalized);
+  }
+  return normalized;
+}
+
+function hydrateAgentChatIdentity() {
+  const sessions = migrateAgentHistorySessions();
+  const messages = agentMessagesForStorage(state.agentMessages);
+  if (!messages.length) {
+    state.activeAgentHistoryId = null;
+    if (!state.activeAgentDraftId) state.activeAgentDraftId = createAgentDraftId();
+    return;
+  }
+  const signature = agentHistoryMessagesSignature(messages);
+  const existing = sessions.find((item) => agentHistoryMessagesSignature(item.messages) === signature);
+  state.activeAgentHistoryId = existing?.id || state.activeAgentHistoryId || null;
+  if (state.activeAgentHistoryId) {
+    state.activeAgentDraftId = "";
+    localStorage.removeItem(storageKeys.agentDraftId);
+  }
+}
+
 function normalizeAgentHistorySessions(sessions = []) {
   const seenIds = new Set();
   const seenMessages = new Set();
@@ -11971,14 +12001,34 @@ function createAgentHistorySessionId() {
   return `agent_${Date.now()}_${Math.random().toString(16).slice(2)}`;
 }
 
-function saveCurrentAgentHistory(messagesOverride = null) {
+function createAgentDraftId() {
+  const id = `draft_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+  localStorage.setItem(storageKeys.agentDraftId, id);
+  state.activeAgentDraftId = id;
+  return id;
+}
+
+function currentAgentHistorySession(messages = state.agentMessages) {
+  const sessions = state.agentHistorySessions || [];
+  const signature = agentHistoryMessagesSignature(messages);
+  if (state.activeAgentHistoryId) {
+    const existing = sessions.find((item) => item.id === state.activeAgentHistoryId);
+    if (existing) return existing;
+  }
+  return signature ? sessions.find((item) => agentHistoryMessagesSignature(item.messages) === signature) || null : null;
+}
+
+function saveCurrentAgentHistory(messagesOverride = null, options = {}) {
   const messages = agentMessagesForStorage(Array.isArray(messagesOverride) ? messagesOverride : state.agentMessages);
   if (!messages.length) return state.agentHistorySessions;
   const sessions = state.agentHistorySessions || [];
   const signature = agentHistoryMessagesSignature(messages);
-  const existing = state.activeAgentHistoryId
-    ? sessions.find((item) => item.id === state.activeAgentHistoryId)
-    : sessions.find((item) => agentHistoryMessagesSignature(item.messages) === signature) || null;
+  const existing = currentAgentHistorySession(messages);
+  const existingSignature = existing ? agentHistoryMessagesSignature(existing.messages) : "";
+  if (options.onlyIfChanged && existing && existingSignature === signature) {
+    state.activeAgentHistoryId = existing.id;
+    return rememberAgentHistorySessions(sessions);
+  }
   const session = {
     ...(existing || {}),
     id: existing?.id || createAgentHistorySessionId(),
@@ -11991,6 +12041,8 @@ function saveCurrentAgentHistory(messagesOverride = null) {
   const nextSessions = [session, ...sessions.filter((item) => item.id !== session.id)];
   const remembered = rememberAgentHistorySessions(nextSessions);
   state.activeAgentHistoryId = session.id;
+  state.activeAgentDraftId = "";
+  localStorage.removeItem(storageKeys.agentDraftId);
   return remembered;
 }
 
@@ -12008,41 +12060,31 @@ function agentHistoryDisplayTitle(item = {}) {
 function agentHistoryTaskTitleFromMessages(messages = []) {
   const firstUser = messages.find((item) => item.role === "user" && String(item.content || "").trim());
   const firstAssistant = messages.find((item) => item.role === "assistant" && String(item.content || "").trim());
-  return normalizeAgentHistoryTitle(firstUser?.content || firstAssistant?.content || "Agent chat");
+  return naturalAgentHistoryTitle(firstUser?.content || firstAssistant?.content || "Agent chat");
 }
 
-function normalizeAgentHistoryTitle(value = "") {
+function naturalAgentHistoryTitle(value = "") {
   const raw = String(value || "")
     .replace(/<[^>]*>/g, " ")
     .replace(/\s+/g, " ")
     .trim();
   const text = raw
+    .replace(/^(你好|您好|嗨|哈喽|hello|hi|hey)[,，\s]*/i, "")
     .replace(/^(帮我|请你|请帮我|我要|我想|可以|能不能|麻烦你|can you|could you|please|pls|i want to|i need to)\s*/i, "")
     .replace(/[。！？!?]+$/g, "")
     .trim();
-  const lower = text.toLowerCase();
-  const rules = [
-    [/你能做什么|能做什么|what can you do|capabilit|功能|能力/, "Explore Agent Capabilities"],
-    [/usage|用量|账单|billing|credit|ledger/, "Optimize Usage Billing Layout"],
-    [/download|下载/, "Fix Download Feedback"],
-    [/语言|英文|中文|language|sidebar|面板|new chat|search chats/, "Fix Agent Sidebar Language"],
-    [/空白|空隙|空间|gap|preview gap|预览|下方/, "Remove Image Preview Gap"],
-    [/动漫|anime|cartoon|二次元/, "Create Anime Style Image"],
-    [/nano|banana|香蕉/, "Generate Nano Banana Concept"],
-    [/product|产品|picker|scanner/, "Optimize Product Workflow"],
-    [/prompt|提示词/, "Refine Prompt Workflow"],
-    [/video|视频|ugc|original/, "Generate Video Concept"],
-    [/image|图片|图像|生成图|照片/, "Generate Image Concept"]
-  ];
-  const matched = rules.find(([pattern]) => pattern.test(lower));
-  if (matched) return matched[1];
+  if (!text) return "Agent Chat";
   if (/^[a-z0-9][a-z0-9\s:._/-]{2,}$/i.test(text)) {
-    const words = text.split(/\s+/).filter(Boolean).slice(0, 7);
+    const words = text.split(/\s+/).filter(Boolean).slice(0, 6);
     const title = words.map((word) => /^(ai|ui|ux|api|ugc|prd)$/i.test(word) ? word.toUpperCase() : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(" ");
     return title || "Agent Task";
   }
-  if (/[㐀-鿿]/.test(text)) return text.slice(0, 18) || "Agent Task";
-  return text.slice(0, 42) || "Agent Task";
+  if (/[㐀-鿿]/.test(text)) return text.slice(0, 16) || "Agent Chat";
+  return text.slice(0, 40) || "Agent Chat";
+}
+
+function normalizeAgentHistoryTitle(value = "") {
+  return naturalAgentHistoryTitle(value);
 }
 
 function markAgentHistorySelection(id = "") {
@@ -13290,6 +13332,23 @@ document.addEventListener("visibilitychange", () => {
   }
   if (hasRunningGenerationJobs()) pollGenerationQueue();
 });
+
+window.addEventListener("storage", (event) => {
+  if (event.key === agentHistoryStorageKey) {
+    state.agentHistorySessions = normalizeAgentHistorySessions(readStoredJson(agentHistoryStorageKey, []));
+    if (state.page === "agent") render();
+  }
+  if (event.key === storageKeys.agentMessages) {
+    const messages = agentMessagesForStorage(readStoredJson(storageKeys.agentMessages, []));
+    if (agentHistoryMessagesSignature(messages) !== agentHistoryMessagesSignature(state.agentMessages)) {
+      state.agentMessages = messages;
+      hydrateAgentChatIdentity();
+      if (state.page === "agent") render();
+    }
+  }
+});
+
+hydrateAgentChatIdentity();
 
 boot().catch((error) => {
   if (isStudioPath() && !state.db && isAuthExpiredError(error)) {
