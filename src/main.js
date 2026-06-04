@@ -6359,8 +6359,7 @@ function pendingResultJobs(projectItem, types) {
       const aTime = Date.parse(a.completedAt || a.updatedAt || a.startedAt || a.createdAt || 0) || 0;
       const bTime = Date.parse(b.completedAt || b.updatedAt || b.startedAt || b.createdAt || 0) || 0;
       return bTime - aTime;
-    })
-    .slice(0, 12);
+    });
 }
 
 function generationJobStatusKey(job = {}) {
