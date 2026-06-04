@@ -67,6 +67,10 @@ const wuyinImagePaths = {
   "Grok Imagine Video": "/api/async/video_grok_imagine"
 };
 const wuyinVideoModel = process.env.WUYIN_VIDEO_MODEL || "veo3.1-fast";
+const crunBaseUrl = (process.env.CRUN_BASE_URL || "https://api.crun.ai").replace(/\/$/, "");
+const crunCreateTaskPath = process.env.CRUN_CREATE_TASK_PATH || "/api/v1/client/job/CreateTask";
+const crunTaskInfoPath = process.env.CRUN_TASK_INFO_PATH || "/api/v1/client/job/TaskInfo";
+const crunVeo31Model = process.env.CRUN_VEO_3_1_MODEL || "google/veo3-1-fast-t2v";
 const grsaiBaseUrl = (process.env.GRSAI_BASE_URL || "https://grsaiapi.com").replace(/\/$/, "");
 const grsaiChatPath = process.env.GRSAI_CHAT_PATH || "/v1/chat/completions";
 const grsaiDrawPath = process.env.GRSAI_DRAW_PATH || "/v1/draw/nano-banana";
@@ -457,32 +461,32 @@ app.get("/api/admin/diagnostics/veo31", async (req, res, next) => {
         prompt
       }
     };
-    const body = wuyinImageBody(project, [
+    const body = crunVeo31Body(project, [
       prompt,
       "Mode: Create Video.",
       "Style: realistic short-form ecommerce video, native-looking TikTok Shop pacing, clear product focus, no fake brand claims."
     ].join("\n"));
-    const submitted = await wuyinRequest(wuyinPathFromProject(project), {
+    const submitted = await crunRequest(crunCreateTaskPath, {
       method: "POST",
       body
     });
-    const taskId = submitted.id || submitted.task_id;
+    const taskId = submitted.task_id || submitted.taskId || submitted.id || submitted.data?.task_id;
     if (!taskId) {
       return res.status(502).json({
         ok: false,
         configured: true,
-        endpoint: wuyinPathFromProject(project),
+        endpoint: crunCreateTaskPath,
         durationMs: Date.now() - startedAt,
         error: "Veo 3.1 task submission did not return a task id.",
         responseShape: Object.keys(submitted || {}).slice(0, 12)
       });
     }
-    const taskData = await pollWuyinTask(taskId);
-    const urls = extractUrlsDeep(taskData);
+    const taskData = await pollCrunTask(taskId);
+    const urls = extractVideoUrls(taskData);
     res.json({
       ok: urls.length > 0,
       configured: true,
-      endpoint: wuyinPathFromProject(project),
+      endpoint: crunCreateTaskPath,
       taskId,
       durationMs: Date.now() - startedAt,
       urlCount: urls.length,
@@ -1373,6 +1377,7 @@ const providerLeakPatterns = [
   /\bAtlas Cloud\b/gi,
   /速创API/gi,
   /\bWuyin\b/gi,
+  /\bCrun\b/gi,
   /无垠科技/gi,
   /\bDeepSeek\b/gi,
   /api\.deepseek\.com/gi,
@@ -1381,6 +1386,7 @@ const providerLeakPatterns = [
   /grsaiapi\.com/gi,
   /api\.atlascloud\.ai/gi,
   /api\.wuyinkeji\.com/gi,
+  /api\.crun\.ai/gi,
   /\brender\.com\b/gi
 ];
 
@@ -1951,7 +1957,8 @@ function providerForMediaModel(model) {
   if (model === "Seedream 5.0 Lite" || model === "Seedream 4.5") return process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Grok Imagine") return process.env.APIMART_API_KEY ? "apimart" : process.env.WUYIN_API_KEY ? "wuyin" : "mock";
   if (model === "Seedance 2.0" || model === "Grok Imagine Video" || model === "Wan 2.7" || model === "Kling V3 Omni" || model === "Kling V3 Motion Control" || model === "MiniMax Hailuo 2.3") return process.env.APIMART_API_KEY ? "apimart" : "mock";
-  if (model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni") return process.env.WUYIN_API_KEY ? "wuyin" : "mock";
+  if (model === "Veo 3.1") return process.env.CRUN_API_KEY ? "crun" : "mock";
+  if (model === "Sora 2" || model === "Gemini Omni") return process.env.WUYIN_API_KEY ? "wuyin" : "mock";
   return "unsupported";
 }
 
@@ -2725,6 +2732,16 @@ function requireWuyinConfig() {
   return apiKey;
 }
 
+function requireCrunConfig() {
+  const apiKey = process.env.CRUN_API_KEY;
+  if (!apiKey || apiKey.includes("replace_with")) {
+    const error = new Error("Crun AI belum configure. Isi CRUN_API_KEY dalam Render Environment Variables dulu.");
+    error.status = 503;
+    throw error;
+  }
+  return apiKey;
+}
+
 function requireGrsaiConfig() {
   const apiKey = process.env.GRSAI_API_KEY;
   if (!apiKey || apiKey.includes("replace_with")) {
@@ -3012,6 +3029,30 @@ async function wuyinRequest(pathname, { method = "GET", body, query = {} } = {})
   return payload.data || payload;
 }
 
+async function crunRequest(pathname, { method = "GET", body, query = {} } = {}) {
+  const apiKey = requireCrunConfig();
+  const url = new URL(`${crunBaseUrl}${pathname}`);
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") url.searchParams.set(key, value);
+  });
+  const response = await fetch(url, {
+    method,
+    headers: {
+      "x-api-key": apiKey,
+      "Content-Type": "application/json"
+    },
+    body: body ? JSON.stringify(body) : undefined,
+    signal: AbortSignal.timeout(Number(process.env.CRUN_TIMEOUT_MS || 120000))
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || (payload.code && ![0, 200].includes(payload.code))) {
+    const error = new Error(payload.error || payload.message || payload.msg || `Crun AI request failed (${response.status})`);
+    error.status = response.status || 502;
+    throw error;
+  }
+  return payload.data || payload;
+}
+
 function formatProjectContext(project, action, step) {
   return JSON.stringify({
     action,
@@ -3180,7 +3221,7 @@ function extractImageUrls(taskData) {
 }
 
 function extractVideoUrls(taskData) {
-  const videos = taskData.result?.videos || taskData.result?.video || taskData.result?.outputs || taskData.videos || [];
+  const videos = taskData.result?.media_urls || taskData.result?.videos || taskData.result?.video || taskData.result?.outputs || taskData.media_urls || taskData.videos || [];
   const directUrls = flattenUrlValues(videos).filter((url) => /\.(mp4|mov|webm)(\?|$)/i.test(url) || /\/video\//i.test(url));
   return [...new Set([...directUrls, ...extractUrlsDeep(taskData).filter((url) => /\.(mp4|mov|webm)(\?|$)/i.test(url))])];
 }
@@ -3324,6 +3365,7 @@ function generationEndpointFor(provider, project) {
   if (provider === "grsai" && project?.clone?.referenceVideo) return grsaiChatPath;
   if (provider === "apimart" && ["Seedance 2.0", "Grok Imagine Video", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control", "MiniMax Hailuo 2.3"].includes(internalMediaModel(project?.image?.model))) return apimartVideoPath;
   if (provider === "grsai") return grsaiDrawPath;
+  if (provider === "crun") return crunCreateTaskPath;
   if (provider === "wuyin") return wuyinPathFromProject(project);
   return apimartImagePath;
 }
@@ -3387,6 +3429,17 @@ function wuyinImageBody(project, prompt) {
     };
   }
   return { prompt, size: imageSize, aspectRatio };
+}
+
+function crunVeo31Body(project, prompt) {
+  const aspectRatio = String(process.env.CRUN_VEO_3_1_ASPECT_RATIO || project.image?.aspectRatio || "9:16").trim();
+  const duration = Number(process.env.CRUN_VEO_3_1_DURATION || videoDurationFor(project, "Veo 3.1") || 8);
+  return {
+    model: crunVeo31Model,
+    prompt,
+    aspect_ratio: aspectRatio,
+    duration: Number.isFinite(duration) && duration > 0 ? duration : 8
+  };
 }
 
 function apimartSeedanceBody(project, prompt) {
@@ -3505,6 +3558,26 @@ async function pollWuyinTask(taskId) {
   throw error;
 }
 
+async function pollCrunTask(taskId) {
+  const maxAttempts = Number(process.env.CRUN_POLL_ATTEMPTS || 60);
+  const delayMs = Number(process.env.CRUN_POLL_MS || 5000);
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, delayMs));
+    const payload = await crunRequest(crunTaskInfoPath, { query: { task_id: taskId } });
+    const data = payload.data || payload;
+    const status = String(data.status || payload.status || "").toLowerCase();
+    if (["succeeded", "success", "completed", "complete", "done"].includes(status)) return data;
+    if (["failed", "error", "cancelled", "canceled"].includes(status)) {
+      const error = new Error(data.error || data.message || data.fail_reason || `Crun AI video task ${status}`);
+      error.status = 502;
+      throw error;
+    }
+  }
+  const error = new Error("Crun AI video task is still processing. Please try again later.");
+  error.status = 202;
+  throw error;
+}
+
 async function pollGrsaiTask(taskId) {
   const maxAttempts = Number(process.env.GRSAI_IMAGE_POLL_ATTEMPTS || 36);
   const delayMs = Number(process.env.GRSAI_IMAGE_POLL_MS || 3000);
@@ -3585,6 +3658,27 @@ async function generateImageWithWuyin(project) {
   };
 }
 
+async function generateVideoWithCrunVeo31(project) {
+  const prompt = [
+    project.image?.prompt || "Create a high-converting TikTok Shop product video.",
+    `Mode: ${project.image?.mode || "Create Video"}.`,
+    "Style: realistic short-form ecommerce video, native-looking TikTok Shop pacing, clear product focus, no fake brand claims."
+  ].join("\n");
+  const data = await crunRequest(crunCreateTaskPath, {
+    method: "POST",
+    body: crunVeo31Body(project, prompt)
+  });
+  const taskId = data.task_id || data.taskId || data.id || data.data?.task_id;
+  if (!taskId) return { text: JSON.stringify(data, null, 2), urls: extractVideoUrls(data) };
+  const taskData = await pollCrunTask(taskId);
+  const urls = extractVideoUrls(taskData);
+  return {
+    text: urls.length ? `Video generated with Pokaya AI.\n\nTask ID: ${taskId}` : `Video task completed with Pokaya AI.\n\nTask ID: ${taskId}`,
+    urls,
+    taskId
+  };
+}
+
 async function generateVideoWithWuyin(project) {
   const prompt = [
     project.image?.prompt || "Create a high-converting TikTok Shop product video.",
@@ -3610,6 +3704,7 @@ function providerConfigured(provider) {
   if (provider === "grsai") return Boolean(process.env.GRSAI_API_KEY && !process.env.GRSAI_API_KEY.includes("replace_with"));
   if (provider === "apimart") return Boolean(process.env.APIMART_API_KEY && !process.env.APIMART_API_KEY.includes("replace_with"));
   if (provider === "wuyin") return Boolean(process.env.WUYIN_API_KEY && !process.env.WUYIN_API_KEY.includes("replace_with"));
+  if (provider === "crun") return Boolean(process.env.CRUN_API_KEY && !process.env.CRUN_API_KEY.includes("replace_with"));
   return false;
 }
 
@@ -3843,7 +3938,11 @@ async function generateWithProvider(project, action, step) {
       const video = await generateVideoWithApimartHailuo23(project);
       return { title: "MiniMax Hailuo 2.3", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" };
     }
-    if (provider === "wuyin" && (model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni")) {
+    if (provider === "crun" && model === "Veo 3.1") {
+      const video = await generateVideoWithCrunVeo31(project);
+      return { title: model, body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "crun" };
+    }
+    if (provider === "wuyin" && (model === "Sora 2" || model === "Gemini Omni")) {
       const video = await generateVideoWithWuyin(project);
       return { title: model, body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "wuyin" };
     }

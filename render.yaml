@@ -157,6 +157,26 @@ services:
         value: chirp-crow
       - key: AI302_AUDIO_TRANSLATE_PATH
         value: /302/audio/translate/task
+      - key: CRUN_API_KEY
+        sync: false
+      - key: CRUN_BASE_URL
+        value: https://api.crun.ai
+      - key: CRUN_CREATE_TASK_PATH
+        value: /api/v1/client/job/CreateTask
+      - key: CRUN_TASK_INFO_PATH
+        value: /api/v1/client/job/TaskInfo
+      - key: CRUN_VEO_3_1_MODEL
+        value: google/veo3-1-fast-t2v
+      - key: CRUN_VEO_3_1_ASPECT_RATIO
+        value: 9:16
+      - key: CRUN_VEO_3_1_DURATION
+        value: "8"
+      - key: CRUN_POLL_ATTEMPTS
+        value: "60"
+      - key: CRUN_POLL_MS
+        value: "5000"
+      - key: CRUN_TIMEOUT_MS
+        value: "120000"
       - key: WUYIN_API_KEY
         sync: false
       - key: WUYIN_BASE_URL
