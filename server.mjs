@@ -2282,6 +2282,22 @@ function hasApimartConfig() {
   return Boolean(process.env.APIMART_API_KEY && !process.env.APIMART_API_KEY.includes("replace_with"));
 }
 
+function readableProviderError(value, fallback = "Provider request failed") {
+  if (!value) return fallback;
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (typeof value === "object") {
+    const nested = value.message || value.msg || value.detail || value.reason || value.error_description;
+    if (nested) return readableProviderError(nested, fallback);
+    try {
+      return JSON.stringify(value).slice(0, 1000);
+    } catch {
+      return fallback;
+    }
+  }
+  return String(value || fallback);
+}
+
 function geminiApiKey() {
   const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "";
   return key && !key.includes("replace_with") ? key : "";
@@ -2484,7 +2500,8 @@ async function apimartRequest(pathname, options = {}) {
   });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok || (payload.code && payload.code >= 400)) {
-    const error = new Error(payload.message || payload.detail || payload.error || `APIMart request failed (${response.status})`);
+    const message = readableProviderError(payload.message || payload.detail || payload.error, `APIMart request failed (${response.status})`);
+    const error = new Error(message);
     error.status = response.status || 502;
     throw error;
   }
@@ -3149,7 +3166,8 @@ async function grsaiRequest(pathname, { method = "POST", body } = {}) {
   });
   const payload = parseJsonishPayload(await response.text());
   if (!response.ok || !isGrsaiSuccessCode(payload.code)) {
-    const error = new Error(payload.msg || payload.message || payload.error || `GRS AI request failed (${response.status})`);
+    const message = readableProviderError(payload.msg || payload.message || payload.error, `GRS AI request failed (${response.status})`);
+    const error = new Error(message);
     error.status = response.status || 502;
     throw error;
   }
@@ -3169,7 +3187,8 @@ async function grsaiChatRequest(body) {
   });
   const payload = parseJsonishPayload(await response.text());
   if (!response.ok || !isGrsaiSuccessCode(payload.code)) {
-    const error = new Error(payload.msg || payload.message || payload.error?.message || payload.error || `GRS AI chat request failed (${response.status})`);
+    const message = readableProviderError(payload.msg || payload.message || payload.error, `GRS AI chat request failed (${response.status})`);
+    const error = new Error(message);
     error.status = response.status || 502;
     throw error;
   }
