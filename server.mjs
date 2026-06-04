@@ -113,7 +113,7 @@ const httpCompressionMinBytes = Number(process.env.HTTP_COMPRESSION_MIN_BYTES ||
 const maxConcurrentGenerationJobs = Math.max(1, Number(process.env.MAX_CONCURRENT_GENERATION_JOBS || 4));
 const userConcurrentGenerationLimit = Math.max(1, Number(process.env.USER_CONCURRENT_GENERATIONS || 2));
 const staleQueuedGenerationMs = Number(process.env.STALE_QUEUED_GENERATION_MS || 10 * 60 * 1000);
-const staleImageGenerationMs = Number(process.env.STALE_IMAGE_GENERATION_MS || 12 * 60 * 1000);
+const staleImageGenerationMs = Number(process.env.STALE_IMAGE_GENERATION_MS || 60 * 1000);
 const staleVideoGenerationMs = Number(process.env.STALE_VIDEO_GENERATION_MS || 45 * 60 * 1000);
 const projectResultStorageLimit = Math.max(0, Number(process.env.PROJECT_RESULT_STORAGE_LIMIT || 1500));
 const storedGenerationJobLimit = Math.max(0, Number(process.env.STORED_GENERATION_JOB_LIMIT || 6000));
@@ -1569,6 +1569,11 @@ function generationJobAgeMs(job = {}, now = Date.now()) {
   return Number.isFinite(base) ? now - base : 0;
 }
 
+function formatGenerationDuration(ms = 0) {
+  if (ms < 90 * 1000) return `${Math.max(1, Math.round(ms / 1000))} seconds`;
+  return `${Math.round(ms / 60000)} minutes`;
+}
+
 function timeoutPromise(promise, timeoutMs, message) {
   if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) return promise;
   let timer;
@@ -1615,7 +1620,7 @@ async function recoverInterruptedGenerationJobs() {
           stage: "failed",
           providerStatus: "timeout",
           errorMessage: publicGenerationError(),
-          providerErrorMessage: `Generation timed out after ${Math.round(age / 60000)} minutes during server restart recovery.`,
+          providerErrorMessage: `Generation timed out after ${formatGenerationDuration(age)} during server restart recovery.`,
           creditsCharged: 0,
           completedAt: recoveredAt,
           timedOutAt: recoveredAt,
@@ -1687,7 +1692,7 @@ async function reconcileStaleGenerationJobs(user, projectId = "") {
         stage: "failed",
         providerStatus: "timeout",
         errorMessage: publicGenerationError(),
-        providerErrorMessage: `Generation timed out after ${Math.round(age / 60000)} minutes.`,
+        providerErrorMessage: `Generation timed out after ${formatGenerationDuration(age)}.`,
         creditsCharged: 0,
         completedAt,
         timedOutAt: completedAt
@@ -4675,7 +4680,7 @@ async function processGenerationJob(jobId) {
     const generated = await timeoutPromise(
       generateWithProvider(snapshot.project, snapshot.job.action, snapshot.job.step, generationJobTracker(jobId)),
       generationJobTimeoutMs(snapshot.job),
-      `Generation provider request timed out after ${Math.round(generationJobTimeoutMs(snapshot.job) / 60000)} minutes.`
+      `Generation provider request timed out after ${formatGenerationDuration(generationJobTimeoutMs(snapshot.job))}.`
     );
     await mutateDb(async (db) => {
       const job = db.generationJobs.find((item) => item.id === jobId);
