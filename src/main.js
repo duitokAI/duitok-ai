@@ -20,6 +20,7 @@ const storageKeys = {
   agentMessages: "pokaya-agent-messages",
   agentContextSummary: "pokaya-agent-context-summary",
   agentHistory: "pokaya-agent-history",
+  agentHistoryBackup: "pokaya-agent-history-backup",
   agentDraftId: "pokaya-agent-draft-id",
   agentActiveRun: "pokaya-agent-active-run"
 };
@@ -163,7 +164,10 @@ const state = {
   agentAttachments: [],
   agentExpandedMessages: {},
   agentHistoryOpen: false,
-  agentHistorySessions: readStoredJson(agentHistoryStorageKey, []),
+  agentHistorySessions: [
+    ...readStoredJson(agentHistoryStorageKey, []),
+    ...readStoredJson(storageKeys.agentHistoryBackup, [])
+  ],
   agentHistoryEditingId: null,
   activeAgentHistoryId: null,
   activeAgentDraftId: localStorage.getItem(storageKeys.agentDraftId) || "",
@@ -12070,9 +12074,18 @@ function clearAgentActiveRun() {
   state.agentRecoveredRun = null;
 }
 
-function rememberAgentHistorySessions(sessions = []) {
-  const safeSessions = normalizeAgentHistorySessions(sessions);
+function rememberAgentHistorySessions(sessions = [], options = {}) {
+  const incomingSessions = normalizeAgentHistorySessions(sessions);
+  const shouldReplace = options.replace === true;
+  const safeSessions = shouldReplace
+    ? incomingSessions
+    : normalizeAgentHistorySessions([
+        ...incomingSessions,
+        ...(state.agentHistorySessions || []),
+        ...readStoredJson(storageKeys.agentHistoryBackup, [])
+      ]);
   localStorage.setItem(agentHistoryStorageKey, JSON.stringify(safeSessions));
+  localStorage.setItem(storageKeys.agentHistoryBackup, JSON.stringify(safeSessions));
   state.agentHistorySessions = safeSessions;
   return safeSessions;
 }
@@ -12360,7 +12373,7 @@ function restoreAgentHistory(id, options = {}) {
 
 function deleteAgentHistory(id) {
   const sessions = (state.agentHistorySessions || []).filter((item) => item.id !== id);
-  rememberAgentHistorySessions(sessions);
+  rememberAgentHistorySessions(sessions, { replace: true });
   deleteAgentChatBackend(id);
   notify("已删除这条历史记录。");
   set({ agentHistorySessions: sessions, activeAgentHistoryId: state.activeAgentHistoryId === id ? null : state.activeAgentHistoryId, agentHistoryEditingId: null });
@@ -12378,7 +12391,7 @@ function renameAgentHistory(id, title, options = {}) {
   }
   if (nextTitle === (session.title || "Untitled chat") && session.manualTitle) return set({ agentHistoryEditingId: null });
   const renamed = sessions.map((item) => item.id === id ? { ...item, title: nextTitle, manualTitle: true, updatedAt: new Date().toISOString() } : item);
-  rememberAgentHistorySessions(renamed);
+  rememberAgentHistorySessions(renamed, { replace: true });
   renameAgentChatBackend(id, nextTitle);
   if (!options.quiet) notify("已重命名对话。");
   return set({ agentHistorySessions: renamed, agentHistoryEditingId: null });
@@ -13583,7 +13596,7 @@ document.addEventListener("visibilitychange", () => {
 
 window.addEventListener("storage", (event) => {
   if (event.key === agentHistoryStorageKey) {
-    state.agentHistorySessions = normalizeAgentHistorySessions(readStoredJson(agentHistoryStorageKey, []));
+    rememberAgentHistorySessions(readStoredJson(agentHistoryStorageKey, []));
     if (state.page === "agent") render();
   }
   if (event.key === storageKeys.agentMessages) {
