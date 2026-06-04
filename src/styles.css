@@ -39860,6 +39860,18 @@ body:has(.studio-shell .image-higgsfield-mode),
   color: #4f0b62 !important;
 }
 
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-action:disabled,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-history-footer-action:disabled,
+.studio-shell .agent-chat-shell.agent-page-panel [data-agent-busy-action="true"] {
+  cursor: not-allowed !important;
+  opacity: 0.52 !important;
+  filter: saturate(0.75) !important;
+}
+
+.studio-shell .agent-chat-shell.agent-page-panel [data-agent-busy-action="true"] svg {
+  animation: spin 1s linear infinite !important;
+}
+
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-action svg,
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-search svg {
   width: 24px !important;

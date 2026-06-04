@@ -20,7 +20,8 @@ const storageKeys = {
   agentMessages: "pokaya-agent-messages",
   agentContextSummary: "pokaya-agent-context-summary",
   agentHistory: "pokaya-agent-history",
-  agentDraftId: "pokaya-agent-draft-id"
+  agentDraftId: "pokaya-agent-draft-id",
+  agentActiveRun: "pokaya-agent-active-run"
 };
 const studioWallZoomMin = 2;
 const studioWallZoomMax = 4;
@@ -166,6 +167,7 @@ const state = {
   agentHistoryEditingId: null,
   activeAgentHistoryId: null,
   activeAgentDraftId: localStorage.getItem(storageKeys.agentDraftId) || "",
+  agentRecoveredRun: readStoredJson(storageKeys.agentActiveRun, null),
   activeAgentRunId: null,
   queuePolling: false,
   langOpen: false,
@@ -1624,6 +1626,9 @@ function shouldPatchAgentChatOnly(patch = {}) {
     "agentVisualPhase",
     "agentIdleActivity",
     "agentContextSummary",
+    "agentRecoveredRun",
+    "activeAgentHistoryId",
+    "activeAgentDraftId",
     "db"
   ]);
   return keys.every((key) => agentOnlyKeys.has(key));
@@ -1634,6 +1639,13 @@ function patchAgentChatDom(patch = {}) {
   if (!shell) return false;
   const affectsThread = ["agentMessages", "agentBusy", "agentTyping", "agentQueue", "agentBusyStartedAt", "agentWorkingTick", "db"].some((key) => Object.prototype.hasOwnProperty.call(patch, key));
   const affectsForm = ["agentInput", "agentAttachments", "agentBusy", "agentTyping", "agentMessages"].some((key) => Object.prototype.hasOwnProperty.call(patch, key));
+  const affectsToolbar = ["agentBusy", "agentTyping", "activeAgentHistoryId"].some((key) => Object.prototype.hasOwnProperty.call(patch, key));
+  if (affectsToolbar) {
+    const toolbar = shell.querySelector(".agent-chat-toolbar");
+    if (!toolbar) return false;
+    toolbar.outerHTML = agentChatToolbar();
+    bindAgentControls();
+  }
   if (affectsThread) {
     const thread = shell.querySelector(".agent-thread");
     if (!thread) return false;
@@ -9179,7 +9191,32 @@ function agentThreadHtml() {
     ${agentCollapsedHistoryBar()}
     ${visibleMessages.map(({ item, index }) => agentMessageArticle(item, index)).join("")}
     ${state.agentBusy && !state.agentTyping ? agentThinkingCard() : ""}
+    ${agentRecoveredRunCard()}
     ${agentQueuedMessages()}`;
+}
+
+function agentRecoveredRunCard() {
+  const run = state.agentRecoveredRun;
+  if (!run || state.agentBusy || state.agentTyping || !state.agentMessages.length) return "";
+  const signature = agentHistoryMessagesSignature(state.agentMessages);
+  const chatMatches = !run.chatId || !state.activeAgentHistoryId || run.chatId === state.activeAgentHistoryId;
+  if (!chatMatches || (run.signature && run.signature !== signature)) return "";
+  const title = state.lang === "zh" ? "处理中任务已恢复" : state.lang === "ms" ? "Tugas sedang dipulihkan" : "Working task restored";
+  const description = state.lang === "zh"
+    ? "这个 chat 之前有一个进行中的 Agent 请求。你可以先留在当前对话，结果回来后会接上；如果太久没变化，可以重新发送。"
+    : state.lang === "ms"
+      ? "Chat ini ada request Agent yang sedang diproses. Kekal di sini; jika terlalu lama, hantar semula."
+      : "This chat had an active Agent request. Stay here for the result to reconnect; if it takes too long, send it again.";
+  return `<article class="assistant agent-thinking agent-thinking-restored">
+    <span>${esc(state.lang === "zh" ? "Agent 正在恢复" : "Agent recovery")}</span>
+    <div class="agent-thinking-row">
+      <b>${icon("loader-circle", 18)}</b>
+      <div>
+        <strong>${esc(title)}</strong>
+        <p>${esc(description)}</p>
+      </div>
+    </div>
+  </article>`;
 }
 
 function agentFormHtml() {
@@ -9248,9 +9285,13 @@ function agentAttachmentLabel(item = {}) {
 function agentChatToolbar() {
   const c = agentUiCopy();
   const sessions = Array.isArray(state.agentHistorySessions) ? state.agentHistorySessions : [];
+  const newChatBusy = state.agentBusy || state.agentTyping;
+  const newChatTitle = newChatBusy
+    ? (state.lang === "zh" ? "Agent 处理中，完成后才能开新 chat" : "Agent is working. Start a new chat after it finishes.")
+    : c.newChat;
   return `<aside class="agent-chat-toolbar agent-session-sidebar" aria-label="${esc(c.history)}">
     <nav class="agent-session-actions" aria-label="Agent chats">
-      <button class="agent-session-action" type="button" data-action="new-agent-chat" title="${esc(c.newChat)}">${icon("square-pen", 20)}<span>${esc(c.newChat)}</span></button>
+      <button class="agent-session-action" type="button" data-action="new-agent-chat" title="${esc(newChatTitle)}" ${newChatBusy ? `disabled aria-disabled="true" data-agent-busy-action="true"` : ""}>${icon(newChatBusy ? "loader-circle" : "square-pen", 20)}<span>${esc(c.newChat)}</span></button>
       <label class="agent-session-search" title="${esc(c.history)}">
         ${icon("search", 20)}
         <input type="search" data-agent-history-search placeholder="${agentHistorySearchPlaceholder()}" aria-label="${agentHistorySearchPlaceholder()}">
@@ -9323,6 +9364,7 @@ function agentHistoryPanel() {
   if (!state.agentHistoryOpen) return "";
   const c = agentUiCopy();
   const sessions = normalizeAgentHistorySessions(state.agentHistorySessions);
+  const newChatBusy = state.agentBusy || state.agentTyping;
   return `<section class="agent-history-panel">
     <header>
       <strong>${icon("history", 16)} ${c.history}</strong>
@@ -9338,7 +9380,7 @@ function agentHistoryPanel() {
         </article>`).join("")}</div>`
       : `<p class="agent-history-empty">还没有历史记录。点「新对话」时，当前对话会自动保存到这里。</p>`}
     <div class="agent-history-footer">
-      <button class="agent-history-footer-action" data-action="new-agent-chat">${icon("message-square-plus", 14)} ${c.newChat}</button>
+      <button class="agent-history-footer-action" data-action="new-agent-chat" ${newChatBusy ? `disabled aria-disabled="true" data-agent-busy-action="true"` : ""}>${icon(newChatBusy ? "loader-circle" : "message-square-plus", 14)} ${c.newChat}</button>
       <button class="agent-history-footer-action danger" data-action="clear-agent-context">${icon("trash-2", 14)} ${c.clearContext}</button>
     </div>
   </section>`;
@@ -10622,19 +10664,21 @@ async function action(event, name) {
       return;
     }
     clearAgentTypingTimer();
+    clearAgentActiveRun();
     saveCurrentAgentHistory(null, { onlyIfChanged: true });
     localStorage.removeItem(storageKeys.agentMessages);
     localStorage.removeItem(storageKeys.agentContextSummary);
     const activeAgentDraftId = createAgentDraftId();
     syncAgentChatUrl("", { replace: false });
-    set({ agentMessages: [], agentInput: "", agentAttachments: [], agentQueue: [], agentTyping: false, agentExpandedMessages: {}, agentContextSummary: "", activeAgentHistoryId: null, activeAgentDraftId, agentHistoryOpen: false, agentDebugOpen: false, agentNewChatPulse: Date.now() });
+    set({ agentMessages: [], agentInput: "", agentAttachments: [], agentQueue: [], agentTyping: false, agentRecoveredRun: null, agentExpandedMessages: {}, agentContextSummary: "", activeAgentHistoryId: null, activeAgentDraftId, agentHistoryOpen: false, agentDebugOpen: false, agentNewChatPulse: Date.now() });
     return setTimeout(() => document.querySelector("[data-agent-input]")?.focus(), 0);
   }
   if (name === "clear-agent-context" || name === "clear-agent") {
     clearAgentTypingTimer();
+    clearAgentActiveRun();
     localStorage.removeItem(storageKeys.agentMessages);
     localStorage.removeItem(storageKeys.agentContextSummary);
-    return set({ agentMessages: [], agentInput: "", agentAttachments: [], agentQueue: [], agentTyping: false, agentContextSummary: "", agentExpandedMessages: {} });
+    return set({ agentMessages: [], agentInput: "", agentAttachments: [], agentQueue: [], agentTyping: false, agentRecoveredRun: null, agentContextSummary: "", agentExpandedMessages: {} });
   }
   if (name === "clear-agent-preferences") return clearAgentPreferences();
   if (name === "clear-agent-confirm") {
@@ -11985,6 +12029,23 @@ function rememberAgentMessages(messages) {
   state.agentContextSummary = localStorage.getItem(storageKeys.agentContextSummary) || "";
 }
 
+function rememberAgentActiveRun(messages = state.agentMessages) {
+  const safeMessages = agentMessagesForStorage(messages);
+  const payload = {
+    chatId: state.activeAgentHistoryId || "",
+    signature: agentHistoryMessagesSignature(safeMessages),
+    startedAt: Date.now()
+  };
+  localStorage.setItem(storageKeys.agentActiveRun, JSON.stringify(payload));
+  state.agentRecoveredRun = payload;
+  return payload;
+}
+
+function clearAgentActiveRun() {
+  localStorage.removeItem(storageKeys.agentActiveRun);
+  state.agentRecoveredRun = null;
+}
+
 function rememberAgentHistorySessions(sessions = []) {
   const safeSessions = normalizeAgentHistorySessions(sessions);
   localStorage.setItem(agentHistoryStorageKey, JSON.stringify(safeSessions));
@@ -12231,6 +12292,7 @@ function restoreAgentHistory(id, options = {}) {
   markAgentHistorySelection(id);
   if (id === agentDraftHistoryId) {
     clearAgentTypingTimer();
+    clearAgentActiveRun();
     localStorage.removeItem(storageKeys.agentMessages);
     localStorage.removeItem(storageKeys.agentContextSummary);
     return set({
@@ -12241,6 +12303,7 @@ function restoreAgentHistory(id, options = {}) {
       agentQueue: [],
       agentBusy: false,
       agentTyping: false,
+      agentRecoveredRun: null,
       agentExpandedMessages: {},
       activeAgentHistoryId: null,
       activeAgentDraftId: createAgentDraftId(),
@@ -12471,10 +12534,12 @@ function stopAgentResponse() {
   const messages = (state.agentMessages || []).filter((item) => !item.isTyping);
   rememberAgentMessages(messages);
   saveCurrentAgentHistory(messages);
+  clearAgentActiveRun();
   set({
     agentMessages: messages,
     agentBusy: false,
     agentTyping: false,
+    agentRecoveredRun: null,
     agentQueue: [],
     agentBusyStartedAt: 0,
     agentWorkingTick: 0,
@@ -12517,7 +12582,8 @@ function typeAgentReply({ baseMessages, assistantMessage, fullContent, finalPatc
     const messages = [...baseMessages, finalAssistantMessage];
     rememberAgentMessages(messages);
     saveCurrentAgentHistory(messages);
-    set({ ...finalPatch, agentMessages: messages, agentBusy: false, agentTyping: false });
+    clearAgentActiveRun();
+    set({ ...finalPatch, agentMessages: messages, agentBusy: false, agentTyping: false, agentRecoveredRun: null });
     agentTypingTimer = null;
     onDone(messages);
   };
@@ -12764,7 +12830,9 @@ async function runAgentMessage(message, attachments = [], queuedApiAttachments =
   const nextMessages = [...state.agentMessages, { role: "user", content: userContent, attachments: messageAttachments }];
   rememberAgentMessages(nextMessages);
   saveCurrentAgentHistory(nextMessages);
-  set({ agentMessages: nextMessages, agentInput: "", agentAttachments: [], agentBusy: true, agentTyping: false, activeAgentHistoryId: state.activeAgentHistoryId });
+  const lockedAgentHistoryId = state.activeAgentHistoryId;
+  rememberAgentActiveRun(nextMessages);
+  set({ agentMessages: nextMessages, agentInput: "", agentAttachments: [], agentBusy: true, agentTyping: false, agentRecoveredRun: null, activeAgentHistoryId: lockedAgentHistoryId });
   startAgentWorkingTimer();
   startAgentVisual(userContent);
   try {
