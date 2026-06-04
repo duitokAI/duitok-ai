@@ -6684,9 +6684,17 @@ textarea {
 .asset-date-group > header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
   min-height: 34px;
   padding-top: 6px;
+}
+
+.asset-date-heading {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .asset-date-group > header h2 {
@@ -6723,6 +6731,15 @@ textarea {
   border: 2px solid rgba(42, 16, 51, 0.16);
   border-radius: 7px;
   background: rgba(255, 255, 255, 0.62);
+}
+
+.asset-date-group > header .studio-wall-zoom-control {
+  position: relative;
+  top: auto;
+  right: auto;
+  flex: 0 0 clamp(116px, 11vw, 188px);
+  width: clamp(116px, 11vw, 188px);
+  margin-left: auto;
 }
 
 .asset-timeline-grid {

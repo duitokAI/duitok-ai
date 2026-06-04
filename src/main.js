@@ -4306,7 +4306,6 @@ function contentLibraryPage() {
   const counts = assetLibraryCounts(all);
   const groups = assetLibraryDateGroups(filtered);
   return `<section class="asset-library-experience studio-wall-zoomable" ${studioWallZoomStyleAttr()}>
-    ${studioWallZoomControl()}
     <aside class="asset-library-panel" aria-label="Content Library filters">
       <label class="asset-library-search">
         ${icon("search", 18)}
@@ -4329,7 +4328,7 @@ function contentLibraryPage() {
       <div class="asset-library-filter-strip" aria-label="Asset type filters">
         ${filterOptions.map((kind) => `<button type="button" class="${activeFilter === kind ? "active" : ""}" data-asset-type="${kind}" aria-pressed="${activeFilter === kind ? "true" : "false"}">${icon(assetTypeIcon(kind), 16)} ${assetTypeLabel(kind)}<small>${counts[kind] || 0}</small></button>`).join("")}
       </div>
-      ${groups.length ? groups.map(assetLibraryDateSection).join("") : assetLibraryEmptyState(query)}
+      ${groups.length ? groups.map((group, index) => assetLibraryDateSection(group, index)).join("") : assetLibraryEmptyState(query)}
     </section>
   </section>`;
 }
@@ -4436,9 +4435,17 @@ function assetLibraryDateLabel(key) {
   return date.toLocaleDateString(state.lang === "zh" ? "zh-CN" : "en-US", { month: "long", day: "numeric", year: "numeric" });
 }
 
-function assetLibraryDateSection(group) {
+function assetLibraryDateSection(group, index = 0) {
+  const zoomControl = index === 0 ? studioWallZoomControl() : "";
   return `<section class="asset-date-group">
-    <header><label><input type="checkbox" aria-label="Select ${esc(group.label)} assets"><span></span></label><h2>${esc(group.label)}</h2><small>${group.entries.length} assets</small></header>
+    <header>
+      <div class="asset-date-heading">
+        <label><input type="checkbox" aria-label="Select ${esc(group.label)} assets"><span></span></label>
+        <h2>${esc(group.label)}</h2>
+        <small>${group.entries.length} assets</small>
+      </div>
+      ${zoomControl}
+    </header>
     <div class="asset-timeline-grid">${group.entries.map((item, index) => assetLibraryCard(item, index)).join("")}</div>
   </section>`;
 }
