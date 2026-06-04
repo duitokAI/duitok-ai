@@ -506,6 +506,55 @@ app.get("/api/admin/diagnostics/generation-failures", async (req, res, next) => 
   }
 });
 
+app.get("/api/admin/diagnostics/seedream-image", async (req, res, next) => {
+  try {
+    requireAdminDiagnosticAccess(req);
+    const startedAt = Date.now();
+    const model = req.query.model === "Seedream 4.5" ? "Seedream 4.5" : "Seedream 5.0 Lite";
+    const prompt = sanitizeAgentText(req.query.prompt || "A clean ecommerce product lifestyle photo of a white ceramic coffee mug on a wooden desk, soft daylight, realistic, sharp focus, no text, 1:1 composition.").slice(0, 1200);
+    const project = {
+      image: {
+        model,
+        mode: "Create Image",
+        prompt,
+        aspectRatio: String(req.query.aspectRatio || "1:1"),
+        resolution: String(req.query.resolution || "2K")
+      }
+    };
+    const events = [];
+    const tracker = async (patch = {}) => {
+      events.push({
+        atMs: Date.now() - startedAt,
+        providerStatus: patch.providerStatus || "",
+        pollCount: patch.pollCount ?? null,
+        hasTaskId: Boolean(patch.providerTaskId || patch.taskId)
+      });
+    };
+    const timeoutMs = Math.min(5 * 60 * 1000, Math.max(30 * 1000, Number(req.query.timeoutMs || staleImageGenerationMs)));
+    const generated = await timeoutPromise(
+      generateImageWithApimart(project, tracker),
+      timeoutMs,
+      `Seedream diagnostic request timed out after ${formatGenerationDuration(timeoutMs)}.`
+    );
+    res.json({
+      ok: Boolean(generated.urls?.[0]),
+      configured: true,
+      endpoint: apimartImagePath,
+      model,
+      providerModel: imageModelFromProject(project),
+      aspectRatio: project.image.aspectRatio,
+      resolution: imageResolutionFromProject(project),
+      taskId: generated.taskId || "",
+      durationMs: Date.now() - startedAt,
+      urlCount: generated.urls?.length || 0,
+      firstUrl: generated.urls?.[0] || "",
+      events
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.get("/api/admin/diagnostics/veo31", async (req, res, next) => {
   try {
     requireAdminDiagnosticAccess(req);
