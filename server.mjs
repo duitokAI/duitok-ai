@@ -443,6 +443,56 @@ app.get("/api/admin/diagnostics/deepseek", async (req, res, next) => {
   }
 });
 
+app.get("/api/admin/diagnostics/veo31", async (req, res, next) => {
+  try {
+    requireAdminDiagnosticAccess(req);
+    const startedAt = Date.now();
+    const prompt = sanitizeAgentText(req.query.prompt || "A simple 8 second vertical TikTok product shot of a hand placing a white mug on a clean desk, natural daylight, smooth camera move.").slice(0, 800);
+    const project = {
+      image: {
+        model: "Veo 3.1",
+        mode: "Create Video",
+        prompt
+      }
+    };
+    const body = wuyinImageBody(project, [
+      prompt,
+      "Mode: Create Video.",
+      "Style: realistic short-form ecommerce video, native-looking TikTok Shop pacing, clear product focus, no fake brand claims."
+    ].join("\n"));
+    const submitted = await wuyinRequest(wuyinPathFromProject(project), {
+      method: "POST",
+      body
+    });
+    const taskId = submitted.id || submitted.task_id;
+    if (!taskId) {
+      return res.status(502).json({
+        ok: false,
+        configured: true,
+        endpoint: wuyinPathFromProject(project),
+        durationMs: Date.now() - startedAt,
+        error: "Veo 3.1 task submission did not return a task id.",
+        responseShape: Object.keys(submitted || {}).slice(0, 12)
+      });
+    }
+    const taskData = await pollWuyinTask(taskId);
+    const urls = extractUrlsDeep(taskData);
+    res.json({
+      ok: urls.length > 0,
+      configured: true,
+      endpoint: wuyinPathFromProject(project),
+      taskId,
+      durationMs: Date.now() - startedAt,
+      urlCount: urls.length,
+      firstUrl: urls[0] || "",
+      status: taskData.status,
+      responseShape: Object.keys(taskData || {}).slice(0, 12)
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 function defaultBilling() {
   return {
     plan: "Pokaya AI Pro",
