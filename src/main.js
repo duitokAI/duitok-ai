@@ -46,7 +46,7 @@ function readStoredJson(key, fallback) {
     return fallback;
   }
 }
-const agentHistoryLimit = 12;
+const agentHistoryLimit = 40;
 let sidebarScrollTop = 0;
 let promoCountdownTimer = null;
 let assetSearchTimer = null;
@@ -12131,8 +12131,8 @@ function hydrateAgentChatIdentity() {
     if (!state.activeAgentDraftId) state.activeAgentDraftId = createAgentDraftId();
     return;
   }
-  const signature = agentHistoryMessagesSignature(messages);
-  const existing = sessions.find((item) => agentHistoryMessagesSignature(item.messages) === signature);
+  const urlChatId = agentChatIdFromUrl();
+  const existing = sessions.find((item) => item.id === urlChatId || item.id === state.activeAgentHistoryId);
   state.activeAgentHistoryId = existing?.id || state.activeAgentHistoryId || null;
   if (state.activeAgentHistoryId) {
     state.activeAgentDraftId = "";
@@ -12165,14 +12165,10 @@ function syncAgentChatUrl(id = "", options = {}) {
 
 function normalizeAgentHistorySessions(sessions = []) {
   const seenIds = new Set();
-  const seenMessages = new Set();
   const safeSessions = [];
   for (const item of Array.isArray(sessions) ? sessions : []) {
     if (!item?.id || !Array.isArray(item.messages) || !item.messages.length || seenIds.has(item.id)) continue;
-    const signature = agentHistoryMessagesSignature(item.messages);
-    if (signature && seenMessages.has(signature)) continue;
     seenIds.add(item.id);
-    if (signature) seenMessages.add(signature);
     safeSessions.push(item);
     if (safeSessions.length >= agentHistoryLimit) break;
   }
@@ -12202,12 +12198,11 @@ function createAgentDraftId() {
 
 function currentAgentHistorySession(messages = state.agentMessages) {
   const sessions = state.agentHistorySessions || [];
-  const signature = agentHistoryMessagesSignature(messages);
   if (state.activeAgentHistoryId) {
     const existing = sessions.find((item) => item.id === state.activeAgentHistoryId);
     if (existing) return existing;
   }
-  return signature ? sessions.find((item) => agentHistoryMessagesSignature(item.messages) === signature) || null : null;
+  return null;
 }
 
 function saveCurrentAgentHistory(messagesOverride = null, options = {}) {
