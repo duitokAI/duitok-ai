@@ -4880,9 +4880,9 @@ function studioResultWall(p, meta = {}) {
   const wallKey = studioWallKey(p, step, types);
   const unloadedCount = Math.max(0, Number(p.resultCount || 0) - (p.results || []).length);
   const timeline = [
-    ...pending.map((job) => ({ kind: "pending", item: job, time: studioWallTimelineTime(job) })),
-    ...items.map((item, index) => ({ kind: "result", item, index, time: studioWallTimelineTime(item) }))
-  ].sort((a, b) => b.time - a.time);
+    ...pending.map((job, index) => ({ kind: "pending", item: job, index, time: studioWallTimelineTime(job), rank: studioWallTimelineRank(job, index) })),
+    ...items.map((item, index) => ({ kind: "result", item, index, time: studioWallTimelineTime(item), rank: studioWallTimelineRank(item, index) }))
+  ].sort((a, b) => (b.time - a.time) || (a.rank - b.rank));
   const cards = timeline.map((entry) => entry.kind === "pending"
     ? studioPendingWallCard(entry.item)
     : studioWallCard(entry.item, entry.index));
@@ -4901,6 +4901,13 @@ function studioWallTimelineTime(item = {}) {
   const originJob = resultOriginJob(item);
   const raw = originJob?.createdAt || item.createdAt || item.startedAt || item.updatedAt || item.completedAt || "";
   return Date.parse(raw || 0) || 0;
+}
+
+function studioWallTimelineRank(item = {}, fallback = 0) {
+  const originJob = resultOriginJob(item);
+  const batchIndex = Number(originJob?.batchIndex || item.batchIndex);
+  if (Number.isFinite(batchIndex) && batchIndex > 0) return batchIndex;
+  return Number.isFinite(fallback) ? fallback + 1000 : 9999;
 }
 
 function studioWallKey(projectItem, step = state.step, types = []) {

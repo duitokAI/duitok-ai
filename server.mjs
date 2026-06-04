@@ -2162,6 +2162,8 @@ function publicGenerationJob(job = {}) {
     textOutput: redactProviderText(job.textOutput, publicGenerationBody(job.type)),
     errorMessage: job.status === "failed" ? publicGenerationError() : redactProviderText(job.errorMessage || ""),
     aspectRatio: job.aspectRatio,
+    batchIndex: job.batchIndex,
+    batchCount: job.batchCount,
     createdAt: job.createdAt,
     startedAt: job.startedAt,
     completedAt: job.completedAt
