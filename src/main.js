@@ -4879,13 +4879,14 @@ function studioResultWall(p, meta = {}) {
   const visibleItems = items.slice(0, limit);
   const unloadedCount = Math.max(0, Number(p.resultCount || 0) - (p.results || []).length);
   const hiddenCount = Math.max(0, items.length - visibleItems.length) + unloadedCount;
-  const timeline = [
-    ...pending.map((job) => ({ kind: "pending", item: job, time: studioWallTimelineTime(job) })),
-    ...visibleItems.map((item, index) => ({ kind: "result", item, index, time: studioWallTimelineTime(item) }))
-  ].sort((a, b) => b.time - a.time);
-  const cards = timeline.map((entry) => entry.kind === "pending"
-    ? studioPendingWallCard(entry.item)
-    : studioWallCard(entry.item, entry.index));
+  const pendingCards = pending
+    .slice()
+    .sort((a, b) => studioWallTimelineTime(b) - studioWallTimelineTime(a))
+    .map((job) => studioPendingWallCard(job));
+  const cards = [
+    ...visibleItems.map((item, index) => studioWallCard(item, index)),
+    ...pendingCards
+  ];
   if (!cards.length) return "";
   return `<section class="studio-result-wall">
     <div class="studio-wall-grid">
