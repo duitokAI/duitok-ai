@@ -11075,10 +11075,13 @@ function updateImageModelDom(modelValue, source = null) {
   const model = imageModelOptions().find((item) => item.value === modelValue) || imageModelOptions()[0];
   const consoleEl = source?.closest?.("[data-image-generate-console]") || document.querySelector("[data-image-generate-console]");
   if (!consoleEl) return;
+  const projectItem = project();
   const currentIcon = consoleEl.querySelector("[data-image-model-current-icon]");
   const currentText = consoleEl.querySelector(".image-model-current-text b");
   const creditLabel = consoleEl.querySelector("[data-image-credit-label]");
   const compactSummary = consoleEl.querySelector("[data-image-compact-summary]");
+  const aspectMenu = consoleEl.querySelector(".image-aspect-ratio-menu");
+  const resolutionMenu = consoleEl.querySelector(".image-resolution-menu");
   if (currentIcon) currentIcon.innerHTML = providerLogo(model.provider);
   if (currentText) currentText.textContent = model.title;
   consoleEl.querySelectorAll("[data-image-model-option]").forEach((button) => {
@@ -11092,7 +11095,19 @@ function updateImageModelDom(modelValue, source = null) {
     creditLabel.textContent = `${(imageModelCredit(model.value) * imageBatchCount(project())).toFixed(2)} Credit`;
   }
   if (compactSummary) compactSummary.textContent = imageCompactPromptText();
+  if (aspectMenu) {
+    const aspectOptions = imageModelCapabilities(model.value).aspectRatios;
+    const selectedAspectRatio = normalizedImageSettingForModel(model.value, "image.aspectRatio", projectItem?.image?.aspectRatio);
+    aspectMenu.outerHTML = imageAspectRatioPicker(selectedAspectRatio, aspectOptions);
+  }
+  if (resolutionMenu) {
+    const resolutionOptions = imageResolutionOptionsForModel(model.value);
+    const selectedResolution = normalizedImageSettingForModel(model.value, "image.resolution", projectItem?.image?.resolution);
+    resolutionMenu.outerHTML = resolutionOptions.length ? imageResolutionPicker(selectedResolution, resolutionOptions) : "";
+  }
   window.lucide?.createIcons();
+  bindImageConsoleCompact();
+  bindAspectRatioFloatingMenus();
 }
 
 function updateImageCountDom(count = imageBatchCount(project())) {
@@ -11144,7 +11159,7 @@ async function saveImageModelQuick(value, source = null) {
   nextDb = dbWithProjectField(nextDb, projectId, "image.resolution", nextResolution);
   state.db = nextDb;
   stabilizeImageConsoleExpansion(1000);
-  render();
+  updateImageModelDom(selected.value, source);
   const consoleEl = source?.closest?.("[data-image-generate-console]");
   if (consoleEl) {
     consoleEl.classList.add("is-hover-expanded");
