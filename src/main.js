@@ -10614,6 +10614,11 @@ async function action(event, name) {
   if (name === "toggle-agent-history") return set({ agentHistoryOpen: !state.agentHistoryOpen });
   if (name === "toggle-agent-debug" && isOwnerAdminAccount()) return set({ agentDebugOpen: !state.agentDebugOpen, agentHistoryOpen: false });
   if (name === "new-agent-chat") {
+    if (state.agentBusy || state.agentTyping) {
+      notify(state.lang === "zh" ? "Agent 还在处理当前对话，完成后再开新 chat。" : "Agent is still working in the current chat. Start a new chat after it finishes.");
+      scrollAgentThreadToBottom();
+      return;
+    }
     clearAgentTypingTimer();
     saveCurrentAgentHistory(null, { onlyIfChanged: true });
     localStorage.removeItem(storageKeys.agentMessages);
