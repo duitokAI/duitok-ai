@@ -66,6 +66,7 @@ let generationPollTimer = null;
 const generationStateEtags = new Map();
 const quickFieldSaveTimers = new Map();
 let quickFieldSaveSeq = 0;
+const pendingAgentChatSync = new Set();
 
 const steps = [
   ["image", "image", "stepImage", "01"],
@@ -1385,6 +1386,9 @@ async function ensureStudioData() {
     throw error;
   }
   state.projectId = state.db.projects[0]?.id;
+  hydrateAgentChatsFromBackend();
+  hydrateAgentChatIdentity();
+  restoreAgentChatFromUrl({ quiet: true, replace: true });
   if (state.page === "dashboard" && shouldShowFirstGenerationWizard()) state.page = "wizard";
 }
 
@@ -9149,8 +9153,9 @@ function agentPage() {
 
 function chatPanel() {
   const fixtureActive = agentLayoutFixtureEnabled();
+  const newChatPulse = state.agentNewChatPulse && Date.now() - Number(state.agentNewChatPulse) < 900;
   return `
-    <section class="agent-panel agent-page-panel agent-chat-shell ${fixtureActive ? "agent-layout-fixture-active" : ""}" ${fixtureActive ? `data-agent-layout-fixture="${agentLayoutFixtureParam}"` : ""}>
+    <section class="agent-panel agent-page-panel agent-chat-shell ${fixtureActive ? "agent-layout-fixture-active" : ""} ${newChatPulse ? "is-new-chat" : ""}" ${fixtureActive ? `data-agent-layout-fixture="${agentLayoutFixtureParam}"` : ""}>
       ${agentChatToolbar()}
       ${agentHistoryPanel()}
       ${agentDebugPanel()}
@@ -10615,7 +10620,9 @@ async function action(event, name) {
     localStorage.removeItem(storageKeys.agentMessages);
     localStorage.removeItem(storageKeys.agentContextSummary);
     const activeAgentDraftId = createAgentDraftId();
-    return set({ agentMessages: [], agentInput: "", agentAttachments: [], agentQueue: [], agentTyping: false, agentExpandedMessages: {}, agentContextSummary: "", activeAgentHistoryId: null, activeAgentDraftId, agentHistoryOpen: false, agentDebugOpen: false });
+    syncAgentChatUrl("", { replace: false });
+    set({ agentMessages: [], agentInput: "", agentAttachments: [], agentQueue: [], agentTyping: false, agentExpandedMessages: {}, agentContextSummary: "", activeAgentHistoryId: null, activeAgentDraftId, agentHistoryOpen: false, agentDebugOpen: false, agentNewChatPulse: Date.now() });
+    return setTimeout(() => document.querySelector("[data-agent-input]")?.focus(), 0);
   }
   if (name === "clear-agent-context" || name === "clear-agent") {
     clearAgentTypingTimer();
@@ -12005,6 +12012,29 @@ function hydrateAgentChatIdentity() {
   }
 }
 
+function hydrateAgentChatsFromBackend() {
+  const backendChats = normalizeAgentHistorySessions(state.db?.agentChats || []);
+  if (!backendChats.length) return;
+  const localChats = normalizeAgentHistorySessions(state.agentHistorySessions || []);
+  rememberAgentHistorySessions([...backendChats, ...localChats]);
+}
+
+function agentChatUrl(id = "") {
+  return id ? `/studio/agent/chat/${encodeURIComponent(id)}` : "/studio/agent";
+}
+
+function agentChatIdFromUrl() {
+  const match = window.location.pathname.match(/^\/studio\/agent\/chat\/([^/]+)$/);
+  return match ? decodeURIComponent(match[1]) : "";
+}
+
+function syncAgentChatUrl(id = "", options = {}) {
+  if (!window.location.pathname.startsWith("/studio/agent")) return;
+  const next = agentChatUrl(id);
+  if (window.location.pathname === next) return;
+  window.history[options.replace ? "replaceState" : "pushState"]({}, "", next);
+}
+
 function normalizeAgentHistorySessions(sessions = []) {
   const seenIds = new Set();
   const seenMessages = new Set();
@@ -12077,7 +12107,43 @@ function saveCurrentAgentHistory(messagesOverride = null, options = {}) {
   state.activeAgentHistoryId = session.id;
   state.activeAgentDraftId = "";
   localStorage.removeItem(storageKeys.agentDraftId);
+  syncAgentChatUrl(session.id, { replace: Boolean(options.replaceUrl) });
+  persistAgentChatSession(session);
   return remembered;
+}
+
+async function persistAgentChatSession(session = {}) {
+  if (!state.token || !session.id || pendingAgentChatSync.has(session.id)) return;
+  pendingAgentChatSync.add(session.id);
+  try {
+    const payload = await api("/agent-chats", {
+      method: "POST",
+      body: JSON.stringify(session)
+    });
+    if (payload?.state) state.db = payload.state;
+    if (payload?.chat) {
+      rememberAgentHistorySessions([payload.chat, ...(state.agentHistorySessions || []).filter((item) => item.id !== payload.chat.id)]);
+      if (!session.manualTitle) requestAgentChatTitle(payload.chat.id);
+    }
+  } catch (error) {
+    console.warn("Agent chat sync failed", error);
+  } finally {
+    pendingAgentChatSync.delete(session.id);
+  }
+}
+
+async function requestAgentChatTitle(id = "") {
+  if (!state.token || !id) return;
+  try {
+    const payload = await api(`/agent-chats/${encodeURIComponent(id)}/title`, { method: "POST" });
+    if (payload?.state) state.db = payload.state;
+    if (payload?.chat && !payload.chat.manualTitle) {
+      rememberAgentHistorySessions([payload.chat, ...(state.agentHistorySessions || []).filter((item) => item.id !== payload.chat.id)]);
+      if (state.page === "agent") render();
+    }
+  } catch (error) {
+    console.warn("Agent chat title sync failed", error);
+  }
 }
 
 function agentHistoryTitleFromMessages(messages = []) {
@@ -12131,7 +12197,21 @@ function markAgentHistorySelection(id = "") {
   });
 }
 
-function restoreAgentHistory(id) {
+function restoreAgentChatFromUrl(options = {}) {
+  const id = agentChatIdFromUrl();
+  if (!id) {
+    if (state.page === "agent" && !state.agentMessages.length) {
+      state.activeAgentHistoryId = null;
+    }
+    return false;
+  }
+  const session = (state.agentHistorySessions || []).find((item) => item.id === id);
+  if (!session) return false;
+  restoreAgentHistory(id, options);
+  return true;
+}
+
+function restoreAgentHistory(id, options = {}) {
   if (id !== agentDraftHistoryId) saveCurrentAgentHistory();
   markAgentHistorySelection(id);
   if (id === agentDraftHistoryId) {
@@ -12148,6 +12228,7 @@ function restoreAgentHistory(id) {
       agentTyping: false,
       agentExpandedMessages: {},
       activeAgentHistoryId: null,
+      activeAgentDraftId: createAgentDraftId(),
       agentHistoryOpen: false
     });
   }
@@ -12171,16 +12252,19 @@ function restoreAgentHistory(id) {
     agentHistoryOpen: false,
     agentDebugOpen: false
   });
+  syncAgentChatUrl(id, { replace: options.replace });
   render();
-  notify("已恢复历史对话。");
+  if (!options.quiet) notify("已恢复历史对话。");
   scrollAgentThreadToBottom();
 }
 
 function deleteAgentHistory(id) {
   const sessions = (state.agentHistorySessions || []).filter((item) => item.id !== id);
   rememberAgentHistorySessions(sessions);
+  deleteAgentChatBackend(id);
   notify("已删除这条历史记录。");
   set({ agentHistorySessions: sessions, activeAgentHistoryId: state.activeAgentHistoryId === id ? null : state.activeAgentHistoryId, agentHistoryEditingId: null });
+  if (state.activeAgentHistoryId === id || window.location.pathname === agentChatUrl(id)) syncAgentChatUrl("", { replace: true });
 }
 
 function renameAgentHistory(id, title, options = {}) {
@@ -12195,8 +12279,33 @@ function renameAgentHistory(id, title, options = {}) {
   if (nextTitle === (session.title || "Untitled chat") && session.manualTitle) return set({ agentHistoryEditingId: null });
   const renamed = sessions.map((item) => item.id === id ? { ...item, title: nextTitle, manualTitle: true, updatedAt: new Date().toISOString() } : item);
   rememberAgentHistorySessions(renamed);
+  renameAgentChatBackend(id, nextTitle);
   if (!options.quiet) notify("已重命名对话。");
   return set({ agentHistorySessions: renamed, agentHistoryEditingId: null });
+}
+
+async function deleteAgentChatBackend(id = "") {
+  if (!state.token || !id) return;
+  try {
+    const db = await api(`/agent-chats/${encodeURIComponent(id)}`, { method: "DELETE" });
+    state.db = db;
+  } catch (error) {
+    console.warn("Agent chat delete sync failed", error);
+  }
+}
+
+async function renameAgentChatBackend(id = "", title = "") {
+  if (!state.token || !id || !title) return;
+  try {
+    const payload = await api(`/agent-chats/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      body: JSON.stringify({ title })
+    });
+    if (payload?.state) state.db = payload.state;
+    if (payload?.chat) rememberAgentHistorySessions([payload.chat, ...(state.agentHistorySessions || []).filter((item) => item.id !== payload.chat.id)]);
+  } catch (error) {
+    console.warn("Agent chat rename sync failed", error);
+  }
 }
 
 function agentMessagesForStorage(messages = []) {
@@ -13380,6 +13489,27 @@ window.addEventListener("storage", (event) => {
       if (state.page === "agent") render();
     }
   }
+});
+
+window.addEventListener("popstate", () => {
+  if (window.location.pathname.startsWith("/studio/agent")) {
+    state.page = "agent";
+    if (!restoreAgentChatFromUrl({ quiet: true, replace: true }) && !agentChatIdFromUrl()) {
+      clearAgentTypingTimer();
+      state.agentMessages = [];
+      state.agentInput = "";
+      state.agentAttachments = [];
+      state.agentQueue = [];
+      state.agentBusy = false;
+      state.agentTyping = false;
+      state.activeAgentHistoryId = null;
+      state.activeAgentDraftId = state.activeAgentDraftId || createAgentDraftId();
+      localStorage.removeItem(storageKeys.agentMessages);
+      render();
+    }
+    return;
+  }
+  render();
 });
 
 hydrateAgentChatIdentity();

@@ -1033,6 +1033,60 @@ function publicAgentTemplate(template = {}) {
   };
 }
 
+function publicAgentChat(chat = {}) {
+  return {
+    id: chat.id,
+    title: sanitizeAgentText(chat.title || "Agent Chat").slice(0, 80),
+    manualTitle: Boolean(chat.manualTitle),
+    createdAt: chat.createdAt,
+    updatedAt: chat.updatedAt,
+    messages: sanitizeAgentChatMessages(chat.messages || [])
+  };
+}
+
+function sanitizeAgentChatMessages(messages = []) {
+  return (Array.isArray(messages) ? messages : [])
+    .filter((item) => ["user", "assistant"].includes(item?.role))
+    .map((item) => ({
+      role: item.role,
+      content: sanitizeAgentText(item.content || "").slice(0, 1600),
+      ...(Array.isArray(item.attachments) && item.attachments.length ? {
+        attachments: item.attachments.slice(0, 4).map((attachment) => ({
+          id: sanitizeAgentText(attachment.id || "").slice(0, 80),
+          name: sanitizeAgentText(attachment.name || "Attachment").slice(0, 120),
+          kind: sanitizeAgentText(attachment.kind || "").slice(0, 20),
+          type: sanitizeAgentText(attachment.type || "").slice(0, 80),
+          size: Number(attachment.size || 0) || 0
+        }))
+      } : {}),
+      ...(item.agentRun ? {
+        agentRun: {
+          id: sanitizeAgentText(item.agentRun.id || "").slice(0, 80),
+          status: sanitizeAgentText(item.agentRun.status || "").slice(0, 40),
+          summary: sanitizeAgentText(item.agentRun.summary || "").slice(0, 240)
+        }
+      } : {})
+    }))
+    .filter((item) => item.content || item.attachments?.length || item.agentRun?.id)
+    .slice(-40);
+}
+
+function naturalAgentChatTitleFromMessages(messages = []) {
+  const first = messages.find((item) => item.role === "user" && String(item.content || "").trim())
+    || messages.find((item) => item.role === "assistant" && String(item.content || "").trim());
+  const raw = sanitizeAgentText(first?.content || "Agent Chat")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/^(你好|您好|嗨|哈喽|hello|hi|hey)[,，\s]*/i, "")
+    .replace(/^(帮我|请你|请帮我|我要|我想|可以|能不能|麻烦你|can you|could you|please|pls|i want to|i need to)\s*/i, "")
+    .replace(/[。！？!?]+$/g, "")
+    .trim();
+  if (!raw) return "Agent Chat";
+  if (/[㐀-鿿]/.test(raw)) return raw.slice(0, 16);
+  return raw.split(/\s+/).filter(Boolean).slice(0, 6).map((word) => /^(ai|ui|ux|api|ugc|prd)$/i.test(word) ? word.toUpperCase() : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(" ").slice(0, 80) || "Agent Chat";
+}
+
 function buildAgentMetrics(db, user) {
   const events = (db.agentFeedbackEvents || []).filter((item) => item.userId === user.id);
   const runs = (db.agentRuns || []).filter((item) => item.userId === user.id);
@@ -1277,6 +1331,13 @@ function normalizeDb(db) {
   db.agentPreferenceMemory ||= {};
   db.agentTemplates ||= [];
   db.agentTemplates = db.agentTemplates.slice(0, 500).map((item) => ({ metadata: {}, usageCount: 0, ...item, userId: item.userId || adminUserId }));
+  db.agentChats ||= [];
+  db.agentChats = keepNewestRows((db.agentChats || []).map((item) => ({
+    messages: [],
+    manualTitle: false,
+    ...item,
+    userId: item.userId || adminUserId
+  })), Number(process.env.STORED_AGENT_CHAT_LIMIT || 600));
   db.agentMemoryVersions ||= [];
   db.agentEvaluations ||= [];
   db.supportTickets ||= [];
@@ -1785,6 +1846,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
   const tiktokConnections = (db.tiktok?.connections || []).filter(owns);
   const tiktokPublishes = (db.tiktok?.publishes || []).filter(owns).map(sanitizePublish);
   const agentTemplates = (db.agentTemplates || []).filter(owns).map(publicAgentTemplate);
+  const agentChats = recentRows((db.agentChats || []).filter(owns), Number(process.env.PUBLIC_STATE_AGENT_CHAT_LIMIT || 40)).map(publicAgentChat);
   const userRevenue = (userId) => db.payments.filter((payment) => payment.userId === userId && payment.status === "paid").reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
   const userCost = (userId) => db.generationJobs.filter((job) => job.userId === userId).reduce((sum, job) => sum + Number(job.costRm || 0), 0);
   const userLastUsed = (userId) => {
@@ -1839,6 +1901,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
     agentPreferences: user ? buildAgentPreferenceSummary(db, user) : defaultAgentPreferenceMemory(),
     agentMetrics: user ? buildAgentMetrics(db, user) : { runs: 0, completedRuns: 0, confirmationRate: 0, positiveSignals: 0, negativeSignals: 0, templates: 0, topTools: [], lastRunAt: null },
     agentTemplates,
+    agentChats,
     admin,
     storage: isAdmin ? storageStatus() : { durableAssets: storageStatus().durableAssets },
     tiktok: {
@@ -6881,6 +6944,110 @@ app.get("/api/state", async (req, res, next) => {
     const { user } = await requireAuth(req);
     const db = await reconcileStaleGenerationJobs(user);
     res.json(publicState(db, user));
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/agent-chats", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    const payload = await mutateDb(async (db) => {
+      db.agentChats ||= [];
+      const id = sanitizeAgentText(req.body.id || "").slice(0, 100) || crypto.randomUUID();
+      const messages = sanitizeAgentChatMessages(req.body.messages || []);
+      if (!messages.length) {
+        const error = new Error("Chat messages are required.");
+        error.status = 400;
+        throw error;
+      }
+      const existing = db.agentChats.find((item) => item.id === id && item.userId === user.id);
+      const now = new Date().toISOString();
+      const manualTitle = Boolean(existing?.manualTitle || req.body.manualTitle);
+      const titleInput = sanitizeAgentText(req.body.title || "").slice(0, 80);
+      const chat = {
+        ...(existing || {}),
+        id,
+        userId: user.id,
+        title: manualTitle && existing?.title ? existing.title : titleInput || existing?.title || naturalAgentChatTitleFromMessages(messages),
+        manualTitle,
+        messages,
+        createdAt: existing?.createdAt || req.body.createdAt || now,
+        updatedAt: now
+      };
+      const index = db.agentChats.findIndex((item) => item.id === id && item.userId === user.id);
+      if (index >= 0) db.agentChats[index] = chat;
+      else db.agentChats.unshift(chat);
+      db.agentChats = keepNewestRows(db.agentChats, Number(process.env.STORED_AGENT_CHAT_LIMIT || 600));
+      await saveDb(db);
+      return { chat: publicAgentChat(chat), state: publicState(db, user) };
+    });
+    res.json(payload);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/agent-chats/:id/title", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    const payload = await mutateDb(async (db) => {
+      const chat = (db.agentChats || []).find((item) => item.id === req.params.id && item.userId === user.id);
+      if (!chat) {
+        const error = new Error("Chat not found.");
+        error.status = 404;
+        throw error;
+      }
+      if (!chat.manualTitle) {
+        chat.title = naturalAgentChatTitleFromMessages(chat.messages || []);
+        chat.updatedAt = new Date().toISOString();
+      }
+      await saveDb(db);
+      return { chat: publicAgentChat(chat), state: publicState(db, user) };
+    });
+    res.json(payload);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.patch("/api/agent-chats/:id", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    const payload = await mutateDb(async (db) => {
+      const chat = (db.agentChats || []).find((item) => item.id === req.params.id && item.userId === user.id);
+      if (!chat) {
+        const error = new Error("Chat not found.");
+        error.status = 404;
+        throw error;
+      }
+      const title = sanitizeAgentText(req.body.title || "").replace(/\s+/g, " ").trim().slice(0, 80);
+      if (!title) {
+        const error = new Error("Chat title is required.");
+        error.status = 400;
+        throw error;
+      }
+      chat.title = title;
+      chat.manualTitle = true;
+      chat.updatedAt = new Date().toISOString();
+      await saveDb(db);
+      return { chat: publicAgentChat(chat), state: publicState(db, user) };
+    });
+    res.json(payload);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.delete("/api/agent-chats/:id", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    const payload = await mutateDb(async (db) => {
+      db.agentChats = (db.agentChats || []).filter((item) => !(item.id === req.params.id && item.userId === user.id));
+      await saveDb(db);
+      return publicState(db, user);
+    });
+    res.json(payload);
   } catch (error) {
     next(error);
   }
