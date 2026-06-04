@@ -499,6 +499,52 @@ app.get("/api/admin/diagnostics/veo31", async (req, res, next) => {
   }
 });
 
+app.get("/api/admin/diagnostics/gemini-omni", async (req, res, next) => {
+  try {
+    requireAdminDiagnosticAccess(req);
+    const startedAt = Date.now();
+    const prompt = sanitizeAgentText(req.query.prompt || "A beautiful woman drinking tea in a calm sunlit cafe, realistic cinematic short video, gentle hand movement, steam rising from the cup, soft natural light, shallow depth of field.").slice(0, 800);
+    const project = {
+      image: {
+        model: "Gemini Omni",
+        mode: "Create Video",
+        prompt
+      }
+    };
+    const body = wuyinImageBody(project, prompt);
+    const submitted = await wuyinRequest(wuyinPathFromProject(project), {
+      method: "POST",
+      body
+    });
+    const taskId = submitted.id || submitted.task_id || submitted.taskId || submitted.data?.id;
+    if (!taskId) {
+      return res.status(502).json({
+        ok: false,
+        configured: true,
+        endpoint: wuyinPathFromProject(project),
+        durationMs: Date.now() - startedAt,
+        error: "Gemini Omni task submission did not return a task id.",
+        responseShape: Object.keys(submitted || {}).slice(0, 12)
+      });
+    }
+    const taskData = await pollWuyinTask(taskId);
+    const urls = extractVideoUrls(taskData).concat(extractUrlsDeep(taskData).filter((url) => /\.(?:mp4|mov|webm)(?:[?#].*)?$/i.test(url)));
+    res.json({
+      ok: urls.length > 0,
+      configured: true,
+      endpoint: wuyinPathFromProject(project),
+      taskId,
+      durationMs: Date.now() - startedAt,
+      urlCount: urls.length,
+      firstUrl: urls[0] || "",
+      status: taskData.status,
+      responseShape: Object.keys(taskData || {}).slice(0, 12)
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 function defaultBilling() {
   return {
     plan: "Pokaya AI Pro",
