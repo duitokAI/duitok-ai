@@ -44905,3 +44905,9 @@ body:has(.studio-shell .video-page-studio),
   min-height: clamp(24px, 5cqw, 30px) !important;
   overflow: visible !important;
 }
+
+.attachment-picker-head .attachment-add-button,
+.attachment-picker-head .attachment-add-button svg,
+.attachment-picker-head .attachment-add-button span {
+  color: #ffffff !important;
+}
