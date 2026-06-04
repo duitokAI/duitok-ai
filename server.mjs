@@ -33,7 +33,6 @@ const apimartSeedream50LiteModel = process.env.APIMART_SEEDREAM_5_LITE_MODEL || 
 const apimartSeedream45Model = process.env.APIMART_SEEDREAM_4_5_MODEL || "seedream-4.5";
 const apimartGrokImageModel = process.env.APIMART_GROK_IMAGE_MODEL || "grok-imagine-1.0-apimart";
 const apimartGrokVideoModel = process.env.APIMART_GROK_VIDEO_MODEL || "grok-imagine-1.0-video-apimart";
-const apimartVeo31Model = process.env.APIMART_VEO_3_1_MODEL || "veo3.1-fast-official";
 const apimartWanVideoModel = process.env.APIMART_WAN_VIDEO_MODEL || "wan2.7";
 const apimartKlingOmniModel = process.env.APIMART_KLING_OMNI_MODEL || "kling-v3-omni";
 const apimartKlingMotionModel = process.env.APIMART_KLING_MOTION_MODEL || "kling-v3-motion-control";
@@ -62,7 +61,7 @@ const wuyinBaseUrl = (process.env.WUYIN_BASE_URL || "https://api.wuyinkeji.com")
 const wuyinVoiceClonePath = process.env.WUYIN_VOICE_CLONE_PATH || "/api/voice/clone";
 const wuyinImagePaths = {
   "Grok Imagine": process.env.WUYIN_GROK_IMAGE_PATH || "/api/async/image_grok_imagine",
-  "Veo 3.1": "/api/async/video_veo3.1_fast",
+  "Veo 3.1": process.env.WUYIN_VEO_3_1_PATH || "/api/async/video_veo3.1_fast",
   "Sora 2": "/api/async/video_sora2",
   "Gemini Omni": "/api/async/video_google_omni",
   "Grok Imagine Video": "/api/async/video_grok_imagine"
@@ -1898,8 +1897,8 @@ function providerForMediaModel(model) {
   model = internalMediaModel(model);
   if (model === "GPT Image 2" || model === "Seedream 5.0 Lite" || model === "Seedream 4.5" || model === "Grok Imagine") return process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Nano Banana Pro" || model === "Nano Banana 2") return process.env.GRSAI_API_KEY ? "grsai" : "mock";
-  if (model === "Seedance 2.0" || model === "Grok Imagine Video" || model === "Wan 2.7" || model === "Kling V3 Omni" || model === "Kling V3 Motion Control" || model === "MiniMax Hailuo 2.3" || model === "Veo 3.1") return process.env.APIMART_API_KEY ? "apimart" : "mock";
-  if (model === "Sora 2" || model === "Gemini Omni") return process.env.WUYIN_API_KEY ? "wuyin" : "mock";
+  if (model === "Seedance 2.0" || model === "Grok Imagine Video" || model === "Wan 2.7" || model === "Kling V3 Omni" || model === "Kling V3 Motion Control" || model === "MiniMax Hailuo 2.3") return process.env.APIMART_API_KEY ? "apimart" : "mock";
+  if (model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni") return process.env.WUYIN_API_KEY ? "wuyin" : "mock";
   return "unsupported";
 }
 
@@ -1922,7 +1921,7 @@ function videoDurationFor(project, model = project.image?.model) {
   if (model === "Kling V3 Omni") return Number(project.image?.duration || process.env.APIMART_KLING_OMNI_DURATION || 5);
   if (model === "Kling V3 Motion Control") return Number(project.image?.duration || process.env.APIMART_KLING_MOTION_DURATION || 5);
   if (model === "MiniMax Hailuo 2.3") return Number(project.image?.duration || process.env.APIMART_HAILUO_2_3_DURATION || 6);
-  if (model === "Veo 3.1") return Number(project.image?.duration || process.env.APIMART_VEO_3_1_DURATION || 8);
+  if (model === "Veo 3.1") return 8;
   return 0;
 }
 
@@ -3231,7 +3230,7 @@ function generationAspectRatioForProject(project, action = "generate-image", ste
 function generationEndpointFor(provider, project) {
   if (provider === "gemini") return `${geminiGeneratePathPrefix}/${geminiVisionModel}:generateContent`;
   if (provider === "grsai" && project?.clone?.referenceVideo) return grsaiChatPath;
-  if (provider === "apimart" && ["Seedance 2.0", "Grok Imagine Video", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control", "MiniMax Hailuo 2.3", "Veo 3.1"].includes(internalMediaModel(project?.image?.model))) return apimartVideoPath;
+  if (provider === "apimart" && ["Seedance 2.0", "Grok Imagine Video", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control", "MiniMax Hailuo 2.3"].includes(internalMediaModel(project?.image?.model))) return apimartVideoPath;
   if (provider === "grsai") return grsaiDrawPath;
   if (provider === "wuyin") return wuyinPathFromProject(project);
   return apimartImagePath;
@@ -3256,6 +3255,7 @@ function wuyinImageBody(project, prompt) {
     return {
       prompt,
       aspectRatio: process.env.WUYIN_VIDEO_RATIO || "9:16",
+      duration: String(videoDurationFor(project, model)),
       size: process.env.WUYIN_VEO_SIZE || "720p"
     };
   }
@@ -3316,31 +3316,6 @@ function apimartGrokVideoBody(project, prompt) {
     duration,
     quality: ["480p", "720p"].includes(quality) ? quality : "480p"
   };
-}
-
-function apimartVeo31Body(project, prompt) {
-  const requestedDuration = Number(videoDurationFor(project, "Veo 3.1")) || 8;
-  const duration = requestedDuration <= 5 ? 4 : requestedDuration <= 7 ? 6 : 8;
-  const requestedAspectRatio = String(project.image?.aspectRatio || process.env.APIMART_VEO_3_1_ASPECT_RATIO || "16:9").trim();
-  const aspectRatio = ["16:9", "9:16"].includes(requestedAspectRatio) ? requestedAspectRatio : "16:9";
-  const requestedResolution = String(project.image?.resolution || process.env.APIMART_VEO_3_1_RESOLUTION || "720p").trim();
-  const normalizedResolution = requestedResolution.toLowerCase();
-  const resolution = normalizedResolution === "4k" ? "4K" : ["720p", "1080p"].includes(normalizedResolution) ? normalizedResolution : "720p";
-  const body = {
-    model: apimartVeo31Model,
-    prompt,
-    duration,
-    aspect_ratio: aspectRatio,
-    resolution,
-    generate_audio: process.env.APIMART_VEO_3_1_GENERATE_AUDIO !== "false"
-  };
-  const negativePrompt = String(project.image?.negativePrompt || process.env.APIMART_VEO_3_1_NEGATIVE_PROMPT || "").trim();
-  if (negativePrompt) body.negative_prompt = negativePrompt;
-  const firstFrameImage = String(project.image?.firstFrameImage || project.image?.referenceImageUrl || process.env.APIMART_VEO_3_1_FIRST_FRAME_IMAGE || "").trim();
-  if (firstFrameImage) body.first_frame_image = firstFrameImage;
-  const lastFrameImage = String(project.image?.lastFrameImage || process.env.APIMART_VEO_3_1_LAST_FRAME_IMAGE || "").trim();
-  if (lastFrameImage) body.last_frame_image = lastFrameImage;
-  return body;
 }
 
 function apimartWanVideoBody(project, prompt) {
@@ -3526,7 +3501,7 @@ async function generateVideoWithWuyin(project) {
   const taskData = await pollWuyinTask(taskId);
   const urls = extractUrlsDeep(taskData);
   return {
-    text: urls.length ? `Video generated with 速创API.\n\nTask ID: ${taskId}` : `Video task completed with 速创API.\n\nTask ID: ${taskId}`,
+    text: urls.length ? `Video generated with Pokaya AI.\n\nTask ID: ${taskId}` : `Video task completed with Pokaya AI.\n\nTask ID: ${taskId}`,
     urls,
     taskId
   };
@@ -3571,28 +3546,6 @@ async function generateVideoWithApimartGrok(project) {
   const urls = extractVideoUrls(taskData);
   return {
     text: urls.length ? `Video generated with Grok Imagine Video.\n\nTask ID: ${taskId}` : `Grok Imagine Video task completed.\n\nTask ID: ${taskId}`,
-    urls,
-    taskId
-  };
-}
-
-async function generateVideoWithApimartVeo31(project) {
-  const prompt = [
-    project.image?.prompt || "Create a high-converting TikTok Shop product video with synchronized sound.",
-    `Mode: ${project.image?.mode || "Create Video"}.`,
-    "Style: cinematic short-form ecommerce video, coherent motion, natural synchronized audio, clear product focus, no fake brand claims."
-  ].join("\n");
-  const data = await apimartRequest(apimartVideoPath, {
-    method: "POST",
-    body: JSON.stringify(apimartVeo31Body(project, prompt))
-  });
-  const task = Array.isArray(data) ? data[0] : data;
-  const taskId = task?.task_id || task?.id;
-  if (!taskId) return { text: JSON.stringify(data, null, 2), urls: extractVideoUrls(data) };
-  const taskData = await pollApimartTask(taskId);
-  const urls = extractVideoUrls(taskData);
-  return {
-    text: urls.length ? `Video generated with Google Veo 3.1.\n\nTask ID: ${taskId}` : `Google Veo 3.1 task completed.\n\nTask ID: ${taskId}`,
     urls,
     taskId
   };
@@ -3714,10 +3667,6 @@ async function generateWithProvider(project, action, step) {
       const video = await generateVideoWithApimartGrok(project);
       return { title: "Grok Imagine Video", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" };
     }
-    if (provider === "apimart" && model === "Veo 3.1") {
-      const video = await generateVideoWithApimartVeo31(project);
-      return { title: "Google Veo 3.1", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" };
-    }
     if (provider === "apimart" && model === "Wan 2.7") {
       const video = await generateVideoWithApimartWan(project);
       return { title: "Wan 2.7", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" };
@@ -3734,9 +3683,9 @@ async function generateWithProvider(project, action, step) {
       const video = await generateVideoWithApimartHailuo23(project);
       return { title: "MiniMax Hailuo 2.3", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" };
     }
-    if (provider === "wuyin" && (model === "Sora 2" || model === "Gemini Omni")) {
+    if (provider === "wuyin" && (model === "Veo 3.1" || model === "Sora 2" || model === "Gemini Omni")) {
       const video = await generateVideoWithWuyin(project);
-      return { title: `速创API ${model}`, body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "wuyin" };
+      return { title: model, body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "wuyin" };
     }
     if (provider === "wuyin" && model === "Grok Imagine") {
       const image = await generateImageWithWuyin(project);

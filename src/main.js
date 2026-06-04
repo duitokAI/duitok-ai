@@ -5749,7 +5749,7 @@ function videoGenerateConsole(p) {
       <div class="video-console-tools">
         ${videoOptionMenu("model", "ugc.provider", videoModelValue(p), [
           ["Seedance 2.0 Fast", "Seedance 2.0 Fast"],
-          ["Veo 3.1", "Google Veo 3.1"],
+          ["Veo 3.1", "Veo 3.1"],
           ["Sora 2", "Sora 2"],
           ["Wan 2.7", "Wan 2.7"],
           ["Kling V3 Omni", "Kling Omni"],
@@ -5895,7 +5895,7 @@ function autoPanel(p) {
       </div>
       <p class="field-label">Provider</p>
       <div class="auto-provider-grid">
-        ${autoButton("auto.provider", "Veo 3.1", "🎬 Google Veo 3.1", provider)}
+        ${autoButton("auto.provider", "Veo 3.1", "🎬 Veo 3.1", provider)}
         ${autoButton("auto.provider", "Sora 2", "⚡ Sora 2", provider)}
         ${autoButton("auto.provider", "GeminiOmni", "🔷 Pokaya AI", provider)}
       </div>
@@ -6003,7 +6003,7 @@ function originalProviderValue(provider) {
 function originalProviderLabel(provider) {
   const labels = {
     "Seedance 2.0": "Seedance",
-    "Veo 3.1": "Google Veo",
+    "Veo 3.1": "Veo",
     "Grok Imagine Video": "Grok",
     "Sora 2": "Sora",
     "Wan 2.7": "Wan",
@@ -6043,7 +6043,7 @@ function originalPanel(p) {
       <p class="original-field-label">Provider</p>
       <div class="original-provider-grid">
         ${originalChoiceButton("original.provider", "Seedance 2.0", "🎞️ Seedance 2.0", provider)}
-        ${originalChoiceButton("original.provider", "Veo 3.1", "🎬 Google Veo 3.1", provider)}
+        ${originalChoiceButton("original.provider", "Veo 3.1", "🎬 Veo 3.1", provider)}
         ${originalChoiceButton("original.provider", "Grok Imagine Video", "⚡ Grok", provider)}
         ${originalChoiceButton("original.provider", "Sora 2", "✨ Sora 2", provider)}
         ${originalChoiceButton("original.provider", "Wan 2.7", "🌊 Wan 2.7", provider)}
