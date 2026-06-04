@@ -4879,14 +4879,13 @@ function studioResultWall(p, meta = {}) {
   const items = p.results.filter((item) => studioResultBelongsToStep(item, step, types)).slice().reverse();
   const wallKey = studioWallKey(p, step, types);
   const unloadedCount = Math.max(0, Number(p.resultCount || 0) - (p.results || []).length);
-  const pendingCards = pending
-    .slice()
-    .sort((a, b) => studioWallTimelineTime(b) - studioWallTimelineTime(a))
-    .map((job) => studioPendingWallCard(job));
-  const cards = [
-    ...items.map((item, index) => studioWallCard(item, index)),
-    ...pendingCards
-  ];
+  const timeline = [
+    ...pending.map((job) => ({ kind: "pending", item: job, time: studioWallTimelineTime(job) })),
+    ...items.map((item, index) => ({ kind: "result", item, index, time: studioWallTimelineTime(item) }))
+  ].sort((a, b) => b.time - a.time);
+  const cards = timeline.map((entry) => entry.kind === "pending"
+    ? studioPendingWallCard(entry.item)
+    : studioWallCard(entry.item, entry.index));
   if (!cards.length) return "";
   return `<section class="studio-result-wall" data-studio-wall-key="${esc(wallKey)}" data-studio-wall-has-more="${unloadedCount ? "true" : "false"}">
     <div class="studio-wall-grid">
