@@ -56,6 +56,7 @@ let imagePresetSaveTimer = null;
 let autoFrameworkSaveTimer = null;
 let autoFrameworkSaveSeq = 0;
 let imageConsoleScrollCleanup = null;
+let studioWallInfiniteScrollCleanup = null;
 let sidebarTooltipCleanup = null;
 let navigationFrame = null;
 let aspectRatioPopoverCleanup = null;
@@ -68,6 +69,7 @@ const imageReferenceSaveSeq = new Map();
 let resultTitleSaveTimer = null;
 let generationPollTimer = null;
 const generationStateEtags = new Map();
+const studioWallLoadingKeys = new Set();
 const quickFieldSaveTimers = new Map();
 let quickFieldSaveSeq = 0;
 const pendingAgentChatSync = new Set();
@@ -2060,6 +2062,7 @@ function render() {
   updatePromoCountdown();
   restoreSidebarScroll();
   bindImageConsoleCompact();
+  bindStudioWallInfiniteScroll();
   bindCollapsedSidebarTooltips();
   scrollToSopAnchor();
 }
@@ -4875,24 +4878,20 @@ function studioResultWall(p, meta = {}) {
   const pending = pendingResultJobs(p, types);
   const items = p.results.filter((item) => studioResultBelongsToStep(item, step, types)).slice().reverse();
   const wallKey = studioWallKey(p, step, types);
-  const limit = studioWallLimit(wallKey);
-  const visibleItems = items.slice(0, limit);
   const unloadedCount = Math.max(0, Number(p.resultCount || 0) - (p.results || []).length);
-  const hiddenCount = Math.max(0, items.length - visibleItems.length) + unloadedCount;
   const pendingCards = pending
     .slice()
     .sort((a, b) => studioWallTimelineTime(b) - studioWallTimelineTime(a))
     .map((job) => studioPendingWallCard(job));
   const cards = [
-    ...visibleItems.map((item, index) => studioWallCard(item, index)),
+    ...items.map((item, index) => studioWallCard(item, index)),
     ...pendingCards
   ];
   if (!cards.length) return "";
-  return `<section class="studio-result-wall">
+  return `<section class="studio-result-wall" data-studio-wall-key="${esc(wallKey)}" data-studio-wall-has-more="${unloadedCount ? "true" : "false"}">
     <div class="studio-wall-grid">
       ${cards.join("")}
     </div>
-    ${hiddenCount ? `<button type="button" class="studio-wall-more" data-studio-wall-more="${esc(wallKey)}">${icon("chevrons-down", 18)} Load ${Math.min(studioWallPageSize, hiddenCount)} more · ${hiddenCount} hidden</button>` : ""}
     ${studioBulkSelectionBar()}
   </section>`;
 }
@@ -4916,13 +4915,60 @@ function studioWallLimit(key) {
 
 async function showMoreStudioWall(key) {
   if (!key) return;
-  const nextLimit = studioWallLimit(key) + studioWallPageSize;
+  if (studioWallLoadingKeys.has(key)) return;
+  const [projectId, step = state.step, ...types] = key.split(":");
+  const projectItem = (state.db?.projects || []).find((item) => item.id === projectId);
+  const matchingCount = (projectItem?.results || []).filter((item) => studioResultBelongsToStep(item, step, types)).length;
+  const nextLimit = Math.max(studioWallLimit(key) + studioWallPageSize, matchingCount + studioWallPageSize);
   const next = {
     ...(state.studioWallLimits || {}),
     [key]: nextLimit
   };
   set({ studioWallLimits: next });
-  await loadOlderStudioWallResults(key, nextLimit);
+  studioWallLoadingKeys.add(key);
+  try {
+    await loadOlderStudioWallResults(key, nextLimit);
+  } finally {
+    studioWallLoadingKeys.delete(key);
+  }
+}
+
+function bindStudioWallInfiniteScroll() {
+  studioWallInfiniteScrollCleanup?.();
+  studioWallInfiniteScrollCleanup = null;
+  const walls = [...document.querySelectorAll(".studio-result-wall[data-studio-wall-key][data-studio-wall-has-more='true']")];
+  if (!walls.length) return;
+  let ticking = false;
+  let loading = false;
+  const scrollTargets = [
+    window,
+    document.querySelector(".workspace"),
+    document.querySelector(".studio-shell")
+  ].filter(Boolean);
+  const uniqueScrollTargets = [...new Set(scrollTargets)];
+  const isNearViewportBottom = (wall) => wall.getBoundingClientRect().bottom - window.innerHeight < 900;
+  const check = async () => {
+    ticking = false;
+    if (loading) return;
+    const wall = walls.find((item) => item.dataset.studioWallHasMore === "true" && isNearViewportBottom(item));
+    if (!wall?.dataset.studioWallKey) return;
+    loading = true;
+    try {
+      await showMoreStudioWall(wall.dataset.studioWallKey);
+    } finally {
+      loading = false;
+    }
+  };
+  const requestCheck = () => {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(check);
+  };
+  uniqueScrollTargets.forEach((target) => target.addEventListener("scroll", requestCheck, { passive: true }));
+  requestCheck();
+  studioWallInfiniteScrollCleanup = () => {
+    uniqueScrollTargets.forEach((target) => target.removeEventListener("scroll", requestCheck));
+  };
 }
 
 async function loadOlderStudioWallResults(key, targetLimit) {
@@ -12033,6 +12079,7 @@ function patchStudioResultWallFromDb(nextDb) {
     else shell.insertAdjacentHTML("afterbegin", wallHtml);
   }
   window.lucide?.createIcons();
+  bindStudioWallInfiniteScroll();
   return true;
 }
 
