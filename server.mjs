@@ -1927,8 +1927,15 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
   const owns = (item) => item.userId === user.id;
   const canInspectAll = isAdmin;
   const userBilling = user?.billing || defaultBilling();
-  const sanitizeResult = (result) => {
-    if (isAdmin) return result;
+  const enrichResultTimeline = (result = {}, originJob = null) => ({
+    ...result,
+    generationJobId: result.generationJobId || originJob?.id,
+    timelineAt: result.timelineAt || originJob?.createdAt || result.createdAt,
+    batchIndex: result.batchIndex || originJob?.batchIndex,
+    batchCount: result.batchCount || originJob?.batchCount
+  });
+  const sanitizeResult = (result, originJob = null) => {
+    if (isAdmin) return enrichResultTimeline(result, originJob);
     const {
       costRm: _costRm,
       costRmb: _costRmb,
@@ -1950,7 +1957,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
       ...safe
     } = result;
     const publicType = safe.videoUrl ? "video" : safe.imageUrl ? "image" : safe.type;
-    return {
+    return enrichResultTimeline({
       ...safe,
       assetStorage: safe.imageUrl || safe.videoUrl ? "pokaya-media" : undefined,
       imageUrl: publicMediaMarker(safe.imageUrl),
@@ -1958,18 +1965,23 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
       model: publicMediaModel(_model),
       title: redactProviderText(safe.title, publicGenerationTitle(publicType)),
       body: redactProviderText(safe.body, publicGenerationBody(publicType))
+    }, originJob);
+  };
+  const sanitizeProject = (project) => {
+    const projectJobs = (db.generationJobs || []).filter((job) => job.projectId === project.id && (isAdmin || job.userId === user.id));
+    const jobsByResultId = new Map(projectJobs.filter((job) => job.resultId).map((job) => [job.resultId, job]));
+    return {
+      ...project,
+      image: {
+        ...(project.image || {}),
+        model: publicMediaModel(project.image?.model)
+      },
+      agentMemory: sanitizeAgentObject(project.agentMemory || {}),
+      results: (isAdmin ? (project.results || []) : recentProjectResults(project.results || []))
+        .map((result) => sanitizeResult(result, jobsByResultId.get(result.id))),
+      resultCount: projectResultCount(project)
     };
   };
-  const sanitizeProject = (project) => ({
-    ...project,
-    image: {
-      ...(project.image || {}),
-      model: publicMediaModel(project.image?.model)
-    },
-    agentMemory: sanitizeAgentObject(project.agentMemory || {}),
-    results: (isAdmin ? (project.results || []) : recentProjectResults(project.results || [])).map(sanitizeResult),
-    resultCount: projectResultCount(project)
-  });
   const sanitizeJob = (job) => {
     if (isAdmin) return job;
     const {
@@ -2125,7 +2137,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
   };
 }
 
-function publicGenerationResult(result = {}) {
+function publicGenerationResult(result = {}, originJob = null) {
   const publicType = result.videoUrl ? "video" : result.imageUrl ? "image" : result.type;
   return {
     id: result.id,
@@ -2141,6 +2153,10 @@ function publicGenerationResult(result = {}) {
     model: publicMediaModel(result.model),
     resolution: result.resolution,
     aspectRatio: result.aspectRatio,
+    generationJobId: result.generationJobId || originJob?.id,
+    timelineAt: result.timelineAt || originJob?.createdAt || result.createdAt,
+    batchIndex: result.batchIndex || originJob?.batchIndex,
+    batchCount: result.batchCount || originJob?.batchCount,
     createdAt: result.createdAt
   };
 }
@@ -2199,10 +2215,11 @@ function publicProjectGenerationState(db, user, projectId) {
   const recentResultIds = new Set(recentResults.map((result) => result.id));
   const projectJobs = (db.generationJobs || [])
     .filter((job) => job.projectId === project.id && (hasAdminPrivileges(user) || job.userId === user.id));
+  const jobsByResultId = new Map(projectJobs.filter((job) => job.resultId).map((job) => [job.resultId, job]));
   return {
     project: {
       id: project.id,
-      results: recentResults.map(publicGenerationResult),
+      results: recentResults.map((result) => publicGenerationResult(result, jobsByResultId.get(result.id))),
       resultCount: projectResultCount(project)
     },
     generationJobs: recentGenerationJobs(projectJobs)
@@ -2216,6 +2233,9 @@ function publicProjectResultsPage(db, user, projectId, query = {}) {
   const project = findProject(db, projectId, user);
   const limit = Math.min(96, Math.max(1, Number.parseInt(query.limit || "48", 10) || 48));
   const before = String(query.before || "").trim();
+  const projectJobs = (db.generationJobs || [])
+    .filter((job) => job.projectId === project.id && (hasAdminPrivileges(user) || job.userId === user.id));
+  const jobsByResultId = new Map(projectJobs.filter((job) => job.resultId).map((job) => [job.resultId, job]));
   let results = project.results || [];
   if (before) {
     const beforeIndex = results.findIndex((result) => result.id === before);
@@ -2224,14 +2244,14 @@ function publicProjectResultsPage(db, user, projectId, query = {}) {
     } else {
       const beforeTime = Date.parse(before);
       if (Number.isFinite(beforeTime)) {
-        results = results.filter((result) => Date.parse(result.createdAt || 0) < beforeTime);
+        results = results.filter((result) => Date.parse(result.timelineAt || jobsByResultId.get(result.id)?.createdAt || result.createdAt || 0) < beforeTime);
       }
     }
   }
   const page = results.slice(Math.max(0, results.length - limit));
   return {
     projectId: project.id,
-    results: page.map(publicGenerationResult),
+    results: page.map((result) => publicGenerationResult(result, jobsByResultId.get(result.id))),
     hasMore: results.length > page.length,
     resultCount: projectResultCount(project),
     archivedResultCount: Number(project.archivedResultCount || 0)
@@ -2243,6 +2263,13 @@ function generationStateEtag(payload = {}) {
     projectId: payload.project?.id || "",
     resultCount: payload.project?.resultCount || 0,
     latestResultId: payload.project?.results?.at?.(-1)?.id || "",
+    results: (payload.project?.results || []).map((result) => [
+      result.id,
+      result.generationJobId || "",
+      result.timelineAt || "",
+      result.batchIndex || "",
+      result.batchCount || ""
+    ]),
     jobs: (payload.generationJobs || []).map((job) => [
       job.id,
       job.status,
@@ -4449,6 +4476,7 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
     const creditsToCharge = creditChargeFor(project, action, currentDb);
     const resultId = crypto.randomUUID();
     const jobId = crypto.randomUUID();
+    const createdAt = new Date().toISOString();
     const assetType = generated.videoUrl ? "video" : generated.imageUrl ? "image" : "text";
     const publicTitle = generated.publicTitle || publicGenerationTitle(assetType);
     const publicBody = publicGenerationBody(assetType);
@@ -4478,13 +4506,15 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
       assetStorageError: mirrored.storageError,
       taskId: generated.taskId,
       providerTaskId: generated.taskId,
+      generationJobId: jobId,
+      timelineAt: createdAt,
       provider: generated.provider,
       model: generated.model || internalMediaModel(project.image?.model),
       resolution: project.image?.resolution || imageResolutionFromProject(project),
       aspectRatio: generationAspectRatioForProject(project, action, step),
       costRm: cost.costRm,
       costUsd: cost.costUsd,
-      createdAt: new Date().toISOString()
+      createdAt
     };
     project.results.push(result);
     const owner = currentDb.users.find((item) => item.id === project.userId) || user;
@@ -4514,8 +4544,8 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
       textOutput: publicBody,
       providerTextOutput: generated.body,
       creditsCharged: creditsToCharge,
-      createdAt: result.createdAt,
-      completedAt: result.createdAt,
+      createdAt,
+      completedAt: createdAt,
       ...cost
     };
     currentDb.generationJobs.unshift(job);
@@ -4531,7 +4561,7 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
       taskId: generated.taskId,
       costRm: job.costRm,
       costUsd: job.costUsd,
-      createdAt: result.createdAt
+      createdAt
     });
     currentDb.usage.unshift(usage(publicTitle, creditsToCharge, project.userId));
     currentDb.creditLedger.unshift(creditEntry(project.userId, "debit", -creditsToCharge, publicTitle, {
@@ -4810,6 +4840,10 @@ async function completeQueuedGeneration(jobId, generated) {
       assetStorageError: mirrored.storageError,
       taskId: generated.taskId,
       providerTaskId: generated.taskId,
+      generationJobId: job.id,
+      timelineAt: job.createdAt || completedAt,
+      batchIndex: job.batchIndex,
+      batchCount: job.batchCount,
       provider: generated.provider,
       model: generated.model || internalMediaModel(project.image?.model),
       resolution: project.image?.resolution || imageResolutionFromProject(project),

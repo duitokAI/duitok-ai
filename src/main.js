@@ -4876,7 +4876,7 @@ function studioResultWall(p, meta = {}) {
   const types = Array.isArray(meta.types) ? meta.types : [state.step];
   const step = state.step || "image";
   const pending = pendingResultJobs(p, types);
-  const items = p.results.filter((item) => studioResultBelongsToStep(item, step, types)).slice().reverse();
+  const items = p.results.filter((item) => studioResultBelongsToStep(item, step, types));
   const wallKey = studioWallKey(p, step, types);
   const unloadedCount = Math.max(0, Number(p.resultCount || 0) - (p.results || []).length);
   const timeline = [
@@ -4899,7 +4899,7 @@ const studioWallPageSize = 24;
 
 function studioWallTimelineTime(item = {}) {
   const originJob = resultOriginJob(item);
-  const raw = originJob?.createdAt || item.createdAt || item.startedAt || item.updatedAt || item.completedAt || "";
+  const raw = item.timelineAt || originJob?.createdAt || item.createdAt || item.startedAt || item.updatedAt || item.completedAt || "";
   return Date.parse(raw || 0) || 0;
 }
 
@@ -6727,7 +6727,7 @@ function resultPromptText(item) {
 
 function resultOriginJob(item) {
   if (!item?.id) return null;
-  return (state.db?.generationJobs || []).find((entry) => entry.resultId === item.id || entry.taskId === item.taskId || entry.providerTaskId === item.providerTaskId) || null;
+  return (state.db?.generationJobs || []).find((entry) => entry.id === item.generationJobId || entry.resultId === item.id || entry.taskId === item.taskId || entry.providerTaskId === item.providerTaskId) || null;
 }
 
 function resultOriginLabel(item) {
@@ -11998,9 +11998,12 @@ function mergeProjectResults(existing = [], incoming = []) {
     if (item?.id) byId.set(item.id, { ...(byId.get(item.id) || {}), ...item });
   });
   return [...byId.values()].sort((a, b) => {
-    const aTime = Date.parse(a.createdAt || 0);
-    const bTime = Date.parse(b.createdAt || 0);
+    const aTime = Date.parse(a.timelineAt || a.createdAt || 0);
+    const bTime = Date.parse(b.timelineAt || b.createdAt || 0);
     if (Number.isFinite(aTime) && Number.isFinite(bTime) && aTime !== bTime) return aTime - bTime;
+    const aBatch = Number(a.batchIndex || 9999);
+    const bBatch = Number(b.batchIndex || 9999);
+    if (Number.isFinite(aBatch) && Number.isFinite(bBatch) && aBatch !== bBatch) return aBatch - bBatch;
     return String(a.id || "").localeCompare(String(b.id || ""));
   });
 }
@@ -12028,7 +12031,13 @@ function scheduleGenerationPoll(attempt = 0, db = state.db) {
 
 function generationResultSignature(db = state.db) {
   return (db?.projects || [])
-    .map((projectItem) => `${projectItem.id}:${(projectItem.results || []).map((item) => item.id).join(",")}`)
+    .map((projectItem) => `${projectItem.id}:${(projectItem.results || []).map((item) => [
+      item.id,
+      item.generationJobId || "",
+      item.timelineAt || "",
+      item.batchIndex || "",
+      item.batchCount || ""
+    ].join(":")).join(",")}`)
     .join("|");
 }
 
