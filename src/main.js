@@ -22,6 +22,8 @@ const storageKeys = {
   agentHistory: "pokaya-agent-history",
   agentDraftId: "pokaya-agent-draft-id"
 };
+const studioWallZoomMin = 2;
+const studioWallZoomMax = 4;
 function migrateStorageKey(key) {
   const legacyKey = `${legacyBrandPrefix}-${key.replace(/^pokaya-/, "")}`;
   const value = localStorage.getItem(key) ?? localStorage.getItem(legacyKey);
@@ -4831,8 +4833,8 @@ function studioImmersiveShell(p, step) {
 
 function studioWallZoomValue() {
   const value = Number(state.studioWallZoom);
-  if (!Number.isFinite(value)) return 2;
-  return Math.max(1, Math.min(4, Math.round(value)));
+  if (!Number.isFinite(value)) return studioWallZoomMin;
+  return Math.max(studioWallZoomMin, Math.min(studioWallZoomMax, Math.round(value)));
 }
 
 function studioWallZoomColumn(value = studioWallZoomValue()) {
@@ -4846,8 +4848,8 @@ function studioWallZoomStyleAttr() {
 
 function studioWallZoomControl() {
   const value = studioWallZoomValue();
-  return `<div class="studio-wall-zoom-control" aria-label="Preview size" style="--studio-wall-zoom-progress:${((value - 1) / 3) * 100}%">
-    <input type="range" min="1" max="4" step="1" value="${value}" data-studio-wall-zoom aria-label="Adjust preview size">
+  return `<div class="studio-wall-zoom-control" aria-label="Preview size" style="--studio-wall-zoom-progress:${((value - studioWallZoomMin) / (studioWallZoomMax - studioWallZoomMin)) * 100}%">
+    <input type="range" min="${studioWallZoomMin}" max="${studioWallZoomMax}" step="1" value="${value}" data-studio-wall-zoom aria-label="Adjust preview size">
   </div>`;
 }
 
@@ -10527,7 +10529,7 @@ function togglePromptAdvanced() {
 }
 
 function updateStudioWallZoom(value) {
-  const zoom = Math.max(1, Math.min(4, Math.round(Number(value) || 1)));
+  const zoom = Math.max(studioWallZoomMin, Math.min(studioWallZoomMax, Math.round(Number(value) || studioWallZoomMin)));
   state.studioWallZoom = zoom;
   localStorage.setItem(storageKeys.studioWallZoom, String(zoom));
   const column = `${studioWallZoomColumn(zoom)}px`;
@@ -10537,7 +10539,7 @@ function updateStudioWallZoom(value) {
   });
   document.querySelectorAll("[data-studio-wall-zoom]").forEach((el) => {
     if (Number(el.value) !== zoom) el.value = zoom;
-    el.closest(".studio-wall-zoom-control")?.style.setProperty("--studio-wall-zoom-progress", `${((zoom - 1) / 3) * 100}%`);
+    el.closest(".studio-wall-zoom-control")?.style.setProperty("--studio-wall-zoom-progress", `${((zoom - studioWallZoomMin) / (studioWallZoomMax - studioWallZoomMin)) * 100}%`);
   });
 }
 
