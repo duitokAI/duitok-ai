@@ -6644,6 +6644,10 @@ function resultSavedAsReference(item, kind) {
   return (state.db?.attachments || []).some((attachment) => attachment.sourceResultId === item.id && attachment.kind === kind);
 }
 
+function resultHasVisibleProjectCategory(item) {
+  return resultSavedAsReference(item, "file");
+}
+
 function resultReferenceButton(item, kind) {
   const saved = resultSavedAsReference(item, kind);
   const isAvatar = kind === "avatar";
@@ -6682,6 +6686,11 @@ function resultOriginLabel(item) {
 
 function resultProjectName(item) {
   return resultProject(item)?.name || "Current project";
+}
+
+function resultProjectInfoRow(item) {
+  if (!resultHasVisibleProjectCategory(item)) return "";
+  return `<div><dt>Project</dt><dd>${esc(resultProjectName(item))}</dd></div>`;
 }
 
 function resultDownloadFilename(item, kind = "image") {
@@ -7512,7 +7521,7 @@ function resultPreviewModal() {
           <div class="result-detail-section-title"><span>${icon("info", 18)} INFORMATION</span></div>
           <dl class="result-detail-info">
             <div><dt>Source</dt><dd>${esc(resultOriginLabel(item))}</dd></div>
-            <div><dt>Project</dt><dd>${esc(resultProjectName(item))}</dd></div>
+            ${resultProjectInfoRow(item)}
             <div><dt>Model</dt><dd>${esc(resultModelDisplay(item))}</dd></div>
             <div><dt>Resolution</dt><dd>${esc(resultResolutionLabel(item))}</dd></div>
             <div><dt>Aspect Ratio</dt><dd>${esc(resultAspectRatioLabel(item))}</dd></div>
