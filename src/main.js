@@ -12216,7 +12216,16 @@ function restoreAgentChatFromUrl(options = {}) {
 }
 
 function restoreAgentHistory(id, options = {}) {
-  if (id !== agentDraftHistoryId) saveCurrentAgentHistory();
+  const requestedId = String(id || "");
+  const historyBeforeRestore = Array.isArray(state.agentHistorySessions) ? state.agentHistorySessions : [];
+  const targetSession = requestedId === agentDraftHistoryId
+    ? null
+    : historyBeforeRestore.find((item) => item.id === requestedId);
+  if (requestedId !== agentDraftHistoryId && !targetSession) return notify("找不到这条历史记录。");
+  if (requestedId !== agentDraftHistoryId) {
+    saveCurrentAgentHistory(null, { onlyIfChanged: true });
+    rememberAgentHistorySessions([...(state.agentHistorySessions || []), ...historyBeforeRestore]);
+  }
   markAgentHistorySelection(id);
   if (id === agentDraftHistoryId) {
     clearAgentTypingTimer();
@@ -12236,9 +12245,7 @@ function restoreAgentHistory(id, options = {}) {
       agentHistoryOpen: false
     });
   }
-  const session = (state.agentHistorySessions || []).find((item) => item.id === id);
-  if (!session) return notify("找不到这条历史记录。");
-  const messages = agentMessagesForStorage(session.messages);
+  const messages = agentMessagesForStorage(targetSession.messages);
   clearAgentTypingTimer();
   localStorage.setItem(storageKeys.agentMessages, JSON.stringify(messages));
   localStorage.removeItem(storageKeys.agentContextSummary);
