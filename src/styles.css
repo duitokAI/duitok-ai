@@ -33628,9 +33628,28 @@ label {
 
 .studio-shell .image-higgsfield-mode.studio-wall-zoomable .studio-wall-actions {
   max-height: calc(100% - (var(--studio-wall-action-inset) * 2)) !important;
-  overflow: hidden !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  scrollbar-color: rgba(255, 255, 255, 0.42) transparent !important;
+  scrollbar-width: thin !important;
+  touch-action: pan-y !important;
+  -webkit-overflow-scrolling: touch !important;
   background: rgba(34, 24, 40, 0.34) !important;
   box-shadow: 0 8px 18px rgba(18, 0, 28, 0.14) !important;
+}
+
+.studio-shell .image-higgsfield-mode.studio-wall-zoomable .studio-wall-actions::-webkit-scrollbar {
+  width: 3px;
+}
+
+.studio-shell .image-higgsfield-mode.studio-wall-zoomable .studio-wall-actions::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.studio-shell .image-higgsfield-mode.studio-wall-zoomable .studio-wall-actions::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.42);
 }
 
 .studio-shell .image-higgsfield-mode.studio-wall-zoomable .studio-wall-actions button::after {
