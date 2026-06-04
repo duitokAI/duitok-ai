@@ -511,12 +511,11 @@ app.get("/api/admin/diagnostics/gemini-omni", async (req, res, next) => {
         prompt
       }
     };
-    const body = wuyinImageBody(project, prompt);
-    const submitted = await wuyinRequest(wuyinPathFromProject(project), {
+    const submitted = req.query.taskId ? null : await wuyinRequest(wuyinPathFromProject(project), {
       method: "POST",
-      body
+      body: wuyinImageBody(project, prompt)
     });
-    const taskId = submitted.id || submitted.task_id || submitted.taskId || submitted.data?.id;
+    const taskId = String(req.query.taskId || submitted?.id || submitted?.task_id || submitted?.taskId || submitted?.data?.id || "").trim();
     if (!taskId) {
       return res.status(502).json({
         ok: false,
@@ -527,7 +526,23 @@ app.get("/api/admin/diagnostics/gemini-omni", async (req, res, next) => {
         responseShape: Object.keys(submitted || {}).slice(0, 12)
       });
     }
-    const taskData = await pollWuyinTask(taskId);
+    let taskData = null;
+    try {
+      taskData = await pollWuyinTask(taskId);
+    } catch (error) {
+      if (error.status === 202) {
+        return res.status(202).json({
+          ok: false,
+          configured: true,
+          endpoint: wuyinPathFromProject(project),
+          taskId,
+          durationMs: Date.now() - startedAt,
+          status: "processing",
+          error: "Gemini Omni task is still processing. Check the task id again shortly."
+        });
+      }
+      throw error;
+    }
     const urls = extractVideoUrls(taskData).concat(extractUrlsDeep(taskData).filter((url) => /\.(?:mp4|mov|webm)(?:[?#].*)?$/i.test(url)));
     res.json({
       ok: urls.length > 0,
