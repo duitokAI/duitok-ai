@@ -526,6 +526,16 @@ app.get("/api/admin/diagnostics/gemini-omni", async (req, res, next) => {
         responseShape: Object.keys(submitted || {}).slice(0, 12)
       });
     }
+    if (!req.query.taskId && req.query.wait !== "1") {
+      return res.json({
+        ok: true,
+        configured: true,
+        endpoint: wuyinPathFromProject(project),
+        taskId,
+        durationMs: Date.now() - startedAt,
+        status: "submitted"
+      });
+    }
     let taskData = null;
     try {
       taskData = await pollWuyinTask(taskId);
