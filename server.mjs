@@ -114,6 +114,8 @@ const maxConcurrentGenerationJobs = Math.max(1, Number(process.env.MAX_CONCURREN
 const userConcurrentGenerationLimit = Math.max(1, Number(process.env.USER_CONCURRENT_GENERATIONS || 2));
 const staleQueuedGenerationMs = Number(process.env.STALE_QUEUED_GENERATION_MS || 10 * 60 * 1000);
 const staleImageGenerationMs = Number(process.env.STALE_IMAGE_GENERATION_MS || 120 * 1000);
+const gptImageGenerationMs = Number(process.env.GPT_IMAGE_GENERATION_TIMEOUT_MS || 6 * 60 * 1000);
+const gptImageApimartAttemptMs = Number(process.env.GPT_IMAGE_APIMART_ATTEMPT_TIMEOUT_MS || 150 * 1000);
 const staleVideoGenerationMs = Number(process.env.STALE_VIDEO_GENERATION_MS || 45 * 60 * 1000);
 const projectResultStorageLimit = Math.max(0, Number(process.env.PROJECT_RESULT_STORAGE_LIMIT || 1500));
 const storedGenerationJobLimit = Math.max(0, Number(process.env.STORED_GENERATION_JOB_LIMIT || 6000));
@@ -1681,6 +1683,7 @@ function mutateDb(handler) {
 
 function generationJobTimeoutMs(job = {}) {
   if (job.status === "queued") return staleQueuedGenerationMs;
+  if (job.action === "generate-image" && internalMediaModel(job.model) === "GPT Image 2") return gptImageGenerationMs;
   return job.type === "video" || job.action === "generate-ugc" ? staleVideoGenerationMs : staleImageGenerationMs;
 }
 
@@ -3732,11 +3735,19 @@ function imageModelFromProject(project) {
   return modelMap[model] || apimartImageModel;
 }
 
-async function pollApimartTask(taskId, tracker = null) {
+async function pollApimartTask(taskId, tracker = null, options = {}) {
   const maxAttempts = Number(process.env.APIMART_POLL_ATTEMPTS || process.env.APIMART_IMAGE_POLL_ATTEMPTS || 60);
   const delayMs = Number(process.env.APIMART_POLL_MS || process.env.APIMART_IMAGE_POLL_MS || 5000);
+  const maxDurationMs = Number(options.maxDurationMs || 0);
+  const startedAt = Date.now();
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, delayMs));
+    if (maxDurationMs > 0 && Date.now() - startedAt >= maxDurationMs) {
+      const error = new Error(`APIMart GPT Image 2 attempt timed out after ${formatGenerationDuration(maxDurationMs)}.`);
+      error.status = 504;
+      error.code = "APIMART_GPT_IMAGE_ATTEMPT_TIMEOUT";
+      throw error;
+    }
     const data = await apimartRequest(`${apimartTaskPathPrefix}/${encodeURIComponent(taskId)}?language=en`);
     await tracker?.({
       providerTaskId: taskId,
@@ -3844,7 +3855,9 @@ async function generateImageWithApimart(project, tracker = null) {
   const taskId = task?.task_id || task?.id;
   if (!taskId) return { text: JSON.stringify(data, null, 2), urls: [] };
   await tracker?.({ providerTaskId: taskId, taskId, providerStatus: "submitted", lastPolledAt: new Date().toISOString(), pollCount: 0 });
-  const taskData = await pollApimartTask(taskId, tracker);
+  const taskData = await pollApimartTask(taskId, tracker, {
+    maxDurationMs: model === "GPT Image 2" ? gptImageApimartAttemptMs : 0
+  });
   const urls = extractImageUrls(taskData);
   if (!urls.length) {
     const error = new Error("Image generation completed, but no image file was returned. Please try again.");
