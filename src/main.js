@@ -4896,7 +4896,7 @@ function studioResultWall(p, meta = {}) {
   const types = Array.isArray(meta.types) ? meta.types : [state.step];
   const step = state.step || "image";
   const pending = pendingResultJobs(p, types);
-  const items = p.results.filter((item) => studioResultBelongsToStep(item, step, types));
+  const items = p.results.filter((item) => studioResultBelongsToStep(item, step, types)).filter(studioResultIsDisplayable);
   const wallKey = studioWallKey(p, step, types);
   const unloadedCount = Math.max(0, Number(p.resultCount || 0) - (p.results || []).length);
   const timeline = [
@@ -5044,6 +5044,12 @@ function videoStudioStep(sourceStep = "") {
 function studioResultBelongsToStep(item = {}, step = state.step, types = []) {
   if (item.type === "video") return step === videoStudioStep(item.sourceStep || item.step);
   return types.includes(item.type);
+}
+
+function studioResultIsDisplayable(item = {}) {
+  if (item.imageUrl || item.videoUrl || item.visualCard || item.type === "visual_card") return true;
+  if (item.type === "text" && (item.body || item.providerBody || item.prompt)) return true;
+  return false;
 }
 
 function studioPendingWallCard(job, orderIndex = 0) {
