@@ -50001,3 +50001,23 @@ body:has(.studio-shell .image-higgsfield-mode),
   overflow-y: auto !important;
   padding-bottom: 28px !important;
 }
+
+/* Top creation tabs: hover must not scale or shift the four main buttons. */
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button,
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button:hover,
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button:active,
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button:focus,
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button:focus-visible,
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button.active,
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button > :is(svg, span, b),
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button:hover > :is(svg, span, b),
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button:active > :is(svg, span, b),
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button.active > :is(svg, span, b) {
+  transform: none !important;
+  animation: none !important;
+  will-change: auto !important;
+}
+
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button {
+  transition-property: background-color, border-color, color, box-shadow, opacity !important;
+}
