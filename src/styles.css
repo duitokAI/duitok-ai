@@ -44637,6 +44637,22 @@ body:has(.studio-shell .video-page-studio),
   min-width: clamp(126px, 32cqw, 240px) !important;
 }
 
+.studio-shell .studio-wall-pending.failed.portrait .studio-wall-failed-center > .generation-credit-refund-note {
+  width: clamp(116px, 54%, 150px) !important;
+  min-width: 0 !important;
+  height: 31px !important;
+  min-height: 31px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 12px !important;
+}
+
+.studio-shell .studio-wall-pending.failed.portrait .studio-wall-failed-center > .generation-credit-refund-note strong {
+  line-height: 1 !important;
+  transform: translateY(-0.5px);
+}
+
 .studio-shell .studio-wall-pending.failed .studio-wall-failed-center > .studio-wall-failed-actions {
   width: min(100%, 360px) !important;
   display: flex !important;
