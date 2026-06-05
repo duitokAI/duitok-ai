@@ -2024,6 +2024,14 @@ function recentGenerationJobs(jobs = [], limit = publicStateJobLimit) {
   });
 }
 
+function generationJobHiddenFromWall(job = {}) {
+  return Boolean(job.hiddenFromWall || job.status === "cancelled");
+}
+
+function generationJobCancelRequested(job = {}) {
+  return Boolean(job.cancelRequestedAt || generationJobHiddenFromWall(job));
+}
+
 function publicState(db, user = db.users?.find((item) => item.id === adminUserId)) {
   const isAdmin = hasAdminPrivileges(user) && Boolean(user.__adminVerified);
   const owns = (item) => item.userId === user.id;
@@ -2153,7 +2161,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
   const projects = (db.projects || []).filter(owns).map(sanitizeProject);
   const usageRows = recentRows((db.usage || []).filter(owns)).map(sanitizeUsage);
   const scheduleRows = recentRows((db.schedule || []).filter(owns)).map(sanitizeSchedule);
-  const generationJobs = recentGenerationJobs((db.generationJobs || []).filter(owns)).map(sanitizeJob);
+  const generationJobs = recentGenerationJobs((db.generationJobs || []).filter(owns).filter((job) => !generationJobHiddenFromWall(job))).map(sanitizeJob);
   const apiCalls = isAdmin ? (db.apiCalls || []).filter(owns) : [];
   const payments = recentRows((db.payments || []).filter(owns));
   const supportTickets = recentRows((db.supportTickets || []).filter(owns));
@@ -2343,7 +2351,8 @@ function publicProjectGenerationState(db, user, projectId) {
       resultCount: projectResultCount(project)
     },
     generationJobs: recentGenerationJobs(projectJobs)
-      .filter((job) => ["queued", "processing", "failed", "cancelled"].includes(job.status) || recentResultIds.has(job.resultId))
+      .filter((job) => !generationJobHiddenFromWall(job))
+      .filter((job) => ["queued", "processing", "failed"].includes(job.status) || recentResultIds.has(job.resultId))
       .map(publicGenerationJob),
     billing: user?.billing || defaultBilling()
   };
@@ -5044,6 +5053,7 @@ async function processGenerationJob(jobId) {
       };
     });
     if (!snapshot) return;
+    if (await stopCancelledGenerationJob(jobId, "local_only")) return;
     applyGenerationJobSnapshot(snapshot.project, snapshot.job);
     if (snapshot.apimartReferenceImageUrls?.length && snapshot.project?.image) {
       snapshot.project.image.apimartReferenceImageUrls = snapshot.apimartReferenceImageUrls;
@@ -5081,6 +5091,7 @@ async function processGenerationJob(jobId) {
         });
       }
     }
+    if (await stopCancelledGenerationJob(jobId, "local_only")) return;
 
     const providerStartedAt = new Date().toISOString();
     await updateGenerationJobDebug(jobId, {
@@ -5094,6 +5105,7 @@ async function processGenerationJob(jobId) {
       generationJobTimeoutMs(snapshot.job),
       `Generation provider request timed out after ${formatGenerationDuration(generationJobTimeoutMs(snapshot.job))}.`
     );
+    if (await stopCancelledGenerationJob(jobId, "soft")) return;
     await mutateDb(async (db) => {
       const job = db.generationJobs.find((item) => item.id === jobId);
       if (job && job.status === "processing") {
@@ -5109,6 +5121,30 @@ async function processGenerationJob(jobId) {
     activeGenerationJobs.delete(jobId);
     kickGenerationQueue();
   }
+}
+
+async function stopCancelledGenerationJob(jobId, cancelMode = "soft") {
+  let stopped = false;
+  await mutateDb(async (db) => {
+    const job = (db.generationJobs || []).find((item) => item.id === jobId);
+    if (!job || !generationJobCancelRequested(job)) return db;
+    const timestamp = job.cancelledAt || new Date().toISOString();
+    Object.assign(job, {
+      status: "cancelled",
+      stage: "cancelled",
+      providerStatus: "cancelled",
+      hiddenFromWall: true,
+      cancelRequestedAt: job.cancelRequestedAt || timestamp,
+      cancelledAt: timestamp,
+      completedAt: job.completedAt || timestamp,
+      cancelMode: job.cancelMode || cancelMode,
+      creditsCharged: 0
+    });
+    stopped = true;
+    await saveDb(db);
+    return db;
+  });
+  return stopped;
 }
 
 function applyGenerationJobSnapshot(project, job) {
@@ -5134,6 +5170,21 @@ async function completeQueuedGeneration(jobId, generated) {
     const job = currentDb.generationJobs.find((item) => item.id === jobId);
     if (!job) return saveDb(currentDb);
     if (job.status !== "processing") return saveDb(currentDb);
+    if (generationJobCancelRequested(job)) {
+      const cancelledAt = job.cancelledAt || new Date().toISOString();
+      Object.assign(job, {
+        status: "cancelled",
+        stage: "cancelled",
+        providerStatus: "cancelled",
+        hiddenFromWall: true,
+        cancelRequestedAt: job.cancelRequestedAt || cancelledAt,
+        cancelledAt,
+        completedAt: job.completedAt || cancelledAt,
+        cancelMode: job.cancelMode || "soft",
+        creditsCharged: 0
+      });
+      return saveDb(currentDb);
+    }
     const project = currentDb.projects.find((item) => item.id === job.projectId);
     if (!project) throw Object.assign(new Error("Project not found"), { status: 404 });
     const jobProject = applyGenerationJobSnapshot(structuredClone(project), job);
@@ -8384,12 +8435,20 @@ app.post("/api/generation-jobs/:id/cancel", async (req, res) => {
   res.json(await mutateDb(async (db) => {
     const job = (db.generationJobs || []).find((item) => item.id === req.params.id);
     if (!job || job.userId !== user.id) throw Object.assign(new Error("Generation job not found"), { status: 404 });
+    if (job.stage === "saving_asset") throw Object.assign(new Error("结果正在保存，已无法取消"), { status: 409 });
     if (["queued", "processing"].includes(job.status)) {
+      const cancelMode = job.status === "processing" && (job.taskId || job.providerTaskId || job.stage === "provider_submitted") ? "soft" : "local_only";
       job.status = "cancelled";
-      job.completedAt = new Date().toISOString();
+      job.stage = "cancelled";
+      job.providerStatus = "cancelled";
+      job.hiddenFromWall = true;
+      job.cancelMode = cancelMode;
+      job.cancelRequestedAt = job.cancelRequestedAt || new Date().toISOString();
+      job.completedAt = job.cancelledAt || job.cancelRequestedAt;
       job.cancelledAt = job.completedAt;
       job.creditsCharged = 0;
       db.usage.unshift(usage("Cancelled generation", 0, user.id));
+      if (cancelMode === "local_only") activeGenerationJobs.delete(job.id);
       await saveDb(db);
     }
     return publicState(db, user);

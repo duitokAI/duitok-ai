@@ -88,6 +88,7 @@ let assetLibraryWarmFrame = null;
 const quickFieldSaveTimers = new Map();
 let quickFieldSaveSeq = 0;
 const pendingAgentChatSync = new Set();
+const locallyHiddenGenerationJobIds = new Set();
 
 const steps = [
   ["image", "image", "stepImage", "01"],
@@ -5480,6 +5481,7 @@ function studioPendingWallCard(job, orderIndex = 0) {
   const aspectClass = Number(mediaRatio) >= 1 ? "landscape" : "portrait";
   const audioJob = isAudioWallItem(job);
   const isFailed = job.status === "failed";
+  const cancelState = getGenerationCancelState(job);
   const statusLabel = generationJobStatusLabel(job);
   const timelineAt = job.timelineAt || job.createdAt || "";
   const promptPreview = String(job.promptSnapshot || job.prompt || "").replaceAll("\n", " ").trim();
@@ -5497,7 +5499,7 @@ function studioPendingWallCard(job, orderIndex = 0) {
       ${isFailed ? `<div class="studio-wall-failed-center">${statusBody}
         <p class="generation-credit-refund-note"><strong>No Charge</strong></p>
         <div class="studio-wall-failed-actions"><button type="button" data-generation-retry="${esc(job.id)}">${icon("refresh-cw", 14)} Retry</button><button type="button" data-generation-edit="${esc(job.id)}">${icon("pencil-line", 14)} Edit</button></div>
-      </div>` : `${processingBody}${job.optimistic ? "" : `<button type="button" data-generation-cancel="${esc(job.id)}" aria-label="Cancel generation" title="Cancel generation">${icon("ban", 22)}</button>`}`}
+      </div>` : `${processingBody}${cancelState.canCancel ? `<button type="button" data-generation-cancel="${esc(job.id)}" aria-label="Cancel generation" title="Cancel generation">${icon("circle-x", 22)}</button>` : ""}`}
     </div>
   </article>`;
 }
@@ -5737,9 +5739,10 @@ function imageCanvasEmpty(p) {
 function imagePendingThumb(job) {
   const statusLabel = generationJobStatusLabel(job);
   const wait = generationJobWaitSeconds(job);
+  const cancelState = getGenerationCancelState(job);
   const promptPreview = String(job.promptSnapshot || job.prompt || "").replaceAll("\n", " ").trim();
   return `<article class="image-history-thumb pending" data-generation-job-id="${esc(job.id)}" data-generation-job-status="${esc(job.status || "queued")}" data-generation-job-stage="${esc(generationJobStatusKey(job))}">
-    ${job.optimistic ? "" : `<button class="image-history-cancel-generation" type="button" data-generation-cancel="${esc(job.id)}" aria-label="取消生成" title="取消生成">${icon("circle-x", 17)}</button>`}
+    ${cancelState.canCancel ? `<button class="image-history-cancel-generation" type="button" data-generation-cancel="${esc(job.id)}" aria-label="取消生成" title="取消生成">${icon("circle-x", 17)}</button>` : ""}
     <div class="image-history-pending-preview" aria-hidden="true">
       <i></i><i></i><i></i>
       <span>${icon("loader-circle", 23)}</span>
@@ -7445,8 +7448,7 @@ function pendingResultJobs(projectItem, types) {
   const serverJobs = state.db?.generationJobs || [];
   const serverIds = new Set(serverJobs.map((job) => job.id));
   return [...optimistic.filter((job) => !serverIds.has(job.id)), ...serverJobs]
-    .filter((job) => job.projectId === projectItem.id && ["queued", "processing", "failed"].includes(job.status)
-      || (job.projectId === projectItem.id && job.status === "cancelled" && generationJobWaitSeconds(job, job.completedAt) < 8))
+    .filter((job) => job.projectId === projectItem.id && !shouldHideGenerationJob(job) && ["queued", "processing", "failed"].includes(job.status))
     .filter((job) => job.type === "video"
       ? step === videoStudioStep(job.step)
       : types.includes(job.type) || (job.action === "generate-image" && types.includes("image")))
@@ -7464,6 +7466,19 @@ function generationJobStatusKey(job = {}) {
   if (job.stage === "saving_asset") return "saving";
   if (job.stage === "provider_submitted" || job.status === "processing") return "generating";
   return "queued";
+}
+
+function getGenerationCancelState(job = {}) {
+  if (!job || job.optimistic) return { canCancel: false, reason: "optimistic" };
+  if (shouldHideGenerationJob(job)) return { canCancel: false, reason: "hidden" };
+  if (["succeeded", "failed", "cancelled"].includes(job.status)) return { canCancel: false, reason: job.status || "terminal" };
+  if (job.stage === "saving_asset") return { canCancel: false, reason: "saving_asset" };
+  if (["queued", "processing"].includes(job.status)) return { canCancel: true, reason: "" };
+  return { canCancel: false, reason: "unknown" };
+}
+
+function shouldHideGenerationJob(job = {}) {
+  return Boolean(job.hiddenFromWall || job.status === "cancelled" || locallyHiddenGenerationJobIds.has(job.id));
 }
 
 function generationJobStatusLabel(job = {}) {
@@ -13328,12 +13343,20 @@ async function generate(name, event = null) {
 
 async function cancelGenerationJob(jobId) {
   if (!jobId || !state.db) return;
-  if (!window.confirm("确认取消这次生成？未完成的任务会停止，未开始扣费的任务会自动释放。")) return;
+  const job = generationJobById(jobId);
+  const cancelState = getGenerationCancelState(job);
+  if (!cancelState.canCancel) {
+    notify(cancelState.reason === "saving_asset" ? "结果正在保存，已无法取消" : "这次生成已无法取消。");
+    return;
+  }
   const previousDb = state.db;
+  const wasHidden = locallyHiddenGenerationJobIds.has(jobId);
+  locallyHiddenGenerationJobIds.add(jobId);
+  const cancelledAt = new Date().toISOString();
   const nextDb = {
     ...previousDb,
     generationJobs: (previousDb.generationJobs || []).map((job) => job.id === jobId
-      ? { ...job, status: "cancelled", completedAt: new Date().toISOString() }
+      ? { ...job, status: "cancelled", stage: "cancelled", providerStatus: "cancelled", hiddenFromWall: true, cancelRequestedAt: cancelledAt, cancelledAt, completedAt: cancelledAt, creditsCharged: 0 }
       : job)
   };
   set({ db: nextDb });
@@ -13343,10 +13366,11 @@ async function cancelGenerationJob(jobId) {
       body: JSON.stringify({})
     });
     set({ db });
-    notify("已取消这次生成。");
+    notify("已取消生成。");
   } catch (error) {
+    if (!wasHidden) locallyHiddenGenerationJobIds.delete(jobId);
     set({ db: previousDb });
-    notify(error.message || "Could not cancel generation.");
+    notify(error.message || "取消失败，请稍后重试。");
   }
 }
 
@@ -13561,7 +13585,11 @@ function patchStudioGenerationCardsFromDb(nextDb) {
   withStableStudioWallMutation(() => {
     document.querySelectorAll(".studio-wall-pending[data-generation-job-id]").forEach((card) => {
       const job = jobs.get(card.dataset.generationJobId);
-      if (!job) return;
+      if (!job || shouldHideGenerationJob(job)) {
+        card.remove();
+        patched = true;
+        return;
+      }
       const currentStatus = card.dataset.generationJobStatus || "";
       const currentAspectRatio = card.dataset.aspectRatio || "";
       const nextAspectRatio = wallAspectRatioForItem(job);
@@ -13625,6 +13653,10 @@ function updateGenerationStatusInDom(db = state.db) {
   document.querySelectorAll("[data-generation-job-id]").forEach((card) => {
     const job = jobs.get(card.dataset.generationJobId);
     if (!job) return;
+    if (shouldHideGenerationJob(job)) {
+      card.remove();
+      return;
+    }
     card.dataset.generationJobStatus = job.status || "queued";
     card.dataset.agentJobStatus = job.status || "queued";
     card.dataset.generationJobStage = generationJobStatusKey(job);
