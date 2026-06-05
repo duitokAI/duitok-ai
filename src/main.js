@@ -6176,6 +6176,21 @@ function videoBatchCount(p = project()) {
 function videoModelOptions() {
   return [
     {
+      value: "Seedance 2.0",
+      provider: "seedream",
+      providerName: "Seedance / ByteDance",
+      title: "Seedance 2.0",
+      description: "Standard Seedance video generation for polished creator clips",
+      badge: "NEW",
+      capabilities: {
+        modes: ["Text to Video", "Image to Video"],
+        aspectRatios: ["9:16", "16:9", "1:1"],
+        qualities: ["720p", "1080p"],
+        durations: ["5s", "8s", "12s", "15s"],
+        audio: ["On", "Off"]
+      }
+    },
+    {
       value: "Seedance 2.0 Fast",
       provider: "seedream",
       providerName: "Seedance / ByteDance",
@@ -6186,7 +6201,7 @@ function videoModelOptions() {
         modes: ["Text to Video", "Image to Video"],
         aspectRatios: ["9:16", "16:9", "1:1"],
         qualities: ["480p", "720p"],
-        durations: ["5s", "8s", "12s"],
+        durations: ["5s", "8s", "12s", "15s"],
         audio: ["On", "Off"]
       }
     },
@@ -6218,6 +6233,36 @@ function videoModelOptions() {
         qualities: ["720p", "1080p"],
         durations: ["8s", "12s"],
         audio: ["On", "Off"]
+      }
+    },
+    {
+      value: "Gemini Omni",
+      provider: "google",
+      providerName: "Google",
+      title: "Gemini Omni",
+      description: "Omni video generation for audio-aware Google-style clips",
+      badge: "OMNI",
+      capabilities: {
+        modes: ["Text to Video", "Image to Video", "Audio"],
+        aspectRatios: ["9:16"],
+        qualities: ["720p"],
+        durations: ["10s"],
+        audio: ["On", "Off"]
+      }
+    },
+    {
+      value: "Grok Imagine Video",
+      provider: "xai",
+      providerName: "xAI",
+      title: "Grok Imagine Video",
+      description: "Fast expressive video generation for bold creative motion",
+      badge: "",
+      capabilities: {
+        modes: ["Text to Video"],
+        aspectRatios: ["16:9", "9:16", "1:1", "3:2", "2:3"],
+        qualities: ["480p"],
+        durations: ["6s", "10s", "15s", "30s"],
+        audio: ["Off"]
       }
     },
     {
@@ -6336,12 +6381,16 @@ function videoAudioValue(p = project()) {
 
 function videoModelValue(p = project()) {
   const value = String(p?.ugc?.provider || "Seedance 2.0 Fast");
+  if (value.trim() === "Seedance 2.0") return "Seedance 2.0";
+  if (/gemini.*omni|omni.*gemini/i.test(value)) return "Gemini Omni";
+  if (/grok.*video|video.*grok|grok.*imagine/i.test(value)) return "Grok Imagine Video";
   if (/sora/i.test(value)) return "Sora 2";
   if (/veo/i.test(value)) return "Veo 3.1";
   if (/wan/i.test(value)) return "Wan 2.7";
   if (/kling.*motion|motion.*kling/i.test(value)) return "Kling V3 Motion Control";
   if (/kling.*omni|omni.*kling/i.test(value)) return "Kling V3 Omni";
   if (/hailuo|minimax/i.test(value)) return "MiniMax Hailuo 2.3";
+  if (/seedance.*fast|fast.*seedance/i.test(value)) return "Seedance 2.0 Fast";
   if (/seedance/i.test(value)) return "Seedance 2.0 Fast";
   return "Seedance 2.0 Fast";
 }
@@ -6479,8 +6528,12 @@ function videoDurationOption(value) {
     title: value,
     description: {
       "5s": "Quick shot",
+      "6s": "Short creative clip",
       "8s": "Standard clip",
-      "12s": "Longer scene"
+      "10s": "Omni-length clip",
+      "12s": "Longer scene",
+      "15s": "Extended product scene",
+      "30s": "Maximum Grok video length"
     }[value] || "Video duration"
   };
 }
