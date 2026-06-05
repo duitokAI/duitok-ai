@@ -47707,3 +47707,38 @@ body:has(.studio-shell .video-page-studio.is-empty),
 .studio-shell .video-page-studio.is-empty > .video-empty-cinema {
   padding-bottom: clamp(170px, 20vh, 240px) !important;
 }
+
+/* Studio page switch stability: keep Video -> Image tab changes from doing a
+   one-frame height collapse while :has() page rules swap. */
+html {
+  scrollbar-gutter: stable;
+}
+
+html.is-route-changing,
+html.is-route-changing body,
+html.is-route-changing #app {
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  max-height: 100dvh !important;
+  overflow: hidden !important;
+  scrollbar-gutter: stable !important;
+}
+
+html.is-route-changing .studio-shell,
+html.is-route-changing .studio-shell .workspace,
+html.is-route-changing .studio-shell .canvas-card,
+html.is-route-changing .studio-shell .studio-workbench-card {
+  min-height: 100dvh !important;
+  overflow: hidden !important;
+}
+
+html.is-route-changing .studio-shell .studio-step-panel,
+html.is-route-changing .studio-shell .image-higgsfield-mode,
+html.is-route-changing .studio-shell .video-page-studio {
+  min-height: max(var(--route-panel-height, 0px), calc(100dvh - var(--project-fixed-tabs-height, 58px))) !important;
+  contain: layout paint !important;
+}
+
+html.is-route-changing .studio-shell .studio-result-wall {
+  min-height: max(420px, calc(100dvh - var(--project-fixed-tabs-height, 58px) - 170px)) !important;
+}

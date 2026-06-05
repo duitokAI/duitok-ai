@@ -2470,12 +2470,20 @@ function scheduleNavigation(patch = {}) {
   const sameProject = !nextProjectId || nextProjectId === state.projectId;
   if (samePage && sameStep && sameProject && !patch.modal && !patch.projectMenuId) return;
   if (!samePage || !sameStep || !sameProject) patch.selectedResultIds = [];
+  const routePanel = document.querySelector(".studio-step-panel");
+  const routePanelHeight = Math.ceil(routePanel?.getBoundingClientRect?.().height || 0);
+  if (routePanelHeight > 0) {
+    document.documentElement.style.setProperty("--route-panel-height", routePanelHeight + "px");
+  }
   document.documentElement.classList.add("is-route-changing");
   if (navigationFrame) window.cancelAnimationFrame(navigationFrame);
   navigationFrame = window.requestAnimationFrame(() => {
     navigationFrame = null;
     set(patch);
-    window.setTimeout(() => document.documentElement.classList.remove("is-route-changing"), 90);
+    window.setTimeout(() => {
+      document.documentElement.classList.remove("is-route-changing");
+      document.documentElement.style.removeProperty("--route-panel-height");
+    }, 140);
   });
 }
 
