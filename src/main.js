@@ -5055,7 +5055,7 @@ function studioPendingWallCard(job, orderIndex = 0) {
   return `<article class="studio-wall-card studio-wall-pending ${aspectClass} ${isFailed ? "failed" : ""}" data-aspect-ratio="${esc(aspectRatio)}" data-media-ratio="${esc(mediaRatio)}" data-generation-job-id="${esc(job.id)}" data-generation-job-status="${esc(job.status || "queued")}" data-wall-time="${esc(timelineAt)}" data-wall-order="${esc(orderIndex)}" style="--media-ratio:${esc(mediaRatio)};--wall-aspect-ratio:${esc(aspectRatioToCss(aspectRatio))};aspect-ratio:var(--wall-aspect-ratio);order:${Number.isFinite(orderIndex) ? orderIndex : 0}">
     <div class="studio-wall-pending-controls" aria-label="${esc(statusLabel)}">
       ${isFailed ? `<div class="studio-wall-failed-center">${statusBody}
-        <p class="generation-credit-refund-note"><strong>Credits safe</strong><span>No charge.</span></p>
+        <p class="generation-credit-refund-note"><strong>No Charge</strong></p>
         <div class="studio-wall-failed-actions"><button type="button" data-generation-retry="${esc(job.id)}">${icon("refresh-cw", 14)} Retry</button><button type="button" data-generation-edit="${esc(job.id)}">${icon("pencil-line", 14)} Edit</button></div>
       </div>` : `${processingBody}${job.optimistic ? "" : `<button type="button" data-generation-cancel="${esc(job.id)}" aria-label="Cancel generation" title="Cancel generation">${icon("ban", 22)}</button>`}`}
     </div>
@@ -6508,7 +6508,7 @@ function generationJobCard(job) {
       ${icon(isFailed ? "triangle-alert" : "loader-circle", 34)}
       <strong>${label}</strong>
       <span>${esc(isFailed ? (job.errorMessage || "Please adjust the prompt and try again.") : promptPreview ? promptPreview.slice(0, 110) : generationJobStageHelp(job))}</span>
-      ${isFailed ? `<p class="generation-credit-refund-note"><strong>Credits safe</strong><span>No charge.</span></p>` : ""}
+      ${isFailed ? `<p class="generation-credit-refund-note"><strong>No Charge</strong></p>` : ""}
       ${isFailed ? `<div class="generation-job-actions"><button type="button" class="dark-button" data-generation-retry="${esc(job.id)}">${icon("refresh-cw", 14)} Retry</button><button type="button" class="dark-button" data-generation-edit="${esc(job.id)}">${icon("pencil-line", 14)} Edit prompt</button></div>` : ""}
     </div>
     <footer>
@@ -12111,7 +12111,8 @@ function patchStudioGenerationCardsFromDb(nextDb) {
     if (!job) return;
     const currentStatus = card.dataset.generationJobStatus || "";
     if (currentStatus === (job.status || "queued")) return;
-    card.outerHTML = studioPendingWallCard(job);
+    const orderIndex = Number(card.dataset.wallOrder || getComputedStyle(card).order || 0);
+    card.outerHTML = studioPendingWallCard(job, Number.isFinite(orderIndex) ? orderIndex : 0);
     patched = true;
   });
   if (patched) window.lucide?.createIcons();
