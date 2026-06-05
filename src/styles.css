@@ -48730,6 +48730,29 @@ html.is-route-changing .studio-shell .studio-result-wall {
   min-height: max(420px, calc(100dvh - var(--project-fixed-tabs-height, 58px) - 170px)) !important;
 }
 
+/* Failed result cards should keep the previous Pokaya rose/plum tone; the
+   neutral gray treatment makes the error state feel detached from the brand. */
+.studio-shell .studio-wall-pending.failed,
+.studio-shell .studio-wall-pending.failed.landscape,
+.studio-shell .studio-wall-pending.failed.portrait,
+.studio-shell .studio-media-wall-surface:not(.is-empty) .studio-wall-pending.failed {
+  background:
+    linear-gradient(145deg, rgba(33, 0, 36, 0.98) 0%, rgba(92, 16, 42, 0.98) 34%, rgba(193, 43, 98, 0.72) 72%, rgba(255, 103, 56, 0.48) 118%) !important;
+  border-color: rgba(255, 103, 56, 0.26) !important;
+}
+
+.studio-shell .studio-wall-pending.failed .studio-wall-failed-center,
+.studio-shell .studio-media-wall-surface:not(.is-empty) .studio-wall-pending.failed .studio-wall-failed-center {
+  background: rgba(50, 16, 58, 0.72) !important;
+  border-color: rgba(255, 103, 56, 0.22) !important;
+}
+
+.studio-shell .studio-wall-pending.failed .generation-credit-refund-note,
+.studio-shell .studio-wall-pending.failed .studio-wall-failed-center > .generation-credit-refund-note {
+  background: rgba(193, 43, 98, 0.46) !important;
+  border-color: rgba(255, 103, 56, 0.52) !important;
+}
+
 html.is-route-changing .studio-shell .studio-step-panel,
 html.is-route-changing .studio-shell .studio-result-wall,
 html.is-route-changing .studio-shell .studio-wall-grid,
