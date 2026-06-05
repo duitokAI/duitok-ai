@@ -1735,7 +1735,16 @@ function scrollAgentThreadToBottom() {
 function shouldPatchModalOnly(patch) {
   if (!isStudioPath() || state.loading || !document.getElementById("modal-root")) return false;
   const keys = Object.keys(patch);
-  return keys.includes("modal") && keys.every((key) => ["modal", "editingProjectId", "projectMenuId", "activeAgentRunId"].includes(key));
+  return keys.includes("modal") && keys.every((key) => [
+    "modal",
+    "editingProjectId",
+    "projectMenuId",
+    "activeAgentRunId",
+    "activeResultId",
+    "resultDetailSource",
+    "editImageBusy",
+    "bulkDeleteBusy"
+  ].includes(key));
 }
 
 function updateModalRoot() {
