@@ -5699,7 +5699,9 @@ function imagePanel(p) {
   const imageTypes = ["image", "video", "visual_card"];
   const meta = studioStepMeta("image");
   const bulkSelecting = isBulkSelectingResults();
-  return `<section class="image-canvas-studio image-higgsfield-mode studio-wall-surface-base studio-media-wall-surface studio-wall-zoomable ${bulkSelecting ? "is-bulk-selecting-results" : ""}" ${studioWallZoomStyleAttr()}>
+  const imageWallHasResults = pendingResultJobs(p, meta.types || imageTypes).length
+    || p.results.some((item) => studioResultBelongsToStep(item, "image", meta.types || imageTypes) && studioResultIsDisplayable(item));
+  return `<section class="image-canvas-studio image-higgsfield-mode studio-wall-surface-base studio-media-wall-surface studio-wall-zoomable ${imageWallHasResults ? "has-results" : "is-empty"} ${bulkSelecting ? "is-bulk-selecting-results" : ""}" ${studioWallZoomStyleAttr()}>
     ${selectedMode === "Virtualize (Poster/Ad)" ? `<div class="image-studio-legacy">${virtualizePanel()}</div>` : `
       <div class="image-studio-grid-bg" aria-hidden="true"></div>
       <div class="image-studio-hero-copy" aria-hidden="true">

@@ -48222,3 +48222,37 @@ body:has(.studio-shell .video-prompt-extractor-page),
 .studio-shell.sidebar-collapsed .video-page-studio.is-empty > .video-generate-console:not(.is-compact).has-open-menu {
   left: calc(var(--studio-sidebar-width, 76px) + clamp(130px, 12vw, 240px)) !important;
 }
+
+/* Image wall state lock: the grid hero is only for the empty Image canvas.
+   Once media or failed jobs exist, the wall needs an opaque workspace surface so
+   result cards do not appear to leak the decorative background between tiles. */
+.studio-shell .image-higgsfield-mode.has-results > .image-studio-grid-bg,
+.studio-shell .image-higgsfield-mode.has-results > .image-studio-hero-copy {
+  display: none !important;
+}
+
+.studio-shell:has(.image-higgsfield-mode.has-results),
+.studio-shell:has(.image-higgsfield-mode.has-results) .workspace,
+.studio-shell .workspace:has(.image-higgsfield-mode.has-results),
+.studio-shell .canvas-card:has(.image-higgsfield-mode.has-results),
+.studio-shell .studio-workbench-card:has(.image-higgsfield-mode.has-results),
+.studio-shell .studio-step-panel:has(.image-higgsfield-mode.has-results),
+.studio-shell .image-higgsfield-mode.has-results,
+.studio-shell .image-higgsfield-mode.has-results > .studio-result-wall {
+  background:
+    radial-gradient(circle at 18% 4%, rgba(193, 43, 98, 0.14), transparent 28%),
+    linear-gradient(135deg, #210024 0%, #32103a 54%, #140016 100%) !important;
+  background-color: #210024 !important;
+}
+
+.studio-shell .image-higgsfield-mode.has-results > .studio-result-wall {
+  height: 100% !important;
+  min-height: min(62vh, 720px) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .image-higgsfield-mode.has-results > .studio-result-wall > .studio-wall-grid {
+  background: transparent !important;
+}
