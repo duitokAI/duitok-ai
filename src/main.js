@@ -70,6 +70,7 @@ let resultTitleSaveTimer = null;
 let generationPollTimer = null;
 const generationStateEtags = new Map();
 const studioWallLoadingKeys = new Set();
+const resultPreviewPreloadCache = new Map();
 const quickFieldSaveTimers = new Map();
 let quickFieldSaveSeq = 0;
 const pendingAgentChatSync = new Set();
@@ -2072,6 +2073,8 @@ function initDelegatedEvents() {
   app.dataset.delegatedEvents = "true";
   app.addEventListener("click", handleDelegatedClick);
   app.addEventListener("pointerdown", handleDelegatedPointerDown, { passive: true });
+  app.addEventListener("pointerover", handleDelegatedPreviewWarm, { passive: true });
+  app.addEventListener("focusin", handleDelegatedPreviewWarm);
 }
 
 function handleDelegatedPointerDown(event) {
@@ -2080,10 +2083,17 @@ function handleDelegatedPointerDown(event) {
     flashResultActionButton(resultActionButton);
     if (resultActionButton.dataset.resultAction === "download") setResultActionBusy(resultActionButton, true);
   }
+  const resultPreviewTarget = event.target.closest?.("[data-result-preview]");
+  if (resultPreviewTarget && app.contains(resultPreviewTarget)) warmResultPreview(resultPreviewTarget.dataset.resultPreview);
   const historyTarget = event.target.closest?.("[data-agent-history-restore],[data-agent-history-restore-row]");
   if (historyTarget && app.contains(historyTarget) && !event.target.closest("[data-agent-history-rename], [data-agent-history-delete], [data-agent-history-title-input]")) {
     markAgentHistorySelection(historyTarget.dataset.agentHistoryRestore || historyTarget.dataset.agentHistoryRestoreRow || "");
   }
+}
+
+function handleDelegatedPreviewWarm(event) {
+  const resultPreviewTarget = event.target.closest?.("[data-result-preview]");
+  if (resultPreviewTarget && app.contains(resultPreviewTarget)) warmResultPreview(resultPreviewTarget.dataset.resultPreview);
 }
 
 function handleDelegatedClick(event) {
@@ -6589,12 +6599,35 @@ function resultProject(item) {
   return item?.projectId ? state.db?.projects?.find((project) => project.id === item.projectId) : null;
 }
 
-function resultMediaSrc(item, kind = "image") {
+function resultMediaSrc(item, kind = "image", options = {}) {
   if (!item) return "";
   const token = encodeURIComponent(state.token || "");
   if (kind === "video" && item.videoUrl) return `/api/media/result/${encodeURIComponent(item.id)}/video?token=${token}`;
-  if (item.imageUrl) return `/api/media/result/${encodeURIComponent(item.id)}/image?token=${token}`;
+  if (item.imageUrl) {
+    const width = Number(options.width || 0);
+    const thumb = options.thumb ? `&thumb=1${width ? `&w=${width}` : ""}` : "";
+    return `/api/media/result/${encodeURIComponent(item.id)}/image?token=${token}${thumb}`;
+  }
   return "";
+}
+
+function warmResultPreview(resultId) {
+  if (!resultId || typeof Image === "undefined") return;
+  const item = findAssetResult(resultId);
+  if (!item?.imageUrl || resultPreviewPreloadCache.has(resultId)) return;
+  const src = resultMediaSrc(item, "image");
+  if (!src) return;
+  const image = new Image();
+  image.decoding = "async";
+  image.loading = "eager";
+  image.fetchPriority = "high";
+  resultPreviewPreloadCache.set(resultId, image);
+  if (resultPreviewPreloadCache.size > 24) {
+    const [oldestId] = resultPreviewPreloadCache.keys();
+    if (oldestId) resultPreviewPreloadCache.delete(oldestId);
+  }
+  image.src = src;
+  image.decode?.().catch(() => {});
 }
 
 function resultResolutionLabel(item) {
@@ -6757,18 +6790,17 @@ function resultDownloadFilename(item, kind = "image") {
 }
 
 function resultPreview(item, options = {}) {
-  const token = encodeURIComponent(state.token || "");
   if (item.visualCard) {
     const visual = visualCardPreview(item.visualCard);
     if (options.clickable) return `<button type="button" class="result-preview-trigger" data-result-preview="${esc(item.id)}" aria-label="Open full preview">${visual}</button>`;
     return visual;
   }
-  const imageBase = item.imageUrl ? `/api/media/result/${encodeURIComponent(item.id)}/image?token=${token}` : "";
+  const imageBase = item.imageUrl ? resultMediaSrc(item, "image") : "";
   const thumbWidth = Number(options.thumbWidth) || studioWallThumbnailWidth();
   const imageSrc = imageBase ? (options.wall ? `${imageBase}&thumb=1&w=${thumbWidth}` : imageBase) : "";
   const imageSizes = options.sizes || studioWallImageSizes();
   const imageSrcset = options.wall && imageBase ? ` srcset="${[384, 640, 960].map((width) => `${imageBase}&thumb=1&w=${width} ${width}w`).join(", ")}" sizes="${esc(imageSizes)}"` : "";
-  const videoSrc = item.videoUrl ? `/api/media/result/${encodeURIComponent(item.id)}/video?token=${token}` : "";
+  const videoSrc = item.videoUrl ? resultMediaSrc(item, "video") : "";
   const imageError = "this.replaceWith(Object.assign(document.createElement('div'),{className:'result-media-error',textContent:'图片保存失败，请联系客服处理'}))";
   const ratioSync = mediaRatioSyncScript();
   const eagerMedia = Boolean(options.full || options.priority);
@@ -7540,7 +7572,7 @@ function activeResult() {
 
 function resultPreviewModal() {
   const item = activeResult();
-  const bg = item ? resultMediaSrc(item, item.videoUrl ? "video" : "image") : "";
+  const bg = item?.imageUrl ? resultMediaSrc(item, "image", { thumb: true, width: 640 }) : "";
   const promptText = item ? resultPromptText(item) : "";
   const safeTitle = esc(resultTitle(item));
   return `<div class="modal-backdrop result-lightbox-backdrop" data-action="close-modal" ${bg ? `style="--result-bg-image: url('${esc(bg)}')"` : ""}>
