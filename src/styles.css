@@ -49945,3 +49945,59 @@ body:has(.studio-shell .image-higgsfield-mode),
   position: relative;
   z-index: 1;
 }
+
+/* Creation sidebar continuous rail lock: the sidebar scroll area used to end
+   around the Business/SOP group and reveal a darker shell layer underneath.
+   Keep every sidebar child on one transparent layer over a full-height rail. */
+.studio-shell:has(.image-higgsfield-mode) .sidebar,
+.studio-shell:has(.video-page-studio) .sidebar,
+.studio-shell:has(.audio-studio-page) .sidebar,
+.studio-shell:has(.video-prompt-extractor-page[data-studio-mode="clone"]) .sidebar {
+  display: flex !important;
+  flex-direction: column !important;
+  padding-bottom: 0 !important;
+  background:
+    radial-gradient(circle at 18% 2%, rgba(255, 103, 56, 0.18), transparent 32%),
+    radial-gradient(circle at 82% 22%, rgba(193, 43, 98, 0.22), transparent 34%),
+    linear-gradient(180deg, #8b1a78 0%, #6f145f 24%, #32103a 58%, #210024 100%) !important;
+  background-color: #210024 !important;
+}
+
+.studio-shell:has(.image-higgsfield-mode) .sidebar::before,
+.studio-shell:has(.video-page-studio) .sidebar::before,
+.studio-shell:has(.audio-studio-page) .sidebar::before,
+.studio-shell:has(.video-prompt-extractor-page[data-studio-mode="clone"]) .sidebar::before {
+  background:
+    radial-gradient(circle at 18% 2%, rgba(255, 103, 56, 0.18), transparent 32%),
+    radial-gradient(circle at 82% 22%, rgba(193, 43, 98, 0.22), transparent 34%),
+    linear-gradient(180deg, #8b1a78 0%, #6f145f 24%, #32103a 58%, #210024 100%) !important;
+}
+
+.studio-shell:has(.image-higgsfield-mode) .sidebar-topbar,
+.studio-shell:has(.video-page-studio) .sidebar-topbar,
+.studio-shell:has(.audio-studio-page) .sidebar-topbar,
+.studio-shell:has(.video-prompt-extractor-page[data-studio-mode="clone"]) .sidebar-topbar,
+.studio-shell:has(.image-higgsfield-mode) .sidebar-language,
+.studio-shell:has(.video-page-studio) .sidebar-language,
+.studio-shell:has(.audio-studio-page) .sidebar-language,
+.studio-shell:has(.video-prompt-extractor-page[data-studio-mode="clone"]) .sidebar-language,
+.studio-shell:has(.image-higgsfield-mode) .sidebar-scroll-area,
+.studio-shell:has(.video-page-studio) .sidebar-scroll-area,
+.studio-shell:has(.audio-studio-page) .sidebar-scroll-area,
+.studio-shell:has(.video-prompt-extractor-page[data-studio-mode="clone"]) .sidebar-scroll-area {
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+.studio-shell:has(.image-higgsfield-mode) .sidebar-scroll-area,
+.studio-shell:has(.video-page-studio) .sidebar-scroll-area,
+.studio-shell:has(.audio-studio-page) .sidebar-scroll-area,
+.studio-shell:has(.video-prompt-extractor-page[data-studio-mode="clone"]) .sidebar-scroll-area {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+  padding-bottom: 28px !important;
+}
