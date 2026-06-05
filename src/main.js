@@ -4893,9 +4893,9 @@ function studioResultWall(p, meta = {}) {
     ...pending.map((job, index) => ({ kind: "pending", item: job, index, time: studioWallTimelineTime(job), rank: studioWallTimelineRank(job, index) })),
     ...items.map((item, index) => ({ kind: "result", item, index, time: studioWallTimelineTime(item), rank: studioWallTimelineRank(item, index) }))
   ].sort((a, b) => (b.time - a.time) || (a.rank - b.rank));
-  const cards = timeline.map((entry) => entry.kind === "pending"
-    ? studioPendingWallCard(entry.item)
-    : studioWallCard(entry.item, entry.index));
+  const cards = timeline.map((entry, orderIndex) => entry.kind === "pending"
+    ? studioPendingWallCard(entry.item, orderIndex)
+    : studioWallCard(entry.item, entry.index, orderIndex));
   if (!cards.length) return "";
   return `<section class="studio-result-wall" data-studio-wall-key="${esc(wallKey)}" data-studio-wall-has-more="${unloadedCount ? "true" : "false"}">
     <div class="studio-wall-grid">
@@ -4907,9 +4907,14 @@ function studioResultWall(p, meta = {}) {
 
 const studioWallPageSize = 24;
 
+function generationJobTimelineTime(job = {}) {
+  const raw = job.timelineAt || job.createdAt || job.startedAt || job.updatedAt || job.completedAt || "";
+  return Date.parse(raw || 0) || 0;
+}
+
 function studioWallTimelineTime(item = {}) {
   const originJob = resultOriginJob(item);
-  const raw = item.timelineAt || originJob?.createdAt || item.createdAt || item.startedAt || item.updatedAt || item.completedAt || "";
+  const raw = item.timelineAt || originJob?.timelineAt || originJob?.createdAt || item.createdAt || item.startedAt || item.updatedAt || item.completedAt || "";
   return Date.parse(raw || 0) || 0;
 }
 
@@ -5029,12 +5034,13 @@ function studioResultBelongsToStep(item = {}, step = state.step, types = []) {
   return types.includes(item.type);
 }
 
-function studioPendingWallCard(job) {
+function studioPendingWallCard(job, orderIndex = 0) {
   const aspectRatio = wallAspectRatioForItem(job, project());
   const mediaRatio = aspectRatioToMediaRatio(aspectRatio);
   const aspectClass = Number(mediaRatio) >= 1 ? "landscape" : "portrait";
   const isFailed = job.status === "failed";
   const statusLabel = generationJobStatusLabel(job);
+  const timelineAt = job.timelineAt || job.createdAt || "";
   const promptPreview = String(job.promptSnapshot || job.prompt || "").replaceAll("\n", " ").trim();
   const statusIcon = `<span class="studio-wall-pending-spinner" role="status" aria-label="${esc(statusLabel)}" title="${esc(statusLabel)}">${icon(isFailed ? "triangle-alert" : "loader-circle", 22)}</span>`;
   const statusBody = `
@@ -5044,7 +5050,7 @@ function studioPendingWallCard(job) {
   const processingBody = `
       ${statusIcon}
       <b>${esc(generationJobCenterLabel(job))}</b>`;
-  return `<article class="studio-wall-card studio-wall-pending ${aspectClass} ${isFailed ? "failed" : ""}" data-aspect-ratio="${esc(aspectRatio)}" data-media-ratio="${esc(mediaRatio)}" data-generation-job-id="${esc(job.id)}" data-generation-job-status="${esc(job.status || "queued")}" style="--media-ratio:${esc(mediaRatio)};--wall-aspect-ratio:${esc(aspectRatioToCss(aspectRatio))};aspect-ratio:var(--wall-aspect-ratio)">
+  return `<article class="studio-wall-card studio-wall-pending ${aspectClass} ${isFailed ? "failed" : ""}" data-aspect-ratio="${esc(aspectRatio)}" data-media-ratio="${esc(mediaRatio)}" data-generation-job-id="${esc(job.id)}" data-generation-job-status="${esc(job.status || "queued")}" data-wall-time="${esc(timelineAt)}" data-wall-order="${esc(orderIndex)}" style="--media-ratio:${esc(mediaRatio)};--wall-aspect-ratio:${esc(aspectRatioToCss(aspectRatio))};aspect-ratio:var(--wall-aspect-ratio);order:${Number.isFinite(orderIndex) ? orderIndex : 0}">
     <div class="studio-wall-pending-controls" aria-label="${esc(statusLabel)}">
       ${isFailed ? `<div class="studio-wall-failed-center">${statusBody}
         <p class="generation-credit-refund-note"><strong>Credits safe</strong><span>No charge.</span></p>
@@ -5054,7 +5060,7 @@ function studioPendingWallCard(job) {
   </article>`;
 }
 
-function studioWallCard(item, index = 0) {
+function studioWallCard(item, index = 0, orderIndex = 0) {
   const promptText = resultPromptText(item).replaceAll("\n", " ").trim();
   const canSaveReference = Boolean(item.imageUrl || item.videoUrl);
   const aspectRatio = wallAspectRatioForItem(item);
@@ -5062,7 +5068,8 @@ function studioWallCard(item, index = 0) {
   const isNew = Date.now() - Date.parse(item.createdAt || 0) < 120000;
   const selected = selectedResultIdSet().has(item.id);
   const bulkSelecting = isBulkSelectingResults();
-  return `<article class="studio-wall-card ${isNew ? "is-new" : ""} ${selected ? "is-selected" : ""} ${bulkSelecting ? "is-bulk-selecting" : ""}" data-aspect-ratio="${esc(aspectRatio)}" data-media-ratio="${esc(mediaRatio)}" data-result-id="${esc(item.id)}" style="--media-ratio:${esc(mediaRatio)};--wall-aspect-ratio:${esc(aspectRatioToCss(aspectRatio))}">
+  const timelineAt = item.timelineAt || resultOriginJob(item)?.timelineAt || item.createdAt || "";
+  return `<article class="studio-wall-card ${isNew ? "is-new" : ""} ${selected ? "is-selected" : ""} ${bulkSelecting ? "is-bulk-selecting" : ""}" data-aspect-ratio="${esc(aspectRatio)}" data-media-ratio="${esc(mediaRatio)}" data-result-id="${esc(item.id)}" data-wall-time="${esc(timelineAt)}" data-wall-order="${esc(orderIndex)}" style="--media-ratio:${esc(mediaRatio)};--wall-aspect-ratio:${esc(aspectRatioToCss(aspectRatio))};order:${Number.isFinite(orderIndex) ? orderIndex : 0}">
     ${isNew ? `<span class="studio-wall-new-badge">New</span>` : ""}
     <button type="button" class="studio-wall-select-toggle" data-result-select="${esc(item.id)}" aria-label="${selected ? "Unselect result" : "Select result"}" aria-pressed="${selected ? "true" : "false"}">
       ${selected ? icon("check", 17) : ""}
@@ -6443,9 +6450,10 @@ function pendingResultJobs(projectItem, types) {
       ? step === videoStudioStep(job.step)
       : types.includes(job.type) || (job.action === "generate-image" && types.includes("image")))
     .sort((a, b) => {
-      const aTime = Date.parse(a.completedAt || a.updatedAt || a.startedAt || a.createdAt || 0) || 0;
-      const bTime = Date.parse(b.completedAt || b.updatedAt || b.startedAt || b.createdAt || 0) || 0;
-      return bTime - aTime;
+      const aTime = generationJobTimelineTime(a);
+      const bTime = generationJobTimelineTime(b);
+      if (bTime !== aTime) return bTime - aTime;
+      return studioWallTimelineRank(a) - studioWallTimelineRank(b);
     });
 }
 

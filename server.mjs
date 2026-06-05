@@ -1930,7 +1930,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
   const enrichResultTimeline = (result = {}, originJob = null) => ({
     ...result,
     generationJobId: result.generationJobId || originJob?.id,
-    timelineAt: result.timelineAt || originJob?.createdAt || result.createdAt,
+    timelineAt: result.timelineAt || generationJobTimelineAt(originJob) || result.createdAt,
     batchIndex: result.batchIndex || originJob?.batchIndex,
     batchCount: result.batchCount || originJob?.batchCount
   });
@@ -1983,7 +1983,11 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
     };
   };
   const sanitizeJob = (job) => {
-    if (isAdmin) return job;
+    const jobWithTimeline = {
+      ...job,
+      timelineAt: generationJobTimelineAt(job)
+    };
+    if (isAdmin) return jobWithTimeline;
     const {
       costRm: _costRm,
       costRmb: _costRmb,
@@ -2005,7 +2009,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
       thumbnailStorageKeys: _thumbnailStorageKeys,
       assetStorageError: _assetStorageError,
       ...safe
-    } = job;
+    } = jobWithTimeline;
     return {
       ...safe,
       assetStorage: safe.imageUrl || safe.videoUrl ? "pokaya-media" : undefined,
@@ -2161,6 +2165,10 @@ function publicGenerationResult(result = {}, originJob = null) {
   };
 }
 
+function generationJobTimelineAt(job = {}) {
+  return job.timelineAt || job.createdAt || job.startedAt || job.updatedAt || job.completedAt || "";
+}
+
 function publicGenerationJob(job = {}) {
   return {
     id: job.id,
@@ -2180,6 +2188,7 @@ function publicGenerationJob(job = {}) {
     aspectRatio: job.aspectRatio,
     batchIndex: job.batchIndex,
     batchCount: job.batchCount,
+    timelineAt: generationJobTimelineAt(job),
     createdAt: job.createdAt,
     startedAt: job.startedAt,
     completedAt: job.completedAt
@@ -2274,6 +2283,7 @@ function generationStateEtag(payload = {}) {
       job.id,
       job.status,
       job.resultId || "",
+      job.timelineAt || "",
       job.startedAt || "",
       job.completedAt || ""
     ]),
