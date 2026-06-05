@@ -6421,6 +6421,7 @@ function videoBatchCount(p = project()) {
 }
 
 function videoModelOptions() {
+  const seedanceAspectRatios = ["9:16", "16:9", "1:1", "4:3", "3:4", "21:9", "adaptive"];
   return [
     {
       value: "Seedance 2.0",
@@ -6431,7 +6432,7 @@ function videoModelOptions() {
       badge: "NEW",
       capabilities: {
         modes: ["Text to Video", "Image to Video"],
-        aspectRatios: ["9:16", "16:9", "1:1"],
+        aspectRatios: seedanceAspectRatios,
         qualities: ["720p", "1080p"],
         durations: ["4s", "8s", "12s", "15s"],
         audio: ["On", "Off"]
@@ -6446,7 +6447,7 @@ function videoModelOptions() {
       badge: "FAST",
       capabilities: {
         modes: ["Text to Video", "Image to Video"],
-        aspectRatios: ["9:16", "16:9", "1:1"],
+        aspectRatios: seedanceAspectRatios,
         qualities: ["480p", "720p"],
         durations: ["4s", "8s", "12s", "15s"],
         audio: ["On", "Off"]
@@ -6491,7 +6492,7 @@ function videoModelOptions() {
       badge: "OMNI",
       capabilities: {
         modes: ["Text to Video", "Image to Video", "Audio"],
-        aspectRatios: ["9:16"],
+        aspectRatios: ["16:9", "9:16"],
         qualities: ["720p"],
         durations: ["10s"],
         audio: ["On", "Off"]
@@ -6551,7 +6552,7 @@ function videoModelOptions() {
       badge: "",
       capabilities: {
         modes: ["Image to Video", "Motion Control"],
-        aspectRatios: ["9:16"],
+        aspectRatios: [],
         qualities: ["720p"],
         durations: ["5s", "12s"],
         audio: ["Off"]
@@ -6566,7 +6567,7 @@ function videoModelOptions() {
       badge: "",
       capabilities: {
         modes: ["Text to Video", "Image to Video"],
-        aspectRatios: ["9:16"],
+        aspectRatios: [],
         qualities: ["480p", "720p"],
         durations: ["5s", "8s", "12s"],
         audio: ["Off"]
@@ -6583,7 +6584,8 @@ function videoModelCapabilities(model = videoModelValue(project())) {
 function normalizedVideoSettingForModel(model, field, value) {
   const capabilities = videoModelCapabilities(model);
   if (field === "ugc.aspectRatio") {
-    const options = capabilities.aspectRatios || ["16:9"];
+    const options = capabilities.aspectRatios || [];
+    if (!options.length) return "";
     return options.includes(value) ? value : options[0] || "16:9";
   }
   if (field === "ugc.quality") {
@@ -6658,7 +6660,6 @@ function videoGenerateConsole(p) {
   const longPromptClass = promptText.length > 120 || promptText.includes("\n") ? "has-long-prompt" : "";
   const selectedModel = videoModelValue(p);
   const selectedModelItem = videoModelOptions().find((item) => item.value === selectedModel) || videoModelOptions()[0];
-  const capabilities = videoModelCapabilities(selectedModel);
   const compactSummary = videoCompactPromptText(promptText);
   const generatingClass = state.generating ? "is-generating" : "";
   return `<section class="video-generate-console ${longPromptClass} ${generatingClass}" data-video-generate-console>
@@ -6675,12 +6676,7 @@ function videoGenerateConsole(p) {
         <b><span data-video-compact-model-icon>${providerLogo(selectedModelItem.provider)}</span>${esc(selectedModelItem.title)}</b>
       </div>
       <div class="video-console-tools">
-        ${videoModelPicker(selectedModel)}
-        ${videoAspectRatioMenu(videoAspectRatioValue(p), capabilities.aspectRatios || [])}
-        ${videoOptionMenu("quality", "ugc.quality", videoQualityValue(p), (capabilities.qualities || []).map(videoQualityOption), "gem", "Select quality")}
-        ${videoDurationSliderMenu(videoDurationValue(p), (capabilities.durations || []).map(videoDurationOption))}
-        ${videoCountStepper(p)}
-        ${(capabilities.audio || []).length ? videoOptionMenu("audio", "ugc.audio", videoAudioValue(p), (capabilities.audio || []).map(videoAudioOption), videoAudioValue(p) === "Off" ? "volume-x" : "volume-2", "Audio") : ""}
+        ${videoConsoleToolsHtml(p, selectedModel)}
       </div>
     </div>
     <button class="video-console-generate" type="button" data-action="generate-ugc" ${state.generating ? "aria-busy=\"true\" disabled" : ""}>
@@ -6749,7 +6745,9 @@ function videoAspectRatioOption(value) {
       "16:9": "Wide cinematic frame",
       "1:1": "Square social feed video",
       "4:3": "Classic product or demo frame",
-      "3:4": "Tall creator and product scene"
+      "3:4": "Tall creator and product scene",
+      "21:9": "Ultra-wide cinematic frame",
+      adaptive: "Let the video model choose from the prompt or reference"
     }[value] || "Video composition frame"
   };
 }
@@ -6791,6 +6789,17 @@ function videoAspectRatioMenu(selectedValue, ratios = []) {
       }).join("")}
     </div>
   </details>`;
+}
+
+function videoConsoleToolsHtml(p, selectedModel = videoModelValue(p)) {
+  const capabilities = videoModelCapabilities(selectedModel);
+  return `
+        ${videoModelPicker(selectedModel)}
+        ${videoAspectRatioMenu(videoAspectRatioValue(p), capabilities.aspectRatios || [])}
+        ${videoOptionMenu("quality", "ugc.quality", videoQualityValue(p), (capabilities.qualities || []).map(videoQualityOption), "gem", "Select quality")}
+        ${videoDurationSliderMenu(videoDurationValue(p), (capabilities.durations || []).map(videoDurationOption))}
+        ${videoCountStepper(p)}
+        ${(capabilities.audio || []).length ? videoOptionMenu("audio", "ugc.audio", videoAudioValue(p), (capabilities.audio || []).map(videoAudioOption), videoAudioValue(p) === "Off" ? "volume-x" : "volume-2", "Audio") : ""}`;
 }
 
 function videoQualityOption(value) {
@@ -12974,39 +12983,12 @@ function updateVideoModelDom(modelValue, source = null) {
   const compactModelIcon = consoleEl.querySelector("[data-video-compact-model-icon]");
   const compactModel = consoleEl.querySelector("[data-video-compact-summary] > b");
   const creditLabel = consoleEl.querySelector("[data-video-credit-label]");
-  const ratioMenu = consoleEl.querySelector(".video-option-ratio");
-  const qualityMenu = consoleEl.querySelector(".video-option-quality");
-  const durationMenu = consoleEl.querySelector(".video-option-duration");
-  const audioMenu = consoleEl.querySelector(".video-option-audio");
-  const capabilities = videoModelCapabilities(model.value);
+  const tools = consoleEl.querySelector(".video-console-tools");
   if (currentIcon) currentIcon.innerHTML = providerLogo(model.provider);
   if (currentText) currentText.textContent = model.title;
   if (compactModelIcon) compactModelIcon.innerHTML = providerLogo(model.provider);
   if (compactModel) compactModel.innerHTML = `<span data-video-compact-model-icon>${providerLogo(model.provider)}</span>${esc(model.title)}`;
-  consoleEl.querySelectorAll("[data-video-model-option]").forEach((button) => {
-    const active = button.dataset.videoModelOption === model.value;
-    button.classList.toggle("active", active);
-    button.setAttribute("aria-pressed", active ? "true" : "false");
-    button.setAttribute("aria-selected", active ? "true" : "false");
-    const check = button.querySelector(".video-model-option-check");
-    if (check) check.innerHTML = active ? icon("check", 18) : "";
-  });
-  if (ratioMenu) {
-    const selectedRatio = normalizedVideoSettingForModel(model.value, "ugc.aspectRatio", projectItem?.ugc?.aspectRatio);
-    ratioMenu.outerHTML = videoAspectRatioMenu(selectedRatio, capabilities.aspectRatios || []);
-  }
-  if (qualityMenu) {
-    const selectedQuality = normalizedVideoSettingForModel(model.value, "ugc.quality", projectItem?.ugc?.quality);
-    qualityMenu.outerHTML = videoOptionMenu("quality", "ugc.quality", selectedQuality, (capabilities.qualities || []).map(videoQualityOption), "gem", "Select quality");
-  }
-  if (durationMenu) {
-    const selectedDuration = normalizedVideoSettingForModel(model.value, "ugc.duration", projectItem?.ugc?.duration);
-    durationMenu.outerHTML = videoDurationSliderMenu(selectedDuration, (capabilities.durations || []).map(videoDurationOption));
-  }
-  if (audioMenu) {
-    const selectedAudio = normalizedVideoSettingForModel(model.value, "ugc.audio", videoAudioValue(projectItem));
-    audioMenu.outerHTML = (capabilities.audio || []).length ? videoOptionMenu("audio", "ugc.audio", selectedAudio, (capabilities.audio || []).map(videoAudioOption), selectedAudio === "Off" ? "volume-x" : "volume-2", "Audio") : "";
-  }
+  if (tools) tools.innerHTML = videoConsoleToolsHtml(projectItem, model.value);
   if (creditLabel && !state.generating) creditLabel.textContent = `${videoCreditEstimate(project())} Credit`;
   window.lucide?.createIcons();
   bindVideoConsoleCompact();
