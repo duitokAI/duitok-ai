@@ -46455,6 +46455,296 @@ body:has(.studio-shell .video-page-studio),
   display: none !important;
 }
 
+/* Audio composer image-page parity: reuse the light Pokaya console language while
+   keeping only the controls audio generation needs. */
+.studio-shell .audio-studio-page .audio-composer {
+  box-sizing: border-box !important;
+  width: calc(100% - clamp(16px, 2vw, 28px)) !important;
+  max-width: 1880px !important;
+  height: 132px !important;
+  min-height: 132px !important;
+  max-height: 132px !important;
+  margin: 10px auto 14px !important;
+  display: grid !important;
+  grid-template-columns: clamp(132px, 10vw, 168px) minmax(0, 1fr) clamp(190px, 16vw, 240px) clamp(150px, 11vw, 188px) !important;
+  align-items: stretch !important;
+  gap: 10px !important;
+  padding: 10px !important;
+  overflow: visible !important;
+  align-self: start !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(33, 0, 36, 0.16) !important;
+  background: rgba(255, 249, 240, 0.94) !important;
+  color: var(--pokaya-ink, #210024) !important;
+  box-shadow:
+    0 16px 44px rgba(34, 0, 45, 0.22),
+    0 8px 24px rgba(255, 49, 95, 0.1),
+    inset 0 1px 0 rgba(255, 250, 252, 0.72) !important;
+  backdrop-filter: blur(22px) saturate(1.08) !important;
+}
+
+.studio-shell .audio-studio-page .audio-mode-dial,
+.studio-shell .audio-studio-page .audio-prompt-well,
+.studio-shell .audio-studio-page .audio-preset-picker summary {
+  height: 112px !important;
+  min-height: 112px !important;
+  max-height: 112px !important;
+  border: 1px solid rgba(33, 0, 36, 0.12) !important;
+  background: rgba(255, 255, 255, 0.68) !important;
+  color: var(--pokaya-ink, #210024) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82) !important;
+}
+
+.studio-shell .audio-studio-page .audio-mode-dial {
+  display: grid !important;
+  grid-template-rows: repeat(3, 30px) !important;
+  align-content: center !important;
+  gap: 4px !important;
+  padding: 6px !important;
+  border-radius: 16px !important;
+}
+
+.studio-shell .audio-studio-page .audio-mode-dial button {
+  min-height: 0 !important;
+  height: 30px !important;
+  max-height: 30px !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  justify-items: center !important;
+  gap: 0 !important;
+  padding: 0 10px !important;
+  border-radius: 13px !important;
+  color: rgba(33, 0, 36, 0.54) !important;
+  background: transparent !important;
+  text-align: center !important;
+}
+
+.studio-shell .audio-studio-page .audio-mode-dial button svg {
+  display: none !important;
+}
+
+.studio-shell .audio-studio-page .audio-mode-dial button span {
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  line-height: 1.08 !important;
+  color: inherit !important;
+}
+
+.studio-shell .audio-studio-page .audio-mode-dial button.active {
+  border-color: rgba(255, 103, 56, 0.34) !important;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 247, 241, 0.88)) !important;
+  color: var(--pokaya-ink, #210024) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 103, 56, 0.1) !important;
+}
+
+.studio-shell .audio-studio-page .audio-mode-dial button:disabled {
+  opacity: 0.5 !important;
+}
+
+.studio-shell .audio-studio-page .audio-prompt-well {
+  min-width: 0 !important;
+  grid-template-rows: minmax(42px, 1fr) 42px !important;
+  gap: 8px !important;
+  padding: 10px 12px !important;
+  border-radius: 17px !important;
+}
+
+.studio-shell .audio-studio-page .audio-prompt-well textarea,
+.studio-shell .workspace:has(.step-tabs) .audio-studio-page .audio-prompt-well textarea {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  max-height: 42px !important;
+  padding: 4px 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--pokaya-ink, #210024) !important;
+  font-size: 16px !important;
+  line-height: 20px !important;
+  font-weight: 650 !important;
+  box-shadow: none !important;
+  overflow-y: auto !important;
+  resize: none !important;
+}
+
+.studio-shell .audio-studio-page .audio-prompt-well textarea::placeholder {
+  color: rgba(33, 0, 36, 0.38) !important;
+}
+
+.studio-shell .audio-studio-page .audio-control-row {
+  height: 42px !important;
+  min-height: 42px !important;
+  max-height: 42px !important;
+  gap: 7px !important;
+}
+
+.studio-shell .audio-studio-page .audio-model-chip,
+.studio-shell .audio-studio-page .audio-segment {
+  height: 38px !important;
+  min-height: 38px !important;
+  max-height: 38px !important;
+  border-radius: 13px !important;
+  border: 1px solid rgba(33, 0, 36, 0.08) !important;
+  background: rgba(255, 255, 255, 0.76) !important;
+  color: rgba(33, 0, 36, 0.72) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+.studio-shell .audio-studio-page .audio-model-chip {
+  padding: 0 12px !important;
+}
+
+.studio-shell .audio-studio-page .audio-segment {
+  padding: 4px !important;
+}
+
+.studio-shell .audio-studio-page .audio-segment button {
+  height: 30px !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
+  padding: 0 10px !important;
+  border-radius: 10px !important;
+  color: rgba(33, 0, 36, 0.5) !important;
+}
+
+.studio-shell .audio-studio-page .audio-segment button.active {
+  background: var(--pokaya-gradient-action, linear-gradient(135deg, #c12b62, #ff6738)) !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 18px rgba(193, 43, 98, 0.18) !important;
+}
+
+.studio-shell .audio-studio-page .audio-preset-picker summary {
+  min-height: 112px !important;
+  height: 112px !important;
+  max-height: 112px !important;
+  grid-template-rows: auto auto minmax(22px, 1fr) !important;
+  gap: 6px !important;
+  padding: 14px !important;
+  border-radius: 17px !important;
+}
+
+.studio-shell .audio-studio-page .audio-preset-picker summary > span {
+  color: rgba(33, 0, 36, 0.5) !important;
+  font-size: 12px !important;
+}
+
+.studio-shell .audio-studio-page .audio-preset-picker summary b {
+  color: #8b1a78 !important;
+  font-size: clamp(15px, 1.35vw, 20px) !important;
+  line-height: 1.05 !important;
+}
+
+.studio-shell .audio-studio-page .audio-preset-picker summary i {
+  color: #ffffff !important;
+  background: var(--pokaya-gradient-action, linear-gradient(135deg, #c12b62, #ff6738)) !important;
+  box-shadow: 0 10px 22px rgba(193, 43, 98, 0.24) !important;
+}
+
+.studio-shell .audio-studio-page .audio-preset-picker summary em span {
+  background: rgba(139, 26, 120, 0.42) !important;
+}
+
+.studio-shell .audio-studio-page .audio-preset-menu {
+  background: rgba(255, 249, 240, 0.98) !important;
+  border-color: rgba(33, 0, 36, 0.12) !important;
+  box-shadow: 0 22px 70px rgba(33, 0, 36, 0.24) !important;
+}
+
+.studio-shell .audio-studio-page .audio-preset-menu button {
+  background: rgba(255, 255, 255, 0.72) !important;
+  color: var(--pokaya-ink, #210024) !important;
+}
+
+.studio-shell .audio-studio-page .audio-preset-menu button small {
+  color: rgba(33, 0, 36, 0.52) !important;
+}
+
+.studio-shell .audio-studio-page .audio-preset-menu button.active {
+  border-color: rgba(193, 43, 98, 0.3) !important;
+  background: rgba(255, 103, 56, 0.1) !important;
+}
+
+.studio-shell .audio-studio-page .audio-generate-button {
+  height: 112px !important;
+  min-height: 112px !important;
+  max-height: 112px !important;
+  border-radius: 17px !important;
+  background: var(--pokaya-gradient-action, linear-gradient(135deg, #c12b62, #ff6738)) !important;
+  color: #ffffff !important;
+  box-shadow: 0 14px 32px rgba(193, 43, 98, 0.22) !important;
+}
+
+.studio-shell .audio-studio-page .audio-generate-button b {
+  font-size: 15px !important;
+}
+
+.studio-shell .audio-studio-page .audio-generate-button span {
+  font-size: 12px !important;
+  opacity: 0.9 !important;
+}
+
+.studio-shell .audio-studio-page .audio-generate-button:disabled {
+  background: linear-gradient(135deg, rgba(193, 43, 98, 0.48), rgba(255, 103, 56, 0.5)) !important;
+  color: rgba(255, 255, 255, 0.82) !important;
+  filter: none !important;
+}
+
+@media (max-width: 900px) {
+  .studio-shell .audio-studio-page .audio-composer {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    grid-template-columns: minmax(0, 1fr) 150px !important;
+    grid-template-areas:
+      "prompt generate"
+      "mode preset" !important;
+  }
+
+  .studio-shell .audio-studio-page .audio-mode-dial {
+    grid-area: mode !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-template-rows: 42px !important;
+  }
+
+  .studio-shell .audio-studio-page .audio-prompt-well {
+    grid-area: prompt !important;
+  }
+
+  .studio-shell .audio-studio-page .audio-preset-picker {
+    grid-area: preset !important;
+  }
+
+  .studio-shell .audio-studio-page .audio-generate-button {
+    grid-area: generate !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .studio-shell .audio-studio-page .audio-composer {
+    width: 100% !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-areas:
+      "prompt"
+      "mode"
+      "preset"
+      "generate" !important;
+  }
+
+  .studio-shell .audio-studio-page .audio-mode-dial {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-template-rows: 42px !important;
+    overflow: hidden !important;
+  }
+
+  .studio-shell .audio-studio-page .audio-preset-picker summary,
+  .studio-shell .audio-studio-page .audio-generate-button {
+    min-height: 64px !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+}
+
 /* Audio page final viewport fit lock. */
 .studio-shell .audio-studio-page {
   gap: 12px !important;
