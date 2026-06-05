@@ -46524,11 +46524,23 @@ body:has(.studio-shell .image-higgsfield-mode),
 }
 
 .studio-shell .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console,
-.studio-shell .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console:not(.is-compact) {
+.studio-shell .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console:not(.is-compact),
+.studio-shell .video-page-studio > .video-generate-console,
+.studio-shell .video-page-studio > .video-generate-console:not(.is-compact) {
   background-color: rgba(255, 249, 240, 0.96) !important;
   background-image:
     linear-gradient(105deg, rgba(255, 249, 240, 0.98) 0%, rgba(255, 249, 240, 0.94) 32%, rgba(139, 26, 120, 0.2) 58%, rgba(193, 43, 98, 0.28) 76%, rgba(255, 103, 56, 0.46) 100%) !important;
-  border-color: rgba(255, 103, 56, 0.46) !important;
+  border-color: rgba(111, 28, 132, 0.16) !important;
+}
+
+.studio-shell .video-page-studio > .video-generate-console .video-console-generate {
+  background:
+    linear-gradient(135deg, #f55374 0%, #f57068 100%) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+  box-shadow:
+    0 14px 34px rgba(245, 82, 112, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
 }
 
 .studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button.active,
