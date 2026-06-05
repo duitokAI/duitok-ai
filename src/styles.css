@@ -49383,7 +49383,7 @@ body:has(.studio-shell .image-higgsfield-mode.has-results),
 
 .studio-shell .image-higgsfield-mode.has-results {
   display: grid !important;
-  grid-template-rows: 36px auto auto !important;
+  grid-template-rows: 46px auto auto !important;
   align-content: start !important;
 }
 
@@ -49491,11 +49491,12 @@ body:has(.studio-shell .image-higgsfield-mode.has-results),
   grid-row: 1 !important;
   justify-self: end !important;
   align-self: center !important;
+  width: clamp(170px, 14vw, 260px) !important;
   height: 14px !important;
   min-height: 14px !important;
   max-height: 14px !important;
   overflow: visible !important;
-  margin: 0 clamp(18px, 2.2vw, 42px) 0 0 !important;
+  margin: 0 clamp(22px, 2.4vw, 44px) 0 0 !important;
   z-index: 80 !important;
 }
 
