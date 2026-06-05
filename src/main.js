@@ -67,6 +67,10 @@ let iconHydrationFrame = null;
 let aspectRatioPopoverCleanup = null;
 let imageCountSaveTimer = null;
 let imageCountSaveSeq = 0;
+let imageModelQuickSaveSeq = 0;
+let videoModelQuickSaveSeq = 0;
+let latestImageModelQuickSelection = null;
+let latestVideoModelQuickSelection = null;
 let imageConsoleExpandLockUntil = 0;
 let imageConsoleExpandedUntilUserScroll = false;
 let imageConsoleUserScrollIntentUntil = 0;
@@ -12546,6 +12550,7 @@ async function saveImageModelQuick(value, source = null) {
   const selected = imageModelOptions().find((item) => item.value === value);
   if (!selected) return;
   const projectId = state.projectId;
+  const requestSeq = ++imageModelQuickSaveSeq;
   const previousDb = state.db;
   const currentProject = project();
   const nextAspectRatio = normalizedImageSettingForModel(selected.value, "image.aspectRatio", currentProject?.image?.aspectRatio);
@@ -12553,6 +12558,7 @@ async function saveImageModelQuick(value, source = null) {
   let nextDb = dbWithProjectField(previousDb, projectId, "image.model", selected.value);
   nextDb = dbWithProjectField(nextDb, projectId, "image.aspectRatio", nextAspectRatio);
   nextDb = dbWithProjectField(nextDb, projectId, "image.resolution", nextResolution);
+  latestImageModelQuickSelection = { projectId, seq: requestSeq, model: selected.value, aspectRatio: nextAspectRatio, resolution: nextResolution };
   state.db = nextDb;
   stabilizeImageConsoleExpansion(1000);
   updateImageModelDom(selected.value, source);
@@ -12578,14 +12584,15 @@ async function saveImageModelQuick(value, source = null) {
         body: JSON.stringify({ field: "image.resolution", value: nextResolution })
       });
     }
-    if (state.projectId !== projectId) return;
+    if (state.projectId !== projectId || imageModelQuickSaveSeq !== requestSeq) return;
     state.db = preserveActiveGenerationState(db, state.db, projectId);
   } catch (error) {
-    if (state.projectId === projectId) {
+    if (state.projectId === projectId && imageModelQuickSaveSeq === requestSeq) {
+      latestImageModelQuickSelection = null;
       state.db = previousDb;
       render();
+      notify(error.message || t("toastSaveFailed"));
     }
-    notify(error.message || t("toastSaveFailed"));
   }
 }
 
@@ -12643,6 +12650,7 @@ async function saveVideoModelQuick(value, source = null) {
   const selected = videoModelOptions().find((item) => item.value === value);
   if (!selected) return;
   const projectId = state.projectId;
+  const requestSeq = ++videoModelQuickSaveSeq;
   const previousDb = state.db;
   const currentProject = project();
   const nextAspectRatio = normalizedVideoSettingForModel(selected.value, "ugc.aspectRatio", currentProject?.ugc?.aspectRatio);
@@ -12654,6 +12662,7 @@ async function saveVideoModelQuick(value, source = null) {
   nextDb = dbWithProjectField(nextDb, projectId, "ugc.quality", nextQuality);
   nextDb = dbWithProjectField(nextDb, projectId, "ugc.duration", nextDuration);
   nextDb = dbWithProjectField(nextDb, projectId, "ugc.audio", nextAudio);
+  latestVideoModelQuickSelection = { projectId, seq: requestSeq, model: selected.value, aspectRatio: nextAspectRatio, quality: nextQuality, duration: nextDuration, audio: nextAudio };
   state.db = nextDb;
   stabilizeVideoConsoleExpansion(1000);
   updateVideoModelDom(selected.value, source);
@@ -12678,14 +12687,15 @@ async function saveVideoModelQuick(value, source = null) {
     await patchIfChanged("ugc.quality", currentProject?.ugc?.quality, nextQuality);
     await patchIfChanged("ugc.duration", currentProject?.ugc?.duration, nextDuration);
     await patchIfChanged("ugc.audio", videoAudioValue(currentProject), nextAudio);
-    if (state.projectId !== projectId) return;
+    if (state.projectId !== projectId || videoModelQuickSaveSeq !== requestSeq) return;
     state.db = preserveActiveGenerationState(db, state.db, projectId);
   } catch (error) {
-    if (state.projectId === projectId) {
+    if (state.projectId === projectId && videoModelQuickSaveSeq === requestSeq) {
+      latestVideoModelQuickSelection = null;
       state.db = previousDb;
       render();
+      notify(error.message || t("toastSaveFailed"));
     }
-    notify(error.message || t("toastSaveFailed"));
   }
 }
 
@@ -13310,13 +13320,14 @@ function syncImageConsoleBeforeGenerate(name) {
     const value = promptInput?.value || project().ugc?.script || "";
     updateVideoPromptLocal(value);
     const current = project();
+    const latestVideoSelection = latestVideoModelQuickSelection?.projectId === state.projectId ? latestVideoModelQuickSelection : null;
     return {
       prompt: value,
-      model: videoModelValue(current),
-      aspectRatio: videoAspectRatioValue(current),
-      resolution: videoQualityValue(current),
-      duration: videoDurationValue(current).match(/\d+/)?.[0] || "8",
-      audio: videoAudioValue(current),
+      model: latestVideoSelection?.model || videoModelValue(current),
+      aspectRatio: latestVideoSelection?.aspectRatio || videoAspectRatioValue(current),
+      resolution: latestVideoSelection?.quality || videoQualityValue(current),
+      duration: String(latestVideoSelection?.duration || videoDurationValue(current)).match(/\d+/)?.[0] || "8",
+      audio: latestVideoSelection?.audio || videoAudioValue(current),
       advancePrompt: Boolean(state.promptAdvancedEnabled)
     };
   }
@@ -13325,11 +13336,12 @@ function syncImageConsoleBeforeGenerate(name) {
   const value = promptInput?.value || project().image?.prompt || "";
   updateImagePromptLocal(value);
   const current = project();
+  const latestImageSelection = latestImageModelQuickSelection?.projectId === state.projectId ? latestImageModelQuickSelection : null;
   return {
     prompt: value,
-    model: current.image?.model || "GPT Image 2",
-    aspectRatio: current.image?.aspectRatio || "9:16",
-    resolution: current.image?.resolution || "1K",
+    model: latestImageSelection?.model || current.image?.model || "GPT Image 2",
+    aspectRatio: latestImageSelection?.aspectRatio || current.image?.aspectRatio || "9:16",
+    resolution: latestImageSelection?.resolution || current.image?.resolution || "1K",
     count: imageBatchCount(current),
     advancePrompt: Boolean(state.promptAdvancedEnabled)
   };
