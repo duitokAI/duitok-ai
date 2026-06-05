@@ -2198,7 +2198,7 @@ function bindResultActionTooltips() {
   resultActionTooltipCleanup?.();
   resultActionTooltipCleanup = null;
   document.querySelectorAll(".result-action-hover-tooltip").forEach((el) => el.remove());
-  const targetSelector = ".studio-wall-actions [data-tooltip], .agent-generation-result-actions [data-tooltip], .result-actions [data-tooltip]";
+  const targetSelector = ".studio-wall-actions [data-tooltip], .agent-generation-result-actions [data-tooltip], .result-actions [data-tooltip], .agent-session-sidebar [data-tooltip], .agent-history-panel [data-tooltip]";
   const tooltip = document.createElement("div");
   tooltip.className = "result-action-hover-tooltip";
   tooltip.setAttribute("role", "tooltip");
@@ -2217,17 +2217,23 @@ function bindResultActionTooltips() {
     const rect = target.getBoundingClientRect();
     const tooltipWidth = Math.max(tooltip.offsetWidth, 96);
     const tooltipHeight = Math.max(tooltip.offsetHeight, 32);
-    const preferLeft = rect.left - tooltipWidth - 10 >= 12;
-    const left = preferLeft
-      ? rect.left - tooltipWidth - 10
-      : Math.min(rect.right + 10, window.innerWidth - tooltipWidth - 12);
-    const top = Math.min(
-      Math.max(12 + tooltipHeight / 2, rect.top + rect.height / 2),
-      window.innerHeight - 12 - tooltipHeight / 2
-    );
-    tooltip.style.left = `${Math.round(Math.max(12, left))}px`;
-    tooltip.style.top = `${Math.round(top)}px`;
-    tooltip.dataset.placement = preferLeft ? "left" : "right";
+    const requestedPlacement = target.dataset.tooltipPlacement || "";
+    const preferTop = requestedPlacement === "top";
+    const preferLeft = !preferTop && rect.left - tooltipWidth - 10 >= 12;
+    const left = preferTop
+      ? rect.left + rect.width / 2 - tooltipWidth / 2
+      : preferLeft
+        ? rect.left - tooltipWidth - 10
+        : Math.min(rect.right + 10, window.innerWidth - tooltipWidth - 12);
+    const top = preferTop
+      ? rect.top - tooltipHeight / 2 - 8
+      : Math.min(
+        Math.max(12 + tooltipHeight / 2, rect.top + rect.height / 2),
+        window.innerHeight - 12 - tooltipHeight / 2
+      );
+    tooltip.style.left = `${Math.round(Math.min(Math.max(12, left), window.innerWidth - tooltipWidth - 12))}px`;
+    tooltip.style.top = `${Math.round(Math.max(12 + tooltipHeight / 2, top))}px`;
+    tooltip.dataset.placement = preferTop ? "top" : preferLeft ? "left" : "right";
     tooltip.classList.add("is-visible");
   };
   const handlePointerOver = (event) => {
@@ -10499,7 +10505,7 @@ function agentChatToolbar() {
   const sessions = Array.isArray(state.agentHistorySessions) ? state.agentHistorySessions : [];
   return `<aside class="agent-chat-toolbar agent-session-sidebar" aria-label="${esc(c.history)}">
     <nav class="agent-session-actions" aria-label="Agent chats">
-      <button class="agent-session-action" type="button" data-action="new-agent-chat" title="${esc(c.newChat)}">${icon("square-pen", 20)}<span>${esc(c.newChat)}</span></button>
+      <button class="agent-session-action" type="button" data-action="new-agent-chat" data-tooltip="${esc(c.newChat)}" aria-label="${esc(c.newChat)}">${icon("square-pen", 20)}<span>${esc(c.newChat)}</span></button>
       <label class="agent-session-search" title="${esc(c.history)}">
         ${icon("search", 20)}
         <input type="search" data-agent-history-search placeholder="${agentHistorySearchPlaceholder()}" aria-label="${agentHistorySearchPlaceholder()}" value="${esc(state.agentHistorySearch || "")}">
@@ -10552,10 +10558,10 @@ function agentHistorySidebarList(sessions = []) {
             <span>${isPinned ? `${icon("pin", 12)} ` : ""}${esc(title)}</span>
             <small>${isRunning ? `${icon("loader-circle", 11)} 运行中 · ` : ""}${agentHistoryMeta(item)}</small>
           </button>`}
-        ${isDraft ? "" : `<button type="button" class="agent-session-pin ${isPinned ? "is-pinned" : ""}" data-agent-history-pin="${esc(item.id)}" title="${isPinned ? "取消置顶" : "置顶对话"}" aria-label="${isPinned ? "取消置顶" : "置顶对话"}">${icon("pin", 15)}</button>
-        <button type="button" class="agent-session-archive" data-agent-history-archive="${esc(item.id)}" title="归档对话" aria-label="归档对话">${icon("archive", 15)}</button>
-        <button type="button" class="agent-session-rename" data-agent-history-rename="${esc(item.id)}" title="重命名对话" aria-label="重命名对话">${icon("pencil", 15)}</button>
-        <button type="button" class="agent-session-delete" data-agent-history-delete="${esc(item.id)}" title="删除这条历史" aria-label="删除这条历史">${icon("trash-2", 15)}</button>`}
+        ${isDraft ? "" : `<button type="button" class="agent-session-pin ${isPinned ? "is-pinned" : ""}" data-agent-history-pin="${esc(item.id)}" data-tooltip="${isPinned ? "取消置顶" : "置顶对话"}" data-tooltip-placement="top" aria-label="${isPinned ? "取消置顶" : "置顶对话"}">${icon("pin", 15)}</button>
+        <button type="button" class="agent-session-archive" data-agent-history-archive="${esc(item.id)}" data-tooltip="归档对话" data-tooltip-placement="top" aria-label="归档对话">${icon("archive", 15)}</button>
+        <button type="button" class="agent-session-rename" data-agent-history-rename="${esc(item.id)}" data-tooltip="重命名对话" data-tooltip-placement="top" aria-label="重命名对话">${icon("pencil", 15)}</button>
+        <button type="button" class="agent-session-delete" data-agent-history-delete="${esc(item.id)}" data-tooltip="删除这条历史" data-tooltip-placement="top" aria-label="删除这条历史">${icon("trash-2", 15)}</button>`}
       </article>`;
     }).join("")}
   </div>`;
