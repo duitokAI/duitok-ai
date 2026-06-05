@@ -510,7 +510,9 @@ app.get("/api/admin/diagnostics/seedream-image", async (req, res, next) => {
   try {
     requireAdminDiagnosticAccess(req);
     const startedAt = Date.now();
-    const model = req.query.model === "Seedream 4.5" ? "Seedream 4.5" : "Seedream 5.0 Lite";
+    const requestedModel = internalMediaModel(req.query.model || "Seedream 5.0 Lite");
+    const allowedDiagnosticModels = new Set(["GPT Image 2", "Seedream 5.0 Lite", "Seedream 4.5", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine"]);
+    const model = allowedDiagnosticModels.has(requestedModel) ? requestedModel : "Seedream 5.0 Lite";
     const prompt = sanitizeAgentText(req.query.prompt || "A clean ecommerce product lifestyle photo of a white ceramic coffee mug on a wooden desk, soft daylight, realistic, sharp focus, no text, 1:1 composition.").slice(0, 1200);
     const project = {
       image: {
@@ -525,21 +527,25 @@ app.get("/api/admin/diagnostics/seedream-image", async (req, res, next) => {
     const tracker = async (patch = {}) => {
       events.push({
         atMs: Date.now() - startedAt,
+        provider: patch.provider || "",
         providerStatus: patch.providerStatus || "",
         pollCount: patch.pollCount ?? null,
-        hasTaskId: Boolean(patch.providerTaskId || patch.taskId)
+        hasTaskId: Boolean(patch.providerTaskId || patch.taskId),
+        error: patch.providerErrorMessage || ""
       });
     };
     const timeoutMs = Math.min(5 * 60 * 1000, Math.max(30 * 1000, Number(req.query.timeoutMs || staleImageGenerationMs)));
     const generated = await timeoutPromise(
-      generateImageWithApimart(project, tracker),
+      model === "Seedream 5.0 Lite" || model === "Seedream 4.5"
+        ? generateImageWithApimart(project, tracker)
+        : generateImageWithFallbacks(project, model, tracker),
       timeoutMs,
-      `Seedream diagnostic request timed out after ${formatGenerationDuration(timeoutMs)}.`
+      `${model} diagnostic request timed out after ${formatGenerationDuration(timeoutMs)}.`
     );
     res.json({
       ok: Boolean(generated.urls?.[0]),
       configured: true,
-      endpoint: apimartImagePath,
+      provider: generated.provider || providerForMediaModel(model),
       model,
       providerModel: imageModelFromProject(project),
       aspectRatio: project.image.aspectRatio,
@@ -548,6 +554,7 @@ app.get("/api/admin/diagnostics/seedream-image", async (req, res, next) => {
       durationMs: Date.now() - startedAt,
       urlCount: generated.urls?.length || 0,
       firstUrl: generated.urls?.[0] || "",
+      providerFallbacks: generated.providerFallbacks || [],
       events
     });
   } catch (error) {
