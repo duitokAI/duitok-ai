@@ -7074,6 +7074,28 @@ function audioSegment(field, options, active) {
   return `<div class="audio-segment">${options.map(([value, label]) => `<button type="button" class="${active === value ? "active" : ""}" data-field-set="${esc(field)}" data-value="${esc(value)}">${esc(label)}</button>`).join("")}</div>`;
 }
 
+function patchAudioModeDom(mode = project().auto?.audioMode || "Voiceover") {
+  const mainBar = document.querySelector(".audio-main-bar");
+  if (!mainBar) return false;
+  const auto = project().auto || {};
+  const promptInput = document.querySelector("[data-audio-prompt]");
+  const promptText = String(promptInput?.value || auto.audioPrompt || "");
+  const language = auto.audioLanguage || "Malay";
+  const scriptMode = auto.audioScriptMode || "Write for me";
+  const voicePreset = auto.voicePreset || "Malay Soft Sell";
+  const isVoiceoverMode = mode === "Voiceover";
+  const inputSlot = mainBar.querySelector(".audio-prompt-well, .audio-file-insert-card");
+  const pickerSlot = mainBar.querySelector(".audio-preset-picker");
+  if (!inputSlot || !pickerSlot) return false;
+  inputSlot.outerHTML = isVoiceoverMode ? audioPromptWell(promptText, language, scriptMode) : audioFileInsertWell();
+  pickerSlot.outerHTML = mode === "Translate" ? audioLanguagePicker(language) : audioVoicePresetPicker(voicePreset);
+  const generateButton = mainBar.querySelector(".audio-generate-button");
+  if (generateButton) generateButton.classList.toggle("is-empty", isVoiceoverMode && !promptText.trim());
+  bindProjectFieldSetControls(mainBar);
+  window.lucide?.createIcons();
+  return true;
+}
+
 function audioPresetButton(value, meta, active) {
   return `<button type="button" class="${active === value ? "active" : ""}" data-field-set="auto.voicePreset" data-value="${esc(value)}">
     <span>${esc(value)}</span>
@@ -12580,7 +12602,7 @@ function bindProjectFieldSetControls(root = document) {
       if (!layoutLocked && el.dataset.fieldSet?.startsWith("ugc.")) stabilizeVideoConsoleExpansion(1000);
       el.closest("details")?.removeAttribute("open");
       saveProjectFieldQuick(el.dataset.fieldSet, el.dataset.value, el);
-      if (el.dataset.fieldSet === "auto.audioMode") render();
+      if (el.dataset.fieldSet === "auto.audioMode" && !patchAudioModeDom(el.dataset.value)) render();
     };
     el.addEventListener("click", save);
     el.addEventListener("keydown", (event) => {

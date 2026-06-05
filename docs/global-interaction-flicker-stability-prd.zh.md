@@ -474,9 +474,9 @@ Tab 切换与 sidebar 切换必须：
 - `npm run build` 通过。
 - 新增 UI 改动必须遵守本 PRD 的布局稳定规则。
 
-## 14. 本次执行范围
+## 14. P0 执行范围
 
-本次先执行 P0 稳定性止血，重点覆盖最容易被用户感知的点击闪缩场景：
+P0 先执行稳定性止血，重点覆盖最容易被用户感知的点击闪缩场景：
 
 - 新增 Studio scoped 交互稳定 CSS 基线，约束按钮、summary、菜单、卡片、composer、media wall 的点击/打开/disabled/selected 状态。
 - Image 生成中状态补齐 hover、focus、数量 stepper、比例浮层、模型菜单的 layout lock，避免生成中误触发底部 bar 展开。
@@ -484,9 +484,24 @@ Tab 切换与 sidebar 切换必须：
 - Audio 底部 composer、模式 dial、preset menu、generate button 增加尺寸与浮层稳定规则，避免打开 preset 或切换模式时撑开 bar。
 - Content Library tile / preview / media 元素增加固定比例和内部替换约束，减少图片刷新时 grid 跳动。
 
-本次不做 P1/P2：
+P0 暂不做以下内容：
 
 - 不重构全站 render 架构。
 - 不实现完整 media wall 虚拟列表。
 - 不新增 Playwright 自动化闪缩检测脚本。
 - 不改后端生成队列与模型业务逻辑。
+
+## 15. P1/P2 追加执行范围
+
+本次追加执行 P1/P2 中最直接影响用户反馈的部分：
+
+- P1：Audio 底部模式切换从整页 `render()` 改成局部 DOM patch，只替换 prompt 区和 preset 区，避免 Voiceover / Change Voice / Translate 点击时整屏闪缩。
+- P1：Audio 局部 patch 后重新绑定新插入控件，并刷新图标，保证按钮可点、样式不丢、交互不被旧 DOM 覆盖。
+- P2：新增 `npm run check:interaction-flicker`，用真实浏览器覆盖 Image 模型菜单、Video 模型菜单、Audio preset 菜单、Audio 模式切换的尺寸漂移检测。
+- P2：检测阈值默认控制在 1px 内，任何按钮点击导致 composer / main bar 位移或尺寸变化都会失败。
+
+本次仍不做以下中大型改造：
+
+- 不实现完整 media wall 虚拟列表。
+- 不重构全站状态管理。
+- 不改变后端生成队列、模型业务逻辑或计费逻辑。
