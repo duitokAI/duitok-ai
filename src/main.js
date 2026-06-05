@@ -49,6 +49,7 @@ function readStoredJson(key, fallback) {
 }
 const agentHistoryLimit = 40;
 let sidebarScrollTop = 0;
+let agentSessionListScrollTop = 0;
 let promoCountdownTimer = null;
 let assetSearchTimer = null;
 let adminSearchTimer = null;
@@ -1570,6 +1571,7 @@ function set(patch) {
   const deferForAgentComposition = agentInputFocus?.composing && !Object.prototype.hasOwnProperty.call(statePatch, "agentInput") && state.page === "agent";
   const shouldScrollAgentThread = shouldAutoScrollAgentThread(patch, agentScroll);
   rememberSidebarScroll();
+  rememberAgentSessionListScroll();
   if (agentInputFocus && !Object.prototype.hasOwnProperty.call(statePatch, "agentInput")) state.agentInput = agentInputFocus.value;
   Object.assign(state, statePatch);
   if (deferForAgentComposition) {
@@ -1723,6 +1725,7 @@ function patchAgentChatDom(patch = {}) {
     if (!toolbar) return false;
     toolbar.outerHTML = agentChatToolbar();
     bindAgentControls();
+    restoreAgentSessionListScroll();
   }
   if (affectsThread) {
     const thread = shell.querySelector(".agent-thread");
@@ -1825,6 +1828,18 @@ function restoreSidebarScroll() {
   if (!sidebar) return;
   const maxScroll = Math.max(0, sidebar.scrollHeight - sidebar.clientHeight);
   sidebar.scrollTop = Math.min(sidebarScrollTop, maxScroll);
+}
+
+function rememberAgentSessionListScroll() {
+  const list = document.querySelector(".agent-session-list");
+  if (list) agentSessionListScrollTop = list.scrollTop;
+}
+
+function restoreAgentSessionListScroll() {
+  const list = document.querySelector(".agent-session-list");
+  if (!list) return;
+  const maxScroll = Math.max(0, list.scrollHeight - list.clientHeight);
+  list.scrollTop = Math.min(agentSessionListScrollTop, maxScroll);
 }
 
 function stabilizeImageConsoleExpansion(duration = 900) {
@@ -2423,6 +2438,7 @@ function render() {
   hydrateIconsSoon();
   updatePromoCountdown();
   restoreSidebarScroll();
+  restoreAgentSessionListScroll();
   bindImageConsoleCompact();
   bindVideoConsoleCompact();
   bindStudioWallInfiniteScroll();
@@ -14349,6 +14365,7 @@ function switchAgentChat(id, options = {}) {
     ? null
     : resolveAgentHistorySession(requestedId);
   if (requestedId !== agentDraftHistoryId && !targetSession) return notify("找不到这条历史记录。");
+  rememberAgentSessionListScroll();
   persistActiveAgentChatSnapshot({ onlyIfChanged: true });
   rememberAgentHistorySessions([...(state.agentHistorySessions || []), ...historyBeforeRestore], { replace: true });
   markAgentHistorySelection(id);
