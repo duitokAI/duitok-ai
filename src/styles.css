@@ -47749,3 +47749,125 @@ body:has(.studio-shell .video-prompt-extractor-page),
   transform: none !important;
   filter: none !important;
 }
+
+
+/* Top creation tabs final lock: Image, Video, and Audio must share one fixed
+   rail geometry so switching pages never changes the bar width, color, or
+   vertical position. */
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode),
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio),
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page),
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) {
+  --project-page-pad-y: 0px !important;
+  --project-page-pad-x: 0px !important;
+  padding: 0 0 56px !important;
+  overflow-x: clip !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) > *,
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio) > *,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) > *,
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) > * {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .project-step-topbar,
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio) .project-step-topbar,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .project-step-topbar,
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .project-step-topbar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 60 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 88px !important;
+  margin: 0 !important;
+  padding: 8px 18px 10px 26px !important;
+  box-sizing: border-box !important;
+  border-bottom: 1px solid rgba(255, 103, 56, 0.14) !important;
+  background: linear-gradient(90deg, rgba(33, 0, 36, 0.96) 0%, rgba(50, 16, 58, 0.9) 38%, rgba(139, 26, 120, 0.62) 70%, rgba(255, 103, 56, 0.42) 100%) !important;
+  box-shadow: 0 12px 28px rgba(33, 0, 36, 0.16) !important;
+  backdrop-filter: blur(18px) saturate(1.12) !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .studio-top-step-tabs,
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio) .studio-top-step-tabs,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .studio-top-step-tabs,
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .studio-top-step-tabs {
+  display: grid !important;
+  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .studio-top-step-tabs button,
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio) .studio-top-step-tabs button,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .studio-top-step-tabs button,
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .studio-top-step-tabs button {
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  height: 58px !important;
+  min-height: 58px !important;
+  max-height: 58px !important;
+  justify-content: center !important;
+  gap: 9px !important;
+  border: 1px solid rgba(255, 249, 240, 0.13) !important;
+  border-radius: 16px !important;
+  padding: 0 12px !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+  color: rgba(255, 249, 240, 0.72) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  text-shadow: none !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .studio-top-step-tabs button:not(:first-child),
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio) .studio-top-step-tabs button:not(:first-child),
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .studio-top-step-tabs button:not(:first-child),
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .studio-top-step-tabs button:not(:first-child) {
+  border-left: 1px solid rgba(255, 249, 240, 0.13) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .studio-top-step-tabs button.active,
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio) .studio-top-step-tabs button.active,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .studio-top-step-tabs button.active,
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .studio-top-step-tabs button.active {
+  background: var(--pokaya-gradient-primary, linear-gradient(100deg, #210024 0%, #32103a 20%, #8b1a78 46%, #c12b62 70%, #ff6738 100%)) !important;
+  border-color: rgba(255, 103, 56, 0.78) !important;
+  color: #ffffff !important;
+  font-weight: 950 !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 249, 240, 0.16),
+    0 16px 34px rgba(255, 103, 56, 0.2) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .studio-top-step-tabs button span,
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio) .studio-top-step-tabs button span,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .studio-top-step-tabs button span,
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .studio-top-step-tabs button span {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .studio-workbench-card,
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio) .studio-workbench-card,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .studio-workbench-card,
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .studio-workbench-card,
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .canvas-card,
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio) .canvas-card,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .canvas-card,
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .canvas-card {
+  border-radius: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
