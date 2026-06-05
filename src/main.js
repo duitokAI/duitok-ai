@@ -1583,6 +1583,9 @@ function set(patch) {
   if (shouldPatchAssetLibraryOnly(statePatch) && patchAssetLibraryDom({ preserveSearchFocus: Object.prototype.hasOwnProperty.call(statePatch, "assetSearch") })) {
     return;
   }
+  if (shouldPatchBulkSelectionOnly(statePatch) && patchBulkSelectionDom()) {
+    return;
+  }
   render();
   restoreAgentInputFocus(agentInputFocus);
   if (shouldScrollAgentThread) scrollAgentThreadToBottom();
@@ -1661,6 +1664,45 @@ function shouldPatchAssetLibraryOnly(patch = {}) {
   if (!keys.length) return false;
   const allowed = new Set(["assetSearch", "assetTypeFilter", "assetProjectFilter", "assetLibraryLimit"]);
   return keys.every((key) => allowed.has(key));
+}
+
+function shouldPatchBulkSelectionOnly(patch = {}) {
+  if (state.loading || !isStudioPath()) return false;
+  const keys = Object.keys(patch);
+  if (!keys.length || !keys.includes("selectedResultIds")) return false;
+  return keys.every((key) => ["selectedResultIds", "bulkDeleteBusy", "bulkReferenceBusy"].includes(key));
+}
+
+function patchBulkSelectionDom() {
+  const wall = document.querySelector(".studio-result-wall");
+  const surface = document.querySelector(".studio-wall-surface-base, .image-higgsfield-mode, .video-page-studio");
+  if (!wall || !surface) return false;
+  const ids = selectedResultIdSet();
+  const selecting = ids.size > 0;
+  surface.classList.toggle("is-bulk-selecting-results", selecting);
+  wall.querySelectorAll(".studio-wall-card[data-result-id]").forEach((card) => {
+    const selected = ids.has(card.dataset.resultId || "");
+    card.classList.toggle("is-selected", selected);
+    card.classList.toggle("is-bulk-selecting", selecting);
+    const button = card.querySelector("[data-result-select]");
+    if (!button) return;
+    button.setAttribute("aria-pressed", selected ? "true" : "false");
+    button.setAttribute("aria-label", selected ? "Unselect result" : "Select result");
+    button.innerHTML = selected ? icon("check", 17) : "";
+  });
+  const previousBar = wall.querySelector(".studio-bulk-selection-bar");
+  const nextBar = studioBulkSelectionBar();
+  if (nextBar) {
+    if (previousBar) previousBar.outerHTML = nextBar;
+    else wall.insertAdjacentHTML("beforeend", nextBar);
+  } else {
+    previousBar?.remove();
+  }
+  document.querySelectorAll(".image-generate-console, .video-page-studio > .video-generate-console").forEach((el) => {
+    el.hidden = selecting;
+  });
+  window.lucide?.createIcons();
+  return true;
 }
 
 function patchAgentChatDom(patch = {}) {
