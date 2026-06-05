@@ -6640,9 +6640,9 @@ function pendingResultJobs(projectItem, types) {
       ? step === videoStudioStep(job.step)
       : types.includes(job.type) || (job.action === "generate-image" && types.includes("image")))
     .sort((a, b) => {
-      const aTime = Date.parse(a.completedAt || a.updatedAt || a.startedAt || a.createdAt || 0) || 0;
-      const bTime = Date.parse(b.completedAt || b.updatedAt || b.startedAt || b.createdAt || 0) || 0;
-      return bTime - aTime;
+      const timeDelta = studioWallTimelineTime(b) - studioWallTimelineTime(a);
+      if (timeDelta) return timeDelta;
+      return studioWallTimelineRank(a) - studioWallTimelineRank(b);
     });
 }
 
@@ -12199,7 +12199,10 @@ function optimisticGenerationJobs(name, count, options = {}) {
       promptSnapshot: options.prompt || "",
       aspectRatio,
       optimistic: true,
-      createdAt
+      createdAt,
+      timelineAt: createdAt,
+      batchIndex: count > 1 ? index + 1 : undefined,
+      batchCount: count > 1 ? count : undefined
     }));
   }
   if (name !== "generate-image") return [];
@@ -12219,7 +12222,10 @@ function optimisticGenerationJobs(name, count, options = {}) {
     promptSnapshot: options.prompt || "",
     aspectRatio,
     optimistic: true,
-    createdAt
+    createdAt,
+    timelineAt: createdAt,
+    batchIndex: count > 1 ? index + 1 : undefined,
+    batchCount: count > 1 ? count : undefined
   }));
 }
 
