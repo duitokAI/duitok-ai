@@ -46786,27 +46786,24 @@ body:has(.studio-shell .video-page-studio),
    keeping only the controls audio generation needs. */
 .studio-shell .audio-studio-page .audio-composer {
   box-sizing: border-box !important;
-  width: calc(100% - clamp(16px, 2vw, 28px)) !important;
-  max-width: 1880px !important;
+  width: calc(100% - clamp(72px, 8vw, 180px)) !important;
+  max-width: min(1680px, calc(100% - clamp(72px, 8vw, 180px))) !important;
   height: auto !important;
-  min-height: 132px !important;
+  min-height: 0 !important;
   max-height: none !important;
-  margin: 10px auto 14px !important;
+  margin: 10px auto 16px !important;
   display: grid !important;
-  grid-template-columns: clamp(260px, 16vw, 320px) minmax(0, 1fr) clamp(190px, 16vw, 240px) clamp(150px, 11vw, 188px) !important;
-  align-items: stretch !important;
-  gap: 10px !important;
-  padding: 10px !important;
+  grid-template-columns: clamp(250px, 17vw, 300px) minmax(0, 1fr) !important;
+  align-items: end !important;
+  gap: 12px !important;
+  padding: 0 !important;
   overflow: visible !important;
   align-self: start !important;
-  border-radius: 20px !important;
-  border: 1px solid rgba(33, 0, 36, 0.16) !important;
-  background: rgba(255, 249, 240, 0.94) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
   color: var(--pokaya-ink, #210024) !important;
-  box-shadow:
-    0 16px 44px rgba(34, 0, 45, 0.22),
-    0 8px 24px rgba(255, 49, 95, 0.1),
-    inset 0 1px 0 rgba(255, 250, 252, 0.72) !important;
+  box-shadow: none !important;
   backdrop-filter: blur(22px) saturate(1.08) !important;
 }
 
@@ -46822,6 +46819,27 @@ body:has(.studio-shell .video-page-studio),
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82) !important;
 }
 
+.studio-shell .audio-studio-page .audio-main-bar {
+  box-sizing: border-box !important;
+  min-width: 0 !important;
+  height: 146px !important;
+  min-height: 146px !important;
+  max-height: 146px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) clamp(190px, 16vw, 240px) clamp(154px, 10vw, 204px) !important;
+  align-items: stretch !important;
+  gap: 9px !important;
+  padding: 10px !important;
+  border: 1px solid rgba(33, 0, 36, 0.16) !important;
+  border-radius: 22px !important;
+  background: rgba(255, 249, 240, 0.94) !important;
+  box-shadow:
+    0 18px 54px rgba(34, 0, 45, 0.24),
+    0 8px 26px rgba(255, 49, 95, 0.1),
+    inset 0 1px 0 rgba(255, 250, 252, 0.72) !important;
+  backdrop-filter: blur(22px) saturate(1.08) !important;
+}
+
 .studio-shell .audio-studio-page .audio-mode-dial {
   --audio-dial-angle: -24deg;
   position: relative !important;
@@ -46831,8 +46849,10 @@ body:has(.studio-shell .video-page-studio),
   grid-template-rows: repeat(3, 36px) !important;
   align-content: center !important;
   gap: 2px !important;
-  min-height: 150px !important;
-  padding: 20px 14px 20px 126px !important;
+  width: clamp(250px, 17vw, 300px) !important;
+  min-height: 146px !important;
+  height: 146px !important;
+  padding: 18px 14px 18px 116px !important;
   border-color: rgba(255, 255, 255, 0.12) !important;
   border-radius: 28px !important;
   background:
@@ -46864,8 +46884,8 @@ body:has(.studio-shell .video-page-studio),
   z-index: -1;
   left: -78px;
   top: 50%;
-  width: 188px;
-  height: 188px;
+  width: 176px;
+  height: 176px;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 999px;
   background:
@@ -46884,7 +46904,7 @@ body:has(.studio-shell .video-page-studio),
   left: 42px;
   top: 50%;
   z-index: 2;
-  width: 72px;
+  width: 66px;
   height: 7px;
   border-radius: 999px;
   background: #ecff9c;
@@ -46988,12 +47008,16 @@ body:has(.studio-shell .video-page-studio),
   gap: 8px !important;
   padding: 10px 12px !important;
   border-radius: 17px !important;
+  height: 126px !important;
+  min-height: 126px !important;
+  max-height: 126px !important;
+  overflow: hidden !important;
 }
 
 .studio-shell .audio-studio-page .audio-file-insert-card {
   box-sizing: border-box !important;
-  height: 112px !important;
-  max-height: 112px !important;
+  height: 126px !important;
+  max-height: 126px !important;
   grid-template-columns: 52px minmax(0, 1fr) !important;
   grid-template-rows: auto auto !important;
   align-content: center !important;
@@ -47071,14 +47095,20 @@ body:has(.studio-shell .video-page-studio),
 }
 
 .studio-shell .audio-studio-page .audio-control-row {
-  height: auto !important;
+  height: 42px !important;
   min-height: 42px !important;
-  max-height: none !important;
+  max-height: 42px !important;
   display: flex !important;
-  flex-wrap: wrap !important;
-  align-content: start !important;
+  flex-wrap: nowrap !important;
+  align-content: center !important;
   gap: 7px !important;
-  overflow: visible !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: none !important;
+}
+
+.studio-shell .audio-studio-page .audio-control-row::-webkit-scrollbar {
+  display: none !important;
 }
 
 .studio-shell .audio-studio-page .audio-model-chip,
@@ -47117,9 +47147,9 @@ body:has(.studio-shell .video-page-studio),
 }
 
 .studio-shell .audio-studio-page .audio-preset-picker summary {
-  min-height: 112px !important;
-  height: 100% !important;
-  max-height: none !important;
+  min-height: 126px !important;
+  height: 126px !important;
+  max-height: 126px !important;
   grid-template-rows: auto auto minmax(22px, 1fr) !important;
   gap: 6px !important;
   padding: 14px !important;
@@ -47178,9 +47208,9 @@ body:has(.studio-shell .video-page-studio),
 }
 
 .studio-shell .audio-studio-page .audio-generate-button {
-  height: 112px !important;
-  min-height: 112px !important;
-  max-height: 112px !important;
+  height: 126px !important;
+  min-height: 126px !important;
+  max-height: 126px !important;
   border-radius: 17px !important;
   background: var(--pokaya-gradient-action, linear-gradient(135deg, #c12b62, #ff6738)) !important;
   color: #ffffff !important;
@@ -47209,16 +47239,20 @@ body:has(.studio-shell .video-page-studio),
     height: auto !important;
     min-height: 0 !important;
     max-height: none !important;
-    grid-template-columns: minmax(0, 1fr) 150px !important;
-    grid-template-areas:
-      "prompt generate"
-      "mode preset" !important;
+    grid-template-columns: minmax(0, 1fr) !important;
   }
 
   .studio-shell .audio-studio-page .audio-mode-dial {
-    grid-area: mode !important;
+    width: 100% !important;
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     grid-template-rows: 42px !important;
+  }
+
+  .studio-shell .audio-studio-page .audio-main-bar {
+    grid-template-columns: minmax(0, 1fr) 150px !important;
+    grid-template-areas:
+      "prompt generate"
+      "preset generate" !important;
   }
 
   .studio-shell .audio-studio-page .audio-prompt-well {
@@ -47242,9 +47276,12 @@ body:has(.studio-shell .video-page-studio),
   .studio-shell .audio-studio-page .audio-composer {
     width: 100% !important;
     grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .studio-shell .audio-studio-page .audio-main-bar {
+    grid-template-columns: minmax(0, 1fr) !important;
     grid-template-areas:
       "prompt"
-      "mode"
       "preset"
       "generate" !important;
   }

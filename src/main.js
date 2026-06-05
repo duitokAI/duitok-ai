@@ -6680,12 +6680,14 @@ function autoPanel(p) {
         ${audioModeButton("Change Voice", "refresh-cw", "Insert reference", mode)}
         ${audioModeButton("Translate", "languages", "Insert reference", mode)}
       </div>
-      ${isVoiceoverMode ? audioPromptWell(promptText, language, scriptMode) : audioFileInsertWell()}
-      ${mode === "Translate" ? audioLanguagePicker(language) : audioVoicePresetPicker(voicePreset)}
-      <button class="audio-generate-button ${isVoiceoverMode && !promptText.trim() ? "is-empty" : ""}" type="button" data-action="generate-audio">
-        <b>Generate Audio</b>
-        <span>0.20 Credit</span>
-      </button>
+      <div class="audio-main-bar">
+        ${isVoiceoverMode ? audioPromptWell(promptText, language, scriptMode) : audioFileInsertWell()}
+        ${mode === "Translate" ? audioLanguagePicker(language) : audioVoicePresetPicker(voicePreset)}
+        <button class="audio-generate-button ${isVoiceoverMode && !promptText.trim() ? "is-empty" : ""}" type="button" data-action="generate-audio">
+          <b>Generate Audio</b>
+          <span>0.20 Credit</span>
+        </button>
+      </div>
     </section>
   </section>`;
 }
