@@ -47504,3 +47504,24 @@ html.is-route-changing .studio-shell .video-generate-console {
   color: transparent !important;
   text-shadow: 0 18px 46px rgba(255, 103, 56, 0.18) !important;
 }
+
+/* Failed card alert group: portrait cards should not show a translucent square
+   behind the alert icon. */
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait .studio-wall-failed-center,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait .studio-wall-failed-center,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait .studio-wall-failed-center {
+  background: transparent !important;
+  background-image: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait .studio-wall-failed-center::before,
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait .studio-wall-failed-center::after,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait .studio-wall-failed-center::before,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait .studio-wall-failed-center::after,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait .studio-wall-failed-center::before,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait .studio-wall-failed-center::after {
+  content: none !important;
+  display: none !important;
+}
