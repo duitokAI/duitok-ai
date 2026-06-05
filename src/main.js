@@ -13329,7 +13329,7 @@ function mergeGenerationRefreshState(previousDb, payload = {}) {
   if (!previousDb || !payload.project?.id) return previousDb;
   const projectId = payload.project.id;
   const projectJobs = Array.isArray(payload.generationJobs) ? payload.generationJobs : [];
-  return {
+  const mergedDb = {
     ...previousDb,
     billing: payload.billing || previousDb.billing,
     projects: (previousDb.projects || []).map((projectItem) => projectItem.id === projectId
@@ -13344,6 +13344,7 @@ function mergeGenerationRefreshState(previousDb, payload = {}) {
       ...projectJobs
     ]
   };
+  return preserveActiveGenerationState(mergedDb, previousDb, projectId);
 }
 
 function preserveActiveGenerationState(incomingDb, currentDb = state.db, projectId = state.projectId) {
