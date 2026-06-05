@@ -73,8 +73,8 @@ const crunTaskInfoPath = process.env.CRUN_TASK_INFO_PATH || "/api/v1/client/job/
 const crunVeo31Model = process.env.CRUN_VEO_3_1_MODEL || "google/veo3-1-fast-t2v";
 const crunSeedream50Model = process.env.CRUN_SEEDREAM_5_MODEL || "bytedance/seedream-5";
 const crunGptImage2Model = process.env.CRUN_GPT_IMAGE_2_MODEL || "openai/gpt-image-2";
-const crunQwenImage20Model = process.env.CRUN_QWEN_IMAGE_2_MODEL || "qwen/qwen-image-2";
-const crunGrokImageModel = process.env.CRUN_GROK_IMAGE_MODEL || "xai/grok-imagine";
+const crunQwenImage20Model = process.env.CRUN_QWEN_IMAGE_2_MODEL || "qwen-image-2.0";
+const crunGrokImageModel = process.env.CRUN_GROK_IMAGE_MODEL || "grok-imagine/t2i";
 const grsaiBaseUrl = (process.env.GRSAI_BASE_URL || "https://grsaiapi.com").replace(/\/$/, "");
 const grsaiChatPath = process.env.GRSAI_CHAT_PATH || "/v1/chat/completions";
 const grsaiDrawPath = process.env.GRSAI_DRAW_PATH || "/v1/draw/nano-banana";
@@ -612,12 +612,13 @@ app.get("/api/admin/diagnostics/seedream-image", async (req, res, next) => {
       : generated.imageUrl
         ? [generated.imageUrl]
         : [];
+    const provider = generated.provider || providerForMediaModel(model);
     res.json({
       ok: Boolean(generatedUrls[0]),
       configured: true,
-      provider: generated.provider || providerForMediaModel(model),
+      provider,
       model,
-      providerModel: imageModelFromProject(project),
+      providerModel: imageProviderModelFromProject(project, provider),
       aspectRatio: project.image.aspectRatio,
       resolution: imageResolutionFromProject(project),
       taskId: generated.taskId || "",
