@@ -6429,7 +6429,7 @@ function videoGenerateConsole(p) {
         ${videoModelPicker(selectedModel)}
         ${videoOptionMenu("ratio", "ugc.aspectRatio", videoAspectRatioValue(p), (capabilities.aspectRatios || []).map(videoAspectRatioOption), "rectangle-horizontal", "Aspect ratio")}
         ${videoOptionMenu("quality", "ugc.quality", videoQualityValue(p), (capabilities.qualities || []).map(videoQualityOption), "gem", "Select quality")}
-        ${videoOptionMenu("duration", "ugc.duration", videoDurationValue(p), (capabilities.durations || []).map(videoDurationOption), "clock-3", "Duration")}
+        ${videoDurationSliderMenu(videoDurationValue(p), (capabilities.durations || []).map(videoDurationOption))}
         ${videoCountStepper(p)}
         ${(capabilities.audio || []).length ? videoOptionMenu("audio", "ugc.audio", videoAudioValue(p), (capabilities.audio || []).map(videoAudioOption), videoAudioValue(p) === "Off" ? "volume-x" : "volume-2", "Audio") : ""}
       </div>
@@ -6571,6 +6571,34 @@ function videoOptionMenu(kind, field, selectedValue, options = [], iconName = "c
           <span class="video-option-check" aria-hidden="true">${active ? icon("check", 18) : ""}</span>
         </button>`;
       }).join("")}
+    </div>
+  </details>`;
+}
+
+
+function videoDurationSliderMenu(selectedValue, options = []) {
+  if (!options.length) return "";
+  const selected = options.find((item) => item.value === selectedValue) || options[0];
+  const selectedIndex = Math.max(0, options.findIndex((item) => item.value === selected.value));
+  const disabled = options.length <= 1;
+  const trackProgress = options.length <= 1 ? 0 : Math.round((selectedIndex / (options.length - 1)) * 100);
+  return `<details class="video-option-menu video-option-duration video-duration-slider-menu ${disabled ? "is-static" : ""}" style="--duration-slider-progress: ${trackProgress}%">
+    <summary aria-label="Duration" ${disabled ? "aria-disabled=\"true\"" : ""}>
+      ${icon("clock-3", 18)}
+      <b data-video-option-current="ugc.duration">${esc(selected.label || selected.value)}</b>
+      ${icon("chevron-down", 16)}
+    </summary>
+    <div class="video-duration-slider-panel" role="group" aria-label="Duration">
+      <div class="video-option-menu-title">Duration</div>
+      <label class="video-duration-slider-field">
+        <span data-video-duration-selected>${esc(selected.title || selected.value)}</span>
+        <input type="range" min="0" max="${Math.max(0, options.length - 1)}" step="1" value="${selectedIndex}" data-video-duration-slider aria-label="Duration">
+      </label>
+      <small data-video-duration-description>${esc(selected.description || "Video duration")}</small>
+      <div class="video-duration-slider-ticks" aria-hidden="true">
+        ${options.map((item, index) => `<span class="${index === selectedIndex ? "active" : ""}" data-video-duration-tick="${index}">${esc(item.label || item.value)}</span>`).join("")}
+      </div>
+      <script type="application/json" data-video-duration-options>${JSON.stringify(options).replace(/</g, "\\u003c")}</script>
     </div>
   </details>`;
 }
@@ -11279,6 +11307,7 @@ function bind() {
   document.querySelectorAll("[data-studio-wall-zoom]").forEach((el) => el.addEventListener("input", () => updateStudioWallZoom(el.value)));
   bindAspectRatioFloatingMenus();
   bindProjectFieldSetControls();
+  bindVideoDurationSliders();
   document.querySelectorAll("[data-field]").forEach((el) => el.addEventListener("change", fieldChange));
   document.querySelectorAll("[data-ugc-builder-option]").forEach((el) => el.addEventListener("click", () => updateUgcBuilderOption(el)));
   document.querySelectorAll("[data-ugc-builder-field]").forEach((el) => el.addEventListener("click", () => updateUgcBuilderField(el.dataset.ugcBuilderField, el.dataset.ugcBuilderValue, true)));
@@ -12173,6 +12202,50 @@ function bindProjectFieldSetControls(root = document) {
   });
 }
 
+
+function bindVideoDurationSliders(root = document) {
+  root.querySelectorAll("[data-video-duration-slider]").forEach((slider) => {
+    if (slider.dataset.videoDurationSliderBound === "true") return;
+    slider.dataset.videoDurationSliderBound = "true";
+    const menu = slider.closest(".video-duration-slider-menu");
+    const optionsNode = menu?.querySelector("[data-video-duration-options]");
+    let options = [];
+    try {
+      options = JSON.parse(optionsNode?.textContent || "[]");
+    } catch {
+      options = [];
+    }
+    if (!menu || !options.length) return;
+    const update = () => {
+      const index = Math.min(options.length - 1, Math.max(0, Number.parseInt(slider.value, 10) || 0));
+      const selected = options[index] || options[0];
+      const progress = options.length <= 1 ? 0 : Math.round((index / (options.length - 1)) * 100);
+      const label = selected.label || selected.value;
+      slider.value = String(index);
+      slider.dataset.label = label;
+      menu.style.setProperty("--duration-slider-progress", `${progress}%`);
+      menu.querySelectorAll("[data-video-duration-selected]").forEach((el) => {
+        el.textContent = selected.title || selected.value;
+      });
+      menu.querySelectorAll("[data-video-duration-description]").forEach((el) => {
+        el.textContent = selected.description || "Video duration";
+      });
+      menu.querySelectorAll("[data-video-duration-tick]").forEach((el) => {
+        el.classList.toggle("active", Number.parseInt(el.dataset.videoDurationTick, 10) === index);
+      });
+      saveProjectFieldQuick("ugc.duration", selected.value, slider);
+    };
+    slider.addEventListener("input", update);
+    slider.addEventListener("change", update);
+    slider.addEventListener("pointerdown", () => stabilizeVideoConsoleExpansion(1000));
+    slider.addEventListener("keydown", (event) => {
+      if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return;
+      stabilizeVideoConsoleExpansion(1000);
+      window.requestAnimationFrame(update);
+    });
+  });
+}
+
 function saveProjectFieldQuick(field, value, source = null) {
   if (!field) return;
   const projectId = state.projectId;
@@ -12371,7 +12444,7 @@ function updateVideoModelDom(modelValue, source = null) {
   }
   if (durationMenu) {
     const selectedDuration = normalizedVideoSettingForModel(model.value, "ugc.duration", projectItem?.ugc?.duration);
-    durationMenu.outerHTML = videoOptionMenu("duration", "ugc.duration", selectedDuration, (capabilities.durations || []).map(videoDurationOption), "clock-3", "Duration");
+    durationMenu.outerHTML = videoDurationSliderMenu(selectedDuration, (capabilities.durations || []).map(videoDurationOption));
   }
   if (audioMenu) {
     const selectedAudio = normalizedVideoSettingForModel(model.value, "ugc.audio", videoAudioValue(projectItem));
@@ -12381,6 +12454,7 @@ function updateVideoModelDom(modelValue, source = null) {
   window.lucide?.createIcons();
   bindVideoConsoleCompact();
   bindProjectFieldSetControls(consoleEl);
+  bindVideoDurationSliders(consoleEl);
 }
 
 async function saveVideoModelQuick(value, source = null) {
