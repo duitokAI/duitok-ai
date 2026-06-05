@@ -48099,6 +48099,53 @@ body:has(.studio-shell .video-page-studio),
   }
 }
 
+/* Audio composer scroll parity: unlike the old fixed demo surface, the Audio bar
+   should live in the page flow like Image Page's composer so users can drag the
+   canvas and reach it naturally instead of being locked to a viewport position. */
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) {
+  min-height: 100dvh !important;
+  overflow-x: clip !important;
+  overflow-y: auto !important;
+  overscroll-behavior-y: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.studio-shell .canvas-card:has(.audio-studio-page),
+.studio-shell .studio-workbench-card:has(.audio-studio-page),
+.studio-shell .studio-step-panel:has(.audio-studio-page) {
+  min-height: auto !important;
+  overflow: visible !important;
+}
+
+.studio-shell .audio-studio-page {
+  min-height: calc(100dvh - var(--project-fixed-tabs-height, 58px)) !important;
+  grid-template-rows: minmax(220px, auto) minmax(0, auto) auto !important;
+  align-content: start !important;
+  padding-bottom: max(32px, env(safe-area-inset-bottom)) !important;
+  overflow: visible !important;
+}
+
+.studio-shell .audio-studio-page .audio-composer {
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+  align-self: start !important;
+  margin-top: clamp(14px, 2vh, 28px) !important;
+  margin-bottom: max(28px, env(safe-area-inset-bottom)) !important;
+}
+
+@media (max-width: 720px) {
+  .studio-shell .audio-studio-page {
+    grid-template-rows: minmax(140px, auto) minmax(0, auto) auto !important;
+    padding-bottom: max(20px, env(safe-area-inset-bottom)) !important;
+  }
+
+  .studio-shell .audio-studio-page .audio-composer {
+    margin-top: 12px !important;
+    margin-bottom: max(20px, env(safe-area-inset-bottom)) !important;
+  }
+}
+
 /* Studio page switch stability: keep Video -> Image tab changes from doing a
    one-frame height collapse while :has() page rules swap. */
 html {
