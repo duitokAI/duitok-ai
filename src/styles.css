@@ -47563,3 +47563,11 @@ html.is-route-changing .studio-shell .video-generate-console {
   content: none !important;
   display: none !important;
 }
+
+/* Studio top tabs: keep the fixed row and individual pill tabs, but remove the
+   rectangular rail color that leaks between buttons and at the right edge. */
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs {
+  background: transparent !important;
+  background-image: none !important;
+  border-color: transparent !important;
+}
