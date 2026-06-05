@@ -2374,6 +2374,10 @@ function hydrateIconsSoon() {
     iconHydrationFrame = null;
     window.lucide?.createIcons();
   };
+  if (document.documentElement.classList.contains("is-route-changing")) {
+    run();
+    return;
+  }
   if ("requestIdleCallback" in window) {
     iconHydrationFrame = window.requestIdleCallback(run, { timeout: 240 });
   } else {
@@ -5708,6 +5712,10 @@ function imageModelCapabilities(model = "GPT Image 2") {
       aspectRatios: imageAspectRatiosAll,
       resolutions: ["2K", "3K"]
     },
+    "Seedream 4.5": {
+      aspectRatios: imageAspectRatiosAll,
+      resolutions: ["2K", "4K"]
+    },
     "Qwen Image 2.0": {
       aspectRatios: imageAspectRatiosAll,
       resolutions: ["1K", "2K"]
@@ -5997,6 +6005,13 @@ function imageModelOptions() {
       provider: "seedream",
       title: "Seedream 5.0 Lite",
       description: "Fast image generation for high-quality creative visuals",
+      badge: ""
+    },
+    {
+      value: "Seedream 4.5",
+      provider: "seedream",
+      title: "Seedream 4.5",
+      description: "Advanced image generation for polished commercial shots",
       badge: ""
     },
     {
@@ -7494,7 +7509,8 @@ function resultMediaLabel(item) {
 function resultModelLabel(item) {
   const model = item.model || item.providerTitle || item.title || "";
   if (/gemini|video prompt|extract/i.test(model)) return "POKAYA AI";
-  if (/seedream/i.test(model)) return "SEEDREAM 5.0 LITE";
+  if (/seedream\s*5/i.test(model)) return "SEEDREAM 5.0 LITE";
+  if (/seedream/i.test(model)) return "SEEDREAM 4.5";
   if (/banana\s*2/i.test(model)) return "NANO BANANA 2";
   if (/nano|banana/i.test(model)) return "NANO BANANA PRO";
   if (/grok imagine/i.test(model)) return "GROK IMAGINE";
@@ -7512,6 +7528,7 @@ function resultModelDisplay(item) {
   if (label === "NANO BANANA PRO") return "Nano Banana Pro";
   if (label === "NANO BANANA 2") return "Nano Banana 2";
   if (label === "SEEDREAM 5.0 LITE") return "Seedream 5.0 Lite";
+  if (label === "SEEDREAM 4.5") return "Seedream 4.5";
   if (label === "GROK IMAGINE") return "Grok Imagine";
   if (label === "GPT IMAGE 2") return "GPT Image 2";
   return label === "VIDEO MODEL" ? "Video model" : label;

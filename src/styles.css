@@ -34021,14 +34021,26 @@ label {
 
 .is-route-changing .studio-shell .workspace {
   pointer-events: none;
+  overflow-anchor: none;
+  transition: none !important;
 }
 
+.is-route-changing .studio-shell .project-step-topbar,
+.is-route-changing .studio-shell .studio-top-step-tabs,
+.is-route-changing .studio-shell .step-tabs,
+.is-route-changing .studio-shell .audio-studio-page,
+.is-route-changing .studio-shell .audio-stage-hero,
+.is-route-changing .studio-shell .audio-wall-stage,
+.is-route-changing .studio-shell .audio-composer,
+.is-route-changing .studio-shell .audio-main-bar,
+.is-route-changing .studio-shell .audio-mode-dial,
 .is-route-changing .studio-shell .image-generate-console,
 .is-route-changing .studio-shell .studio-wall-card,
 .is-route-changing .studio-shell .side-primary,
 .is-route-changing .studio-shell .side-link,
 .is-route-changing .studio-shell .project-button,
 .is-route-changing .studio-shell .agent-primary-card {
+  animation: none !important;
   transition: none !important;
 }
 
@@ -47457,7 +47469,20 @@ body:has(.studio-shell .video-page-studio),
 
 /* Audio page final viewport fit lock. */
 .studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) {
-  padding-top: var(--project-fixed-tabs-height) !important;
+  --project-page-pad-x: 0px;
+  --project-page-pad-y: 0px;
+  min-height: 100dvh !important;
+  overflow: hidden !important;
+  overflow-anchor: none !important;
+  padding: var(--project-fixed-tabs-height, 58px) 0 0 !important;
+  transition: none !important;
+}
+
+.studio-shell .canvas-card:has(.audio-studio-page),
+.studio-shell .studio-workbench-card:has(.audio-studio-page),
+.studio-shell .studio-step-panel:has(.audio-studio-page) {
+  min-height: calc(100dvh - var(--project-fixed-tabs-height, 58px)) !important;
+  overflow: hidden !important;
 }
 
 .studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .project-step-topbar {
@@ -47566,6 +47591,8 @@ body:has(.studio-shell .video-page-studio),
 
 .studio-shell .audio-studio-page {
   gap: 12px !important;
+  min-height: calc(100dvh - var(--project-fixed-tabs-height, 58px)) !important;
+  overflow-anchor: none !important;
 }
 
 /* Audio mobile viewport fit lock. */
@@ -48374,7 +48401,15 @@ html.is-route-changing #app {
   min-height: 100dvh !important;
   max-height: 100dvh !important;
   overflow: hidden !important;
+}
+
+html.is-route-changing {
   scrollbar-gutter: stable !important;
+}
+
+html.is-route-changing body,
+html.is-route-changing #app {
+  scrollbar-gutter: auto !important;
 }
 
 html.is-route-changing .studio-shell,
