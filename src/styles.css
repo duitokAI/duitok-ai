@@ -49730,3 +49730,85 @@ body:has(.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"]),
     grid-template-rows: minmax(calc(100dvh - var(--project-fixed-tabs-height, 72px) - 12px), auto) auto !important;
   }
 }
+
+/* Image page composer final flow lock: the Image result wall owns the scroll.
+   The prompt bar must remain after the wall in document flow, never docked to
+   the viewport bottom by an empty-state grid row or later composer override. */
+html:has(.studio-shell .image-higgsfield-mode),
+body:has(.studio-shell .image-higgsfield-mode),
+#app:has(.studio-shell .image-higgsfield-mode),
+.studio-shell:has(.image-higgsfield-mode),
+.studio-shell:has(.image-higgsfield-mode) .workspace,
+.studio-shell:has(.step-tabs):has(.image-higgsfield-mode) .workspace,
+.studio-shell .workspace:has(.image-higgsfield-mode),
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode),
+.studio-shell .canvas-card:has(.image-higgsfield-mode),
+.studio-shell .studio-workbench-card:has(.image-higgsfield-mode),
+.studio-shell .studio-step-panel:has(.image-higgsfield-mode),
+.studio-shell .image-canvas-studio.image-higgsfield-mode,
+.studio-shell .image-higgsfield-mode {
+  height: auto !important;
+  min-height: 100dvh !important;
+  max-height: none !important;
+  overflow-x: clip !important;
+  overflow-y: visible !important;
+}
+
+.studio-shell .image-canvas-studio.image-higgsfield-mode,
+.studio-shell .image-higgsfield-mode {
+  display: block !important;
+  grid-template-rows: none !important;
+  align-content: start !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall,
+.studio-shell .image-higgsfield-mode.has-results > .studio-result-wall {
+  display: block !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid,
+.studio-shell .image-higgsfield-mode.has-results > .studio-result-wall > .studio-wall-grid {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+  align-content: start !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact),
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).is-hover-expanded,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-open-menu,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt,
+.studio-shell .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console,
+.studio-shell .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console:not(.is-compact) {
+  position: relative !important;
+  inset: auto !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  grid-row: auto !important;
+  transform: none !important;
+  z-index: 12 !important;
+  margin: 10px clamp(16px, 2vw, 28px) max(24px, env(safe-area-inset-bottom)) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-wall-zoom-control {
+  position: absolute !important;
+  top: 10px !important;
+  right: 12px !important;
+  grid-row: auto !important;
+  justify-self: auto !important;
+  align-self: auto !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  overflow: visible !important;
+  margin: 0 !important;
+  z-index: 80 !important;
+}
