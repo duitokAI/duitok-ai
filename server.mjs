@@ -500,6 +500,10 @@ app.get("/api/admin/diagnostics/generation-failures", async (req, res, next) => 
           requestedModel: job.requestedModel || job.model,
           resolvedProvider: job.resolvedProvider || job.provider,
           providerModel: job.providerModel || "",
+          providerPlan: job.providerPlan || [],
+          configuredProviders: job.configuredProviders || [],
+          skippedProviders: job.skippedProviders || [],
+          providerFallbacks: job.providerFallbacks || [],
           apiErrorMessage: redactProviderText(call.errorMessage || ""),
           apiEndpoint: redactProviderText(call.endpoint || ""),
           apiCreatedAt: call.createdAt || ""
@@ -554,6 +558,9 @@ app.get("/api/admin/diagnostics/recent-generations", async (req, res, next) => {
           endpoint: redactProviderText(call.endpoint || ""),
           taskId: job.taskId || call.taskId || "",
           providerTaskId: job.providerTaskId || call.taskId || "",
+          providerPlan: job.providerPlan || [],
+          configuredProviders: job.configuredProviders || [],
+          skippedProviders: job.skippedProviders || [],
           providerFallbacks: job.providerFallbacks || [],
           aspectRatio: job.aspectRatio,
           resolution: job.resolution,
@@ -4431,6 +4438,20 @@ function imageProviderOrderForModel(model) {
   return [providerForMediaModel(model)];
 }
 
+function imageProviderPlanForModel(model, project = null) {
+  model = internalMediaModel(model);
+  const requiresApimartFirst = model === "GPT Image 2" && apimartReferenceImageUrlsFromSnapshot(project).length > 0;
+  const providerPlan = requiresApimartFirst
+    ? ["apimart", ...imageProviderOrderForModel(model).filter((provider) => provider !== "apimart")]
+    : imageProviderOrderForModel(model);
+  const configuredProviders = providerPlan.filter((provider) => providerConfigured(provider));
+  return {
+    providerPlan,
+    configuredProviders,
+    skippedProviders: providerPlan.filter((provider) => !providerConfigured(provider))
+  };
+}
+
 function publicProviderFailureMessage(error) {
   const message = readableProviderError(error?.message || error, "Provider failed");
   return sanitizeAgentText(message).slice(0, 180);
@@ -4460,12 +4481,13 @@ async function generateImageThroughProvider(provider, model, project, tracker = 
 
 async function generateImageWithFallbacks(project, model, tracker = null) {
   const attempts = [];
-  const hasApimartReferences = internalMediaModel(model) === "GPT Image 2" && apimartReferenceImageUrlsFromSnapshot(project).length > 0;
-  const orderedProviders = hasApimartReferences
-    ? ["apimart", ...imageProviderOrderForModel(model).filter((provider) => provider !== "apimart")]
-    : imageProviderOrderForModel(model);
-  const providers = orderedProviders.filter((provider) => providerConfigured(provider));
-  if (!providers.length) return null;
+  const { providerPlan, configuredProviders: providers, skippedProviders } = imageProviderPlanForModel(model, project);
+  await tracker?.({ providerPlan, configuredProviders: providers, skippedProviders, providerStatus: "provider_plan_ready" });
+  if (!providers.length) {
+    const error = new Error(`No configured image provider for ${internalMediaModel(model)}. Configure one of: ${providerPlan.join(", ")}.`);
+    error.status = 503;
+    throw error;
+  }
   for (const provider of providers) {
     try {
       const generated = await generateImageThroughProvider(provider, model, project, tracker);
@@ -4929,6 +4951,9 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
     const requestedProviderModel = action === "generate-image"
       ? imageProviderModelFromProject(project, requestedProvider)
       : cost.model;
+    const providerPlanData = action === "generate-image" && !isVideoMediaModel(project.image?.model)
+      ? imageProviderPlanForModel(project.image?.model, project)
+      : { providerPlan: [requestedProvider], configuredProviders: providerConfigured(requestedProvider) ? [requestedProvider] : [], skippedProviders: providerConfigured(requestedProvider) ? [] : [requestedProvider] };
     const aspectRatio = generationAspectRatioForProject(project, action, step);
     const createdAt = new Date().toISOString();
     const jobs = jobIds.map((jobId, index) => ({
@@ -4949,6 +4974,9 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
       aspectRatio,
       resolution: project.image?.resolution || imageResolutionFromProject(project),
       createdAt,
+      providerPlan: providerPlanData.providerPlan,
+      configuredProviders: providerPlanData.configuredProviders,
+      skippedProviders: providerPlanData.skippedProviders,
       requestedModel,
       requestedProvider,
       providerModel: requestedProviderModel,
