@@ -47446,25 +47446,6 @@ body:has(.studio-shell .video-page-studio),
   }
 }
 
-/* Video empty composer bottom lock: keep the bar pinned to the viewport floor. */
-.studio-shell .video-page-studio.is-empty > .video-generate-console,
-.studio-shell .video-page-studio.is-empty > .video-generate-console:not(.is-compact),
-.studio-shell .video-page-studio.is-empty > .video-generate-console:not(.is-compact).is-hover-expanded,
-.studio-shell .video-page-studio.is-empty > .video-generate-console:not(.is-compact).has-open-menu {
-  position: fixed !important;
-  left: calc(var(--studio-sidebar-width, 304px) + clamp(16px, 1.6vw, 28px)) !important;
-  right: clamp(16px, 1.6vw, 28px) !important;
-  bottom: max(14px, env(safe-area-inset-bottom)) !important;
-  z-index: 1180 !important;
-  width: auto !important;
-  max-width: none !important;
-  margin: 0 !important;
-}
-
-.studio-shell .video-page-studio.is-empty > .video-empty-cinema {
-  padding-bottom: clamp(170px, 20vh, 240px) !important;
-}
-
 /* Studio page switch stability: keep Video -> Image tab changes from doing a
    one-frame height collapse while :has() page rules swap. */
 html {
