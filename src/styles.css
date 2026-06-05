@@ -41169,17 +41169,17 @@ body:has(.studio-shell .video-prompt-extractor-page),
 
 /* Clone Prompt empty mode follows Image Page composer logic: no hidden result wall,
    no full-height placeholder, and no colored floor under the upload bar. */
-.studio-shell .workspace:has(.video-prompt-extractor-page.is-empty),
-.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page.is-empty),
-.studio-shell .canvas-card:has(.video-prompt-extractor-page.is-empty),
-.studio-shell .studio-workbench-card:has(.video-prompt-extractor-page.is-empty),
-.studio-shell .studio-step-panel:has(.video-prompt-extractor-page.is-empty) {
+.studio-shell .workspace:has(.video-prompt-extractor-page.is-empty:not(.video-page-studio)),
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page.is-empty:not(.video-page-studio)),
+.studio-shell .canvas-card:has(.video-prompt-extractor-page.is-empty:not(.video-page-studio)),
+.studio-shell .studio-workbench-card:has(.video-prompt-extractor-page.is-empty:not(.video-page-studio)),
+.studio-shell .studio-step-panel:has(.video-prompt-extractor-page.is-empty:not(.video-page-studio)) {
   min-height: 0 !important;
   padding-bottom: 0 !important;
   overflow: visible !important;
 }
 
-.studio-shell .video-prompt-extractor-page.is-empty {
+.studio-shell .video-prompt-extractor-page.is-empty:not(.video-page-studio) {
   min-height: 0 !important;
   height: auto !important;
   display: block !important;
@@ -41188,12 +41188,12 @@ body:has(.studio-shell .video-prompt-extractor-page),
   background-color: transparent !important;
 }
 
-.studio-shell .video-prompt-extractor-page.is-empty > .studio-wall-zoom-control,
-.studio-shell .video-prompt-extractor-page.is-empty > .video-prompt-empty-wall {
+.studio-shell .video-prompt-extractor-page.is-empty:not(.video-page-studio) > .studio-wall-zoom-control,
+.studio-shell .video-prompt-extractor-page.is-empty:not(.video-page-studio) > .video-prompt-empty-wall {
   display: none !important;
 }
 
-.studio-shell .video-prompt-extractor-page.is-empty > .video-prompt-dock {
+.studio-shell .video-prompt-extractor-page.is-empty:not(.video-page-studio) > .video-prompt-dock {
   position: relative !important;
   bottom: auto !important;
   grid-row: auto !important;
@@ -41320,21 +41320,21 @@ body:has(.studio-shell .video-prompt-extractor-page),
 
 /* Clone Prompt empty dock position: mirror Image Page by keeping the uploader at
    the bottom of the studio canvas, not directly under the fixed top tabs. */
-.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page.is-empty) {
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page.is-empty:not(.video-page-studio)) {
   min-height: 100dvh !important;
   padding: var(--project-fixed-tabs-height) 0 56px !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
 }
 
-.studio-shell .canvas-card:has(.video-prompt-extractor-page.is-empty),
-.studio-shell .studio-workbench-card:has(.video-prompt-extractor-page.is-empty),
-.studio-shell .studio-step-panel:has(.video-prompt-extractor-page.is-empty) {
+.studio-shell .canvas-card:has(.video-prompt-extractor-page.is-empty:not(.video-page-studio)),
+.studio-shell .studio-workbench-card:has(.video-prompt-extractor-page.is-empty:not(.video-page-studio)),
+.studio-shell .studio-step-panel:has(.video-prompt-extractor-page.is-empty:not(.video-page-studio)) {
   min-height: calc(100dvh - var(--project-fixed-tabs-height)) !important;
   overflow: visible !important;
 }
 
-.studio-shell .video-prompt-extractor-page.is-empty {
+.studio-shell .video-prompt-extractor-page.is-empty:not(.video-page-studio) {
   min-height: calc(100dvh - var(--project-fixed-tabs-height) - 56px) !important;
   display: grid !important;
   grid-template-rows: minmax(0, 1fr) auto !important;
@@ -41342,7 +41342,7 @@ body:has(.studio-shell .video-prompt-extractor-page),
   padding: 0 0 clamp(14px, 2vh, 22px) !important;
 }
 
-.studio-shell .video-prompt-extractor-page.is-empty > .video-prompt-dock {
+.studio-shell .video-prompt-extractor-page.is-empty:not(.video-page-studio) > .video-prompt-dock {
   grid-row: 2 !important;
   align-self: end !important;
   margin: 0 auto !important;
