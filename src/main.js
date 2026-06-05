@@ -87,6 +87,15 @@ const studioWallLoadingKeys = new Set();
 const resultPreviewPreloadCache = new Map();
 let assetLibraryWarmFrame = null;
 let assetLibraryHydrateFrame = null;
+const assetLibraryFilterCache = {
+  db: null,
+  lang: "",
+  type: "",
+  project: "",
+  search: "",
+  all: [],
+  filtered: []
+};
 const quickFieldSaveTimers = new Map();
 let quickFieldSaveSeq = 0;
 const pendingAgentChatSync = new Set();
@@ -2426,6 +2435,10 @@ function routeShell(content) {
 }
 
 function render() {
+  if (typeof window !== "undefined") {
+    window.__pokayaPerfStats ||= { renders: 0, libraryPatches: 0, libraryAppends: 0 };
+    window.__pokayaPerfStats.renders += 1;
+  }
   if (assetLibraryWarmFrame) {
     window.cancelAnimationFrame(assetLibraryWarmFrame);
     assetLibraryWarmFrame = null;
@@ -4806,10 +4819,25 @@ function contentLibraryPage() {
 }
 
 function assetLibraryFilteredItems(filterOptions = ["all", "image", "video", "text", "visual_card"]) {
-  const all = allResults().slice().sort(assetLibraryNewestFirst);
   const activeFilter = filterOptions.includes(state.assetTypeFilter) ? state.assetTypeFilter : "all";
   const activeProject = state.assetProjectFilter || "all";
   const query = String(state.assetSearch || "").trim().toLowerCase();
+  if (
+    assetLibraryFilterCache.db === state.db &&
+    assetLibraryFilterCache.lang === state.lang &&
+    assetLibraryFilterCache.type === activeFilter &&
+    assetLibraryFilterCache.project === activeProject &&
+    assetLibraryFilterCache.search === query
+  ) {
+    return {
+      all: assetLibraryFilterCache.all,
+      filtered: assetLibraryFilterCache.filtered,
+      activeFilter,
+      activeProject,
+      query
+    };
+  }
+  const all = allResults().slice().sort(assetLibraryNewestFirst);
   const filtered = all.filter((item) => {
     const kind = assetMediaKind(item);
     const projectMatch = activeProject === "all" || item.projectId === activeProject;
@@ -4830,6 +4858,13 @@ function assetLibraryFilteredItems(filterOptions = ["all", "image", "video", "te
     const searchMatch = !query || searchText.includes(query);
     return projectMatch && kindMatch && searchMatch;
   });
+  assetLibraryFilterCache.db = state.db;
+  assetLibraryFilterCache.lang = state.lang;
+  assetLibraryFilterCache.type = activeFilter;
+  assetLibraryFilterCache.project = activeProject;
+  assetLibraryFilterCache.search = query;
+  assetLibraryFilterCache.all = all;
+  assetLibraryFilterCache.filtered = filtered;
   return { all, filtered, activeFilter, activeProject, query };
 }
 
@@ -7843,10 +7878,13 @@ function scheduleAssetLibraryThumbWarmup() {
 function scheduleAssetLibraryDeferredMediaHydration() {
   if (state.page !== "library" || state.loading) return;
   if (assetLibraryHydrateFrame) window.cancelAnimationFrame(assetLibraryHydrateFrame);
-  const hydrate = () => {
+  const hydrateBatch = (deadline = null) => {
     assetLibraryHydrateFrame = null;
     if (state.page !== "library" || state.loading) return;
-    const slots = [...document.querySelectorAll("[data-asset-deferred-result]")].slice(0, assetLibraryHydrateBatchSize);
+    const budget = deadline && typeof deadline.timeRemaining === "function"
+      ? Math.max(1, Math.min(assetLibraryHydrateBatchSize, Math.floor(deadline.timeRemaining() / 4) || 1))
+      : assetLibraryHydrateBatchSize;
+    const slots = [...document.querySelectorAll("[data-asset-deferred-result]")].slice(0, budget);
     slots.forEach((slot) => {
       const item = findAssetResult(slot.dataset.assetDeferredResult);
       if (!item) return;
@@ -7862,13 +7900,24 @@ function scheduleAssetLibraryDeferredMediaHydration() {
       else window.setTimeout(scheduleNext, 90);
     }
   };
-  assetLibraryHydrateFrame = window.requestAnimationFrame(hydrate);
+  const schedule = () => {
+    if ("requestIdleCallback" in window) {
+      window.requestIdleCallback(hydrateBatch, { timeout: 500 });
+    } else {
+      assetLibraryHydrateFrame = window.requestAnimationFrame(() => hydrateBatch());
+    }
+  };
+  assetLibraryHydrateFrame = window.requestAnimationFrame(schedule);
 }
 
 function patchAssetLibraryDom({ preserveSearchFocus = false } = {}) {
   if (state.page !== "library" || state.loading) return false;
   const workspace = document.querySelector(".workspace.workspace-library");
   if (!workspace) return false;
+  if (typeof window !== "undefined") {
+    window.__pokayaPerfStats ||= { renders: 0, libraryPatches: 0, libraryAppends: 0 };
+    window.__pokayaPerfStats.libraryPatches += 1;
+  }
   const activeSearch = preserveSearchFocus && document.activeElement?.matches?.("[data-asset-search]")
     ? {
         value: document.activeElement.value,
@@ -7911,6 +7960,10 @@ function appendAssetLibraryItems(previousLimit, nextLimit) {
   if (state.page !== "library" || state.loading) return false;
   const main = document.querySelector(".asset-library-main");
   if (!main) return false;
+  if (typeof window !== "undefined") {
+    window.__pokayaPerfStats ||= { renders: 0, libraryPatches: 0, libraryAppends: 0 };
+    window.__pokayaPerfStats.libraryAppends += 1;
+  }
   const { filtered } = assetLibraryFilteredItems();
   const nextItems = filtered.slice(previousLimit, nextLimit);
   if (!nextItems.length) return false;

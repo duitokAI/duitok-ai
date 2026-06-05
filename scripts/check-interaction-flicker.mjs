@@ -61,6 +61,16 @@ function assertStable(label, delta) {
 async function measure(page) {
   return page.evaluate(async () => {
     const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    window.__pokayaLongTasks = [];
+    try {
+      window.__pokayaLongTaskObserver?.disconnect?.();
+      window.__pokayaLongTaskObserver = new PerformanceObserver((list) => {
+        window.__pokayaLongTasks.push(...list.getEntries().map((entry) => Math.round(entry.duration)));
+      });
+      window.__pokayaLongTaskObserver.observe({ type: "longtask", buffered: true });
+    } catch {
+      window.__pokayaLongTaskObserver = null;
+    }
     const rect = (selector) => {
       const el = document.querySelector(selector);
       if (!el) return null;
@@ -73,6 +83,7 @@ async function measure(page) {
       dw: Math.round(after.w - before.w),
       dh: Math.round(after.h - before.h)
     } : null;
+    const stats = () => ({ renders: 0, libraryPatches: 0, libraryAppends: 0, ...(window.__pokayaPerfStats || {}) });
     const clickTab = (index) => {
       const tabs = [...document.querySelectorAll(".studio-higgsfield-tabs button,.step-tabs button")];
       tabs[index]?.click();
@@ -118,20 +129,32 @@ async function measure(page) {
     const modeAfter = rect(".audio-composer");
     out.audioModeSwitch = delta(modeBefore, modeAfter);
 
+    const beforeLibraryStats = stats();
     document.querySelector('[data-page="library"]')?.click();
-    await sleep(500);
+    await sleep(250);
     const libraryBefore = rect(".asset-library-main");
     const deferredBefore = document.querySelectorAll("[data-asset-deferred-result]").length;
-    await sleep(1200);
-    const deferredAfterHydrate = document.querySelectorAll("[data-asset-deferred-result]").length;
+    const beforeMoreStats = stats();
+    const moreStart = performance.now();
     document.querySelector("[data-asset-library-more]")?.click();
     await sleep(350);
+    const loadMoreMs = Math.round(performance.now() - moreStart);
+    const afterMoreStats = stats();
+    await sleep(1000);
+    const deferredAfterHydrate = document.querySelectorAll("[data-asset-deferred-result]").length;
     const libraryAfter = rect(".asset-library-main");
+    const longTasks = window.__pokayaLongTasks || [];
     out.contentLibrary = {
       main: delta(libraryBefore, libraryAfter),
       deferredBefore,
       deferredAfterHydrate,
-      tileCount: document.querySelectorAll(".asset-tile").length
+      tileCount: document.querySelectorAll(".asset-tile").length,
+      loadMoreMs,
+      loadMoreRenderDelta: afterMoreStats.renders - beforeMoreStats.renders,
+      loadMoreAppendDelta: afterMoreStats.libraryAppends - beforeMoreStats.libraryAppends,
+      libraryAppendDelta: afterMoreStats.libraryAppends - beforeLibraryStats.libraryAppends,
+      longTaskCount: longTasks.length,
+      maxLongTaskMs: longTasks.length ? Math.max(...longTasks) : 0
     };
 
     return out;
@@ -145,7 +168,7 @@ async function seedLibraryResults(email) {
   const project = (db.projects || []).find((item) => item.userId === user?.id) || db.projects?.[0];
   if (!user || !project) return;
   const now = Date.now();
-  project.results = Array.from({ length: 42 }, (_, index) => {
+  project.results = Array.from({ length: 96 }, (_, index) => {
     const hue = (index * 29) % 360;
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="480" height="480"><defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop stop-color="hsl(${hue},78%,62%)"/><stop offset="1" stop-color="hsl(${(hue + 52) % 360},84%,74%)"/></linearGradient></defs><rect width="480" height="480" fill="url(#g)"/><circle cx="${120 + (index % 5) * 56}" cy="${130 + (index % 4) * 44}" r="88" fill="rgba(255,255,255,.42)"/></svg>`;
     return {
@@ -199,18 +222,31 @@ try {
   const result = await measure(page);
   await browser.close();
 
+  console.log(JSON.stringify(result, null, 2));
+
   assertStable("Image model menu", result.imageModelMenu);
   assertStable("Video model menu", result.videoModelMenu);
   assertStable("Audio preset menu composer", result.audioPresetMenu?.composer);
   assertStable("Audio preset menu main bar", result.audioPresetMenu?.mainBar);
   assertStable("Audio mode switch", result.audioModeSwitch);
   assertStable("Content Library main", result.contentLibrary?.main);
-  if (!process.env.POKAYA_FLICKER_URL && Number(result.contentLibrary?.tileCount || 0) < 42) {
-    throw new Error(`Content Library seeded assets did not render: ${result.contentLibrary?.tileCount || 0}/42`);
+  if (!process.env.POKAYA_FLICKER_URL && Number(result.contentLibrary?.tileCount || 0) < 48) {
+    throw new Error(`Content Library seeded assets did not render after load more: ${result.contentLibrary?.tileCount || 0}/48`);
+  }
+  if (Number(result.contentLibrary?.loadMoreRenderDelta || 0) > 0) {
+    throw new Error(`Content Library load more triggered full render: ${result.contentLibrary.loadMoreRenderDelta}`);
+  }
+  if (!process.env.POKAYA_FLICKER_URL && Number(result.contentLibrary?.libraryAppendDelta || 0) < 1) {
+    throw new Error("Content Library did not use append path.");
+  }
+  if (Number(result.contentLibrary?.loadMoreMs || 0) > 900) {
+    throw new Error(`Content Library load more is too slow: ${result.contentLibrary.loadMoreMs}ms`);
+  }
+  if (Number(result.contentLibrary?.maxLongTaskMs || 0) > 250) {
+    throw new Error(`Studio interaction long task exceeded budget: ${result.contentLibrary.maxLongTaskMs}ms`);
   }
 
   console.log("Interaction flicker checks passed.");
-  console.log(JSON.stringify(result, null, 2));
 } finally {
   if (server) server.kill("SIGTERM");
   await rm(dataDir, { recursive: true, force: true });

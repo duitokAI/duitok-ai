@@ -14,6 +14,7 @@
     "check:generation-snapshot": "node scripts/check-generation-job-snapshot.mjs",
     "check:interaction-flicker": "node scripts/check-interaction-flicker.mjs",
     "check:provider-leaks": "node scripts/check-provider-leaks.mjs",
+    "check:studio-performance": "node scripts/check-interaction-flicker.mjs",
     "generate:agent3d": "node scripts/generate-pokaya-agent-glb.mjs",
     "start": "node server.mjs",
     "preview": "NODE_ENV=production node server.mjs"
