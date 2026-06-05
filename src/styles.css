@@ -2122,7 +2122,7 @@ body,
 }
 
 .video-option-list button {
-  min-height: 58px;
+  min-height: 68px;
   grid-template-columns: minmax(0, 1fr) 22px;
   gap: 10px;
   justify-content: stretch;
@@ -2206,6 +2206,16 @@ body,
   line-height: 1.22;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.video-option-list .video-option-copy small {
+  display: -webkit-box;
+  max-width: 100%;
+  text-overflow: clip;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 .video-model-option-copy small {
