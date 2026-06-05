@@ -7113,6 +7113,32 @@ textarea {
   font-weight: 720;
 }
 
+.asset-library-more {
+  min-height: 76px;
+  display: grid;
+  place-items: center;
+  padding: 12px 0 24px;
+}
+
+.asset-library-more button {
+  min-width: 168px;
+  justify-content: center;
+}
+
+.asset-library-more small {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.result-card,
+.generation-job-card,
+.admin-user-row,
+.usage-ledger-table article {
+  content-visibility: auto;
+  contain-intrinsic-size: 220px;
+}
+
 @media (min-width: 1500px) {
   .asset-library-experience {
     --asset-thumb: clamp(132px, 7.2vw, 168px);

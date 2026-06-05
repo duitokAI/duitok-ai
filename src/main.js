@@ -58,8 +58,10 @@ let autoFrameworkSaveTimer = null;
 let autoFrameworkSaveSeq = 0;
 let imageConsoleScrollCleanup = null;
 let studioWallInfiniteScrollCleanup = null;
+let assetLibraryInfiniteScrollCleanup = null;
 let sidebarTooltipCleanup = null;
 let navigationFrame = null;
+let iconHydrationFrame = null;
 let aspectRatioPopoverCleanup = null;
 let imageCountSaveTimer = null;
 let imageCountSaveSeq = 0;
@@ -206,6 +208,7 @@ const state = {
   assetSearch: "",
   assetTypeFilter: "all",
   assetProjectFilter: "all",
+  assetLibraryLimit: 36,
   studioWallLimits: {},
   wizardStep: 1,
   wizardFeature: "",
@@ -1572,6 +1575,9 @@ function set(patch) {
     else restoreAgentThreadScroll(agentScroll);
     return;
   }
+  if (shouldPatchAssetLibraryOnly(statePatch) && patchAssetLibraryDom({ preserveSearchFocus: Object.prototype.hasOwnProperty.call(statePatch, "assetSearch") })) {
+    return;
+  }
   render();
   restoreAgentInputFocus(agentInputFocus);
   if (shouldScrollAgentThread) scrollAgentThreadToBottom();
@@ -1642,6 +1648,14 @@ function shouldPatchAgentChatOnly(patch = {}) {
     "db"
   ]);
   return keys.every((key) => agentOnlyKeys.has(key));
+}
+
+function shouldPatchAssetLibraryOnly(patch = {}) {
+  if (state.page !== "library" || state.loading) return false;
+  const keys = Object.keys(patch);
+  if (!keys.length) return false;
+  const allowed = new Set(["assetSearch", "assetTypeFilter", "assetProjectFilter", "assetLibraryLimit"]);
+  return keys.every((key) => allowed.has(key));
 }
 
 function patchAgentChatDom(patch = {}) {
@@ -2062,18 +2076,35 @@ function render() {
     window.cancelAnimationFrame(assetLibraryWarmFrame);
     assetLibraryWarmFrame = null;
   }
+  assetLibraryInfiniteScrollCleanup?.();
+  assetLibraryInfiniteScrollCleanup = null;
   initDelegatedEvents();
   app.innerHTML = state.loading ? `<main class="loading">${icon("loader-circle")} Loading...</main>` : routeShell(route());
   applyStudioChineseLocalization();
   bind();
-  window.lucide?.createIcons();
+  hydrateIconsSoon();
   updatePromoCountdown();
   restoreSidebarScroll();
   bindImageConsoleCompact();
   bindStudioWallInfiniteScroll();
+  bindAssetLibraryInfiniteScroll();
   bindCollapsedSidebarTooltips();
   scrollToSopAnchor();
   scheduleAssetLibraryThumbWarmup();
+}
+
+function hydrateIconsSoon() {
+  if (!window.lucide?.createIcons) return;
+  if (iconHydrationFrame) return;
+  const run = () => {
+    iconHydrationFrame = null;
+    window.lucide?.createIcons();
+  };
+  if ("requestIdleCallback" in window) {
+    iconHydrationFrame = window.requestIdleCallback(run, { timeout: 240 });
+  } else {
+    iconHydrationFrame = window.requestAnimationFrame(run);
+  }
 }
 
 function initDelegatedEvents() {
@@ -4346,7 +4377,10 @@ function contentLibraryPage() {
     return projectMatch && kindMatch && searchMatch;
   });
   const counts = assetLibraryCounts(all);
-  const groups = assetLibraryDateGroups(filtered);
+  const projectCounts = assetLibraryProjectCounts(all);
+  const visibleItems = filtered.slice(0, assetLibraryLimit());
+  const groups = assetLibraryDateGroups(visibleItems);
+  const hasMore = visibleItems.length < filtered.length;
   let renderedAssetIndex = 0;
   const sections = groups.map((group, index) => {
     const section = assetLibraryDateSection(group, index, renderedAssetIndex);
@@ -4369,7 +4403,7 @@ function contentLibraryPage() {
       <div class="asset-library-section-title"><span>Projects</span><button type="button" data-action="new-project" title="${esc(t("createProject"))}" aria-label="${esc(t("createProject"))}">${icon("plus", 14)}</button></div>
       <nav class="asset-library-projects">
         ${assetLibraryProjectButton("all", "All projects", all.length, activeProject)}
-        ${state.db.projects.map((projectItem) => assetLibraryProjectButton(projectItem.id, projectItem.name, all.filter((item) => item.projectId === projectItem.id).length, activeProject)).join("")}
+        ${state.db.projects.map((projectItem) => assetLibraryProjectButton(projectItem.id, projectItem.name, projectCounts.get(projectItem.id) || 0, activeProject)).join("")}
       </nav>
     </aside>
     <section class="asset-library-main">
@@ -4377,8 +4411,22 @@ function contentLibraryPage() {
         ${filterOptions.map((kind) => `<button type="button" class="${activeFilter === kind ? "active" : ""}" data-asset-type="${kind}" aria-pressed="${activeFilter === kind ? "true" : "false"}">${icon(assetTypeIcon(kind), 16)} ${assetTypeLabel(kind)}<small>${counts[kind] || 0}</small></button>`).join("")}
       </div>
       ${groups.length ? sections : assetLibraryEmptyState(query)}
+      ${hasMore ? assetLibraryMoreButton(visibleItems.length, filtered.length) : ""}
     </section>
   </section>`;
+}
+
+const assetLibraryPageSize = 36;
+
+function assetLibraryLimit() {
+  const value = Number(state.assetLibraryLimit || 0);
+  return Math.max(assetLibraryPageSize, Number.isFinite(value) ? value : assetLibraryPageSize);
+}
+
+function assetLibraryMoreButton(visible, total) {
+  return `<div class="asset-library-more" data-asset-library-more-sentinel>
+    <button type="button" class="dark-button" data-asset-library-more>${icon("chevrons-down", 16)} Load more <small>${visible}/${total}</small></button>
+  </div>`;
 }
 
 function assetMediaKind(item = {}) {
@@ -4416,6 +4464,13 @@ function assetLibraryCounts(items = []) {
     counts[kind] = (counts[kind] || 0) + 1;
     return counts;
   }, { all: 0, image: 0, video: 0, text: 0, visual_card: 0 });
+}
+
+function assetLibraryProjectCounts(items = []) {
+  return items.reduce((counts, item) => {
+    if (item.projectId) counts.set(item.projectId, (counts.get(item.projectId) || 0) + 1);
+    return counts;
+  }, new Map());
 }
 
 function assetLibraryNavButton(kind, ic, label, count, activeFilter) {
@@ -6717,6 +6772,98 @@ function scheduleAssetLibraryThumbWarmup() {
     if ("requestIdleCallback" in window) window.requestIdleCallback(warm, { timeout: 900 });
     else window.setTimeout(warm, 120);
   });
+}
+
+function patchAssetLibraryDom({ preserveSearchFocus = false } = {}) {
+  if (state.page !== "library" || state.loading) return false;
+  const workspace = document.querySelector(".workspace.workspace-library");
+  if (!workspace) return false;
+  const activeSearch = preserveSearchFocus && document.activeElement?.matches?.("[data-asset-search]")
+    ? {
+        value: document.activeElement.value,
+        start: document.activeElement.selectionStart,
+        end: document.activeElement.selectionEnd
+      }
+    : null;
+  assetLibraryInfiniteScrollCleanup?.();
+  assetLibraryInfiniteScrollCleanup = null;
+  workspace.innerHTML = contentLibraryPage();
+  bindAssetLibraryControls(workspace);
+  bindAssetLibraryInfiniteScroll();
+  hydrateIconsSoon();
+  scheduleAssetLibraryThumbWarmup();
+  if (activeSearch) {
+    window.requestAnimationFrame(() => {
+      const input = workspace.querySelector("[data-asset-search]");
+      if (!input) return;
+      input.focus({ preventScroll: true });
+      input.value = activeSearch.value;
+      const end = Math.min(activeSearch.end ?? activeSearch.value.length, activeSearch.value.length);
+      input.setSelectionRange(Math.min(activeSearch.start ?? end, end), end);
+    });
+  }
+  return true;
+}
+
+function showMoreAssetLibrary() {
+  state.assetLibraryLimit = assetLibraryLimit() + assetLibraryPageSize;
+  if (!patchAssetLibraryDom()) render();
+}
+
+function resetAssetLibraryLimit() {
+  state.assetLibraryLimit = assetLibraryPageSize;
+}
+
+function bindAssetLibraryControls(root = document) {
+  root.querySelectorAll("[data-asset-type]").forEach((el) => el.addEventListener("click", () => {
+    resetAssetLibraryLimit();
+    set({ assetTypeFilter: el.dataset.assetType });
+  }));
+  root.querySelectorAll("[data-asset-project]").forEach((el) => el.addEventListener("click", () => {
+    resetAssetLibraryLimit();
+    set({ assetProjectFilter: el.dataset.assetProject });
+  }));
+  root.querySelectorAll("[data-asset-library-more]").forEach((el) => el.addEventListener("click", showMoreAssetLibrary));
+  root.querySelectorAll("[data-asset-search]").forEach((el) => el.addEventListener("input", (event) => {
+    state.assetSearch = event.target.value;
+    resetAssetLibraryLimit();
+    clearTimeout(assetSearchTimer);
+    assetSearchTimer = setTimeout(() => {
+      if (!patchAssetLibraryDom({ preserveSearchFocus: true })) render();
+    }, 140);
+  }));
+}
+
+function bindAssetLibraryInfiniteScroll() {
+  assetLibraryInfiniteScrollCleanup?.();
+  assetLibraryInfiniteScrollCleanup = null;
+  if (state.page !== "library") return;
+  const sentinel = document.querySelector("[data-asset-library-more-sentinel]");
+  if (!sentinel) return;
+  let ticking = false;
+  const scrollTargets = [
+    window,
+    document.querySelector(".workspace-library"),
+    document.querySelector(".asset-library-main"),
+    document.querySelector(".studio-shell")
+  ].filter(Boolean);
+  const uniqueScrollTargets = [...new Set(scrollTargets)];
+  const check = () => {
+    ticking = false;
+    const nextSentinel = document.querySelector("[data-asset-library-more-sentinel]");
+    if (!nextSentinel) return;
+    if (nextSentinel.getBoundingClientRect().top - window.innerHeight < 700) showMoreAssetLibrary();
+  };
+  const requestCheck = () => {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(check);
+  };
+  uniqueScrollTargets.forEach((target) => target.addEventListener("scroll", requestCheck, { passive: true }));
+  window.requestIdleCallback?.(requestCheck, { timeout: 900 }) || window.setTimeout(requestCheck, 180);
+  assetLibraryInfiniteScrollCleanup = () => {
+    uniqueScrollTargets.forEach((target) => target.removeEventListener("scroll", requestCheck));
+  };
 }
 
 function resultResolutionLabel(item) {
@@ -10526,13 +10673,7 @@ function bind() {
   document.querySelectorAll("[data-result-title-save]").forEach((el) => {
     el.addEventListener("click", () => renameResultInline(el.closest(".result-title-editor")?.querySelector("[data-result-title]")));
   });
-  document.querySelectorAll("[data-asset-type]").forEach((el) => el.addEventListener("click", () => set({ assetTypeFilter: el.dataset.assetType })));
-  document.querySelectorAll("[data-asset-project]").forEach((el) => el.addEventListener("click", () => set({ assetProjectFilter: el.dataset.assetProject })));
-  document.querySelectorAll("[data-asset-search]").forEach((el) => el.addEventListener("input", (event) => {
-    state.assetSearch = event.target.value;
-    clearTimeout(assetSearchTimer);
-    assetSearchTimer = setTimeout(render, 180);
-  }));
+  bindAssetLibraryControls();
   document.querySelectorAll("[data-sop-search]").forEach((el) => el.addEventListener("input", (event) => {
     state.sopSearch = event.target.value;
     clearTimeout(sopSearchTimer);
@@ -12207,6 +12348,9 @@ function hasRunningGenerationJobs(db = state.db) {
 
 function generationPollDelay(attempt = 0, db = state.db) {
   const runningCount = (db?.generationJobs || []).filter((job) => ["queued", "processing"].includes(job.status)).length;
+  const foregroundGenerationPage = state.page === "project" || state.page === "agent";
+  if (navigator.connection?.saveData) return foregroundGenerationPage ? 8000 : 15000;
+  if (!foregroundGenerationPage) return attempt < 4 ? 6000 : 10000;
   if (runningCount > 1 && attempt < 6) return 1800;
   if (attempt < 2) return 1500;
   if (attempt < 12) return 3000;
