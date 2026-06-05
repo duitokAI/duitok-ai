@@ -5113,6 +5113,7 @@ function studioResultBelongsToStep(item = {}, step = state.step, types = []) {
 }
 
 function studioResultIsDisplayable(item = {}) {
+  if (item.type === "audio" || item.audioUrl) return true;
   if (item.imageUrl || item.videoUrl || item.visualCard || item.type === "visual_card") return true;
   if (item.type === "text" && (item.body || item.providerBody || item.prompt)) return true;
   return false;
@@ -5122,6 +5123,7 @@ function studioPendingWallCard(job, orderIndex = 0) {
   const aspectRatio = wallAspectRatioForItem(job, project());
   const mediaRatio = aspectRatioToMediaRatio(aspectRatio);
   const aspectClass = Number(mediaRatio) >= 1 ? "landscape" : "portrait";
+  const audioJob = isAudioWallItem(job);
   const isFailed = job.status === "failed";
   const statusLabel = generationJobStatusLabel(job);
   const timelineAt = job.timelineAt || job.createdAt || "";
@@ -5134,7 +5136,8 @@ function studioPendingWallCard(job, orderIndex = 0) {
   const processingBody = `
       ${statusIcon}
       <b>${esc(generationJobCenterLabel(job))}</b>`;
-  return `<article class="studio-wall-card studio-wall-pending ${aspectClass} ${isFailed ? "failed" : ""}" data-aspect-ratio="${esc(aspectRatio)}" data-media-ratio="${esc(mediaRatio)}" data-generation-job-id="${esc(job.id)}" data-generation-job-status="${esc(job.status || "queued")}" style="--media-ratio:${esc(mediaRatio)};--wall-aspect-ratio:${esc(aspectRatioToCss(aspectRatio))};aspect-ratio:var(--wall-aspect-ratio)">
+  return `<article class="studio-wall-card studio-wall-pending ${audioJob ? "studio-audio-wall-card studio-audio-wall-pending" : ""} ${aspectClass} ${isFailed ? "failed" : ""}" data-aspect-ratio="${esc(aspectRatio)}" data-media-ratio="${esc(mediaRatio)}" data-generation-job-id="${esc(job.id)}" data-generation-job-status="${esc(job.status || "queued")}" style="--media-ratio:${esc(mediaRatio)};--wall-aspect-ratio:${esc(aspectRatioToCss(aspectRatio))};aspect-ratio:var(--wall-aspect-ratio)">
+    ${audioJob ? audioWallPreview(job, { pending: true }) : ""}
     <div class="studio-wall-pending-controls" aria-label="${esc(statusLabel)}">
       ${isFailed ? `<div class="studio-wall-failed-center">${statusBody}
         <p class="generation-credit-refund-note"><strong>No Charge</strong></p>
@@ -5145,6 +5148,7 @@ function studioPendingWallCard(job, orderIndex = 0) {
 }
 
 function studioWallCard(item, index = 0) {
+  if (isAudioWallItem(item)) return studioAudioWallCard(item, index);
   const promptText = resultPromptText(item).replaceAll("\n", " ").trim();
   const canSaveReference = Boolean(item.imageUrl || item.videoUrl);
   const aspectRatio = wallAspectRatioForItem(item);
@@ -5168,6 +5172,65 @@ function studioWallCard(item, index = 0) {
   </article>`;
 }
 
+function isAudioWallItem(item = {}) {
+  return item?.type === "audio" || item?.action === "generate-audio" || Boolean(item?.audioUrl);
+}
+
+function studioAudioWallCard(item, index = 0) {
+  const promptText = audioPromptText(item);
+  const duration = audioDurationLabel(item);
+  const isNew = Date.now() - Date.parse(item.createdAt || 0) < 120000;
+  const selected = selectedResultIdSet().has(item.id);
+  const bulkSelecting = isBulkSelectingResults();
+  const downloadable = Boolean(item.audioUrl);
+  return `<article class="studio-wall-card studio-audio-wall-card ${isNew ? "is-new" : ""} ${selected ? "is-selected" : ""} ${bulkSelecting ? "is-bulk-selecting" : ""}" data-aspect-ratio="16:9" data-media-ratio="1.7778" data-result-id="${esc(item.id)}" style="--media-ratio:1.7778;--wall-aspect-ratio:16 / 9">
+    ${isNew ? `<span class="studio-wall-new-badge">New</span>` : ""}
+    <button type="button" class="studio-wall-select-toggle" data-result-select="${esc(item.id)}" aria-label="${selected ? "Unselect result" : "Select result"}" aria-pressed="${selected ? "true" : "false"}">
+      ${selected ? icon("check", 17) : ""}
+    </button>
+    ${audioWallPreview(item, { priority: index < 6 })}
+    <div class="studio-wall-actions" aria-label="Audio actions">
+      <button type="button" data-action="audio-coming-soon" data-tooltip="Play" aria-label="Play audio">${icon("play", 18)}</button>
+      <button type="button" data-result-action="download" data-result-id="${esc(item.id)}" data-result-kind="audio" data-tooltip="Download" aria-label="Download audio" ${downloadable ? "" : "disabled"}>${icon("download", 18)}</button>
+      <button type="button" data-result-action="delete" data-result-id="${esc(item.id)}" data-tooltip="Delete" aria-label="Delete">${icon("trash-2", 18)}</button>
+    </div>
+    <footer><b>${esc(promptText)}</b><span>${esc(duration)}</span></footer>
+  </article>`;
+}
+
+function audioPromptText(item = {}) {
+  return String(item.title || item.prompt || item.body || item.promptSnapshot || "Generated audio").replaceAll("\n", " ").trim();
+}
+
+function audioDurationLabel(item = {}) {
+  const raw = Number(item.durationSeconds || item.duration || item.lengthSeconds || 0);
+  if (Number.isFinite(raw) && raw > 0) {
+    const seconds = Math.round(raw);
+    return `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+  }
+  return item.audioUrl ? "Audio clip" : "00:00";
+}
+
+function audioWallPreview(item = {}, options = {}) {
+  const promptText = audioPromptText(item);
+  const bars = audioWaveformBars(`${item.id || ""}${promptText}`, options.pending ? 34 : 56);
+  return `<div class="studio-audio-wall-preview" aria-label="${esc(promptText)}">
+    <div class="studio-audio-waveform" aria-hidden="true">${bars}</div>
+    ${options.pending ? `<span class="studio-audio-generating-badge">${icon("loader-circle", 15)} Generating</span>` : ""}
+  </div>`;
+}
+
+function audioWaveformBars(seed = "", count = 48) {
+  const text = String(seed || "pokaya-audio");
+  let hash = 0;
+  for (let index = 0; index < text.length; index += 1) hash = (hash * 31 + text.charCodeAt(index)) % 9973;
+  return Array.from({ length: count }, (_, index) => {
+    hash = (hash * 47 + index * 13 + 23) % 9973;
+    const height = 18 + (hash % 72);
+    return `<i style="--h:${height}"></i>`;
+  }).join("");
+}
+
 function selectedResultIdSet() {
   return new Set(Array.isArray(state.selectedResultIds) ? state.selectedResultIds : []);
 }
@@ -5184,7 +5247,7 @@ function isBulkSelectingResults() {
 function studioBulkSelectionBar() {
   const items = selectedResults();
   if (!items.length) return "";
-  const downloadableCount = items.filter((item) => item.imageUrl || item.videoUrl).length;
+  const downloadableCount = items.filter((item) => item.imageUrl || item.videoUrl || item.audioUrl).length;
   const selectedLabel = `${items.length} selected`;
   const busyKind = state.bulkReferenceBusy || "";
   const savingAvatar = busyKind === "avatar";
@@ -6066,13 +6129,14 @@ function wordCount(value = "") {
 
 function autoPanel(p) {
   const auto = p.auto || {};
+  const meta = studioStepMeta("auto");
+  const wall = studioResultWall(p, meta);
   const mode = auto.audioMode || "Voiceover";
   const language = auto.audioLanguage || "Malay";
   const scriptMode = auto.audioScriptMode || "Write for me";
   const voicePreset = auto.voicePreset || "Malay Soft Sell";
   const promptText = auto.audioPrompt || "";
-  const audioItems = (p.results || []).filter((item) => item.type === "audio").slice(-6).reverse();
-  return `<section class="audio-studio-page">
+  return `<section class="audio-studio-page studio-wall-zoomable ${wall ? "" : "is-empty"}" ${studioWallZoomStyleAttr()}>
     <section class="audio-stage-hero">
       <div class="audio-eq" aria-hidden="true">${Array.from({ length: 34 }, (_, index) => `<i style="--bar:${index % 9}"></i>`).join("")}</div>
       <div class="audio-title-lockup">
@@ -6081,13 +6145,7 @@ function autoPanel(p) {
         <p>Generate voiceover direction for TikTok Shop videos, with change voice and translate workflows prepared for the next backend phase.</p>
       </div>
     </section>
-    <section class="audio-recent-panel">
-      <header>
-        <div><b>${icon("history", 18)} Recent audio</b><span>${audioItems.length ? `${audioItems.length} clips` : "No audio clips yet"}</span></div>
-        <button type="button" data-action="audio-coming-soon">${icon("folder-open", 16)} Save to Library</button>
-      </header>
-      ${audioItems.length ? `<div class="audio-result-list">${audioItems.map(audioResultCard).join("")}</div>` : audioEmptyState()}
-    </section>
+    ${wall ? `<section class="audio-wall-stage">${studioWallZoomControl()}${wall}</section>` : `<section class="audio-wall-stage is-empty">${audioEmptyState()}</section>`}
     <section class="audio-composer" aria-label="Audio composer">
       <div class="audio-mode-dial" role="tablist" aria-label="Audio mode">
         ${audioModeButton("Voiceover", "mic", "Create spoken narration", mode, false)}
@@ -6741,6 +6799,7 @@ function resultProject(item) {
 function resultMediaSrc(item, kind = "image", options = {}) {
   if (!item) return "";
   const params = new URLSearchParams({ token: state.token || "" });
+  if (kind === "audio" && item.audioUrl) return item.audioUrl;
   if (kind === "video" && item.videoUrl) return `/api/media/result/${encodeURIComponent(item.id)}/video?${params.toString()}`;
   if (item.imageUrl) {
     const width = Number(options.width || 0);
@@ -6914,6 +6973,7 @@ function aspectRatioToCss(value = "9:16") {
 }
 
 function intrinsicMediaRatioForItem(item = {}) {
+  if (isAudioWallItem(item)) return "1.7778";
   const resolutionText = typeof item.resolution === "string" ? item.resolution : "";
   const resolutionMatch = resolutionText.match(/(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)/i);
   const width = Number(
@@ -6935,12 +6995,14 @@ function intrinsicMediaRatioForItem(item = {}) {
 }
 
 function projectWallAspectRatio(projectItem = project(), type = "image") {
+  if (type === "audio") return "16:9";
   if (type === "video" || type === "ugc") return normalizeAspectRatio(projectItem?.ugc?.aspectRatio || projectItem?.image?.aspectRatio || "16:9", "16:9");
   if (type === "text" || type === "story") return normalizeAspectRatio(projectItem?.image?.aspectRatio || "1:1", "1:1");
   return normalizeAspectRatio(projectItem?.image?.aspectRatio || "9:16", "9:16");
 }
 
 function wallAspectRatioForItem(item = {}, projectItem = resultProject(item), fallback = "") {
+  if (isAudioWallItem(item)) return "16:9";
   if (item?.aspectRatio) return normalizeAspectRatio(item.aspectRatio, fallback || projectWallAspectRatio(projectItem, item.type));
   if (item?.type === "video" || item?.action === "generate-ugc") return projectWallAspectRatio(projectItem, "video");
   if (item?.type === "text" || item?.type === "story") return projectWallAspectRatio(projectItem, "text");
@@ -7031,7 +7093,7 @@ function resultDownloadFilename(item, kind = "image") {
     .replace(/[^a-z0-9\u4e00-\u9fa5]+/gi, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 72) || "pokaya-asset";
-  const ext = kind === "video" ? "mp4" : kind === "text" ? "txt" : "png";
+  const ext = kind === "video" ? "mp4" : kind === "audio" ? "mp3" : kind === "text" ? "txt" : "png";
   return `${base}.${ext}`;
 }
 
@@ -14045,14 +14107,14 @@ async function bulkResultAction(actionName) {
 }
 
 async function bulkDownloadSelectedResults() {
-  const items = selectedResults().filter((item) => item.imageUrl || item.videoUrl);
+  const items = selectedResults().filter((item) => item.imageUrl || item.videoUrl || item.audioUrl);
   if (!items.length) return notify("没有可下载的生成结果。");
   notify(`正在下载 ${items.length} 张图片。`);
   let failed = 0;
   for (const item of items) {
-    const kind = item.videoUrl ? "video" : "image";
+    const kind = item.videoUrl ? "video" : item.audioUrl ? "audio" : "image";
     try {
-      downloadDirect(`/api/media/result/${item.id}/${kind}`, resultDownloadFilename(item, kind), { keepModal: true });
+      downloadDirect(kind === "audio" ? item.audioUrl : `/api/media/result/${item.id}/${kind}`, resultDownloadFilename(item, kind), { keepModal: true });
     } catch {
       failed += 1;
     }
@@ -14128,6 +14190,7 @@ async function resultAction(button) {
     if (actionName === "download") {
       const kind = button.dataset.resultKind || "text";
       const filename = resultDownloadFilename(item, kind);
+      if (kind === "audio" && item?.audioUrl) return downloadDirect(item.audioUrl, filename);
       const path = kind === "text" ? `/api/export/result/${id}` : `/api/media/result/${id}/${kind}`;
       await wait(80);
       if (kind !== "text") downloadDirect(path, filename, { keepModal: true });

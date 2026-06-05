@@ -45615,6 +45615,124 @@ body:has(.studio-shell .video-prompt-extractor-page),
   font-weight: 850;
 }
 
+.studio-shell .audio-wall-stage {
+  width: min(1320px, 100%);
+  margin: 0 auto;
+  min-width: 0;
+}
+
+.studio-shell .audio-wall-stage > .studio-wall-zoom-control {
+  margin: 0 0 10px auto;
+}
+
+.studio-shell .audio-wall-stage .studio-result-wall {
+  min-height: 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .audio-wall-stage .studio-wall-grid {
+  height: auto !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(var(--studio-wall-column, 360px), 100%), 1fr)) !important;
+  grid-auto-rows: auto !important;
+  gap: 6px !important;
+  padding: 0 !important;
+}
+
+.studio-shell .studio-audio-wall-card {
+  aspect-ratio: 16 / 9 !important;
+  min-height: 0 !important;
+  border-radius: 0 !important;
+  background: #000 !important;
+  border: 1px solid rgba(255, 255, 255, 0.035);
+  box-shadow: none !important;
+}
+
+.studio-shell .studio-audio-wall-preview {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: start;
+  padding: clamp(14px, 2.1vw, 26px);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.045), transparent 36%),
+    #000;
+}
+
+.studio-shell .studio-audio-waveform {
+  display: flex;
+  align-items: center;
+  gap: clamp(3px, 0.45vw, 7px);
+  height: clamp(58px, 9vw, 104px);
+  opacity: 0.22;
+  overflow: hidden;
+}
+
+.studio-shell .studio-audio-waveform i {
+  flex: 1 0 3px;
+  max-width: 9px;
+  height: calc(var(--h, 44) * 1%);
+  min-height: 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.48);
+}
+
+.studio-shell .studio-audio-wall-card footer {
+  inset: auto 20px 18px 20px !important;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 18px;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.38) !important;
+  backdrop-filter: none !important;
+}
+
+.studio-shell .studio-audio-wall-card footer b {
+  min-width: 0;
+  color: rgba(255, 255, 255, 0.34);
+  font-size: clamp(12px, 1.35vw, 20px);
+  font-weight: 820;
+}
+
+.studio-shell .studio-audio-wall-card footer span {
+  color: rgba(255, 255, 255, 0.52);
+  font-size: clamp(12px, 1.25vw, 18px);
+  font-weight: 900;
+}
+
+.studio-shell .studio-audio-wall-card .studio-wall-actions {
+  top: 12px;
+  right: 12px;
+}
+
+.studio-shell .studio-audio-wall-card .studio-wall-actions button:disabled {
+  opacity: 0.32;
+}
+
+.studio-shell .studio-audio-wall-pending .studio-audio-generating-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transform: translate(-50%, -50%);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.studio-shell .studio-audio-wall-pending > .studio-wall-pending-controls {
+  position: relative;
+  z-index: 2;
+  color: rgba(255, 255, 255, 0.72) !important;
+}
+
 .studio-shell .audio-empty-state {
   display: grid;
   grid-template-columns: 24px minmax(0, 1fr);
