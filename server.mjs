@@ -2486,7 +2486,8 @@ function requireAi302Config() {
 
 function providerForMediaModel(model) {
   model = internalMediaModel(model);
-  if (model === "GPT Image 2" || model === "Nano Banana Pro" || model === "Nano Banana 2") return process.env.GRSAI_API_KEY ? "grsai" : process.env.APIMART_API_KEY ? "apimart" : "mock";
+  if (model === "GPT Image 2") return process.env.APIMART_API_KEY ? "apimart" : "mock";
+  if (model === "Nano Banana Pro" || model === "Nano Banana 2") return process.env.GRSAI_API_KEY ? "grsai" : process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Seedream 5.0 Lite" || model === "Seedream 4.5") return process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Grok Imagine") return process.env.APIMART_API_KEY ? "apimart" : process.env.WUYIN_API_KEY ? "wuyin" : "mock";
   if (model === "Seedance 2.0" || model === "Grok Imagine Video" || model === "Wan 2.7" || model === "Kling V3 Omni" || model === "Kling V3 Motion Control" || model === "MiniMax Hailuo 2.3") return process.env.APIMART_API_KEY ? "apimart" : "mock";
@@ -4313,7 +4314,8 @@ function providerConfigured(provider) {
 
 function imageProviderOrderForModel(model) {
   model = internalMediaModel(model);
-  if (model === "GPT Image 2" || model === "Nano Banana Pro" || model === "Nano Banana 2") return ["grsai", "apimart"];
+  if (model === "GPT Image 2") return ["apimart"];
+  if (model === "Nano Banana Pro" || model === "Nano Banana 2") return ["grsai", "apimart"];
   if (model === "Grok Imagine") return ["apimart", "wuyin"];
   if (model === "Seedream 5.0 Lite" || model === "Seedream 4.5") return ["apimart"];
   return [providerForMediaModel(model)];
