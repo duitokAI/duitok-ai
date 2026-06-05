@@ -11,6 +11,7 @@
     "check:agent-layout": "node scripts/check-agent-message-layout.mjs",
     "check:agent-smoke": "node scripts/test-agent-smoke.mjs",
     "check:chip": "node scripts/check-chip-config.mjs",
+    "check:generation-snapshot": "node scripts/check-generation-job-snapshot.mjs",
     "check:provider-leaks": "node scripts/check-provider-leaks.mjs",
     "generate:agent3d": "node scripts/generate-pokaya-agent-glb.mjs",
     "start": "node server.mjs",

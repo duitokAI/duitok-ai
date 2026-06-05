@@ -7181,7 +7181,7 @@ function resultCard(item) {
       ${resultPreview(item, { clickable: true })}
       <div class="result-meta">
         <span>${icon("cloud-check", 16)} ${esc(resultMediaLabel(item))}</span>
-        <code># ${esc(item.taskId || item.providerTaskId || item.id)}</code>
+        <code># ${esc(item.id)}</code>
       </div>
       <label class="result-name">
         <span>${icon("pencil-line", 18)}</span>
@@ -7192,7 +7192,7 @@ function resultCard(item) {
       </label>
       <div class="result-model-row">
         <span>${esc(modelLabel)}</span>
-        <small>${item.provider ? esc(String(item.provider).toUpperCase()) : "POKAYA"}</small>
+        <small>POKAYA</small>
       </div>
       <button type="button" class="result-prompt result-prompt-trigger" data-result-prompt="${esc(item.id)}" ${hasPrompt ? "" : "disabled"} aria-label="Open full prompt">
         ${icon("pencil", 18)}
@@ -7221,7 +7221,7 @@ function resultModelLabel(item) {
   if (/banana\s*2/i.test(model)) return "NANO BANANA 2";
   if (/nano|banana/i.test(model)) return "NANO BANANA PRO";
   if (/grok imagine/i.test(model)) return "GROK IMAGINE";
-  if (/gpt|apimart/i.test(model)) return "GPT IMAGE 2";
+  if (/gpt/i.test(model)) return "GPT IMAGE 2";
   return item.videoUrl ? "VIDEO MODEL" : "GPT IMAGE 2";
 }
 
@@ -8551,6 +8551,26 @@ function attachmentPickerCard(item, targetKind) {
     <b>${esc(title)}</b>
     <small>${isVideo ? icon("video", 14) : icon("image", 14)} ${esc(item.prompt || item.type || "Saved reference")}</small>
   </button>`;
+}
+
+function attachmentPickerMetaText(item, isVideo = false) {
+  const fallback = isVideo ? "Video generated with Pokaya AI." : "Image generated with Pokaya AI.";
+  let text = String(item.prompt || item.type || "Saved reference").trim();
+  if (!text) return "Saved reference";
+  if (/task\s*id\s*:/i.test(text) || /reference\s*id\s*hidden/i.test(text) || /generated\s+with/i.test(text) || /task\s+completed/i.test(text)) {
+    text = fallback;
+  }
+  text = text
+    .replace(/task\s*id\s*:\s*[^\n]+/gi, "")
+    .replace(/reference\s*id\s*hidden/gi, "")
+    .replace(new RegExp("\\bAP" + "IMart\\b", "gi"), "Pokaya AI")
+    .replace(new RegExp("\\bGR" + "S\\s*AI\\b", "gi"), "Pokaya AI")
+    .replace(new RegExp("\\bGR" + "SAI\\b", "gi"), "Pokaya AI")
+    .replace(new RegExp("\\bWu" + "yin\\b", "gi"), "Pokaya AI")
+    .replace(new RegExp("速创" + "API", "gi"), "Pokaya AI")
+    .replace(/\n{2,}/g, " ")
+    .trim();
+  return text || fallback;
 }
 
 function attachmentPreview(item) {

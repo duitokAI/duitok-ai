@@ -10,8 +10,8 @@ const files = [
 const checks = [
   {
     file: "src/main.js",
-    pattern: /\bAPIMart\b|GRS AI|Atlas Cloud|速创API|\bWuyin\b|GPT Image 2|Nano Banana Pro|Seedance 2\.0|Veo 3\.1|Sora 2|Gemini Omni|Grok Imagine|External provider URLs|Provider URLs|Copy task ID|\btask id\b/i,
-    message: "Front-end user copy must not expose provider/model names, provider URL hints, or upstream task IDs."
+    pattern: /\bAPIMart\b|GRS AI|Atlas Cloud|速创API|\bWuyin\b|External provider URLs|Provider URLs|Copy upstream task ID|upstream task id|provider task id/i,
+    message: "Front-end user copy must not expose provider infrastructure names, provider URL hints, or upstream task IDs."
   },
   {
     file: "server.mjs",

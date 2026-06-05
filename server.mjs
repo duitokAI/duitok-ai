@@ -492,6 +492,9 @@ app.get("/api/admin/diagnostics/generation-failures", async (req, res, next) => 
           timedOutAt: job.timedOutAt || "",
           errorMessage: redactProviderText(job.errorMessage || publicGenerationError()),
           providerErrorMessage: redactProviderText(job.providerErrorMessage || ""),
+          requestedModel: job.requestedModel || job.model,
+          resolvedProvider: job.resolvedProvider || job.provider,
+          providerModel: job.providerModel || "",
           apiErrorMessage: redactProviderText(call.errorMessage || ""),
           apiEndpoint: redactProviderText(call.endpoint || ""),
           apiCreatedAt: call.createdAt || ""
@@ -535,9 +538,14 @@ app.get("/api/admin/diagnostics/recent-generations", async (req, res, next) => {
           status: job.status,
           stage: job.stage || "",
           model: job.model,
+          requestedModel: job.requestedModel || job.model,
+          requestedProvider: job.requestedProvider || "",
+          resolvedProvider: job.resolvedProvider || job.provider,
+          providerModel: job.providerModel || "",
           provider: job.provider,
           apiProvider: call.provider || "",
           apiModel: call.model || "",
+          apiProviderModel: call.providerModel || "",
           endpoint: redactProviderText(call.endpoint || ""),
           taskId: job.taskId || call.taskId || "",
           providerTaskId: job.providerTaskId || call.taskId || "",
@@ -1756,8 +1764,9 @@ async function recoverInterruptedGenerationJobs() {
           userId: job.userId,
           projectId: job.projectId,
           generationJobId: job.id,
-          provider: job.provider,
-          model: job.model,
+          provider: job.resolvedProvider || job.provider,
+          model: job.requestedModel || job.model,
+          providerModel: job.providerModel || "",
           endpoint: "",
           status: "failed",
           errorMessage: job.providerErrorMessage,
@@ -1826,8 +1835,9 @@ async function reconcileStaleGenerationJobs(user, projectId = "") {
         userId: job.userId,
         projectId: job.projectId,
         generationJobId: job.id,
-        provider: job.provider,
-        model: job.model,
+        provider: job.resolvedProvider || job.provider,
+        model: job.requestedModel || job.model,
+        providerModel: job.providerModel || "",
         endpoint: "",
         status: "failed",
         errorMessage: job.providerErrorMessage,
@@ -2023,6 +2033,10 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
       taskId: _taskId,
       providerTaskId: _providerTaskId,
       provider: _provider,
+      requestedProvider: _requestedProvider,
+      resolvedProvider: _resolvedProvider,
+      providerModel: _providerModel,
+      providerFallbacks: _providerFallbacks,
       model: _model,
       providerTitle: _providerTitle,
       providerBody: _providerBody,
@@ -2067,6 +2081,10 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
       costRmb: _costRmb,
       costUsd: _costUsd,
       provider: _provider,
+      requestedProvider: _requestedProvider,
+      resolvedProvider: _resolvedProvider,
+      providerModel: _providerModel,
+      providerFallbacks: _providerFallbacks,
       endpoint: _endpoint,
       model: _model,
       taskId: _taskId,
@@ -3736,6 +3754,25 @@ function imageModelFromProject(project) {
   return modelMap[model] || apimartImageModel;
 }
 
+function grsaiImageModelFromProject(project) {
+  const model = internalMediaModel(project.image?.model);
+  const resolution = imageResolutionFromProject(project);
+  const modelMap = {
+    "GPT Image 2": resolution === "1K" ? grsaiGptImage2Model : grsaiGptImage2VipModel,
+    "Nano Banana Pro": grsaiNanoModel,
+    "Nano Banana 2": grsaiNanoBanana2Model
+  };
+  return modelMap[model] || grsaiNanoModel;
+}
+
+function imageProviderModelFromProject(project, provider = providerForMediaModel(project?.image?.model)) {
+  if (provider === "grsai") return grsaiImageModelFromProject(project);
+  if (provider === "apimart") return imageModelFromProject(project);
+  if (provider === "wuyin") return internalMediaModel(project?.image?.model) || "";
+  if (provider === "crun") return crunVeo31Model;
+  return internalMediaModel(project?.image?.model) || "";
+}
+
 async function pollApimartTask(taskId, tracker = null, options = {}) {
   const maxAttempts = Number(process.env.APIMART_POLL_ATTEMPTS || process.env.APIMART_IMAGE_POLL_ATTEMPTS || 60);
   const delayMs = Number(process.env.APIMART_POLL_MS || process.env.APIMART_IMAGE_POLL_MS || 5000);
@@ -3950,15 +3987,9 @@ function generationEndpointFor(provider, project) {
 }
 
 function grsaiImageBody(project, prompt) {
-  const model = internalMediaModel(project.image?.model);
   const resolution = imageResolutionFromProject(project);
-  const grsaiModelMap = {
-    "GPT Image 2": resolution === "1K" ? grsaiGptImage2Model : grsaiGptImage2VipModel,
-    "Nano Banana Pro": grsaiNanoModel,
-    "Nano Banana 2": grsaiNanoBanana2Model
-  };
   return {
-    model: grsaiModelMap[model] || grsaiNanoModel,
+    model: grsaiImageModelFromProject(project),
     prompt,
     aspectRatio: imageAspectRatioFromProject(project),
     imageSize: resolution,
@@ -4327,18 +4358,19 @@ function publicProviderFailureMessage(error) {
 }
 
 async function generateImageThroughProvider(provider, model, project, tracker = null) {
-  await tracker?.({ provider, providerStatus: "provider_selected" });
+  const providerModel = imageProviderModelFromProject(project, provider);
+  await tracker?.({ provider, resolvedProvider: provider, providerModel, providerStatus: "provider_selected" });
   if (provider === "grsai") {
     const image = await generateImageWithGrsai(project, tracker);
-    return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "grsai" };
+    return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "grsai", resolvedProvider: "grsai", providerModel };
   }
   if (provider === "wuyin") {
     const image = await generateImageWithWuyin(project, tracker);
-    return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "wuyin" };
+    return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "wuyin", resolvedProvider: "wuyin", providerModel };
   }
   if (provider === "apimart") {
     const image = await generateImageWithApimart(project, tracker);
-    return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "apimart" };
+    return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "apimart", resolvedProvider: "apimart", providerModel };
   }
   return null;
 }
@@ -4573,19 +4605,22 @@ async function generateWithProvider(project, action, step, tracker = null) {
       return { title: model, body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "wuyin" };
     }
     if (provider === "wuyin" && model === "Grok Imagine") {
-      await tracker?.({ provider: "wuyin", providerStatus: "provider_selected" });
+      const providerModel = imageProviderModelFromProject(project, "wuyin");
+      await tracker?.({ provider: "wuyin", resolvedProvider: "wuyin", providerModel, providerStatus: "provider_selected" });
       const image = await generateImageWithWuyin(project, tracker);
-      return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "wuyin" };
+      return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "wuyin", resolvedProvider: "wuyin", providerModel };
     }
     if (provider === "grsai") {
-      await tracker?.({ provider: "grsai", providerStatus: "provider_selected" });
+      const providerModel = imageProviderModelFromProject(project, "grsai");
+      await tracker?.({ provider: "grsai", resolvedProvider: "grsai", providerModel, providerStatus: "provider_selected" });
       const image = await generateImageWithGrsai(project, tracker);
-      return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "grsai" };
+      return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "grsai", resolvedProvider: "grsai", providerModel };
     }
     if (provider === "apimart") {
-      await tracker?.({ provider: "apimart", providerStatus: "provider_selected" });
+      const providerModel = imageProviderModelFromProject(project, "apimart");
+      await tracker?.({ provider: "apimart", resolvedProvider: "apimart", providerModel, providerStatus: "provider_selected" });
       const image = await generateImageWithApimart(project, tracker);
-      return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "apimart" };
+      return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "apimart", resolvedProvider: "apimart", providerModel };
     }
   }
   if (process.env.APIMART_API_KEY) {
@@ -4600,6 +4635,9 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
     const project = findProject(currentDb, projectId, user);
     const cost = generationCostFor(currentDb, project, action, generated);
     const creditsToCharge = creditChargeFor(project, action, currentDb);
+    const requestedModel = cost.model;
+    const resolvedProvider = generated.resolvedProvider || generated.provider || cost.provider;
+    const providerModel = generated.providerModel || (action === "generate-image" ? imageProviderModelFromProject(project, resolvedProvider) : cost.model);
     const resultId = crypto.randomUUID();
     const jobId = crypto.randomUUID();
     const createdAt = new Date().toISOString();
@@ -4634,8 +4672,11 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
       providerTaskId: generated.taskId,
       generationJobId: jobId,
       timelineAt: createdAt,
-      provider: generated.provider,
-      model: generated.model || internalMediaModel(project.image?.model),
+      requestedModel,
+      resolvedProvider,
+      providerModel,
+      provider: resolvedProvider,
+      model: generated.model || requestedModel || internalMediaModel(project.image?.model),
       resolution: project.image?.resolution || imageResolutionFromProject(project),
       aspectRatio: generationAspectRatioForProject(project, action, step),
       costRm: cost.costRm,
@@ -4657,6 +4698,11 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
       status: "succeeded",
       taskId: generated.taskId,
       providerTaskId: generated.taskId,
+      requestedModel,
+      requestedProvider: cost.provider,
+      resolvedProvider,
+      providerModel,
+      providerFallbacks: generated.providerFallbacks,
       prompt: generated.prompt || project.image?.prompt || "",
       aspectRatio: result.aspectRatio,
       imageUrl: result.imageUrl,
@@ -4674,15 +4720,18 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
       completedAt: createdAt,
       ...cost
     };
+    job.provider = resolvedProvider;
+    job.model = requestedModel;
     currentDb.generationJobs.unshift(job);
     currentDb.apiCalls.unshift({
       id: crypto.randomUUID(),
       userId: project.userId,
       projectId,
       generationJobId: job.id,
-      provider: job.provider,
-      model: job.model,
-      endpoint: generationEndpointFor(job.provider, project),
+      provider: resolvedProvider,
+      model: requestedModel,
+      providerModel,
+      endpoint: generationEndpointFor(resolvedProvider, project),
       status: "succeeded",
       taskId: generated.taskId,
       costRm: job.costRm,
@@ -4792,6 +4841,11 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
     const creditsToCharge = creditChargeFor(project, action, currentDb);
     assertGenerationAccess(currentDb, user, roundCredits(creditsToCharge * batchCount), batchCount);
     const cost = generationCostFor(currentDb, project, action, { provider: providerForMediaModel(project.image?.model) });
+    const requestedModel = cost.model;
+    const requestedProvider = cost.provider;
+    const requestedProviderModel = action === "generate-image"
+      ? imageProviderModelFromProject(project, requestedProvider)
+      : cost.model;
     const aspectRatio = generationAspectRatioForProject(project, action, step);
     const createdAt = new Date().toISOString();
     const jobs = jobIds.map((jobId, index) => ({
@@ -4810,9 +4864,13 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
       creditsRequired: creditsToCharge,
       duration: videoDurationFor(project),
       aspectRatio,
+      resolution: project.image?.resolution || imageResolutionFromProject(project),
       createdAt,
-      model: cost.model,
-      provider: cost.provider,
+      requestedModel,
+      requestedProvider,
+      providerModel: requestedProviderModel,
+      model: requestedModel,
+      provider: requestedProvider,
       unit: cost.unit,
       internalPromptOverride: promptOverride || undefined,
       internalPromptAdvanced: shouldAdvancePrompt || undefined,
@@ -4936,7 +4994,7 @@ async function processGenerationJob(jobId) {
 function applyGenerationJobSnapshot(project, job) {
   if (!project || !job) return project;
   project.image ||= {};
-  if (job.model) project.image.model = internalMediaModel(job.model);
+  if (job.requestedModel || job.model) project.image.model = internalMediaModel(job.requestedModel || job.model);
   if (job.aspectRatio) project.image.aspectRatio = String(job.aspectRatio);
   if (job.resolution) project.image.resolution = String(job.resolution);
   if (job.duration) project.image.duration = String(job.duration);
@@ -4960,7 +5018,10 @@ async function completeQueuedGeneration(jobId, generated) {
     if (!project) throw Object.assign(new Error("Project not found"), { status: 404 });
     const jobProject = applyGenerationJobSnapshot(structuredClone(project), job);
     const owner = currentDb.users.find((item) => item.id === project.userId);
-    const cost = generationCostFor(currentDb, jobProject, job.action, { ...generated, model: job.model || generated.model });
+    const requestedModel = job.requestedModel || job.model || generated.model || internalMediaModel(jobProject.image?.model);
+    const resolvedProvider = generated.resolvedProvider || generated.provider || job.resolvedProvider || job.provider || providerForMediaModel(requestedModel);
+    const providerModel = generated.providerModel || job.providerModel || imageProviderModelFromProject(jobProject, resolvedProvider);
+    const cost = generationCostFor(currentDb, jobProject, job.action, { ...generated, model: requestedModel, provider: resolvedProvider });
     const creditsToCharge = creditChargeFor(jobProject, job.action, currentDb);
     const completedAt = new Date().toISOString();
     const resultId = crypto.randomUUID();
@@ -4997,8 +5058,12 @@ async function completeQueuedGeneration(jobId, generated) {
       timelineAt: job.createdAt || completedAt,
       batchIndex: job.batchIndex,
       batchCount: job.batchCount,
-      provider: generated.provider,
-      model: job.model || generated.model || internalMediaModel(jobProject.image?.model),
+      requestedModel,
+      requestedProvider: job.requestedProvider || job.provider,
+      resolvedProvider,
+      providerModel,
+      provider: resolvedProvider,
+      model: requestedModel,
       resolution: job.resolution || jobProject.image?.resolution || imageResolutionFromProject(jobProject),
       aspectRatio: job.aspectRatio || generationAspectRatioForProject(jobProject, job.action, job.step),
       costRm: cost.costRm,
@@ -5032,23 +5097,28 @@ async function completeQueuedGeneration(jobId, generated) {
       providerErrorMessage: undefined,
       providerFallbacks: generated.providerFallbacks,
       aspectRatio: job.aspectRatio || generationAspectRatioForProject(jobProject, job.action, job.step),
-      provider: cost.provider,
-      model: cost.model,
+      ...cost,
+      requestedModel,
+      requestedProvider: job.requestedProvider || job.provider,
+      resolvedProvider,
+      provider: resolvedProvider,
+      providerModel,
+      model: requestedModel,
       unit: cost.unit,
       creditsCharged: creditsToCharge,
       creditsRequired: creditsToCharge,
       duration: videoDurationFor(jobProject),
-      completedAt,
-      ...cost
+      completedAt
     });
     currentDb.apiCalls.unshift({
       id: crypto.randomUUID(),
       userId: project.userId,
       projectId: project.id,
       generationJobId: job.id,
-      provider: job.provider,
-      model: job.model,
-      endpoint: generationEndpointFor(job.provider, project),
+      provider: resolvedProvider,
+      model: requestedModel,
+      providerModel,
+      endpoint: generationEndpointFor(resolvedProvider, jobProject),
       status: "succeeded",
       taskId: generated.taskId,
       costRm: job.costRm,
@@ -5072,6 +5142,10 @@ async function failQueuedGeneration(jobId, error) {
     if (!job) return saveDb(currentDb);
     if (!["queued", "processing"].includes(job.status)) return saveDb(currentDb);
     const project = currentDb.projects.find((item) => item.id === job.projectId);
+    const jobProject = project ? applyGenerationJobSnapshot(structuredClone(project), job) : null;
+    const requestedModel = job.requestedModel || job.model || internalMediaModel(jobProject?.image?.model);
+    const resolvedProvider = job.resolvedProvider || job.provider || providerForMediaModel(requestedModel);
+    const providerModel = job.providerModel || (jobProject ? imageProviderModelFromProject(jobProject, resolvedProvider) : requestedModel);
     const completedAt = new Date().toISOString();
     Object.assign(job, {
       status: "failed",
@@ -5080,6 +5154,10 @@ async function failQueuedGeneration(jobId, error) {
       lastPolledAt: completedAt,
       errorMessage: publicGenerationError(),
       providerErrorMessage: error.message || "Generation failed",
+      requestedModel,
+      resolvedProvider,
+      provider: resolvedProvider,
+      providerModel,
       creditsCharged: 0,
       completedAt
     });
@@ -5088,9 +5166,10 @@ async function failQueuedGeneration(jobId, error) {
       userId: job.userId,
       projectId: job.projectId,
       generationJobId: job.id,
-      provider: job.provider,
-      model: job.model,
-      endpoint: project ? generationEndpointFor(job.provider, project) : "",
+      provider: resolvedProvider,
+      model: requestedModel,
+      providerModel,
+      endpoint: jobProject ? generationEndpointFor(resolvedProvider, jobProject) : "",
       status: "failed",
       errorMessage: job.providerErrorMessage || job.errorMessage,
       costRm: 0,
