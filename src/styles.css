@@ -40109,7 +40109,7 @@ body:has(.studio-shell .image-higgsfield-mode),
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-item {
   min-width: 0 !important;
   display: grid !important;
-  grid-template-columns: minmax(0, 1fr) 30px 30px !important;
+  grid-template-columns: minmax(0, 1fr) repeat(4, 28px) !important;
   align-items: center !important;
   gap: 2px !important;
   border-radius: 10px !important;
@@ -40161,6 +40161,13 @@ body:has(.studio-shell .image-higgsfield-mode),
   font-weight: 650 !important;
 }
 
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-restore small svg {
+  width: 11px !important;
+  height: 11px !important;
+  animation: spin 1s linear infinite !important;
+  vertical-align: -1px !important;
+}
+
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-edit {
   min-width: 0 !important;
   min-height: 44px !important;
@@ -40194,12 +40201,14 @@ body:has(.studio-shell .image-higgsfield-mode),
   white-space: nowrap !important;
 }
 
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-pin,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-archive,
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-rename,
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-delete {
-  width: 30px !important;
-  min-width: 30px !important;
-  height: 30px !important;
-  min-height: 30px !important;
+  width: 28px !important;
+  min-width: 28px !important;
+  height: 28px !important;
+  min-height: 28px !important;
   display: grid !important;
   place-items: center !important;
   border: 0 !important;
@@ -40213,12 +40222,19 @@ body:has(.studio-shell .image-higgsfield-mode),
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-item:hover .agent-session-rename,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-item:hover .agent-session-pin,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-item:hover .agent-session-archive,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-pin:focus-visible,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-archive:focus-visible,
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-rename:focus-visible,
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-item:hover .agent-session-delete,
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-delete:focus-visible {
   opacity: 1 !important;
 }
 
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-pin:hover,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-pin.is-pinned,
+.studio-shell .agent-chat-shell.agent-page-panel .agent-session-archive:hover,
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-rename:hover {
   background: rgba(111, 28, 132, 0.1) !important;
   color: #4f0b62 !important;
