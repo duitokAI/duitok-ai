@@ -1665,7 +1665,7 @@ body,
   min-width: 0;
   height: 42px;
   display: grid;
-  grid-template-columns: minmax(170px, 1.2fr) 88px 92px 88px 108px 92px;
+  grid-template-columns: clamp(150px, 18vw, 250px) 112px 116px 108px 116px 104px;
   gap: 8px;
   align-items: center;
 }
@@ -1909,7 +1909,7 @@ body,
   }
 
   .video-console-tools {
-    grid-template-columns: minmax(150px, 1fr) 80px 84px 80px 102px 84px;
+    grid-template-columns: clamp(138px, 18vw, 210px) 98px 104px 98px 110px 96px;
     gap: 7px;
   }
 
