@@ -115,7 +115,7 @@ const userConcurrentGenerationLimit = Math.max(1, Number(process.env.USER_CONCUR
 const staleQueuedGenerationMs = Number(process.env.STALE_QUEUED_GENERATION_MS || 10 * 60 * 1000);
 const staleImageGenerationMs = Number(process.env.STALE_IMAGE_GENERATION_MS || 120 * 1000);
 const gptImageGenerationMs = Number(process.env.GPT_IMAGE_GENERATION_TIMEOUT_MS || 6 * 60 * 1000);
-const gptImageApimartAttemptMs = Number(process.env.GPT_IMAGE_APIMART_ATTEMPT_TIMEOUT_MS || 150 * 1000);
+const gptImageApimartAttemptMs = Number(process.env.GPT_IMAGE_APIMART_ATTEMPT_TIMEOUT_MS || 6 * 60 * 1000);
 const staleVideoGenerationMs = Number(process.env.STALE_VIDEO_GENERATION_MS || 45 * 60 * 1000);
 const projectResultStorageLimit = Math.max(0, Number(process.env.PROJECT_RESULT_STORAGE_LIMIT || 1500));
 const storedGenerationJobLimit = Math.max(0, Number(process.env.STORED_GENERATION_JOB_LIMIT || 6000));
@@ -4320,7 +4320,8 @@ function imageProviderOrderForModel(model) {
 }
 
 function publicProviderFailureMessage(error) {
-  return sanitizeAgentText(error?.message || "Provider failed").slice(0, 180);
+  const message = readableProviderError(error?.message || error, "Provider failed");
+  return sanitizeAgentText(message).slice(0, 180);
 }
 
 async function generateImageThroughProvider(provider, model, project, tracker = null) {

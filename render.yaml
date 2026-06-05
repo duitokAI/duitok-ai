@@ -63,6 +63,10 @@ services:
         value: "60"
       - key: APIMART_POLL_MS
         value: "5000"
+      - key: GPT_IMAGE_GENERATION_TIMEOUT_MS
+        value: "360000"
+      - key: GPT_IMAGE_APIMART_ATTEMPT_TIMEOUT_MS
+        value: "360000"
       - key: APIMART_TEXT_MODEL
         value: gpt-5-mini
       - key: APIMART_IMAGE_MODEL
