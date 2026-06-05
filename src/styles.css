@@ -48971,3 +48971,50 @@ h3,
 .studio-shell .image-higgsfield-mode.has-results > .studio-result-wall > .studio-wall-grid {
   background: transparent !important;
 }
+
+/* Studio top gap lock: keep the creation tabs compact and prevent the Image
+   wall zoom slider from taking a grid row above the media wall. */
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .project-step-topbar,
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio) .project-step-topbar,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .project-step-topbar,
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .project-step-topbar {
+  height: 72px !important;
+  min-height: 72px !important;
+  max-height: 72px !important;
+  padding: 7px 18px 7px 26px !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .studio-top-step-tabs,
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio) .studio-top-step-tabs,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .studio-top-step-tabs,
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .studio-top-step-tabs {
+  height: 58px !important;
+  min-height: 58px !important;
+  max-height: 58px !important;
+  align-items: stretch !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .studio-top-step-tabs button,
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .studio-top-step-tabs button.active,
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio) .studio-top-step-tabs button,
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio) .studio-top-step-tabs button.active,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .studio-top-step-tabs button,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .studio-top-step-tabs button.active,
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .studio-top-step-tabs button,
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .studio-top-step-tabs button.active {
+  height: 58px !important;
+  min-height: 58px !important;
+  max-height: 58px !important;
+  align-self: stretch !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-wall-zoom-control {
+  position: absolute !important;
+  top: 10px !important;
+  right: 12px !important;
+  grid-area: auto !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  overflow: visible !important;
+}
