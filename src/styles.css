@@ -44917,3 +44917,36 @@ body:has(.studio-shell .video-page-studio),
 .attachment-picker-head .attachment-add-button span {
   color: #ffffff !important;
 }
+
+/* Studio wall paint stability: generation polling and lightbox open/close should
+   never let scroll anchoring or transitions make the wall appear to shrink. */
+.studio-shell .image-higgsfield-mode,
+.studio-shell .video-page-studio,
+.studio-shell .video-prompt-extractor-page,
+.studio-shell .studio-result-wall,
+.studio-shell .studio-wall-grid,
+.studio-shell .studio-wall-card {
+  overflow-anchor: none !important;
+}
+
+.studio-shell .image-higgsfield-mode.is-studio-wall-patching .studio-result-wall,
+.studio-shell .studio-immersive-page.is-studio-wall-patching .studio-result-wall {
+  contain: layout paint style !important;
+}
+
+.studio-shell .image-higgsfield-mode.is-studio-wall-patching .studio-wall-card,
+.studio-shell .studio-immersive-page.is-studio-wall-patching .studio-wall-card,
+.studio-shell .image-higgsfield-mode.is-studio-wall-patching .studio-wall-card *,
+.studio-shell .studio-immersive-page.is-studio-wall-patching .studio-wall-card * {
+  transition-property: none !important;
+}
+
+.studio-shell .image-higgsfield-mode .studio-wall-card,
+.studio-shell .studio-immersive-page .studio-wall-card,
+.studio-shell .image-higgsfield-mode .studio-wall-card .result-image,
+.studio-shell .studio-immersive-page .studio-wall-card .result-image,
+.studio-shell .image-higgsfield-mode .studio-wall-card .result-video,
+.studio-shell .studio-immersive-page .studio-wall-card .result-video {
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}

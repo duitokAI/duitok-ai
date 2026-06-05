@@ -1713,7 +1713,17 @@ function scrollAgentThreadToBottom() {
 function shouldPatchModalOnly(patch) {
   if (!isStudioPath() || state.loading || !document.getElementById("modal-root")) return false;
   const keys = Object.keys(patch);
-  return keys.includes("modal") && keys.every((key) => ["modal", "editingProjectId", "projectMenuId", "activeAgentRunId"].includes(key));
+  const modalPatchKeys = [
+    "modal",
+    "editingProjectId",
+    "projectMenuId",
+    "activeAgentRunId",
+    "activeResultId",
+    "resultDetailSource",
+    "editImageBusy",
+    "bulkDeleteBusy"
+  ];
+  return keys.includes("modal") && keys.every((key) => modalPatchKeys.includes(key));
 }
 
 function updateModalRoot() {
@@ -12106,17 +12116,40 @@ function patchStudioGenerationCardsFromDb(nextDb) {
   if (state.page !== "project" || !state.projectId || !nextDb) return false;
   let patched = false;
   const jobs = new Map((nextDb.generationJobs || []).map((job) => [job.id, job]));
-  document.querySelectorAll(".studio-wall-pending[data-generation-job-id]").forEach((card) => {
-    const job = jobs.get(card.dataset.generationJobId);
-    if (!job) return;
-    const currentStatus = card.dataset.generationJobStatus || "";
-    if (currentStatus === (job.status || "queued")) return;
-    const orderIndex = Number(card.dataset.wallOrder || getComputedStyle(card).order || 0);
-    card.outerHTML = studioPendingWallCard(job, Number.isFinite(orderIndex) ? orderIndex : 0);
-    patched = true;
+  withStableStudioWallMutation(() => {
+    document.querySelectorAll(".studio-wall-pending[data-generation-job-id]").forEach((card) => {
+      const job = jobs.get(card.dataset.generationJobId);
+      if (!job) return;
+      const currentStatus = card.dataset.generationJobStatus || "";
+      if (currentStatus === (job.status || "queued")) return;
+      const orderIndex = Number(card.dataset.wallOrder || getComputedStyle(card).order || 0);
+      card.outerHTML = studioPendingWallCard(job, Number.isFinite(orderIndex) ? orderIndex : 0);
+      patched = true;
+    });
   });
   if (patched) window.lucide?.createIcons();
   return patched;
+}
+
+function withStableStudioWallMutation(callback) {
+  const shell = document.querySelector(".image-higgsfield-mode, .studio-immersive-page");
+  const wall = shell?.querySelector(".studio-result-wall");
+  if (!wall) return callback();
+  const previousMinHeight = wall.style.minHeight;
+  const currentHeight = Math.ceil(wall.getBoundingClientRect().height);
+  if (currentHeight > 0) wall.style.minHeight = `${currentHeight}px`;
+  shell.classList.add("is-studio-wall-patching");
+  try {
+    return callback();
+  } finally {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        shell.classList.remove("is-studio-wall-patching");
+        const nextWall = shell.querySelector(".studio-result-wall");
+        if (nextWall) nextWall.style.minHeight = previousMinHeight;
+      });
+    });
+  }
 }
 
 function patchStudioResultWallFromDb(nextDb) {
@@ -12127,15 +12160,17 @@ function patchStudioResultWallFromDb(nextDb) {
   if (!nextProject) return false;
   state.db = nextDb;
   const wallHtml = studioResultWall(nextProject, studioStepMeta(state.step));
-  const existingWall = shell.querySelector(".studio-result-wall");
-  if (existingWall) {
-    if (wallHtml) existingWall.outerHTML = wallHtml;
-    else existingWall.remove();
-  } else if (wallHtml) {
-    const dock = shell.querySelector(".image-generate-console, .studio-generate-dock");
-    if (dock) dock.insertAdjacentHTML("beforebegin", wallHtml);
-    else shell.insertAdjacentHTML("afterbegin", wallHtml);
-  }
+  withStableStudioWallMutation(() => {
+    const existingWall = shell.querySelector(".studio-result-wall");
+    if (existingWall) {
+      if (wallHtml) existingWall.outerHTML = wallHtml;
+      else existingWall.remove();
+    } else if (wallHtml) {
+      const dock = shell.querySelector(".image-generate-console, .studio-generate-dock");
+      if (dock) dock.insertAdjacentHTML("beforebegin", wallHtml);
+      else shell.insertAdjacentHTML("afterbegin", wallHtml);
+    }
+  });
   window.lucide?.createIcons();
   bindStudioWallInfiniteScroll();
   return true;
