@@ -6391,22 +6391,37 @@ function videoModelPicker(selectedModel) {
         const active = item.value === selectedModel;
         const capabilities = item.capabilities || {};
         const chips = [
-          ...(capabilities.modes || []).slice(0, 2),
-          ...(capabilities.qualities || []).slice(-1),
-          (capabilities.audio || []).includes("On") ? "Audio" : ""
+          ...(capabilities.modes || []).slice(0, 1).map((label) => ({ label })),
+          ...(capabilities.qualities || []).slice(-1).map((label) => ({ label, icon: "gem" })),
+          videoDurationCapabilityChip(capabilities.durations),
+          (capabilities.audio || []).includes("On") ? { label: "Audio", icon: "volume-2" } : null
         ].filter(Boolean);
         return `<button class="video-model-option ${active ? "active" : ""}" type="button" data-video-model-option="${esc(item.value)}" aria-pressed="${active ? "true" : "false"}" role="option" aria-selected="${active ? "true" : "false"}">
           <span class="video-model-option-icon">${providerLogo(item.provider)}</span>
           <span class="video-model-option-copy">
             <b><span>${esc(item.title)}</span>${item.badge ? ` <em>${esc(item.badge)}</em>` : ""}</b>
             <small>${esc(item.providerName)} · ${esc(item.description)}</small>
-            <i>${chips.map((chip) => `<span>${esc(chip)}</span>`).join("")}</i>
+            <i>${chips.map((chip) => `<span>${chip.icon ? icon(chip.icon, 13) : ""}${esc(chip.label)}</span>`).join("")}</i>
           </span>
           <span class="video-model-option-check" aria-hidden="true">${active ? icon("check", 18) : ""}</span>
         </button>`;
       }).join("")}
     </div>
   </details>`;
+}
+
+function videoDurationCapabilityChip(durations = []) {
+  const seconds = (durations || [])
+    .map((value) => Number.parseInt(String(value).match(/\d+/)?.[0] || "", 10))
+    .filter((value) => Number.isFinite(value) && value > 0)
+    .sort((a, b) => a - b);
+  if (!seconds.length) return null;
+  const min = seconds[0];
+  const max = seconds.at(-1);
+  return {
+    label: min === max ? `Max ${max}s` : `${min}s-${max}s`,
+    icon: "clock-3"
+  };
 }
 
 function videoAspectRatioOption(value) {

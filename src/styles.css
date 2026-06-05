@@ -1887,6 +1887,17 @@ body,
   font-size: 10px;
   font-weight: 900;
   line-height: 1.15;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.video-model-option-copy i span svg {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 12px;
+  color: rgba(43, 6, 52, 0.52);
+  stroke-width: 2.6;
 }
 
 .video-option-check,
@@ -47015,31 +47026,6 @@ body:has(.studio-shell .video-page-studio),
 }
 
 /* Audio page final viewport fit lock. */
-.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) {
-  padding-top: var(--project-fixed-tabs-height) !important;
-}
-
-.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .project-step-topbar {
-  position: fixed !important;
-  top: 0 !important;
-  right: 0 !important;
-  left: var(--studio-sidebar-width, 288px) !important;
-  z-index: 6400 !important;
-  pointer-events: auto !important;
-}
-
-.studio-shell.sidebar-collapsed .workspace:has(.step-tabs):has(.audio-studio-page) .project-step-topbar {
-  left: var(--studio-sidebar-width, 70px) !important;
-}
-
-.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .studio-top-step-tabs,
-.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .step-tabs,
-.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .step-tabs button {
-  position: relative !important;
-  z-index: 6401 !important;
-  pointer-events: auto !important;
-}
-
 .studio-shell .audio-studio-page {
   gap: 12px !important;
 }
