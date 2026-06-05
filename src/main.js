@@ -164,7 +164,7 @@ const state = {
   agentIdleActivity: "sleep",
   agentQueue: [],
   agentMessages: readStoredJson(storageKeys.agentMessages, []),
-  agentContextSummary: localStorage.getItem(storageKeys.agentContextSummary) || "",
+  agentContextSummary: "",
   agentAttachments: [],
   agentExpandedMessages: {},
   agentHistoryOpen: false,
@@ -10820,8 +10820,8 @@ async function action(event, name) {
     clearAgentActiveRun();
     saveCurrentAgentHistory(null, { onlyIfChanged: true });
     localStorage.removeItem(storageKeys.agentMessages);
-    localStorage.removeItem(storageKeys.agentContextSummary);
     const activeAgentDraftId = createAgentDraftId();
+    clearAgentContextSummary(activeAgentDraftId);
     syncAgentChatUrl("", { replace: false });
     set({ agentMessages: [], agentInput: "", agentAttachments: [], agentQueue: [], agentTyping: false, agentRecoveredRun: null, agentExpandedMessages: {}, agentContextSummary: "", activeAgentHistoryId: null, activeAgentDraftId, agentHistoryOpen: false, agentDebugOpen: false, agentNewChatPulse: Date.now() });
     return setTimeout(() => document.querySelector("[data-agent-input]")?.focus(), 0);
@@ -10830,7 +10830,7 @@ async function action(event, name) {
     clearAgentTypingTimer();
     clearAgentActiveRun();
     localStorage.removeItem(storageKeys.agentMessages);
-    localStorage.removeItem(storageKeys.agentContextSummary);
+    clearAgentContextSummary();
     return set({ agentMessages: [], agentInput: "", agentAttachments: [], agentQueue: [], agentTyping: false, agentRecoveredRun: null, agentContextSummary: "", agentExpandedMessages: {} });
   }
   if (name === "clear-agent-preferences") return clearAgentPreferences();
@@ -12269,7 +12269,7 @@ function rememberAgentMessages(messages) {
   const overflow = safeMessages.slice(0, Math.max(0, safeMessages.length - 10));
   if (overflow.length) rememberAgentContextSummary(overflow);
   localStorage.setItem(storageKeys.agentMessages, JSON.stringify(safeMessages.slice(-10)));
-  state.agentContextSummary = localStorage.getItem(storageKeys.agentContextSummary) || "";
+  state.agentContextSummary = readAgentContextSummary();
 }
 
 function rememberAgentActiveRun(messages = state.agentMessages) {
@@ -12394,7 +12394,32 @@ function createAgentDraftId() {
   const id = `draft_${Date.now()}_${Math.random().toString(16).slice(2)}`;
   localStorage.setItem(storageKeys.agentDraftId, id);
   state.activeAgentDraftId = id;
+  clearAgentContextSummary(id);
   return id;
+}
+
+function agentContextScopeId() {
+  return state.activeAgentHistoryId || state.activeAgentDraftId || "draft";
+}
+
+function agentContextSummaryStorageKey(scopeId = "") {
+  const id = String(scopeId || "draft").trim() || "draft";
+  return `${storageKeys.agentContextSummary}:${id}`;
+}
+
+function readAgentContextSummary(scopeId = agentContextScopeId()) {
+  return localStorage.getItem(agentContextSummaryStorageKey(scopeId)) || "";
+}
+
+function writeAgentContextSummary(value = "", scopeId = agentContextScopeId()) {
+  localStorage.setItem(agentContextSummaryStorageKey(scopeId), String(value || ""));
+  localStorage.removeItem(storageKeys.agentContextSummary);
+}
+
+function clearAgentContextSummary(scopeId = agentContextScopeId()) {
+  localStorage.removeItem(agentContextSummaryStorageKey(scopeId));
+  localStorage.removeItem(storageKeys.agentContextSummary);
+  if (scopeId === agentContextScopeId()) state.agentContextSummary = "";
 }
 
 function currentAgentHistorySession(messages = state.agentMessages) {
@@ -12406,6 +12431,11 @@ function currentAgentHistorySession(messages = state.agentMessages) {
   return null;
 }
 
+function activeAgentHistoryIsIsolated() {
+  if (!state.activeAgentHistoryId) return false;
+  return Boolean((state.agentHistorySessions || []).find((item) => item.id === state.activeAgentHistoryId)?.isolatedContext);
+}
+
 function saveCurrentAgentHistory(messagesOverride = null, options = {}) {
   const messages = agentMessagesForStorage(Array.isArray(messagesOverride) ? messagesOverride : state.agentMessages);
   if (!messages.length) return state.agentHistorySessions;
@@ -12413,6 +12443,7 @@ function saveCurrentAgentHistory(messagesOverride = null, options = {}) {
   const signature = agentHistoryMessagesSignature(messages);
   const existing = currentAgentHistorySession(messages);
   const existingSignature = existing ? agentHistoryMessagesSignature(existing.messages) : "";
+  const previousSummaryScope = state.activeAgentHistoryId || state.activeAgentDraftId || "";
   if (options.onlyIfChanged && existing && existingSignature === signature) {
     state.activeAgentHistoryId = existing.id;
     return rememberAgentHistorySessions(sessions);
@@ -12423,6 +12454,7 @@ function saveCurrentAgentHistory(messagesOverride = null, options = {}) {
     title: String(existing?.title || "").trim()
       ? existing.title
       : agentHistoryTitleFromMessages(messages),
+    isolatedContext: Boolean(existing?.isolatedContext || options.isolatedContext),
     updatedAt: new Date().toISOString(),
     messages
   };
@@ -12434,6 +12466,10 @@ function saveCurrentAgentHistory(messagesOverride = null, options = {}) {
   state.activeAgentHistoryId = session.id;
   state.activeAgentDraftId = "";
   localStorage.removeItem(storageKeys.agentDraftId);
+  if (previousSummaryScope && previousSummaryScope !== session.id && state.agentContextSummary) {
+    writeAgentContextSummary(state.agentContextSummary, session.id);
+    clearAgentContextSummary(previousSummaryScope);
+  }
   syncAgentChatUrl(session.id, { replace: Boolean(options.replaceUrl) });
   persistAgentChatSession(session);
   return remembered;
@@ -12559,7 +12595,8 @@ function restoreAgentHistory(id, options = {}) {
     clearAgentTypingTimer();
     clearAgentActiveRun();
     localStorage.removeItem(storageKeys.agentMessages);
-    localStorage.removeItem(storageKeys.agentContextSummary);
+    const activeAgentDraftId = createAgentDraftId();
+    clearAgentContextSummary(activeAgentDraftId);
     return set({
       page: "agent",
       agentMessages: [],
@@ -12570,15 +12607,15 @@ function restoreAgentHistory(id, options = {}) {
       agentTyping: false,
       agentRecoveredRun: null,
       agentExpandedMessages: {},
+      agentContextSummary: "",
       activeAgentHistoryId: null,
-      activeAgentDraftId: createAgentDraftId(),
+      activeAgentDraftId,
       agentHistoryOpen: false
     });
   }
   const messages = agentMessagesForStorage(targetSession.messages);
   clearAgentTypingTimer();
   localStorage.setItem(storageKeys.agentMessages, JSON.stringify(messages));
-  localStorage.removeItem(storageKeys.agentContextSummary);
   Object.assign(state, {
     page: "agent",
     agentMessages: messages,
@@ -12588,7 +12625,7 @@ function restoreAgentHistory(id, options = {}) {
     agentBusy: false,
     agentTyping: false,
     agentExpandedMessages: {},
-    agentContextSummary: "",
+    agentContextSummary: readAgentContextSummary(id),
     activeAgentHistoryId: id,
     agentHistoryOpen: false,
     agentDebugOpen: false
@@ -12725,7 +12762,7 @@ function compactAgentCardForStorage(card = {}) {
 }
 
 function rememberAgentContextSummary(messages = []) {
-  const previous = state.agentContextSummary || localStorage.getItem(storageKeys.agentContextSummary) || "";
+  const previous = state.agentContextSummary || readAgentContextSummary() || "";
   const lines = messages.map((item) => {
     const text = String(item.content || "").replace(/\s+/g, " ").slice(0, 180);
     return `${item.role === "user" ? "User" : "Agent"}: ${text}`;
@@ -12734,7 +12771,8 @@ function rememberAgentContextSummary(messages = []) {
     previous,
     lines.length ? `Recent compressed context (${new Date().toLocaleDateString()}): ${lines.join(" | ")}` : ""
   ].filter(Boolean).join("\n").slice(-1800);
-  localStorage.setItem(storageKeys.agentContextSummary, next);
+  writeAgentContextSummary(next);
+  state.agentContextSummary = next;
 }
 
 function applyAgentUiActions(uiActions = [], db) {
@@ -13090,11 +13128,12 @@ async function runAgentMessage(message, attachments = [], queuedApiAttachments =
   agentAbortController?.abort();
   agentAbortController = new AbortController();
   const userContent = content || "请先看我上传的附件，然后判断下一步应该怎么做。";
+  const isolatedAgentContext = activeAgentHistoryIsIsolated() || (!state.activeAgentHistoryId && !(state.agentMessages || []).length);
   const messageAttachments = attachments.map(agentAttachmentForStorage);
   const apiAttachments = Array.isArray(queuedApiAttachments) ? queuedApiAttachments : attachments.map(agentAttachmentForApi);
   const nextMessages = [...state.agentMessages, { role: "user", content: userContent, attachments: messageAttachments }];
   rememberAgentMessages(nextMessages);
-  saveCurrentAgentHistory(nextMessages);
+  saveCurrentAgentHistory(nextMessages, { isolatedContext: isolatedAgentContext });
   const lockedAgentHistoryId = state.activeAgentHistoryId;
   rememberAgentActiveRun(nextMessages);
   set({ agentMessages: nextMessages, agentInput: "", agentAttachments: [], agentBusy: true, agentTyping: false, agentRecoveredRun: null, activeAgentHistoryId: lockedAgentHistoryId });
@@ -13107,8 +13146,9 @@ async function runAgentMessage(message, attachments = [], queuedApiAttachments =
       body: JSON.stringify({
         messages: nextMessages,
         attachments: apiAttachments,
-        contextSummary: state.agentContextSummary,
-        projectId: state.projectId,
+        contextSummary: isolatedAgentContext ? "" : state.agentContextSummary,
+        projectId: isolatedAgentContext ? "" : state.projectId,
+        isolatedContext: isolatedAgentContext,
         page: state.page,
         step: state.step
       })

@@ -1205,6 +1205,7 @@ function publicAgentChat(chat = {}) {
     id: chat.id,
     title: sanitizeAgentText(chat.title || "Agent Chat").slice(0, 80),
     manualTitle: Boolean(chat.manualTitle),
+    isolatedContext: Boolean(chat.isolatedContext),
     createdAt: chat.createdAt,
     updatedAt: chat.updatedAt,
     messages: sanitizeAgentChatMessages(chat.messages || [])
@@ -5316,8 +5317,10 @@ function summarizeAgentHistory(messages = []) {
   ].filter(Boolean).join("\n").slice(0, agentSummaryCharLimit);
 }
 
-function agentContextSummary({ clientSummary = "", olderMessages = [], workspace = null, projectId = "" } = {}) {
-  const activeProject = workspace?.projects?.find((item) => item.id === projectId) || workspace?.projects?.[0] || null;
+function agentContextSummary({ clientSummary = "", olderMessages = [], workspace = null, projectId = "", isolatedContext = false } = {}) {
+  const activeProject = !isolatedContext && projectId
+    ? workspace?.projects?.find((item) => item.id === projectId) || null
+    : null;
   const memory = activeProject?.agentMemory || {};
   return [
     "Conversation summary, not raw transcript:",
@@ -7401,12 +7404,14 @@ app.post("/api/agent-chats", async (req, res, next) => {
       const now = new Date().toISOString();
       const manualTitle = Boolean(existing?.manualTitle || req.body.manualTitle);
       const titleInput = sanitizeAgentText(req.body.title || "").slice(0, 80);
+      const isolatedContext = Boolean(existing?.isolatedContext || req.body.isolatedContext);
       const chat = {
         ...(existing || {}),
         id,
         userId: user.id,
         title: manualTitle && existing?.title ? existing.title : titleInput || existing?.title || naturalAgentChatTitleFromMessages(messages),
         manualTitle,
+        isolatedContext,
         messages,
         createdAt: existing?.createdAt || req.body.createdAt || now,
         updatedAt: now
@@ -8147,13 +8152,15 @@ app.post("/api/agent", async (req, res, next) => {
     const attachments = sanitizeAgentAttachments(req.body.attachments);
     const stateForUser = publicState(db, user);
     const preferenceSummary = buildAgentPreferenceSummary(db, user);
-    const projectId = req.body.projectId || stateForUser.projects[0]?.id;
+    const isolatedContext = req.body.isolatedContext === true;
+    const projectId = isolatedContext ? "" : req.body.projectId || stateForUser.projects[0]?.id;
     const latestUserMessage = [...history].reverse().find((item) => item.role === "user" && typeof item.content === "string")?.content || (attachments.length ? "User attached media and wants Agent to decide the next step." : "");
     const contextSummary = agentContextSummary({
       clientSummary: req.body.contextSummary,
       olderMessages: rawHistory.slice(0, Math.max(0, rawHistory.length - agentRecentMessageLimit)),
       workspace: compactWorkspaceState(stateForUser),
-      projectId
+      projectId,
+      isolatedContext
     });
     const runId = crypto.randomUUID();
     const intent = "chat";
@@ -8263,7 +8270,9 @@ app.post("/api/agent", async (req, res, next) => {
       },
       {
         role: "system",
-        content: `Current workspace JSON with internal content setup records:\n${JSON.stringify(compactWorkspaceState(stateForUser), null, 2)}\nInternal current content setup id: ${projectId || "none"}\nReminder: never say "project" in user-facing replies; say current content setup, product direction, content settings, or workspace.`
+        content: isolatedContext
+          ? "This is a new isolated chat. No previous chat or content setup is selected. Do not infer the product, model, visual style, or goal from other chats or workspace memory. Ask one short question when the user's request needs a product/model/context."
+          : `Current workspace JSON with internal content setup records:\n${JSON.stringify(compactWorkspaceState(stateForUser), null, 2)}\nInternal current content setup id: ${projectId || "none"}\nReminder: never say "project" in user-facing replies; say current content setup, product direction, content settings, or workspace.`
       },
       {
         role: "system",
