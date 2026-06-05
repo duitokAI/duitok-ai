@@ -1836,7 +1836,7 @@ body,
   min-width: 0;
   height: 42px;
   display: grid;
-  grid-template-columns: clamp(190px, 20vw, 280px) 114px 124px 112px 116px 108px;
+  grid-template-columns: clamp(186px, 19vw, 268px) 132px 116px 108px 112px 104px;
   gap: 8px;
   align-items: center;
 }
@@ -1932,8 +1932,8 @@ body,
 }
 
 .video-aspect-ratio-glyph {
-  width: var(--video-ratio-icon-width);
-  height: var(--video-ratio-icon-height);
+  width: min(var(--video-ratio-icon-width), 30px);
+  height: min(var(--video-ratio-icon-height), 30px);
   justify-self: center;
   border: 3px solid rgba(169, 111, 219, 0.72);
   border-radius: 6px;
@@ -1941,7 +1941,7 @@ body,
 }
 
 .video-option-ratio summary {
-  grid-template-columns: 38px minmax(0, 1fr) 14px;
+  grid-template-columns: 30px minmax(48px, 1fr) 14px;
 }
 
 .video-option-list {
@@ -2551,7 +2551,7 @@ body,
   }
 
   .video-console-tools {
-    grid-template-columns: clamp(172px, 20vw, 230px) 104px 112px 100px 110px 98px;
+    grid-template-columns: clamp(168px, 19vw, 220px) 122px 104px 96px 104px 94px;
     gap: 7px;
   }
 
@@ -49580,4 +49580,99 @@ body:has(.studio-shell .image-higgsfield-mode.has-results),
   height: 58px !important;
   min-height: 58px !important;
   max-height: 58px !important;
+}
+
+/* Audio + Clone composer flow lock: match Image/Video page behavior by keeping
+   bottom bars in the scrollable studio canvas instead of pinned to the viewport. */
+html:has(.studio-shell .audio-studio-page),
+body:has(.studio-shell .audio-studio-page),
+#app:has(.studio-shell .audio-studio-page),
+.studio-shell:has(.audio-studio-page),
+.studio-shell:has(.audio-studio-page) .workspace,
+.studio-shell .workspace:has(.audio-studio-page),
+.studio-shell .canvas-card:has(.audio-studio-page),
+.studio-shell .studio-workbench-card:has(.audio-studio-page),
+.studio-shell .studio-step-panel:has(.audio-studio-page),
+html:has(.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"]),
+body:has(.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"]),
+#app:has(.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"]),
+.studio-shell:has(.video-prompt-extractor-page[data-studio-mode="clone"]),
+.studio-shell:has(.video-prompt-extractor-page[data-studio-mode="clone"]) .workspace,
+.studio-shell .workspace:has(.video-prompt-extractor-page[data-studio-mode="clone"]),
+.studio-shell .canvas-card:has(.video-prompt-extractor-page[data-studio-mode="clone"]),
+.studio-shell .studio-workbench-card:has(.video-prompt-extractor-page[data-studio-mode="clone"]),
+.studio-shell .studio-step-panel:has(.video-prompt-extractor-page[data-studio-mode="clone"]) {
+  height: auto !important;
+  min-height: 100dvh !important;
+  max-height: none !important;
+  overflow-x: clip !important;
+  overflow-y: auto !important;
+}
+
+.studio-shell .audio-studio-page {
+  min-height: calc(100dvh - var(--project-fixed-tabs-height, 72px) + clamp(150px, 18vh, 240px)) !important;
+  grid-template-rows: minmax(calc(100dvh - var(--project-fixed-tabs-height, 72px) - 72px), auto) auto auto !important;
+  align-content: start !important;
+  overflow: visible !important;
+  padding-bottom: max(28px, env(safe-area-inset-bottom)) !important;
+}
+
+.studio-shell .audio-studio-page .audio-stage-hero {
+  min-height: calc(100dvh - var(--project-fixed-tabs-height, 72px) - 220px) !important;
+}
+
+.studio-shell .audio-studio-page .audio-wall-stage {
+  min-height: 0 !important;
+}
+
+.studio-shell .audio-studio-page .audio-composer,
+.studio-shell .audio-studio-page .audio-composer:not(.is-compact) {
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  grid-row: auto !important;
+  z-index: 12 !important;
+  transform: none !important;
+  align-self: start !important;
+  margin: clamp(18px, 3vh, 42px) auto max(28px, env(safe-area-inset-bottom)) !important;
+}
+
+.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"] {
+  min-height: calc(100dvh - var(--project-fixed-tabs-height, 72px) + clamp(150px, 18vh, 240px)) !important;
+  grid-template-rows: minmax(calc(100dvh - var(--project-fixed-tabs-height, 72px) - 24px), auto) auto !important;
+  align-content: start !important;
+  overflow: visible !important;
+  padding-bottom: max(28px, env(safe-area-inset-bottom)) !important;
+}
+
+.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"] > .video-prompt-dock,
+.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"].is-empty:not(.video-page-studio) > .video-prompt-dock {
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  grid-row: 2 !important;
+  z-index: 12 !important;
+  transform: none !important;
+  align-self: start !important;
+  margin: clamp(18px, 3vh, 42px) auto max(28px, env(safe-area-inset-bottom)) !important;
+}
+
+@media (max-width: 720px) {
+  .studio-shell .audio-studio-page {
+    min-height: calc(100dvh - var(--project-fixed-tabs-height, 72px) + 120px) !important;
+    grid-template-rows: minmax(calc(100dvh - var(--project-fixed-tabs-height, 72px) - 180px), auto) auto auto !important;
+  }
+
+  .studio-shell .audio-studio-page .audio-stage-hero {
+    min-height: calc(100dvh - var(--project-fixed-tabs-height, 72px) - 260px) !important;
+  }
+
+  .studio-shell .video-prompt-extractor-page[data-studio-mode="clone"] {
+    min-height: calc(100dvh - var(--project-fixed-tabs-height, 72px) + 120px) !important;
+    grid-template-rows: minmax(calc(100dvh - var(--project-fixed-tabs-height, 72px) - 40px), auto) auto !important;
+  }
 }
