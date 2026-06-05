@@ -5613,7 +5613,7 @@ function imagePanel(p) {
   const imageTypes = ["image", "video", "visual_card"];
   const meta = studioStepMeta("image");
   const bulkSelecting = isBulkSelectingResults();
-  return `<section class="image-canvas-studio image-higgsfield-mode studio-media-wall-surface studio-wall-zoomable ${bulkSelecting ? "is-bulk-selecting-results" : ""}" ${studioWallZoomStyleAttr()}>
+  return `<section class="image-canvas-studio image-higgsfield-mode studio-wall-surface-base studio-media-wall-surface studio-wall-zoomable ${bulkSelecting ? "is-bulk-selecting-results" : ""}" ${studioWallZoomStyleAttr()}>
     ${selectedMode === "Virtualize (Poster/Ad)" ? `<div class="image-studio-legacy">${virtualizePanel()}</div>` : `
       ${studioWallZoomControl()}
       ${studioResultWall(p, meta)}
@@ -6266,7 +6266,7 @@ function ugcPanel(p) {
   const meta = studioStepMeta("ugc");
   const bulkSelecting = isBulkSelectingResults();
   const wall = studioResultWall(p, meta);
-  return `<section class="video-page-studio video-prompt-extractor-page studio-media-wall-surface studio-wall-zoomable ${wall ? "" : "is-empty"} ${bulkSelecting ? "is-bulk-selecting-results" : ""}" data-studio-mode="ugc" ${studioWallZoomStyleAttr()}>
+  return `<section class="video-page-studio video-prompt-extractor-page studio-wall-surface-base studio-media-wall-surface studio-wall-zoomable ${wall ? "" : "is-empty"} ${bulkSelecting ? "is-bulk-selecting-results" : ""}" data-studio-mode="ugc" ${studioWallZoomStyleAttr()}>
     ${studioWallZoomControl()}
     ${wall || videoEmptyStudioBackdrop()}
     ${bulkSelecting ? "" : videoGenerateConsole(p)}
@@ -6834,7 +6834,7 @@ function autoPanel(p) {
   const voicePreset = auto.voicePreset || "Malay Soft Sell";
   const promptText = auto.audioPrompt || "";
   const isVoiceoverMode = mode === "Voiceover";
-  return `<section class="audio-studio-page studio-wall-zoomable ${wall ? "" : "is-empty"}" ${studioWallZoomStyleAttr()}>
+  return `<section class="audio-studio-page studio-wall-surface-base studio-audio-wall-surface studio-wall-zoomable ${wall ? "" : "is-empty"}" ${studioWallZoomStyleAttr()}>
     <section class="audio-stage-hero">
       <div class="audio-eq" aria-hidden="true">${Array.from({ length: 34 }, (_, index) => `<i style="--bar:${index % 9}"></i>`).join("")}</div>
       <div class="audio-title-lockup">

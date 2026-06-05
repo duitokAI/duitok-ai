@@ -46061,16 +46061,38 @@ body:has(.studio-shell .video-prompt-extractor-page),
   font-weight: 850;
 }
 
+.studio-shell .studio-wall-surface-base {
+  min-width: 0 !important;
+  overflow-anchor: none !important;
+}
+
+.studio-shell .studio-wall-surface-base > .studio-result-wall,
+.studio-shell .studio-wall-surface-base .audio-wall-stage > .studio-result-wall {
+  min-width: 0 !important;
+}
+
+.studio-shell .studio-wall-surface-base .studio-wall-grid {
+  min-width: 0 !important;
+}
+
+.studio-shell .studio-audio-wall-surface {
+  --studio-audio-wall-column: 360px;
+  --studio-wall-column: var(--studio-audio-wall-column);
+}
+
+.studio-shell .studio-audio-wall-surface .audio-wall-stage,
 .studio-shell .audio-wall-stage {
   width: min(1320px, 100%);
   margin: 0 auto;
   min-width: 0;
 }
 
+.studio-shell .studio-audio-wall-surface .audio-wall-stage > .studio-wall-zoom-control,
 .studio-shell .audio-wall-stage > .studio-wall-zoom-control {
   margin: 0 0 10px auto;
 }
 
+.studio-shell .studio-audio-wall-surface .audio-wall-stage .studio-result-wall,
 .studio-shell .audio-wall-stage .studio-result-wall {
   min-height: 0 !important;
   overflow: visible !important;
@@ -46080,14 +46102,16 @@ body:has(.studio-shell .video-prompt-extractor-page),
   box-shadow: none !important;
 }
 
+.studio-shell .studio-audio-wall-surface .audio-wall-stage .studio-wall-grid,
 .studio-shell .audio-wall-stage .studio-wall-grid {
   height: auto !important;
-  grid-template-columns: repeat(auto-fit, minmax(min(var(--studio-wall-column, 360px), 100%), 1fr)) !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(var(--studio-audio-wall-column, var(--studio-wall-column, 360px)), 100%), 1fr)) !important;
   grid-auto-rows: auto !important;
   gap: 6px !important;
   padding: 0 !important;
 }
 
+.studio-shell .studio-audio-wall-surface .studio-audio-wall-card,
 .studio-shell .studio-audio-wall-card {
   aspect-ratio: 16 / 9 !important;
   min-height: 0 !important;
@@ -46097,6 +46121,7 @@ body:has(.studio-shell .video-prompt-extractor-page),
   box-shadow: none !important;
 }
 
+.studio-shell .studio-audio-wall-surface .studio-audio-wall-preview,
 .studio-shell .studio-audio-wall-preview {
   position: absolute;
   inset: 0;
@@ -46108,6 +46133,7 @@ body:has(.studio-shell .video-prompt-extractor-page),
     #000;
 }
 
+.studio-shell .studio-audio-wall-surface .studio-audio-waveform,
 .studio-shell .studio-audio-waveform {
   display: flex;
   align-items: center;
@@ -46117,6 +46143,7 @@ body:has(.studio-shell .video-prompt-extractor-page),
   overflow: hidden;
 }
 
+.studio-shell .studio-audio-wall-surface .studio-audio-waveform i,
 .studio-shell .studio-audio-waveform i {
   flex: 1 0 3px;
   max-width: 9px;
@@ -46126,6 +46153,7 @@ body:has(.studio-shell .video-prompt-extractor-page),
   background: rgba(255, 255, 255, 0.48);
 }
 
+.studio-shell .studio-audio-wall-surface .studio-audio-wall-card footer,
 .studio-shell .studio-audio-wall-card footer {
   inset: auto 20px 18px 20px !important;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -46138,6 +46166,7 @@ body:has(.studio-shell .video-prompt-extractor-page),
   backdrop-filter: none !important;
 }
 
+.studio-shell .studio-audio-wall-surface .studio-audio-wall-card footer b,
 .studio-shell .studio-audio-wall-card footer b {
   min-width: 0;
   color: rgba(255, 255, 255, 0.34);
@@ -46145,21 +46174,25 @@ body:has(.studio-shell .video-prompt-extractor-page),
   font-weight: 820;
 }
 
+.studio-shell .studio-audio-wall-surface .studio-audio-wall-card footer span,
 .studio-shell .studio-audio-wall-card footer span {
   color: rgba(255, 255, 255, 0.52);
   font-size: clamp(12px, 1.25vw, 18px);
   font-weight: 900;
 }
 
+.studio-shell .studio-audio-wall-surface .studio-audio-wall-card .studio-wall-actions,
 .studio-shell .studio-audio-wall-card .studio-wall-actions {
   top: 12px;
   right: 12px;
 }
 
+.studio-shell .studio-audio-wall-surface .studio-audio-wall-card .studio-wall-actions button:disabled,
 .studio-shell .studio-audio-wall-card .studio-wall-actions button:disabled {
   opacity: 0.32;
 }
 
+.studio-shell .studio-audio-wall-surface .studio-audio-wall-pending .studio-audio-generating-badge,
 .studio-shell .studio-audio-wall-pending .studio-audio-generating-badge {
   position: absolute;
   top: 50%;
@@ -46173,6 +46206,7 @@ body:has(.studio-shell .video-prompt-extractor-page),
   font-weight: 900;
 }
 
+.studio-shell .studio-audio-wall-surface .studio-audio-wall-pending > .studio-wall-pending-controls,
 .studio-shell .studio-audio-wall-pending > .studio-wall-pending-controls {
   position: relative;
   z-index: 2;
