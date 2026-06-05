@@ -95,7 +95,7 @@ const ai302SunoFetchPathPrefix = process.env.AI302_SUNO_FETCH_PATH_PREFIX || "/s
 const ai302SunoModel = process.env.AI302_SUNO_MODEL || "chirp-crow";
 const ai302AudioTranslatePath = process.env.AI302_AUDIO_TRANSLATE_PATH || "/302/audio/translate/task";
 const webSearchBaseUrl = process.env.WEB_SEARCH_BASE_URL || "https://duckduckgo.com/html/";
-const allowedMediaModels = new Set(["GPT Image 2", "Seedream 5.0 Lite", "Seedream 4.5", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control", "MiniMax Hailuo 2.3"]);
+const allowedMediaModels = new Set(["GPT Image 2", "Seedream 5.0 Lite", "Seedream 4.5", "Qwen Image 2.0", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control", "MiniMax Hailuo 2.3"]);
 const thumbnailCache = new Map();
 const thumbnailInflight = new Map();
 const thumbnailCacheMaxItems = Number(process.env.THUMBNAIL_CACHE_MAX_ITEMS || 160);
@@ -129,6 +129,7 @@ const publicMediaModelMap = {
   "GPT Image 2": "GPT Image 2",
   "Seedream 5.0 Lite": "Seedream 5.0 Lite",
   "Seedream 4.5": "Seedream 4.5",
+  "Qwen Image 2.0": "Qwen Image 2.0",
   "Nano Banana Pro": "Nano Banana Pro",
   "Nano Banana 2": "Nano Banana 2",
   "Grok Imagine": "Grok Imagine",
@@ -768,6 +769,7 @@ function defaultModelCosts() {
     "GPT Image 2": { costRm: 0.024, costUsd: 0.006, unit: "image" },
     "Seedream 5.0 Lite": { costRm: 0.024, costUsd: 0.006, unit: "image" },
     "Seedream 4.5": { costRm: 0.024, costUsd: 0.006, unit: "image" },
+    "Qwen Image 2.0": { costRm: 0.024, costUsd: 0.006, unit: "image" },
     "Nano Banana Pro": { costRm: 0.105, costRmb: 0.18, unit: "image" },
     "Nano Banana 2": { costRm: 0.105, costRmb: 0.18, unit: "image" },
     "Grok Imagine": { costRm: 0.024, costRmb: 0.05, unit: "image" },
@@ -1938,6 +1940,7 @@ function requestedMediaModelFromText(content = "") {
   if (/seedream\s*5|seedream\s*5\.0|seedream.*lite|seedream\s*lite|seedream\s*五/i.test(text)) return "Seedream 5.0 Lite";
   if (/seedream\s*4(?:\.5)?|seedream|seedream\s*四/i.test(text)) return "Seedream 4.5";
   if (/nano\s*banana\s*2|banana\s*2|香蕉\s*2/i.test(text)) return "Nano Banana 2";
+  if (/qwen\s*image\s*2(?:\.0)?|qwen|通义|千问/i.test(text)) return "Qwen Image 2.0";
   if (/nano\s*banana|banana\s*pro|香蕉|nano\s*pro/i.test(text)) return "Nano Banana Pro";
   if (/gpt\s*image|gpt-image|image\s*2/i.test(text)) return "GPT Image 2";
   if (/gemini\s*omni/i.test(text)) return "Gemini Omni";
@@ -2512,6 +2515,7 @@ function providerForMediaModel(model) {
   if (model === "Nano Banana Pro" || model === "Nano Banana 2") return process.env.GRSAI_API_KEY ? "grsai" : process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Seedream 5.0 Lite") return process.env.CRUN_API_KEY ? "crun" : process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Seedream 4.5") return process.env.APIMART_API_KEY ? "apimart" : "mock";
+  if (model === "Qwen Image 2.0") return process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Grok Imagine") return process.env.APIMART_API_KEY ? "apimart" : process.env.WUYIN_API_KEY ? "wuyin" : "mock";
   if (model === "Seedance 2.0" || model === "Grok Imagine Video" || model === "Wan 2.7" || model === "Kling V3 Omni" || model === "Kling V3 Motion Control" || model === "MiniMax Hailuo 2.3") return process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Veo 3.1") return process.env.CRUN_API_KEY ? "crun" : "mock";
@@ -2540,6 +2544,7 @@ function imageProviderCostFor(project, model, provider) {
     }
     if (model === "Seedream 5.0 Lite") return { costRm: Math.round((0.028 / usdPerRm) * 1000) / 1000, costUsd: 0.028, unit: `${resolution} image` };
     if (model === "Seedream 4.5") return { costRm: Math.round((0.025 / usdPerRm) * 1000) / 1000, costUsd: 0.025, unit: `${resolution} image` };
+    if (model === "Qwen Image 2.0") return { costRm: Math.round((0.006 / usdPerRm) * 1000) / 1000, costUsd: 0.006, unit: `${resolution} image` };
     if (model === "Nano Banana Pro") {
       const costUsd = resolution === "4K" ? 0.05 : 0.04;
       return { costRm: Math.round((costUsd / usdPerRm) * 1000) / 1000, costUsd, unit: `${resolution} image` };
@@ -4405,6 +4410,7 @@ function imageProviderOrderForModel(model) {
   if (model === "Grok Imagine") return ["apimart", "wuyin"];
   if (model === "Seedream 5.0 Lite") return ["crun", "apimart"];
   if (model === "Seedream 4.5") return ["apimart"];
+  if (model === "Qwen Image 2.0") return ["apimart"];
   return [providerForMediaModel(model)];
 }
 

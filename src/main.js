@@ -5914,6 +5914,13 @@ function imageModelOptions() {
       badge: ""
     },
     {
+      value: "Qwen Image 2.0",
+      provider: "qwen",
+      title: "Qwen Image 2.0",
+      description: "Fast image generation for clean commercial concepts",
+      badge: ""
+    },
+    {
       value: "Nano Banana Pro",
       provider: "google",
       title: "Nano Banana Pro",
@@ -5983,6 +5990,9 @@ function providerLogo(provider) {
   }
   if (provider === "seedream") {
     return `<span class="provider-logo provider-logo-seedream" aria-hidden="true">S</span>`;
+  }
+  if (provider === "qwen") {
+    return `<span class="provider-logo provider-logo-qwen" aria-hidden="true">Q</span>`;
   }
   if (provider === "wan") {
     return `<span class="provider-logo provider-logo-wan" aria-hidden="true">W</span>`;
