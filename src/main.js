@@ -12223,6 +12223,16 @@ function rememberAgentHistorySessions(sessions = [], options = {}) {
   return safeSessions;
 }
 
+function mergeAgentHistorySessionInPlace(session = {}) {
+  if (!session?.id) return state.agentHistorySessions || [];
+  const sessions = normalizeAgentHistorySessions(state.agentHistorySessions || []);
+  const index = sessions.findIndex((item) => item.id === session.id);
+  const nextSessions = index >= 0
+    ? sessions.map((item) => item.id === session.id ? { ...item, ...session } : item)
+    : [session, ...sessions];
+  return rememberAgentHistorySessions(nextSessions, { replace: true });
+}
+
 function migrateAgentHistorySessions() {
   const current = Array.isArray(state.agentHistorySessions) ? state.agentHistorySessions : [];
   const normalized = normalizeAgentHistorySessions(current);
@@ -12334,8 +12344,11 @@ function saveCurrentAgentHistory(messagesOverride = null, options = {}) {
     updatedAt: new Date().toISOString(),
     messages
   };
-  const nextSessions = [session, ...sessions.filter((item) => item.id !== session.id)];
-  const remembered = rememberAgentHistorySessions(nextSessions);
+  const existingIndex = sessions.findIndex((item) => item.id === session.id);
+  const nextSessions = existingIndex >= 0
+    ? sessions.map((item) => item.id === session.id ? session : item)
+    : [session, ...sessions];
+  const remembered = rememberAgentHistorySessions(nextSessions, { replace: true });
   state.activeAgentHistoryId = session.id;
   state.activeAgentDraftId = "";
   localStorage.removeItem(storageKeys.agentDraftId);
@@ -12354,7 +12367,7 @@ async function persistAgentChatSession(session = {}) {
     });
     if (payload?.state) state.db = payload.state;
     if (payload?.chat) {
-      rememberAgentHistorySessions([payload.chat, ...(state.agentHistorySessions || []).filter((item) => item.id !== payload.chat.id)]);
+      mergeAgentHistorySessionInPlace(payload.chat);
       if (!session.manualTitle) requestAgentChatTitle(payload.chat.id);
     }
   } catch (error) {
@@ -12370,7 +12383,7 @@ async function requestAgentChatTitle(id = "") {
     const payload = await api(`/agent-chats/${encodeURIComponent(id)}/title`, { method: "POST" });
     if (payload?.state) state.db = payload.state;
     if (payload?.chat && !payload.chat.manualTitle) {
-      rememberAgentHistorySessions([payload.chat, ...(state.agentHistorySessions || []).filter((item) => item.id !== payload.chat.id)]);
+      mergeAgentHistorySessionInPlace(payload.chat);
       if (state.page === "agent") render();
     }
   } catch (error) {
@@ -12543,7 +12556,7 @@ async function renameAgentChatBackend(id = "", title = "") {
       body: JSON.stringify({ title })
     });
     if (payload?.state) state.db = payload.state;
-    if (payload?.chat) rememberAgentHistorySessions([payload.chat, ...(state.agentHistorySessions || []).filter((item) => item.id !== payload.chat.id)]);
+    if (payload?.chat) mergeAgentHistorySessionInPlace(payload.chat);
   } catch (error) {
     console.warn("Agent chat rename sync failed", error);
   }
