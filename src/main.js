@@ -5444,6 +5444,8 @@ function studioWallCard(item, index = 0) {
   const canSaveReference = Boolean(item.imageUrl || item.videoUrl);
   const aspectRatio = wallAspectRatioForItem(item);
   const mediaRatio = intrinsicMediaRatioForItem(item) || aspectRatioToMediaRatio(aspectRatio);
+  const mediaKind = item.videoUrl ? "Video" : item.imageUrl ? "Image" : "Result";
+  const downloadKind = item.videoUrl ? "video" : item.imageUrl ? "image" : "text";
   const isNew = Date.now() - Date.parse(item.createdAt || 0) < 120000;
   const selected = selectedResultIdSet().has(item.id);
   const bulkSelecting = isBulkSelectingResults();
@@ -5453,10 +5455,10 @@ function studioWallCard(item, index = 0) {
       ${selected ? icon("check", 17) : ""}
     </button>
     ${resultPreview(item, { clickable: true, wall: true, priority: index < 6 })}
-    <div class="studio-wall-actions" aria-label="Image actions">
+    <div class="studio-wall-actions" aria-label="${esc(mediaKind)} actions">
       <button type="button" data-result-action="save-avatar" data-result-id="${esc(item.id)}" data-tooltip="Save as Avatar" aria-label="Save as Avatar" ${canSaveReference ? "" : "disabled"}>${icon("user-round-plus", 17)}</button>
       <button type="button" data-result-action="save-product" data-result-id="${esc(item.id)}" data-tooltip="Save as Product" aria-label="Save as Product" ${canSaveReference ? "" : "disabled"}>${icon("package-plus", 17)}</button>
-      <button type="button" data-result-action="download" data-result-id="${esc(item.id)}" data-result-kind="${item.videoUrl ? "video" : item.imageUrl ? "image" : "text"}" data-tooltip="Download" aria-label="Download">${icon("download", 18)}</button>
+      <button type="button" data-result-action="download" data-result-id="${esc(item.id)}" data-result-kind="${esc(downloadKind)}" data-tooltip="Download" aria-label="Download ${esc(mediaKind.toLowerCase())}">${icon("download", 18)}</button>
       <button type="button" data-result-action="delete" data-result-id="${esc(item.id)}" data-tooltip="Delete" aria-label="Delete">${icon("trash-2", 18)}</button>
     </div>
     <footer><b>${esc(item.title || resultModelLabel(item))}</b><span>${esc(promptText ? promptText.slice(0, 92) : resultMediaLabel(item))}</span></footer>
@@ -5611,7 +5613,7 @@ function imagePanel(p) {
   const imageTypes = ["image", "video", "visual_card"];
   const meta = studioStepMeta("image");
   const bulkSelecting = isBulkSelectingResults();
-  return `<section class="image-canvas-studio image-higgsfield-mode studio-wall-zoomable ${bulkSelecting ? "is-bulk-selecting-results" : ""}" ${studioWallZoomStyleAttr()}>
+  return `<section class="image-canvas-studio image-higgsfield-mode studio-media-wall-surface studio-wall-zoomable ${bulkSelecting ? "is-bulk-selecting-results" : ""}" ${studioWallZoomStyleAttr()}>
     ${selectedMode === "Virtualize (Poster/Ad)" ? `<div class="image-studio-legacy">${virtualizePanel()}</div>` : `
       ${studioWallZoomControl()}
       ${studioResultWall(p, meta)}
@@ -6264,7 +6266,7 @@ function ugcPanel(p) {
   const meta = studioStepMeta("ugc");
   const bulkSelecting = isBulkSelectingResults();
   const wall = studioResultWall(p, meta);
-  return `<section class="video-page-studio video-prompt-extractor-page image-higgsfield-mode studio-wall-zoomable ${wall ? "" : "is-empty"} ${bulkSelecting ? "is-bulk-selecting-results" : ""}" data-studio-mode="ugc" ${studioWallZoomStyleAttr()}>
+  return `<section class="video-page-studio video-prompt-extractor-page studio-media-wall-surface studio-wall-zoomable ${wall ? "" : "is-empty"} ${bulkSelecting ? "is-bulk-selecting-results" : ""}" data-studio-mode="ugc" ${studioWallZoomStyleAttr()}>
     ${studioWallZoomControl()}
     ${wall || videoEmptyStudioBackdrop()}
     ${bulkSelecting ? "" : videoGenerateConsole(p)}
