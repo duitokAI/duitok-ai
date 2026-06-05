@@ -48229,3 +48229,39 @@ body:has(.studio-shell .video-prompt-extractor-page),
 .studio-shell.sidebar-collapsed .video-page-studio.is-empty > .video-generate-console:not(.is-compact).has-open-menu {
   left: calc(var(--studio-sidebar-width, 76px) + clamp(130px, 12vw, 240px)) !important;
 }
+
+/* Video page sidebar rail lock: the empty video canvas owns viewport-height
+   overflow rules, so keep the nav rail painted independently for the full
+   viewport instead of relying on the sidebar content height. */
+.studio-shell:has(.video-page-studio) .sidebar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 7200 !important;
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  isolation: isolate !important;
+  background: transparent !important;
+}
+
+.studio-shell:has(.video-page-studio) .sidebar::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 0;
+  width: var(--studio-sidebar-width, 300px);
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, #210024 0%, #32103a 42%, #8b1a78 78%, #c12b62 118%);
+  box-shadow: 16px 0 48px rgba(28, 6, 33, 0.16);
+}
+
+.studio-shell.sidebar-collapsed:has(.video-page-studio) .sidebar::before {
+  width: var(--studio-sidebar-width, 76px);
+}
+
+.studio-shell:has(.video-page-studio) .sidebar > * {
+  position: relative;
+  z-index: 1;
+}
