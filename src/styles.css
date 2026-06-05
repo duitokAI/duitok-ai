@@ -47695,6 +47695,77 @@ html.is-generation-submitting .studio-shell .video-generate-console {
   will-change: auto !important;
 }
 
+/* Global Studio interaction stability baseline. Buttons, menus, cards and
+   composers must not resize when clicked, selected, opened, or disabled. */
+.studio-shell,
+.studio-shell * {
+  box-sizing: border-box;
+}
+
+.studio-shell :where(button, summary, input, textarea, select) {
+  font-synthesis-weight: none;
+}
+
+.studio-shell :where(button, summary, [role="button"], [data-field-set], [data-action], [data-result-action]) {
+  min-width: 0;
+  touch-action: manipulation;
+  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+  transition-duration: 120ms;
+  transition-timing-function: ease;
+  overflow-anchor: none;
+}
+
+.studio-shell :where(button, [role="button"], summary):disabled,
+.studio-shell :where(button, [role="button"], summary)[aria-disabled="true"] {
+  transform: none !important;
+}
+
+.studio-shell :where(details) {
+  min-width: 0;
+  overflow: visible;
+}
+
+.studio-shell :where(details[open]) > summary {
+  margin: 0;
+}
+
+.studio-shell :where(.image-model-menu, .image-option-menu, .video-model-menu, .video-option-list, .video-duration-slider-panel, .audio-preset-menu, .lang-options, .asset-library-project-actions) {
+  contain: paint;
+  overflow-anchor: none;
+}
+
+.studio-shell :where(.studio-higgsfield-tabs button, .sidebar button, .sidebar-item, .asset-library-nav button, .asset-library-projects button, .asset-library-filter-strip button, .image-console-generate, .video-console-generate, .audio-generate-button, .studio-wall-actions button, .asset-tile-actions button, .result-actions button, .result-save-options button) {
+  flex-shrink: 0;
+  transform: translateZ(0);
+}
+
+.studio-shell :where(.studio-higgsfield-tabs button, .sidebar button, .sidebar-item, .asset-library-nav button, .asset-library-projects button, .asset-library-filter-strip button, .image-console-generate, .video-console-generate, .audio-generate-button, .studio-wall-actions button, .asset-tile-actions button, .result-actions button):active {
+  transform: translateZ(0) !important;
+}
+
+.studio-shell :where(.image-generate-console, .video-generate-console, .audio-composer, .audio-main-bar, .studio-result-wall, .studio-wall-grid, .studio-wall-card, .asset-tile, .asset-timeline-grid) {
+  overflow-anchor: none;
+}
+
+.studio-shell :where(.studio-wall-card, .studio-wall-pending, .asset-tile) {
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+.studio-shell :where(.studio-wall-card .result-preview-trigger, .studio-wall-card .result-image, .studio-wall-card .result-video-shell, .asset-tile-preview, .asset-tile-preview .result-preview-trigger, .asset-tile-preview .result-image, .asset-tile-preview .result-video-shell) {
+  display: block;
+  aspect-ratio: inherit;
+  contain: paint;
+}
+
+.studio-shell :where(.studio-wall-actions, .asset-tile-overlay, .asset-tile-actions) {
+  contain: paint;
+}
+
+.studio-shell :where(.image-generate-console.has-open-menu, .video-generate-console.has-open-menu, .audio-composer:has(details[open])) {
+  contain: none !important;
+}
+
 /* Image generation menu stability: opening the model menu while jobs are
    rendering must not resize the composer or ask the media wall to relayout. */
 .studio-shell .image-higgsfield-mode > .image-generate-console.is-generating.has-open-menu,
@@ -47713,6 +47784,83 @@ html.is-generation-submitting .studio-shell .video-generate-console {
   animation: none !important;
   transition: none !important;
   overflow-anchor: none !important;
+}
+
+/* Video uses the same locked interaction contract as Image while jobs are
+   running, so model/options menus cannot expand the composer or wall. */
+.studio-shell .video-page-studio > .video-generate-console.is-generating.has-open-menu,
+.studio-shell .video-page-studio > .video-generate-console.is-generating.has-open-menu.is-hover-expanded,
+.studio-shell .video-page-studio > .video-generate-console.is-generating.has-open-menu:not(.is-compact) {
+  animation: none !important;
+  transition: none !important;
+  transform: translateZ(0) !important;
+  will-change: auto !important;
+}
+
+.studio-shell .video-page-studio:has(.video-generate-console.is-generating.has-open-menu) .studio-result-wall,
+.studio-shell .video-page-studio:has(.video-generate-console.is-generating.has-open-menu) .studio-wall-grid,
+.studio-shell .video-page-studio:has(.video-generate-console.is-generating.has-open-menu) .studio-wall-card,
+.studio-shell .video-page-studio:has(.video-generate-console.is-generating.has-open-menu) .studio-wall-pending {
+  animation: none !important;
+  transition: none !important;
+  overflow-anchor: none !important;
+}
+
+/* Audio composer stability: opening presets or switching mode only changes the
+   interior state. The detached dial and light bar keep their outer contracts. */
+.studio-shell .audio-studio-page .audio-composer,
+.studio-shell .audio-studio-page .audio-main-bar,
+.studio-shell .audio-studio-page .audio-mode-dial,
+.studio-shell .audio-studio-page .audio-prompt-well,
+.studio-shell .audio-studio-page .audio-file-insert-card,
+.studio-shell .audio-studio-page .audio-preset-picker summary,
+.studio-shell .audio-studio-page .audio-generate-button {
+  overflow-anchor: none !important;
+  transition-property: color, background-color, border-color, box-shadow, opacity, transform !important;
+}
+
+.studio-shell .audio-studio-page .audio-composer:has(details[open]) {
+  z-index: 40 !important;
+}
+
+.studio-shell .audio-studio-page .audio-preset-picker[open] {
+  z-index: 45 !important;
+}
+
+.studio-shell .audio-studio-page .audio-preset-picker[open] summary {
+  margin: 0 !important;
+}
+
+.studio-shell .audio-studio-page .audio-mode-dial button,
+.studio-shell .audio-studio-page .audio-segment button {
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+}
+
+.studio-shell .audio-studio-page .audio-generate-button.is-empty,
+.studio-shell .audio-studio-page .audio-generate-button:disabled {
+  height: 126px !important;
+  min-height: 126px !important;
+  max-height: 126px !important;
+  transform: translateZ(0) !important;
+}
+
+/* Content Library refresh stability: thumbnails and action overlays live inside
+   fixed-ratio tiles, so async image decode cannot resize the grid. */
+.studio-shell .asset-tile,
+.studio-shell .asset-tile-preview,
+.studio-shell .asset-tile-preview .result-preview-trigger {
+  min-height: 0 !important;
+}
+
+.studio-shell .asset-tile-preview img,
+.studio-shell .asset-tile-preview video,
+.studio-shell .asset-tile-preview .result-video-shell,
+.studio-shell .asset-tile-preview .visual-card-preview {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
 }
 
 /* Image composer shell: keep the outer frame neutral; coral stays reserved for

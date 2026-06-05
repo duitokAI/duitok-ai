@@ -1926,7 +1926,7 @@ function bindImageConsoleCompact() {
     const expandLocked = imageConsoleExpandedUntilUserScroll || Date.now() < imageConsoleExpandLockUntil || consoleEl.contains(document.activeElement);
     if (expandLocked) {
       consoleEl.classList.add("is-hover-expanded");
-      consoleEl.classList.remove("is-compact");
+      if (!state.generating && !consoleEl.classList.contains("is-generating")) consoleEl.classList.remove("is-compact");
     }
     const shouldCompact = compact && !hovering && !menuOpen && !expandLocked;
     consoleEl.classList.toggle("is-compact", shouldCompact);
@@ -1941,7 +1941,7 @@ function bindImageConsoleCompact() {
     hovering = true;
     imageConsoleExpandedUntilUserScroll = true;
     consoleEl.classList.add("is-hover-expanded");
-    consoleEl.classList.remove("is-compact");
+    if (!state.generating && !consoleEl.classList.contains("is-generating")) consoleEl.classList.remove("is-compact");
   };
   const expandForPointerHover = (event) => {
     if (event.pointerType === "touch") return;
@@ -2066,7 +2066,7 @@ function bindVideoConsoleCompact() {
     consoleEl.classList.toggle("has-open-menu", menuOpen);
     if (menuOpen) {
       consoleEl.classList.add("is-hover-expanded");
-      consoleEl.classList.remove("is-compact");
+      if (!state.generating && !consoleEl.classList.contains("is-generating")) consoleEl.classList.remove("is-compact");
     }
   };
   const scrollTargets = [
@@ -2094,7 +2094,7 @@ function bindVideoConsoleCompact() {
     const expandLocked = videoConsoleExpandedUntilUserScroll || Date.now() < videoConsoleExpandLockUntil || consoleEl.contains(document.activeElement);
     if (expandLocked) {
       consoleEl.classList.add("is-hover-expanded");
-      consoleEl.classList.remove("is-compact");
+      if (!state.generating && !consoleEl.classList.contains("is-generating")) consoleEl.classList.remove("is-compact");
     }
     const shouldCompact = compact && !hovering && !menuOpen && !expandLocked;
     consoleEl.classList.toggle("is-compact", shouldCompact);
@@ -2109,7 +2109,7 @@ function bindVideoConsoleCompact() {
     hovering = true;
     videoConsoleExpandedUntilUserScroll = true;
     consoleEl.classList.add("is-hover-expanded");
-    consoleEl.classList.remove("is-compact");
+    if (!state.generating && !consoleEl.classList.contains("is-generating")) consoleEl.classList.remove("is-compact");
   };
   const expandForPointerHover = (event) => {
     if (event.pointerType === "touch") return;
@@ -2514,12 +2514,12 @@ function handleDelegatedClick(event) {
   if (target.dataset.resultAddProject) return addResultToProject(target.dataset.resultAddProject);
   if (target.dataset.imageCanvasResult) return set({ imageCanvasSelectedResultId: target.dataset.imageCanvasResult });
   if (target.dataset.imageModelOption) {
-    stabilizeImageConsoleExpansion(1000);
+    if (!state.generating && !document.documentElement.classList.contains("is-generation-submitting")) stabilizeImageConsoleExpansion(1000);
     target.closest("details")?.removeAttribute("open");
     return saveImageModelQuick(target.dataset.imageModelOption, target);
   }
   if (target.dataset.videoModelOption) {
-    stabilizeVideoConsoleExpansion(1000);
+    if (!state.generating && !document.documentElement.classList.contains("is-generation-submitting")) stabilizeVideoConsoleExpansion(1000);
     target.closest("details")?.removeAttribute("open");
     return saveVideoModelQuick(target.dataset.videoModelOption, target);
   }
@@ -6028,7 +6028,7 @@ function openAspectRatioPopover(summary) {
   consoleEl?.querySelectorAll(".image-model-picker[open],.image-resolution-menu[open]").forEach((el) => el.removeAttribute("open"));
   source.removeAttribute("open");
   consoleEl?.classList.add("has-open-menu", "is-hover-expanded");
-  consoleEl?.classList.remove("is-compact");
+  if (!state.generating && !consoleEl?.classList?.contains("is-generating")) consoleEl?.classList.remove("is-compact");
   const popover = document.createElement("div");
   popover.className = "image-aspect-ratio-options floating-aspect-ratio-options";
   popover.dataset.sourceId = sourceId;
@@ -6057,7 +6057,7 @@ function openAspectRatioPopover(summary) {
   popover.querySelectorAll("button").forEach((button) => button.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
-    stabilizeImageConsoleExpansion(1000);
+    if (!state.generating && !document.documentElement.classList.contains("is-generation-submitting")) stabilizeImageConsoleExpansion(1000);
     saveProjectFieldQuick("image.aspectRatio", button.dataset.value, button);
     closeAspectRatioPopover();
   }));
@@ -6611,7 +6611,8 @@ function videoGenerateConsole(p) {
   const selectedModelItem = videoModelOptions().find((item) => item.value === selectedModel) || videoModelOptions()[0];
   const capabilities = videoModelCapabilities(selectedModel);
   const compactSummary = videoCompactPromptText(promptText);
-  return `<section class="video-generate-console ${longPromptClass}" data-video-generate-console>
+  const generatingClass = state.generating ? "is-generating" : "";
+  return `<section class="video-generate-console ${longPromptClass} ${generatingClass}" data-video-generate-console>
     <div class="video-console-main">
       <div class="video-console-prompt" data-video-console-prompt-zone>
         <button class="video-prompt-insert" type="button" data-action="open-attachment-picker" data-attachment-kind="product" title="Add video reference" aria-label="Add video reference">
@@ -12533,8 +12534,9 @@ function bindProjectFieldSetControls(root = document) {
     if (el.dataset.fieldSetBound === "true") return;
     el.dataset.fieldSetBound = "true";
     const save = () => {
-      if (el.dataset.fieldSet?.startsWith("image.")) stabilizeImageConsoleExpansion(1000);
-      if (el.dataset.fieldSet?.startsWith("ugc.")) stabilizeVideoConsoleExpansion(1000);
+      const layoutLocked = state.generating || document.documentElement.classList.contains("is-generation-submitting");
+      if (!layoutLocked && el.dataset.fieldSet?.startsWith("image.")) stabilizeImageConsoleExpansion(1000);
+      if (!layoutLocked && el.dataset.fieldSet?.startsWith("ugc.")) stabilizeVideoConsoleExpansion(1000);
       el.closest("details")?.removeAttribute("open");
       saveProjectFieldQuick(el.dataset.fieldSet, el.dataset.value, el);
       if (el.dataset.fieldSet === "auto.audioMode") render();
@@ -12577,10 +12579,12 @@ function bindVideoDurationSliders(root = document) {
     };
     slider.addEventListener("input", update);
     slider.addEventListener("change", update);
-    slider.addEventListener("pointerdown", () => stabilizeVideoConsoleExpansion(1000));
+    slider.addEventListener("pointerdown", () => {
+      if (!state.generating && !document.documentElement.classList.contains("is-generation-submitting")) stabilizeVideoConsoleExpansion(1000);
+    });
     slider.addEventListener("keydown", (event) => {
       if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return;
-      stabilizeVideoConsoleExpansion(1000);
+      if (!state.generating && !document.documentElement.classList.contains("is-generation-submitting")) stabilizeVideoConsoleExpansion(1000);
       window.requestAnimationFrame(update);
     });
   });
@@ -12677,7 +12681,9 @@ function updateImageCountDom(count = imageBatchCount(project())) {
   }
   if (compactSummary) compactSummary.textContent = imageCompactPromptText();
   consoleEl.classList.add("is-hover-expanded");
-  consoleEl.classList.remove("is-compact");
+  if (!state.generating && !document.documentElement.classList.contains("is-generation-submitting")) {
+    consoleEl.classList.remove("is-compact");
+  }
 }
 
 function updateVideoCountDom(count = videoBatchCount(project())) {
@@ -12697,7 +12703,9 @@ function updateVideoCountDom(count = videoBatchCount(project())) {
   const compactSummary = consoleEl.querySelector("[data-video-compact-summary] > span");
   if (compactSummary) compactSummary.textContent = videoCompactPromptText(project()?.ugc?.script || "");
   consoleEl.classList.add("is-hover-expanded");
-  consoleEl.classList.remove("is-compact");
+  if (!state.generating && !document.documentElement.classList.contains("is-generation-submitting")) {
+    consoleEl.classList.remove("is-compact");
+  }
 }
 
 async function saveImageModelQuick(value, source = null) {
@@ -12822,12 +12830,16 @@ async function saveVideoModelQuick(value, source = null) {
   nextDb = dbWithProjectField(nextDb, projectId, "ugc.audio", nextAudio);
   latestVideoModelQuickSelection = { projectId, seq: requestSeq, model: selected.value, aspectRatio: nextAspectRatio, quality: nextQuality, duration: nextDuration, audio: nextAudio };
   state.db = nextDb;
-  stabilizeVideoConsoleExpansion(1000);
+  if (!state.generating && !document.documentElement.classList.contains("is-generation-submitting")) {
+    stabilizeVideoConsoleExpansion(1000);
+  }
   updateVideoModelDom(selected.value, source);
   const consoleEl = source?.closest?.("[data-video-generate-console]");
   if (consoleEl) {
     consoleEl.classList.add("is-hover-expanded");
-    consoleEl.classList.remove("is-compact");
+    if (!state.generating && !document.documentElement.classList.contains("is-generation-submitting")) {
+      consoleEl.classList.remove("is-compact");
+    }
   }
   try {
     let db = await api(`/projects/${projectId}/field`, {
