@@ -32,3 +32,14 @@ These rules apply to every agent working inside this project, including new chat
 - For any Pokaya Studio, sidebar, settings modal, composer, media wall, billing, usage, image/video result, or responsive layout change, follow the project-local skill at `.codex/skills/pokaya-ui-stability/SKILL.md`.
 - This skill is required for UI bug fixes, visual polish, responsive adaptation, performance-sensitive media work, and any change driven by screenshots.
 - Do not introduce a new frontend framework, UI kit, animation library, or routing architecture for these tasks unless the user explicitly asks for that migration.
+
+## Pokaya Studio Purple Orange Design System
+
+- Studio/backend Figma-to-code work must keep the Purple to Orange Mix as tokenized project style: `#210024`, `#32103A`, `#8B1A78`, `#C12B62`, `#FF6738`.
+- Do not hardcode new Studio colors in component markup. Add or reuse scoped CSS variables under `.studio-shell` whenever possible.
+- Use deep plum for Studio shell/sidebar/media-wall foundations, orange for primary action, focus, selected edge, and confirm states, and rose/magenta for active or hover surfaces.
+- Keep Studio changes scoped to the logged-in backend surface. Do not let Studio palette overrides affect public landing, login/register, or marketing pages.
+- Treat Figma MCP output as design context only. Translate any generated React/Tailwind suggestions into this project's existing vanilla JS/CSS structure.
+- Preserve existing Studio DOM and routing unless a task explicitly requires markup changes.
+- Media wall, top tabs, sidebar nav, and composer controls must keep stable dimensions across hover, loading, selected, failed, and narrow viewport states.
+- Primary gradient styling is reserved for Generate/Confirm actions. Retry/Edit, status badges, and parameter pills must remain visually secondary.

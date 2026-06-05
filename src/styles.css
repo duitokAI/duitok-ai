@@ -47594,6 +47594,394 @@ body:has(.studio-shell .video-page-studio),
   }
 }
 
+/* Studio purple-orange design system v3: turn the reference palette into
+   stable backend roles instead of one-off gradients. */
+.studio-shell {
+  --studio-plum-950: #210024;
+  --studio-plum-900: #32103a;
+  --studio-magenta-700: #8b1a78;
+  --studio-rose-600: #c12b62;
+  --studio-orange-500: #ff6738;
+  --studio-cream: #fff9f0;
+  --studio-shell-bg: #210024;
+  --studio-sidebar-bg: #210024;
+  --studio-sidebar-surface: rgba(50, 16, 58, 0.72);
+  --studio-sidebar-surface-hover: rgba(139, 26, 120, 0.28);
+  --studio-sidebar-surface-active: rgba(139, 26, 120, 0.42);
+  --studio-wall-bg: #210024;
+  --studio-wall-panel: #32103a;
+  --studio-wall-line: rgba(255, 249, 240, 0.24);
+  --studio-action-primary: linear-gradient(135deg, #c12b62 0%, #ff6738 100%);
+  --studio-action-primary-hover: linear-gradient(135deg, #d9366f 0%, #ff7848 100%);
+  --studio-selected-edge: #ff6738;
+  --studio-focus-ring: rgba(255, 103, 56, 0.4);
+  --studio-failed-bg: rgba(50, 16, 58, 0.9);
+  --studio-failed-border: rgba(255, 249, 240, 0.18);
+  --studio-no-charge-bg: rgba(193, 43, 98, 0.24);
+  --studio-composer-bg: rgba(255, 249, 240, 0.94);
+  --studio-composer-border: rgba(255, 103, 56, 0.38);
+  --studio-control-bg: rgba(255, 255, 255, 0.84);
+  --studio-control-bg-hover: #ffffff;
+  --studio-control-text: #210024;
+  --studio-control-muted: rgba(33, 0, 36, 0.52);
+  background:
+    linear-gradient(180deg, rgba(33, 0, 36, 0.98), rgba(33, 0, 36, 0.98)),
+    radial-gradient(circle at 82% 8%, rgba(255, 103, 56, 0.22), transparent 30%) !important;
+  font-family: Inter, "PingFang SC", "Microsoft YaHei", "Noto Sans", sans-serif !important;
+}
+
+html:has(.studio-shell .image-higgsfield-mode),
+body:has(.studio-shell .image-higgsfield-mode),
+#app:has(.studio-shell .image-higgsfield-mode),
+.studio-shell:has(.image-higgsfield-mode),
+.studio-shell:has(.image-higgsfield-mode) .workspace,
+.studio-shell:has(.step-tabs):has(.image-higgsfield-mode) .workspace,
+.studio-shell .workspace:has(.image-higgsfield-mode),
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode),
+.studio-shell .canvas-card:has(.image-higgsfield-mode),
+.studio-shell .studio-workbench-card:has(.image-higgsfield-mode),
+.studio-shell .studio-step-panel:has(.image-higgsfield-mode),
+.studio-shell .image-canvas-studio.image-higgsfield-mode,
+.studio-shell .image-higgsfield-mode,
+.studio-shell .image-higgsfield-mode > .studio-result-wall,
+html:has(.studio-shell .video-page-studio),
+body:has(.studio-shell .video-page-studio),
+#app:has(.studio-shell .video-page-studio),
+.studio-shell:has(.video-page-studio),
+.studio-shell:has(.step-tabs):has(.video-page-studio),
+.studio-shell:has(.video-page-studio) .workspace,
+.studio-shell .workspace:has(.video-page-studio),
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio),
+.studio-shell .canvas-card:has(.video-page-studio),
+.studio-shell .studio-workbench-card:has(.video-page-studio),
+.studio-shell .studio-step-panel:has(.video-page-studio),
+.studio-shell .video-page-studio,
+.studio-shell .video-page-studio > .studio-result-wall,
+html:has(.studio-shell .video-prompt-extractor-page),
+body:has(.studio-shell .video-prompt-extractor-page),
+#app:has(.studio-shell .video-prompt-extractor-page),
+.studio-shell:has(.video-prompt-extractor-page),
+.studio-shell .workspace:has(.video-prompt-extractor-page),
+.studio-shell .canvas-card:has(.video-prompt-extractor-page),
+.studio-shell .studio-workbench-card:has(.video-prompt-extractor-page),
+.studio-shell .studio-step-panel:has(.video-prompt-extractor-page),
+.studio-shell .video-prompt-extractor-page,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall {
+  background:
+    radial-gradient(circle at 86% 8%, rgba(255, 103, 56, 0.18), transparent 32%),
+    linear-gradient(180deg, #210024 0%, #27052e 46%, #210024 100%) !important;
+  background-color: var(--studio-wall-bg) !important;
+}
+
+.studio-shell .sidebar {
+  background:
+    linear-gradient(180deg, rgba(33, 0, 36, 0.98) 0%, rgba(33, 0, 36, 0.96) 58%, rgba(50, 16, 58, 0.98) 100%),
+    radial-gradient(circle at 84% 2%, rgba(255, 103, 56, 0.12), transparent 34%) !important;
+  border-right-color: rgba(255, 249, 240, 0.12) !important;
+  box-shadow: 18px 0 52px rgba(33, 0, 36, 0.34) !important;
+}
+
+.studio-shell .sidebar-topbar,
+.studio-shell .sidebar-language .lang-switch,
+.studio-shell .agent-primary-card,
+.studio-shell .side-primary,
+.studio-shell .side-link {
+  background: var(--studio-sidebar-surface) !important;
+  border-color: rgba(255, 249, 240, 0.1) !important;
+  color: rgba(255, 249, 240, 0.82) !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .sidebar-language .lang-switch:hover,
+.studio-shell .agent-primary-card:hover,
+.studio-shell .side-primary:hover,
+.studio-shell .side-link:hover {
+  background: var(--studio-sidebar-surface-hover) !important;
+  border-color: rgba(255, 103, 56, 0.2) !important;
+  color: #ffffff !important;
+  transform: none !important;
+}
+
+.studio-shell .agent-primary-card.active,
+.studio-shell .side-primary.active,
+.studio-shell .side-link.active,
+.studio-shell .sidebar-item.active,
+.studio-shell .nav-item.active {
+  background:
+    linear-gradient(90deg, rgba(255, 103, 56, 0.2), transparent 12%),
+    var(--studio-sidebar-surface-active) !important;
+  border-color: rgba(255, 103, 56, 0.48) !important;
+  color: #ffffff !important;
+  box-shadow:
+    inset 4px 0 0 var(--studio-selected-edge),
+    0 12px 30px rgba(33, 0, 36, 0.26) !important;
+}
+
+.studio-shell .side-section,
+.studio-shell .side-section.account {
+  color: rgba(255, 249, 240, 0.5) !important;
+  font-size: 12px !important;
+  line-height: 18px !important;
+  letter-spacing: 0.16em !important;
+}
+
+.studio-shell .agent-primary-status {
+  color: rgba(255, 249, 240, 0.92) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.studio-shell .agent-primary-status i {
+  background: #66df80 !important;
+  box-shadow: 0 0 0 5px rgba(102, 223, 128, 0.14) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .project-step-topbar {
+  background:
+    linear-gradient(90deg, rgba(33, 0, 36, 0.94) 0%, rgba(50, 16, 58, 0.9) 68%, rgba(139, 26, 120, 0.62) 100%) !important;
+  border-bottom-color: rgba(255, 249, 240, 0.12) !important;
+  box-shadow: 0 12px 30px rgba(33, 0, 36, 0.24) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .studio-top-step-tabs,
+.studio-shell .workspace:has(.step-tabs) .step-tabs,
+.studio-shell nav.step-tabs.studio-top-step-tabs {
+  background: rgba(255, 249, 240, 0.08) !important;
+  border-color: rgba(255, 249, 240, 0.08) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .step-tabs button,
+.studio-shell .step-tabs button,
+.studio-shell .image-studio-tabs button {
+  background: rgba(255, 249, 240, 0.075) !important;
+  border-color: rgba(255, 249, 240, 0.11) !important;
+  color: rgba(255, 249, 240, 0.68) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 249, 240, 0.06) !important;
+  text-shadow: none !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .step-tabs button:hover,
+.studio-shell .step-tabs button:hover,
+.studio-shell .image-studio-tabs button:hover {
+  background: rgba(255, 249, 240, 0.13) !important;
+  border-color: rgba(255, 103, 56, 0.26) !important;
+  color: rgba(255, 255, 255, 0.94) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .step-tabs button.active,
+.studio-shell .workspace:has(.step-tabs) .step-tabs button.active:hover,
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button.active,
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button.active:hover,
+.studio-shell .step-tabs button.active,
+.studio-shell .image-studio-tabs button.active {
+  background:
+    linear-gradient(100deg, #32103a 0%, #8b1a78 48%, #c12b62 76%, #ff6738 100%) !important;
+  border-color: rgba(255, 103, 56, 0.64) !important;
+  color: #ffffff !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 249, 240, 0.2),
+    0 14px 28px rgba(255, 103, 56, 0.16) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs) .step-tabs button.active svg,
+.studio-shell .step-tabs button.active svg,
+.studio-shell .image-studio-tabs button.active svg {
+  color: #ffffff !important;
+}
+
+.studio-shell .studio-result-wall,
+.studio-shell .image-higgsfield-mode > .studio-result-wall,
+.studio-shell .video-page-studio > .studio-result-wall,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall {
+  background:
+    linear-gradient(rgba(255, 249, 240, 0.2) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 249, 240, 0.2) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(33, 0, 36, 0.96), rgba(33, 0, 36, 0.98)) !important;
+  background-size: var(--studio-wall-column, 320px) auto, auto var(--studio-wall-column, 320px), auto !important;
+}
+
+.studio-shell .studio-wall-card {
+  background: var(--studio-wall-panel) !important;
+  border-color: var(--studio-wall-line) !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .studio-wall-card:has(.result-image),
+.studio-shell .studio-wall-card:has(.result-video) {
+  background: #160018 !important;
+}
+
+.studio-shell .studio-wall-card img,
+.studio-shell .studio-wall-card video,
+.studio-shell .studio-wall-card .result-image,
+.studio-shell .studio-wall-card .result-video {
+  filter: none !important;
+}
+
+.studio-shell .studio-wall-pending.failed,
+.studio-shell .studio-wall-pending.failed.landscape,
+.studio-shell .studio-wall-pending.failed.portrait {
+  background:
+    radial-gradient(circle at 50% 38%, rgba(193, 43, 98, 0.2), transparent 42%),
+    var(--studio-failed-bg) !important;
+  border-color: var(--studio-failed-border) !important;
+}
+
+.studio-shell .studio-wall-pending.failed .studio-wall-failed-center {
+  padding: clamp(12px, 2cqw, 18px) !important;
+  border: 1px solid rgba(255, 249, 240, 0.1) !important;
+  border-radius: clamp(14px, 2.4cqw, 22px) !important;
+  background: rgba(255, 249, 240, 0.045) !important;
+  box-shadow: 0 18px 46px rgba(33, 0, 36, 0.26) !important;
+}
+
+.studio-shell .studio-wall-pending.failed .studio-wall-failed-center > b {
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  color: #fff9f0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: clamp(16px, 3.4cqw, 24px) !important;
+  line-height: 1.1 !important;
+}
+
+.studio-shell .studio-wall-pending.failed .studio-wall-failed-center > small {
+  color: rgba(255, 249, 240, 0.6) !important;
+  font-size: clamp(11px, 2.2cqw, 14px) !important;
+  line-height: 1.25 !important;
+}
+
+.studio-shell .generation-credit-refund-note,
+.studio-shell .studio-wall-pending.failed .studio-wall-failed-center > .generation-credit-refund-note {
+  min-width: 0 !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 0 18px !important;
+  border: 1px solid rgba(255, 103, 56, 0.34) !important;
+  border-radius: 999px !important;
+  background: var(--studio-no-charge-bg) !important;
+  color: #fff9f0 !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .generation-credit-refund-note strong {
+  color: #fff9f0 !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+}
+
+.studio-shell .studio-wall-failed-actions button,
+.studio-shell .studio-wall-pending.failed .studio-wall-failed-actions button {
+  height: 30px !important;
+  min-height: 30px !important;
+  width: auto !important;
+  flex: 0 0 auto !important;
+  padding: 0 10px !important;
+  border: 1px solid rgba(255, 249, 240, 0.18) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 249, 240, 0.09) !important;
+  color: rgba(255, 249, 240, 0.92) !important;
+  box-shadow: none !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+}
+
+.studio-shell .studio-wall-failed-actions button:hover {
+  border-color: rgba(255, 103, 56, 0.42) !important;
+  background: rgba(255, 103, 56, 0.14) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console,
+.studio-shell .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console,
+.studio-shell .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console:not(.is-compact),
+.studio-shell .video-page-studio > .video-generate-console,
+.studio-shell .video-prompt-extractor-page > .video-prompt-dock,
+.studio-shell .studio-generate-dock,
+.studio-shell .prompt-composer,
+.studio-shell .agent-input-shell {
+  background:
+    linear-gradient(105deg, rgba(255, 249, 240, 0.98) 0%, rgba(255, 249, 240, 0.94) 52%, rgba(193, 43, 98, 0.12) 78%, rgba(255, 103, 56, 0.24) 100%) !important;
+  border-color: var(--studio-composer-border) !important;
+  color: var(--studio-control-text) !important;
+  box-shadow: 0 20px 52px rgba(33, 0, 36, 0.28) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console input,
+.studio-shell .image-higgsfield-mode > .image-generate-console textarea,
+.studio-shell .image-higgsfield-mode > .image-generate-console select,
+.studio-shell .video-page-studio > .video-generate-console input,
+.studio-shell .video-page-studio > .video-generate-console textarea,
+.studio-shell .video-page-studio > .video-generate-console select,
+.studio-shell .video-prompt-extractor-page > .video-prompt-dock input,
+.studio-shell .video-prompt-extractor-page > .video-prompt-dock textarea,
+.studio-shell .video-prompt-extractor-page > .video-prompt-dock select,
+.studio-shell .studio-generate-dock input,
+.studio-shell .studio-generate-dock textarea,
+.studio-shell .studio-generate-dock select {
+  background: var(--studio-control-bg) !important;
+  border-color: rgba(33, 0, 36, 0.12) !important;
+  color: var(--studio-control-text) !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console input::placeholder,
+.studio-shell .image-higgsfield-mode > .image-generate-console textarea::placeholder,
+.studio-shell .video-page-studio > .video-generate-console input::placeholder,
+.studio-shell .video-page-studio > .video-generate-console textarea::placeholder,
+.studio-shell .video-prompt-extractor-page > .video-prompt-dock input::placeholder,
+.studio-shell .video-prompt-extractor-page > .video-prompt-dock textarea::placeholder,
+.studio-shell .studio-generate-dock input::placeholder,
+.studio-shell .studio-generate-dock textarea::placeholder {
+  color: var(--studio-control-muted) !important;
+}
+
+.studio-shell .studio-dock-add,
+.studio-shell .studio-dock-tools span,
+.studio-shell .image-generate-console button:not(.image-submit),
+.studio-shell .video-generate-console button:not(.video-submit),
+.studio-shell .video-prompt-dock button:not([data-action="generate-video"]) {
+  background: var(--studio-control-bg) !important;
+  border-color: rgba(33, 0, 36, 0.12) !important;
+  color: var(--studio-control-text) !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .studio-dock-add:hover,
+.studio-shell .studio-dock-tools span:hover,
+.studio-shell .image-generate-console button:not(.image-submit):hover,
+.studio-shell .video-generate-console button:not(.video-submit):hover,
+.studio-shell .video-prompt-dock button:not([data-action="generate-video"]):hover {
+  background: var(--studio-control-bg-hover) !important;
+  border-color: rgba(255, 103, 56, 0.3) !important;
+}
+
+.studio-shell .studio-dock-generate,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-submit,
+.studio-shell .video-page-studio > .video-generate-console .video-submit,
+.studio-shell button[data-action="generate"] {
+  background: var(--studio-action-primary) !important;
+  border-color: rgba(255, 249, 240, 0.36) !important;
+  color: #ffffff !important;
+  box-shadow: 0 16px 36px rgba(255, 103, 56, 0.28) !important;
+}
+
+.studio-shell .studio-dock-generate:hover,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-submit:hover,
+.studio-shell .video-page-studio > .video-generate-console .video-submit:hover,
+.studio-shell button[data-action="generate"]:hover {
+  background: var(--studio-action-primary-hover) !important;
+  box-shadow: 0 18px 42px rgba(255, 103, 56, 0.34) !important;
+}
+
+.studio-shell input:focus,
+.studio-shell select:focus,
+.studio-shell textarea:focus,
+.studio-shell button:focus-visible {
+  border-color: rgba(255, 103, 56, 0.54) !important;
+  box-shadow: 0 0 0 4px var(--studio-focus-ring) !important;
+  outline: 0 !important;
+}
+
 /* Video empty canvas: match Image Page's full-height studio dock, keeping only
    a light cinematic hint behind the prompt. */
 html:has(.studio-shell .video-page-studio.is-empty),
@@ -47687,6 +48075,271 @@ body:has(.studio-shell .video-page-studio.is-empty),
   bottom: auto !important;
   align-self: end !important;
   margin: 0 auto max(14px, env(safe-area-inset-bottom)) !important;
+}
+
+@media (max-width: 900px) {
+  .studio-shell .workspace:has(.step-tabs) .project-step-topbar {
+    padding-inline: 10px !important;
+  }
+
+  .studio-shell .workspace:has(.step-tabs) .step-tabs button {
+    min-width: 124px !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .studio-shell .image-higgsfield-mode > .image-generate-console,
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact),
+  .studio-shell .image-higgsfield-mode > .image-generate-console.is-hover-expanded,
+  .studio-shell .image-higgsfield-mode > .image-generate-console.has-open-menu,
+  .studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt {
+    left: 8px !important;
+    right: 8px !important;
+    bottom: max(8px, env(safe-area-inset-bottom)) !important;
+    width: auto !important;
+    max-width: calc(100vw - 16px) !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto auto auto !important;
+    gap: 10px !important;
+    align-items: stretch !important;
+    padding: 10px !important;
+    overflow: visible !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console .image-console-main,
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-main,
+  .studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-console-main {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 196px !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+    gap: 8px !important;
+    grid-column: 1 !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console .image-console-prompt,
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-prompt,
+  .studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-console-prompt {
+    width: 100% !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    max-height: 58px !important;
+    grid-column: 1 !important;
+    grid-template-columns: 44px minmax(0, 1fr) !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console .image-console-prompt textarea,
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-prompt textarea,
+  .studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-console-prompt textarea {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    overflow: hidden !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console .image-console-tools,
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools,
+  .studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-console-tools {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 142px !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(92px, 0.38fr) !important;
+    grid-template-rows: 42px 42px 42px !important;
+    gap: 8px !important;
+    align-items: center !important;
+    overflow: visible !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console .image-model-enhance-group,
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-enhance-group,
+  .studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-model-enhance-group {
+    width: 100% !important;
+    min-width: 0 !important;
+    grid-template-columns: minmax(0, 1fr) 44px !important;
+    grid-column: 1 / -1 !important;
+    grid-row: 1 !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console .image-aspect-ratio-menu,
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console .image-resolution-menu,
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console .image-count-stepper,
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper {
+    grid-column: 1 / -1 !important;
+    grid-row: 3 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console .image-console-references,
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references,
+  .studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-console-references {
+    position: static !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    grid-column: 1 !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console .image-console-references .image-reference-thumb,
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references .image-reference-thumb {
+    position: static !important;
+    transform: none !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console .image-console-generate,
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate,
+  .studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-console-generate {
+    position: static !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 64px !important;
+    min-height: 64px !important;
+    max-height: 64px !important;
+    display: grid !important;
+    grid-template-columns: auto minmax(0, auto) !important;
+    grid-template-rows: auto auto !important;
+    justify-content: center !important;
+    align-content: center !important;
+    column-gap: 8px !important;
+    row-gap: 2px !important;
+    grid-column: 1 !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console .image-console-generate svg {
+    grid-row: 1 / span 2 !important;
+    align-self: center !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console .image-console-generate b,
+  .studio-shell .image-higgsfield-mode > .image-generate-console .image-console-generate span {
+    min-width: 0 !important;
+    white-space: nowrap !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .studio-shell:not(.sidebar-collapsed) .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console,
+  .studio-shell:not(.sidebar-collapsed) .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console:not(.is-compact),
+  .studio-shell.sidebar-collapsed .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console,
+  .studio-shell.sidebar-collapsed .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console:not(.is-compact) {
+    inset-inline: 8px !important;
+    bottom: max(8px, env(safe-area-inset-bottom)) !important;
+    width: auto !important;
+    max-width: calc(100vw - 16px) !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto auto auto !important;
+    gap: 10px !important;
+    padding: 10px !important;
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console > .image-console-main,
+  .studio-shell:not(.sidebar-collapsed) .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console:not(.is-compact) > .image-console-main,
+  .studio-shell.sidebar-collapsed .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console > .image-console-main,
+  .studio-shell.sidebar-collapsed .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console:not(.is-compact) > .image-console-main {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    position: relative !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 196px !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console > .image-console-main > .image-console-tools,
+  .studio-shell:not(.sidebar-collapsed) .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console:not(.is-compact) > .image-console-main > .image-console-tools,
+  .studio-shell.sidebar-collapsed .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console > .image-console-main > .image-console-tools,
+  .studio-shell.sidebar-collapsed .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console:not(.is-compact) > .image-console-main > .image-console-tools {
+    height: auto !important;
+    min-height: 142px !important;
+    grid-template-rows: 42px 42px 42px !important;
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console > .image-console-main > .image-console-prompt,
+  .studio-shell:not(.sidebar-collapsed) .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console:not(.is-compact) > .image-console-main > .image-console-prompt,
+  .studio-shell.sidebar-collapsed .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console > .image-console-main > .image-console-prompt,
+  .studio-shell.sidebar-collapsed .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console:not(.is-compact) > .image-console-main > .image-console-prompt {
+    width: 100% !important;
+    min-width: 0 !important;
+    grid-template-columns: 44px minmax(0, 1fr) !important;
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console > .image-console-main > .image-console-prompt textarea,
+  .studio-shell:not(.sidebar-collapsed) .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console:not(.is-compact) > .image-console-main > .image-console-prompt textarea,
+  .studio-shell.sidebar-collapsed .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console > .image-console-main > .image-console-prompt textarea,
+  .studio-shell.sidebar-collapsed .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console:not(.is-compact) > .image-console-main > .image-console-prompt textarea {
+    width: calc(100vw - 88px) !important;
+    min-width: calc(100vw - 88px) !important;
+    max-width: calc(100vw - 88px) !important;
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console > .image-console-references,
+  .studio-shell:not(.sidebar-collapsed) .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console:not(.is-compact) > .image-console-references,
+  .studio-shell.sidebar-collapsed .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console > .image-console-references,
+  .studio-shell.sidebar-collapsed .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console:not(.is-compact) > .image-console-references {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    position: static !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .studio-shell:not(.sidebar-collapsed) .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console > .image-console-generate,
+  .studio-shell:not(.sidebar-collapsed) .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console:not(.is-compact) > .image-console-generate,
+  .studio-shell.sidebar-collapsed .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console > .image-console-generate,
+  .studio-shell.sidebar-collapsed .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console:not(.is-compact) > .image-console-generate {
+    grid-column: 1 !important;
+    grid-row: 3 !important;
+    position: static !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 64px !important;
+    min-height: 64px !important;
+    max-height: 64px !important;
+  }
 }
 
 /* Video empty composer bottom lock: keep the bar pinned to the viewport floor. */
