@@ -9648,7 +9648,7 @@ function getCachedThumbnail(key) {
 
 function sendThumbnail(res, bytes, cacheKey = "") {
   res.setHeader("Content-Type", "image/webp");
-  res.setHeader("Cache-Control", "private, max-age=86400");
+  res.setHeader("Cache-Control", "private, max-age=604800, stale-while-revalidate=86400");
   res.setHeader("ETag", weakEtag(`${cacheKey}:${bytes.length}`));
   return res.send(bytes);
 }

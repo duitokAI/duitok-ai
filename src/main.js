@@ -71,6 +71,7 @@ let generationPollTimer = null;
 const generationStateEtags = new Map();
 const studioWallLoadingKeys = new Set();
 const resultPreviewPreloadCache = new Map();
+let assetLibraryWarmFrame = null;
 const quickFieldSaveTimers = new Map();
 let quickFieldSaveSeq = 0;
 const pendingAgentChatSync = new Set();
@@ -2065,6 +2066,10 @@ function routeShell(content) {
 }
 
 function render() {
+  if (assetLibraryWarmFrame) {
+    window.cancelAnimationFrame(assetLibraryWarmFrame);
+    assetLibraryWarmFrame = null;
+  }
   initDelegatedEvents();
   app.innerHTML = state.loading ? `<main class="loading">${icon("loader-circle")} Loading...</main>` : routeShell(route());
   applyStudioChineseLocalization();
@@ -2076,6 +2081,7 @@ function render() {
   bindStudioWallInfiniteScroll();
   bindCollapsedSidebarTooltips();
   scrollToSopAnchor();
+  scheduleAssetLibraryThumbWarmup();
 }
 
 function initDelegatedEvents() {
@@ -4352,6 +4358,12 @@ function contentLibraryPage() {
   });
   const counts = assetLibraryCounts(all);
   const groups = assetLibraryDateGroups(filtered);
+  let renderedAssetIndex = 0;
+  const sections = groups.map((group, index) => {
+    const section = assetLibraryDateSection(group, index, renderedAssetIndex);
+    renderedAssetIndex += group.entries.length;
+    return section;
+  }).join("");
   return `<section class="asset-library-experience studio-wall-zoomable" ${studioWallZoomStyleAttr()}>
     <aside class="asset-library-panel" aria-label="Content Library filters">
       <label class="asset-library-search">
@@ -4375,7 +4387,7 @@ function contentLibraryPage() {
       <div class="asset-library-filter-strip" aria-label="Asset type filters">
         ${filterOptions.map((kind) => `<button type="button" class="${activeFilter === kind ? "active" : ""}" data-asset-type="${kind}" aria-pressed="${activeFilter === kind ? "true" : "false"}">${icon(assetTypeIcon(kind), 16)} ${assetTypeLabel(kind)}<small>${counts[kind] || 0}</small></button>`).join("")}
       </div>
-      ${groups.length ? groups.map((group, index) => assetLibraryDateSection(group, index)).join("") : assetLibraryEmptyState(query)}
+      ${groups.length ? sections : assetLibraryEmptyState(query)}
     </section>
   </section>`;
 }
@@ -4482,7 +4494,7 @@ function assetLibraryDateLabel(key) {
   return date.toLocaleDateString(state.lang === "zh" ? "zh-CN" : "en-US", { month: "long", day: "numeric", year: "numeric" });
 }
 
-function assetLibraryDateSection(group, index = 0) {
+function assetLibraryDateSection(group, index = 0, startIndex = 0) {
   const zoomControl = index === 0 ? studioWallZoomControl() : "";
   return `<section class="asset-date-group">
     <header>
@@ -4493,7 +4505,7 @@ function assetLibraryDateSection(group, index = 0) {
       </div>
       ${zoomControl}
     </header>
-    <div class="asset-timeline-grid">${group.entries.map((item, index) => assetLibraryCard(item, index)).join("")}</div>
+    <div class="asset-timeline-grid">${group.entries.map((item, index) => assetLibraryCard(item, startIndex + index)).join("")}</div>
   </section>`;
 }
 
@@ -4512,7 +4524,7 @@ function assetLibraryPreview(item, kind, index = 0) {
     const body = resultPromptText(item).replaceAll("\n", " ").trim() || item.providerBody || item.body || "Text result";
     return `<div class="asset-text-thumb">${icon("file-text", 28)}<strong>${esc(item.title || "Text result")}</strong><p>${esc(body)}</p></div>`;
   }
-  return resultPreview(item, { clickable: false, wall: true, priority: index < 10, thumbWidth: 384, sizes: "(max-width: 760px) 42vw, 180px" });
+  return resultPreview(item, { clickable: false, wall: true, priority: index < 6, thumbWidth: 384, sizes: "(max-width: 760px) 42vw, 180px" });
 }
 
 function assetLibraryEmptyState(query) {
@@ -6628,12 +6640,13 @@ function resultProject(item) {
 
 function resultMediaSrc(item, kind = "image", options = {}) {
   if (!item) return "";
-  const token = encodeURIComponent(state.token || "");
-  if (kind === "video" && item.videoUrl) return `/api/media/result/${encodeURIComponent(item.id)}/video?token=${token}`;
+  const params = new URLSearchParams({ token: state.token || "" });
+  if (kind === "video" && item.videoUrl) return `/api/media/result/${encodeURIComponent(item.id)}/video?${params.toString()}`;
   if (item.imageUrl) {
     const width = Number(options.width || 0);
-    const thumb = options.thumb ? `&thumb=1${width ? `&w=${width}` : ""}` : "";
-    return `/api/media/result/${encodeURIComponent(item.id)}/image?token=${token}${thumb}`;
+    if (options.thumb) params.set("thumb", "1");
+    if (options.thumb && width) params.set("w", String(width));
+    return `/api/media/result/${encodeURIComponent(item.id)}/image?${params.toString()}`;
   }
   return "";
 }
@@ -6642,7 +6655,7 @@ function warmResultPreview(resultId) {
   if (!resultId || typeof Image === "undefined") return;
   const item = findAssetResult(resultId);
   if (!item?.imageUrl || resultPreviewPreloadCache.has(resultId)) return;
-  const src = resultMediaSrc(item, "image");
+  const src = resultMediaSrc(item, "image", { thumb: true, width: 640 });
   if (!src) return;
   const image = new Image();
   image.decoding = "async";
@@ -6655,6 +6668,20 @@ function warmResultPreview(resultId) {
   }
   image.src = src;
   image.decode?.().catch(() => {});
+}
+
+function scheduleAssetLibraryThumbWarmup() {
+  if (state.page !== "library" || state.loading) return;
+  assetLibraryWarmFrame = window.requestAnimationFrame(() => {
+    assetLibraryWarmFrame = null;
+    const warm = () => {
+      [...document.querySelectorAll(".asset-library-main [data-result-preview]")]
+        .slice(0, 8)
+        .forEach((el) => warmResultPreview(el.dataset.resultPreview));
+    };
+    if ("requestIdleCallback" in window) window.requestIdleCallback(warm, { timeout: 900 });
+    else window.setTimeout(warm, 120);
+  });
 }
 
 function resultResolutionLabel(item) {
@@ -6824,9 +6851,9 @@ function resultPreview(item, options = {}) {
   }
   const imageBase = item.imageUrl ? resultMediaSrc(item, "image") : "";
   const thumbWidth = Number(options.thumbWidth) || studioWallThumbnailWidth();
-  const imageSrc = imageBase ? (options.wall ? `${imageBase}&thumb=1&w=${thumbWidth}` : imageBase) : "";
+  const imageSrc = item.imageUrl ? (options.wall ? resultMediaSrc(item, "image", { thumb: true, width: thumbWidth }) : imageBase) : "";
   const imageSizes = options.sizes || studioWallImageSizes();
-  const imageSrcset = options.wall && imageBase ? ` srcset="${[384, 640, 960].map((width) => `${imageBase}&thumb=1&w=${width} ${width}w`).join(", ")}" sizes="${esc(imageSizes)}"` : "";
+  const imageSrcset = options.wall && item.imageUrl ? ` srcset="${[384, 640, 960].map((width) => `${resultMediaSrc(item, "image", { thumb: true, width })} ${width}w`).join(", ")}" sizes="${esc(imageSizes)}"` : "";
   const videoSrc = item.videoUrl ? resultMediaSrc(item, "video") : "";
   const imageError = "this.replaceWith(Object.assign(document.createElement('div'),{className:'result-media-error',textContent:'图片保存失败，请联系客服处理'}))";
   const ratioSync = mediaRatioSyncScript();
