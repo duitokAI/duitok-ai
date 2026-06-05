@@ -47630,3 +47630,92 @@ body:has(.studio-shell .video-prompt-extractor-page),
 .studio-shell .video-prompt-extractor-page {
   min-height: calc(100dvh - var(--project-fixed-tabs-height, 58px)) !important;
 }
+
+/* Image prompt enhance button: keep the magic-wand control calm inside the
+   light composer and prevent click/focus states from resizing the toolbar. */
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-prompt-enhance,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-prompt-enhance,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance {
+  box-sizing: border-box !important;
+  width: var(--image-toolbar-control-height, 42px) !important;
+  min-width: var(--image-toolbar-control-height, 42px) !important;
+  max-width: var(--image-toolbar-control-height, 42px) !important;
+  height: var(--image-toolbar-control-height, 42px) !important;
+  min-height: var(--image-toolbar-control-height, 42px) !important;
+  max-height: var(--image-toolbar-control-height, 42px) !important;
+  padding: 0 !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border: 1px solid rgba(139, 26, 120, 0.16) !important;
+  border-radius: 16px !important;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 249, 240, 0.9) 48%, rgba(255, 103, 56, 0.12) 100%) !important;
+  color: #8b1a78 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 8px 18px rgba(33, 0, 36, 0.08) !important;
+  outline: 0 !important;
+  transform: none !important;
+  filter: none !important;
+  transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease, box-shadow 0.12s ease !important;
+  will-change: auto !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-prompt-enhance:hover:not(:disabled),
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-prompt-enhance:hover:not(:disabled),
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance:hover:not(:disabled),
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-prompt-enhance:focus-visible,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-prompt-enhance:focus-visible,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance:focus-visible {
+  border-color: rgba(193, 43, 98, 0.28) !important;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 249, 240, 0.92) 42%, rgba(193, 43, 98, 0.16) 100%) !important;
+  color: #c12b62 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 10px 22px rgba(193, 43, 98, 0.14) !important;
+  transform: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-prompt-enhance:active,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-prompt-enhance:active,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance:active {
+  width: var(--image-toolbar-control-height, 42px) !important;
+  min-width: var(--image-toolbar-control-height, 42px) !important;
+  max-width: var(--image-toolbar-control-height, 42px) !important;
+  height: var(--image-toolbar-control-height, 42px) !important;
+  min-height: var(--image-toolbar-control-height, 42px) !important;
+  max-height: var(--image-toolbar-control-height, 42px) !important;
+  transform: none !important;
+  box-shadow:
+    inset 0 1px 2px rgba(33, 0, 36, 0.08),
+    0 8px 18px rgba(33, 0, 36, 0.08) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-prompt-enhance.is-active,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-prompt-enhance.is-active,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance.is-active {
+  border-color: rgba(255, 103, 56, 0.36) !important;
+  background:
+    linear-gradient(135deg, #8b1a78 0%, #c12b62 54%, #ff6738 100%) !important;
+  color: #fff9f0 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 249, 240, 0.28),
+    0 12px 24px rgba(193, 43, 98, 0.2) !important;
+  transform: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-prompt-enhance svg,
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-prompt-enhance i,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-prompt-enhance svg,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-long-prompt .image-prompt-enhance i,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance svg,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance i {
+  width: 17px !important;
+  min-width: 17px !important;
+  height: 17px !important;
+  min-height: 17px !important;
+  color: currentColor !important;
+  transform: none !important;
+  filter: none !important;
+}
