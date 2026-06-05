@@ -2166,6 +2166,7 @@ function publicGenerationResult(result = {}, originJob = null) {
 }
 
 function generationJobTimelineAt(job = {}) {
+  job = job || {};
   return job.timelineAt || job.createdAt || job.startedAt || job.updatedAt || job.completedAt || "";
 }
 

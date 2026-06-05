@@ -4908,11 +4908,13 @@ function studioResultWall(p, meta = {}) {
 const studioWallPageSize = 24;
 
 function generationJobTimelineTime(job = {}) {
+  job = job || {};
   const raw = job.timelineAt || job.createdAt || job.startedAt || job.updatedAt || job.completedAt || "";
   return Date.parse(raw || 0) || 0;
 }
 
 function studioWallTimelineTime(item = {}) {
+  item = item || {};
   const originJob = resultOriginJob(item);
   const raw = item.timelineAt || originJob?.timelineAt || originJob?.createdAt || item.createdAt || item.startedAt || item.updatedAt || item.completedAt || "";
   return Date.parse(raw || 0) || 0;
