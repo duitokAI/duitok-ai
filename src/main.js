@@ -1071,7 +1071,7 @@ const copy = {
     sopDashboard: "SOP Dashboard",
     statImage: "Image",
     statUgc: "UGC",
-    statAuto: "Product Scanner",
+    statAuto: "Audio",
     statOriginal: "Original Video",
     statClone: "Clone Prompt",
     statReady: "Ready to Post",
@@ -1150,7 +1150,7 @@ const copy = {
     imagesPossible: "images possible",
     video8s: "Video 8s",
     videosPossible: "videos possible",
-    autoContentPack: "Product Scanner (10 video pack)",
+    autoContentPack: "Audio voiceover pack",
     batch: "batch",
     autoContentPackNote: "10 video x 8s + 1 master plan",
     selectCreditPackage: "Select credit package",
@@ -4824,7 +4824,7 @@ function sopButtonLabel() {
     en: {
       image: "Image SOP",
       ugc: "UGC SOP",
-      auto: "Product Scanner SOP",
+      auto: "Audio SOP",
       original: "Original Video SOP",
       clone: "Clone Prompt SOP",
       story: "Story SOP",
@@ -4851,7 +4851,7 @@ function studioStepMeta(step = state.step) {
   return {
     image: { title: "图片", icon: "image", action: "generate-image", promptField: "image.prompt", prompt: "Create a high-converting TikTok Shop product image...", types: ["image", "visual_card"], primary: "Generate" },
     ugc: { title: "UGC", icon: "video", action: "generate-ugc", promptField: "ugc.script", prompt: "Describe the UGC scene, product action, and spoken line...", types: ["ugc", "video"], primary: "Generate Video" },
-    auto: { title: "商品扫描器", icon: "layout-template", action: "generate-auto", promptField: "auto.productUrl", prompt: "Paste product link or describe the product...", types: ["auto"], primary: "Generate Batch", input: true },
+    auto: { title: "Audio", icon: "audio-lines", action: "generate-audio", promptField: "auto.audioPrompt", prompt: "Describe the voice, scene, and emotion you imagine...", types: ["audio"], primary: "Generate Audio" },
     original: { title: "原创视频", icon: "film", action: "analyze-original", promptField: "original.brief", prompt: "Describe the video scene, camera, action, mood, and dialogue...", types: ["original", "video"], primary: "Generate Video" },
     clone: { title: "影片 Prompt 提取", icon: "layers-3", action: "clone-prompt", promptField: "clone.notes", prompt: "Drop a reference video to extract its reusable prompt.", types: ["clone"], primary: "Extract Prompt" },
     story: { title: "故事脚本", icon: "book-open", action: "write-story", promptField: "story.notes", prompt: "Describe the story topic, emotion, product, or lesson...", types: ["story"], primary: "Preview" }
@@ -6000,71 +6000,109 @@ function wordCount(value = "") {
 }
 
 function autoPanel(p) {
-  const source = p.auto.source || "Affiliate";
-  const provider = p.auto.provider || "Veo 3.1";
-  const planStyle = p.auto.planStyle || "Normal Flow";
-  const duration = p.auto.duration || "8s";
-  const size = p.auto.size || "9:16";
-  const ctaMode = p.auto.ctaMode || "Shop CTA";
-  const quantity = String(p.auto.quantity || "5");
-  const selectedFrameworks = Array.isArray(p.auto.frameworks) ? p.auto.frameworks : [];
-  const frameworks = autoFrameworks();
-  return studioImmersiveShell(p, "auto", `
-    <section class="auto-content-card auto-command-card">
-      <div class="auto-content-head">
-        <h2>${icon("wand-sparkles", 26)} Product Scanner</h2>
-        <span>AI → IMAGE → VIDEO → MERGE</span>
-      </div>
-      <div class="auto-source-tabs">
-        ${autoButton("auto.source", "Affiliate", "🔗 Affiliate", source)}
-        ${autoButton("auto.source", "Manual Product", "📦 Manual Product", source)}
-      </div>
-      <label class="auto-product-picker">
-        <input data-field="auto.productUrl" value="${esc(p.auto.productUrl)}" placeholder="Pick a product from the dropdown →">
-        <span>🕐 <b>0</b></span>
-      </label>
-      <p class="auto-helper">Untuk Fetch Buka Extension Auto Post Tab Affiliate</p>
-      <div class="auto-persona-card form-grid three">
-        ${select("auto.gender", "Gender", ["Female", "Male"], p.auto.gender || "Female")}
-        ${select("auto.style", "Style", ["Hijab", "No Hijab", "Casual", "Professional"], p.auto.style || "Hijab")}
-        ${select("auto.age", "Age", ["20s", "30s", "40s (Makcik)", "55+ (Nenek)"], p.auto.age || "30s")}
-      </div>
-      <p class="field-label">Provider</p>
-      <div class="auto-provider-grid">
-        ${autoButton("auto.provider", "Veo 3.1", "🎬 Veo 3.1", provider)}
-        ${autoButton("auto.provider", "Sora 2", "⚡ Sora 2", provider)}
-        ${autoButton("auto.provider", "GeminiOmni", "🔷 Pokaya AI", provider)}
-      </div>
-      <div class="auto-duration-row">
-        ${autoButton("auto.duration", "8s", "8s (1 shot)", duration)}
-        ${autoButton("auto.duration", "16s", "16s (2 shots)", duration)}
-      </div>
-      <label class="auto-size-field">Size${select("auto.size", "", ["9:16", "16:9", "1:1"], size)}</label>
-      <p class="field-label">Plan Style</p>
-      <div class="auto-plan-grid">
-        ${autoPlanButton("Normal Flow", "AI plans the batch from selected frameworks.", planStyle)}
-        ${autoPlanButton("Custom Idea", "Start from your own idea, then create variants.", planStyle, true)}
-      </div>
-      <p class="field-label">Frameworks <small>(pick up to 5 angles)</small></p>
-      <div class="auto-framework-grid">
-        ${frameworks.map((item) => autoFrameworkChip(item, selectedFrameworks)).join("")}
-      </div>
-      <section class="auto-cta-card">
-        <p class="field-label">CTA Mode <small>(last 2 seconds)</small></p>
-        <div class="auto-cta-list">
-          ${autoChoiceCard("auto.ctaMode", "Shop CTA", "🛒 SHOP CTA", "\"Tekan beg kuning\" style ending with rotating variants.", ctaMode)}
-          ${autoChoiceCard("auto.ctaMode", "Custom CTA", "✏️ CUSTOM CTA", "Use your own closing line or promotion instruction.", ctaMode)}
-          ${autoChoiceCard("auto.ctaMode", "No CTA", "🚫 NO CTA", "Use the full video for content only.", ctaMode)}
-        </div>
-      </section>
-      <div class="auto-submit-row">
-        <label>Quantity${select("auto.quantity", "", ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"], quantity)}</label>
-        <button class="gold-button auto-generate-button" data-action="generate-auto">${icon("video")} Generate</button>
+  const auto = p.auto || {};
+  const mode = auto.audioMode || "Voiceover";
+  const language = auto.audioLanguage || "Malay";
+  const scriptMode = auto.audioScriptMode || "Write for me";
+  const voicePreset = auto.voicePreset || "Malay Soft Sell";
+  const promptText = auto.audioPrompt || "";
+  const audioItems = (p.results || []).filter((item) => item.type === "audio").slice(-6).reverse();
+  return `<section class="audio-studio-page">
+    <section class="audio-stage-hero">
+      <div class="audio-eq" aria-hidden="true">${Array.from({ length: 34 }, (_, index) => `<i style="--bar:${index % 9}"></i>`).join("")}</div>
+      <div class="audio-title-lockup">
+        <span>AUDIO</span>
+        <h1>Ready to give your video a voice?</h1>
+        <p>Generate voiceover direction for TikTok Shop videos, with change voice and translate workflows prepared for the next backend phase.</p>
       </div>
     </section>
-    ${autoProcessLog(p)}
-    ${autoHistoryPanel(p)}
-  `);
+    <section class="audio-recent-panel">
+      <header>
+        <div><b>${icon("history", 18)} Recent audio</b><span>${audioItems.length ? `${audioItems.length} clips` : "No audio clips yet"}</span></div>
+        <button type="button" data-action="audio-coming-soon">${icon("folder-open", 16)} Save to Library</button>
+      </header>
+      ${audioItems.length ? `<div class="audio-result-list">${audioItems.map(audioResultCard).join("")}</div>` : audioEmptyState()}
+    </section>
+    <section class="audio-composer" aria-label="Audio composer">
+      <div class="audio-mode-dial" role="tablist" aria-label="Audio mode">
+        ${audioModeButton("Voiceover", "mic", "Create spoken narration", mode, false)}
+        ${audioModeButton("Change Voice", "refresh-cw", "Coming soon", mode, true)}
+        ${audioModeButton("Translate", "languages", "Coming soon", mode, true)}
+      </div>
+      <div class="audio-prompt-well">
+        <textarea data-field="auto.audioPrompt" data-audio-prompt rows="3" placeholder="Describe the voice, scene, and emotion you imagine...">${esc(promptText)}</textarea>
+        <div class="audio-control-row">
+          <span class="audio-model-chip">${icon("audio-lines", 16)} Pokaya Voice v1</span>
+          ${audioSegment("auto.audioLanguage", [["Malay", "Malay"], ["English", "English"], ["Chinese", "Chinese"], ["Indonesian", "Indonesian"]], language)}
+          ${audioSegment("auto.audioScriptMode", [["Write for me", "Write for me"], ["Use my script", "Use my script"]], scriptMode)}
+        </div>
+      </div>
+      <details class="audio-preset-picker">
+        <summary>
+          <span>Voice Preset</span>
+          <b>${esc(voicePreset)}</b>
+          <em>${audioMiniWaveform()}</em>
+          <i>${icon("play", 16)}</i>
+        </summary>
+        <div class="audio-preset-menu">
+          ${audioPresetButton("Malay Soft Sell", "Female · MY · warm", voicePreset)}
+          ${audioPresetButton("Energetic Creator", "Female · EN · fast", voicePreset)}
+          ${audioPresetButton("Calm Explainer", "Male · EN · calm", voicePreset)}
+          ${audioPresetButton("Chinese Warm", "Female · ZH · gentle", voicePreset)}
+          ${audioPresetButton("Indo Promo", "Female · ID · bright", voicePreset)}
+          ${audioPresetButton("Abang Trust", "Male · MY · confident", voicePreset)}
+        </div>
+      </details>
+      <button class="audio-generate-button" type="button" data-action="generate-audio" ${promptText.trim() ? "" : "disabled"}>
+        <b>Generate Audio</b>
+        <span>0.20 Credit</span>
+      </button>
+    </section>
+  </section>`;
+}
+
+function audioModeButton(value, ic, note, active, disabled = false) {
+  return `<button type="button" class="${active === value ? "active" : ""}" data-field-set="auto.audioMode" data-value="${esc(value)}" ${disabled ? "disabled aria-disabled=\"true\" title=\"Coming soon\"" : ""}>
+    ${icon(ic, 18)}
+    <span>${esc(value)}</span>
+    <small>${esc(note)}</small>
+  </button>`;
+}
+
+function audioSegment(field, options, active) {
+  return `<div class="audio-segment">${options.map(([value, label]) => `<button type="button" class="${active === value ? "active" : ""}" data-field-set="${esc(field)}" data-value="${esc(value)}">${esc(label)}</button>`).join("")}</div>`;
+}
+
+function audioPresetButton(value, meta, active) {
+  return `<button type="button" class="${active === value ? "active" : ""}" data-field-set="auto.voicePreset" data-value="${esc(value)}">
+    <span>${esc(value)}</span>
+    <small>${esc(meta)}</small>
+    <i>${icon(active === value ? "check" : "play", 15)}</i>
+  </button>`;
+}
+
+function audioMiniWaveform() {
+  return Array.from({ length: 16 }, (_, index) => `<span style="--h:${(index * 7) % 13}"></span>`).join("");
+}
+
+function audioEmptyState() {
+  return `<div class="audio-empty-state">
+    ${icon("audio-lines", 30)}
+    <strong>Audio generation is ready for backend hookup.</strong>
+    <span>Voiceover UI, presets, language controls, and result space are in place. Connect a generate-audio queue action to create real clips.</span>
+  </div>`;
+}
+
+function audioResultCard(item) {
+  return `<article class="audio-result-card">
+    <button type="button" data-action="audio-coming-soon">${icon("play", 16)}</button>
+    <div>
+      <b>${esc(item.title || "Audio clip")}</b>
+      <span>${audioMiniWaveform()}</span>
+      <small>${esc(item.prompt || item.body || "Generated voiceover")}</small>
+    </div>
+    <button type="button" data-action="audio-coming-soon">${icon("download", 16)}</button>
+  </article>`;
 }
 
 function autoButton(field, value, label, active) {
@@ -6118,7 +6156,7 @@ function autoProcessLog(p) {
 function autoHistoryPanel(p) {
   const items = p.results.filter((item) => item.type === "auto").slice(-8).reverse();
   return `<section class="auto-history-card">
-    <header><h3>${icon("history", 18)} History — Product Scanner — ${esc(p.name)}</h3><span>${items.length} items</span></header>
+    <header><h3>${icon("history", 18)} History — Audio — ${esc(p.name)}</h3><span>${items.length} items</span></header>
     ${items.length ? `<div class="result-grid">${items.map(resultCard).join("")}</div>` : `<div class="viral-empty"><b>${icon("history", 28)}</b><strong>Belum ada history.</strong><span>Generate satu, ia akan muncul di sini.</span></div>`}
   </section>`;
 }
