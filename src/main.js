@@ -5601,32 +5601,34 @@ function imageBatchCount(p = project()) {
 }
 
 function imageModelCapabilities(model = "GPT Image 2") {
-  const commonRatios = ["9:16", "3:4", "2:3", "1:1", "4:3", "16:9", "3:2"];
-  const imageAspectRatiosAll = ["9:16", "3:4", "2:3", "1:1", "4:3", "16:9", "3:2", "4:5", "5:4", "1:2", "2:1", "1:3", "3:1", "9:21", "21:9"];
-  const nanoBananaAspectRatios = [...imageAspectRatiosAll, "1:4", "4:1", "1:8", "8:1"];
+  const imageAspectRatiosAll = ["9:16", "3:4", "2:3", "1:1", "4:3", "16:9", "3:2", "4:5", "5:4", "1:2", "2:1", "1:3", "3:1", "9:21", "21:9", "1:4", "4:1", "1:8", "8:1"];
   const capabilities = {
     "GPT Image 2": {
       aspectRatios: imageAspectRatiosAll,
       resolutions: ["1K", "2K", "4K"]
     },
     "Seedream 5.0 Lite": {
-      aspectRatios: [...commonRatios, "21:9"],
+      aspectRatios: imageAspectRatiosAll,
       resolutions: ["2K", "3K"]
     },
     "Seedream 4.5": {
-      aspectRatios: [...commonRatios, "9:21", "21:9"],
+      aspectRatios: imageAspectRatiosAll,
       resolutions: ["2K", "4K"]
     },
+    "Qwen Image 2.0": {
+      aspectRatios: imageAspectRatiosAll,
+      resolutions: ["1K", "2K"]
+    },
     "Nano Banana Pro": {
-      aspectRatios: ["9:16", "3:4", "2:3", "1:1", "16:9", "3:2", "4:5", "5:4", "21:9"],
+      aspectRatios: imageAspectRatiosAll,
       resolutions: ["1K", "2K", "4K"]
     },
     "Nano Banana 2": {
-      aspectRatios: nanoBananaAspectRatios,
+      aspectRatios: imageAspectRatiosAll,
       resolutions: ["512", "1K", "2K", "4K"]
     },
     "Grok Imagine": {
-      aspectRatios: ["1:1", "16:9", "9:16", "3:2", "2:3"],
+      aspectRatios: imageAspectRatiosAll,
       resolutions: ["1K"]
     }
   };
