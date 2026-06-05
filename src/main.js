@@ -13965,8 +13965,8 @@ function agentHistorySessionSort(a = {}, b = {}) {
   const pinnedA = a.pinnedAt ? 1 : 0;
   const pinnedB = b.pinnedAt ? 1 : 0;
   if (pinnedA !== pinnedB) return pinnedB - pinnedA;
-  const timeA = Date.parse(a.lastOpenedAt || a.updatedAt || a.createdAt || 0) || 0;
-  const timeB = Date.parse(b.lastOpenedAt || b.updatedAt || b.createdAt || 0) || 0;
+  const timeA = Date.parse(a.updatedAt || a.createdAt || 0) || 0;
+  const timeB = Date.parse(b.updatedAt || b.createdAt || 0) || 0;
   return timeB - timeA;
 }
 
@@ -14278,9 +14278,6 @@ function switchAgentChat(id, options = {}) {
   const messages = agentMessagesForStorage(targetSession.messages);
   clearAgentTypingTimer();
   localStorage.setItem(storageKeys.agentMessages, JSON.stringify(messages));
-  const openedAt = new Date().toISOString();
-  const updatedSession = { ...targetSession, lastOpenedAt: openedAt };
-  mergeAgentHistorySessionInPlace(updatedSession);
   Object.assign(state, {
     page: "agent",
     agentMessages: messages,
