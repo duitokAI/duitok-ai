@@ -4920,7 +4920,7 @@ function assetLibraryDateSection(group, index = 0, startIndex = 0) {
 
 function assetLibraryCard(item, index = 0) {
   const kind = assetMediaKind(item);
-  const title = item.title || item.providerTitle || resultMediaLabel(item);
+  const title = resultTitle(item);
   return `<article class="asset-tile asset-tile-${esc(kind)}" data-result-id="${esc(item.id)}">
     <button type="button" class="asset-tile-preview" data-result-preview="${esc(item.id)}" aria-label="Preview ${esc(title)}">
       ${assetLibraryPreview(item, kind, index)}
@@ -4931,7 +4931,7 @@ function assetLibraryCard(item, index = 0) {
 function assetLibraryPreview(item, kind, index = 0) {
   if (kind === "text") {
     const body = resultPromptText(item).replaceAll("\n", " ").trim() || item.providerBody || item.body || "Text result";
-    return `<div class="asset-text-thumb">${icon("file-text", 28)}<strong>${esc(item.title || "Text result")}</strong><p>${esc(body)}</p></div>`;
+    return `<div class="asset-text-thumb">${icon("file-text", 28)}<strong>${esc(resultTitle(item))}</strong><p>${esc(body)}</p></div>`;
   }
   return resultPreview(item, { clickable: false, wall: true, priority: index < 6, thumbWidth: 384, sizes: "(max-width: 760px) 42vw, 180px" });
 }
@@ -5525,7 +5525,7 @@ function studioWallCard(item, index = 0) {
       <button type="button" data-result-action="download" data-result-id="${esc(item.id)}" data-result-kind="${esc(downloadKind)}" data-tooltip="Download" aria-label="Download ${esc(mediaKind.toLowerCase())}">${icon("download", 18)}</button>
       <button type="button" data-result-action="delete" data-result-id="${esc(item.id)}" data-tooltip="Delete" aria-label="Delete">${icon("trash-2", 18)}</button>
     </div>
-    <footer><b>${esc(item.title || resultModelLabel(item))}</b><span>${esc(promptText ? promptText.slice(0, 92) : resultMediaLabel(item))}</span></footer>
+    <footer><b>${esc(resultTitle(item))}</b><span>${esc(promptText ? promptText.slice(0, 92) : resultMediaLabel(item))}</span></footer>
   </article>`;
 }
 
@@ -5709,7 +5709,7 @@ function imageCanvasPreview(item) {
   return `<article class="image-main-preview">
     <div class="image-preview-frame">${resultPreview(item)}</div>
     <footer>
-      <div><b>${esc(item.title || resultModelLabel(item))}</b><span>${esc(promptText ? promptText.slice(0, 150) : "Generated Pokaya image")}</span></div>
+      <div><b>${esc(resultTitle(item))}</b><span>${esc(promptText ? promptText.slice(0, 150) : resultMediaLabel(item))}</span></div>
       <div class="image-preview-actions">
         <button type="button" data-result-action="download" data-result-id="${esc(item.id)}" data-result-kind="${item.videoUrl ? "video" : item.imageUrl ? "image" : "text"}">${icon("download", 16)} Download</button>
         <button type="button" data-result-action="save" data-result-id="${esc(item.id)}">${icon("image-plus", 16)} Save ref</button>
@@ -5762,7 +5762,7 @@ function imageHistoryThumb(item, selectedId = "") {
       : `<span>${icon("file-text", 22)}</span>`;
   return `<button class="image-history-thumb ${active ? "active" : ""}" type="button" data-image-canvas-result="${esc(item.id)}">
     ${media}
-    <small>${esc(item.title || resultModelLabel(item))}</small>
+    <small>${esc(resultTitle(item))}</small>
   </button>`;
 }
 
@@ -6359,7 +6359,7 @@ function videoModelOptions() {
         modes: ["Text to Video", "Image to Video"],
         aspectRatios: ["9:16", "16:9", "1:1"],
         qualities: ["720p", "1080p"],
-        durations: ["4s", "8s", "12s", "15s"],
+        durations: ["5s", "8s", "12s", "15s"],
         audio: ["On", "Off"]
       }
     },
@@ -6374,7 +6374,7 @@ function videoModelOptions() {
         modes: ["Text to Video", "Image to Video"],
         aspectRatios: ["9:16", "16:9", "1:1"],
         qualities: ["480p", "720p"],
-        durations: ["4s", "8s", "12s", "15s"],
+        durations: ["5s", "8s", "12s", "15s"],
         audio: ["On", "Off"]
       }
     },
@@ -6703,7 +6703,6 @@ function videoDurationOption(value) {
     label: value,
     title: value,
     description: {
-      "4s": "Shortest Seedance clip",
       "5s": "Quick shot",
       "6s": "Short creative clip",
       "8s": "Standard clip",
@@ -7517,7 +7516,7 @@ function generationJobCard(job) {
 }
 
 function resultCard(item) {
-  const title = item.title || "Generated asset";
+  const title = resultTitle(item);
   const promptText = resultPromptText(item);
   const promptPreview = promptText.replaceAll("\n", " ").trim();
   const hasPrompt = Boolean(promptPreview);
@@ -7578,9 +7577,34 @@ function resultModelLabel(item) {
   return item.videoUrl ? "VIDEO MODEL" : "GPT IMAGE 2";
 }
 
+function normalizedResultTitle(value = "") {
+  return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function resultShortId(item = {}) {
+  const prefix = item.videoUrl || item.type === "video" ? "VID" : item.audioUrl || item.type === "audio" ? "AUD" : item.imageUrl || item.visualCard || item.type === "image" ? "IMG" : "GEN";
+  const source = String(item.id || item.providerTaskId || item.taskId || item.createdAt || "result")
+    .replace(/[^a-z0-9]/gi, "")
+    .toUpperCase();
+  return `${prefix}-${source.slice(-6).padStart(6, "0")}`;
+}
+
+function isDefaultResultTitle(title = "", item = {}) {
+  const value = normalizedResultTitle(title);
+  if (!value) return true;
+  const providerTitle = normalizedResultTitle(item.providerTitle);
+  if (providerTitle && value.toLowerCase() === providerTitle.toLowerCase()) return true;
+  if (/^(pokaya\s+ai\s+)?(image|video|result)$/i.test(value)) return true;
+  if (/^(pokaya\s+image|pokaya\s+image\s+pro|pokaya\s+ai\s+image|pokaya\s+ai\s+video|pokaya\s+ai\s+result)$/i.test(value)) return true;
+  if (/^(generated\s+asset|generated\s+image|generated\s+video|generated\s+text|untitled\s+image|untitled\s+video)$/i.test(value)) return true;
+  if (/^(gpt\s+image\s+2|apimart\s+image|nano\s+banana\s+pro|nano\s+banana\s+2|seedream\s+4\.5|seedream\s+5\.0\s+lite|qwen\s+image\s+2\.0|grok\s+imagine|veo\s+3\.1)$/i.test(value)) return true;
+  return false;
+}
+
 function resultTitle(item) {
-  if (!item) return "Untitled image";
-  return item.title || item.providerTitle || (item.videoUrl ? "Untitled video" : "Untitled image");
+  if (!item) return resultShortId({});
+  const title = normalizedResultTitle(item.title);
+  return isDefaultResultTitle(title, item) ? resultShortId(item) : title;
 }
 
 function resultModelDisplay(item) {
@@ -7897,7 +7921,7 @@ function resultProjectInfoRow(item) {
 }
 
 function resultDownloadFilename(item, kind = "image") {
-  const base = String(item?.title || item?.providerTitle || item?.id || "pokaya-asset")
+  const base = String(resultTitle(item) || item?.id || "pokaya-asset")
     .toLowerCase()
     .replace(/[^a-z0-9\u4e00-\u9fa5]+/gi, "-")
     .replace(/^-+|-+$/g, "")
@@ -7923,7 +7947,7 @@ function resultPreview(item, options = {}) {
   const eagerMedia = Boolean(options.full || options.priority);
   const imagePriority = options.full || options.priority ? "high" : options.wall ? "auto" : "low";
   const imageDecoding = options.full ? "sync" : "async";
-  const image = imageSrc ? `<img class="result-image" src="${imageSrc}"${imageSrcset} alt="${esc(item.title)}" loading="${eagerMedia ? "eager" : "lazy"}" decoding="${imageDecoding}" fetchpriority="${imagePriority}" draggable="false" onload="${esc(ratioSync)}" onerror="${esc(imageError)}">` : "";
+  const image = imageSrc ? `<img class="result-image" src="${imageSrc}"${imageSrcset} alt="${esc(resultTitle(item))}" loading="${eagerMedia ? "eager" : "lazy"}" decoding="${imageDecoding}" fetchpriority="${imagePriority}" draggable="false" onload="${esc(ratioSync)}" onerror="${esc(imageError)}">` : "";
   const videoPreload = eagerMedia ? "metadata" : "none";
   const video = videoSrc ? `<div class="result-video-shell"><video class="result-video" src="${videoSrc}" preload="${videoPreload}" playsinline onloadedmetadata="${esc(ratioSync)}"></video><button type="button" class="result-play-button" data-video-play="${esc(item.id)}">${icon("play", 26)}<span>点击播放</span></button></div>` : "";
   const videoPoster = videoSrc ? `<div class="result-video-shell result-video-poster" aria-hidden="true"><span class="result-video-poster-icon">${icon("video", 30)}</span><span class="result-play-button">${icon("play", 26)}<span>点击查看</span></span></div>` : "";
