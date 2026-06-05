@@ -1218,6 +1218,7 @@ function sanitizeAgentChatMessages(messages = []) {
     .map((item) => ({
       role: item.role,
       content: sanitizeAgentText(item.content || "").slice(0, 1600),
+      ...(item.clientMessageId ? { clientMessageId: sanitizeAgentText(item.clientMessageId).slice(0, 100) } : {}),
       ...(Array.isArray(item.attachments) && item.attachments.length ? {
         attachments: item.attachments.slice(0, 4).map((attachment) => ({
           id: sanitizeAgentText(attachment.id || "").slice(0, 80),
@@ -5152,7 +5153,8 @@ function sanitizeAgentMessageHistory(messages = []) {
     .slice(-agentHistoryHardLimit)
     .map((item) => ({
       role: item.role,
-      content: sanitizeAgentText(item.content).slice(0, agentMessageCharLimit)
+      content: sanitizeAgentText(item.content).slice(0, agentMessageCharLimit),
+      ...(item.clientMessageId ? { clientMessageId: sanitizeAgentText(item.clientMessageId).slice(0, 100) } : {})
     }))
     .filter((item) => item.content);
 }
@@ -8188,6 +8190,8 @@ app.post("/api/agent", async (req, res, next) => {
     const stateForUser = publicState(db, user);
     const preferenceSummary = buildAgentPreferenceSummary(db, user);
     const isolatedContext = req.body.isolatedContext === true;
+    const chatId = sanitizeAgentText(req.body.chatId || "").slice(0, 100);
+    const clientMessageId = sanitizeAgentText(req.body.clientMessageId || "").slice(0, 100);
     const projectId = isolatedContext ? "" : req.body.projectId || stateForUser.projects[0]?.id;
     const latestUserMessage = [...history].reverse().find((item) => item.role === "user" && typeof item.content === "string")?.content || (attachments.length ? "User attached media and wants Agent to decide the next step." : "");
     const contextSummary = agentContextSummary({
@@ -8203,6 +8207,8 @@ app.post("/api/agent", async (req, res, next) => {
     let agentRun = {
       id: runId,
       userId: user.id,
+      chatId,
+      clientMessageId,
       projectId: projectId || "",
       status: "planning",
       intent,
@@ -8225,6 +8231,8 @@ app.post("/api/agent", async (req, res, next) => {
       };
       await saveAgentRun(agentRun);
       return res.json({
+        chatId,
+        clientMessageId,
         reply: agentSecurityRefusal(latestUserMessage),
         db: stateForUser,
         toolResults: [],
@@ -8242,6 +8250,8 @@ app.post("/api/agent", async (req, res, next) => {
       };
       await saveAgentRun(agentRun);
       return res.status(503).json({
+        chatId,
+        clientMessageId,
         error: "Agent brain is not configured yet.",
         reply: "Agent 上游模型还没配置好，请管理员检查 DEEPSEEK_API_KEY 和 DEEPSEEK_MODEL。",
         db: stateForUser,
@@ -8261,6 +8271,8 @@ app.post("/api/agent", async (req, res, next) => {
       };
       await saveAgentRun(agentRun);
       return res.json({
+        chatId,
+        clientMessageId,
         reply: agentVisionUnavailableReply(user.lang || stateForUser.lang || "zh"),
         db: stateForUser,
         toolResults: [],
@@ -8355,6 +8367,8 @@ app.post("/api/agent", async (req, res, next) => {
         };
         await saveAgentRun(agentRun);
         return res.json({
+          chatId,
+          clientMessageId,
           reply: sanitizeAgentReply(message.content || "Done.", latestUserMessage),
           db: latestDb,
           toolResults,
@@ -8389,6 +8403,8 @@ app.post("/api/agent", async (req, res, next) => {
           };
           await saveAgentRun(agentRun);
           return res.json({
+            chatId,
+            clientMessageId,
             reply: confirmation.message,
             db: latestDb,
             toolResults,
@@ -8415,6 +8431,8 @@ app.post("/api/agent", async (req, res, next) => {
           };
           await saveAgentRun(agentRun);
           return res.status(error.status || 500).json({
+            chatId,
+            clientMessageId,
             reply: sanitizeAgentReply(`I could not complete that action. ${recovery.reason}`, latestUserMessage),
             db: latestDb,
             toolResults,
@@ -8475,6 +8493,8 @@ app.post("/api/agent", async (req, res, next) => {
       }
     }
     res.json({
+      chatId,
+      clientMessageId,
       reply: sanitizeAgentReply(finalReply || "I completed the available Pokaya actions. Check the updated workspace.", latestUserMessage),
       db: latestDb,
       toolResults,

@@ -12325,6 +12325,32 @@ function mergeAgentHistorySessionInPlace(session = {}) {
   return rememberAgentHistorySessions(nextSessions, { replace: true });
 }
 
+function agentChatIsActive(id = "") {
+  return Boolean(id) && String(state.activeAgentHistoryId || "") === String(id);
+}
+
+function saveAgentHistoryMessagesForSession(id = "", messages = [], patch = {}, options = {}) {
+  const chatId = String(id || "");
+  const safeMessages = agentMessagesForStorage(messages);
+  if (!chatId || !safeMessages.length) return null;
+  const sessions = normalizeAgentHistorySessions(state.agentHistorySessions || []);
+  const existing = sessions.find((item) => item.id === chatId) || {};
+  const session = {
+    ...existing,
+    ...patch,
+    id: chatId,
+    title: String(existing.title || patch.title || "").trim()
+      ? (existing.title || patch.title)
+      : agentHistoryTitleFromMessages(safeMessages),
+    isolatedContext: Boolean(existing.isolatedContext || patch.isolatedContext),
+    updatedAt: new Date().toISOString(),
+    messages: safeMessages
+  };
+  mergeAgentHistorySessionInPlace(session);
+  if (options.persist !== false) persistAgentChatSession(session);
+  return session;
+}
+
 function migrateAgentHistorySessions() {
   const current = Array.isArray(state.agentHistorySessions) ? state.agentHistorySessions : [];
   const normalized = normalizeAgentHistorySessions(current);
@@ -12702,6 +12728,7 @@ function agentMessagesForStorage(messages = []) {
     .map((item) => ({
       role: item.role,
       content: String(item.content || "").slice(0, 1600),
+      ...(item.clientMessageId ? { clientMessageId: String(item.clientMessageId).slice(0, 100) } : {}),
       ...(Array.isArray(item.attachments) && item.attachments.length ? { attachments: item.attachments.map(agentAttachmentForStorage) } : {}),
       ...(item.agentRun ? { agentRun: compactAgentRunForStorage(item.agentRun) } : {})
     }));
@@ -13137,11 +13164,13 @@ async function runAgentMessage(message, attachments = [], queuedApiAttachments =
   clearAgentTypingTimer();
   agentAbortController?.abort();
   agentAbortController = new AbortController();
+  const requestController = agentAbortController;
   const userContent = content || "请先看我上传的附件，然后判断下一步应该怎么做。";
   const isolatedAgentContext = activeAgentHistoryIsIsolated() || (!state.activeAgentHistoryId && !(state.agentMessages || []).length);
   const messageAttachments = attachments.map(agentAttachmentForStorage);
   const apiAttachments = Array.isArray(queuedApiAttachments) ? queuedApiAttachments : attachments.map(agentAttachmentForApi);
-  const nextMessages = [...state.agentMessages, { role: "user", content: userContent, attachments: messageAttachments }];
+  const clientMessageId = `msg_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+  const nextMessages = [...state.agentMessages, { role: "user", content: userContent, attachments: messageAttachments, clientMessageId }];
   rememberAgentMessages(nextMessages);
   saveCurrentAgentHistory(nextMessages, { isolatedContext: isolatedAgentContext });
   const lockedAgentHistoryId = state.activeAgentHistoryId;
@@ -13152,10 +13181,12 @@ async function runAgentMessage(message, attachments = [], queuedApiAttachments =
   try {
     const res = await api("/agent", {
       method: "POST",
-      signal: agentAbortController.signal,
+      signal: requestController.signal,
       body: JSON.stringify({
         messages: nextMessages,
         attachments: apiAttachments,
+        chatId: lockedAgentHistoryId,
+        clientMessageId,
         contextSummary: isolatedAgentContext ? "" : state.agentContextSummary,
         projectId: isolatedAgentContext ? "" : state.projectId,
         isolatedContext: isolatedAgentContext,
@@ -13163,12 +13194,22 @@ async function runAgentMessage(message, attachments = [], queuedApiAttachments =
         step: state.step
       })
     });
-    agentAbortController = null;
+    if (agentAbortController === requestController) agentAbortController = null;
     const db = res.db || state.db;
+    const responseChatId = res.chatId || res.agentRun?.chatId || lockedAgentHistoryId;
+    const finalAssistantMessage = { role: "assistant", content: res.reply || "Done.", agentRun: res.agentRun || null };
+    if (responseChatId !== lockedAgentHistoryId || !agentChatIsActive(lockedAgentHistoryId)) {
+      if (res.db) state.db = res.db;
+      saveAgentHistoryMessagesForSession(lockedAgentHistoryId, [...nextMessages, finalAssistantMessage], { isolatedContext: isolatedAgentContext });
+      if (res.toolResults?.length) notify(t("toastAgentWorkspaceUpdated"));
+      if ((db.generationJobs || []).some((job) => ["queued", "processing"].includes(job.status))) pollGenerationQueue();
+      window.setTimeout(processAgentQueue, 0);
+      return;
+    }
     typeAgentReply({
       baseMessages: nextMessages,
-      assistantMessage: { role: "assistant", content: "", agentRun: res.agentRun || null },
-      fullContent: res.reply || "Done.",
+      assistantMessage: { ...finalAssistantMessage, content: "" },
+      fullContent: finalAssistantMessage.content,
       finalPatch: {
         db,
         agentAttachments: [],
@@ -13183,11 +13224,17 @@ async function runAgentMessage(message, attachments = [], queuedApiAttachments =
     });
   } catch (error) {
     if (error?.name === "AbortError") return;
-    agentAbortController = null;
+    if (agentAbortController === requestController) agentAbortController = null;
     const safeError = agentUserSafeError(error);
+    const finalAssistantMessage = { role: "assistant", content: safeError };
+    if (!agentChatIsActive(lockedAgentHistoryId)) {
+      saveAgentHistoryMessagesForSession(lockedAgentHistoryId, [...nextMessages, finalAssistantMessage], { isolatedContext: isolatedAgentContext });
+      window.setTimeout(processAgentQueue, 0);
+      return;
+    }
     typeAgentReply({
       baseMessages: nextMessages,
-      assistantMessage: { role: "assistant", content: "" },
+      assistantMessage: { ...finalAssistantMessage, content: "" },
       fullContent: safeError,
       onDone: () => {
         completeAgentVisual();
