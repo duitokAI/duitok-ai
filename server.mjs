@@ -3412,6 +3412,22 @@ function projectPromptVisualInputs(db, project) {
   ].filter(Boolean).slice(0, 4);
 }
 
+function apimartReferenceImageUrlsForProject(db, project) {
+  return [
+    projectAttachmentVisual(db, project.image?.avatarAttachmentId, "Avatar reference"),
+    projectAttachmentVisual(db, project.image?.productAttachmentId, "Product reference")
+  ]
+    .map((item) => item?.dataUrl || item?.url || "")
+    .filter((url) => /^data:image\//i.test(url) || /^https?:\/\//i.test(url))
+    .slice(0, 2);
+}
+
+function apimartReferenceImageUrlsFromSnapshot(project) {
+  return (Array.isArray(project?.image?.apimartReferenceImageUrls) ? project.image.apimartReferenceImageUrls : [])
+    .filter((url) => /^data:image\//i.test(String(url)) || /^https?:\/\//i.test(String(url)))
+    .slice(0, 2);
+}
+
 function grsaiVisionContent(textBlock = "", inputs = [], objectShape = true) {
   return [
     { type: "text", text: textBlock },
@@ -3799,6 +3815,7 @@ function flattenUrlValues(value) {
 async function generateImageWithApimart(project, tracker = null) {
   const aspectRatio = imageAspectRatioFromProject(project);
   const resolution = imageResolutionFromProject(project);
+  const model = internalMediaModel(project.image?.model);
   const prompt = [
     project.image?.prompt || "Create a high-converting TikTok Shop product image.",
     `Mode: ${project.image?.mode || "Create Image"}.`,
@@ -3810,7 +3827,14 @@ async function generateImageWithApimart(project, tracker = null) {
     n: 1,
     size: aspectRatio
   };
-  if (resolution && internalMediaModel(project.image?.model) !== "Grok Imagine") requestBody.resolution = resolution;
+  const referenceImageUrls = model === "GPT Image 2" ? apimartReferenceImageUrlsFromSnapshot(project) : [];
+  if (referenceImageUrls.length) requestBody.image_urls = referenceImageUrls;
+  if (resolution && model !== "Grok Imagine") requestBody.resolution = resolution;
+  await tracker?.({
+    providerStatus: "request_prepared",
+    referenceImageCount: referenceImageUrls.length,
+    referenceImagesSent: referenceImageUrls.length > 0
+  });
   const data = await apimartRequest(apimartImagePath, {
     method: "POST",
     body: JSON.stringify(requestBody)
@@ -4304,7 +4328,11 @@ async function generateImageThroughProvider(provider, model, project, tracker = 
 
 async function generateImageWithFallbacks(project, model, tracker = null) {
   const attempts = [];
-  const providers = imageProviderOrderForModel(model).filter((provider) => providerConfigured(provider));
+  const hasApimartReferences = internalMediaModel(model) === "GPT Image 2" && apimartReferenceImageUrlsFromSnapshot(project).length > 0;
+  const orderedProviders = hasApimartReferences
+    ? ["apimart", ...imageProviderOrderForModel(model).filter((provider) => provider !== "apimart")]
+    : imageProviderOrderForModel(model);
+  const providers = orderedProviders.filter((provider) => providerConfigured(provider));
   if (!providers.length) return null;
   for (const provider of providers) {
     try {
@@ -4814,10 +4842,17 @@ async function processGenerationJob(jobId) {
       job.providerStatus = job.internalPromptAdvanced ? "prompt_advanced" : "provider_submitted";
       job.pollCount = 0;
       await saveDb(db);
-      return { job: structuredClone(job), project: structuredClone(project) };
+      return {
+        job: structuredClone(job),
+        project: structuredClone(project),
+        apimartReferenceImageUrls: apimartReferenceImageUrlsForProject(db, project)
+      };
     });
     if (!snapshot) return;
     applyGenerationJobSnapshot(snapshot.project, snapshot.job);
+    if (snapshot.apimartReferenceImageUrls?.length && snapshot.project?.image) {
+      snapshot.project.image.apimartReferenceImageUrls = snapshot.apimartReferenceImageUrls;
+    }
     if (snapshot.job.internalPromptOverride && snapshot.project?.image) {
       snapshot.project.image.prompt = snapshot.job.internalPromptOverride;
     }
