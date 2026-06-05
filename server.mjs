@@ -506,6 +506,58 @@ app.get("/api/admin/diagnostics/generation-failures", async (req, res, next) => 
   }
 });
 
+app.get("/api/admin/diagnostics/recent-generations", async (req, res, next) => {
+  try {
+    requireAdminDiagnosticAccess(req);
+    const db = await ensureDb();
+    const limit = Math.min(30, Math.max(1, Number.parseInt(req.query.limit || "10", 10) || 10));
+    const apiCallsByJob = new Map((db.apiCalls || [])
+      .filter((call) => call.generationJobId)
+      .map((call) => [call.generationJobId, call]));
+    const jobs = (db.generationJobs || [])
+      .slice()
+      .sort((a, b) => {
+        const aTime = Date.parse(a.completedAt || a.updatedAt || a.startedAt || a.createdAt || 0) || 0;
+        const bTime = Date.parse(b.completedAt || b.updatedAt || b.startedAt || b.createdAt || 0) || 0;
+        return bTime - aTime;
+      })
+      .slice(0, limit)
+      .map((job) => {
+        const call = apiCallsByJob.get(job.id) || {};
+        return {
+          id: job.id,
+          projectId: job.projectId,
+          userId: job.userId,
+          resultId: job.resultId || "",
+          type: job.type,
+          status: job.status,
+          stage: job.stage || "",
+          model: job.model,
+          provider: job.provider,
+          apiProvider: call.provider || "",
+          apiModel: call.model || "",
+          endpoint: redactProviderText(call.endpoint || ""),
+          taskId: job.taskId || call.taskId || "",
+          providerTaskId: job.providerTaskId || call.taskId || "",
+          providerFallbacks: job.providerFallbacks || [],
+          aspectRatio: job.aspectRatio,
+          resolution: job.resolution,
+          count: job.count,
+          createdAt: job.createdAt,
+          startedAt: job.startedAt || "",
+          completedAt: job.completedAt || "",
+          imageUrl: Boolean(job.imageUrl || job.originalImageUrl),
+          videoUrl: Boolean(job.videoUrl || job.originalVideoUrl),
+          errorMessage: job.errorMessage ? redactProviderText(job.errorMessage) : "",
+          providerErrorMessage: job.providerErrorMessage ? redactProviderText(job.providerErrorMessage) : ""
+        };
+      });
+    res.json({ ok: true, returned: jobs.length, jobs });
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.get("/api/admin/diagnostics/seedream-image", async (req, res, next) => {
   try {
     requireAdminDiagnosticAccess(req);
