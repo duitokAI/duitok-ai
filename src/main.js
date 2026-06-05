@@ -61,6 +61,7 @@ let videoConsoleScrollCleanup = null;
 let studioWallInfiniteScrollCleanup = null;
 let assetLibraryInfiniteScrollCleanup = null;
 let sidebarTooltipCleanup = null;
+let resultActionTooltipCleanup = null;
 let navigationFrame = null;
 let iconHydrationFrame = null;
 let aspectRatioPopoverCleanup = null;
@@ -2193,6 +2194,78 @@ function bindCollapsedSidebarTooltips() {
   };
 }
 
+function bindResultActionTooltips() {
+  resultActionTooltipCleanup?.();
+  resultActionTooltipCleanup = null;
+  document.querySelectorAll(".result-action-hover-tooltip").forEach((el) => el.remove());
+  const targetSelector = ".studio-wall-actions [data-tooltip], .agent-generation-result-actions [data-tooltip], .result-actions [data-tooltip]";
+  const tooltip = document.createElement("div");
+  tooltip.className = "result-action-hover-tooltip";
+  tooltip.setAttribute("role", "tooltip");
+  document.body.appendChild(tooltip);
+  let activeTarget = null;
+  const hide = () => {
+    activeTarget = null;
+    tooltip.classList.remove("is-visible");
+    tooltip.textContent = "";
+  };
+  const show = (target) => {
+    const label = target.dataset.tooltip || target.getAttribute("aria-label") || target.getAttribute("title") || "";
+    if (!label || target.disabled) return hide();
+    activeTarget = target;
+    tooltip.textContent = label;
+    const rect = target.getBoundingClientRect();
+    const tooltipWidth = Math.max(tooltip.offsetWidth, 96);
+    const tooltipHeight = Math.max(tooltip.offsetHeight, 32);
+    const preferLeft = rect.left - tooltipWidth - 10 >= 12;
+    const left = preferLeft
+      ? rect.left - tooltipWidth - 10
+      : Math.min(rect.right + 10, window.innerWidth - tooltipWidth - 12);
+    const top = Math.min(
+      Math.max(12 + tooltipHeight / 2, rect.top + rect.height / 2),
+      window.innerHeight - 12 - tooltipHeight / 2
+    );
+    tooltip.style.left = `${Math.round(Math.max(12, left))}px`;
+    tooltip.style.top = `${Math.round(top)}px`;
+    tooltip.dataset.placement = preferLeft ? "left" : "right";
+    tooltip.classList.add("is-visible");
+  };
+  const handlePointerOver = (event) => {
+    const target = event.target.closest?.(targetSelector);
+    if (!target || target === activeTarget) return;
+    show(target);
+  };
+  const handlePointerOut = (event) => {
+    if (!activeTarget) return;
+    const related = event.relatedTarget;
+    if (related && activeTarget.contains(related)) return;
+    hide();
+  };
+  const handleFocusIn = (event) => {
+    const target = event.target.closest?.(targetSelector);
+    if (target) show(target);
+  };
+  const handleScrollOrResize = () => {
+    if (!activeTarget) return;
+    show(activeTarget);
+  };
+  document.addEventListener("pointerover", handlePointerOver);
+  document.addEventListener("pointerout", handlePointerOut);
+  document.addEventListener("focusin", handleFocusIn);
+  document.addEventListener("focusout", hide);
+  window.addEventListener("scroll", handleScrollOrResize, true);
+  window.addEventListener("resize", handleScrollOrResize);
+  resultActionTooltipCleanup = () => {
+    document.removeEventListener("pointerover", handlePointerOver);
+    document.removeEventListener("pointerout", handlePointerOut);
+    document.removeEventListener("focusin", handleFocusIn);
+    document.removeEventListener("focusout", hide);
+    window.removeEventListener("scroll", handleScrollOrResize, true);
+    window.removeEventListener("resize", handleScrollOrResize);
+    tooltip.remove();
+  };
+}
+
 function project() {
   return state.db.projects.find((item) => item.id === state.projectId) || state.db.projects[0];
 }
@@ -2274,6 +2347,7 @@ function render() {
   bindStudioWallInfiniteScroll();
   bindAssetLibraryInfiniteScroll();
   bindCollapsedSidebarTooltips();
+  bindResultActionTooltips();
   scrollToSopAnchor();
   scheduleAssetLibraryThumbWarmup();
 }
