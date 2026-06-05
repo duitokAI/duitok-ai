@@ -2476,7 +2476,7 @@ function handleDelegatedPreviewWarm(event) {
 }
 
 function handleDelegatedClick(event) {
-  const target = event.target.closest?.("[data-page],[data-step],[data-step-open],[data-project],[data-studio-wall-more],[data-result-select],[data-bulk-result-action],[data-result-action],[data-result-preview],[data-result-prompt],[data-image-canvas-result],[data-image-model-option],[data-video-model-option],[data-generation-cancel],[data-generation-retry],[data-generation-edit],[data-settings-section],[data-agent-history-restore],[data-agent-history-restore-row],[data-agent-history-pin],[data-agent-history-archive]");
+  const target = event.target.closest?.("[data-page],[data-step],[data-step-open],[data-project],[data-studio-wall-more],[data-result-select],[data-bulk-result-action],[data-result-action],[data-result-preview],[data-result-prompt],[data-result-add-project],[data-image-canvas-result],[data-image-model-option],[data-video-model-option],[data-generation-cancel],[data-generation-retry],[data-generation-edit],[data-settings-section],[data-agent-history-restore],[data-agent-history-restore-row],[data-agent-history-pin],[data-agent-history-archive]");
   if (!target || !app.contains(target)) return;
 
   if (target.dataset.agentHistoryRestore) {
@@ -2511,6 +2511,7 @@ function handleDelegatedClick(event) {
     return set({ modal: "previewResult", activeResultId: target.dataset.resultPreview, resultDetailSource: fromAgent ? "agent" : "" });
   }
   if (target.dataset.resultPrompt) return set({ modal: "resultPrompt", activeResultId: target.dataset.resultPrompt });
+  if (target.dataset.resultAddProject) return addResultToProject(target.dataset.resultAddProject);
   if (target.dataset.imageCanvasResult) return set({ imageCanvasSelectedResultId: target.dataset.imageCanvasResult });
   if (target.dataset.imageModelOption) {
     stabilizeImageConsoleExpansion(1000);
@@ -4159,7 +4160,26 @@ function selectedDateRange() {
 }
 
 function allResults() {
-  return state.db.projects.flatMap((item) => item.results.map((result) => ({ ...result, projectId: item.id, projectName: item.name })));
+  const projectResults = state.db.projects.flatMap((item) => item.results.map((result) => ({ ...result, projectId: item.id, projectName: item.name })));
+  const resultById = new Map(projectResults.map((item) => [item.id, item]));
+  const projectById = new Map((state.db.projects || []).map((item) => [item.id, item]));
+  const projectFileAssets = (state.db.attachments || [])
+    .filter((item) => item.kind === "file" && item.sourceResultId && item.projectId)
+    .map((attachment) => {
+      const source = resultById.get(attachment.sourceResultId);
+      const targetProject = projectById.get(attachment.projectId);
+      if (!source || !targetProject || source.projectId === attachment.projectId) return null;
+      return {
+        ...source,
+        title: attachment.name || source.title,
+        projectId: attachment.projectId,
+        projectName: targetProject.name,
+        libraryAttachmentId: attachment.id,
+        createdAt: attachment.createdAt || source.createdAt
+      };
+    })
+    .filter(Boolean);
+  return [...projectResults, ...projectFileAssets];
 }
 
 function wizardCopy() {
@@ -7892,8 +7912,18 @@ function resultSavedAsReference(item, kind) {
   return (state.db?.attachments || []).some((attachment) => attachment.sourceResultId === item.id && attachment.kind === kind);
 }
 
+function resultProjectFileAttachments(item) {
+  if (!item?.id) return [];
+  return (state.db?.attachments || []).filter((attachment) => attachment.sourceResultId === item.id && attachment.kind === "file" && attachment.projectId);
+}
+
+function resultProjectNamesForFile(item) {
+  const projectById = new Map((state.db?.projects || []).map((projectItem) => [projectItem.id, projectItem.name]));
+  return [...new Set(resultProjectFileAttachments(item).map((attachment) => projectById.get(attachment.projectId)).filter(Boolean))];
+}
+
 function resultHasVisibleProjectCategory(item) {
-  return resultSavedAsReference(item, "file");
+  return resultProjectFileAttachments(item).length > 0;
 }
 
 function resultReferenceButton(item, kind) {
@@ -7907,9 +7937,10 @@ function resultReferenceButton(item, kind) {
 }
 
 function resultProjectSaveButton(item) {
-  const saved = resultSavedAsReference(item, "file");
-  const label = saved ? "Saved to project" : "Save to project";
-  return `<button type="button" class="result-detail-project-button ${saved ? "is-saved" : ""}" data-result-action="save-project" data-result-id="${esc(item?.id || "")}" ${item?.imageUrl || item?.videoUrl ? "" : "disabled"} ${saved ? "disabled" : ""}>
+  const names = resultProjectNamesForFile(item);
+  const saved = names.length > 0;
+  const label = saved ? `Added to ${names[0]}` : "Add to Project";
+  return `<button type="button" class="result-detail-project-button ${saved ? "is-saved" : ""}" data-result-action="save-project" data-result-id="${esc(item?.id || "")}" ${item?.imageUrl || item?.videoUrl ? "" : "disabled"}>
     ${icon(saved ? "check-circle-2" : "folder-plus", 20)}
     <span>${esc(label)}</span>
   </button>`;
@@ -7938,7 +7969,7 @@ function resultProjectName(item) {
 
 function resultProjectInfoRow(item) {
   if (!resultHasVisibleProjectCategory(item)) return "";
-  return `<div><dt>Project</dt><dd>${esc(resultProjectName(item))}</dd></div>`;
+  return `<div><dt>Project</dt><dd>${esc(resultProjectNamesForFile(item).join(", "))}</dd></div>`;
 }
 
 function resultDownloadFilename(item, kind = "image") {
@@ -8575,6 +8606,7 @@ function modal() {
   if (state.modal === "ugcPromptBuilder") return ugcPromptBuilderModal();
   if (state.modal === "previewResult") return resultPreviewModal();
   if (state.modal === "resultPrompt") return resultPromptModal();
+  if (state.modal === "addResultToProject") return addResultToProjectModal();
   if (state.modal === "saveResultReference") return saveResultReferenceModal();
   if (state.modal === "editResultImage") return editResultImageModal();
   if (state.modal === "deleteResult") return deleteResultModal();
@@ -8811,6 +8843,43 @@ function resultPromptModal() {
         <pre>${esc(promptText || "No prompt saved for this result.")}</pre>
         <button type="button" class="result-prompt-copy" data-action="copy-result-prompt">${icon("copy", 22)} Copy Prompt</button>
       </div>
+    </section>
+  </div>`;
+}
+
+function resultAlreadyInProject(item, projectId = "") {
+  if (!item?.id || !projectId) return false;
+  if (item.projectId === projectId) return true;
+  return resultProjectFileAttachments(item).some((attachment) => attachment.projectId === projectId);
+}
+
+function addResultToProjectModal() {
+  const item = activeResult();
+  const projects = state.db?.projects || [];
+  const title = item ? resultTitle(item) : "Selected asset";
+  return `<div class="modal-backdrop add-project-backdrop" data-action="close-modal">
+    <section class="modal add-project-modal" role="dialog" aria-modal="true" aria-label="Add to Project">
+      <button class="icon-only close" data-action="close-modal" type="button" aria-label="Close">${icon("x")}</button>
+      <p class="folder-label">${icon("folder-plus", 18)} PROJECT LIBRARY</p>
+      <h2>Add to Project</h2>
+      <p class="add-project-intro">${esc(title)} will appear under the selected Project in Content Library.</p>
+      <div class="add-project-list">
+        ${projects.map((projectItem) => {
+          const added = resultAlreadyInProject(item, projectItem.id);
+          return `<button type="button" class="${added ? "is-added" : ""}" data-result-add-project="${esc(projectItem.id)}" ${added ? "disabled" : ""}>
+            ${icon(added ? "check-circle-2" : "folder", 18)}
+            <span>${esc(projectItem.name)}</span>
+            <small>${added ? "Added" : "Add"}</small>
+          </button>`;
+        }).join("")}
+      </div>
+      <form class="add-project-create" data-form="add-result-project">
+        <label>
+          <span>Create new Project</span>
+          <input name="name" placeholder="Project ${projects.length + 1}" required>
+        </label>
+        <button class="gold-button" type="submit">${icon("plus", 17)} Create and add</button>
+      </form>
     </section>
   </div>`;
 }
@@ -12230,6 +12299,36 @@ async function submit(event) {
     }
     return;
   }
+  if (event.currentTarget.dataset.form === "add-result-project") {
+    const form = event.currentTarget;
+    if (form.dataset.submitting === "true") return;
+    const resultId = state.activeResultId;
+    if (!resultId) return notify("No asset selected.");
+    const submitButton = form.querySelector("button[type='submit']");
+    form.dataset.submitting = "true";
+    if (submitButton) submitButton.disabled = true;
+    try {
+      const created = await api("/projects", { method: "POST", body: JSON.stringify({ name: data.name }) });
+      const normalizedName = String(data.name || "").trim().toLowerCase();
+      const projectId = [...(created.projects || [])].reverse().find((item) => String(item.name || "").trim().toLowerCase() === normalizedName)?.id || created.projects.at(-1)?.id;
+      if (!projectId) throw new Error("Project was not created.");
+      const db = await api(`/results/${resultId}/save-reference`, {
+        method: "POST",
+        body: JSON.stringify({ kind: "file", projectId })
+      });
+      const projectName = db.projects.find((item) => item.id === projectId)?.name || "Project";
+      notify(`Added to ${projectName}.`);
+      return set({ db, modal: "previewResult", activeResultId: resultId, assetProjectFilter: projectId });
+    } catch (error) {
+      notify(error.message);
+    } finally {
+      if (form.isConnected) {
+        delete form.dataset.submitting;
+        if (submitButton) submitButton.disabled = false;
+      }
+    }
+    return;
+  }
   if (event.currentTarget.dataset.form === "rename-project") {
     return renameProject(data.name);
   }
@@ -15275,6 +15374,24 @@ async function bulkSaveSelectedResultsAsReference(kind = "avatar") {
   }
 }
 
+async function addResultToProject(projectId = "") {
+  const id = state.activeResultId;
+  const item = activeResult();
+  if (!id || !item) return notify("No asset selected.");
+  if (!projectId) return notify("Choose a Project first.");
+  const projectName = state.db?.projects?.find((projectItem) => projectItem.id === projectId)?.name || "Project";
+  try {
+    const db = await api(`/results/${id}/save-reference`, {
+      method: "POST",
+      body: JSON.stringify({ kind: "file", projectId })
+    });
+    notify(`Added to ${projectName}.`);
+    return set({ db, modal: "previewResult", activeResultId: id, assetProjectFilter: projectId });
+  } catch (error) {
+    return notify(error.message);
+  }
+}
+
 function setResultActionBusy(button, busy) {
   if (!button) return;
   button.classList.toggle("is-working", Boolean(busy));
@@ -15354,15 +15471,7 @@ async function resultAction(button) {
       else set({ db, modal: null, activeResultId: null });
       return notify(kind === "avatar" ? "已保存为人物参考。" : "已保存为产品图参考。");
     }
-    if (actionName === "save-project") {
-      const db = await api(`/results/${id}/save-reference`, {
-        method: "POST",
-        body: JSON.stringify({ kind: "file" })
-      });
-      if (state.modal === "previewResult") set({ db, modal: "previewResult", activeResultId: id });
-      else set({ db, modal: null, activeResultId: null });
-      return notify("已保存到当前项目。");
-    }
+    if (actionName === "save-project") return set({ modal: "addResultToProject", activeResultId: id });
   } catch (error) {
     notify(error.message);
   } finally {

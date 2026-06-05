@@ -9321,16 +9321,21 @@ app.post("/api/results/:id/save-reference", async (req, res, next) => {
     }
     res.json(await mutateDb(async (db) => {
       const { project, result } = findResultWithProject(db, req.params.id, user);
+      const targetProject = kind === "file" && req.body.projectId
+        ? findProject(db, req.body.projectId, user)
+        : project;
       if (!result.imageUrl && !result.videoUrl) {
         const error = new Error("This result has no media to save as a reference.");
         error.status = 400;
         throw error;
       }
       db.attachments ||= [];
+      const existing = db.attachments.find((item) => item.userId === user.id && item.projectId === targetProject.id && item.kind === kind && item.sourceResultId === result.id);
+      if (existing) return publicState(db, user);
       db.attachments.unshift({
         id: crypto.randomUUID(),
         userId: user.id,
-        projectId: project.id,
+        projectId: targetProject.id,
         kind,
         name: String(req.body.name || result.title || (kind === "avatar" ? "Saved avatar reference" : kind === "product" ? "Saved product reference" : "Saved project media")).slice(0, 120),
         type: result.videoUrl ? "video" : "image",

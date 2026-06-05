@@ -26666,8 +26666,100 @@ label {
 
 .result-detail-project-button.is-saved,
 .result-detail-project-button:disabled {
-  cursor: default;
   opacity: 0.78;
+}
+
+.result-detail-project-button.is-saved {
+  cursor: pointer;
+}
+
+.add-project-modal {
+  width: min(520px, calc(100vw - 32px));
+}
+
+.add-project-intro {
+  margin: -4px 0 12px;
+  color: rgba(43, 6, 52, 0.58);
+  font-size: 14px;
+  font-weight: 760;
+  line-height: 1.35;
+}
+
+.add-project-list {
+  display: grid;
+  gap: 8px;
+  max-height: min(320px, 42dvh);
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.add-project-list button {
+  min-width: 0;
+  min-height: 48px;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(116, 69, 143, 0.12);
+  border-radius: 14px;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.74);
+  color: #2b0634;
+  font-weight: 900;
+  text-align: left;
+}
+
+.add-project-list button span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.add-project-list button small {
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: rgba(116, 69, 143, 0.1);
+  color: rgba(43, 6, 52, 0.6);
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.add-project-list button:not(:disabled):hover {
+  border-color: rgba(255, 80, 123, 0.24);
+  background: #ffffff;
+}
+
+.add-project-list button.is-added {
+  color: rgba(43, 6, 52, 0.54);
+}
+
+.add-project-create {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(116, 69, 143, 0.12);
+}
+
+.add-project-create label {
+  display: grid;
+  gap: 6px;
+  color: rgba(43, 6, 52, 0.58);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.add-project-create input {
+  min-height: 44px;
+  border: 1px solid rgba(116, 69, 143, 0.14);
+  border-radius: 14px;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.86);
+  color: #2b0634;
+  font-size: 14px;
+  font-weight: 850;
+  outline: 0;
 }
 
 .result-detail-file-button {
