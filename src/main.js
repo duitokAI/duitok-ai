@@ -22,6 +22,7 @@ const storageKeys = {
   agentHistory: "pokaya-agent-history",
   agentHistoryBackup: "pokaya-agent-history-backup",
   agentDraftId: "pokaya-agent-draft-id",
+  agentDraftInputs: "pokaya-agent-draft-inputs",
   agentActiveRun: "pokaya-agent-active-run"
 };
 const studioWallZoomMin = 2;
@@ -79,7 +80,7 @@ const pendingAgentChatSync = new Set();
 const steps = [
   ["image", "image", "stepImage", "01"],
   ["ugc", "video", "stepUgc", "02"],
-  ["auto", "layout-template", "stepAuto", "03"],
+  ["auto", "audio-lines", "stepAuto", "03"],
   ["original", "film", "stepOriginal", "04"],
   ["clone", "layers-3", "stepClone", "05"],
   ["story", "book-open", "stepStory", "06"]
@@ -172,6 +173,7 @@ const state = {
     ...readStoredJson(agentHistoryStorageKey, []),
     ...readStoredJson(storageKeys.agentHistoryBackup, [])
   ],
+  agentHistorySearch: "",
   agentHistoryEditingId: null,
   activeAgentHistoryId: null,
   activeAgentDraftId: localStorage.getItem(storageKeys.agentDraftId) || "",
@@ -363,7 +365,7 @@ const copy = {
     speedCopy: "Idea, prompt, image, video dan caption disusun supaya lebih cepat digunakan.",
     price: "RM79.80",
     priceTitle: "Satu tempat untuk mula guna AI secara praktikal",
-    priceCopy: "Image AI, Video AI, Prompt Library, Product Scanner, Storytelling, Clone Video dan affiliate pack dalam satu platform.",
+    priceCopy: "Image AI, Video AI, Audio, Prompt Library, Storytelling, Clone Video dan affiliate pack dalam satu platform.",
     simple: "Senang",
     simpleTitle: "Tak perlu jadi prompt expert",
     simpleCopy: "Pilih tujuan, isi maklumat ringkas, dan Pokaya bantu susun output.",
@@ -387,8 +389,8 @@ const copy = {
     hookSample: "Prompt siap untuk hook, caption, storytelling, sales angle dan content idea.",
     scriptTitle: "Video AI",
     scriptSample: "Video pendek untuk TikTok, Reels, Shorts, ads dan product demo tanpa shoot manual.",
-    captionTitle: "Product Scanner",
-    captionSample: "Dari satu produk atau idea, Pokaya bantu susun angle, script, visual direction dan caption.",
+    captionTitle: "Audio",
+    captionSample: "Beri suara kepada video anda dengan voiceover, preset suara dan arahan emosi yang lebih jelas.",
     planTitle: "Affiliate Pack",
     planSample: "Pakej khas untuk beginner yang mahu mula promote produk dengan hook, script dan visual.",
     howKicker: "Cara guna",
@@ -431,7 +433,7 @@ const copy = {
     sopImage: "SOP Image",
     stepImage: "Image",
     stepUgc: "Video",
-    stepAuto: "商品扫描器",
+    stepAuto: "Audio",
     stepOriginal: "Original Video",
     stepClone: "Clone Prompt",
     stepStory: "Storytelling",
@@ -488,7 +490,7 @@ const copy = {
     sopDashboard: "SOP Dashboard",
     statImage: "Image",
     statUgc: "UGC",
-    statAuto: "Product Scanner",
+    statAuto: "Audio",
     statOriginal: "Original Video",
     statClone: "Clone Prompt",
     statReady: "Ready to Post",
@@ -567,7 +569,7 @@ const copy = {
     imagesPossible: "images possible",
     video8s: "Video 8s",
     videosPossible: "videos possible",
-    autoContentPack: "Product Scanner (10 video pack)",
+    autoContentPack: "Audio voiceover pack",
     batch: "batch",
     autoContentPackNote: "10 video x 8s + 1 master plan",
     selectCreditPackage: "Pilih pakej credit",
@@ -654,7 +656,7 @@ const copy = {
     speedCopy: "Idea、prompt、image、video 和 caption 都整理在同一个地方。",
     price: "RM79.80",
     priceTitle: "一个能直接开始的 AI 工具箱",
-    priceCopy: "Image AI、Video AI、Prompt Library、Product Scanner、Storytelling、Clone Video 和 affiliate pack 集中在一个平台。",
+    priceCopy: "Image AI、Video AI、Audio、Prompt Library、Storytelling、Clone Video 和 affiliate pack 集中在一个平台。",
     simple: "简单",
     simpleTitle: "不用先变成 prompt 专家",
     simpleCopy: "选择目标，填写简单资料，Pokaya 帮您整理出可以直接使用的 output。",
@@ -722,7 +724,7 @@ const copy = {
     sopImage: "图片 SOP",
     stepImage: "图片",
     stepUgc: "Video",
-    stepAuto: "Product Scanner",
+    stepAuto: "声音",
     stepOriginal: "原创视频",
     stepClone: "复刻提示词",
     stepStory: "故事脚本",
@@ -779,7 +781,7 @@ const copy = {
     sopDashboard: "SOP 总控",
     statImage: "图片",
     statUgc: "UGC",
-    statAuto: "Product Scanner",
+    statAuto: "Audio",
     statOriginal: "原创视频",
     statClone: "复刻提示词",
     statReady: "待发布",
@@ -858,7 +860,7 @@ const copy = {
     imagesPossible: "张图片",
     video8s: "8 秒视频",
     videosPossible: "条视频",
-    autoContentPack: "Product Scanner（10 条视频包）",
+    autoContentPack: "Audio 配音包",
     batch: "组",
     autoContentPackNote: "10 条 8 秒视频 + 1 份主计划",
     selectCreditPackage: "选择充值配套",
@@ -944,7 +946,7 @@ const copy = {
     speedCopy: "Generate ideas, prompts, visuals, scripts, and videos without opening 10 different tools.",
     price: "RM79.80",
     priceTitle: "One practical AI toolkit",
-    priceCopy: "Image AI, Video AI, Prompt Library, Product Scanner, Storytelling, Clone Video, and affiliate packs in one platform.",
+    priceCopy: "Image AI, Video AI, Audio, Prompt Library, Storytelling, Clone Video, and affiliate packs in one platform.",
     simple: "Easy",
     simpleTitle: "No prompt expertise needed",
     simpleCopy: "Choose a task, add simple details, and Pokaya helps structure output you can use.",
@@ -968,8 +970,8 @@ const copy = {
     hookSample: "Ready prompts for hooks, captions, storytelling, sales angles, and content ideas.",
     scriptTitle: "Video AI",
     scriptSample: "Create short videos for TikTok, Reels, Shorts, ads, and product demos without doing everything manually.",
-    captionTitle: "Product Scanner",
-    captionSample: "From one product or idea, Pokaya helps structure angles, scripts, visual direction, and captions.",
+    captionTitle: "Audio",
+    captionSample: "Give your video a voice with voiceover prompts, voice presets, and clear emotional direction.",
     planTitle: "Affiliate Pack",
     planSample: "A starter pack for beginners who want to promote products with hooks, scripts, content angles, and visuals.",
     howKicker: "How it works",
@@ -1012,7 +1014,7 @@ const copy = {
     sopImage: "SOP Image",
     stepImage: "Image",
     stepUgc: "Video",
-    stepAuto: "Product Scanner",
+    stepAuto: "Audio",
     stepOriginal: "Original Video",
     stepClone: "Clone Prompt",
     stepStory: "Storytelling",
@@ -1714,17 +1716,7 @@ function scrollAgentThreadToBottom() {
 function shouldPatchModalOnly(patch) {
   if (!isStudioPath() || state.loading || !document.getElementById("modal-root")) return false;
   const keys = Object.keys(patch);
-  const modalPatchKeys = [
-    "modal",
-    "editingProjectId",
-    "projectMenuId",
-    "activeAgentRunId",
-    "activeResultId",
-    "resultDetailSource",
-    "editImageBusy",
-    "bulkDeleteBusy"
-  ];
-  return keys.includes("modal") && keys.every((key) => modalPatchKeys.includes(key));
+  return keys.includes("modal") && keys.every((key) => ["modal", "editingProjectId", "projectMenuId", "activeAgentRunId"].includes(key));
 }
 
 function updateModalRoot() {
@@ -2095,10 +2087,7 @@ function initDelegatedEvents() {
 
 function handleDelegatedPointerDown(event) {
   const resultActionButton = event.target.closest?.("[data-result-action]");
-  if (resultActionButton && app.contains(resultActionButton)) {
-    flashResultActionButton(resultActionButton);
-    if (resultActionButton.dataset.resultAction === "download") setResultActionBusy(resultActionButton, true);
-  }
+  if (resultActionButton && app.contains(resultActionButton)) flashResultActionButton(resultActionButton);
   const resultPreviewTarget = event.target.closest?.("[data-result-preview]");
   if (resultPreviewTarget && app.contains(resultPreviewTarget)) warmResultPreview(resultPreviewTarget.dataset.resultPreview);
   const historyTarget = event.target.closest?.("[data-agent-history-restore],[data-agent-history-restore-row]");
@@ -2311,7 +2300,7 @@ function studioChineseDictionary() {
     "images possible": "可生成图片数",
     "Video 8s": "8 秒视频",
     "videos possible": "可生成视频数",
-    "Product Scanner (10 video pack)": "Product Scanner（10 条视频包）",
+    "Audio (10 video pack)": "Audio（10 条视频包）",
     "batch": "批次",
     "10 video x 8s + 1 master plan": "10 条 8 秒视频 + 1 份主计划",
     "Select credit package": "选择充值配套",
@@ -2744,7 +2733,7 @@ function registerPage() {
           <div class="price"><s>RM300</s><b>RM79.80</b><small>${pricePeriodContent().period}</small></div>
           <div class="included-credit-banner">${includedCreditBanner()}</div>
           <div class="usage-price-grid">${usagePriceCards()}</div>
-          <ul><li>Full Studio access</li><li>Prompt Library</li><li>Image AI tools</li><li>Video AI tools</li><li>Product Scanner tools</li><li>Clone Video & Storytelling tools</li><li>TikTok Affiliate Pack</li><li>VIP tool updates</li></ul>
+          <ul><li>Full Studio access</li><li>Prompt Library</li><li>Image AI tools</li><li>Video AI tools</li><li>Audio tools</li><li>Clone Video & Storytelling tools</li><li>TikTok Affiliate Pack</li><li>VIP tool updates</li></ul>
         </article>
       </section>
       <section id="checkout" class="signup-section checkout-section">
@@ -2951,7 +2940,7 @@ function featureMosaicCards() {
       ["01", "Image AI", "Hasilkan gambar produk, creator shot, thumbnail dan promo visual untuk content harian.", "image"],
       ["02", "Video AI", "Buat video pendek untuk TikTok, Reels, Shorts, ads dan product demo tanpa shoot manual.", "video"],
       ["03", "Prompt Library", "Prompt siap untuk hook, caption, storytelling, sales angle dan content idea.", "message-square-text"],
-      ["04", "Product Scanner", "Dari satu produk atau idea, Pokaya susun angle, script, visual direction dan caption.", "sparkles"],
+      ["04", "Audio", "Beri suara kepada video dengan voiceover, preset suara dan arahan emosi.", "audio-lines"],
       ["05", "TikTok Affiliate Pack", "Pakej pertama yang dioptimumkan untuk beginner yang mahu mula promote produk.", "badge-dollar-sign"]
     ],
     zh: [
@@ -2965,7 +2954,7 @@ function featureMosaicCards() {
       ["01", "Image AI", "Create product images, creator shots, thumbnails, and promo visuals for daily content.", "image"],
       ["02", "Video AI", "Create short videos for TikTok, Reels, Shorts, ads, and product demos without manual filming.", "video"],
       ["03", "Prompt Library", "Ready prompts for hooks, captions, storytelling, sales angles, and content ideas.", "message-square-text"],
-      ["04", "Product Scanner", "From one product or idea, Pokaya structures angles, scripts, visual direction, and captions.", "sparkles"],
+      ["04", "Audio", "Give your videos a voice with voiceover direction, presets, and emotion controls.", "audio-lines"],
       ["05", "TikTok Affiliate Pack", "The first optimized pack for beginners who want to start promoting products.", "badge-dollar-sign"]
     ]
   };
@@ -3028,7 +3017,7 @@ function whyPokayaContent() {
 function whyPokayaCards() {
   const data = {
     ms: [
-      ["layout-template", "Ada cara guna", "Pilih tugas seperti image, video, prompt, product scanner atau affiliate pack."],
+      ["layout-template", "Ada cara guna", "Pilih tugas seperti image, video, audio, prompt atau affiliate pack."],
       ["message-square-text", "Ada prompt siap", "Tidak perlu mula dari kosong untuk hook, caption, sales angle atau storytelling."],
       ["wand-sparkles", "Ada platform", "Generate dan simpan output dalam satu tempat, bukan lompat antara banyak tool."],
       ["badge-dollar-sign", "Ada arah income", "Fokus pada content, promotion dan peluang income tanpa menjanjikan hasil tetap."]
@@ -3040,7 +3029,7 @@ function whyPokayaCards() {
       ["badge-dollar-sign", "开始发布测试", "把内容用于 TikTok Affiliate、短视频带货和产品推广，不承诺固定结果。"]
     ],
     en: [
-      ["layout-template", "Clear steps", "Choose tasks such as image, video, prompt, product scanner, or affiliate pack."],
+      ["layout-template", "Clear steps", "Choose tasks such as image, video, audio, prompt, or affiliate pack."],
       ["message-square-text", "Ready prompts", "Hooks, captions, sales angles, and storytelling do not start from a blank page."],
       ["wand-sparkles", "Platform", "Generate and save outputs in one place instead of jumping between tools."],
       ["badge-dollar-sign", "Income direction", "Focused on content, promotion, and online income opportunities without promising results."]
@@ -3065,7 +3054,7 @@ function outputPreviewCards() {
 function workflowSteps() {
   const data = {
     ms: [
-      ["mouse-pointer-2", "Pilih tugas", "Pilih Image AI, Video AI, Prompt Library, Product Scanner atau TikTok Affiliate Pack."],
+      ["mouse-pointer-2", "Pilih tugas", "Pilih Image AI, Video AI, Audio, Prompt Library atau TikTok Affiliate Pack."],
       ["file-input", "Isi maklumat ringkas", "Masukkan produk, niche, idea, reference atau tujuan content yang anda mahu buat."],
       ["message-square-text", "Generate prompt & plan", "Pokaya bantu susun hook, caption, script, angle atau content plan."],
       ["image", "Generate visual", "Hasilkan image, creator shot, thumbnail atau product visual untuk digunakan."],
@@ -3081,7 +3070,7 @@ function workflowSteps() {
       ["send", "开始发布和推广", "用于 TikTok Affiliate、短视频带货和产品推广，再根据反馈持续优化。"]
     ],
     en: [
-      ["mouse-pointer-2", "Choose a task", "Pick Image AI, Video AI, Prompt Library, Product Scanner, or TikTok Affiliate Pack."],
+      ["mouse-pointer-2", "Choose a task", "Pick Image AI, Video AI, Audio, Prompt Library, or TikTok Affiliate Pack."],
       ["file-input", "Add simple details", "Enter a product, niche, idea, reference, or content goal."],
       ["message-square-text", "Generate prompt and plan", "Pokaya helps structure hooks, captions, scripts, angles, or content plans."],
       ["image", "Generate visuals", "Create images, creator shots, thumbnails, or product visuals."],
@@ -3213,7 +3202,7 @@ function testVolumeSteps() {
     ms: [
       ["1", "Cepat", "Generate idea, prompt, visual, script dan video tanpa buka 10 tool berbeza."],
       ["2", "Senang", "Pilih tujuan, isi maklumat ringkas, dan Pokaya bantu susun output."],
-      ["3", "Lengkap", "Image AI, Video AI, Prompt Library, Product Scanner dan Affiliate Pack dalam satu platform."],
+      ["3", "Lengkap", "Image AI, Video AI, Audio, Prompt Library dan Affiliate Pack dalam satu platform."],
       ["4", "Praktikal", "Fokus pada output yang boleh digunakan untuk content, produk dan promotion."]
     ],
     zh: [
@@ -3224,7 +3213,7 @@ function testVolumeSteps() {
     en: [
       ["1", "Fast", "Generate ideas, prompts, visuals, scripts, and videos without opening 10 tools."],
       ["2", "Easy", "Choose a goal, enter simple information, and let Pokaya structure the output."],
-      ["3", "Complete", "Image AI, Video AI, Prompt Library, Product Scanner, and Affiliate Pack in one platform."],
+      ["3", "Complete", "Image AI, Video AI, Audio, Prompt Library, and Affiliate Pack in one platform."],
       ["4", "Practical", "Focus on outputs that can be used for content, products, and promotion."]
     ]
   };
@@ -3337,7 +3326,7 @@ function sevenDayContent() {
 function sevenDaySteps() {
   const data = {
     ms: [
-      ["Step 1", "Pilih tugas pertama", "Mula dengan Image AI, Prompt Library atau Product Scanner."],
+      ["Step 1", "Pilih tugas pertama", "Mula dengan Image AI, Video AI, Audio atau Prompt Library."],
       ["Step 2", "Isi input", "Masukkan produk, niche, idea atau reference yang anda ada."],
       ["Step 3", "Generate output", "Hasilkan prompt, visual, script, video atau content plan."],
       ["Step 4", "Simpan dan guna", "Download, copy atau simpan output dalam workspace."],
@@ -3346,7 +3335,7 @@ function sevenDaySteps() {
       ["Step 7", "Ulang rutin", "Gunakan langkah yang sama setiap kali mahu buat content baru."]
     ],
     zh: [
-      ["Step 1", "选择第一个任务", "从 Image AI、Prompt Library 或 Product Scanner 开始。"],
+      ["Step 1", "选择第一个任务", "从 Image AI、Video AI、Audio 或 Prompt Library 开始。"],
       ["Step 2", "填写输入", "输入产品、niche、想法或 reference。"],
       ["Step 3", "生成 output", "生成 prompt、visual、script、video 或 content plan。"],
       ["Step 4", "保存并使用", "下载、复制或保存到 workspace。"],
@@ -3355,7 +3344,7 @@ function sevenDaySteps() {
       ["Step 7", "重复使用", "每次要做新内容时，重复同一套步骤。"]
     ],
     en: [
-      ["Step 1", "Choose your first task", "Start with Image AI, Prompt Library, or Product Scanner."],
+      ["Step 1", "Choose your first task", "Start with Image AI, Video AI, Audio, or Prompt Library."],
       ["Step 2", "Add input", "Enter a product, niche, idea, or reference you already have."],
       ["Step 3", "Generate output", "Create a prompt, visual, script, video, or content plan."],
       ["Step 4", "Save and use it", "Download, copy, or save the output in your workspace."],
@@ -3403,9 +3392,9 @@ function scenarioCards() {
 
 function pricingBullets() {
   const data = {
-    ms: ["Image AI untuk gambar produk & content", "Video AI untuk TikTok, Reels & ads", "Unlimited Generate", "Prompt Library untuk sales & marketing", "Product Scanner idea, hook & script", "Access Image Studio", "Access Video Studio", "Clone Video & Storytelling tools", "TikTok Affiliate Pack", "VIP group & tool updates"],
-    zh: ["AI 产品图片生成", "AI 短视频素材生成", "口播文案辅助", "推广文案辅助", "内容 idea 辅助", "TikTok Affiliate 内容工具", "Prompt Library", "Product Scanner", "Storytelling", "Clone Video", "VIP 交流群", "Image AI 低至 20 sen", "Video AI 低至 RM0.40"],
-    en: ["Image AI for product and content images", "Video AI for TikTok, Reels, and ads", "Unlimited Generate", "Prompt Library for sales and marketing", "Product Scanner ideas, hooks, and scripts", "Access Image Studio", "Access Video Studio", "Clone Video and Storytelling tools", "TikTok Affiliate Pack", "VIP group and tool updates"]
+    ms: ["Image AI untuk gambar produk & content", "Video AI untuk TikTok, Reels & ads", "Audio voiceover workspace", "Unlimited Generate", "Prompt Library untuk sales & marketing", "Access Image Studio", "Access Video Studio", "Clone Video & Storytelling tools", "TikTok Affiliate Pack", "VIP group & tool updates"],
+    zh: ["AI 产品图片生成", "AI 短视频素材生成", "Audio 配音工作台", "口播文案辅助", "推广文案辅助", "内容 idea 辅助", "TikTok Affiliate 内容工具", "Prompt Library", "Storytelling", "Clone Video", "VIP 交流群", "Image AI 低至 20 sen", "Video AI 低至 RM0.40"],
+    en: ["Image AI for product and content images", "Video AI for TikTok, Reels, and ads", "Audio voiceover workspace", "Unlimited Generate", "Prompt Library for sales and marketing", "Access Image Studio", "Access Video Studio", "Clone Video and Storytelling tools", "TikTok Affiliate Pack", "VIP group and tool updates"]
   };
   return data[state.lang] || data.ms;
 }
@@ -3506,7 +3495,7 @@ function faqItems() {
       ["Saya beginner, boleh guna?", "Boleh. Pokaya AI dibina untuk pengguna yang mahu mula guna AI tanpa perlu belajar banyak tool atau prompt yang rumit."],
       ["Adakah Pokaya AI hanya untuk TikTok Affiliate?", "Tidak. Pokaya AI ialah AI toolkit untuk content, sales dan online income. TikTok Affiliate ialah pack pertama yang kami optimalkan secara mendalam."],
       ["Apa beza Pokaya AI dengan ChatGPT?", "ChatGPT ialah chatbot umum. Pokaya AI membungkus prompt, image, video dan content plan menjadi tools yang lebih terus guna untuk content dan promotion."],
-      ["Apa yang saya dapat dalam plan Pro?", "Anda dapat akses kepada Image AI, Video AI, Prompt Library, Product Scanner, Storytelling, Clone Video, TikTok Affiliate Pack dan VIP group."],
+      ["Apa yang saya dapat dalam plan Pro?", "Anda dapat akses kepada Image AI, Video AI, Audio, Prompt Library, Storytelling, Clone Video, TikTok Affiliate Pack dan VIP group."],
       ["Perlu top up credit lagi?", "Jika generation menggunakan credit, anda hanya top up bila perlu. Plan Pro unlock platform, tools dan rate generate. Kos generation perlu dipaparkan sebelum anda generate."],
       ["Boleh cancel bila-bila?", "Boleh. Anda boleh cancel bila-bila melalui akaun anda atau hubungi support."],
       ["Boleh bayar guna FPX?", "Boleh. Pokaya AI menyokong FPX online banking dan kaedah pembayaran Malaysia yang tersedia."]
@@ -3516,7 +3505,7 @@ function faqItems() {
       ["Pokaya AI 保证赚钱吗？", "不保证。Pokaya AI 是内容工具，帮助您更快生成素材、文案和内容方向，实际结果取决于选品、发布、测试和执行。"],
       ["我完全不会做 TikTok Affiliate，可以用吗？", "可以。Pokaya AI 适合想用 AI 开始做 TikTok Affiliate 内容的人。您不需要一开始就会拍摄、剪辑或写脚本，可以先用 AI 辅助生成内容素材和文案。"],
       ["Pokaya AI 是课程吗？", "Pokaya AI 主要是 AI 内容工具平台，不是传统课程。它更适合想直接用 AI 生成内容、做产品推广和开始 TikTok Affiliate 内容的人。"],
-      ["RM79.80/月包含什么？", "RM79.80/月可以开通 Pokaya AI Pro，使用平台里的 AI 内容工具，例如产品图片生成、短视频素材生成、口播文案、内容 idea、Prompt Library、Product Scanner、Storytelling、Clone Video 和 VIP 交流群。"],
+      ["RM79.80/月包含什么？", "RM79.80/月可以开通 Pokaya AI Pro，使用平台里的 AI 内容工具，例如产品图片生成、短视频素材生成、Audio 配音工作台、口播文案、内容 idea、Prompt Library、Storytelling、Clone Video 和 VIP 交流群。"],
       ["我需要会剪辑吗？", "不需要一开始就会复杂剪辑。Pokaya AI 的重点是帮您更快生成内容素材和文案，让您降低开始做 TikTok Affiliate 内容的门槛。"],
       ["Pokaya AI 只适合 TikTok Affiliate 吗？", "现阶段 Pokaya AI 会重点帮助 TikTok Affiliate 用户做内容。如果您是小卖家、内容创作者，或者想用 AI 做产品推广，也可以用 Pokaya AI 生成内容素材和推广文案。"],
       ["为什么不用自己找 AI 工具？", "很多人不是没有 AI 工具，而是不知道该用哪个、怎么用、怎么把它变成可以发布的内容。Pokaya AI 把常用内容生成能力放在一个平台里，让您不用自己到处研究和切换工具。"],
@@ -3529,7 +3518,7 @@ function faqItems() {
       ["Can beginners use it?", "Yes. Pokaya AI is built for users who want to start using AI without learning many tools or complicated prompts first."],
       ["Is Pokaya AI only for TikTok Affiliate?", "No. Pokaya AI is an AI toolkit for content, sales, and online income. TikTok Affiliate is the first pack we optimized deeply."],
       ["How is Pokaya AI different from ChatGPT?", "ChatGPT is a general chatbot. Pokaya AI packages prompts, images, videos, and content plans into tools that are more directly usable for content and promotion."],
-      ["What do I get in Pro?", "You get Image AI, Video AI, Prompt Library, Product Scanner, Storytelling, Clone Video, TikTok Affiliate Pack, and VIP group access."],
+      ["What do I get in Pro?", "You get Image AI, Video AI, Audio, Prompt Library, Storytelling, Clone Video, TikTok Affiliate Pack, and VIP group access."],
       ["Do I need to top up credits?", "If generation uses credits, top up only when needed. Pro unlocks the platform, tools, and generation rates. Costs should be shown before generation."],
       ["Can I cancel anytime?", "Yes. You can cancel in your account or contact support."],
       ["Can I pay with FPX?", "Yes. Pokaya AI supports FPX online banking and available Malaysia payment methods."]
@@ -4113,7 +4102,7 @@ function nextActionTitle() {
 function nextActionCopy(stats) {
   const ready = state.db.schedule.filter((item) => item.status === "Ready").length;
   if (ready > 0) return "You have content in the queue. Schedule the best pieces for tonight's TikTok peak hours before generating more.";
-  if (stats.results.length === 0) return "No content has been generated in this date range. Start with UGC or Product Scanner to build a publishing batch.";
+  if (stats.results.length === 0) return "No content has been generated in this date range. Start with Video or Audio to build a publishing batch.";
   return "Your content exists, but nothing is marked ready. Move generated outputs into the Scheduler so the workspace becomes operational.";
 }
 
@@ -4817,7 +4806,7 @@ function sopButtonLabel() {
     ms: {
       image: "SOP Image",
       ugc: "SOP UGC",
-      auto: "SOP Product Scanner",
+      auto: "SOP Audio",
       original: "SOP Original Video",
       clone: "SOP Clone Prompt",
       story: "SOP Story",
@@ -4826,7 +4815,7 @@ function sopButtonLabel() {
     zh: {
       image: "图片 SOP",
       ugc: "UGC SOP",
-      auto: "Product Scanner SOP",
+      auto: "声音 SOP",
       original: "原创视频 SOP",
       clone: "复刻提示词 SOP",
       story: "故事脚本 SOP",
@@ -5080,7 +5069,7 @@ function studioPendingWallCard(job, orderIndex = 0) {
   const processingBody = `
       ${statusIcon}
       <b>${esc(generationJobCenterLabel(job))}</b>`;
-  return `<article class="studio-wall-card studio-wall-pending ${aspectClass} ${isFailed ? "failed" : ""}" data-aspect-ratio="${esc(aspectRatio)}" data-media-ratio="${esc(mediaRatio)}" data-generation-job-id="${esc(job.id)}" data-generation-job-status="${esc(job.status || "queued")}" data-wall-time="${esc(timelineAt)}" data-wall-order="${esc(orderIndex)}" style="--media-ratio:${esc(mediaRatio)};--wall-aspect-ratio:${esc(aspectRatioToCss(aspectRatio))};aspect-ratio:var(--wall-aspect-ratio);order:${Number.isFinite(orderIndex) ? orderIndex : 0}">
+  return `<article class="studio-wall-card studio-wall-pending ${aspectClass} ${isFailed ? "failed" : ""}" data-aspect-ratio="${esc(aspectRatio)}" data-media-ratio="${esc(mediaRatio)}" data-generation-job-id="${esc(job.id)}" data-generation-job-status="${esc(job.status || "queued")}" style="--media-ratio:${esc(mediaRatio)};--wall-aspect-ratio:${esc(aspectRatioToCss(aspectRatio))};aspect-ratio:var(--wall-aspect-ratio)">
     <div class="studio-wall-pending-controls" aria-label="${esc(statusLabel)}">
       ${isFailed ? `<div class="studio-wall-failed-center">${statusBody}
         <p class="generation-credit-refund-note"><strong>No Charge</strong></p>
@@ -5090,7 +5079,7 @@ function studioPendingWallCard(job, orderIndex = 0) {
   </article>`;
 }
 
-function studioWallCard(item, index = 0, orderIndex = 0) {
+function studioWallCard(item, index = 0) {
   const promptText = resultPromptText(item).replaceAll("\n", " ").trim();
   const canSaveReference = Boolean(item.imageUrl || item.videoUrl);
   const aspectRatio = wallAspectRatioForItem(item);
@@ -5098,8 +5087,7 @@ function studioWallCard(item, index = 0, orderIndex = 0) {
   const isNew = Date.now() - Date.parse(item.createdAt || 0) < 120000;
   const selected = selectedResultIdSet().has(item.id);
   const bulkSelecting = isBulkSelectingResults();
-  const timelineAt = item.timelineAt || resultOriginJob(item)?.timelineAt || item.createdAt || "";
-  return `<article class="studio-wall-card ${isNew ? "is-new" : ""} ${selected ? "is-selected" : ""} ${bulkSelecting ? "is-bulk-selecting" : ""}" data-aspect-ratio="${esc(aspectRatio)}" data-media-ratio="${esc(mediaRatio)}" data-result-id="${esc(item.id)}" data-wall-time="${esc(timelineAt)}" data-wall-order="${esc(orderIndex)}" style="--media-ratio:${esc(mediaRatio)};--wall-aspect-ratio:${esc(aspectRatioToCss(aspectRatio))};order:${Number.isFinite(orderIndex) ? orderIndex : 0}">
+  return `<article class="studio-wall-card ${isNew ? "is-new" : ""} ${selected ? "is-selected" : ""} ${bulkSelecting ? "is-bulk-selecting" : ""}" data-aspect-ratio="${esc(aspectRatio)}" data-media-ratio="${esc(mediaRatio)}" data-result-id="${esc(item.id)}" style="--media-ratio:${esc(mediaRatio)};--wall-aspect-ratio:${esc(aspectRatioToCss(aspectRatio))}">
     ${isNew ? `<span class="studio-wall-new-badge">New</span>` : ""}
     <button type="button" class="studio-wall-select-toggle" data-result-select="${esc(item.id)}" aria-label="${selected ? "Unselect result" : "Select result"}" aria-pressed="${selected ? "true" : "false"}">
       ${selected ? icon("check", 17) : ""}
@@ -5177,7 +5165,7 @@ function studioDockChips(p, meta = {}) {
   const chips = {
     image: ["9:16", p.image?.model || "GPT Image 2", "~0.15 credit"],
     ugc: [p.ugc?.provider || "Veo 3.1", p.ugc?.imageMode || "Reference", "8s"],
-    auto: [p.auto?.provider || "Veo 3.1", `${p.auto?.quantity || 5} videos`, p.auto?.ctaMode || "Shop CTA"],
+    auto: [p.auto?.voicePreset || "Malay Soft Sell", p.auto?.audioLanguage || "Malay", p.auto?.audioMode || "Voiceover"],
     original: [originalProviderValue(p.original?.provider), p.original?.imageMode || "Text only", p.original?.aspectRatio || "9:16"],
     clone: ["Reference video", "Prompt", "Frame analysis"],
     story: [p.story?.language || "MY Bahasa Melayu", p.story?.visualStyle || "Cinematic", p.story?.voice || "Jamal"]
@@ -5189,7 +5177,7 @@ function studioDockCredit(meta = {}) {
   return {
     image: "credit preview",
     ugc: "video credits",
-    auto: "batch credits",
+    auto: "0.20 credit",
     original: "video credits",
     clone: "prompt credits",
     story: "story credits"
@@ -6491,10 +6479,9 @@ function pendingResultJobs(projectItem, types) {
       ? step === videoStudioStep(job.step)
       : types.includes(job.type) || (job.action === "generate-image" && types.includes("image")))
     .sort((a, b) => {
-      const aTime = generationJobTimelineTime(a);
-      const bTime = generationJobTimelineTime(b);
-      if (bTime !== aTime) return bTime - aTime;
-      return studioWallTimelineRank(a) - studioWallTimelineRank(b);
+      const aTime = Date.parse(a.completedAt || a.updatedAt || a.startedAt || a.createdAt || 0) || 0;
+      const bTime = Date.parse(b.completedAt || b.updatedAt || b.startedAt || b.createdAt || 0) || 0;
+      return bTime - aTime;
     });
 }
 
@@ -7844,30 +7831,12 @@ function attachmentPickerTab(value, ic, active) {
 function attachmentPickerCard(item, targetKind) {
   const preview = attachmentPreview(item);
   const title = item.name || (item.kind === "avatar" ? "Avatar reference" : "Product reference");
+  const isVideo = item.mediaKind === "video" || /^video\//i.test(item.type || "");
   return `<button class="attachment-picker-card" type="button" data-attachment-pick="${esc(item.id)}" data-attachment-target="${esc(targetKind)}">
     ${preview}
     <b>${esc(title)}</b>
+    <small>${isVideo ? icon("video", 14) : icon("image", 14)} ${esc(item.prompt || item.type || "Saved reference")}</small>
   </button>`;
-}
-
-function attachmentPickerMetaText(item, isVideo = false) {
-  const fallback = isVideo ? "Video generated with Pokaya AI." : "Image generated with Pokaya AI.";
-  let text = String(item.prompt || item.type || "Saved reference").trim();
-  if (!text) return "Saved reference";
-  if (/task\s*id\s*:/i.test(text) || /reference\s*id\s*hidden/i.test(text) || /generated\s+with/i.test(text) || /task\s+completed/i.test(text)) {
-    text = fallback;
-  }
-  text = text
-    .replace(/task\s*id\s*:\s*[^\n]+/gi, "")
-    .replace(/reference\s*id\s*hidden/gi, "")
-    .replace(new RegExp("\\bAP" + "IMart\\b", "gi"), "Pokaya AI")
-    .replace(new RegExp("\\bGR" + "S\\s*AI\\b", "gi"), "Pokaya AI")
-    .replace(new RegExp("\\bGR" + "SAI\\b", "gi"), "Pokaya AI")
-    .replace(new RegExp("\\bWu" + "yin\\b", "gi"), "Pokaya AI")
-    .replace(/速创API/gi, "Pokaya AI")
-    .replace(/\n{2,}/g, " ")
-    .trim();
-  return text || fallback;
 }
 
 function attachmentPreview(item) {
@@ -7938,7 +7907,7 @@ function sopDashboardContent() {
       close: "Faham - tutup",
       path: "Welcome screen · pick / create project · daily stats",
       whatTitle: "Apa ini?",
-      what: "Dashboard ialah landing page selepas login. Ia tunjuk ringkasan production keseluruhan, credit yang digunakan dan project yang sedang aktif. Semua generation seperti Image, UGC, Product Scanner, Story, Cinema dan Clone mesti dibuat dalam satu project supaya history, cost dan output tidak bercampur.",
+      what: "Dashboard ialah landing page selepas login. Ia tunjuk ringkasan production keseluruhan, credit yang digunakan dan project yang sedang aktif. Semua generation seperti Image, UGC, Audio, Story, Cinema dan Clone mesti dibuat dalam satu project supaya history, cost dan output tidak bercampur.",
       whenTitle: "Bila guna tab ni?",
       when: "Guna Dashboard setiap kali login, bila nak switch client atau campaign, dan bila nak semak output bulan ini: berapa banyak asset sudah generated, berapa credit/cost digunakan dan hari mana production paling aktif.",
       guideTitle: "Cara guna",
@@ -7948,13 +7917,13 @@ function sopDashboardContent() {
       workflow: "Buat satu project untuk satu client, campaign atau produk. Generate batch content, review output dalam history grid, kemudian ulang semula pada bulan baru supaya Dashboard boleh tunjuk progression yang jelas.",
       sections: { 7: "Detail — Stats Cards & Filter", 11: "Sidebar Layout — Apa Setiap Section" },
       steps: [
-        { no: "1", title: "Dashboard overview", subtitle: "Stats cards, date filter dan daily production chart", copy: "Bahagian atas tunjuk total Image, UGC, Cinema, Product Scanner dan Total Cost untuk date range yang dipilih. Bahagian tengah ialah filter tarikh. Chart bawah bantu korang nampak trend production setiap hari." },
+        { no: "1", title: "Dashboard overview", subtitle: "Stats cards, date filter dan daily production chart", copy: "Bahagian atas tunjuk total Image, UGC, Cinema, Audio dan Total Cost untuk date range yang dipilih. Bahagian tengah ialah filter tarikh. Chart bawah bantu korang nampak trend production setiap hari." },
         { no: "2", title: "Apa itu Project?", copy: "Project ialah folder kerja untuk satu client, campaign atau produk. Semua generation, history dan cost akan disimpan ikut project yang aktif.", bullets: ["Project 'meow' — client A skincare brand", "Project 'Project 1' — client B yoga pants"], after: "Tukar project di sidebar bermaksud tukar context kerja." },
         { no: "3", title: "Buat New Project", copy: "Tekan + New Project, masukkan nama yang jelas seperti 'Brand X Campaign Q1', kemudian create. Project baru akan muncul dalam sidebar.", tip: "Pakai nama specific. 'Skincare-A-Aug-Campaign' lebih mudah dibaca daripada 'Project 5'." },
         { no: "4", title: "Switch antara Projects", copy: "Klik nama project di sidebar untuk tukar workspace. Semua tab generation dan history akan ikut project yang dipilih." },
         { no: "5", title: "Search Projects", copy: "Gunakan search bar kalau project sudah banyak. Taip nama client, produk atau campaign untuk filter senarai project." },
         { no: "6", title: "Project menu (3-dot)", copy: "Hover project untuk buka menu 3-dot. Dari sini boleh rename atau delete project.", tip: "Rename selamat. Delete hanya bila project memang sudah tamat kerana history dalam project itu akan hilang." },
-        { no: "7", title: "Stats cards", copy: "Cards menunjukkan total generation mengikut asset type dalam date range aktif.", bullets: ["Image — gambar dari Image tab", "UGC — video dari UGC tab", "Cinema — video cinematic / story output", "Product Scanner — batch content plan dan video"] },
+        { no: "7", title: "Stats cards", copy: "Cards menunjukkan total generation mengikut asset type dalam date range aktif.", bullets: ["Image — gambar dari Image tab", "UGC — video dari UGC tab", "Cinema — video cinematic / story output", "Audio — batch content plan dan video"] },
         { no: "8", title: "Total Cost", copy: "Total Cost menunjukkan credit atau kos generation dalam date range tersebut. Ini berguna untuk kira monthly spend atau charge client.", tip: "Untuk invoice bulanan, set From ke hari pertama bulan dan To ke hari terakhir bulan." },
         { no: "9", title: "Filter by Date Range", copy: "Pilih From Date dan To Date, kemudian tekan Apply. Reset akan kembali ke range default. Tarikh ikut timezone Malaysia." },
         { no: "10", title: "Daily Production chart", copy: "Chart ini tunjuk trend harian. Gunakan untuk cari spike, gap production atau hari campaign berjalan kuat." },
@@ -7973,7 +7942,7 @@ function sopDashboardContent() {
       close: "我明白了 - 关闭",
       path: "登录首页 · 选择 / 创建项目 · 查看每日数据",
       whatTitle: "这是什么？",
-      what: "Dashboard 是您登录后的工作台首页。它会汇总当前账号的整体产出、生成成本、Credit 使用情况和正在操作的项目。Image、UGC、Product Scanner、Story、Cinema、Clone 等所有生成动作，都应该先归入一个 Project，方便您后续查看历史、复盘成本和管理客户交付。",
+      what: "Dashboard 是您登录后的工作台首页。它会汇总当前账号的整体产出、生成成本、Credit 使用情况和正在操作的项目。Image、UGC、Audio、Story、Cinema、Clone 等所有生成动作，都应该先归入一个 Project，方便您后续查看历史、复盘成本和管理客户交付。",
       whenTitle: "什么时候用？",
       when: "每次登录、切换客户 / Campaign、查看本月产出、核对成本或复盘每日生成节奏时，都先看 Dashboard。它不是一个装饰页，而是您判断下一步要继续生成、复盘还是发布的总控台。",
       guideTitle: "怎么用",
@@ -7983,13 +7952,13 @@ function sopDashboardContent() {
       workflow: "一个客户、一个 Campaign 或一个产品，尽量对应一个 Project。先批量生成内容，再在 history grid 里复盘，月底用 Dashboard 看总量、成本和节奏，下个月继续沿用同一个 Project 追踪增长。",
       sections: { 7: "细节 — 数据卡片与筛选", 11: "侧边栏 — 每个区域的作用" },
       steps: [
-        { no: "1", title: "Dashboard 总览", subtitle: "数据卡片、日期筛选、每日产出图表", copy: "顶部是 Image、UGC、Cinema、Product Scanner 和 Total Cost 的汇总。中间可以用日期筛选指定时间范围。下方图表用来查看每天的生成趋势。" },
+        { no: "1", title: "Dashboard 总览", subtitle: "数据卡片、日期筛选、每日产出图表", copy: "顶部是 Image、UGC、Cinema、Audio 和 Total Cost 的汇总。中间可以用日期筛选指定时间范围。下方图表用来查看每天的生成趋势。" },
         { no: "2", title: "Project 是什么？", copy: "Project 可以理解成一个工作文件夹，用来承载一个客户、一个 Campaign 或一个产品。所有生成内容、历史记录和成本都会归入当前 Project。", bullets: ["Project 'meow' — 客户 A 的护肤品牌", "Project 'Project 1' — 客户 B 的瑜伽裤产品"], after: "切换 sidebar 里的 Project，就等于切换当前工作上下文。" },
         { no: "3", title: "创建 New Project", copy: "点击 + New Project，输入清楚的项目名，例如 'Brand X Campaign Q1'，然后创建。新项目会出现在左侧 Projects 列表里。", tip: "命名尽量具体。'Skincare-A-Aug-Campaign' 比 'Project 5' 更容易管理。" },
         { no: "4", title: "切换 Project", copy: "点击 sidebar 里的项目名称，就会切换当前 workspace。所有生成 tab 和 history 都会跟着当前 Project 变化。" },
         { no: "5", title: "搜索 Project", copy: "项目变多后，用 sidebar 顶部的搜索框输入客户名、产品名或 Campaign 名，可以快速过滤项目。" },
         { no: "6", title: "Project 三点菜单", copy: "鼠标移到项目上，会出现 3-dot 菜单。您可以 Rename 或 Delete 项目。", tip: "Rename 是安全操作。Delete 会删除该项目里的历史内容，只在项目确实废弃时使用。" },
-        { no: "7", title: "数据卡片", copy: "这些卡片显示当前日期范围内，各类资产的生成总量。", bullets: ["Image — Image tab 生成的图片", "UGC — UGC tab 生成的视频", "Cinema — cinematic / story 视频输出", "Product Scanner — 批量内容计划和视频"] },
+        { no: "7", title: "数据卡片", copy: "这些卡片显示当前日期范围内，各类资产的生成总量。", bullets: ["Image — Image tab 生成的图片", "UGC — UGC tab 生成的视频", "Cinema — cinematic / story 视频输出", "Audio — 批量内容计划和视频"] },
         { no: "8", title: "Total Cost", copy: "Total Cost 显示当前日期范围内消耗的 Credit 或生成成本，适合用来做月度成本核算或客户报价。", tip: "做月度 invoice 时，把 From 设为月初，把 To 设为月底。" },
         { no: "9", title: "日期筛选", copy: "选择 From Date 和 To Date 后点击 Apply。Reset 会回到默认时间范围。日期按马来西亚时间计算。" },
         { no: "10", title: "每日产出图表", copy: "这个图表用来观察每日生成趋势，帮助您发现爆发日、空档期或 Campaign 启动后的产出变化。" },
@@ -8008,7 +7977,7 @@ function sopDashboardContent() {
       close: "Got it - close",
       path: "Welcome screen · choose / create project · review daily stats",
       whatTitle: "What is this?",
-      what: "The Dashboard is the first workspace screen after login. It summarizes total production, generation cost, credit usage, and the active project. Every generation flow — Image, UGC, Product Scanner, Story, Cinema, and Clone — should live inside a project so history, cost, and deliverables stay organized.",
+      what: "The Dashboard is the first workspace screen after login. It summarizes total production, generation cost, credit usage, and the active project. Every generation flow — Image, UGC, Audio, Story, Cinema, and Clone — should live inside a project so history, cost, and deliverables stay organized.",
       whenTitle: "When should I use it?",
       when: "Use the Dashboard whenever you log in, switch between clients or campaigns, check monthly output, review spend, or decide what to generate next. Think of it as the control room for production, not a decorative landing page.",
       guideTitle: "How to use it",
@@ -8018,13 +7987,13 @@ function sopDashboardContent() {
       workflow: "Create one project per client, campaign, or product. Generate a content batch, review the history grid, then use the Dashboard at month end to track output, cost, and production rhythm before continuing the next batch.",
       sections: { 7: "Details — Stats Cards & Filter", 11: "Sidebar Layout — What Each Section Does" },
       steps: [
-        { no: "1", title: "Dashboard overview", subtitle: "Stats cards, date filter, and daily production chart", copy: "The top cards summarize Image, UGC, Cinema, Product Scanner, and Total Cost for the selected date range. The date filter controls the reporting window. The chart shows production activity by day." },
+        { no: "1", title: "Dashboard overview", subtitle: "Stats cards, date filter, and daily production chart", copy: "The top cards summarize Image, UGC, Cinema, Audio, and Total Cost for the selected date range. The date filter controls the reporting window. The chart shows production activity by day." },
         { no: "2", title: "What is a Project?", copy: "A project is a workspace folder for one client, campaign, or product. All generated assets, history, and cost data are stored under the active project.", bullets: ["Project 'meow' — Client A skincare brand", "Project 'Project 1' — Client B yoga pants"], after: "Switching projects in the sidebar changes the working context." },
         { no: "3", title: "Create a New Project", copy: "Click + New Project, enter a clear name such as 'Brand X Campaign Q1', then create it. The new project appears in the Projects list.", tip: "Use specific names. 'Skincare-A-Aug-Campaign' is easier to manage than 'Project 5'." },
         { no: "4", title: "Switch between Projects", copy: "Click a project name in the sidebar to switch workspaces. Generation tabs and history grids will follow the selected project." },
         { no: "5", title: "Search Projects", copy: "When the list grows, use the sidebar search field to filter by client, product, or campaign name." },
         { no: "6", title: "Project menu (3-dot)", copy: "Hover over a project to reveal the 3-dot menu. Use it to rename or delete a project.", tip: "Rename is safe. Delete removes that project's history, so use it only for abandoned projects." },
-        { no: "7", title: "Stats cards", copy: "Stats cards show generated asset totals for the active date range.", bullets: ["Image — images generated from the Image tab", "UGC — videos generated from the UGC tab", "Cinema — cinematic / story video output", "Product Scanner — batch content plans and videos"] },
+        { no: "7", title: "Stats cards", copy: "Stats cards show generated asset totals for the active date range.", bullets: ["Image — images generated from the Image tab", "UGC — videos generated from the UGC tab", "Cinema — cinematic / story video output", "Audio — batch content plans and videos"] },
         { no: "8", title: "Total Cost", copy: "Total Cost shows credit spend or generation cost for the selected range. Use it for monthly accounting or client billing.", tip: "For a monthly invoice, set From to the first day of the month and To to the last day." },
         { no: "9", title: "Date Range Filter", copy: "Choose From Date and To Date, then click Apply. Reset returns to the default range. Dates follow Malaysia time." },
         { no: "10", title: "Daily Production chart", copy: "The chart shows daily production trends so you can spot spikes, gaps, or campaign launch activity." },
@@ -8138,7 +8107,7 @@ function sopUgcContent() {
       whatTitle: "Apa ini?",
       what: "Tab UGC digunakan untuk generate video gaya selfie atau handheld, seolah-olah orang sebenar sedang review produk dalam Bahasa Melayu. Avatar boleh pegang produk, bercakap ke kamera dan ikut dialog yang korang tulis. Format ini paling sesuai untuk affiliate dan TikTok Shop content.",
       whenTitle: "Bila guna tab ni?",
-      when: "Guna UGC bila korang nak satu video review dengan dialog yang sudah jelas. Kalau nak banyak video sekali gus dengan AI plan, guna Product Scanner. Kalau nak AI bantu draft variasi, buka AI Agent UGC di chat panel bawah.",
+      when: "Guna UGC bila korang nak satu video review dengan dialog yang sudah jelas. Kalau nak banyak video sekali gus dengan AI plan, guna Audio. Kalau nak AI bantu draft variasi, buka AI Agent UGC di chat panel bawah.",
       guideTitle: "Cara guna",
       stepLabel: "Step",
       tipLabel: "Tip",
@@ -8172,7 +8141,7 @@ function sopUgcContent() {
       whatTitle: "这是什么？",
       what: "UGC 页面用来生成自拍感、手持感的视频，就像真实 creator 用马来语对着镜头介绍产品。Avatar 可以拿着产品、看镜头说您写好的台词，适合 affiliate 和 TikTok Shop 内容。",
       whenTitle: "什么时候用？",
-      when: "当您已经有明确台词，只想生成一条 UGC review 视频时，用 UGC tab。如果要一次做很多条并让 AI 帮您规划，用 Product Scanner。如果想边聊边让 AI 起草，用下方的 AI Agent UGC。",
+      when: "当您已经有明确台词，只想生成一条 UGC review 视频时，用 UGC tab。如果要一次做很多条并让 AI 帮您规划，用 Audio。如果想边聊边让 AI 起草，用下方的 AI Agent UGC。",
       guideTitle: "怎么用",
       stepLabel: "步骤",
       tipLabel: "提示",
@@ -8206,7 +8175,7 @@ function sopUgcContent() {
       whatTitle: "What is this?",
       what: "The UGC tab generates selfie-style or handheld product review videos, as if a real creator is speaking Malay to camera. The avatar can hold the product, look at the camera, and deliver the dialog you wrote. It is built for affiliate and TikTok Shop content.",
       whenTitle: "When should I use it?",
-      when: "Use UGC when you want one specific review video with a clear dialog. Use Product Scanner when you want AI to plan many videos at once. Use AI Agent UGC when you want to chat and let AI draft variants with you.",
+      when: "Use UGC when you want one specific review video with a clear dialog. Use Audio when you want AI to plan many videos at once. Use AI Agent UGC when you want to chat and let AI draft variants with you.",
       guideTitle: "How to use it",
       stepLabel: "Step",
       tipLabel: "Tip",
@@ -8237,24 +8206,100 @@ function sopUgcContent() {
 }
 
 function sopAutoContentContent() {
+  return sopAudioContentContent();
+}
+
+function sopAudioContentContent() {
   const content = {
     ms: {
       eyebrow: "Panduan",
-      title: "Tab Product Scanner — Banyak Video Sekali Klik",
+      title: "Audio Tab — Voiceover untuk video",
       close: "Faham - tutup",
-      path: "AI → Image → Video → Merge · 1-10 video per batch",
+      path: "Voiceover · Voice preset · Translate prepared",
       whatTitle: "Apa ini?",
-      what: "Product Scanner digunakan untuk generate banyak video UGC daripada satu produk. Paste link TikTok Shop / Shopee atau upload produk manual, kemudian AI plan beberapa angle seperti UGC, Product dan Lifestyle, fire semua, lalu simpan caption, cover text dan hashtags untuk auto-post.",
+      what: "Audio ialah workspace untuk beri suara kepada video. Tulis scene, emosi dan gaya suara; pilih voice preset; kemudian gunakan voiceover itu sebagai arahan audio untuk video content.",
       whenTitle: "Bila guna tab ni?",
-      when: "Guna Product Scanner bila korang nak monthly content batch, contohnya 10-30 video untuk satu produk, atau nak test banyak hook dan framework untuk cari angle paling viral. Kalau cuma nak satu video dengan dialog specific, guna UGC tab.",
+      when: "Guna Audio bila video anda sudah ada visual direction tetapi perlukan suara, tone, hook atau bahasa yang lebih jelas.",
       guideTitle: "Cara guna",
       stepLabel: "Step",
       tipLabel: "Tip",
       workflowTitle: "Workflow tip",
-      workflow: "Product Scanner paling kuat bila digabungkan dengan Auto Post extension. Generate batch, review hasil, schedule hourly melalui TikTok native scheduler, kemudian biar TikTok handle posting.",
+      workflow: "Mulakan dengan Voiceover. Change Voice dan Translate disediakan sebagai workflow seterusnya selepas backend audio action disambung.",
+      sections: {},
+      steps: [
+        { no: "1", title: "Pilih mode", copy: "Voiceover ialah mode aktif pertama. Change Voice dan Translate dipaparkan sebagai coming soon supaya user faham arah produk tanpa submit palsu." },
+        { no: "2", title: "Tulis prompt suara", copy: "Terangkan suara, scene dan emosi. Contoh: friendly Malay female voiceover, soft sell, warm and confident." },
+        { no: "3", title: "Pilih voice preset", copy: "Gunakan preset seperti Malay Soft Sell, Energetic Creator atau Calm Explainer. Preset tidak mengubah layout composer." },
+        { no: "4", title: "Generate Audio", copy: "Frontend sudah siap. Backend generate-audio perlu disambung sebelum audio clip sebenar boleh dibuat." }
+      ]
+    },
+    zh: {
+      eyebrow: "指南",
+      title: "Audio 页面 — 给短视频配音",
+      close: "我明白了 - 关闭",
+      path: "Voiceover · 声音预设 · 翻译预留",
+      whatTitle: "这是什么？",
+      what: "Audio 是给短视频配声音的工作台。您可以描述声音、场景和情绪，选择 voice preset，为视频准备口播配音方向。",
+      whenTitle: "什么时候用？",
+      when: "当您已经有视频画面或脚本方向，但需要更清楚的声音、语气、hook 或语言版本时，用 Audio。",
+      guideTitle: "怎么用",
+      stepLabel: "步骤",
+      tipLabel: "提示",
+      workflowTitle: "操作建议",
+      workflow: "第一版先从 Voiceover 开始。Change Voice 和 Translate 作为后续后端能力预留，不做假提交。",
+      sections: {},
+      steps: [
+        { no: "1", title: "选择模式", copy: "Voiceover 是当前可用的默认模式。Change Voice 和 Translate 会显示为 coming soon，避免用户误以为已经能生成。" },
+        { no: "2", title: "填写声音 prompt", copy: "描述声音、场景和情绪。例如：friendly Malay female voiceover, soft sell, warm and confident。" },
+        { no: "3", title: "选择声音预设", copy: "可以选择 Malay Soft Sell、Energetic Creator、Calm Explainer 等 preset。切换 preset 不应该让 composer 跳动。" },
+        { no: "4", title: "生成 Audio", copy: "前端页面已经准备好；需要接入 backend generate-audio action 后，才能生成真实音频。" }
+      ]
+    },
+    en: {
+      eyebrow: "Guide",
+      title: "Audio Tab — Voiceover for video",
+      close: "Got it - close",
+      path: "Voiceover · Voice preset · Translate prepared",
+      whatTitle: "What is this?",
+      what: "Audio is the workspace for giving videos a voice. Describe the voice, scene, and emotion, choose a preset, and prepare voiceover direction for video content.",
+      whenTitle: "When should I use it?",
+      when: "Use Audio when your video has visual direction but needs a clearer voice, tone, hook, or language version.",
+      guideTitle: "How to use it",
+      stepLabel: "Step",
+      tipLabel: "Tip",
+      workflowTitle: "Workflow tip",
+      workflow: "Start with Voiceover. Change Voice and Translate are reserved for the next backend audio phase.",
+      sections: {},
+      steps: [
+        { no: "1", title: "Choose mode", copy: "Voiceover is the first active mode. Change Voice and Translate are shown as coming soon so users do not submit into a fake flow." },
+        { no: "2", title: "Write the voice prompt", copy: "Describe the voice, scene, and emotion. Example: friendly Malay female voiceover, soft sell, warm and confident." },
+        { no: "3", title: "Pick a voice preset", copy: "Use presets such as Malay Soft Sell, Energetic Creator, or Calm Explainer. Switching presets should not resize the composer." },
+        { no: "4", title: "Generate Audio", copy: "The frontend is ready. A backend generate-audio action must be connected before real audio clips can be created." }
+      ]
+    }
+  };
+  return content[state.lang] || content.ms;
+}
+
+function sopAutoLegacyContent() {
+  const content = {
+    ms: {
+      eyebrow: "Panduan",
+      title: "Tab Audio — Banyak Video Sekali Klik",
+      close: "Faham - tutup",
+      path: "AI → Image → Video → Merge · 1-10 video per batch",
+      whatTitle: "Apa ini?",
+      what: "Audio digunakan untuk generate banyak video UGC daripada satu produk. Paste link TikTok Shop / Shopee atau upload produk manual, kemudian AI plan beberapa angle seperti UGC, Product dan Lifestyle, fire semua, lalu simpan caption, cover text dan hashtags untuk auto-post.",
+      whenTitle: "Bila guna tab ni?",
+      when: "Guna Audio bila korang nak monthly content batch, contohnya 10-30 video untuk satu produk, atau nak test banyak hook dan framework untuk cari angle paling viral. Kalau cuma nak satu video dengan dialog specific, guna UGC tab.",
+      guideTitle: "Cara guna",
+      stepLabel: "Step",
+      tipLabel: "Tip",
+      workflowTitle: "Workflow tip",
+      workflow: "Audio paling kuat bila digabungkan dengan Auto Post extension. Generate batch, review hasil, schedule hourly melalui TikTok native scheduler, kemudian biar TikTok handle posting.",
       sections: { 9: "Dropdown & Pilihan — Apa Maksud Setiap Satu" },
       steps: [
-        { no: "1", title: "Form Product Scanner overview", subtitle: "Affiliate / Manual Product, persona, duration, frameworks, CTA dan quantity", copy: "Mulakan dengan Affiliate link atau Manual Product. Selepas itu set Gender, Style, Age, duration 8s atau 16s, Plan Mode, frameworks, CTA mode dan Quantity 1-10." },
+        { no: "1", title: "Form Audio overview", subtitle: "Affiliate / Manual Product, persona, duration, frameworks, CTA dan quantity", copy: "Mulakan dengan Affiliate link atau Manual Product. Selepas itu set Gender, Style, Age, duration 8s atau 16s, Plan Mode, frameworks, CTA mode dan Quantity 1-10." },
         { no: "2", title: "Affiliate vs Manual Product", copy: "Affiliate ialah default: paste link TikTok Shop atau Shopee supaya AI fetch nama, harga dan image. Manual Product sesuai untuk produk private, listing baru atau produk yang tidak boleh scrape.", tip: "Link pendek vt.tiktok.com selalunya gagal fetch. Buka link dalam browser, copy URL penuh /pdp/... kemudian paste semula." },
         { no: "3", title: "History Saved Products", copy: "Kalau produk pernah difetch, icon history di sebelah input akan tunjuk count. Click untuk pilih saved product tanpa burn another scrape call." },
         { no: "4", title: "Set Avatar Persona", copy: "Pilih Gender Female atau Male. Untuk Female, pilih Style Hijab atau No Hijab. Pilih Age seperti 20s, 30s, 40s Makcik atau 55+ Nenek. Persona ini akan digunakan merentas UGC frameworks." },
@@ -8278,18 +8323,18 @@ function sopAutoContentContent() {
     },
     zh: {
       eyebrow: "指南",
-      title: "Product Scanner 页面 — 一次生成多条视频",
+      title: "Audio 页面 — 一次生成多条视频",
       close: "我明白了 - 关闭",
       path: "AI → 图片 → 视频 → 合并 · 每批 1-10 条视频",
       whatTitle: "这是什么？",
-      what: "Product Scanner 用来围绕一个产品批量生成多条 UGC 视频。您可以贴 TikTok Shop / Shopee 链接，或手动上传产品资料；AI 会规划多个角度，例如 UGC、Product、Lifestyle，并自动保存 caption、cover text 和 hashtags，方便后续 auto-post。",
+      what: "Audio 用来围绕一个产品批量生成多条 UGC 视频。您可以贴 TikTok Shop / Shopee 链接，或手动上传产品资料；AI 会规划多个角度，例如 UGC、Product、Lifestyle，并自动保存 caption、cover text 和 hashtags，方便后续 auto-post。",
       whenTitle: "什么时候用？",
-      when: "当您要为一个产品做月度内容批次，例如 10-30 条视频，或想一次测试多个 hook / framework 时，用 Product Scanner。如果只做一条明确台词的视频，用 UGC tab 就够了。",
+      when: "当您要为一个产品做月度内容批次，例如 10-30 条视频，或想一次测试多个 hook / framework 时，用 Audio。如果只做一条明确台词的视频，用 UGC tab 就够了。",
       guideTitle: "怎么用",
       stepLabel: "步骤",
       tipLabel: "提示",
       workflowTitle: "操作建议",
-      workflow: "Product Scanner 最适合搭配 Auto Post Chrome extension：批量生成，review 后用 TikTok native scheduler 排程发布，后续由 TikTok 处理 posting。",
+      workflow: "Audio 最适合搭配 Auto Post Chrome extension：批量生成，review 后用 TikTok native scheduler 排程发布，后续由 TikTok 处理 posting。",
       sections: { 9: "下拉选项 — 每个选项是什么意思" },
       steps: [
         { no: "1", title: "表单总览", subtitle: "Affiliate / Manual Product、persona、duration、framework、CTA、quantity", copy: "先选择 Affiliate link 或 Manual Product，再设置 Gender、Style、Age、8s/16s、Plan Mode、frameworks、CTA mode 和 Quantity 1-10。" },
@@ -8316,21 +8361,21 @@ function sopAutoContentContent() {
     },
     en: {
       eyebrow: "Guide",
-      title: "Product Scanner Tab — Batch Videos in One Click",
+      title: "Audio Tab — Batch Videos in One Click",
       close: "Got it - close",
       path: "AI → Image → Video → Merge · 1-10 videos per batch",
       whatTitle: "What is this?",
-      what: "Product Scanner generates many UGC videos from one product. Paste a TikTok Shop / Shopee link or enter product details manually, then AI plans multiple angles such as UGC, Product, and Lifestyle, generates the batch, and saves captions, cover text, and hashtags for auto-posting.",
+      what: "Audio generates many UGC videos from one product. Paste a TikTok Shop / Shopee link or enter product details manually, then AI plans multiple angles such as UGC, Product, and Lifestyle, generates the batch, and saves captions, cover text, and hashtags for auto-posting.",
       whenTitle: "When should I use it?",
-      when: "Use Product Scanner for monthly production batches, such as 10-30 videos for one product, or when you want to test multiple hooks and frameworks quickly. If you only need one specific video, use the UGC tab.",
+      when: "Use Audio for monthly production batches, such as 10-30 videos for one product, or when you want to test multiple hooks and frameworks quickly. If you only need one specific video, use the UGC tab.",
       guideTitle: "How to use it",
       stepLabel: "Step",
       tipLabel: "Tip",
       workflowTitle: "Workflow tip",
-      workflow: "Product Scanner is strongest with the Auto Post Chrome extension. Generate a batch, review the outputs, schedule hourly through TikTok's native scheduler, then let TikTok handle posting.",
+      workflow: "Audio is strongest with the Auto Post Chrome extension. Generate a batch, review the outputs, schedule hourly through TikTok's native scheduler, then let TikTok handle posting.",
       sections: { 9: "Dropdowns & Options — What Each One Means" },
       steps: [
-        { no: "1", title: "Product Scanner form overview", subtitle: "Affiliate / Manual Product, persona, duration, frameworks, CTA, and quantity", copy: "Start with an Affiliate link or Manual Product. Then set Gender, Style, Age, 8s/16s duration, Plan Mode, frameworks, CTA mode, and Quantity from 1-10." },
+        { no: "1", title: "Audio form overview", subtitle: "Affiliate / Manual Product, persona, duration, frameworks, CTA, and quantity", copy: "Start with an Affiliate link or Manual Product. Then set Gender, Style, Age, 8s/16s duration, Plan Mode, frameworks, CTA mode, and Quantity from 1-10." },
         { no: "2", title: "Affiliate vs Manual Product", copy: "Affiliate is the default: paste a TikTok Shop or Shopee link so AI can fetch name, price, and image. Manual Product is for private listings, new products, or products that cannot be scraped.", tip: "Short vt.tiktok.com links often fail. Open the link in a browser first, then copy the full /pdp/... URL." },
         { no: "3", title: "History Saved Products", copy: "If a product was fetched before, the history icon beside the input shows a count. Click it to reuse saved products without another scrape call." },
         { no: "4", title: "Set Avatar Persona", copy: "Choose Female or Male. For Female, choose Hijab or No Hijab. Choose Age such as 20s, 30s, 40s Makcik, or 55+ Nenek. This persona carries across UGC frameworks." },
@@ -8538,7 +8583,7 @@ function sopLibrary() {
     dashboard: { group: "Getting Started", shortTitle: "Start", icon: "layout-dashboard", desc: "Set up projects and read production stats.", time: "5 min", nextLabel: "Create new project", nextPage: "dashboard", nextAction: "new-project", content: sopDashboardContent },
     image: { group: "Create Content", shortTitle: "Image", icon: "image", desc: "Generate product visuals and avatar images.", time: "7 min", nextLabel: "Go to Image tab", nextStep: "image", content: sopImageContent },
     ugc: { group: "Create Content", shortTitle: "UGC", icon: "video", desc: "Create selfie-style product videos.", time: "8 min", nextLabel: "Go to UGC tab", nextStep: "ugc", content: sopUgcContent },
-    auto: { group: "Create Content", shortTitle: "Batch", icon: "wand-sparkles", desc: "Batch hooks, scripts, and videos faster.", time: "10 min", nextLabel: "Go to Product Scanner", nextStep: "auto", content: sopAutoContentContent },
+    auto: { group: "Create Content", shortTitle: "Audio", icon: "audio-lines", desc: "Plan voiceover, presets, and audio direction.", time: "5 min", nextLabel: "Go to Audio", nextStep: "auto", content: sopAudioContentContent },
     original: { group: "Create Content", shortTitle: "Cinema", icon: "film", desc: "Write original cinematic video prompts.", time: "6 min", nextLabel: "Go to Original Video", nextStep: "original", content: sopOriginalVideoContent },
     clone: { group: "Create Content", shortTitle: "Clone", icon: "layers-3", desc: "Break down competitor video structure.", time: "6 min", nextLabel: "Go to Clone Prompt", nextStep: "clone", content: sopClonePromptContent },
     scheduler: { group: "Publish & Operate", shortTitle: "Schedule", icon: "calendar-days", desc: "Plan posting cadence and queue drafts.", time: "Soon" },
@@ -10415,6 +10460,18 @@ function bind() {
       if (event.key !== "Enter" || (!event.metaKey && !event.ctrlKey) || event.shiftKey || event.altKey || event.isComposing) return;
       event.preventDefault();
       generate("generate-ugc", event);
+    });
+  });
+  document.querySelectorAll("[data-audio-prompt]").forEach((el) => {
+    updateAudioPromptEditorRows(el);
+    el.addEventListener("input", () => {
+      updateAudioPromptLocal(el.value);
+      updateAudioPromptEditorRows(el);
+    });
+    el.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" || (!event.metaKey && !event.ctrlKey) || event.shiftKey || event.altKey || event.isComposing) return;
+      event.preventDefault();
+      audioGeneratePlaceholder();
     });
   });
   document.querySelectorAll("[data-result-title]").forEach((el) => {

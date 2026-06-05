@@ -1010,7 +1010,7 @@ function blankProject(id, name, userId = adminUserId) {
     createdAt: new Date().toISOString(),
     image: { model: "GPT Image 2", mode: "Create Image", duration: "8", aspectRatio: "9:16", resolution: "2K", count: 1, prompt: "" },
     ugc: { avatar: "Malay female", voice: "BM Casual", length: "30 seconds", script: "Hook, product proof, objection, offer, CTA." },
-    auto: { platform: "TikTok", batch: "7 posts", tone: "Viral hook", productUrl: "" },
+    auto: { platform: "TikTok", batch: "7 posts", tone: "Viral hook", productUrl: "", audioMode: "Voiceover", audioLanguage: "Malay", audioScriptMode: "Write for me", voicePreset: "Malay Soft Sell", audioPrompt: "" },
     original: { brief: "Rewrite this into Pokaya AI style while keeping the product claim safe." },
     clone: { url: "", rules: "Keep structure, change product, rewrite hook, avoid copying exact words." },
     story: { arc: "Problem -> proof -> offer", market: "Malaysia TikTok Shop", notes: "" },
