@@ -4816,6 +4816,7 @@ async function processGenerationJob(jobId) {
       return { job: structuredClone(job), project: structuredClone(project) };
     });
     if (!snapshot) return;
+    applyGenerationJobSnapshot(snapshot.project, snapshot.job);
     if (snapshot.job.internalPromptOverride && snapshot.project?.image) {
       snapshot.project.image.prompt = snapshot.job.internalPromptOverride;
     }
@@ -4879,6 +4880,24 @@ async function processGenerationJob(jobId) {
   }
 }
 
+function applyGenerationJobSnapshot(project, job) {
+  if (!project || !job) return project;
+  project.image ||= {};
+  if (job.model) project.image.model = internalMediaModel(job.model);
+  if (job.aspectRatio) project.image.aspectRatio = String(job.aspectRatio);
+  if (job.resolution) project.image.resolution = String(job.resolution);
+  if (job.duration) project.image.duration = String(job.duration);
+  if (job.prompt) {
+    if (job.action === "generate-ugc") {
+      project.ugc ||= {};
+      project.ugc.script = job.prompt;
+    } else {
+      project.image.prompt = job.prompt;
+    }
+  }
+  return project;
+}
+
 async function completeQueuedGeneration(jobId, generated) {
   await mutateDb(async (currentDb) => {
     const job = currentDb.generationJobs.find((item) => item.id === jobId);
@@ -4886,9 +4905,10 @@ async function completeQueuedGeneration(jobId, generated) {
     if (job.status !== "processing") return saveDb(currentDb);
     const project = currentDb.projects.find((item) => item.id === job.projectId);
     if (!project) throw Object.assign(new Error("Project not found"), { status: 404 });
+    const jobProject = applyGenerationJobSnapshot(structuredClone(project), job);
     const owner = currentDb.users.find((item) => item.id === project.userId);
-    const cost = generationCostFor(currentDb, project, job.action, generated);
-    const creditsToCharge = creditChargeFor(project, job.action, currentDb);
+    const cost = generationCostFor(currentDb, jobProject, job.action, { ...generated, model: job.model || generated.model });
+    const creditsToCharge = creditChargeFor(jobProject, job.action, currentDb);
     const completedAt = new Date().toISOString();
     const resultId = crypto.randomUUID();
     const assetType = generated.videoUrl ? "video" : generated.imageUrl ? "image" : "text";
@@ -4925,9 +4945,9 @@ async function completeQueuedGeneration(jobId, generated) {
       batchIndex: job.batchIndex,
       batchCount: job.batchCount,
       provider: generated.provider,
-      model: generated.model || internalMediaModel(project.image?.model),
-      resolution: project.image?.resolution || imageResolutionFromProject(project),
-      aspectRatio: job.aspectRatio || generationAspectRatioForProject(project, job.action, job.step),
+      model: job.model || generated.model || internalMediaModel(jobProject.image?.model),
+      resolution: job.resolution || jobProject.image?.resolution || imageResolutionFromProject(jobProject),
+      aspectRatio: job.aspectRatio || generationAspectRatioForProject(jobProject, job.action, job.step),
       costRm: cost.costRm,
       costUsd: cost.costUsd,
       createdAt: completedAt
@@ -4958,13 +4978,13 @@ async function completeQueuedGeneration(jobId, generated) {
       prompt: generated.prompt || job.prompt || "",
       providerErrorMessage: undefined,
       providerFallbacks: generated.providerFallbacks,
-      aspectRatio: job.aspectRatio || generationAspectRatioForProject(project, job.action, job.step),
+      aspectRatio: job.aspectRatio || generationAspectRatioForProject(jobProject, job.action, job.step),
       provider: cost.provider,
       model: cost.model,
       unit: cost.unit,
       creditsCharged: creditsToCharge,
       creditsRequired: creditsToCharge,
-      duration: videoDurationFor(project),
+      duration: videoDurationFor(jobProject),
       completedAt,
       ...cost
     });
