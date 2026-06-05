@@ -6661,6 +6661,7 @@ function autoPanel(p) {
   const scriptMode = auto.audioScriptMode || "Write for me";
   const voicePreset = auto.voicePreset || "Malay Soft Sell";
   const promptText = auto.audioPrompt || "";
+  const isVoiceoverMode = mode === "Voiceover";
   return `<section class="audio-studio-page studio-wall-zoomable ${wall ? "" : "is-empty"}" ${studioWallZoomStyleAttr()}>
     <section class="audio-stage-hero">
       <div class="audio-eq" aria-hidden="true">${Array.from({ length: 34 }, (_, index) => `<i style="--bar:${index % 9}"></i>`).join("")}</div>
@@ -6674,39 +6675,91 @@ function autoPanel(p) {
     <section class="audio-composer" aria-label="Audio composer">
       <div class="audio-mode-dial" role="tablist" aria-label="Audio mode">
         ${audioModeButton("Voiceover", "mic", "Create spoken narration", mode)}
-        ${audioModeButton("Change Voice", "refresh-cw", "Coming soon", mode, true)}
-        ${audioModeButton("Translate", "languages", "Coming soon", mode, true)}
+        ${audioModeButton("Change Voice", "refresh-cw", "Insert reference", mode)}
+        ${audioModeButton("Translate", "languages", "Insert reference", mode)}
       </div>
-      <div class="audio-prompt-well">
-        <textarea data-field="auto.audioPrompt" data-audio-prompt rows="3" placeholder="Describe the voice, scene, and emotion you imagine...">${esc(promptText)}</textarea>
-        <div class="audio-control-row">
-          <span class="audio-model-chip">${icon("audio-lines", 16)} Pokaya Voice v1</span>
-          ${audioSegment("auto.audioLanguage", [["Malay", "Malay"], ["English", "English"], ["Chinese", "Chinese"], ["Indonesian", "Indonesian"]], language)}
-          ${audioSegment("auto.audioScriptMode", [["Write for me", "Write for me"], ["Use my script", "Use my script"]], scriptMode)}
-        </div>
-      </div>
-      <details class="audio-preset-picker">
-        <summary>
-          <span>Voice Preset</span>
-          <b>${esc(voicePreset)}</b>
-          <em>${audioMiniWaveform()}</em>
-          <i>${icon("play", 16)}</i>
-        </summary>
-        <div class="audio-preset-menu">
-          ${audioPresetButton("Malay Soft Sell", "Female · MY · warm", voicePreset)}
-          ${audioPresetButton("Energetic Creator", "Female · EN · fast", voicePreset)}
-          ${audioPresetButton("Calm Explainer", "Male · EN · calm", voicePreset)}
-          ${audioPresetButton("Chinese Warm", "Female · ZH · gentle", voicePreset)}
-          ${audioPresetButton("Indo Promo", "Female · ID · bright", voicePreset)}
-          ${audioPresetButton("Abang Trust", "Male · MY · confident", voicePreset)}
-        </div>
-      </details>
-      <button class="audio-generate-button ${promptText.trim() ? "" : "is-empty"}" type="button" data-action="generate-audio">
+      ${isVoiceoverMode ? audioPromptWell(promptText, language, scriptMode) : audioFileInsertWell()}
+      ${mode === "Translate" ? audioLanguagePicker(language) : audioVoicePresetPicker(voicePreset)}
+      <button class="audio-generate-button ${isVoiceoverMode && !promptText.trim() ? "is-empty" : ""}" type="button" data-action="generate-audio">
         <b>Generate Audio</b>
         <span>0.20 Credit</span>
       </button>
     </section>
   </section>`;
+}
+
+function audioPromptWell(promptText, language, scriptMode) {
+  return `<div class="audio-prompt-well">
+    <textarea data-field="auto.audioPrompt" data-audio-prompt rows="3" placeholder="Describe the voice, scene, and emotion you imagine...">${esc(promptText)}</textarea>
+    <div class="audio-control-row">
+      <span class="audio-model-chip">${icon("audio-lines", 16)} Pokaya Voice v1</span>
+      ${audioSegment("auto.audioLanguage", [["Malay", "Malay"], ["English", "English"], ["Chinese", "Chinese"], ["Indonesian", "Indonesian"]], language)}
+      ${audioSegment("auto.audioScriptMode", [["Write for me", "Write for me"], ["Use my script", "Use my script"]], scriptMode)}
+    </div>
+  </div>`;
+}
+
+function audioFileInsertWell() {
+  const title = "Reference Video";
+  return `<button class="audio-file-insert-card" type="button" data-action="audio-coming-soon" aria-label="Insert ${esc(title)}">
+    <span>${icon("files", 24)}</span>
+    <b>${esc(title)}</b>
+    <small>Drop here or Choose from files</small>
+  </button>`;
+}
+
+function audioVoicePresetPicker(voicePreset) {
+  return `<details class="audio-preset-picker">
+    <summary>
+      <span>Voice Preset</span>
+      <b>${esc(voicePreset)}</b>
+      <em>${audioMiniWaveform()}</em>
+      <i>${icon("play", 16)}</i>
+    </summary>
+    <div class="audio-preset-menu">
+      ${audioPresetButton("Malay Soft Sell", "Female · MY · warm", voicePreset)}
+      ${audioPresetButton("Energetic Creator", "Female · EN · fast", voicePreset)}
+      ${audioPresetButton("Calm Explainer", "Male · EN · calm", voicePreset)}
+      ${audioPresetButton("Chinese Warm", "Female · ZH · gentle", voicePreset)}
+      ${audioPresetButton("Indo Promo", "Female · ID · bright", voicePreset)}
+      ${audioPresetButton("Abang Trust", "Male · MY · confident", voicePreset)}
+    </div>
+  </details>`;
+}
+
+function audioLanguagePicker(language) {
+  return `<details class="audio-preset-picker audio-language-picker">
+    <summary>
+      <span>Language</span>
+      <b data-audio-language-current>${esc(language)}</b>
+      <strong data-audio-language-flag>${audioLanguageFlag(language)}</strong>
+      <em>${audioMiniWaveform()}</em>
+    </summary>
+    <div class="audio-preset-menu">
+      ${audioLanguageButton("Malay", "Malaysia", language)}
+      ${audioLanguageButton("English", "United States", language)}
+      ${audioLanguageButton("Chinese", "China", language)}
+      ${audioLanguageButton("Indonesian", "Indonesia", language)}
+    </div>
+  </details>`;
+}
+
+function audioLanguageButton(value, meta, active) {
+  return `<button type="button" class="${active === value ? "active" : ""}" data-field-set="auto.audioLanguage" data-value="${esc(value)}">
+    <span>${audioLanguageFlag(value)} ${esc(value)}</span>
+    <small>${esc(meta)}</small>
+    <i>${icon(active === value ? "check" : "languages", 15)}</i>
+  </button>`;
+}
+
+function audioLanguageFlag(language) {
+  const flags = {
+    Malay: "🇲🇾",
+    English: "🇺🇸",
+    Chinese: "🇨🇳",
+    Indonesian: "🇮🇩"
+  };
+  return flags[language] || "🌐";
 }
 
 function audioModeButton(value, ic, note, active, disabled = false) {
@@ -12081,6 +12134,14 @@ function setFieldSetActive(field, value, source = null) {
       el.textContent = value;
     });
   }
+  if (field === "auto.audioLanguage") {
+    document.querySelectorAll("[data-audio-language-current]").forEach((el) => {
+      el.textContent = value;
+    });
+    document.querySelectorAll("[data-audio-language-flag]").forEach((el) => {
+      el.textContent = audioLanguageFlag(value);
+    });
+  }
   if (field === "original.provider") {
     const provider = originalProviderValue(value);
     const button = document.querySelector(".original-generate-button");
@@ -12097,6 +12158,7 @@ function bindProjectFieldSetControls(root = document) {
       if (el.dataset.fieldSet?.startsWith("ugc.")) stabilizeVideoConsoleExpansion(1000);
       el.closest("details")?.removeAttribute("open");
       saveProjectFieldQuick(el.dataset.fieldSet, el.dataset.value, el);
+      if (el.dataset.fieldSet === "auto.audioMode") render();
     };
     el.addEventListener("click", save);
     el.addEventListener("keydown", (event) => {
