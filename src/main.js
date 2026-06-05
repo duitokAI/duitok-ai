@@ -57,6 +57,7 @@ let imagePresetSaveTimer = null;
 let autoFrameworkSaveTimer = null;
 let autoFrameworkSaveSeq = 0;
 let imageConsoleScrollCleanup = null;
+let videoConsoleScrollCleanup = null;
 let studioWallInfiniteScrollCleanup = null;
 let assetLibraryInfiniteScrollCleanup = null;
 let sidebarTooltipCleanup = null;
@@ -68,6 +69,9 @@ let imageCountSaveSeq = 0;
 let imageConsoleExpandLockUntil = 0;
 let imageConsoleExpandedUntilUserScroll = false;
 let imageConsoleUserScrollIntentUntil = 0;
+let videoConsoleExpandLockUntil = 0;
+let videoConsoleExpandedUntilUserScroll = false;
+let videoConsoleUserScrollIntentUntil = 0;
 const imageReferenceSaveSeq = new Map();
 let resultTitleSaveTimer = null;
 let generationPollTimer = null;
@@ -1948,6 +1952,186 @@ function bindImageConsoleCompact() {
   };
 }
 
+function stabilizeVideoConsoleExpansion(duration = 700) {
+  videoConsoleExpandLockUntil = Date.now() + duration;
+  videoConsoleExpandedUntilUserScroll = true;
+  const restore = () => {
+    document.querySelectorAll(".video-page-studio .video-generate-console").forEach((el) => {
+      el.classList.add("is-hover-expanded");
+      el.classList.remove("is-compact");
+    });
+  };
+  restore();
+  requestAnimationFrame(() => {
+    restore();
+    requestAnimationFrame(restore);
+  });
+  [40, 120, 260, 600, duration].forEach((delay) => window.setTimeout(restore, delay));
+}
+
+function bindVideoConsoleCompact() {
+  videoConsoleScrollCleanup?.();
+  videoConsoleScrollCleanup = null;
+  const consoleEl = document.querySelector(".video-page-studio .video-generate-console");
+  if (!consoleEl) return;
+  let ticking = false;
+  let compact = consoleEl.classList.contains("is-compact");
+  let hovering = false;
+  let menuOpen = false;
+  let compactAt = 1;
+  let expandAt = 0;
+  const allMenus = [...consoleEl.querySelectorAll(".video-model-picker,.video-option-menu")];
+  const closeVideoConsoleMenus = (except = null) => {
+    allMenus.forEach((el) => {
+      if (el !== except) el.removeAttribute("open");
+    });
+  };
+  const updateMenuState = () => {
+    menuOpen = allMenus.some((el) => el.hasAttribute("open"));
+    consoleEl.classList.toggle("has-open-menu", menuOpen);
+    if (menuOpen) {
+      consoleEl.classList.add("is-hover-expanded");
+      consoleEl.classList.remove("is-compact");
+    }
+  };
+  const scrollTargets = [
+    window,
+    document.querySelector(".workspace"),
+    document.querySelector(".studio-shell")
+  ].filter(Boolean);
+  const uniqueScrollTargets = [...new Set(scrollTargets)];
+  const scrollOffset = () => Math.max(
+    window.scrollY || 0,
+    ...uniqueScrollTargets
+      .filter((target) => target !== window)
+      .map((target) => target.scrollTop || 0)
+  );
+  const refreshThresholds = () => {
+    compactAt = 1;
+    expandAt = 0;
+  };
+  const sync = () => {
+    ticking = false;
+    const scrollY = scrollOffset();
+    const nextCompact = compact ? scrollY > expandAt : scrollY > compactAt;
+    if (nextCompact !== compact) compact = nextCompact;
+    updateMenuState();
+    const expandLocked = videoConsoleExpandedUntilUserScroll || Date.now() < videoConsoleExpandLockUntil || consoleEl.contains(document.activeElement);
+    if (expandLocked) {
+      consoleEl.classList.add("is-hover-expanded");
+      consoleEl.classList.remove("is-compact");
+    }
+    const shouldCompact = compact && !hovering && !menuOpen && !expandLocked;
+    consoleEl.classList.toggle("is-compact", shouldCompact);
+    if (shouldCompact) closeVideoConsoleMenus();
+  };
+  const requestSync = () => {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(sync);
+  };
+  const expandForHover = () => {
+    hovering = true;
+    videoConsoleExpandedUntilUserScroll = true;
+    consoleEl.classList.add("is-hover-expanded");
+    consoleEl.classList.remove("is-compact");
+  };
+  const expandForPointerHover = (event) => {
+    if (event.pointerType === "touch") return;
+    expandForHover();
+  };
+  const releaseHoverExpansion = () => {
+    hovering = false;
+    updateMenuState();
+    requestSync();
+  };
+  const markUserScrollIntent = () => {
+    videoConsoleUserScrollIntentUntil = Date.now() + 800;
+  };
+  const handleUserScrollKey = (event) => {
+    if (["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "].includes(event.key)) {
+      markUserScrollIntent();
+    }
+  };
+  const handleScroll = () => {
+    const hasUserScrollIntent = Date.now() < videoConsoleUserScrollIntentUntil;
+    if (hasUserScrollIntent) {
+      videoConsoleExpandLockUntil = 0;
+      videoConsoleExpandedUntilUserScroll = false;
+      if (hovering) hovering = false;
+      if (!menuOpen) consoleEl.classList.remove("is-hover-expanded");
+    }
+    requestSync();
+  };
+  const restoreAfterFocus = (event) => {
+    if (event.relatedTarget && consoleEl.contains(event.relatedTarget)) return;
+    releaseHoverExpansion();
+  };
+  const handleResize = () => {
+    refreshThresholds();
+    requestSync();
+  };
+  const handleMenuToggle = (event) => {
+    const menu = event.currentTarget;
+    if (menu.hasAttribute("open")) closeVideoConsoleMenus(menu);
+    updateMenuState();
+    requestSync();
+  };
+  const handleSummaryPointerDown = (event) => {
+    const menu = event.target.closest?.(".video-model-picker,.video-option-menu");
+    if (!menu) return;
+    if (menu.classList.contains("is-static")) {
+      event.preventDefault();
+      return;
+    }
+    stabilizeVideoConsoleExpansion(700);
+    closeVideoConsoleMenus(menu);
+    updateMenuState();
+  };
+  const handleEscape = (event) => {
+    if (event.key !== "Escape") return;
+    closeVideoConsoleMenus();
+    updateMenuState();
+    requestSync();
+  };
+  uniqueScrollTargets.forEach((target) => target.addEventListener("scroll", handleScroll, { passive: true }));
+  window.addEventListener("wheel", markUserScrollIntent, { passive: true, capture: true });
+  window.addEventListener("touchmove", markUserScrollIntent, { passive: true, capture: true });
+  window.addEventListener("keydown", handleUserScrollKey, true);
+  window.addEventListener("resize", handleResize);
+  document.addEventListener("keydown", handleEscape);
+  consoleEl.addEventListener("mouseenter", expandForHover);
+  consoleEl.addEventListener("mousemove", expandForHover);
+  consoleEl.addEventListener("mouseleave", releaseHoverExpansion);
+  consoleEl.addEventListener("pointerenter", expandForPointerHover);
+  consoleEl.addEventListener("pointermove", expandForPointerHover);
+  consoleEl.addEventListener("pointerleave", releaseHoverExpansion);
+  consoleEl.addEventListener("focusin", expandForHover);
+  consoleEl.addEventListener("focusout", restoreAfterFocus);
+  allMenus.forEach((el) => el.addEventListener("toggle", handleMenuToggle));
+  consoleEl.querySelectorAll(".video-model-picker summary,.video-option-menu summary").forEach((el) => el.addEventListener("pointerdown", handleSummaryPointerDown));
+  refreshThresholds();
+  sync();
+  videoConsoleScrollCleanup = () => {
+    uniqueScrollTargets.forEach((target) => target.removeEventListener("scroll", handleScroll));
+    window.removeEventListener("wheel", markUserScrollIntent, true);
+    window.removeEventListener("touchmove", markUserScrollIntent, true);
+    window.removeEventListener("keydown", handleUserScrollKey, true);
+    window.removeEventListener("resize", handleResize);
+    document.removeEventListener("keydown", handleEscape);
+    consoleEl.removeEventListener("mouseenter", expandForHover);
+    consoleEl.removeEventListener("mousemove", expandForHover);
+    consoleEl.removeEventListener("mouseleave", releaseHoverExpansion);
+    consoleEl.removeEventListener("pointerenter", expandForPointerHover);
+    consoleEl.removeEventListener("pointermove", expandForPointerHover);
+    consoleEl.removeEventListener("pointerleave", releaseHoverExpansion);
+    consoleEl.removeEventListener("focusin", expandForHover);
+    consoleEl.removeEventListener("focusout", restoreAfterFocus);
+    allMenus.forEach((el) => el.removeEventListener("toggle", handleMenuToggle));
+    consoleEl.querySelectorAll(".video-model-picker summary,.video-option-menu summary").forEach((el) => el.removeEventListener("pointerdown", handleSummaryPointerDown));
+  };
+}
+
 
 function bindCollapsedSidebarTooltips() {
   sidebarTooltipCleanup?.();
@@ -2086,6 +2270,7 @@ function render() {
   updatePromoCountdown();
   restoreSidebarScroll();
   bindImageConsoleCompact();
+  bindVideoConsoleCompact();
   bindStudioWallInfiniteScroll();
   bindAssetLibraryInfiniteScroll();
   bindCollapsedSidebarTooltips();
@@ -2133,7 +2318,7 @@ function handleDelegatedPreviewWarm(event) {
 }
 
 function handleDelegatedClick(event) {
-  const target = event.target.closest?.("[data-page],[data-step],[data-step-open],[data-project],[data-studio-wall-more],[data-result-select],[data-bulk-result-action],[data-result-action],[data-result-preview],[data-result-prompt],[data-image-canvas-result],[data-image-model-option],[data-generation-cancel],[data-generation-retry],[data-generation-edit],[data-settings-section],[data-agent-history-restore],[data-agent-history-restore-row],[data-agent-history-pin],[data-agent-history-archive]");
+  const target = event.target.closest?.("[data-page],[data-step],[data-step-open],[data-project],[data-studio-wall-more],[data-result-select],[data-bulk-result-action],[data-result-action],[data-result-preview],[data-result-prompt],[data-image-canvas-result],[data-image-model-option],[data-video-model-option],[data-generation-cancel],[data-generation-retry],[data-generation-edit],[data-settings-section],[data-agent-history-restore],[data-agent-history-restore-row],[data-agent-history-pin],[data-agent-history-archive]");
   if (!target || !app.contains(target)) return;
 
   if (target.dataset.agentHistoryRestore) {
@@ -2173,6 +2358,11 @@ function handleDelegatedClick(event) {
     stabilizeImageConsoleExpansion(1000);
     target.closest("details")?.removeAttribute("open");
     return saveImageModelQuick(target.dataset.imageModelOption, target);
+  }
+  if (target.dataset.videoModelOption) {
+    stabilizeVideoConsoleExpansion(1000);
+    target.closest("details")?.removeAttribute("open");
+    return saveVideoModelQuick(target.dataset.videoModelOption, target);
   }
   if (target.dataset.settingsSection) {
     return set({ settingsSection: normalizeSettingsSection(target.dataset.settingsSection) });
@@ -5777,6 +5967,15 @@ function providerLogo(provider) {
   if (provider === "seedream") {
     return `<span class="provider-logo provider-logo-seedream" aria-hidden="true">S</span>`;
   }
+  if (provider === "wan") {
+    return `<span class="provider-logo provider-logo-wan" aria-hidden="true">W</span>`;
+  }
+  if (provider === "kling") {
+    return `<span class="provider-logo provider-logo-kling" aria-hidden="true">K</span>`;
+  }
+  if (provider === "minimax") {
+    return `<span class="provider-logo provider-logo-minimax" aria-hidden="true">M</span>`;
+  }
   if (provider === "xai") {
     return `<span class="provider-logo provider-logo-xai" aria-hidden="true">X</span>`;
   }
@@ -5959,23 +6158,165 @@ function videoBatchCount(p = project()) {
   return Math.min(4, Math.max(1, count));
 }
 
+function videoModelOptions() {
+  return [
+    {
+      value: "Seedance 2.0 Fast",
+      provider: "seedream",
+      providerName: "Seedance / ByteDance",
+      title: "Seedance 2.0 Fast",
+      description: "Fast social video generation for creator-style clips",
+      badge: "FAST",
+      capabilities: {
+        modes: ["Text to Video", "Image to Video"],
+        aspectRatios: ["9:16", "16:9", "1:1"],
+        qualities: ["480p", "720p"],
+        durations: ["5s", "8s", "12s"],
+        audio: ["On", "Off"]
+      }
+    },
+    {
+      value: "Veo 3.1",
+      provider: "google",
+      providerName: "Google",
+      title: "Veo 3.1",
+      description: "Cinematic video generation with realistic motion",
+      badge: "",
+      capabilities: {
+        modes: ["Text to Video", "Image to Video", "Audio"],
+        aspectRatios: ["16:9", "9:16"],
+        qualities: ["720p", "1080p"],
+        durations: ["8s"],
+        audio: ["On", "Off"]
+      }
+    },
+    {
+      value: "Sora 2",
+      provider: "openai",
+      providerName: "OpenAI",
+      title: "Sora 2",
+      description: "High-quality narrative video generation",
+      badge: "",
+      capabilities: {
+        modes: ["Text to Video"],
+        aspectRatios: ["16:9", "9:16"],
+        qualities: ["720p", "1080p"],
+        durations: ["8s", "12s"],
+        audio: ["On", "Off"]
+      }
+    },
+    {
+      value: "Wan 2.7",
+      provider: "wan",
+      providerName: "Alibaba Wan",
+      title: "Wan 2.7",
+      description: "Flexible video model for product and creator shots",
+      badge: "",
+      capabilities: {
+        modes: ["Text to Video", "Image to Video"],
+        aspectRatios: ["9:16", "16:9", "1:1", "4:3", "3:4"],
+        qualities: ["480p", "720p"],
+        durations: ["5s", "8s", "12s"],
+        audio: ["Off"]
+      }
+    },
+    {
+      value: "Kling V3 Omni",
+      provider: "kling",
+      providerName: "Kling",
+      title: "Kling V3 Omni",
+      description: "Multi-modal video generation with strong motion control",
+      badge: "OMNI",
+      capabilities: {
+        modes: ["Text to Video", "Image to Video", "Video to Video"],
+        aspectRatios: ["9:16", "16:9", "1:1"],
+        qualities: ["720p", "1080p"],
+        durations: ["5s", "12s"],
+        audio: ["On", "Off"]
+      }
+    },
+    {
+      value: "Kling V3 Motion Control",
+      provider: "kling",
+      providerName: "Kling",
+      title: "Kling V3 Motion Control",
+      description: "Motion-guided video generation for controlled movement",
+      badge: "",
+      capabilities: {
+        modes: ["Image to Video", "Motion Control"],
+        aspectRatios: ["9:16", "16:9"],
+        qualities: ["720p"],
+        durations: ["5s", "12s"],
+        audio: ["Off"]
+      }
+    },
+    {
+      value: "MiniMax Hailuo 2.3",
+      provider: "minimax",
+      providerName: "MiniMax",
+      title: "MiniMax Hailuo 2.3",
+      description: "Fast video generation for short creative scenes",
+      badge: "",
+      capabilities: {
+        modes: ["Text to Video", "Image to Video"],
+        aspectRatios: ["9:16", "16:9", "1:1"],
+        qualities: ["480p", "720p"],
+        durations: ["5s", "8s", "12s"],
+        audio: ["Off"]
+      }
+    }
+  ];
+}
+
+function videoModelCapabilities(model = videoModelValue(project())) {
+  const selected = videoModelOptions().find((item) => item.value === model) || videoModelOptions()[0];
+  return selected.capabilities || {};
+}
+
+function normalizedVideoSettingForModel(model, field, value) {
+  const capabilities = videoModelCapabilities(model);
+  if (field === "ugc.aspectRatio") {
+    const options = capabilities.aspectRatios || ["16:9"];
+    return options.includes(value) ? value : options[0] || "16:9";
+  }
+  if (field === "ugc.quality") {
+    const options = capabilities.qualities || ["720p"];
+    const normalized = String(value || "").toLowerCase();
+    return options.includes(normalized) ? normalized : options[0] || "720p";
+  }
+  if (field === "ugc.duration") {
+    const options = capabilities.durations || ["8s"];
+    return options.includes(value) ? value : options[0] || "8s";
+  }
+  if (field === "ugc.audio") {
+    const options = capabilities.audio || ["On", "Off"];
+    return options.includes(value) ? value : options[0] || "On";
+  }
+  return value;
+}
+
 function videoDurationValue(p = project()) {
   const value = String(p?.ugc?.duration || "12s");
-  return ["5s", "8s", "12s"].includes(value) ? value : "12s";
+  const model = videoModelValue(p);
+  return normalizedVideoSettingForModel(model, "ugc.duration", value);
 }
 
 function videoAspectRatioValue(p = project()) {
   const value = String(p?.ugc?.aspectRatio || p?.image?.aspectRatio || "16:9");
-  return ["9:16", "16:9", "1:1", "4:3", "3:4"].includes(value) ? value : "16:9";
+  const model = videoModelValue(p);
+  return normalizedVideoSettingForModel(model, "ugc.aspectRatio", value);
 }
 
 function videoQualityValue(p = project()) {
   const value = String(p?.ugc?.quality || "720p").toLowerCase();
-  return ["480p", "720p", "1080p"].includes(value) ? value : "720p";
+  const model = videoModelValue(p);
+  return normalizedVideoSettingForModel(model, "ugc.quality", value);
 }
 
 function videoAudioValue(p = project()) {
-  return String(p?.ugc?.audio || "On").toLowerCase() === "off" ? "Off" : "On";
+  const value = String(p?.ugc?.audio || "On").toLowerCase() === "off" ? "Off" : "On";
+  const model = videoModelValue(p);
+  return normalizedVideoSettingForModel(model, "ugc.audio", value);
 }
 
 function videoModelValue(p = project()) {
@@ -6001,6 +6342,10 @@ function videoCreditEstimate(p = project()) {
 function videoGenerateConsole(p) {
   const promptText = String(p.ugc?.script || "");
   const longPromptClass = promptText.length > 120 || promptText.includes("\n") ? "has-long-prompt" : "";
+  const selectedModel = videoModelValue(p);
+  const selectedModelItem = videoModelOptions().find((item) => item.value === selectedModel) || videoModelOptions()[0];
+  const capabilities = videoModelCapabilities(selectedModel);
+  const compactSummary = videoCompactPromptText(promptText);
   return `<section class="video-generate-console ${longPromptClass}" data-video-generate-console>
     <div class="video-console-main">
       <div class="video-console-prompt" data-video-console-prompt-zone>
@@ -6010,21 +6355,17 @@ function videoGenerateConsole(p) {
         <textarea data-field="ugc.script" data-video-console-prompt rows="2" placeholder="Describe the video you want to create...">${esc(p.ugc?.script || "")}</textarea>
         <button class="video-prompt-enhance ${state.promptAdvancedEnabled ? "is-active" : ""}" type="button" data-action="toggle-prompt-advanced" aria-label="${state.promptAdvancedEnabled ? "Enhance on" : "Enhance off"}" aria-pressed="${state.promptAdvancedEnabled ? "true" : "false"}" title="Prompt enhance" ${state.promptAdvancedBusy ? "disabled" : ""}>${icon("wand", 17)}</button>
       </div>
+      <div class="video-console-compact-summary" data-video-compact-summary aria-hidden="true">
+        <span>${esc(compactSummary)}</span>
+        <b><span data-video-compact-model-icon>${providerLogo(selectedModelItem.provider)}</span>${esc(selectedModelItem.title)}</b>
+      </div>
       <div class="video-console-tools">
-        ${videoOptionMenu("model", "ugc.provider", videoModelValue(p), [
-          ["Seedance 2.0 Fast", "Seedance 2.0 Fast"],
-          ["Veo 3.1", "Veo 3.1"],
-          ["Sora 2", "Sora 2"],
-          ["Wan 2.7", "Wan 2.7"],
-          ["Kling V3 Omni", "Kling Omni"],
-          ["Kling V3 Motion Control", "Kling Motion"],
-          ["MiniMax Hailuo 2.3", "Hailuo 2.3"]
-        ], "audio-lines")}
-        ${videoOptionMenu("ratio", "ugc.aspectRatio", videoAspectRatioValue(p), ["16:9", "9:16", "1:1", "4:3", "3:4"].map((value) => [value, value]), "rectangle-horizontal")}
-        ${videoOptionMenu("quality", "ugc.quality", videoQualityValue(p), ["480p", "720p", "1080p"].map((value) => [value, value]), "gem")}
-        ${videoOptionMenu("duration", "ugc.duration", videoDurationValue(p), ["5s", "8s", "12s"].map((value) => [value, value]), "clock-3")}
+        ${videoModelPicker(selectedModel)}
+        ${videoOptionMenu("ratio", "ugc.aspectRatio", videoAspectRatioValue(p), (capabilities.aspectRatios || []).map(videoAspectRatioOption), "rectangle-horizontal", "Aspect ratio")}
+        ${videoOptionMenu("quality", "ugc.quality", videoQualityValue(p), (capabilities.qualities || []).map(videoQualityOption), "gem", "Select quality")}
+        ${videoOptionMenu("duration", "ugc.duration", videoDurationValue(p), (capabilities.durations || []).map(videoDurationOption), "clock-3", "Duration")}
         ${videoCountStepper(p)}
-        ${videoOptionMenu("audio", "ugc.audio", videoAudioValue(p), [["On", "On"], ["Off", "Off"]], videoAudioValue(p) === "Off" ? "volume-x" : "volume-2")}
+        ${(capabilities.audio || []).length ? videoOptionMenu("audio", "ugc.audio", videoAudioValue(p), (capabilities.audio || []).map(videoAudioOption), videoAudioValue(p) === "Off" ? "volume-x" : "volume-2", "Audio") : ""}
       </div>
     </div>
     <button class="video-console-generate" type="button" data-action="generate-ugc" ${state.generating ? "aria-busy=\"true\" disabled" : ""}>
@@ -6035,15 +6376,116 @@ function videoGenerateConsole(p) {
   </section>`;
 }
 
-function videoOptionMenu(kind, field, selectedValue, options = [], iconName = "circle") {
-  return `<details class="video-option-menu video-option-${esc(kind)}">
-    <summary aria-label="${esc(kind)}">
+function videoModelPicker(selectedModel) {
+  const models = videoModelOptions();
+  const selected = models.find((item) => item.value === selectedModel) || models[0];
+  return `<details class="video-model-picker video-option-menu video-option-model">
+    <summary aria-label="Select video model">
+      <span class="video-model-current-icon" data-video-model-current-icon>${providerLogo(selected.provider)}</span>
+      <b class="video-model-current-text">${esc(selected.title)}</b>
+      ${icon("chevron-down", 16)}
+    </summary>
+    <div class="video-model-menu" role="listbox" aria-label="Video models">
+      <div class="video-option-menu-title">Video models</div>
+      ${models.map((item) => {
+        const active = item.value === selectedModel;
+        const capabilities = item.capabilities || {};
+        const chips = [
+          ...(capabilities.modes || []).slice(0, 2),
+          ...(capabilities.qualities || []).slice(-1),
+          (capabilities.audio || []).includes("On") ? "Audio" : ""
+        ].filter(Boolean);
+        return `<button class="video-model-option ${active ? "active" : ""}" type="button" data-video-model-option="${esc(item.value)}" aria-pressed="${active ? "true" : "false"}" role="option" aria-selected="${active ? "true" : "false"}">
+          <span class="video-model-option-icon">${providerLogo(item.provider)}</span>
+          <span class="video-model-option-copy">
+            <b><span>${esc(item.title)}</span>${item.badge ? ` <em>${esc(item.badge)}</em>` : ""}</b>
+            <small>${esc(item.providerName)} · ${esc(item.description)}</small>
+            <i>${chips.map((chip) => `<span>${esc(chip)}</span>`).join("")}</i>
+          </span>
+          <span class="video-model-option-check" aria-hidden="true">${active ? icon("check", 18) : ""}</span>
+        </button>`;
+      }).join("")}
+    </div>
+  </details>`;
+}
+
+function videoAspectRatioOption(value) {
+  return {
+    value,
+    label: value,
+    title: value,
+    description: {
+      "9:16": "Vertical shorts and mobile-first videos",
+      "16:9": "Wide cinematic frame",
+      "1:1": "Square social feed video",
+      "4:3": "Classic product or demo frame",
+      "3:4": "Tall creator and product scene"
+    }[value] || "Video composition frame"
+  };
+}
+
+function videoQualityOption(value) {
+  return {
+    value,
+    label: value,
+    title: value,
+    badge: {
+      "480p": "FAST",
+      "720p": "DEFAULT",
+      "1080p": "PRO"
+    }[value] || "",
+    description: {
+      "480p": "Fast preview generation",
+      "720p": "Balanced quality and cost",
+      "1080p": "Sharper output for final video"
+    }[value] || "Video output quality"
+  };
+}
+
+function videoDurationOption(value) {
+  return {
+    value,
+    label: value,
+    title: value,
+    description: {
+      "5s": "Quick shot",
+      "8s": "Standard clip",
+      "12s": "Longer scene"
+    }[value] || "Video duration"
+  };
+}
+
+function videoAudioOption(value) {
+  return {
+    value,
+    label: value,
+    title: value,
+    description: value === "Off" ? "Silent video" : "Generate video with audio"
+  };
+}
+
+function videoOptionMenu(kind, field, selectedValue, options = [], iconName = "circle", title = "") {
+  if (!options.length) return "";
+  const selected = options.find((item) => item.value === selectedValue) || options[0];
+  const disabled = options.length <= 1;
+  return `<details class="video-option-menu video-option-${esc(kind)} ${disabled ? "is-static" : ""}">
+    <summary aria-label="${esc(kind)}" ${disabled ? "aria-disabled=\"true\"" : ""}>
       ${icon(iconName, 18)}
-      <b data-video-option-current="${esc(field)}">${esc(selectedValue)}</b>
+      <b data-video-option-current="${esc(field)}">${esc(selected?.label || selectedValue)}</b>
       ${icon("chevron-down", 16)}
     </summary>
     <div class="video-option-list" role="listbox" aria-label="${esc(kind)}">
-      ${options.map(([value, label]) => `<button type="button" class="${value === selectedValue ? "active" : ""}" data-field-set="${esc(field)}" data-value="${esc(value)}" role="option" aria-selected="${value === selectedValue ? "true" : "false"}">${esc(label)}</button>`).join("")}
+      <div class="video-option-menu-title">${esc(title || kind)}</div>
+      ${options.map((item) => {
+        const active = item.value === selectedValue;
+        return `<button type="button" class="video-option-item ${active ? "active" : ""}" data-field-set="${esc(field)}" data-value="${esc(item.value)}" data-label="${esc(item.label || item.title || item.value)}" role="option" aria-selected="${active ? "true" : "false"}">
+          <span class="video-option-copy">
+            <b>${esc(item.title || item.value)}${item.badge ? ` <em>${esc(item.badge)}</em>` : ""}</b>
+            <small>${esc(item.description || "")}</small>
+          </span>
+          <span class="video-option-check" aria-hidden="true">${active ? icon("check", 18) : ""}</span>
+        </button>`;
+      }).join("")}
     </div>
   </details>`;
 }
@@ -10947,6 +11389,9 @@ function updateVideoPromptLocal(value = "") {
   if (!state.projectId || !state.db) return;
   state.db = dbWithProjectField(state.db, state.projectId, "ugc.script", value);
   syncVideoPromptDensityClass(value);
+  document.querySelectorAll("[data-video-compact-summary] > span").forEach((el) => {
+    el.textContent = videoCompactPromptText(value);
+  });
 }
 
 function imageCompactPromptText(value = null) {
@@ -10955,6 +11400,14 @@ function imageCompactPromptText(value = null) {
     .replace(/\s+/g, " ")
     .trim();
   return text || "Describe your image";
+}
+
+function videoCompactPromptText(value = null) {
+  const liveValue = document.querySelector("[data-video-console-prompt]")?.value;
+  const text = String(value ?? liveValue ?? project()?.ugc?.script ?? "")
+    .replace(/\s+/g, " ")
+    .trim();
+  return text || "Describe your video";
 }
 
 function syncImagePromptDensityClass(value = project()?.image?.prompt || "") {
@@ -11486,12 +11939,14 @@ function setFieldSetActive(field, value, source = null) {
   }
   if (field?.startsWith("ugc.")) {
     document.querySelectorAll(`[data-video-option-current="${field}"]`).forEach((el) => {
-      el.textContent = value;
+      el.textContent = source?.dataset.label || value;
     });
     document.querySelectorAll(`[data-field-set="${field}"]`).forEach((el) => {
       const active = el.dataset.value === value;
       el.classList.toggle("active", active);
       el.setAttribute("aria-selected", active ? "true" : "false");
+      const check = el.querySelector(".video-option-check");
+      if (check) check.innerHTML = active ? icon("check", 18) : "";
     });
     updateVideoCountDom(videoBatchCount(project()));
   }
@@ -11508,6 +11963,7 @@ function bindProjectFieldSetControls(root = document) {
     el.dataset.fieldSetBound = "true";
     const save = () => {
       if (el.dataset.fieldSet?.startsWith("image.")) stabilizeImageConsoleExpansion(1000);
+      if (el.dataset.fieldSet?.startsWith("ugc.")) stabilizeVideoConsoleExpansion(1000);
       el.closest("details")?.removeAttribute("open");
       saveProjectFieldQuick(el.dataset.fieldSet, el.dataset.value, el);
     };
@@ -11628,6 +12084,10 @@ function updateVideoCountDom(count = videoBatchCount(project())) {
   if (creditLabel && !state.generating) {
     creditLabel.textContent = `${videoCreditEstimate(project())} Credit`;
   }
+  const compactSummary = consoleEl.querySelector("[data-video-compact-summary] > span");
+  if (compactSummary) compactSummary.textContent = videoCompactPromptText(project()?.ugc?.script || "");
+  consoleEl.classList.add("is-hover-expanded");
+  consoleEl.classList.remove("is-compact");
 }
 
 async function saveImageModelQuick(value, source = null) {
@@ -11666,6 +12126,105 @@ async function saveImageModelQuick(value, source = null) {
         body: JSON.stringify({ field: "image.resolution", value: nextResolution })
       });
     }
+    if (state.projectId !== projectId) return;
+    state.db = preserveActiveGenerationState(db, state.db, projectId);
+  } catch (error) {
+    if (state.projectId === projectId) {
+      state.db = previousDb;
+      render();
+    }
+    notify(error.message || t("toastSaveFailed"));
+  }
+}
+
+function updateVideoModelDom(modelValue, source = null) {
+  const model = videoModelOptions().find((item) => item.value === modelValue) || videoModelOptions()[0];
+  const consoleEl = source?.closest?.("[data-video-generate-console]") || document.querySelector("[data-video-generate-console]");
+  if (!consoleEl) return;
+  const projectItem = project();
+  const currentIcon = consoleEl.querySelector("[data-video-model-current-icon]");
+  const currentText = consoleEl.querySelector(".video-model-current-text");
+  const compactModelIcon = consoleEl.querySelector("[data-video-compact-model-icon]");
+  const compactModel = consoleEl.querySelector("[data-video-compact-summary] > b");
+  const creditLabel = consoleEl.querySelector("[data-video-credit-label]");
+  const ratioMenu = consoleEl.querySelector(".video-option-ratio");
+  const qualityMenu = consoleEl.querySelector(".video-option-quality");
+  const durationMenu = consoleEl.querySelector(".video-option-duration");
+  const audioMenu = consoleEl.querySelector(".video-option-audio");
+  const capabilities = videoModelCapabilities(model.value);
+  if (currentIcon) currentIcon.innerHTML = providerLogo(model.provider);
+  if (currentText) currentText.textContent = model.title;
+  if (compactModelIcon) compactModelIcon.innerHTML = providerLogo(model.provider);
+  if (compactModel) compactModel.innerHTML = `<span data-video-compact-model-icon>${providerLogo(model.provider)}</span>${esc(model.title)}`;
+  consoleEl.querySelectorAll("[data-video-model-option]").forEach((button) => {
+    const active = button.dataset.videoModelOption === model.value;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", active ? "true" : "false");
+    button.setAttribute("aria-selected", active ? "true" : "false");
+    const check = button.querySelector(".video-model-option-check");
+    if (check) check.innerHTML = active ? icon("check", 18) : "";
+  });
+  if (ratioMenu) {
+    const selectedRatio = normalizedVideoSettingForModel(model.value, "ugc.aspectRatio", projectItem?.ugc?.aspectRatio);
+    ratioMenu.outerHTML = videoOptionMenu("ratio", "ugc.aspectRatio", selectedRatio, (capabilities.aspectRatios || []).map(videoAspectRatioOption), "rectangle-horizontal", "Aspect ratio");
+  }
+  if (qualityMenu) {
+    const selectedQuality = normalizedVideoSettingForModel(model.value, "ugc.quality", projectItem?.ugc?.quality);
+    qualityMenu.outerHTML = videoOptionMenu("quality", "ugc.quality", selectedQuality, (capabilities.qualities || []).map(videoQualityOption), "gem", "Select quality");
+  }
+  if (durationMenu) {
+    const selectedDuration = normalizedVideoSettingForModel(model.value, "ugc.duration", projectItem?.ugc?.duration);
+    durationMenu.outerHTML = videoOptionMenu("duration", "ugc.duration", selectedDuration, (capabilities.durations || []).map(videoDurationOption), "clock-3", "Duration");
+  }
+  if (audioMenu) {
+    const selectedAudio = normalizedVideoSettingForModel(model.value, "ugc.audio", videoAudioValue(projectItem));
+    audioMenu.outerHTML = (capabilities.audio || []).length ? videoOptionMenu("audio", "ugc.audio", selectedAudio, (capabilities.audio || []).map(videoAudioOption), selectedAudio === "Off" ? "volume-x" : "volume-2", "Audio") : "";
+  }
+  if (creditLabel && !state.generating) creditLabel.textContent = `${videoCreditEstimate(project())} Credit`;
+  window.lucide?.createIcons();
+  bindVideoConsoleCompact();
+  bindProjectFieldSetControls(consoleEl);
+}
+
+async function saveVideoModelQuick(value, source = null) {
+  const selected = videoModelOptions().find((item) => item.value === value);
+  if (!selected) return;
+  const projectId = state.projectId;
+  const previousDb = state.db;
+  const currentProject = project();
+  const nextAspectRatio = normalizedVideoSettingForModel(selected.value, "ugc.aspectRatio", currentProject?.ugc?.aspectRatio);
+  const nextQuality = normalizedVideoSettingForModel(selected.value, "ugc.quality", currentProject?.ugc?.quality);
+  const nextDuration = normalizedVideoSettingForModel(selected.value, "ugc.duration", currentProject?.ugc?.duration);
+  const nextAudio = normalizedVideoSettingForModel(selected.value, "ugc.audio", videoAudioValue(currentProject));
+  let nextDb = dbWithProjectField(previousDb, projectId, "ugc.provider", selected.value);
+  nextDb = dbWithProjectField(nextDb, projectId, "ugc.aspectRatio", nextAspectRatio);
+  nextDb = dbWithProjectField(nextDb, projectId, "ugc.quality", nextQuality);
+  nextDb = dbWithProjectField(nextDb, projectId, "ugc.duration", nextDuration);
+  nextDb = dbWithProjectField(nextDb, projectId, "ugc.audio", nextAudio);
+  state.db = nextDb;
+  stabilizeVideoConsoleExpansion(1000);
+  updateVideoModelDom(selected.value, source);
+  const consoleEl = source?.closest?.("[data-video-generate-console]");
+  if (consoleEl) {
+    consoleEl.classList.add("is-hover-expanded");
+    consoleEl.classList.remove("is-compact");
+  }
+  try {
+    let db = await api(`/projects/${projectId}/field`, {
+      method: "PATCH",
+      body: JSON.stringify({ field: "ugc.provider", value: selected.value })
+    });
+    const patchIfChanged = async (field, previousValue, nextValue) => {
+      if (String(previousValue || "") === String(nextValue || "")) return;
+      db = await api(`/projects/${projectId}/field`, {
+        method: "PATCH",
+        body: JSON.stringify({ field, value: nextValue })
+      });
+    };
+    await patchIfChanged("ugc.aspectRatio", currentProject?.ugc?.aspectRatio, nextAspectRatio);
+    await patchIfChanged("ugc.quality", currentProject?.ugc?.quality, nextQuality);
+    await patchIfChanged("ugc.duration", currentProject?.ugc?.duration, nextDuration);
+    await patchIfChanged("ugc.audio", videoAudioValue(currentProject), nextAudio);
     if (state.projectId !== projectId) return;
     state.db = preserveActiveGenerationState(db, state.db, projectId);
   } catch (error) {
