@@ -1892,6 +1892,13 @@ function publicGenerationTitle(type = "text") {
   return "Pokaya AI Result";
 }
 
+function publicGenerationShortId(id = "", type = "text") {
+  const prefix = type === "video" ? "VID" : type === "audio" ? "AUD" : type === "image" ? "IMG" : "GEN";
+  const source = String(id || crypto.randomUUID()).replace(/[^a-z0-9]/gi, "").toUpperCase();
+  const code = source.slice(-6).padStart(6, "0");
+  return `${prefix}-${code}`;
+}
+
 function publicGenerationBody(type = "text") {
   if (type === "video") return "Video generated with Pokaya AI.";
   if (type === "image") return "Image generated with Pokaya AI.";
@@ -4747,7 +4754,7 @@ async function saveGeneratedResult(projectId, action, step, generated, user) {
     const jobId = crypto.randomUUID();
     const createdAt = new Date().toISOString();
     const assetType = generated.videoUrl ? "video" : generated.imageUrl ? "image" : "text";
-    const publicTitle = generated.publicTitle || publicGenerationTitle(assetType);
+    const publicTitle = generated.publicTitle || publicGenerationShortId(resultId, assetType);
     const publicBody = publicGenerationBody(assetType);
     const mirrored = await mirrorAssetToStorage(generated.videoUrl || generated.imageUrl, {
       userId: project.userId,
@@ -5137,7 +5144,7 @@ async function completeQueuedGeneration(jobId, generated) {
     const completedAt = new Date().toISOString();
     const resultId = crypto.randomUUID();
     const assetType = generated.videoUrl ? "video" : generated.imageUrl ? "image" : "text";
-    const publicTitle = generated.publicTitle || publicGenerationTitle(assetType);
+    const publicTitle = generated.publicTitle || publicGenerationShortId(resultId, assetType);
     const publicBody = publicGenerationBody(assetType);
     const mirrored = await mirrorAssetToStorage(generated.videoUrl || generated.imageUrl, {
       userId: project.userId,
