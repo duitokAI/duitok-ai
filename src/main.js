@@ -7198,6 +7198,11 @@ function clonePanel(p) {
   const meta = studioStepMeta("clone");
   const wall = studioResultWall(p, meta);
   return `<section class="studio-immersive-page studio-wall-zoomable video-prompt-extractor-page ${wall ? "" : "is-empty"}" data-studio-mode="clone" ${studioWallZoomStyleAttr()}>
+    <div class="clone-studio-grid-bg" aria-hidden="true"></div>
+    <div class="clone-studio-hero-copy" aria-hidden="true">
+      <span>CLONE STUDIO</span>
+      <b>CLONE THE HOOK</b>
+    </div>
     ${studioWallZoomControl()}
     ${wall || ""}
     ${videoPromptExtractorDock(p)}
