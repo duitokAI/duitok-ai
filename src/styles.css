@@ -48695,3 +48695,11 @@ html.is-route-changing .studio-shell .video-page-studio {
 html.is-route-changing .studio-shell .studio-result-wall {
   min-height: max(420px, calc(100dvh - var(--project-fixed-tabs-height, 58px) - 170px)) !important;
 }
+
+html.is-route-changing .studio-shell .studio-step-panel,
+html.is-route-changing .studio-shell .studio-result-wall,
+html.is-route-changing .studio-shell .studio-wall-grid,
+html.is-route-changing .studio-shell .image-generate-console,
+html.is-route-changing .studio-shell .video-generate-console {
+  content-visibility: visible !important;
+}
