@@ -2067,6 +2067,14 @@ body,
   white-space: nowrap;
 }
 
+.video-model-option-copy small {
+  display: -webkit-box;
+  max-width: 100%;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  white-space: normal;
+}
+
 .video-model-option-copy i {
   min-width: 0;
   display: flex;
