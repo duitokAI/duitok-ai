@@ -46746,7 +46746,7 @@ body:has(.studio-shell .video-page-studio),
   max-height: none !important;
   margin: 10px auto 14px !important;
   display: grid !important;
-  grid-template-columns: clamp(132px, 10vw, 168px) minmax(0, 1fr) clamp(190px, 16vw, 240px) clamp(150px, 11vw, 188px) !important;
+  grid-template-columns: clamp(260px, 16vw, 320px) minmax(0, 1fr) clamp(190px, 16vw, 240px) clamp(150px, 11vw, 188px) !important;
   align-items: stretch !important;
   gap: 10px !important;
   padding: 10px !important;
@@ -46775,26 +46775,130 @@ body:has(.studio-shell .video-page-studio),
 }
 
 .studio-shell .audio-studio-page .audio-mode-dial {
+  --audio-dial-angle: -24deg;
+  position: relative !important;
+  isolation: isolate !important;
+  overflow: hidden !important;
   display: grid !important;
-  grid-template-rows: repeat(3, 30px) !important;
+  grid-template-rows: repeat(3, 36px) !important;
   align-content: center !important;
-  gap: 4px !important;
-  padding: 6px !important;
-  border-radius: 16px !important;
+  gap: 2px !important;
+  min-height: 150px !important;
+  padding: 20px 14px 20px 126px !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  border-radius: 28px !important;
+  background:
+    radial-gradient(circle at 0 50%, rgba(255, 255, 255, 0.08), transparent 44%),
+    linear-gradient(145deg, #282a2a 0%, #202222 58%, #161819 100%) !important;
+  color: rgba(247, 244, 250, 0.78) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -18px 32px rgba(0, 0, 0, 0.18),
+    0 16px 42px rgba(0, 0, 0, 0.18) !important;
+}
+
+.studio-shell .audio-studio-page .audio-mode-dial:has([data-value="Change Voice"].active) {
+  --audio-dial-angle: 0deg;
+}
+
+.studio-shell .audio-studio-page .audio-mode-dial:has([data-value="Translate"].active) {
+  --audio-dial-angle: 24deg;
+}
+
+.studio-shell .audio-studio-page .audio-mode-dial::before,
+.studio-shell .audio-studio-page .audio-mode-dial::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.studio-shell .audio-studio-page .audio-mode-dial::before {
+  z-index: -1;
+  left: -78px;
+  top: 50%;
+  width: 188px;
+  height: 188px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 34% 38%, rgba(255, 255, 255, 0.2), transparent 7%),
+    radial-gradient(circle at 42% 48%, rgba(255, 255, 255, 0.08), transparent 9%),
+    linear-gradient(145deg, #555 0%, #343434 38%, #191a1b 100%);
+  box-shadow:
+    inset 18px 18px 34px rgba(255, 255, 255, 0.08),
+    inset -20px -24px 42px rgba(0, 0, 0, 0.42),
+    10px 0 26px rgba(0, 0, 0, 0.34);
+  transform: translateY(-50%) rotate(var(--audio-dial-angle));
+  transition: transform 180ms ease;
+}
+
+.studio-shell .audio-studio-page .audio-mode-dial::after {
+  left: 42px;
+  top: 50%;
+  z-index: 2;
+  width: 72px;
+  height: 7px;
+  border-radius: 999px;
+  background: #ecff9c;
+  box-shadow: 0 0 18px rgba(236, 255, 156, 0.34);
+  transform-origin: -28px 50%;
+  transform: translateY(-50%) rotate(var(--audio-dial-angle));
+  transition: transform 180ms ease;
 }
 
 .studio-shell .audio-studio-page .audio-mode-dial button {
   min-height: 0 !important;
-  height: 30px !important;
-  max-height: 30px !important;
+  height: 36px !important;
+  max-height: 36px !important;
+  position: relative !important;
+  z-index: 2 !important;
   grid-template-columns: minmax(0, 1fr) !important;
-  justify-items: center !important;
+  justify-items: start !important;
   gap: 0 !important;
-  padding: 0 10px !important;
-  border-radius: 13px !important;
-  color: rgba(33, 0, 36, 0.54) !important;
+  padding: 0 12px !important;
+  border: 2px solid transparent !important;
+  border-radius: 7px !important;
+  color: rgba(247, 244, 250, 0.66) !important;
   background: transparent !important;
-  text-align: center !important;
+  text-align: left !important;
+}
+
+.studio-shell .audio-studio-page .audio-mode-dial button::before {
+  content: "";
+  position: absolute;
+  left: -22px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #111315;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
+  transform: translateY(-50%);
+}
+
+.studio-shell .audio-studio-page .audio-mode-dial button::after {
+  content: "";
+  position: absolute;
+  left: -66px;
+  top: 50%;
+  width: 44px;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(215, 218, 218, 0.45);
+  transform: translateY(-50%);
+  opacity: 0.62;
+}
+
+.studio-shell .audio-studio-page .audio-mode-dial button:first-child::after {
+  width: 40px;
+  transform: translateY(-50%) rotate(-17deg);
+  transform-origin: 100% 50%;
+}
+
+.studio-shell .audio-studio-page .audio-mode-dial button:last-child::after {
+  width: 40px;
+  transform: translateY(-50%) rotate(17deg);
+  transform-origin: 100% 50%;
 }
 
 .studio-shell .audio-studio-page .audio-mode-dial button svg {
@@ -46802,17 +46906,24 @@ body:has(.studio-shell .video-page-studio),
 }
 
 .studio-shell .audio-studio-page .audio-mode-dial button span {
-  font-size: 12px !important;
+  font-size: 13px !important;
   font-weight: 900 !important;
-  line-height: 1.08 !important;
+  line-height: 1 !important;
   color: inherit !important;
 }
 
 .studio-shell .audio-studio-page .audio-mode-dial button.active {
-  border-color: rgba(255, 103, 56, 0.34) !important;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 247, 241, 0.88)) !important;
-  color: var(--pokaya-ink, #210024) !important;
-  box-shadow: inset 0 0 0 1px rgba(255, 103, 56, 0.1) !important;
+  border-color: #9dcbff !important;
+  background: rgba(20, 23, 27, 0.88) !important;
+  color: rgba(255, 255, 255, 0.92) !important;
+  box-shadow:
+    0 0 0 1px rgba(157, 203, 255, 0.28),
+    0 8px 22px rgba(0, 0, 0, 0.18) !important;
+}
+
+.studio-shell .audio-studio-page .audio-mode-dial button.active::before {
+  background: #ecff9c;
+  box-shadow: 0 0 10px rgba(236, 255, 156, 0.5);
 }
 
 .studio-shell .audio-studio-page .audio-mode-dial button:disabled {

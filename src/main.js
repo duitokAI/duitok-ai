@@ -6657,7 +6657,7 @@ function autoPanel(p) {
 }
 
 function audioModeButton(value, ic, note, active, disabled = false) {
-  return `<button type="button" class="${active === value ? "active" : ""} ${disabled ? "coming-soon" : ""}" data-field-set="auto.audioMode" data-value="${esc(value)}" ${disabled ? "aria-disabled=\"true\" title=\"Coming soon\"" : ""}>
+  return `<button type="button" class="${active === value ? "active" : ""} ${disabled ? "coming-soon" : ""}" data-field-set="auto.audioMode" data-value="${esc(value)}" ${disabled ? "title=\"Coming soon\"" : ""}>
     ${icon(ic, 18)}
     <span>${esc(value)}</span>
     <small>${esc(note)}</small>
