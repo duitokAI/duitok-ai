@@ -48674,7 +48674,7 @@ body:has(.studio-shell .video-page-studio.is-empty),
 .studio-shell .video-page-studio.is-empty > .video-generate-console:not(.is-compact).is-hover-expanded,
 .studio-shell .video-page-studio.is-empty > .video-generate-console:not(.is-compact).has-open-menu {
   position: fixed !important;
-  left: clamp(16px, 1.6vw, 28px) !important;
+  left: calc(var(--studio-sidebar-width, 304px) + clamp(16px, 1.6vw, 28px)) !important;
   right: clamp(16px, 1.6vw, 28px) !important;
   bottom: max(14px, env(safe-area-inset-bottom)) !important;
   z-index: 1180 !important;
