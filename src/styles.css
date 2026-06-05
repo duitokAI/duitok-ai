@@ -49262,12 +49262,32 @@ h3,
 .studio-shell .video-page-studio.is-empty {
   grid-template-rows: minmax(0, 1fr) !important;
   align-content: stretch !important;
+  position: relative !important;
 }
 
 .studio-shell .video-page-studio.is-empty > .video-empty-cinema {
   grid-row: 1 !important;
   min-height: calc(100dvh - var(--project-fixed-tabs-height, 88px)) !important;
   padding-bottom: clamp(150px, 18vh, 220px) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio.is-empty)::after {
+  content: "";
+  position: fixed;
+  left: var(--studio-sidebar-width, 304px);
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  height: clamp(110px, 15vh, 190px);
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 76% 20%, rgba(255, 103, 56, 0.18), transparent 34%),
+    radial-gradient(circle at 36% 35%, rgba(139, 26, 120, 0.24), transparent 38%),
+    linear-gradient(135deg, #210024 0%, #32103a 38%, #8b1a78 72%, #210024 100%);
+}
+
+.studio-shell.sidebar-collapsed .workspace:has(.step-tabs):has(.video-page-studio.is-empty)::after {
+  left: var(--studio-sidebar-width, 76px);
 }
 
 .studio-shell .video-page-studio.is-empty > .video-generate-console,
