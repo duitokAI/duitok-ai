@@ -25301,6 +25301,16 @@ label {
 }
 
 .studio-shell .workspace:has(.step-tabs) .project-step-topbar {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: none;
+}
+
+.studio-shell .workspace:has(.step-tabs) .project-step-topbar::-webkit-scrollbar {
+  display: none;
+}
+
+.studio-shell .workspace:has(.step-tabs) .project-step-topbar {
   position: sticky;
   top: 0;
   z-index: 14;
@@ -25314,7 +25324,7 @@ label {
 }
 
 .studio-shell .workspace:has(.step-tabs) .studio-top-step-tabs {
-  width: 100%;
+  width: max-content;
   max-width: none !important;
   margin: 0 !important;
 }
@@ -25410,10 +25420,10 @@ label {
 /* Sticky media-wall tabs: keep labels readable while scrolling over thumbnails. */
 .studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .project-step-topbar,
 .studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .project-step-topbar {
-  background: rgba(255, 250, 255, 0.82) !important;
-  border-bottom: 1px solid rgba(42, 6, 51, 0.08) !important;
-  box-shadow: 0 10px 26px rgba(42, 6, 51, 0.08) !important;
-  backdrop-filter: blur(18px) saturate(1.12) !important;
+  background: transparent !important;
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
 }
 
 .studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .step-tabs button,
@@ -47393,4 +47403,32 @@ html.is-route-changing .studio-shell .studio-wall-grid,
 html.is-route-changing .studio-shell .image-generate-console,
 html.is-route-changing .studio-shell .video-generate-console {
   content-visibility: visible !important;
+}
+
+/* Media wall tab rail fix: prevent the fixed topbar from painting an empty
+   translucent rectangle after the last tool tab. */
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .project-step-topbar,
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio) .project-step-topbar,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .project-step-topbar {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  background: transparent !important;
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  scrollbar-width: none !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .project-step-topbar::-webkit-scrollbar,
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio) .project-step-topbar::-webkit-scrollbar,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .project-step-topbar::-webkit-scrollbar {
+  display: none !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .studio-top-step-tabs,
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio) .studio-top-step-tabs,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .studio-top-step-tabs {
+  width: max-content !important;
+  min-width: 0 !important;
+  max-width: none !important;
 }
