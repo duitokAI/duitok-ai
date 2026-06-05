@@ -7562,6 +7562,29 @@ textarea {
   display: none;
 }
 
+.asset-deferred-thumb {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  border-radius: inherit;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(251, 241, 247, 0.82)),
+    rgba(255, 255, 255, 0.78);
+  contain: paint;
+}
+
+.asset-deferred-thumb span {
+  width: 30%;
+  max-width: 54px;
+  aspect-ratio: 1 / 1;
+  border-radius: 16px;
+  background: rgba(93, 8, 108, 0.08);
+  box-shadow:
+    42px -24px 0 -13px rgba(255, 79, 124, 0.1),
+    -36px 30px 0 -15px rgba(93, 8, 108, 0.07);
+}
+
 .asset-tile .asset-type-pill,
 .asset-tile .asset-play-pill,
 .asset-tile .asset-tile-overlay {

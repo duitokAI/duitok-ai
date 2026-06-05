@@ -1,4 +1,4 @@
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
@@ -8,6 +8,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const port = Number(process.env.POKAYA_FLICKER_PORT || 4193);
 const baseUrl = process.env.POKAYA_FLICKER_URL || `http://127.0.0.1:${port}`;
 const maxDeltaPx = Number(process.env.POKAYA_FLICKER_MAX_DELTA_PX || 1);
+let dbPath = "";
 
 async function loadPlaywright() {
   try {
@@ -117,12 +118,54 @@ async function measure(page) {
     const modeAfter = rect(".audio-composer");
     out.audioModeSwitch = delta(modeBefore, modeAfter);
 
+    document.querySelector('[data-page="library"]')?.click();
+    await sleep(500);
+    const libraryBefore = rect(".asset-library-main");
+    const deferredBefore = document.querySelectorAll("[data-asset-deferred-result]").length;
+    await sleep(1200);
+    const deferredAfterHydrate = document.querySelectorAll("[data-asset-deferred-result]").length;
+    document.querySelector("[data-asset-library-more]")?.click();
+    await sleep(350);
+    const libraryAfter = rect(".asset-library-main");
+    out.contentLibrary = {
+      main: delta(libraryBefore, libraryAfter),
+      deferredBefore,
+      deferredAfterHydrate,
+      tileCount: document.querySelectorAll(".asset-tile").length
+    };
+
     return out;
   });
 }
 
+async function seedLibraryResults(email) {
+  if (process.env.POKAYA_FLICKER_URL) return;
+  const db = JSON.parse(await readFile(dbPath, "utf8"));
+  const user = (db.users || []).find((item) => String(item.email || "").toLowerCase() === String(email || "").toLowerCase());
+  const project = (db.projects || []).find((item) => item.userId === user?.id) || db.projects?.[0];
+  if (!user || !project) return;
+  const now = Date.now();
+  project.results = Array.from({ length: 42 }, (_, index) => {
+    const hue = (index * 29) % 360;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="480" height="480"><defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop stop-color="hsl(${hue},78%,62%)"/><stop offset="1" stop-color="hsl(${(hue + 52) % 360},84%,74%)"/></linearGradient></defs><rect width="480" height="480" fill="url(#g)"/><circle cx="${120 + (index % 5) * 56}" cy="${130 + (index % 4) * 44}" r="88" fill="rgba(255,255,255,.42)"/></svg>`;
+    return {
+      id: `flicker-lib-${index}`,
+      type: "image",
+      title: `Library perf asset ${index + 1}`,
+      prompt: "Interaction flicker and library performance smoke asset",
+      imageUrl: `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`,
+      model: "GPT Image 2",
+      aspectRatio: "1:1",
+      createdAt: new Date(now - index * 60_000).toISOString(),
+      updatedAt: new Date(now - index * 60_000).toISOString()
+    };
+  });
+  await writeFile(dbPath, JSON.stringify(db, null, 2));
+}
+
 const { chromium } = await loadPlaywright();
 const dataDir = await mkdtemp(path.join(os.tmpdir(), "pokaya-flicker-data-"));
+dbPath = path.join(dataDir, "db.json");
 const server = process.env.POKAYA_FLICKER_URL ? null : spawn("node", ["server.mjs"], {
   cwd: root,
   env: {
@@ -140,11 +183,13 @@ try {
   if (server) await waitForServer(server, baseUrl);
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport: { width: 2048, height: 1152 }, deviceScaleFactor: 1 });
+  const email = `flicker-${Date.now()}@pokaya.local`;
   await page.goto(`${baseUrl}/login`, { waitUntil: "domcontentloaded" });
-  await page.fill('input[name="email"]', `flicker-${Date.now()}@pokaya.local`);
+  await page.fill('input[name="email"]', email);
   await page.fill('input[name="password"]', "pokaya-flicker-test");
   await page.click('form[data-form="login"] button[type="submit"]');
   await page.waitForTimeout(900);
+  await seedLibraryResults(email);
   await page.evaluate(() => {
     const user = JSON.parse(localStorage.getItem("pokaya-user") || "{}");
     localStorage.setItem(`pokaya-first-wizard:${String(user.email || "test").toLowerCase()}`, "done");
@@ -159,6 +204,10 @@ try {
   assertStable("Audio preset menu composer", result.audioPresetMenu?.composer);
   assertStable("Audio preset menu main bar", result.audioPresetMenu?.mainBar);
   assertStable("Audio mode switch", result.audioModeSwitch);
+  assertStable("Content Library main", result.contentLibrary?.main);
+  if (!process.env.POKAYA_FLICKER_URL && Number(result.contentLibrary?.tileCount || 0) < 42) {
+    throw new Error(`Content Library seeded assets did not render: ${result.contentLibrary?.tileCount || 0}/42`);
+  }
 
   console.log("Interaction flicker checks passed.");
   console.log(JSON.stringify(result, null, 2));

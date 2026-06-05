@@ -86,6 +86,7 @@ const generationStateEtags = new Map();
 const studioWallLoadingKeys = new Set();
 const resultPreviewPreloadCache = new Map();
 let assetLibraryWarmFrame = null;
+let assetLibraryHydrateFrame = null;
 const quickFieldSaveTimers = new Map();
 let quickFieldSaveSeq = 0;
 const pendingAgentChatSync = new Set();
@@ -220,7 +221,7 @@ const state = {
   assetSearch: "",
   assetTypeFilter: "all",
   assetProjectFilter: "all",
-  assetLibraryLimit: 36,
+  assetLibraryLimit: 24,
   studioWallLimits: {},
   wizardStep: 1,
   wizardFeature: "",
@@ -2429,6 +2430,10 @@ function render() {
     window.cancelAnimationFrame(assetLibraryWarmFrame);
     assetLibraryWarmFrame = null;
   }
+  if (assetLibraryHydrateFrame) {
+    window.cancelAnimationFrame(assetLibraryHydrateFrame);
+    assetLibraryHydrateFrame = null;
+  }
   assetLibraryInfiniteScrollCleanup?.();
   assetLibraryInfiniteScrollCleanup = null;
   initDelegatedEvents();
@@ -2447,6 +2452,7 @@ function render() {
   bindResultActionTooltips();
   scrollToSopAnchor();
   scheduleAssetLibraryThumbWarmup();
+  scheduleAssetLibraryDeferredMediaHydration();
 }
 
 function hydrateIconsSoon() {
@@ -4754,31 +4760,11 @@ function paymentRow(payment, adminActions = false) {
 }
 
 function contentLibraryPage() {
-  const all = allResults().slice().sort(assetLibraryNewestFirst);
   const filterOptions = ["all", "image", "video", "text", "visual_card"];
+  const { all, filtered } = assetLibraryFilteredItems(filterOptions);
   const activeFilter = filterOptions.includes(state.assetTypeFilter) ? state.assetTypeFilter : "all";
   const activeProject = state.assetProjectFilter || "all";
   const query = String(state.assetSearch || "").trim().toLowerCase();
-  const filtered = all.filter((item) => {
-    const kind = assetMediaKind(item);
-    const projectMatch = activeProject === "all" || item.projectId === activeProject;
-    const kindMatch = activeFilter === "all" || activeFilter === kind || activeFilter === item.type;
-    const searchText = [
-      item.title,
-      item.providerTitle,
-      item.prompt,
-      item.providerBody,
-      item.body,
-      item.model,
-      item.provider,
-      item.projectName,
-      item.id,
-      item.taskId,
-      item.providerTaskId
-    ].filter(Boolean).join(" ").toLowerCase();
-    const searchMatch = !query || searchText.includes(query);
-    return projectMatch && kindMatch && searchMatch;
-  });
   const counts = assetLibraryCounts(all);
   const projectCounts = assetLibraryProjectCounts(all);
   const visibleItems = filtered.slice(0, assetLibraryLimit());
@@ -4819,7 +4805,37 @@ function contentLibraryPage() {
   </section>`;
 }
 
-const assetLibraryPageSize = 36;
+function assetLibraryFilteredItems(filterOptions = ["all", "image", "video", "text", "visual_card"]) {
+  const all = allResults().slice().sort(assetLibraryNewestFirst);
+  const activeFilter = filterOptions.includes(state.assetTypeFilter) ? state.assetTypeFilter : "all";
+  const activeProject = state.assetProjectFilter || "all";
+  const query = String(state.assetSearch || "").trim().toLowerCase();
+  const filtered = all.filter((item) => {
+    const kind = assetMediaKind(item);
+    const projectMatch = activeProject === "all" || item.projectId === activeProject;
+    const kindMatch = activeFilter === "all" || activeFilter === kind || activeFilter === item.type;
+    const searchText = [
+      item.title,
+      item.providerTitle,
+      item.prompt,
+      item.providerBody,
+      item.body,
+      item.model,
+      item.provider,
+      item.projectName,
+      item.id,
+      item.taskId,
+      item.providerTaskId
+    ].filter(Boolean).join(" ").toLowerCase();
+    const searchMatch = !query || searchText.includes(query);
+    return projectMatch && kindMatch && searchMatch;
+  });
+  return { all, filtered, activeFilter, activeProject, query };
+}
+
+const assetLibraryPageSize = 24;
+const assetLibraryImmediateMediaCount = 12;
+const assetLibraryHydrateBatchSize = 6;
 
 function assetLibraryLimit() {
   const value = Number(state.assetLibraryLimit || 0);
@@ -4943,34 +4959,49 @@ function assetLibraryDateLabel(key) {
 
 function assetLibraryDateSection(group, index = 0, startIndex = 0) {
   const zoomControl = index === 0 ? studioWallZoomControl() : "";
-  return `<section class="asset-date-group">
+  const entries = group.entries || [];
+  return `<section class="asset-date-group" data-asset-date-group="${esc(group.key)}">
     <header>
       <div class="asset-date-heading">
         <label><input type="checkbox" aria-label="Select ${esc(group.label)} assets"><span></span></label>
         <h2>${esc(group.label)}</h2>
-        <small>${group.entries.length} assets</small>
+        <small>${entries.length} assets</small>
       </div>
       ${zoomControl}
     </header>
-    <div class="asset-timeline-grid">${group.entries.map((item, index) => assetLibraryCard(item, startIndex + index)).join("")}</div>
+    <div class="asset-timeline-grid">${entries.map((entry, index) => {
+      const item = entry?.item || entry;
+      const itemIndex = Number.isFinite(entry?.index) ? entry.index : startIndex + index;
+      return assetLibraryCard(item, itemIndex);
+    }).join("")}</div>
   </section>`;
 }
 
 function assetLibraryCard(item, index = 0) {
   const kind = assetMediaKind(item);
   const title = resultTitle(item);
+  const deferred = assetLibraryShouldDeferMedia(kind, index);
   return `<article class="asset-tile asset-tile-${esc(kind)}" data-result-id="${esc(item.id)}">
-    <button type="button" class="asset-tile-preview" data-result-preview="${esc(item.id)}" aria-label="Preview ${esc(title)}">
+    <button type="button" class="asset-tile-preview" data-result-preview="${esc(item.id)}" ${deferred ? `data-asset-deferred-result="${esc(item.id)}" data-asset-index="${index}"` : ""} aria-label="Preview ${esc(title)}">
       ${assetLibraryPreview(item, kind, index)}
     </button>
   </article>`;
 }
 
-function assetLibraryPreview(item, kind, index = 0) {
+function assetLibraryShouldDeferMedia(kind, index = 0) {
+  return kind !== "text" && index >= assetLibraryImmediateMediaCount;
+}
+
+function assetLibraryDeferredPreview(kind) {
+  return `<div class="asset-deferred-thumb asset-deferred-${esc(kind)}" aria-hidden="true"><span></span></div>`;
+}
+
+function assetLibraryPreview(item, kind, index = 0, options = {}) {
   if (kind === "text") {
     const body = resultPromptText(item).replaceAll("\n", " ").trim() || item.providerBody || item.body || "Text result";
     return `<div class="asset-text-thumb">${icon("file-text", 28)}<strong>${esc(resultTitle(item))}</strong><p>${esc(body)}</p></div>`;
   }
+  if (!options.force && assetLibraryShouldDeferMedia(kind, index)) return assetLibraryDeferredPreview(kind);
   return resultPreview(item, { clickable: false, wall: true, priority: index < 6, thumbWidth: 384, sizes: "(max-width: 760px) 42vw, 180px" });
 }
 
@@ -7800,6 +7831,31 @@ function scheduleAssetLibraryThumbWarmup() {
   });
 }
 
+function scheduleAssetLibraryDeferredMediaHydration() {
+  if (state.page !== "library" || state.loading) return;
+  if (assetLibraryHydrateFrame) window.cancelAnimationFrame(assetLibraryHydrateFrame);
+  const hydrate = () => {
+    assetLibraryHydrateFrame = null;
+    if (state.page !== "library" || state.loading) return;
+    const slots = [...document.querySelectorAll("[data-asset-deferred-result]")].slice(0, assetLibraryHydrateBatchSize);
+    slots.forEach((slot) => {
+      const item = findAssetResult(slot.dataset.assetDeferredResult);
+      if (!item) return;
+      const kind = assetMediaKind(item);
+      const index = Number.parseInt(slot.dataset.assetIndex || "0", 10) || 0;
+      slot.innerHTML = assetLibraryPreview(item, kind, index, { force: true });
+      slot.removeAttribute("data-asset-deferred-result");
+      slot.removeAttribute("data-asset-index");
+    });
+    if (document.querySelector("[data-asset-deferred-result]")) {
+      const scheduleNext = () => scheduleAssetLibraryDeferredMediaHydration();
+      if ("requestIdleCallback" in window) window.requestIdleCallback(scheduleNext, { timeout: 700 });
+      else window.setTimeout(scheduleNext, 90);
+    }
+  };
+  assetLibraryHydrateFrame = window.requestAnimationFrame(hydrate);
+}
+
 function patchAssetLibraryDom({ preserveSearchFocus = false } = {}) {
   if (state.page !== "library" || state.loading) return false;
   const workspace = document.querySelector(".workspace.workspace-library");
@@ -7818,6 +7874,7 @@ function patchAssetLibraryDom({ preserveSearchFocus = false } = {}) {
   bindAssetLibraryInfiniteScroll();
   hydrateIconsSoon();
   scheduleAssetLibraryThumbWarmup();
+  scheduleAssetLibraryDeferredMediaHydration();
   if (activeSearch) {
     window.requestAnimationFrame(() => {
       const input = workspace.querySelector("[data-asset-search]");
@@ -7831,9 +7888,59 @@ function patchAssetLibraryDom({ preserveSearchFocus = false } = {}) {
   return true;
 }
 
+function assetLibraryAppendGroups(items = [], startIndex = 0) {
+  const groups = new Map();
+  items.forEach((item, offset) => {
+    const key = assetLibraryDateKey(item);
+    if (!groups.has(key)) groups.set(key, { key, label: assetLibraryDateLabel(key), entries: [] });
+    groups.get(key).entries.push({ item, index: startIndex + offset });
+  });
+  return [...groups.values()].sort((a, b) => assetLibraryDateSortValue(b.key) - assetLibraryDateSortValue(a.key));
+}
+
+function appendAssetLibraryItems(previousLimit, nextLimit) {
+  if (state.page !== "library" || state.loading) return false;
+  const main = document.querySelector(".asset-library-main");
+  if (!main) return false;
+  const { filtered } = assetLibraryFilteredItems();
+  const nextItems = filtered.slice(previousLimit, nextLimit);
+  if (!nextItems.length) return false;
+  const sentinel = main.querySelector("[data-asset-library-more-sentinel]");
+  const groups = assetLibraryAppendGroups(nextItems, previousLimit);
+  groups.forEach((group) => {
+    const existing = [...main.querySelectorAll("[data-asset-date-group]")].find((el) => el.dataset.assetDateGroup === group.key);
+    if (existing) {
+      const grid = existing.querySelector(".asset-timeline-grid");
+      const count = existing.querySelector(".asset-date-heading small");
+      grid?.insertAdjacentHTML("beforeend", group.entries.map((entry) => assetLibraryCard(entry.item, entry.index)).join(""));
+      if (count) {
+        const nextCount = (Number.parseInt(count.textContent, 10) || 0) + group.entries.length;
+        count.textContent = `${nextCount} assets`;
+      }
+      return;
+    }
+    const html = assetLibraryDateSection(group, 1, previousLimit);
+    if (sentinel) sentinel.insertAdjacentHTML("beforebegin", html);
+    else main.insertAdjacentHTML("beforeend", html);
+  });
+  const visible = Math.min(nextLimit, filtered.length);
+  if (sentinel && visible < filtered.length) {
+    sentinel.outerHTML = assetLibraryMoreButton(visible, filtered.length);
+  } else {
+    sentinel?.remove();
+  }
+  bindAssetLibraryControls(main);
+  bindAssetLibraryInfiniteScroll();
+  hydrateIconsSoon();
+  scheduleAssetLibraryThumbWarmup();
+  scheduleAssetLibraryDeferredMediaHydration();
+  return true;
+}
+
 function showMoreAssetLibrary() {
-  state.assetLibraryLimit = assetLibraryLimit() + assetLibraryPageSize;
-  if (!patchAssetLibraryDom()) render();
+  const previousLimit = assetLibraryLimit();
+  state.assetLibraryLimit = previousLimit + assetLibraryPageSize;
+  if (!appendAssetLibraryItems(previousLimit, state.assetLibraryLimit) && !patchAssetLibraryDom()) render();
 }
 
 function resetAssetLibraryLimit() {
@@ -7841,23 +7948,39 @@ function resetAssetLibraryLimit() {
 }
 
 function bindAssetLibraryControls(root = document) {
-  root.querySelectorAll("[data-asset-type]").forEach((el) => el.addEventListener("click", () => {
-    resetAssetLibraryLimit();
-    set({ assetTypeFilter: el.dataset.assetType });
-  }));
-  root.querySelectorAll("[data-asset-project]").forEach((el) => el.addEventListener("click", () => {
-    resetAssetLibraryLimit();
-    set({ assetProjectFilter: el.dataset.assetProject });
-  }));
-  root.querySelectorAll("[data-asset-library-more]").forEach((el) => el.addEventListener("click", showMoreAssetLibrary));
-  root.querySelectorAll("[data-asset-search]").forEach((el) => el.addEventListener("input", (event) => {
-    state.assetSearch = event.target.value;
-    resetAssetLibraryLimit();
-    clearTimeout(assetSearchTimer);
-    assetSearchTimer = setTimeout(() => {
-      if (!patchAssetLibraryDom({ preserveSearchFocus: true })) render();
-    }, 140);
-  }));
+  root.querySelectorAll("[data-asset-type]").forEach((el) => {
+    if (el.dataset.assetLibraryBound === "true") return;
+    el.dataset.assetLibraryBound = "true";
+    el.addEventListener("click", () => {
+      resetAssetLibraryLimit();
+      set({ assetTypeFilter: el.dataset.assetType });
+    });
+  });
+  root.querySelectorAll("[data-asset-project]").forEach((el) => {
+    if (el.dataset.assetLibraryBound === "true") return;
+    el.dataset.assetLibraryBound = "true";
+    el.addEventListener("click", () => {
+      resetAssetLibraryLimit();
+      set({ assetProjectFilter: el.dataset.assetProject });
+    });
+  });
+  root.querySelectorAll("[data-asset-library-more]").forEach((el) => {
+    if (el.dataset.assetLibraryBound === "true") return;
+    el.dataset.assetLibraryBound = "true";
+    el.addEventListener("click", showMoreAssetLibrary);
+  });
+  root.querySelectorAll("[data-asset-search]").forEach((el) => {
+    if (el.dataset.assetLibraryBound === "true") return;
+    el.dataset.assetLibraryBound = "true";
+    el.addEventListener("input", (event) => {
+      state.assetSearch = event.target.value;
+      resetAssetLibraryLimit();
+      clearTimeout(assetSearchTimer);
+      assetSearchTimer = setTimeout(() => {
+        if (!patchAssetLibraryDom({ preserveSearchFocus: true })) render();
+      }, 140);
+    });
+  });
 }
 
 function bindAssetLibraryInfiniteScroll() {
