@@ -778,7 +778,7 @@ function defaultModelCosts() {
     "Nano Banana Pro": { costRm: 0.105, costRmb: 0.18, unit: "image" },
     "Nano Banana 2": { costRm: 0.105, costRmb: 0.18, unit: "image" },
     "Grok Imagine": { costRm: 0.024, costRmb: 0.05, unit: "image" },
-    "Seedance 2.0": { costRm: 0.98, costUsd: 0.208, unit: "5s video" },
+    "Seedance 2.0": { costRm: 0.98, costUsd: 0.208, unit: "4s+ video" },
     "Veo 3.1": { costRm: 0.234, costRmb: 0.4, unit: "8s video" },
     "Sora 2": { costRm: 0.093, costRmb: 0.16, unit: "8s video" },
     "Gemini Omni": { costRm: 0.584, costRmb: 1, unit: "10s video" },
@@ -1967,7 +1967,7 @@ function requestedMediaModelFromText(content = "") {
 function generationModelOptionsText(kind = "auto") {
   const estimate = (model) => formatCreditValue(creditChargeFor({ image: { model } }, "generate-image"));
   if (kind === "image") return `GPT Image 2（${estimate("GPT Image 2")} credits/张）、Seedream 5.0 Lite（${estimate("Seedream 5.0 Lite")} credits/张）、Qwen Image 2.0（${estimate("Qwen Image 2.0")} credits/张）、Nano Banana Pro（${estimate("Nano Banana Pro")} credits/张）、Nano Banana 2（${estimate("Nano Banana 2")} credits/张）或 Grok Imagine（${estimate("Grok Imagine")} credits/张）`;
-  if (kind === "video") return `Veo 3.1（${estimate("Veo 3.1")} credits/8秒）、Seedance 2.0（${estimate("Seedance 2.0")} credits/5秒）、Seedance 2.0 Fast（${estimate("Seedance 2.0 Fast")} credits/5秒）、Sora 2（${estimate("Sora 2")} credits/8秒）、Gemini Omni（${estimate("Gemini Omni")} credits/10秒）、Grok Imagine Video（${estimate("Grok Imagine Video")} credits/10秒）、Wan 2.7（${estimate("Wan 2.7")} credits/8秒）、Kling V3 Omni（${estimate("Kling V3 Omni")} credits/5秒）、Kling V3 Motion Control（${estimate("Kling V3 Motion Control")} credits/5秒）、MiniMax Hailuo 2.3（${estimate("MiniMax Hailuo 2.3")} credits/6秒）`;
+  if (kind === "video") return `Veo 3.1（${estimate("Veo 3.1")} credits/8秒）、Seedance 2.0（${estimate("Seedance 2.0")} credits/4秒起）、Seedance 2.0 Fast（${estimate("Seedance 2.0 Fast")} credits/4秒起）、Sora 2（${estimate("Sora 2")} credits/8秒）、Gemini Omni（${estimate("Gemini Omni")} credits/10秒）、Grok Imagine Video（${estimate("Grok Imagine Video")} credits/10秒）、Wan 2.7（${estimate("Wan 2.7")} credits/8秒）、Kling V3 Omni（${estimate("Kling V3 Omni")} credits/5秒）、Kling V3 Motion Control（${estimate("Kling V3 Motion Control")} credits/5秒）、MiniMax Hailuo 2.3（${estimate("MiniMax Hailuo 2.3")} credits/6秒）`;
   return `图片：GPT Image 2（${estimate("GPT Image 2")}）/ Seedream 5.0 Lite（${estimate("Seedream 5.0 Lite")}）/ Qwen Image 2.0（${estimate("Qwen Image 2.0")}）/ Nano Banana Pro（${estimate("Nano Banana Pro")}）/ Nano Banana 2（${estimate("Nano Banana 2")}）/ Grok Imagine（${estimate("Grok Imagine")}）；视频：Veo 3.1（${estimate("Veo 3.1")}）/ Seedance 2.0（${estimate("Seedance 2.0")}）/ Seedance 2.0 Fast（${estimate("Seedance 2.0 Fast")}）/ Sora 2（${estimate("Sora 2")}）/ Gemini Omni（${estimate("Gemini Omni")}）/ Grok Imagine Video（${estimate("Grok Imagine Video")}）/ Wan 2.7（${estimate("Wan 2.7")}）/ Kling V3 Omni（${estimate("Kling V3 Omni")}）/ Kling V3 Motion Control（${estimate("Kling V3 Motion Control")}）/ MiniMax Hailuo 2.3（${estimate("MiniMax Hailuo 2.3")}）`;
 }
 
@@ -2588,7 +2588,7 @@ function generationCostFor(db, project, action, generated) {
 
 function videoDurationFor(project, model = project.image?.model) {
   model = internalMediaModel(model);
-  if (model === "Seedance 2.0") return Number(project.image?.duration || process.env.APIMART_SEEDANCE_DURATION || 5);
+  if (model === "Seedance 2.0") return Number(project.image?.duration || process.env.APIMART_SEEDANCE_DURATION || 4);
   if (model === "Sora 2") return Number(project.image?.duration || process.env.WUYIN_SORA_DURATION || 8);
   if (model === "Gemini Omni") return 10;
   if (model === "Grok Imagine Video") return Number(project.image?.duration || process.env.APIMART_GROK_VIDEO_DURATION || 6);
@@ -4112,7 +4112,9 @@ function crunImageBody(project, prompt) {
 function apimartSeedanceBody(project, prompt) {
   const resolution = String(process.env.APIMART_SEEDANCE_RESOLUTION || project.image?.resolution || "1080p").trim().toLowerCase();
   const size = imageAspectRatioFromProject(project);
-  const duration = Math.min(15, Math.max(5, Number(videoDurationFor(project, "Seedance 2.0")) || 5));
+  const minDuration = Math.max(1, Number(process.env.APIMART_SEEDANCE_MIN_DURATION || 4));
+  const maxDuration = Math.max(minDuration, Number(process.env.APIMART_SEEDANCE_MAX_DURATION || 15));
+  const duration = Math.min(maxDuration, Math.max(minDuration, Number(videoDurationFor(project, "Seedance 2.0")) || minDuration));
   return {
     model: apimartSeedanceModel,
     prompt,

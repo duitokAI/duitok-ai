@@ -6359,7 +6359,7 @@ function videoModelOptions() {
         modes: ["Text to Video", "Image to Video"],
         aspectRatios: ["9:16", "16:9", "1:1"],
         qualities: ["720p", "1080p"],
-        durations: ["5s", "8s", "12s", "15s"],
+        durations: ["4s", "8s", "12s", "15s"],
         audio: ["On", "Off"]
       }
     },
@@ -6374,7 +6374,7 @@ function videoModelOptions() {
         modes: ["Text to Video", "Image to Video"],
         aspectRatios: ["9:16", "16:9", "1:1"],
         qualities: ["480p", "720p"],
-        durations: ["5s", "8s", "12s", "15s"],
+        durations: ["4s", "8s", "12s", "15s"],
         audio: ["On", "Off"]
       }
     },
@@ -6703,6 +6703,7 @@ function videoDurationOption(value) {
     label: value,
     title: value,
     description: {
+      "4s": "Shortest Seedance clip",
       "5s": "Quick shot",
       "6s": "Short creative clip",
       "8s": "Standard clip",
