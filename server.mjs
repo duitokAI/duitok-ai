@@ -3808,7 +3808,11 @@ async function pollApimartTask(taskId, tracker = null, options = {}) {
     });
     if (data.status === "completed") return data;
     if (["failed", "cancelled"].includes(data.status)) {
-      const error = new Error(data.fail_reason || data.error || `APIMart image task ${data.status}`);
+      const message = readableProviderError(
+        data.fail_reason || data.failReason || data.failure_reason || data.error || data.message || data.msg || data.detail || data.base_resp?.status_msg,
+        `APIMart image task ${data.status}`
+      );
+      const error = new Error(message);
       error.status = 502;
       throw error;
     }
@@ -4231,7 +4235,11 @@ async function pollCrunTask(taskId, tracker = null) {
     });
     if (["succeeded", "success", "completed", "complete", "done"].includes(status)) return data;
     if (["failed", "error", "cancelled", "canceled"].includes(status)) {
-      const error = new Error(data.error || data.message || data.fail_reason || `Crun AI video task ${status}`);
+      const message = readableProviderError(
+        data.error || data.message || data.fail_reason || data.failReason || data.failure_reason || payload.error || payload.message,
+        `Crun AI video task ${status}`
+      );
+      const error = new Error(message);
       error.status = 502;
       throw error;
     }
@@ -4258,7 +4266,11 @@ async function pollGrsaiTask(taskId, tracker = null) {
     });
     if (data.progress >= 100 || ["succeeded", "success", "completed"].includes(status)) return payload;
     if (["failed", "error", "cancelled"].includes(status) || data.failure_reason || data.error) {
-      const error = new Error(data.failure_reason || data.error || payload.msg || `GRS AI image task ${status || "failed"}`);
+      const message = readableProviderError(
+        data.failure_reason || data.fail_reason || data.failReason || data.error || data.message || payload.msg || payload.message || payload.error,
+        `GRS AI image task ${status || "failed"}`
+      );
+      const error = new Error(message);
       error.status = 502;
       throw error;
     }
