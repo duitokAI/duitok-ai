@@ -30,7 +30,6 @@ const apimartTextModel = process.env.APIMART_TEXT_MODEL || "gpt-5-mini";
 const agentVisionModel = process.env.AGENT_VISION_MODEL || process.env.APIMART_VISION_MODEL || "gpt-4o-mini";
 const apimartImageModel = process.env.APIMART_IMAGE_MODEL || "gpt-image-2";
 const apimartSeedream50LiteModel = process.env.APIMART_SEEDREAM_5_LITE_MODEL || "seedream-5.0-lite";
-const apimartSeedream45Model = process.env.APIMART_SEEDREAM_4_5_MODEL || "seedream-4.5";
 const apimartQwenImage20Model = process.env.APIMART_QWEN_IMAGE_2_MODEL || "qwen-image-2.0";
 const apimartGrokImageModel = process.env.APIMART_GROK_IMAGE_MODEL || "grok-imagine-1.0-apimart";
 const apimartGrokVideoModel = process.env.APIMART_GROK_VIDEO_MODEL || "grok-imagine-1.0-video-apimart";
@@ -73,6 +72,9 @@ const crunCreateTaskPath = process.env.CRUN_CREATE_TASK_PATH || "/api/v1/client/
 const crunTaskInfoPath = process.env.CRUN_TASK_INFO_PATH || "/api/v1/client/job/TaskInfo";
 const crunVeo31Model = process.env.CRUN_VEO_3_1_MODEL || "google/veo3-1-fast-t2v";
 const crunSeedream50Model = process.env.CRUN_SEEDREAM_5_MODEL || "bytedance/seedream-5";
+const crunGptImage2Model = process.env.CRUN_GPT_IMAGE_2_MODEL || "openai/gpt-image-2";
+const crunQwenImage20Model = process.env.CRUN_QWEN_IMAGE_2_MODEL || "qwen/qwen-image-2";
+const crunGrokImageModel = process.env.CRUN_GROK_IMAGE_MODEL || "xai/grok-imagine";
 const grsaiBaseUrl = (process.env.GRSAI_BASE_URL || "https://grsaiapi.com").replace(/\/$/, "");
 const grsaiChatPath = process.env.GRSAI_CHAT_PATH || "/v1/chat/completions";
 const grsaiDrawPath = process.env.GRSAI_DRAW_PATH || "/v1/draw/nano-banana";
@@ -95,7 +97,7 @@ const ai302SunoFetchPathPrefix = process.env.AI302_SUNO_FETCH_PATH_PREFIX || "/s
 const ai302SunoModel = process.env.AI302_SUNO_MODEL || "chirp-crow";
 const ai302AudioTranslatePath = process.env.AI302_AUDIO_TRANSLATE_PATH || "/302/audio/translate/task";
 const webSearchBaseUrl = process.env.WEB_SEARCH_BASE_URL || "https://duckduckgo.com/html/";
-const allowedMediaModels = new Set(["GPT Image 2", "Seedream 5.0 Lite", "Seedream 4.5", "Qwen Image 2.0", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control", "MiniMax Hailuo 2.3"]);
+const allowedMediaModels = new Set(["GPT Image 2", "Seedream 5.0 Lite", "Qwen Image 2.0", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control", "MiniMax Hailuo 2.3"]);
 const thumbnailCache = new Map();
 const thumbnailInflight = new Map();
 const thumbnailCacheMaxItems = Number(process.env.THUMBNAIL_CACHE_MAX_ITEMS || 160);
@@ -128,7 +130,6 @@ const supportedImageAspectRatios = ["9:16", "3:4", "2:3", "1:1", "4:3", "16:9", 
 const publicMediaModelMap = {
   "GPT Image 2": "GPT Image 2",
   "Seedream 5.0 Lite": "Seedream 5.0 Lite",
-  "Seedream 4.5": "Seedream 4.5",
   "Qwen Image 2.0": "Qwen Image 2.0",
   "Nano Banana Pro": "Nano Banana Pro",
   "Nano Banana 2": "Nano Banana 2",
@@ -577,7 +578,7 @@ app.get("/api/admin/diagnostics/seedream-image", async (req, res, next) => {
     requireAdminDiagnosticAccess(req);
     const startedAt = Date.now();
     const requestedModel = internalMediaModel(req.query.model || "Seedream 5.0 Lite");
-    const allowedDiagnosticModels = new Set(["GPT Image 2", "Seedream 5.0 Lite", "Seedream 4.5", "Qwen Image 2.0", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine"]);
+    const allowedDiagnosticModels = new Set(["GPT Image 2", "Seedream 5.0 Lite", "Qwen Image 2.0", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine"]);
     const model = allowedDiagnosticModels.has(requestedModel) ? requestedModel : "Seedream 5.0 Lite";
     const prompt = sanitizeAgentText(req.query.prompt || "A clean ecommerce product lifestyle photo of a white ceramic coffee mug on a wooden desk, soft daylight, realistic, sharp focus, no text, 1:1 composition.").slice(0, 1200);
     const project = {
@@ -601,11 +602,8 @@ app.get("/api/admin/diagnostics/seedream-image", async (req, res, next) => {
       });
     };
     const timeoutMs = Math.min(5 * 60 * 1000, Math.max(30 * 1000, Number(req.query.timeoutMs || staleImageGenerationMs)));
-    const usesDirectApimartDiagnostic = model === "Seedream 5.0 Lite" || model === "Seedream 4.5" || model === "Qwen Image 2.0";
     const generated = await timeoutPromise(
-      usesDirectApimartDiagnostic
-        ? generateImageWithApimart(project, tracker)
-        : generateImageWithFallbacks(project, model, tracker),
+      generateImageWithFallbacks(project, model, tracker),
       timeoutMs,
       `${model} diagnostic request timed out after ${formatGenerationDuration(timeoutMs)}.`
     );
@@ -617,7 +615,7 @@ app.get("/api/admin/diagnostics/seedream-image", async (req, res, next) => {
     res.json({
       ok: Boolean(generatedUrls[0]),
       configured: true,
-      provider: generated.provider || (usesDirectApimartDiagnostic ? "apimart" : providerForMediaModel(model)),
+      provider: generated.provider || providerForMediaModel(model),
       model,
       providerModel: imageModelFromProject(project),
       aspectRatio: project.image.aspectRatio,
@@ -768,7 +766,6 @@ function defaultModelCosts() {
   return {
     "GPT Image 2": { costRm: 0.024, costUsd: 0.006, unit: "image" },
     "Seedream 5.0 Lite": { costRm: 0.024, costUsd: 0.006, unit: "image" },
-    "Seedream 4.5": { costRm: 0.024, costUsd: 0.006, unit: "image" },
     "Qwen Image 2.0": { costRm: 0.024, costUsd: 0.006, unit: "image" },
     "Nano Banana Pro": { costRm: 0.105, costRmb: 0.18, unit: "image" },
     "Nano Banana 2": { costRm: 0.105, costRmb: 0.18, unit: "image" },
@@ -1937,8 +1934,7 @@ function requestedMediaModelFromText(content = "") {
   if (/\bveo\b|veo\s*3(?:\.1)?|谷歌\s*veo/i.test(text)) return "Veo 3.1";
   if (/seedance|seedance\s*2(?:\.0)?|豆包|即梦/i.test(text)) return "Seedance 2.0";
   if (/\bsora\b|sora\s*2/i.test(text)) return "Sora 2";
-  if (/seedream\s*5|seedream\s*5\.0|seedream.*lite|seedream\s*lite|seedream\s*五/i.test(text)) return "Seedream 5.0 Lite";
-  if (/seedream\s*4(?:\.5)?|seedream|seedream\s*四/i.test(text)) return "Seedream 4.5";
+  if (/seedream\s*5|seedream\s*5\.0|seedream.*lite|seedream\s*lite|seedream\s*五|seedream/i.test(text)) return "Seedream 5.0 Lite";
   if (/nano\s*banana\s*2|banana\s*2|香蕉\s*2/i.test(text)) return "Nano Banana 2";
   if (/qwen\s*image\s*2(?:\.0)?|qwen|通义|千问/i.test(text)) return "Qwen Image 2.0";
   if (/nano\s*banana|banana\s*pro|香蕉|nano\s*pro/i.test(text)) return "Nano Banana Pro";
@@ -1955,9 +1951,9 @@ function requestedMediaModelFromText(content = "") {
 
 function generationModelOptionsText(kind = "auto") {
   const estimate = (model) => formatCreditValue(creditChargeFor({ image: { model } }, "generate-image"));
-  if (kind === "image") return `GPT Image 2（${estimate("GPT Image 2")} credits/张）、Seedream 5.0 Lite（${estimate("Seedream 5.0 Lite")} credits/张）、Seedream 4.5（${estimate("Seedream 4.5")} credits/张）、Nano Banana Pro（${estimate("Nano Banana Pro")} credits/张）、Nano Banana 2（${estimate("Nano Banana 2")} credits/张）或 Grok Imagine（${estimate("Grok Imagine")} credits/张）`;
+  if (kind === "image") return `GPT Image 2（${estimate("GPT Image 2")} credits/张）、Seedream 5.0 Lite（${estimate("Seedream 5.0 Lite")} credits/张）、Qwen Image 2.0（${estimate("Qwen Image 2.0")} credits/张）、Nano Banana Pro（${estimate("Nano Banana Pro")} credits/张）、Nano Banana 2（${estimate("Nano Banana 2")} credits/张）或 Grok Imagine（${estimate("Grok Imagine")} credits/张）`;
   if (kind === "video") return `Veo 3.1（${estimate("Veo 3.1")} credits/8秒）、Seedance 2.0（${estimate("Seedance 2.0")} credits/5秒）、Seedance 2.0 Fast（${estimate("Seedance 2.0 Fast")} credits/5秒）、Sora 2（${estimate("Sora 2")} credits/8秒）、Gemini Omni（${estimate("Gemini Omni")} credits/10秒）、Grok Imagine Video（${estimate("Grok Imagine Video")} credits/10秒）、Wan 2.7（${estimate("Wan 2.7")} credits/8秒）、Kling V3 Omni（${estimate("Kling V3 Omni")} credits/5秒）、Kling V3 Motion Control（${estimate("Kling V3 Motion Control")} credits/5秒）、MiniMax Hailuo 2.3（${estimate("MiniMax Hailuo 2.3")} credits/6秒）`;
-  return `图片：GPT Image 2（${estimate("GPT Image 2")}）/ Seedream 5.0 Lite（${estimate("Seedream 5.0 Lite")}）/ Seedream 4.5（${estimate("Seedream 4.5")}）/ Nano Banana Pro（${estimate("Nano Banana Pro")}）/ Nano Banana 2（${estimate("Nano Banana 2")}）/ Grok Imagine（${estimate("Grok Imagine")}）；视频：Veo 3.1（${estimate("Veo 3.1")}）/ Seedance 2.0（${estimate("Seedance 2.0")}）/ Seedance 2.0 Fast（${estimate("Seedance 2.0 Fast")}）/ Sora 2（${estimate("Sora 2")}）/ Gemini Omni（${estimate("Gemini Omni")}）/ Grok Imagine Video（${estimate("Grok Imagine Video")}）/ Wan 2.7（${estimate("Wan 2.7")}）/ Kling V3 Omni（${estimate("Kling V3 Omni")}）/ Kling V3 Motion Control（${estimate("Kling V3 Motion Control")}）/ MiniMax Hailuo 2.3（${estimate("MiniMax Hailuo 2.3")}）`;
+  return `图片：GPT Image 2（${estimate("GPT Image 2")}）/ Seedream 5.0 Lite（${estimate("Seedream 5.0 Lite")}）/ Qwen Image 2.0（${estimate("Qwen Image 2.0")}）/ Nano Banana Pro（${estimate("Nano Banana Pro")}）/ Nano Banana 2（${estimate("Nano Banana 2")}）/ Grok Imagine（${estimate("Grok Imagine")}）；视频：Veo 3.1（${estimate("Veo 3.1")}）/ Seedance 2.0（${estimate("Seedance 2.0")}）/ Seedance 2.0 Fast（${estimate("Seedance 2.0 Fast")}）/ Sora 2（${estimate("Sora 2")}）/ Gemini Omni（${estimate("Gemini Omni")}）/ Grok Imagine Video（${estimate("Grok Imagine Video")}）/ Wan 2.7（${estimate("Wan 2.7")}）/ Kling V3 Omni（${estimate("Kling V3 Omni")}）/ Kling V3 Motion Control（${estimate("Kling V3 Motion Control")}）/ MiniMax Hailuo 2.3（${estimate("MiniMax Hailuo 2.3")}）`;
 }
 
 function redactProviderText(value, fallback = "") {
@@ -2511,12 +2507,11 @@ function requireAi302Config() {
 
 function providerForMediaModel(model) {
   model = internalMediaModel(model);
-  if (model === "GPT Image 2") return process.env.APIMART_API_KEY ? "apimart" : "mock";
+  if (model === "GPT Image 2") return process.env.APIMART_API_KEY ? "apimart" : process.env.CRUN_API_KEY ? "crun" : "mock";
   if (model === "Nano Banana Pro" || model === "Nano Banana 2") return process.env.GRSAI_API_KEY ? "grsai" : process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Seedream 5.0 Lite") return process.env.CRUN_API_KEY ? "crun" : process.env.APIMART_API_KEY ? "apimart" : "mock";
-  if (model === "Seedream 4.5") return process.env.APIMART_API_KEY ? "apimart" : "mock";
-  if (model === "Qwen Image 2.0") return process.env.APIMART_API_KEY ? "apimart" : "mock";
-  if (model === "Grok Imagine") return process.env.APIMART_API_KEY ? "apimart" : process.env.WUYIN_API_KEY ? "wuyin" : "mock";
+  if (model === "Qwen Image 2.0") return process.env.APIMART_API_KEY ? "apimart" : process.env.CRUN_API_KEY ? "crun" : "mock";
+  if (model === "Grok Imagine") return process.env.APIMART_API_KEY ? "apimart" : process.env.CRUN_API_KEY ? "crun" : "mock";
   if (model === "Seedance 2.0" || model === "Grok Imagine Video" || model === "Wan 2.7" || model === "Kling V3 Omni" || model === "Kling V3 Motion Control" || model === "MiniMax Hailuo 2.3") return process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Veo 3.1") return process.env.CRUN_API_KEY ? "crun" : "mock";
   if (model === "Sora 2" || model === "Gemini Omni") return process.env.WUYIN_API_KEY ? "wuyin" : "mock";
@@ -2543,7 +2538,6 @@ function imageProviderCostFor(project, model, provider) {
       return { costRm: Math.round((costUsd / usdPerRm) * 1000) / 1000, costUsd, unit: `${resolution} image` };
     }
     if (model === "Seedream 5.0 Lite") return { costRm: Math.round((0.028 / usdPerRm) * 1000) / 1000, costUsd: 0.028, unit: `${resolution} image` };
-    if (model === "Seedream 4.5") return { costRm: Math.round((0.025 / usdPerRm) * 1000) / 1000, costUsd: 0.025, unit: `${resolution} image` };
     if (model === "Qwen Image 2.0") return { costRm: Math.round((0.006 / usdPerRm) * 1000) / 1000, costUsd: 0.006, unit: `${resolution} image` };
     if (model === "Nano Banana Pro") {
       const costUsd = resolution === "4K" ? 0.05 : 0.04;
@@ -2556,6 +2550,12 @@ function imageProviderCostFor(project, model, provider) {
     if (model === "Grok Imagine") return { costRm: Math.round((0.015 / usdPerRm) * 1000) / 1000, costUsd: 0.015, unit: `${resolution} image` };
   }
   if (provider === "crun" && model === "Seedream 5.0 Lite") return { costRm: Math.round((0.028 / usdPerRm) * 1000) / 1000, costUsd: 0.028, unit: `${resolution} image` };
+  if (provider === "crun" && model === "GPT Image 2") {
+    const costUsd = resolution === "4K" ? 0.018 : resolution === "2K" ? 0.012 : 0.006;
+    return { costRm: Math.round((costUsd / usdPerRm) * 1000) / 1000, costUsd, unit: `${resolution} image` };
+  }
+  if (provider === "crun" && model === "Qwen Image 2.0") return { costRm: Math.round((0.006 / usdPerRm) * 1000) / 1000, costUsd: 0.006, unit: `${resolution} image` };
+  if (provider === "crun" && model === "Grok Imagine") return { costRm: Math.round((0.015 / usdPerRm) * 1000) / 1000, costUsd: 0.015, unit: `${resolution} image` };
   if (provider === "wuyin" && model === "Grok Imagine") return { costRm: rmFromRmb(0.1), costRmb: 0.1, unit: `${resolution} image` };
   return null;
 }
@@ -3757,7 +3757,6 @@ function imageModelFromProject(project) {
   const modelMap = {
     "GPT Image 2": process.env.APIMART_IMAGE_MODEL || "gpt-image-2",
     "Seedream 5.0 Lite": apimartSeedream50LiteModel,
-    "Seedream 4.5": apimartSeedream45Model,
     "Qwen Image 2.0": apimartQwenImage20Model,
     "Nano Banana Pro": process.env.APIMART_NANO_BANANA_PRO_MODEL || "gemini-3-pro-image-preview",
     "Nano Banana 2": process.env.APIMART_NANO_BANANA_2_MODEL || "gemini-3.1-flash-image-preview",
@@ -3781,8 +3780,7 @@ function imageProviderModelFromProject(project, provider = providerForMediaModel
   if (provider === "grsai") return grsaiImageModelFromProject(project);
   if (provider === "apimart") return imageModelFromProject(project);
   if (provider === "wuyin") return internalMediaModel(project?.image?.model) || "";
-  if (provider === "crun" && internalMediaModel(project?.image?.model) === "Seedream 5.0 Lite") return crunSeedream50Model;
-  if (provider === "crun") return crunVeo31Model;
+  if (provider === "crun") return crunImageModelFromProject(project);
   return internalMediaModel(project?.image?.model) || "";
 }
 
@@ -3938,10 +3936,6 @@ function imageCapabilitiesForModel(model = "GPT Image 2") {
       aspectRatios: imageAspectRatiosAll,
       resolutions: ["2K", "3K"]
     },
-    "Seedream 4.5": {
-      aspectRatios: imageAspectRatiosAll,
-      resolutions: ["2K", "4K"]
-    },
     "Qwen Image 2.0": {
       aspectRatios: imageAspectRatiosAll,
       resolutions: ["1K", "2K"]
@@ -4069,18 +4063,29 @@ function crunVeo31Body(project, prompt) {
   };
 }
 
-function crunSeedream5Body(project, prompt) {
+function crunImageModelFromProject(project) {
+  const model = internalMediaModel(project?.image?.model);
+  const modelMap = {
+    "GPT Image 2": crunGptImage2Model,
+    "Seedream 5.0 Lite": crunSeedream50Model,
+    "Qwen Image 2.0": crunQwenImage20Model,
+    "Grok Imagine": crunGrokImageModel
+  };
+  return modelMap[model] || crunSeedream50Model;
+}
+
+function crunImageBody(project, prompt) {
   const aspectRatio = imageAspectRatioFromProject(project);
   const resolution = imageResolutionFromProject(project);
   return {
-    model: crunSeedream50Model,
+    model: crunImageModelFromProject(project),
     input: {
       prompt,
       aspect_ratio: aspectRatio,
       resolution,
       num_outputs: 1,
-      enhance_prompt: process.env.CRUN_SEEDREAM_5_ENHANCE_PROMPT === "true",
-      output_format: process.env.CRUN_SEEDREAM_5_OUTPUT_FORMAT || "jpeg"
+      enhance_prompt: process.env.CRUN_IMAGE_ENHANCE_PROMPT === "true",
+      output_format: process.env.CRUN_IMAGE_OUTPUT_FORMAT || "jpeg"
     }
   };
 }
@@ -4324,7 +4329,7 @@ async function generateImageWithWuyin(project, tracker = null) {
   };
 }
 
-async function generateImageWithCrunSeedream5(project, tracker = null) {
+async function generateImageWithCrun(project, tracker = null) {
   const prompt = [
     project.image?.prompt || "Create a high-converting TikTok Shop product image.",
     `Mode: ${project.image?.mode || "Create Image"}.`,
@@ -4332,7 +4337,7 @@ async function generateImageWithCrunSeedream5(project, tracker = null) {
   ].join("\n");
   const data = await crunRequest(crunCreateTaskPath, {
     method: "POST",
-    body: crunSeedream5Body(project, prompt)
+    body: crunImageBody(project, prompt)
   });
   const taskId = data.task_id || data.taskId || data.id || data.data?.task_id;
   if (!taskId) return { text: JSON.stringify(data, null, 2), urls: extractImageUrls(data) };
@@ -4405,12 +4410,11 @@ function providerConfigured(provider) {
 
 function imageProviderOrderForModel(model) {
   model = internalMediaModel(model);
-  if (model === "GPT Image 2") return ["apimart"];
+  if (model === "GPT Image 2") return ["apimart", "crun"];
   if (model === "Nano Banana Pro" || model === "Nano Banana 2") return ["grsai", "apimart"];
-  if (model === "Grok Imagine") return ["apimart", "wuyin"];
+  if (model === "Grok Imagine") return ["apimart", "crun"];
   if (model === "Seedream 5.0 Lite") return ["crun", "apimart"];
-  if (model === "Seedream 4.5") return ["apimart"];
-  if (model === "Qwen Image 2.0") return ["apimart"];
+  if (model === "Qwen Image 2.0") return ["apimart", "crun"];
   return [providerForMediaModel(model)];
 }
 
@@ -4434,8 +4438,8 @@ async function generateImageThroughProvider(provider, model, project, tracker = 
     const image = await generateImageWithApimart(project, tracker);
     return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "apimart", resolvedProvider: "apimart", providerModel };
   }
-  if (provider === "crun" && model === "Seedream 5.0 Lite") {
-    const image = await generateImageWithCrunSeedream5(project, tracker);
+  if (provider === "crun" && ["GPT Image 2", "Seedream 5.0 Lite", "Qwen Image 2.0", "Grok Imagine"].includes(model)) {
+    const image = await generateImageWithCrun(project, tracker);
     return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "crun", resolvedProvider: "crun", providerModel };
   }
   return null;
@@ -5904,7 +5908,7 @@ const agentTools = [
           },
           model: {
             type: "string",
-            enum: ["GPT Image 2", "Seedream 5.0 Lite", "Seedream 4.5", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control", "MiniMax Hailuo 2.3"],
+            enum: ["GPT Image 2", "Seedream 5.0 Lite", "Qwen Image 2.0", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control", "MiniMax Hailuo 2.3"],
             description: "User-selected generation model. Ask the user to choose before passing this when the requested media type is unclear."
           }
         },
@@ -8454,8 +8458,8 @@ app.post("/api/agent", async (req, res, next) => {
           "Use trend_research before answering about fresh trends, unfamiliar aesthetic names, product-market fit, what to sell, content angles, competitors, recent demand, or terms that may have a changing meaning. Use raw web_search only for simple fact lookup. After research, answer naturally with practical guidance for the user's goal and cite source URLs briefly when useful.",
           "Act like a capable assistant: when the user asks for an output, fill the relevant content settings and run the matching tool if enough information is available.",
           "Pokaya AI is the platform, not a generation model. Never present Pokaya AI as a model option.",
-          "User-facing model names are allowed and should be shown when relevant: GPT Image 2, Seedream 5.0 Lite, Seedream 4.5, Nano Banana Pro, Nano Banana 2, and Grok Imagine for images; Veo 3.1, Seedance 2.0, Seedance 2.0 Fast, Sora 2, Gemini Omni, Grok Imagine Video, Wan 2.7, Kling V3 Omni, Kling V3 Motion Control, and MiniMax Hailuo 2.3 for videos. Do not mention provider names, base URLs, routes, keys, or infrastructure.",
-          "User-facing model names are allowed and should be shown when relevant: GPT Image 2, Seedream 5.0 Lite, Seedream 4.5, Nano Banana Pro, Nano Banana 2, and Grok Imagine for images; Veo 3.1, Seedance 2.0, Seedance 2.0 Fast, Sora 2, Gemini Omni, Grok Imagine Video, Wan 2.7, Kling V3 Omni, Kling V3 Motion Control, and MiniMax Hailuo 2.3 for videos. Do not mention provider names, base URLs, routes, keys, or infrastructure.",
+          "User-facing model names are allowed and should be shown when relevant: GPT Image 2, Seedream 5.0 Lite, Qwen Image 2.0, Nano Banana Pro, Nano Banana 2, and Grok Imagine for images; Veo 3.1, Seedance 2.0, Seedance 2.0 Fast, Sora 2, Gemini Omni, Grok Imagine Video, Wan 2.7, Kling V3 Omni, Kling V3 Motion Control, and MiniMax Hailuo 2.3 for videos. Do not mention provider names, base URLs, routes, keys, or infrastructure.",
+          "User-facing model names are allowed and should be shown when relevant: GPT Image 2, Seedream 5.0 Lite, Qwen Image 2.0, Nano Banana Pro, Nano Banana 2, and Grok Imagine for images; Veo 3.1, Seedance 2.0, Seedance 2.0 Fast, Sora 2, Gemini Omni, Grok Imagine Video, Wan 2.7, Kling V3 Omni, Kling V3 Motion Control, and MiniMax Hailuo 2.3 for videos. Do not mention provider names, base URLs, routes, keys, or infrastructure.",
           "Before generating a video, make sure the user has selected a video model. If no model is selected or the request is ambiguous, ask one short question with the video model choices and estimated credits instead of generating. Credits are USD-denominated: USD 1 = 1000 credits. Use backend estimates from the selected model instead of old RM-based credit values.",
           "If the user already says a model name such as Veo, Seedance, or Sora, save that model to the current content settings before creating the prompt or queuing generation.",
           "Common workflows: product/content request = inspect_workspace_state -> create_project or update fields internally -> generate_project_output when the user needs an image, poster, cover, carousel asset, video, or other rendered media through Pokaya's platform models. Weekly content plan = inspect_workspace_state -> remember_agent_context when useful -> create_content_plan, and only create schedule drafts when the user asks for drafts. Video prompt request = create_seedance_prompt; video generation request = create_seedance_prompt -> generate_project_output after confirmation. In user-facing replies, say video prompt or generate video instead of naming the internal video model.",
