@@ -45315,3 +45315,196 @@ body:has(.studio-shell .video-prompt-extractor-page),
 .studio-shell .image-higgsfield-mode > .image-generate-console::after {
   background: transparent !important;
 }
+
+/* Studio palette pass 2: make Purple to Orange Mix the dominant backend theme. */
+.studio-shell {
+  --pokaya-gradient-primary: linear-gradient(100deg, #210024 0%, #32103a 22%, #8b1a78 48%, #c12b62 72%, #ff6738 100%);
+  --pokaya-gradient-action: linear-gradient(120deg, #8b1a78 0%, #c12b62 38%, #ff6738 100%);
+  background:
+    linear-gradient(115deg, #210024 0%, #32103a 32%, #8b1a78 60%, #c12b62 82%, #ff6738 120%) !important;
+}
+
+html:has(.studio-shell .image-higgsfield-mode),
+body:has(.studio-shell .image-higgsfield-mode),
+#app:has(.studio-shell .image-higgsfield-mode),
+.studio-shell:has(.image-higgsfield-mode),
+.studio-shell:has(.image-higgsfield-mode) .workspace,
+.studio-shell:has(.step-tabs):has(.image-higgsfield-mode) .workspace,
+.studio-shell .workspace:has(.image-higgsfield-mode),
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode),
+.studio-shell .canvas-card:has(.image-higgsfield-mode),
+.studio-shell .studio-workbench-card:has(.image-higgsfield-mode),
+.studio-shell .studio-step-panel:has(.image-higgsfield-mode),
+.studio-shell .image-canvas-studio.image-higgsfield-mode,
+.studio-shell .image-higgsfield-mode,
+.studio-shell .image-higgsfield-mode > .studio-result-wall,
+html:has(.studio-shell .video-page-studio),
+body:has(.studio-shell .video-page-studio),
+#app:has(.studio-shell .video-page-studio),
+.studio-shell:has(.video-page-studio),
+.studio-shell:has(.step-tabs):has(.video-page-studio),
+.studio-shell:has(.video-page-studio) .workspace,
+.studio-shell .workspace:has(.video-page-studio),
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio),
+.studio-shell .canvas-card:has(.video-page-studio),
+.studio-shell .studio-workbench-card:has(.video-page-studio),
+.studio-shell .studio-step-panel:has(.video-page-studio),
+.studio-shell .video-page-studio,
+.studio-shell .video-page-studio > .studio-result-wall,
+html:has(.studio-shell .video-prompt-extractor-page),
+body:has(.studio-shell .video-prompt-extractor-page),
+#app:has(.studio-shell .video-prompt-extractor-page),
+.studio-shell:has(.video-prompt-extractor-page),
+.studio-shell .workspace:has(.video-prompt-extractor-page),
+.studio-shell .canvas-card:has(.video-prompt-extractor-page),
+.studio-shell .studio-workbench-card:has(.video-prompt-extractor-page),
+.studio-shell .studio-step-panel:has(.video-prompt-extractor-page),
+.studio-shell .video-prompt-extractor-page,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall {
+  background:
+    linear-gradient(115deg, rgba(33, 0, 36, 0.99) 0%, rgba(50, 16, 58, 0.98) 26%, rgba(139, 26, 120, 0.92) 58%, rgba(193, 43, 98, 0.82) 78%, rgba(255, 103, 56, 0.72) 118%) !important;
+  background-color: #32103a !important;
+}
+
+.studio-shell .sidebar,
+.studio-shell .studio-sidebar,
+.studio-shell aside:has(.sidebar-item) {
+  background:
+    linear-gradient(180deg, #210024 0%, #32103a 42%, #8b1a78 78%, #c12b62 118%) !important;
+}
+
+.studio-shell .sidebar-item.active,
+.studio-shell .nav-item.active,
+.studio-shell .step-tabs button.active,
+.studio-shell .image-studio-tabs button.active,
+.studio-shell .agent-session-row.active {
+  background: var(--pokaya-gradient-primary) !important;
+  border-color: rgba(255, 103, 56, 0.78) !important;
+  box-shadow:
+    inset 4px 0 0 #ff6738,
+    inset 0 -1px 0 rgba(255, 255, 255, 0.24),
+    0 16px 36px rgba(255, 103, 56, 0.16) !important;
+}
+
+.studio-shell .step-tabs,
+.studio-shell .image-studio-tabs,
+.studio-shell .project-fixed-tabs,
+.studio-shell .studio-top-tabs {
+  background:
+    linear-gradient(90deg, rgba(33, 0, 36, 0.72), rgba(139, 26, 120, 0.54), rgba(255, 103, 56, 0.3)) !important;
+  border-color: rgba(255, 103, 56, 0.2) !important;
+}
+
+.studio-shell .step-tabs button,
+.studio-shell .image-studio-tabs button {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.studio-shell .studio-wall-pending,
+.studio-shell .studio-wall-card {
+  background:
+    linear-gradient(145deg, rgba(33, 0, 36, 0.96) 0%, rgba(50, 16, 58, 0.96) 34%, rgba(139, 26, 120, 0.64) 76%, rgba(255, 103, 56, 0.22) 118%) !important;
+  border-color: rgba(255, 103, 56, 0.22) !important;
+}
+
+.studio-shell .studio-wall-pending.failed {
+  background:
+    linear-gradient(145deg, rgba(33, 0, 36, 0.98) 0%, rgba(92, 16, 42, 0.98) 34%, rgba(193, 43, 98, 0.72) 72%, rgba(255, 103, 56, 0.48) 118%) !important;
+}
+
+.studio-shell .generation-credit-refund-note,
+.studio-shell .studio-wall-failed-actions button {
+  border-color: rgba(255, 103, 56, 0.42) !important;
+  background:
+    linear-gradient(120deg, rgba(139, 26, 120, 0.8), rgba(193, 43, 98, 0.74), rgba(255, 103, 56, 0.58)) !important;
+}
+
+.studio-shell .image-generate-console,
+.studio-shell .studio-generate-dock,
+.studio-shell .prompt-composer,
+.studio-shell .agent-input-shell {
+  background:
+    linear-gradient(105deg, rgba(255, 249, 240, 0.98) 0%, rgba(255, 249, 240, 0.94) 42%, rgba(193, 43, 98, 0.18) 76%, rgba(255, 103, 56, 0.34) 100%) !important;
+  border-color: rgba(255, 103, 56, 0.36) !important;
+}
+
+.studio-shell button[data-action="generate"],
+.studio-shell button[data-agent-send],
+.studio-shell button[data-result-action="download"],
+.studio-shell button[data-result-action="schedule"],
+.studio-shell .credit-balance-panel button,
+.studio-shell .billing-actions button {
+  background: var(--pokaya-gradient-action) !important;
+  box-shadow: 0 18px 38px rgba(255, 103, 56, 0.26) !important;
+}
+
+html:has(.studio-shell .image-higgsfield-mode),
+body:has(.studio-shell .image-higgsfield-mode),
+#app:has(.studio-shell .image-higgsfield-mode),
+.studio-shell:has(.image-higgsfield-mode),
+.studio-shell:has(.image-higgsfield-mode) .workspace,
+.studio-shell:has(.step-tabs):has(.image-higgsfield-mode) .workspace,
+.studio-shell .workspace:has(.image-higgsfield-mode),
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode),
+.studio-shell .canvas-card:has(.image-higgsfield-mode),
+.studio-shell .studio-workbench-card:has(.image-higgsfield-mode),
+.studio-shell .studio-step-panel:has(.image-higgsfield-mode),
+.studio-shell .image-canvas-studio.image-higgsfield-mode,
+.studio-shell .image-higgsfield-mode,
+.studio-shell .image-higgsfield-mode > .studio-result-wall {
+  background:
+    linear-gradient(110deg, #210024 0%, #32103a 22%, #8b1a78 48%, #c12b62 68%, #ff6738 100%) !important;
+  background-color: #ff6738 !important;
+}
+
+.studio-shell nav.step-tabs.studio-top-step-tabs {
+  background:
+    linear-gradient(90deg, rgba(33, 0, 36, 0.9) 0%, rgba(139, 26, 120, 0.72) 48%, rgba(255, 103, 56, 0.58) 100%) !important;
+}
+
+.studio-shell nav.step-tabs.studio-top-step-tabs button.active {
+  background: var(--pokaya-gradient-primary) !important;
+  border-color: rgba(255, 249, 240, 0.32) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 249, 240, 0.18),
+    0 16px 34px rgba(255, 103, 56, 0.2) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console,
+.studio-shell .video-page-studio > .video-generate-console,
+.studio-shell .video-prompt-extractor-page > .video-prompt-dock {
+  background:
+    linear-gradient(105deg, rgba(255, 249, 240, 0.98) 0%, rgba(255, 249, 240, 0.94) 34%, rgba(139, 26, 120, 0.18) 58%, rgba(193, 43, 98, 0.24) 76%, rgba(255, 103, 56, 0.42) 100%) !important;
+  border-color: rgba(255, 103, 56, 0.42) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console .image-submit,
+.studio-shell .video-page-studio > .video-generate-console .video-submit,
+.studio-shell button[data-action="generate"] {
+  background:
+    linear-gradient(120deg, #c12b62 0%, #ff6738 100%) !important;
+}
+
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button.active,
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button.active:hover {
+  background-color: #8b1a78 !important;
+  background-image: linear-gradient(100deg, #210024 0%, #32103a 20%, #8b1a78 46%, #c12b62 70%, #ff6738 100%) !important;
+  border-color: rgba(255, 103, 56, 0.78) !important;
+}
+
+.studio-shell .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console,
+.studio-shell .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console:not(.is-compact) {
+  background-color: rgba(255, 249, 240, 0.96) !important;
+  background-image:
+    linear-gradient(105deg, rgba(255, 249, 240, 0.98) 0%, rgba(255, 249, 240, 0.94) 32%, rgba(139, 26, 120, 0.2) 58%, rgba(193, 43, 98, 0.28) 76%, rgba(255, 103, 56, 0.46) 100%) !important;
+  border-color: rgba(255, 103, 56, 0.46) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button.active,
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button.active:hover,
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio) .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button.active,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button.active {
+  background: linear-gradient(100deg, #210024 0%, #32103a 18%, #8b1a78 42%, #c12b62 66%, #ff6738 100%) !important;
+  border-color: rgba(255, 103, 56, 0.82) !important;
+  color: #ffffff !important;
+}
