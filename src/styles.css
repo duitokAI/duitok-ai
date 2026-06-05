@@ -47444,3 +47444,25 @@ html.is-route-changing .studio-shell .video-generate-console {
 .studio-shell .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console:not(.is-compact) {
   border-color: rgba(111, 28, 132, 0.16) !important;
 }
+
+/* Failed card refund pill: landscape and portrait tiles should share the same
+   filled No Charge treatment. */
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .generation-credit-refund-note,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .generation-credit-refund-note,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .generation-credit-refund-note,
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .generation-credit-refund-note,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .generation-credit-refund-note,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.landscape .generation-credit-refund-note {
+  border: 1px solid rgba(255, 103, 56, 0.58) !important;
+  background: linear-gradient(120deg, rgba(139, 26, 120, 0.95) 0%, rgba(193, 43, 98, 0.9) 54%, rgba(255, 103, 56, 0.82) 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 10px 26px rgba(193, 43, 98, 0.2) !important;
+  color: #ffffff !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .generation-credit-refund-note strong,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .generation-credit-refund-note strong,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .generation-credit-refund-note strong {
+  color: #ffffff !important;
+}
