@@ -44950,3 +44950,333 @@ body:has(.studio-shell .video-page-studio),
   backface-visibility: hidden;
   transform: translateZ(0);
 }
+
+/* Pokaya Studio color and typography refresh - scoped to the logged-in user backend. */
+.studio-shell {
+  --pokaya-plum-950: #210024;
+  --pokaya-plum-900: #32103a;
+  --pokaya-magenta-700: #8b1a78;
+  --pokaya-rose-600: #c12b62;
+  --pokaya-orange-500: #ff6738;
+  --pokaya-canvas: #fbf6ec;
+  --pokaya-surface: #ffffff;
+  --pokaya-surface-warm: #fff9f0;
+  --pokaya-line: rgba(255, 255, 255, 0.16);
+  --pokaya-line-dark: rgba(33, 0, 36, 0.16);
+  --pokaya-ink: #210024;
+  --pokaya-ink-inverse: #fff9f0;
+  --pokaya-muted: rgba(255, 249, 240, 0.68);
+  --pokaya-subtle: rgba(255, 249, 240, 0.46);
+  --pokaya-gradient-primary: linear-gradient(90deg, #210024 0%, #8b1a78 48%, #c12b62 72%, #ff6738 100%);
+  --pokaya-gradient-action: linear-gradient(135deg, #c12b62 0%, #ff6738 100%);
+  --text-display-size: 32px;
+  --text-display-line: 40px;
+  --text-h1-size: 24px;
+  --text-h1-line: 32px;
+  --text-h2-size: 20px;
+  --text-h2-line: 28px;
+  --text-h3-size: 16px;
+  --text-h3-line: 24px;
+  --text-body-size: 14px;
+  --text-body-line: 22px;
+  --text-body-lg-size: 16px;
+  --text-body-lg-line: 24px;
+  --text-caption-size: 12px;
+  --text-caption-line: 18px;
+  --studio-purple-950: #210024;
+  --studio-purple-900: #32103a;
+  --studio-purple-800: #32103a;
+  --studio-purple-700: #8b1a78;
+  --studio-purple-600: #8b1a78;
+  --studio-pink: #c12b62;
+  --studio-coral: #ff6738;
+  --studio-yellow: #ff6738;
+  --studio-shell: #210024;
+  --studio-lilac: #32103a;
+  --studio-card: #32103a;
+  --studio-ink: #fff9f0;
+  --studio-muted: rgba(255, 249, 240, 0.68);
+  --studio-line: rgba(255, 255, 255, 0.16);
+  background:
+    linear-gradient(180deg, #210024 0%, #180019 100%) !important;
+  color: var(--pokaya-ink-inverse) !important;
+  font-family: Inter, "PingFang SC", "Microsoft YaHei", "Noto Sans", sans-serif !important;
+  font-size: var(--text-body-size) !important;
+  line-height: var(--text-body-line) !important;
+  letter-spacing: 0 !important;
+}
+
+.studio-shell *,
+.studio-shell button,
+.studio-shell input,
+.studio-shell select,
+.studio-shell textarea {
+  font-family: Inter, "PingFang SC", "Microsoft YaHei", "Noto Sans", sans-serif !important;
+  letter-spacing: 0 !important;
+}
+
+.studio-shell .workspace,
+.studio-shell .workspace:has(.image-higgsfield-mode),
+.studio-shell .workspace:has(.video-prompt-extractor-page),
+.studio-shell .workspace:has(.video-page-studio),
+.studio-shell .image-higgsfield-mode,
+.studio-shell .video-page-studio,
+.studio-shell .video-prompt-extractor-page {
+  background:
+    linear-gradient(180deg, #32103a 0%, #210024 100%) !important;
+  color: var(--pokaya-ink-inverse) !important;
+}
+
+.studio-shell h1,
+.studio-shell .project-head h1,
+.studio-shell .dashboard-head h1,
+.studio-shell .settings-panel h2,
+.studio-shell .modal h2 {
+  font-size: var(--text-h1-size) !important;
+  line-height: var(--text-h1-line) !important;
+  font-weight: 700 !important;
+}
+
+.studio-shell h2,
+.studio-shell .card-title h2,
+.studio-shell .section-title,
+.studio-shell .studio-step-panel h2,
+.studio-shell .billing-panel h2,
+.studio-shell .usage-panel h2 {
+  font-size: var(--text-h2-size) !important;
+  line-height: var(--text-h2-line) !important;
+  font-weight: 600 !important;
+}
+
+.studio-shell h3,
+.studio-shell .card-title h3,
+.studio-shell .studio-wall-card strong,
+.studio-shell .result-card h3,
+.studio-shell .agent-message strong {
+  font-size: var(--text-h3-size) !important;
+  line-height: var(--text-h3-line) !important;
+  font-weight: 600 !important;
+}
+
+.studio-shell p,
+.studio-shell li,
+.studio-shell label,
+.studio-shell input,
+.studio-shell select,
+.studio-shell textarea,
+.studio-shell .subtitle,
+.studio-shell .agent-message,
+.studio-shell .result-prompt-modal-body,
+.studio-shell .sop-step-body p,
+.studio-shell .sop-step-body li {
+  font-size: var(--text-body-size) !important;
+  line-height: var(--text-body-line) !important;
+  font-weight: 400 !important;
+}
+
+.studio-shell small,
+.studio-shell .caption,
+.studio-shell .folder-label,
+.studio-shell .model-pill,
+.studio-shell .usage-meta,
+.studio-shell .result-meta,
+.studio-shell .studio-wall-new-badge,
+.studio-shell .agent-message time,
+.studio-shell .timestamp {
+  font-size: var(--text-caption-size) !important;
+  line-height: var(--text-caption-line) !important;
+  font-weight: 400 !important;
+}
+
+.studio-shell .sidebar,
+.studio-shell .studio-sidebar,
+.studio-shell aside:has(.sidebar-item) {
+  background:
+    linear-gradient(180deg, #32103a 0%, #210024 72%, #180019 100%) !important;
+  color: var(--pokaya-ink-inverse) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+.studio-shell .sidebar-item,
+.studio-shell .nav-item,
+.studio-shell .language-switcher,
+.studio-shell .agent-mini-card {
+  color: rgba(255, 249, 240, 0.82) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.studio-shell .sidebar-item.active,
+.studio-shell .nav-item.active,
+.studio-shell .step-tabs button.active,
+.studio-shell .image-studio-tabs button.active,
+.studio-shell .agent-session-row.active {
+  color: #ffffff !important;
+  border-color: rgba(255, 103, 56, 0.55) !important;
+  background:
+    linear-gradient(135deg, rgba(139, 26, 120, 0.82), rgba(193, 43, 98, 0.72)) !important;
+  box-shadow: inset 4px 0 0 #ff6738, 0 14px 34px rgba(33, 0, 36, 0.24) !important;
+}
+
+.studio-shell .step-tabs,
+.studio-shell .image-studio-tabs,
+.studio-shell .project-fixed-tabs,
+.studio-shell .studio-top-tabs {
+  background: rgba(255, 249, 240, 0.24) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+.studio-shell .step-tabs button,
+.studio-shell .image-studio-tabs button {
+  color: rgba(255, 249, 240, 0.76) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.studio-shell .studio-wall-pending,
+.studio-shell .studio-wall-card {
+  background:
+    linear-gradient(180deg, rgba(50, 16, 58, 0.96), rgba(33, 0, 36, 0.98)) !important;
+  border-color: rgba(255, 249, 240, 0.22) !important;
+  box-shadow: 0 14px 34px rgba(33, 0, 36, 0.24) !important;
+}
+
+.studio-shell .studio-wall-pending.failed {
+  background:
+    linear-gradient(180deg, rgba(92, 16, 42, 0.98), rgba(33, 0, 36, 0.98)) !important;
+}
+
+.studio-shell .studio-wall-failed-actions button,
+.studio-shell .generation-job-actions button,
+.studio-shell button[data-action="generate"],
+.studio-shell button[data-agent-send],
+.studio-shell button[data-result-action="download"],
+.studio-shell button[data-result-action="schedule"] {
+  background: var(--pokaya-gradient-action) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 14px 32px rgba(193, 43, 98, 0.22) !important;
+}
+
+.studio-shell .image-generate-console,
+.studio-shell .studio-generate-dock,
+.studio-shell .prompt-composer,
+.studio-shell .agent-input-shell,
+.studio-shell .modal,
+.studio-shell .settings-modal,
+.studio-shell .result-prompt-modal,
+.studio-shell .attachment-picker {
+  background: rgba(255, 249, 240, 0.94) !important;
+  border-color: rgba(33, 0, 36, 0.16) !important;
+  color: var(--pokaya-ink) !important;
+  box-shadow: 0 20px 54px rgba(33, 0, 36, 0.28) !important;
+}
+
+.studio-shell .image-generate-console *,
+.studio-shell .studio-generate-dock *,
+.studio-shell .prompt-composer *,
+.studio-shell .modal *,
+.studio-shell .settings-modal *,
+.studio-shell .result-prompt-modal *,
+.studio-shell .attachment-picker * {
+  color: inherit;
+}
+
+.studio-shell input,
+.studio-shell select,
+.studio-shell textarea {
+  color: var(--pokaya-ink) !important;
+  background-color: #ffffff !important;
+  border-color: rgba(33, 0, 36, 0.14) !important;
+}
+
+.studio-shell input::placeholder,
+.studio-shell textarea::placeholder {
+  color: rgba(33, 0, 36, 0.42) !important;
+}
+
+.studio-shell input:focus,
+.studio-shell select:focus,
+.studio-shell textarea:focus,
+.studio-shell button:focus-visible {
+  border-color: rgba(193, 43, 98, 0.6) !important;
+  box-shadow: 0 0 0 4px rgba(193, 43, 98, 0.24) !important;
+  outline: 0 !important;
+}
+
+.studio-shell .credit-balance,
+.studio-shell .usage-number,
+.studio-shell .usage-card strong,
+.studio-shell .billing-amount,
+.studio-shell .amount,
+.studio-shell .cost-list b,
+.studio-shell .generation-cost,
+.studio-shell .admin-stat strong,
+.studio-shell .plan-price,
+.studio-shell .wallet-amount,
+.studio-shell .result-cost,
+.studio-shell .credit-count,
+.studio-shell .timestamp,
+.studio-shell time {
+  font-variant-numeric: tabular-nums !important;
+}
+
+@media (max-width: 720px) {
+  .studio-shell p,
+  .studio-shell li,
+  .studio-shell label,
+  .studio-shell input,
+  .studio-shell select,
+  .studio-shell textarea,
+  .studio-shell .agent-message {
+    font-size: var(--text-body-lg-size) !important;
+    line-height: var(--text-body-lg-line) !important;
+  }
+}
+
+html:has(.studio-shell .image-higgsfield-mode),
+body:has(.studio-shell .image-higgsfield-mode),
+#app:has(.studio-shell .image-higgsfield-mode),
+.studio-shell:has(.image-higgsfield-mode),
+.studio-shell:has(.image-higgsfield-mode) .workspace,
+.studio-shell:has(.step-tabs):has(.image-higgsfield-mode) .workspace,
+.studio-shell .workspace:has(.image-higgsfield-mode),
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode),
+.studio-shell .canvas-card:has(.image-higgsfield-mode),
+.studio-shell .studio-workbench-card:has(.image-higgsfield-mode),
+.studio-shell .studio-step-panel:has(.image-higgsfield-mode),
+.studio-shell .image-canvas-studio.image-higgsfield-mode,
+.studio-shell .image-higgsfield-mode,
+.studio-shell .image-higgsfield-mode > .studio-result-wall,
+html:has(.studio-shell .video-page-studio),
+body:has(.studio-shell .video-page-studio),
+#app:has(.studio-shell .video-page-studio),
+.studio-shell:has(.video-page-studio),
+.studio-shell:has(.step-tabs):has(.video-page-studio),
+.studio-shell:has(.video-page-studio) .workspace,
+.studio-shell .workspace:has(.video-page-studio),
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio),
+.studio-shell .canvas-card:has(.video-page-studio),
+.studio-shell .studio-workbench-card:has(.video-page-studio),
+.studio-shell .studio-step-panel:has(.video-page-studio),
+.studio-shell .video-page-studio,
+.studio-shell .video-page-studio > .studio-result-wall,
+html:has(.studio-shell .video-prompt-extractor-page),
+body:has(.studio-shell .video-prompt-extractor-page),
+#app:has(.studio-shell .video-prompt-extractor-page),
+.studio-shell:has(.video-prompt-extractor-page),
+.studio-shell .workspace:has(.video-prompt-extractor-page),
+.studio-shell .canvas-card:has(.video-prompt-extractor-page),
+.studio-shell .studio-workbench-card:has(.video-prompt-extractor-page),
+.studio-shell .studio-step-panel:has(.video-prompt-extractor-page),
+.studio-shell .video-prompt-extractor-page,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall {
+  background:
+    linear-gradient(180deg, rgba(50, 16, 58, 0.98) 0%, rgba(33, 0, 36, 0.99) 100%) !important;
+  background-color: #210024 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console::after {
+  background: transparent !important;
+}
