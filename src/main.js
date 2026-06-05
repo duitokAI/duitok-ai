@@ -5820,10 +5820,20 @@ const ugcBuilderStyleOptions = {
 function ugcPanel(p) {
   const meta = studioStepMeta("ugc");
   const bulkSelecting = isBulkSelectingResults();
-  return `<section class="video-page-studio video-prompt-extractor-page studio-wall-zoomable ${bulkSelecting ? "is-bulk-selecting-results" : ""}" data-studio-mode="ugc" ${studioWallZoomStyleAttr()}>
+  const wall = studioResultWall(p, meta);
+  return `<section class="video-page-studio video-prompt-extractor-page studio-wall-zoomable ${wall ? "" : "is-empty"} ${bulkSelecting ? "is-bulk-selecting-results" : ""}" data-studio-mode="ugc" ${studioWallZoomStyleAttr()}>
     ${studioWallZoomControl()}
-    ${studioResultWall(p, meta)}
+    ${wall || videoEmptyStudioBackdrop()}
     ${bulkSelecting ? "" : videoGenerateConsole(p)}
+  </section>`;
+}
+
+function videoEmptyStudioBackdrop() {
+  return `<section class="video-empty-cinema" aria-label="Video studio">
+    <div class="video-empty-cinema-frame">
+      <span>CINEMA STUDIO 3.5</span>
+      <h2>What would you shoot<br>with infinite budget?</h2>
+    </div>
   </section>`;
 }
 
