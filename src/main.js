@@ -70,6 +70,7 @@ let imageCountSaveSeq = 0;
 let imageConsoleExpandLockUntil = 0;
 let imageConsoleExpandedUntilUserScroll = false;
 let imageConsoleUserScrollIntentUntil = 0;
+let generationSubmitLayoutLockTimer = null;
 let videoConsoleExpandLockUntil = 0;
 let videoConsoleExpandedUntilUserScroll = false;
 let videoConsoleUserScrollIntentUntil = 0;
@@ -1846,6 +1847,23 @@ function stabilizeImageConsoleExpansion(duration = 900) {
     requestAnimationFrame(restore);
   });
   [40, 120, 260, 600, duration].forEach((delay) => window.setTimeout(restore, delay));
+}
+
+function lockGenerationSubmitLayout(name = "generate-image", duration = 1600) {
+  if (name === "generate-image") stabilizeImageConsoleExpansion(duration);
+  if (name === "generate-ugc") stabilizeVideoConsoleExpansion(duration);
+  document.documentElement.classList.add("is-generation-submitting");
+  window.clearTimeout(generationSubmitLayoutLockTimer);
+  generationSubmitLayoutLockTimer = window.setTimeout(() => {
+    document.documentElement.classList.remove("is-generation-submitting");
+    generationSubmitLayoutLockTimer = null;
+  }, duration);
+}
+
+function unlockGenerationSubmitLayout() {
+  if (generationSubmitLayoutLockTimer) window.clearTimeout(generationSubmitLayoutLockTimer);
+  generationSubmitLayoutLockTimer = null;
+  document.documentElement.classList.remove("is-generation-submitting");
 }
 
 function bindImageConsoleCompact() {
@@ -13228,6 +13246,7 @@ async function generate(name, event = null) {
     notify(generationFeedbackCopy("busy"));
     return;
   }
+  lockGenerationSubmitLayout(name);
   const generationOptions = syncImageConsoleBeforeGenerate(name);
   const count = name === "generate-image" ? imageBatchCount(project()) : name === "generate-ugc" ? videoBatchCount(project()) : 1;
   const optimisticJobs = optimisticGenerationJobs(name, count, generationOptions);
@@ -13240,6 +13259,7 @@ async function generate(name, event = null) {
     });
     notify(generationOptions.advancePrompt ? "Queued. Prompt Enhance will run before generation." : generationFeedbackCopy("submitting"));
     const db = await api(`/projects/${state.projectId}/generate`, { method: "POST", body: JSON.stringify({ action: name, step: state.step, count, ...generationOptions }) });
+    lockGenerationSubmitLayout(name, 900);
     set({
       db,
       generating: false,
@@ -13247,12 +13267,15 @@ async function generate(name, event = null) {
     });
     notify(generationFeedbackCopy("queued", count));
     pollGenerationQueue();
+    window.setTimeout(unlockGenerationSubmitLayout, 240);
   } catch (error) {
+    lockGenerationSubmitLayout(name, 700);
     set({
       generating: false,
       promptAdvancedBusy: false,
       optimisticGenerationJobs: (state.optimisticGenerationJobs || []).filter((job) => !optimisticIds.has(job.id))
     });
+    window.setTimeout(unlockGenerationSubmitLayout, 240);
     notify(error.message);
   }
 }
