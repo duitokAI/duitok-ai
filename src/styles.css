@@ -47466,3 +47466,28 @@ html.is-route-changing .studio-shell .video-generate-console {
 .studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .generation-credit-refund-note strong {
   color: #ffffff !important;
 }
+
+/* Failed card alert icon: remove the translucent square behind the warning
+   glyph, especially on portrait tiles. */
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .studio-wall-pending-spinner,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .studio-wall-pending-spinner,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .studio-wall-pending-spinner,
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait .studio-wall-pending-spinner,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait .studio-wall-pending-spinner,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait .studio-wall-pending-spinner {
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .studio-wall-pending-spinner::before,
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .studio-wall-pending-spinner::after,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .studio-wall-pending-spinner::before,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .studio-wall-pending-spinner::after,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .studio-wall-pending-spinner::before,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .studio-wall-pending-spinner::after {
+  content: none !important;
+  display: none !important;
+}
