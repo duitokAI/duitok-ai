@@ -16,7 +16,7 @@
 - 点击取消后，目标卡片必须立即从当前图片墙和历史 pending 列表中消失。
 - 明确定义每个生成阶段的可取消规则，避免“按钮能点但后台已经太晚”的模糊体验。
 - 后端返回状态不能让已取消卡片重新刷回图片墙。
-- 对供应商已经接单的任务，区分“硬取消”和“软取消”，保证用户界面结果一致。
+- 对供应商已经接单或可能已产生供应商成本的任务，进入成本锁定，不再允许用户取消。
 - 保持扣费语义清楚：取消成功后用户不应为未产出的结果付费。
 
 ## 3. 非目标
@@ -86,8 +86,9 @@
 | --- | --- | --- | --- |
 | `queued` | 排队中 | 可以 | 点击后立即隐藏，后端直接标记 `cancelled` |
 | `prompt_advanced` | 优化 prompt 中 | 可以 | 点击后立即隐藏；如果优化已在执行，后端软取消并丢弃后续结果 |
-| `provider_submitted` 且未拿到供应商任务 ID | 正在提交模型 | 可以 | 点击后立即隐藏；后端在提交前边界检查取消状态 |
-| `provider_submitted` 且已有供应商任务 ID | 模型生成中 | 可以软取消 | 点击后立即隐藏；如供应商支持取消则尝试硬取消，否则标记软取消并丢弃后续结果 |
+| `provider_submitted` 但供应商请求尚未开始 | 准备提交模型 | 可以 | 点击后立即隐藏；后端在提交前边界检查取消状态 |
+| `provider_submitted` 且已有 `providerStartedAt` | 已提交供应商 | 不可以 | 供应商可能已经开始计费，隐藏取消按钮 |
+| `provider_submitted` 且已有供应商任务 ID | 模型生成中 | 不可以 | 供应商已接受任务，视为成本锁定，不允许用户取消 |
 | `saving_asset` | 保存结果中 | 不可以 | 不显示取消按钮，或置灰提示 `正在保存，无法取消` |
 | `succeeded` | 已完成 | 不可以 | 不显示取消按钮 |
 | `failed` | 已失败 | 不可以 | 不显示取消按钮，展示 `Retry / Edit` |
@@ -115,9 +116,26 @@ generation-state 应支持隐藏语义：
 - 如需诊断，可通过 admin/debug 接口查看 cancelled job。
 - 如果为了历史审计必须返回，则 job 上应带 `hiddenFromWall: true`，前端必须过滤。
 
-### 6.3 软取消规则
+### 6.3 成本锁定规则
 
-供应商已经开始生成时，系统不一定能真正中止上游任务。此时用户体验仍应表现为“已取消”。
+一旦后端开始调用供应商，或供应商返回任务 ID，任务进入成本锁定。
+
+成本锁定定义：
+
+- job 写入 `providerBillingLocked: true`。
+- 同时写入 `cancelLockedAt` 和 `cancelLockReason`。
+- 前端不再展示取消按钮。
+- 如果用户因为轮询延迟刚好点到取消，后端返回 `409`。
+- toast 显示：`供应商已接受任务并可能已扣费，已无法取消`
+
+第一期成本锁定边界：
+
+- `providerStartedAt` 存在：供应商请求已经开始，视为可能计费。
+- `providerTaskId` 或 `taskId` 存在：供应商已接受任务，视为已进入计费区间。
+
+### 6.4 软取消规则
+
+软取消只允许发生在用户点击取消早于成本锁定，但后端异步流程仍在收尾的情况。用户不能在成本锁定后主动发起软取消。
 
 软取消定义：
 
@@ -127,20 +145,20 @@ generation-state 应支持隐藏语义：
 - 用户侧不扣费；如果已有预扣费，走退款或 credit release。
 - 内部可记录供应商成本，但不暴露给用户。
 
-### 6.4 硬取消规则
+### 6.5 硬取消规则
 
-如果供应商支持取消 API，则后端应尝试调用。
+如果未来供应商支持取消 API，也只能用于内部成本控制或后台补偿；用户侧是否可取消仍以成本锁定为准。
 
 硬取消定义：
 
 - job 标记 `providerCancelAttempted: true`。
 - provider 取消成功后标记 `providerCancelStatus: "cancelled"`。
 - provider 取消失败或超时，降级为软取消。
-- 无论硬取消成功与否，用户界面都不应重新显示该卡片。
+- 无论硬取消成功与否，用户界面都不应重新显示已取消卡片。
 
-### 6.5 不可取消阶段
+### 6.6 不可取消阶段
 
-进入 `saving_asset` 后，用户不再能取消，因为此时结果已经生成，系统正在做本地保存、入库、缩略图或 CDN 写入。
+进入成本锁定或 `saving_asset` 后，用户不再能取消。
 
 前端规则：
 
@@ -163,6 +181,9 @@ generation-state 应支持隐藏语义：
 | `providerTaskId` | string | 上游供应商任务 ID |
 | `providerCancelAttempted` | boolean | 是否尝试调用供应商取消 |
 | `providerCancelStatus` | string | `not_supported / pending / cancelled / failed` |
+| `providerBillingLocked` | boolean | 供应商请求已开始或任务已被接受，用户侧不可取消 |
+| `cancelLockedAt` | ISO string | 取消能力被锁定的时间 |
+| `cancelLockReason` | string | `provider_request_started / provider_task_accepted / saving_asset` |
 | `creditsCharged` | number | 用户实际扣费 |
 | `creditsReleasedAt` | ISO string | 取消释放 credit 的时间 |
 
@@ -321,7 +342,7 @@ async function cancelProviderGeneration(job) {
 toast：
 
 - 成功：`已取消生成`
-- 软取消：`已取消显示，结果将不会保存`
+- 成本锁定：`供应商已接受任务并可能已扣费，已无法取消`
 - 太晚：`结果正在保存，已无法取消`
 - 失败：`取消失败，请稍后重试`
 
@@ -330,7 +351,8 @@ toast：
 - 点击生成中卡片的取消按钮后，该卡片在 100ms 内从当前墙面消失。
 - API 成功后，被取消卡片不会因为 generation-state 刷新重新出现。
 - API 失败时，原卡片恢复，且用户看到失败提示。
-- `queued / prompt_advanced / provider_submitted` 阶段都可以点击取消。
+- `queued / prompt_advanced` 阶段可以点击取消。
+- 进入 `providerStartedAt / providerTaskId / saving_asset` 后不能取消。
 - `saving_asset / succeeded / failed / cancelled` 阶段不展示可点击取消按钮。
 - 供应商返回结果晚于取消请求时，结果不会被保存进项目墙。
 - 取消单张批量任务不会影响同批次其它卡片。
@@ -390,4 +412,3 @@ toast：
 2. 再改后端 cancel response 和 generation-state，解决“刷新后又回来”的一致性问题。
 3. 补 worker 边界检查，避免供应商晚返回后仍保存结果。
 4. 最后接 provider cancel adapter，逐个供应商支持硬取消。
-

@@ -1735,6 +1735,17 @@ async function updateGenerationJobDebug(jobId, patch = {}) {
   await mutateDb(async (db) => {
     const job = (db.generationJobs || []).find((item) => item.id === jobId);
     if (!job || !["queued", "processing"].includes(job.status)) return db;
+    if (patch.providerStartedAt) {
+      patch.providerBillingLocked = true;
+      patch.cancelLockedAt ||= patch.providerStartedAt;
+      patch.cancelLockReason ||= "provider_request_started";
+    }
+    if (patch.providerTaskId || patch.taskId) {
+      const timestamp = new Date().toISOString();
+      patch.providerBillingLocked = true;
+      patch.cancelLockedAt ||= timestamp;
+      patch.cancelLockReason ||= "provider_task_accepted";
+    }
     Object.assign(job, patch);
     await saveDb(db);
     return db;
@@ -2032,6 +2043,10 @@ function generationJobCancelRequested(job = {}) {
   return Boolean(job.cancelRequestedAt || generationJobHiddenFromWall(job));
 }
 
+function generationJobProviderBillingLocked(job = {}) {
+  return Boolean(job.providerBillingLocked || job.cancelLockedAt || job.providerStartedAt || job.providerTaskId || job.taskId);
+}
+
 function publicState(db, user = db.users?.find((item) => item.id === adminUserId)) {
   const isAdmin = hasAdminPrivileges(user) && Boolean(user.__adminVerified);
   const owns = (item) => item.userId === user.id;
@@ -2307,6 +2322,9 @@ function publicGenerationJob(job = {}) {
     aspectRatio: job.aspectRatio,
     batchIndex: job.batchIndex,
     batchCount: job.batchCount,
+    providerBillingLocked: generationJobProviderBillingLocked(job),
+    cancelLockedAt: job.cancelLockedAt,
+    cancelLockReason: job.cancelLockReason || "",
     timelineAt: generationJobTimelineAt(job),
     createdAt: job.createdAt,
     startedAt: job.startedAt,
@@ -2404,6 +2422,8 @@ function generationStateEtag(payload = {}) {
       job.status,
       job.resultId || "",
       job.timelineAt || "",
+      job.providerBillingLocked ? "locked" : "",
+      job.cancelLockedAt || "",
       job.startedAt || "",
       job.completedAt || ""
     ]),
@@ -8435,9 +8455,10 @@ app.post("/api/generation-jobs/:id/cancel", async (req, res) => {
   res.json(await mutateDb(async (db) => {
     const job = (db.generationJobs || []).find((item) => item.id === req.params.id);
     if (!job || job.userId !== user.id) throw Object.assign(new Error("Generation job not found"), { status: 404 });
+    if (generationJobProviderBillingLocked(job)) throw Object.assign(new Error("供应商已接受任务并可能已扣费，已无法取消"), { status: 409 });
     if (job.stage === "saving_asset") throw Object.assign(new Error("结果正在保存，已无法取消"), { status: 409 });
     if (["queued", "processing"].includes(job.status)) {
-      const cancelMode = job.status === "processing" && (job.taskId || job.providerTaskId || job.stage === "provider_submitted") ? "soft" : "local_only";
+      const cancelMode = "local_only";
       job.status = "cancelled";
       job.stage = "cancelled";
       job.providerStatus = "cancelled";

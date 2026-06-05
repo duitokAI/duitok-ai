@@ -5513,7 +5513,7 @@ function studioPendingWallCard(job, orderIndex = 0) {
   const processingBody = `
       ${statusIcon}
       <b>${esc(generationJobCenterLabel(job))}</b>`;
-  return `<article class="studio-wall-card studio-wall-pending ${audioJob ? "studio-audio-wall-card studio-audio-wall-pending" : ""} ${aspectClass} ${isFailed ? "failed" : ""}" data-aspect-ratio="${esc(aspectRatio)}" data-media-ratio="${esc(mediaRatio)}" data-generation-job-id="${esc(job.id)}" data-generation-job-status="${esc(job.status || "queued")}" style="--media-ratio:${esc(mediaRatio)};--wall-aspect-ratio:${esc(aspectRatioToCss(aspectRatio))};aspect-ratio:var(--wall-aspect-ratio)">
+  return `<article class="studio-wall-card studio-wall-pending ${audioJob ? "studio-audio-wall-card studio-audio-wall-pending" : ""} ${aspectClass} ${isFailed ? "failed" : ""}" data-aspect-ratio="${esc(aspectRatio)}" data-media-ratio="${esc(mediaRatio)}" data-generation-job-id="${esc(job.id)}" data-generation-job-status="${esc(job.status || "queued")}" data-generation-cancel-locked="${cancelState.reason === "provider_billing_locked" ? "true" : "false"}" style="--media-ratio:${esc(mediaRatio)};--wall-aspect-ratio:${esc(aspectRatioToCss(aspectRatio))};aspect-ratio:var(--wall-aspect-ratio)">
     ${audioJob ? audioWallPreview(job, { pending: true }) : ""}
     <div class="studio-wall-pending-controls" aria-label="${esc(statusLabel)}">
       ${isFailed ? `<div class="studio-wall-failed-center">${statusBody}
@@ -7497,6 +7497,7 @@ function getGenerationCancelState(job = {}) {
   if (!job || job.optimistic) return { canCancel: false, reason: "optimistic" };
   if (shouldHideGenerationJob(job)) return { canCancel: false, reason: "hidden" };
   if (["succeeded", "failed", "cancelled"].includes(job.status)) return { canCancel: false, reason: job.status || "terminal" };
+  if (job.providerBillingLocked || job.cancelLockedAt) return { canCancel: false, reason: "provider_billing_locked" };
   if (job.stage === "saving_asset") return { canCancel: false, reason: "saving_asset" };
   if (["queued", "processing"].includes(job.status)) return { canCancel: true, reason: "" };
   return { canCancel: false, reason: "unknown" };
@@ -13450,7 +13451,7 @@ async function cancelGenerationJob(jobId) {
   const job = generationJobById(jobId);
   const cancelState = getGenerationCancelState(job);
   if (!cancelState.canCancel) {
-    notify(cancelState.reason === "saving_asset" ? "结果正在保存，已无法取消" : "这次生成已无法取消。");
+    notify(cancelState.reason === "provider_billing_locked" ? "供应商已接受任务并可能已扣费，已无法取消。" : cancelState.reason === "saving_asset" ? "结果正在保存，已无法取消" : "这次生成已无法取消。");
     return;
   }
   const previousDb = state.db;
@@ -13695,9 +13696,11 @@ function patchStudioGenerationCardsFromDb(nextDb) {
         return;
       }
       const currentStatus = card.dataset.generationJobStatus || "";
+      const currentCancelLocked = card.dataset.generationCancelLocked || "false";
+      const nextCancelLocked = getGenerationCancelState(job).reason === "provider_billing_locked" ? "true" : "false";
       const currentAspectRatio = card.dataset.aspectRatio || "";
       const nextAspectRatio = wallAspectRatioForItem(job);
-      if (currentStatus === (job.status || "queued") && currentAspectRatio === nextAspectRatio) return;
+      if (currentStatus === (job.status || "queued") && currentCancelLocked === nextCancelLocked && currentAspectRatio === nextAspectRatio) return;
       const orderIndex = Number(card.dataset.wallOrder || getComputedStyle(card).order || 0);
       card.outerHTML = studioPendingWallCard(job, Number.isFinite(orderIndex) ? orderIndex : 0);
       patched = true;
