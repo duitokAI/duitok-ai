@@ -49676,3 +49676,52 @@ body:has(.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"]),
     grid-template-rows: minmax(calc(100dvh - var(--project-fixed-tabs-height, 72px) - 40px), auto) auto !important;
   }
 }
+
+/* Audio + Clone drag-reveal final nudge: keep the control bar just after the
+   first viewport, matching Image/Video pages where the canvas can be dragged
+   down to reach the composer instead of showing a fixed bottom slab. */
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page),
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page[data-studio-mode="clone"]) {
+  scroll-behavior: auto !important;
+  touch-action: pan-y !important;
+}
+
+.studio-shell .audio-studio-page {
+  min-height: calc(100dvh - var(--project-fixed-tabs-height, 72px) + clamp(220px, 28vh, 360px)) !important;
+  grid-template-rows: minmax(calc(100dvh - var(--project-fixed-tabs-height, 72px) + 28px), auto) auto auto !important;
+}
+
+.studio-shell .audio-studio-page .audio-stage-hero {
+  min-height: calc(100dvh - var(--project-fixed-tabs-height, 72px) - 24px) !important;
+}
+
+.studio-shell .audio-studio-page .audio-composer,
+.studio-shell .audio-studio-page .audio-composer:not(.is-compact) {
+  margin-top: clamp(20px, 3vh, 44px) !important;
+}
+
+.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"] {
+  min-height: calc(100dvh - var(--project-fixed-tabs-height, 72px) + clamp(220px, 28vh, 360px)) !important;
+  grid-template-rows: minmax(calc(100dvh - var(--project-fixed-tabs-height, 72px) + 28px), auto) auto !important;
+}
+
+.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"] > .video-prompt-dock,
+.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"].is-empty:not(.video-page-studio) > .video-prompt-dock {
+  margin-top: clamp(20px, 3vh, 44px) !important;
+}
+
+@media (max-width: 720px) {
+  .studio-shell .audio-studio-page {
+    min-height: calc(100dvh - var(--project-fixed-tabs-height, 72px) + 180px) !important;
+    grid-template-rows: minmax(calc(100dvh - var(--project-fixed-tabs-height, 72px) - 12px), auto) auto auto !important;
+  }
+
+  .studio-shell .audio-studio-page .audio-stage-hero {
+    min-height: calc(100dvh - var(--project-fixed-tabs-height, 72px) - 72px) !important;
+  }
+
+  .studio-shell .video-prompt-extractor-page[data-studio-mode="clone"] {
+    min-height: calc(100dvh - var(--project-fixed-tabs-height, 72px) + 180px) !important;
+    grid-template-rows: minmax(calc(100dvh - var(--project-fixed-tabs-height, 72px) - 12px), auto) auto !important;
+  }
+}
