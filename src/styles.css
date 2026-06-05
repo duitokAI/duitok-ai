@@ -49382,10 +49382,13 @@ body:has(.studio-shell .image-higgsfield-mode.has-results),
 }
 
 .studio-shell .image-higgsfield-mode.has-results {
-  display: block !important;
+  display: grid !important;
+  grid-template-rows: 36px auto auto !important;
+  align-content: start !important;
 }
 
 .studio-shell .image-higgsfield-mode.has-results > .studio-result-wall {
+  grid-row: 2 !important;
   height: auto !important;
   min-height: 0 !important;
   max-height: none !important;
@@ -49405,6 +49408,7 @@ body:has(.studio-shell .image-higgsfield-mode.has-results),
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-open-menu,
 .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt {
   position: relative !important;
+  grid-row: 3 !important;
   left: auto !important;
   right: auto !important;
   bottom: auto !important;
