@@ -94,10 +94,10 @@ const steps = [
   ["image", "image", "stepImage", "01"],
   ["ugc", "video", "stepUgc", "02"],
   ["auto", "audio-lines", "stepAuto", "03"],
-  ["original", "film", "stepOriginal", "04"],
-  ["clone", "layers-3", "stepClone", "05"],
-  ["story", "book-open", "stepStory", "06"]
+  ["clone", "layers-3", "stepClone", "04"]
 ];
+
+const visibleStudioStepIds = new Set(steps.map(([id]) => id));
 
 const pages = [
   ["attachments", "image", "attachments"],
@@ -1563,6 +1563,7 @@ async function refreshState() {
 function set(patch) {
   const statePatch = { ...patch };
   delete statePatch.suppressAgentAutoScroll;
+  if (Object.prototype.hasOwnProperty.call(statePatch, "step") && !visibleStudioStepIds.has(statePatch.step)) statePatch.step = "image";
   const modalOnly = shouldPatchModalOnly(statePatch);
   const agentScroll = captureAgentThreadScroll();
   const agentInputFocus = captureAgentInputFocus(statePatch);
@@ -5276,6 +5277,7 @@ function sopButtonLabel() {
 }
 
 function stepPanel(p) {
+  if (!visibleStudioStepIds.has(state.step)) state.step = "image";
   const panels = {
     image: imagePanel,
     ugc: ugcPanel,
