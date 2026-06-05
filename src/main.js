@@ -6502,7 +6502,7 @@ function videoModelOptions() {
       badge: "",
       capabilities: {
         modes: ["Image to Video", "Motion Control"],
-        aspectRatios: ["9:16", "16:9"],
+        aspectRatios: ["9:16"],
         qualities: ["720p"],
         durations: ["5s", "12s"],
         audio: ["Off"]
@@ -6517,7 +6517,7 @@ function videoModelOptions() {
       badge: "",
       capabilities: {
         modes: ["Text to Video", "Image to Video"],
-        aspectRatios: ["9:16", "16:9", "1:1"],
+        aspectRatios: ["9:16"],
         qualities: ["480p", "720p"],
         durations: ["5s", "8s", "12s"],
         audio: ["Off"]
@@ -6627,7 +6627,7 @@ function videoGenerateConsole(p) {
       </div>
       <div class="video-console-tools">
         ${videoModelPicker(selectedModel)}
-        ${videoOptionMenu("ratio", "ugc.aspectRatio", videoAspectRatioValue(p), (capabilities.aspectRatios || []).map(videoAspectRatioOption), "rectangle-horizontal", "Aspect ratio")}
+        ${videoAspectRatioMenu(videoAspectRatioValue(p), capabilities.aspectRatios || [])}
         ${videoOptionMenu("quality", "ugc.quality", videoQualityValue(p), (capabilities.qualities || []).map(videoQualityOption), "gem", "Select quality")}
         ${videoDurationSliderMenu(videoDurationValue(p), (capabilities.durations || []).map(videoDurationOption))}
         ${videoCountStepper(p)}
@@ -6703,6 +6703,45 @@ function videoAspectRatioOption(value) {
       "3:4": "Tall creator and product scene"
     }[value] || "Video composition frame"
   };
+}
+
+function videoAspectRatioGlyph(value = "16:9") {
+  const [w = 16, h = 9] = String(value).split(":").map((item) => Number(item) || 1);
+  const maxWidth = 38;
+  const maxHeight = 38;
+  const minSide = 12;
+  const scale = Math.min(maxWidth / w, maxHeight / h);
+  const width = Math.max(minSide, Math.round(w * scale));
+  const height = Math.max(minSide, Math.round(h * scale));
+  return `<span class="video-aspect-ratio-glyph" aria-hidden="true" style="--video-ratio-icon-width:${width}px;--video-ratio-icon-height:${height}px"></span>`;
+}
+
+function videoAspectRatioMenu(selectedValue, ratios = []) {
+  const options = (ratios || []).map(videoAspectRatioOption);
+  if (!options.length) return "";
+  const selected = options.find((item) => item.value === selectedValue) || options[0];
+  const disabled = options.length <= 1;
+  return `<details class="video-option-menu video-option-ratio video-aspect-ratio-menu ${disabled ? "is-static" : ""}">
+    <summary aria-label="Aspect ratio" ${disabled ? "aria-disabled=\"true\"" : ""}>
+      ${videoAspectRatioGlyph(selected.value)}
+      <b data-video-option-current="ugc.aspectRatio">${esc(selected.label || selected.value)}</b>
+      ${icon("chevron-down", 16)}
+    </summary>
+    <div class="video-option-list video-aspect-ratio-list" role="listbox" aria-label="Aspect ratio">
+      <div class="video-option-menu-title">Aspect ratio</div>
+      ${options.map((item) => {
+        const active = item.value === selected.value;
+        return `<button type="button" class="video-aspect-ratio-option ${active ? "active" : ""}" data-field-set="ugc.aspectRatio" data-value="${esc(item.value)}" data-label="${esc(item.label || item.value)}" role="option" aria-selected="${active ? "true" : "false"}">
+          ${videoAspectRatioGlyph(item.value)}
+          <span class="video-option-copy">
+            <b>${esc(item.title || item.value)}</b>
+            <small>${esc(item.description || "")}</small>
+          </span>
+          <span class="video-option-check" aria-hidden="true">${active ? icon("check", 18) : ""}</span>
+        </button>`;
+      }).join("")}
+    </div>
+  </details>`;
 }
 
 function videoQualityOption(value) {
@@ -12791,7 +12830,7 @@ function updateVideoModelDom(modelValue, source = null) {
   });
   if (ratioMenu) {
     const selectedRatio = normalizedVideoSettingForModel(model.value, "ugc.aspectRatio", projectItem?.ugc?.aspectRatio);
-    ratioMenu.outerHTML = videoOptionMenu("ratio", "ugc.aspectRatio", selectedRatio, (capabilities.aspectRatios || []).map(videoAspectRatioOption), "rectangle-horizontal", "Aspect ratio");
+    ratioMenu.outerHTML = videoAspectRatioMenu(selectedRatio, capabilities.aspectRatios || []);
   }
   if (qualityMenu) {
     const selectedQuality = normalizedVideoSettingForModel(model.value, "ugc.quality", projectItem?.ugc?.quality);

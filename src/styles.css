@@ -1931,6 +1931,19 @@ body,
   stroke-width: 2.5;
 }
 
+.video-aspect-ratio-glyph {
+  width: var(--video-ratio-icon-width);
+  height: var(--video-ratio-icon-height);
+  justify-self: center;
+  border: 3px solid rgba(169, 111, 219, 0.72);
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.46);
+}
+
+.video-option-ratio summary {
+  grid-template-columns: 38px minmax(0, 1fr) 14px;
+}
+
 .video-option-list {
   position: absolute;
   left: 0;
@@ -2081,6 +2094,14 @@ body,
   backdrop-filter: blur(18px);
 }
 
+.video-aspect-ratio-list {
+  width: min(360px, calc(100vw - 36px));
+  max-height: min(480px, calc(100dvh - 180px));
+  overflow-y: auto;
+  padding: 12px;
+  border-radius: 20px;
+}
+
 .video-option-menu-title {
   padding: 4px 8px 8px;
   color: rgba(43, 6, 52, 0.82);
@@ -2107,6 +2128,18 @@ body,
   padding: 9px 10px;
   border-radius: 12px;
   text-align: left;
+}
+
+.video-aspect-ratio-list .video-aspect-ratio-option {
+  min-height: 70px;
+  grid-template-columns: 58px minmax(0, 1fr) 22px;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+}
+
+.video-aspect-ratio-option .video-option-copy b {
+  font-size: 18px;
 }
 
 .video-model-option {

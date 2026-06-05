@@ -4021,11 +4021,34 @@ function imageAspectRatioFromProject(project) {
   return ratios.includes(value) ? value : ratios.includes(fallback) ? fallback : ratios[0] || "9:16";
 }
 
+function videoCapabilitiesForModel(model = "Seedance 2.0 Fast") {
+  model = internalMediaModel(model);
+  const capabilities = {
+    "Seedance 2.0": { aspectRatios: ["9:16", "16:9", "1:1"] },
+    "Seedance 2.0 Fast": { aspectRatios: ["9:16", "16:9", "1:1"] },
+    "Veo 3.1": { aspectRatios: ["16:9", "9:16"] },
+    "Sora 2": { aspectRatios: ["16:9", "9:16"] },
+    "Gemini Omni": { aspectRatios: ["9:16"] },
+    "Grok Imagine Video": { aspectRatios: ["16:9", "9:16", "1:1", "3:2", "2:3"] },
+    "Wan 2.7": { aspectRatios: ["9:16", "16:9", "1:1", "4:3", "3:4"] },
+    "Kling V3 Omni": { aspectRatios: ["9:16", "16:9", "1:1"] },
+    "Kling V3 Motion Control": { aspectRatios: ["9:16"] },
+    "MiniMax Hailuo 2.3": { aspectRatios: ["9:16"] }
+  };
+  return capabilities[model] || capabilities["Seedance 2.0 Fast"];
+}
+
+function videoAspectRatioFromProject(project, model = "") {
+  const mediaModel = internalMediaModel(model || project?.image?.model || project?.ugc?.provider || "Seedance 2.0 Fast");
+  const ratios = videoCapabilitiesForModel(mediaModel).aspectRatios;
+  const requested = String(project?.image?.aspectRatio || project?.ugc?.aspectRatio || "").trim();
+  return ratios.includes(requested) ? requested : ratios[0] || "9:16";
+}
+
 function generationAspectRatioForProject(project, action = "generate-image", step = "") {
   if (action === "generate-image") return imageAspectRatioFromProject(project);
   if (action === "generate-ugc" || step === "ugc") {
-    const ugcRatio = String(project?.ugc?.aspectRatio || "").trim();
-    return supportedImageAspectRatios.includes(ugcRatio) ? ugcRatio : "16:9";
+    return videoAspectRatioFromProject(project);
   }
   const originalRatio = String(project?.original?.aspectRatio || "").match(/(\d+)\s*[:/]\s*(\d+)/);
   if (originalRatio) {
@@ -4059,12 +4082,13 @@ function grsaiImageBody(project, prompt) {
 function wuyinImageBody(project, prompt) {
   const model = internalMediaModel(project.image?.model);
   const aspectRatio = imageAspectRatioFromProject(project);
+  const videoAspectRatio = videoAspectRatioFromProject(project, model);
   const imageSize = process.env.WUYIN_IMAGE_SIZE || "1K";
   if (model === "Veo 3.1") {
     return {
       model: wuyinVideoModel,
       prompt,
-      aspectRatio: process.env.WUYIN_VIDEO_RATIO || "9:16",
+      aspectRatio: videoAspectRatio,
       duration: String(videoDurationFor(project, model)),
       size: process.env.WUYIN_VEO_SIZE || "720p"
     };
@@ -4072,7 +4096,7 @@ function wuyinImageBody(project, prompt) {
   if (model === "Sora 2") {
     return {
       prompt,
-      aspectRatio: process.env.WUYIN_SORA_ASPECT_RATIO || process.env.WUYIN_VIDEO_RATIO || "9:16",
+      aspectRatio: videoAspectRatio,
       duration: String(videoDurationFor(project, model)),
       size: process.env.WUYIN_SORA_SIZE || "small"
     };
@@ -4088,7 +4112,7 @@ function wuyinImageBody(project, prompt) {
     return {
       prompt,
       duration: String(videoDurationFor(project, model)),
-      aspect_ratio: process.env.WUYIN_GROK_ASPECT_RATIO || process.env.WUYIN_VIDEO_RATIO || "9:16"
+      aspect_ratio: videoAspectRatio
     };
   }
   if (model === "Grok Imagine") {
@@ -4101,7 +4125,7 @@ function wuyinImageBody(project, prompt) {
 }
 
 function crunVeo31Body(project, prompt) {
-  const aspectRatio = String(process.env.CRUN_VEO_3_1_ASPECT_RATIO || project.image?.aspectRatio || "9:16").trim();
+  const aspectRatio = videoAspectRatioFromProject(project, "Veo 3.1");
   const duration = Number(process.env.CRUN_VEO_3_1_DURATION || videoDurationFor(project, "Veo 3.1") || 8);
   return {
     model: crunVeo31Model,
@@ -4140,7 +4164,7 @@ function crunImageBody(project, prompt) {
 
 function apimartSeedanceBody(project, prompt) {
   const resolution = String(process.env.APIMART_SEEDANCE_RESOLUTION || project.image?.resolution || "1080p").trim().toLowerCase();
-  const size = imageAspectRatioFromProject(project);
+  const size = videoAspectRatioFromProject(project, "Seedance 2.0");
   const minDuration = Math.max(1, Number(process.env.APIMART_SEEDANCE_MIN_DURATION || 4));
   const maxDuration = Math.max(minDuration, Number(process.env.APIMART_SEEDANCE_MAX_DURATION || 15));
   const duration = Math.min(maxDuration, Math.max(minDuration, Number(videoDurationFor(project, "Seedance 2.0")) || minDuration));
@@ -4155,22 +4179,20 @@ function apimartSeedanceBody(project, prompt) {
 }
 
 function apimartGrokVideoBody(project, prompt) {
-  const allowedSizes = ["16:9", "9:16", "1:1", "3:2", "2:3"];
-  const size = String(project.image?.aspectRatio || process.env.APIMART_GROK_VIDEO_SIZE || "16:9").trim();
+  const size = videoAspectRatioFromProject(project, "Grok Imagine Video");
   const quality = String(project.image?.resolution || process.env.APIMART_GROK_VIDEO_QUALITY || "480p").trim().toLowerCase();
   const duration = Math.min(30, Math.max(6, Number(videoDurationFor(project, "Grok Imagine Video")) || 6));
   return {
     model: apimartGrokVideoModel,
     prompt,
-    size: allowedSizes.includes(size) ? size : "16:9",
+    size,
     duration,
     quality: ["480p", "720p"].includes(quality) ? quality : "480p"
   };
 }
 
 function apimartWanVideoBody(project, prompt) {
-  const allowedSizes = ["16:9", "9:16", "1:1", "4:3", "3:4"];
-  const size = String(project.image?.aspectRatio || process.env.APIMART_WAN_VIDEO_SIZE || "16:9").trim();
+  const size = videoAspectRatioFromProject(project, "Wan 2.7");
   const resolution = String(project.image?.resolution || process.env.APIMART_WAN_VIDEO_RESOLUTION || "1080P").trim().toUpperCase();
   const duration = Math.min(15, Math.max(2, Number(videoDurationFor(project, "Wan 2.7")) || 8));
   return {
@@ -4178,13 +4200,12 @@ function apimartWanVideoBody(project, prompt) {
     prompt,
     resolution: ["720P", "1080P"].includes(resolution) ? resolution : "1080P",
     duration,
-    size: allowedSizes.includes(size) ? size : "16:9"
+    size
   };
 }
 
 function apimartKlingOmniBody(project, prompt) {
-  const allowedRatios = ["16:9", "9:16", "1:1"];
-  const aspectRatio = String(project.image?.aspectRatio || process.env.APIMART_KLING_OMNI_ASPECT_RATIO || "16:9").trim();
+  const aspectRatio = videoAspectRatioFromProject(project, "Kling V3 Omni");
   const mode = String(project.image?.resolution || process.env.APIMART_KLING_OMNI_MODE || "std").trim().toLowerCase();
   const duration = Math.min(15, Math.max(3, Number(videoDurationFor(project, "Kling V3 Omni")) || 5));
   return {
@@ -4192,7 +4213,7 @@ function apimartKlingOmniBody(project, prompt) {
     prompt,
     mode: ["std", "pro", "4k"].includes(mode) ? mode : "std",
     duration,
-    aspect_ratio: allowedRatios.includes(aspectRatio) ? aspectRatio : "16:9",
+    aspect_ratio: aspectRatio,
     audio: process.env.APIMART_KLING_OMNI_AUDIO === "true"
   };
 }
