@@ -6347,8 +6347,11 @@ function normalizedVideoSettingForModel(model, field, value) {
     return options.includes(normalized) ? normalized : options[0] || "720p";
   }
   if (field === "ugc.duration") {
-    const options = capabilities.durations || ["8s"];
-    return options.includes(value) ? value : options[0] || "8s";
+    const range = videoDurationRange(capabilities.durations || ["8s"]);
+    const seconds = Number.parseInt(String(value || "").match(/\d+/)?.[0] || "", 10);
+    const fallback = Number.parseInt(String((capabilities.durations || ["8s"])[0] || "8s"), 10) || range.min;
+    const safeSeconds = Number.isFinite(seconds) ? seconds : fallback;
+    return `${Math.min(range.max, Math.max(range.min, Math.round(safeSeconds)))}s`;
   }
   if (field === "ugc.audio") {
     const options = capabilities.audio || ["On", "Off"];
@@ -6540,6 +6543,27 @@ function videoDurationOption(value) {
   };
 }
 
+function videoDurationRange(durations = []) {
+  const seconds = (durations || [])
+    .map((value) => Number.parseInt(String(value).match(/\d+/)?.[0] || "", 10))
+    .filter((value) => Number.isFinite(value) && value > 0)
+    .sort((a, b) => a - b);
+  const fallback = seconds[0] || 8;
+  return {
+    min: seconds[0] || fallback,
+    max: seconds.at(-1) || fallback
+  };
+}
+
+function videoDurationDescriptionForSeconds(seconds, min, max) {
+  if (seconds <= min) return "Shortest supported clip";
+  if (seconds >= max) return "Longest supported scene";
+  if (seconds <= 6) return "Quick shot";
+  if (seconds <= 9) return "Standard clip";
+  if (seconds <= 12) return "Longer scene";
+  return "Extended product scene";
+}
+
 function videoAudioOption(value) {
   return {
     value,
@@ -6578,27 +6602,32 @@ function videoOptionMenu(kind, field, selectedValue, options = [], iconName = "c
 
 function videoDurationSliderMenu(selectedValue, options = []) {
   if (!options.length) return "";
-  const selected = options.find((item) => item.value === selectedValue) || options[0];
-  const selectedIndex = Math.max(0, options.findIndex((item) => item.value === selected.value));
-  const disabled = options.length <= 1;
-  const trackProgress = options.length <= 1 ? 0 : Math.round((selectedIndex / (options.length - 1)) * 100);
+  const range = videoDurationRange(options.map((item) => item.value));
+  const selectedSeconds = Math.min(
+    range.max,
+    Math.max(range.min, Number.parseInt(String(selectedValue || "").match(/\d+/)?.[0] || "", 10) || range.min)
+  );
+  const disabled = range.min === range.max;
+  const trackProgress = disabled ? 0 : Math.round(((selectedSeconds - range.min) / (range.max - range.min)) * 100);
+  const selectedLabel = `${selectedSeconds}s`;
+  const description = videoDurationDescriptionForSeconds(selectedSeconds, range.min, range.max);
   return `<details class="video-option-menu video-option-duration video-duration-slider-menu ${disabled ? "is-static" : ""}" style="--duration-slider-progress: ${trackProgress}%">
     <summary aria-label="Duration" ${disabled ? "aria-disabled=\"true\"" : ""}>
       ${icon("clock-3", 18)}
-      <b data-video-option-current="ugc.duration">${esc(selected.label || selected.value)}</b>
+      <b data-video-option-current="ugc.duration">${esc(selectedLabel)}</b>
       ${icon("chevron-down", 16)}
     </summary>
     <div class="video-duration-slider-panel" role="group" aria-label="Duration">
       <div class="video-option-menu-title">Duration</div>
       <label class="video-duration-slider-field">
-        <span data-video-duration-selected>${esc(selected.title || selected.value)}</span>
-        <input type="range" min="0" max="${Math.max(0, options.length - 1)}" step="1" value="${selectedIndex}" data-video-duration-slider aria-label="Duration">
+        <span data-video-duration-selected>${esc(selectedLabel)}</span>
+        <input type="range" min="${range.min}" max="${range.max}" step="1" value="${selectedSeconds}" data-video-duration-slider aria-label="Duration">
       </label>
-      <small data-video-duration-description>${esc(selected.description || "Video duration")}</small>
+      <small data-video-duration-description>${esc(description)}</small>
       <div class="video-duration-slider-ticks" aria-hidden="true">
-        ${options.map((item, index) => `<span class="${index === selectedIndex ? "active" : ""}" data-video-duration-tick="${index}">${esc(item.label || item.value)}</span>`).join("")}
+        <span data-video-duration-tick="${range.min}" class="${selectedSeconds === range.min ? "active" : ""}">${range.min}s</span>
+        <span data-video-duration-tick="${range.max}" class="${selectedSeconds === range.max ? "active" : ""}">${range.max}s</span>
       </div>
-      <script type="application/json" data-video-duration-options>${JSON.stringify(options).replace(/</g, "\\u003c")}</script>
     </div>
   </details>`;
 }
@@ -12208,32 +12237,26 @@ function bindVideoDurationSliders(root = document) {
     if (slider.dataset.videoDurationSliderBound === "true") return;
     slider.dataset.videoDurationSliderBound = "true";
     const menu = slider.closest(".video-duration-slider-menu");
-    const optionsNode = menu?.querySelector("[data-video-duration-options]");
-    let options = [];
-    try {
-      options = JSON.parse(optionsNode?.textContent || "[]");
-    } catch {
-      options = [];
-    }
-    if (!menu || !options.length) return;
+    const min = Number.parseInt(slider.min, 10) || 1;
+    const max = Number.parseInt(slider.max, 10) || min;
+    if (!menu) return;
     const update = () => {
-      const index = Math.min(options.length - 1, Math.max(0, Number.parseInt(slider.value, 10) || 0));
-      const selected = options[index] || options[0];
-      const progress = options.length <= 1 ? 0 : Math.round((index / (options.length - 1)) * 100);
-      const label = selected.label || selected.value;
-      slider.value = String(index);
+      const seconds = Math.min(max, Math.max(min, Number.parseInt(slider.value, 10) || min));
+      const progress = max <= min ? 0 : Math.round(((seconds - min) / (max - min)) * 100);
+      const label = `${seconds}s`;
+      slider.value = String(seconds);
       slider.dataset.label = label;
       menu.style.setProperty("--duration-slider-progress", `${progress}%`);
       menu.querySelectorAll("[data-video-duration-selected]").forEach((el) => {
-        el.textContent = selected.title || selected.value;
+        el.textContent = label;
       });
       menu.querySelectorAll("[data-video-duration-description]").forEach((el) => {
-        el.textContent = selected.description || "Video duration";
+        el.textContent = videoDurationDescriptionForSeconds(seconds, min, max);
       });
       menu.querySelectorAll("[data-video-duration-tick]").forEach((el) => {
-        el.classList.toggle("active", Number.parseInt(el.dataset.videoDurationTick, 10) === index);
+        el.classList.toggle("active", Number.parseInt(el.dataset.videoDurationTick, 10) === seconds);
       });
-      saveProjectFieldQuick("ugc.duration", selected.value, slider);
+      saveProjectFieldQuick("ugc.duration", label, slider);
     };
     slider.addEventListener("input", update);
     slider.addEventListener("change", update);
