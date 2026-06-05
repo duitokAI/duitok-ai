@@ -47064,3 +47064,120 @@ body:has(.studio-shell .video-page-studio),
     min-height: 140px !important;
   }
 }
+
+/* Image composer interaction stability: model/count changes must not resize the dock. */
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) {
+  --image-stable-control-h: 56px;
+  --image-stable-generate-w: clamp(184px, 13vw, 238px);
+  grid-template-columns: minmax(0, 1fr) minmax(226px, 0.46fr) var(--image-stable-generate-w) !important;
+  grid-template-areas:
+    "prompt refs generate"
+    "tools refs generate" !important;
+  align-items: stretch !important;
+  contain: layout paint !important;
+  min-height: 154px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-main,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-enhance-group,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-references {
+  min-width: 0 !important;
+  min-height: 0 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools {
+  grid-template-columns: minmax(220px, 1.55fr) minmax(92px, 0.52fr) minmax(96px, 0.52fr) minmax(112px, 0.62fr) !important;
+  grid-auto-rows: var(--image-stable-control-h) !important;
+  align-items: stretch !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-enhance-group {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 44px !important;
+  gap: 8px !important;
+  height: var(--image-stable-control-h) !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-prompt-enhance,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu summary,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu summary {
+  width: 100% !important;
+  height: var(--image-stable-control-h) !important;
+  min-height: var(--image-stable-control-h) !important;
+  max-height: var(--image-stable-control-h) !important;
+  box-sizing: border-box !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-picker summary {
+  grid-template-columns: 22px minmax(0, 1fr) 14px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-current-text,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-model-current-text b,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-aspect-ratio-menu summary b,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-resolution-menu summary b,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate b,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate small {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper {
+  grid-template-columns: 36px minmax(44px, 1fr) 36px !important;
+  padding: 0 6px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper button {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-count-stepper span {
+  width: 100% !important;
+  justify-content: center !important;
+  padding: 0 !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate {
+  width: var(--image-stable-generate-w) !important;
+  min-width: var(--image-stable-generate-w) !important;
+  max-width: var(--image-stable-generate-w) !important;
+  min-height: 126px !important;
+  height: 100% !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate svg {
+  width: 28px !important;
+  height: 28px !important;
+  flex: 0 0 auto !important;
+}
+
+@media (max-width: 1180px) {
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) {
+    grid-template-columns: minmax(0, 1fr) 150px !important;
+    grid-template-areas:
+      "prompt generate"
+      "tools generate"
+      "refs generate" !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-tools {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact) .image-console-generate {
+    width: 150px !important;
+    min-width: 150px !important;
+    max-width: 150px !important;
+  }
+}

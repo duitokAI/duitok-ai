@@ -7406,7 +7406,7 @@ function resultAspectRatioLabel(item) {
   return wallAspectRatioForItem(item, resultProject(item), "Unknown");
 }
 
-const supportedWallAspectRatios = ["9:16", "3:4", "2:3", "1:1", "4:3", "3:2", "16:9"];
+const supportedWallAspectRatios = ["9:16", "3:4", "2:3", "4:5", "1:1", "5:4", "4:3", "3:2", "16:9", "1:2", "2:1", "9:21", "21:9"];
 
 function normalizeAspectRatio(value, fallback = "9:16") {
   const raw = String(value || "").trim();
@@ -10843,9 +10843,8 @@ function agentGenerationFailedActions(entry = {}) {
 function agentGenerationPendingFrame(entry = {}, options = {}) {
   const { job, jobId, status, mediaType, card } = entry;
   const isFailed = status === "failed";
-  const aspectRatioRaw = String(job?.aspectRatio || card?.aspectRatio || project().image?.aspectRatio || "");
-  const aspectRatio = aspectRatioRaw.includes("16:9") ? "16:9" : aspectRatioRaw.includes("1:1") ? "1:1" : "9:16";
-  const aspectStyle = aspectRatio === "16:9" ? "16 / 9" : aspectRatio === "1:1" ? "1 / 1" : "9 / 16";
+  const aspectRatio = normalizeAspectRatio(job?.aspectRatio || card?.aspectRatio || project().image?.aspectRatio || "9:16");
+  const aspectStyle = aspectRatioToCss(aspectRatio);
   const summary = isFailed
     ? (job?.errorMessage || "生成失败，请调整 prompt 后再试一次。")
     : status === "processing" ? "模型正在生成，完成后会自动出现在这里。" : "任务已加入队列，马上开始生成。";
@@ -11896,7 +11895,7 @@ function updateImageBatchCount(delta) {
   const previousDb = state.db;
   const nextCount = Math.min(4, Math.max(1, imageBatchCount(project()) + delta));
   if (nextCount === imageBatchCount(project())) return;
-  imageConsoleExpandLockUntil = Date.now() + 700;
+  stabilizeImageConsoleExpansion(700);
   state.db = dbWithProjectField(previousDb, projectId, "image.count", nextCount);
   updateImageCountDom(nextCount);
   const seq = ++imageCountSaveSeq;
@@ -12808,7 +12807,7 @@ function markGenerateTriggerSubmitting(trigger) {
 function optimisticGenerationJobs(name, count, options = {}) {
   if (name === "generate-ugc") {
     const current = project();
-    const aspectRatio = current.ugc?.aspectRatio || current.image?.aspectRatio || "16:9";
+    const aspectRatio = options.aspectRatio || current.ugc?.aspectRatio || current.image?.aspectRatio || "16:9";
     const createdAt = new Date().toISOString();
     return Array.from({ length: count }, (_, index) => ({
       id: `optimistic_${Date.now()}_${index}_${Math.random().toString(16).slice(2)}`,
@@ -12830,7 +12829,7 @@ function optimisticGenerationJobs(name, count, options = {}) {
   }
   if (name !== "generate-image") return [];
   const current = project();
-  const aspectRatio = current.image?.aspectRatio || "9:16";
+  const aspectRatio = options.aspectRatio || current.image?.aspectRatio || "9:16";
   const type = /seedance|veo|sora|video|omni/i.test(String(current.image?.model || "")) ? "video" : "image";
   const createdAt = new Date().toISOString();
   return Array.from({ length: count }, (_, index) => ({
@@ -13120,7 +13119,9 @@ function patchStudioGenerationCardsFromDb(nextDb) {
       const job = jobs.get(card.dataset.generationJobId);
       if (!job) return;
       const currentStatus = card.dataset.generationJobStatus || "";
-      if (currentStatus === (job.status || "queued")) return;
+      const currentAspectRatio = card.dataset.aspectRatio || "";
+      const nextAspectRatio = wallAspectRatioForItem(job);
+      if (currentStatus === (job.status || "queued") && currentAspectRatio === nextAspectRatio) return;
       const orderIndex = Number(card.dataset.wallOrder || getComputedStyle(card).order || 0);
       card.outerHTML = studioPendingWallCard(job, Number.isFinite(orderIndex) ? orderIndex : 0);
       patched = true;
