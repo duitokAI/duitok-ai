@@ -48125,3 +48125,49 @@ body:has(.studio-shell .video-prompt-extractor-page),
   background: transparent !important;
   box-shadow: none !important;
 }
+
+/* Clone Prompt dock color parity: this upload bar should read as the same
+   warm Pokaya composer family as Image Page, with coral reserved for action. */
+.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"] > .video-prompt-dock,
+.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"].is-empty:not(.video-page-studio) > .video-prompt-dock {
+  border-color: rgba(111, 28, 132, 0.16) !important;
+  background-color: rgba(255, 249, 240, 0.96) !important;
+  background-image:
+    radial-gradient(circle at 9% 0%, rgba(255, 255, 255, 0.98), transparent 34%),
+    linear-gradient(105deg, rgba(255, 249, 240, 0.99) 0%, rgba(255, 249, 240, 0.95) 43%, rgba(193, 43, 98, 0.16) 75%, rgba(255, 103, 56, 0.3) 100%) !important;
+  box-shadow:
+    0 10px 28px rgba(70, 16, 84, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"] .video-prompt-upload {
+  border-color: rgba(111, 28, 132, 0.12) !important;
+  background: rgba(255, 255, 255, 0.88) !important;
+  color: #2b0634 !important;
+}
+
+.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"] .video-prompt-upload:hover,
+.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"] .video-prompt-dock:focus-within .video-prompt-upload {
+  border-color: rgba(255, 103, 56, 0.38) !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+}
+
+.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"] .video-prompt-upload > span {
+  background: linear-gradient(135deg, #fff8ff 0%, #f2e1ff 100%) !important;
+  color: #c12b62 !important;
+}
+
+.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"] .video-prompt-extract {
+  border: 1px solid rgba(255, 249, 240, 0.28) !important;
+  background: linear-gradient(135deg, #f55374 0%, #f57068 100%) !important;
+  color: #ffffff !important;
+  box-shadow:
+    0 14px 34px rgba(245, 82, 112, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+}
+
+.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"] .video-prompt-extract:disabled {
+  opacity: 0.68 !important;
+  filter: saturate(0.82) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+}
