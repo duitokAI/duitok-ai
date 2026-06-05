@@ -31,6 +31,7 @@ const agentVisionModel = process.env.AGENT_VISION_MODEL || process.env.APIMART_V
 const apimartImageModel = process.env.APIMART_IMAGE_MODEL || "gpt-image-2";
 const apimartSeedream50LiteModel = process.env.APIMART_SEEDREAM_5_LITE_MODEL || "seedream-5.0-lite";
 const apimartSeedream45Model = process.env.APIMART_SEEDREAM_4_5_MODEL || "seedream-4.5";
+const apimartQwenImage20Model = process.env.APIMART_QWEN_IMAGE_2_MODEL || "qwen-image-2.0";
 const apimartGrokImageModel = process.env.APIMART_GROK_IMAGE_MODEL || "grok-imagine-1.0-apimart";
 const apimartGrokVideoModel = process.env.APIMART_GROK_VIDEO_MODEL || "grok-imagine-1.0-video-apimart";
 const apimartWanVideoModel = process.env.APIMART_WAN_VIDEO_MODEL || "wan2.7";
@@ -575,7 +576,7 @@ app.get("/api/admin/diagnostics/seedream-image", async (req, res, next) => {
     requireAdminDiagnosticAccess(req);
     const startedAt = Date.now();
     const requestedModel = internalMediaModel(req.query.model || "Seedream 5.0 Lite");
-    const allowedDiagnosticModels = new Set(["GPT Image 2", "Seedream 5.0 Lite", "Seedream 4.5", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine"]);
+    const allowedDiagnosticModels = new Set(["GPT Image 2", "Seedream 5.0 Lite", "Seedream 4.5", "Qwen Image 2.0", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine"]);
     const model = allowedDiagnosticModels.has(requestedModel) ? requestedModel : "Seedream 5.0 Lite";
     const prompt = sanitizeAgentText(req.query.prompt || "A clean ecommerce product lifestyle photo of a white ceramic coffee mug on a wooden desk, soft daylight, realistic, sharp focus, no text, 1:1 composition.").slice(0, 1200);
     const project = {
@@ -600,7 +601,7 @@ app.get("/api/admin/diagnostics/seedream-image", async (req, res, next) => {
     };
     const timeoutMs = Math.min(5 * 60 * 1000, Math.max(30 * 1000, Number(req.query.timeoutMs || staleImageGenerationMs)));
     const generated = await timeoutPromise(
-      model === "Seedream 5.0 Lite" || model === "Seedream 4.5"
+      model === "Seedream 5.0 Lite" || model === "Seedream 4.5" || model === "Qwen Image 2.0"
         ? generateImageWithApimart(project, tracker)
         : generateImageWithFallbacks(project, model, tracker),
       timeoutMs,
@@ -3751,6 +3752,7 @@ function imageModelFromProject(project) {
     "GPT Image 2": process.env.APIMART_IMAGE_MODEL || "gpt-image-2",
     "Seedream 5.0 Lite": apimartSeedream50LiteModel,
     "Seedream 4.5": apimartSeedream45Model,
+    "Qwen Image 2.0": apimartQwenImage20Model,
     "Nano Banana Pro": process.env.APIMART_NANO_BANANA_PRO_MODEL || "gemini-3-pro-image-preview",
     "Nano Banana 2": process.env.APIMART_NANO_BANANA_2_MODEL || "gemini-3.1-flash-image-preview",
     "Grok Imagine": apimartGrokImageModel
@@ -3935,6 +3937,10 @@ function imageCapabilitiesForModel(model = "GPT Image 2") {
     "Seedream 4.5": {
       aspectRatios: [...commonRatios, "9:21", "21:9"],
       resolutions: ["2K", "4K"]
+    },
+    "Qwen Image 2.0": {
+      aspectRatios: commonRatios,
+      resolutions: ["1K", "2K"]
     },
     "Nano Banana Pro": {
       aspectRatios: [...commonRatios, "4:5", "5:4", "21:9"],
