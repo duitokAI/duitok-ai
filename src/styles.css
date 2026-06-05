@@ -49383,7 +49383,7 @@ body:has(.studio-shell .image-higgsfield-mode.has-results),
 
 .studio-shell .image-higgsfield-mode.has-results {
   display: grid !important;
-  grid-template-rows: 24px auto auto !important;
+  grid-template-rows: 36px auto auto !important;
   align-content: start !important;
 }
 
@@ -49486,17 +49486,16 @@ body:has(.studio-shell .image-higgsfield-mode.has-results),
 
 .studio-shell .image-higgsfield-mode > .studio-wall-zoom-control {
   position: sticky !important;
-  top: 5px !important;
+  top: 10px !important;
   right: auto !important;
   grid-row: 1 !important;
   justify-self: end !important;
-  align-self: start !important;
-  width: clamp(170px, 14vw, 260px) !important;
+  align-self: center !important;
   height: 14px !important;
   min-height: 14px !important;
   max-height: 14px !important;
   overflow: visible !important;
-  margin: 0 clamp(22px, 2.4vw, 44px) 0 0 !important;
+  margin: 0 clamp(18px, 2.2vw, 42px) 0 0 !important;
   z-index: 80 !important;
 }
 
@@ -49730,278 +49729,6 @@ body:has(.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"]),
     grid-template-rows: minmax(calc(100dvh - var(--project-fixed-tabs-height, 72px) - 12px), auto) auto !important;
   }
 }
-
-/* Image page composer final flow lock: the Image result wall owns the scroll.
-   The prompt bar must remain after the wall in document flow, never docked to
-   the viewport bottom by an empty-state grid row or later composer override. */
-html:has(.studio-shell .image-higgsfield-mode),
-body:has(.studio-shell .image-higgsfield-mode),
-#app:has(.studio-shell .image-higgsfield-mode),
-.studio-shell:has(.image-higgsfield-mode),
-.studio-shell:has(.image-higgsfield-mode) .workspace,
-.studio-shell:has(.step-tabs):has(.image-higgsfield-mode) .workspace,
-.studio-shell .workspace:has(.image-higgsfield-mode),
-.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode),
-.studio-shell .canvas-card:has(.image-higgsfield-mode),
-.studio-shell .studio-workbench-card:has(.image-higgsfield-mode),
-.studio-shell .studio-step-panel:has(.image-higgsfield-mode),
-.studio-shell .image-canvas-studio.image-higgsfield-mode,
-.studio-shell .image-higgsfield-mode {
-  height: auto !important;
-  min-height: 100dvh !important;
-  max-height: none !important;
-  overflow-x: clip !important;
-  overflow-y: visible !important;
-}
-
-.studio-shell .image-canvas-studio.image-higgsfield-mode,
-.studio-shell .image-higgsfield-mode {
-  display: block !important;
-  grid-template-rows: none !important;
-  align-content: start !important;
-}
-
-.studio-shell .image-higgsfield-mode > .studio-result-wall,
-.studio-shell .image-higgsfield-mode.has-results > .studio-result-wall {
-  display: block !important;
-  height: auto !important;
-  min-height: 0 !important;
-  max-height: none !important;
-  overflow: visible !important;
-}
-
-.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid,
-.studio-shell .image-higgsfield-mode.has-results > .studio-result-wall > .studio-wall-grid {
-  height: auto !important;
-  min-height: 0 !important;
-  max-height: none !important;
-  overflow: visible !important;
-  align-content: start !important;
-}
-
-.studio-shell .image-higgsfield-mode > .image-generate-console,
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact),
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).is-hover-expanded,
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-open-menu,
-.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt,
-.studio-shell .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console,
-.studio-shell .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console:not(.is-compact) {
-  position: relative !important;
-  inset: auto !important;
-  left: auto !important;
-  right: auto !important;
-  top: auto !important;
-  bottom: auto !important;
-  grid-row: auto !important;
-  transform: none !important;
-  z-index: 12 !important;
-  margin: 10px clamp(16px, 2vw, 28px) max(24px, env(safe-area-inset-bottom)) !important;
-}
-
-.studio-shell .image-higgsfield-mode > .studio-wall-zoom-control {
-  position: absolute !important;
-  top: 10px !important;
-  right: 12px !important;
-  grid-row: auto !important;
-  justify-self: auto !important;
-  align-self: auto !important;
-  height: 0 !important;
-  min-height: 0 !important;
-  max-height: 0 !important;
-  overflow: visible !important;
-  margin: 0 !important;
-  z-index: 80 !important;
-}
-
-/* Image zoom thin-rail final lock: keep the preview-size slider as a very thin
-   row like Video Page, after the composer-flow restore above. */
-.studio-shell .image-canvas-studio.image-higgsfield-mode.has-results,
-.studio-shell .image-higgsfield-mode.has-results {
-  display: grid !important;
-  grid-template-rows: 12px auto auto !important;
-  align-content: start !important;
-}
-
-.studio-shell .image-higgsfield-mode.has-results > .studio-wall-zoom-control {
-  position: relative !important;
-  top: -1px !important;
-  right: auto !important;
-  grid-row: 1 !important;
-  justify-self: end !important;
-  align-self: start !important;
-  width: clamp(170px, 14vw, 260px) !important;
-  height: 12px !important;
-  min-height: 12px !important;
-  max-height: 12px !important;
-  margin: 0 clamp(22px, 2.4vw, 44px) 0 0 !important;
-  overflow: visible !important;
-}
-
-.studio-shell .image-higgsfield-mode.has-results > .studio-result-wall {
-  grid-row: 2 !important;
-}
-
-.studio-shell .image-higgsfield-mode.has-results > .image-generate-console,
-.studio-shell .image-canvas-studio.image-higgsfield-mode.has-results.studio-wall-zoomable > section.image-generate-console {
-  grid-row: 3 !important;
-}
-
-/* Creation workspace top alignment lock: Image, Video, Audio, and Clone must
-   share one top rail strategy. Keep the tab rail fixed at the viewport top,
-   reserve its height exactly once in the workspace, and paint the sidebar as a
-   full-height rail so no plum background break appears while switching tools. */
-.studio-shell:has(.image-higgsfield-mode),
-.studio-shell:has(.video-page-studio),
-.studio-shell:has(.audio-studio-page),
-.studio-shell:has(.video-prompt-extractor-page[data-studio-mode="clone"]) {
-  --project-fixed-tabs-height: 72px;
-}
-
-.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode),
-.studio-shell .workspace:has(.step-tabs):has(.video-page-studio),
-.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page),
-.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page[data-studio-mode="clone"]) {
-  padding: var(--project-fixed-tabs-height, 72px) 0 56px !important;
-  margin: 0 !important;
-  transform: none !important;
-  min-height: 100dvh !important;
-  overflow-x: clip !important;
-}
-
-.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .project-step-topbar,
-.studio-shell .workspace:has(.step-tabs):has(.video-page-studio) .project-step-topbar,
-.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .project-step-topbar,
-.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page[data-studio-mode="clone"]) .project-step-topbar {
-  position: fixed !important;
-  top: 0 !important;
-  left: var(--studio-sidebar-width, 304px) !important;
-  right: 0 !important;
-  z-index: 7200 !important;
-  width: auto !important;
-  max-width: none !important;
-  height: var(--project-fixed-tabs-height, 72px) !important;
-  min-height: var(--project-fixed-tabs-height, 72px) !important;
-  max-height: var(--project-fixed-tabs-height, 72px) !important;
-  margin: 0 !important;
-  padding: 7px 18px 7px 26px !important;
-  box-sizing: border-box !important;
-  transform: none !important;
-}
-
-.studio-shell.sidebar-collapsed .workspace:has(.step-tabs):has(.image-higgsfield-mode) .project-step-topbar,
-.studio-shell.sidebar-collapsed .workspace:has(.step-tabs):has(.video-page-studio) .project-step-topbar,
-.studio-shell.sidebar-collapsed .workspace:has(.step-tabs):has(.audio-studio-page) .project-step-topbar,
-.studio-shell.sidebar-collapsed .workspace:has(.step-tabs):has(.video-prompt-extractor-page[data-studio-mode="clone"]) .project-step-topbar {
-  left: var(--studio-sidebar-width, 76px) !important;
-}
-
-.studio-shell:has(.image-higgsfield-mode) .sidebar,
-.studio-shell:has(.video-page-studio) .sidebar,
-.studio-shell:has(.audio-studio-page) .sidebar,
-.studio-shell:has(.video-prompt-extractor-page[data-studio-mode="clone"]) .sidebar {
-  position: sticky !important;
-  top: 0 !important;
-  z-index: 7201 !important;
-  height: 100vh !important;
-  height: 100dvh !important;
-  min-height: 100vh !important;
-  min-height: 100dvh !important;
-  max-height: 100dvh !important;
-  min-block-size: 100dvh !important;
-  isolation: isolate !important;
-  overflow: hidden !important;
-  background:
-    linear-gradient(180deg, #210024 0%, #32103a 42%, #8b1a78 78%, #c12b62 118%) !important;
-}
-
-.studio-shell:has(.image-higgsfield-mode) .sidebar::before,
-.studio-shell:has(.video-page-studio) .sidebar::before,
-.studio-shell:has(.audio-studio-page) .sidebar::before,
-.studio-shell:has(.video-prompt-extractor-page[data-studio-mode="clone"]) .sidebar::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 0;
-  width: var(--studio-sidebar-width, 304px);
-  pointer-events: none;
-  background:
-    linear-gradient(180deg, #210024 0%, #32103a 42%, #8b1a78 78%, #c12b62 118%);
-  box-shadow: 16px 0 48px rgba(28, 6, 33, 0.16);
-}
-
-.studio-shell.sidebar-collapsed:has(.image-higgsfield-mode) .sidebar::before,
-.studio-shell.sidebar-collapsed:has(.video-page-studio) .sidebar::before,
-.studio-shell.sidebar-collapsed:has(.audio-studio-page) .sidebar::before,
-.studio-shell.sidebar-collapsed:has(.video-prompt-extractor-page[data-studio-mode="clone"]) .sidebar::before {
-  width: var(--studio-sidebar-width, 76px);
-}
-
-.studio-shell:has(.image-higgsfield-mode) .sidebar > *,
-.studio-shell:has(.video-page-studio) .sidebar > *,
-.studio-shell:has(.audio-studio-page) .sidebar > *,
-.studio-shell:has(.video-prompt-extractor-page[data-studio-mode="clone"]) .sidebar > * {
-  position: relative;
-  z-index: 1;
-}
-
-/* Creation sidebar continuous rail lock: the sidebar scroll area used to end
-   around the Business/SOP group and reveal a darker shell layer underneath.
-   Keep every sidebar child on one transparent layer over a full-height rail. */
-.studio-shell:has(.image-higgsfield-mode) .sidebar,
-.studio-shell:has(.video-page-studio) .sidebar,
-.studio-shell:has(.audio-studio-page) .sidebar,
-.studio-shell:has(.video-prompt-extractor-page[data-studio-mode="clone"]) .sidebar {
-  display: flex !important;
-  flex-direction: column !important;
-  padding-bottom: 0 !important;
-  background:
-    radial-gradient(circle at 18% 2%, rgba(255, 103, 56, 0.18), transparent 32%),
-    radial-gradient(circle at 82% 22%, rgba(193, 43, 98, 0.22), transparent 34%),
-    linear-gradient(180deg, #8b1a78 0%, #6f145f 24%, #32103a 58%, #210024 100%) !important;
-  background-color: #210024 !important;
-}
-
-.studio-shell:has(.image-higgsfield-mode) .sidebar::before,
-.studio-shell:has(.video-page-studio) .sidebar::before,
-.studio-shell:has(.audio-studio-page) .sidebar::before,
-.studio-shell:has(.video-prompt-extractor-page[data-studio-mode="clone"]) .sidebar::before {
-  background:
-    radial-gradient(circle at 18% 2%, rgba(255, 103, 56, 0.18), transparent 32%),
-    radial-gradient(circle at 82% 22%, rgba(193, 43, 98, 0.22), transparent 34%),
-    linear-gradient(180deg, #8b1a78 0%, #6f145f 24%, #32103a 58%, #210024 100%) !important;
-}
-
-.studio-shell:has(.image-higgsfield-mode) .sidebar-topbar,
-.studio-shell:has(.video-page-studio) .sidebar-topbar,
-.studio-shell:has(.audio-studio-page) .sidebar-topbar,
-.studio-shell:has(.video-prompt-extractor-page[data-studio-mode="clone"]) .sidebar-topbar,
-.studio-shell:has(.image-higgsfield-mode) .sidebar-language,
-.studio-shell:has(.video-page-studio) .sidebar-language,
-.studio-shell:has(.audio-studio-page) .sidebar-language,
-.studio-shell:has(.video-prompt-extractor-page[data-studio-mode="clone"]) .sidebar-language,
-.studio-shell:has(.image-higgsfield-mode) .sidebar-scroll-area,
-.studio-shell:has(.video-page-studio) .sidebar-scroll-area,
-.studio-shell:has(.audio-studio-page) .sidebar-scroll-area,
-.studio-shell:has(.video-prompt-extractor-page[data-studio-mode="clone"]) .sidebar-scroll-area {
-  background: transparent !important;
-  background-image: none !important;
-  box-shadow: none !important;
-}
-
-.studio-shell:has(.image-higgsfield-mode) .sidebar-scroll-area,
-.studio-shell:has(.video-page-studio) .sidebar-scroll-area,
-.studio-shell:has(.audio-studio-page) .sidebar-scroll-area,
-.studio-shell:has(.video-prompt-extractor-page[data-studio-mode="clone"]) .sidebar-scroll-area {
-  flex: 1 1 auto !important;
-  min-height: 0 !important;
-  height: auto !important;
-  max-height: none !important;
-  overflow-y: auto !important;
-  padding-bottom: 28px !important;
-}
-
 /* Top creation tabs: hover must not scale or shift the four main buttons. */
 .studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button,
 .studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button:hover,
