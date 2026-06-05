@@ -71,6 +71,7 @@ const crunBaseUrl = (process.env.CRUN_BASE_URL || "https://api.crun.ai").replace
 const crunCreateTaskPath = process.env.CRUN_CREATE_TASK_PATH || "/api/v1/client/job/CreateTask";
 const crunTaskInfoPath = process.env.CRUN_TASK_INFO_PATH || "/api/v1/client/job/TaskInfo";
 const crunVeo31Model = process.env.CRUN_VEO_3_1_MODEL || "google/veo3-1-fast-t2v";
+const crunSeedream50Model = process.env.CRUN_SEEDREAM_5_MODEL || "bytedance/seedream-5";
 const grsaiBaseUrl = (process.env.GRSAI_BASE_URL || "https://grsaiapi.com").replace(/\/$/, "");
 const grsaiChatPath = process.env.GRSAI_CHAT_PATH || "/v1/chat/completions";
 const grsaiDrawPath = process.env.GRSAI_DRAW_PATH || "/v1/draw/nano-banana";
@@ -2507,7 +2508,8 @@ function providerForMediaModel(model) {
   model = internalMediaModel(model);
   if (model === "GPT Image 2") return process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Nano Banana Pro" || model === "Nano Banana 2") return process.env.GRSAI_API_KEY ? "grsai" : process.env.APIMART_API_KEY ? "apimart" : "mock";
-  if (model === "Seedream 5.0 Lite" || model === "Seedream 4.5") return process.env.APIMART_API_KEY ? "apimart" : "mock";
+  if (model === "Seedream 5.0 Lite") return process.env.CRUN_API_KEY ? "crun" : process.env.APIMART_API_KEY ? "apimart" : "mock";
+  if (model === "Seedream 4.5") return process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Grok Imagine") return process.env.APIMART_API_KEY ? "apimart" : process.env.WUYIN_API_KEY ? "wuyin" : "mock";
   if (model === "Seedance 2.0" || model === "Grok Imagine Video" || model === "Wan 2.7" || model === "Kling V3 Omni" || model === "Kling V3 Motion Control" || model === "MiniMax Hailuo 2.3") return process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Veo 3.1") return process.env.CRUN_API_KEY ? "crun" : "mock";
@@ -2546,6 +2548,7 @@ function imageProviderCostFor(project, model, provider) {
     }
     if (model === "Grok Imagine") return { costRm: Math.round((0.015 / usdPerRm) * 1000) / 1000, costUsd: 0.015, unit: `${resolution} image` };
   }
+  if (provider === "crun" && model === "Seedream 5.0 Lite") return { costRm: Math.round((0.028 / usdPerRm) * 1000) / 1000, costUsd: 0.028, unit: `${resolution} image` };
   if (provider === "wuyin" && model === "Grok Imagine") return { costRm: rmFromRmb(0.1), costRmb: 0.1, unit: `${resolution} image` };
   return null;
 }
@@ -3770,6 +3773,7 @@ function imageProviderModelFromProject(project, provider = providerForMediaModel
   if (provider === "grsai") return grsaiImageModelFromProject(project);
   if (provider === "apimart") return imageModelFromProject(project);
   if (provider === "wuyin") return internalMediaModel(project?.image?.model) || "";
+  if (provider === "crun" && internalMediaModel(project?.image?.model) === "Seedream 5.0 Lite") return crunSeedream50Model;
   if (provider === "crun") return crunVeo31Model;
   return internalMediaModel(project?.image?.model) || "";
 }
@@ -4055,6 +4059,22 @@ function crunVeo31Body(project, prompt) {
   };
 }
 
+function crunSeedream5Body(project, prompt) {
+  const aspectRatio = imageAspectRatioFromProject(project);
+  const resolution = imageResolutionFromProject(project);
+  return {
+    model: crunSeedream50Model,
+    input: {
+      prompt,
+      aspect_ratio: aspectRatio,
+      resolution,
+      num_outputs: 1,
+      enhance_prompt: process.env.CRUN_SEEDREAM_5_ENHANCE_PROMPT === "true",
+      output_format: process.env.CRUN_SEEDREAM_5_OUTPUT_FORMAT || "jpeg"
+    }
+  };
+}
+
 function apimartSeedanceBody(project, prompt) {
   const resolution = String(process.env.APIMART_SEEDANCE_RESOLUTION || project.image?.resolution || "1080p").trim().toLowerCase();
   const size = imageAspectRatioFromProject(project);
@@ -4294,6 +4314,33 @@ async function generateImageWithWuyin(project, tracker = null) {
   };
 }
 
+async function generateImageWithCrunSeedream5(project, tracker = null) {
+  const prompt = [
+    project.image?.prompt || "Create a high-converting TikTok Shop product image.",
+    `Mode: ${project.image?.mode || "Create Image"}.`,
+    "Style: realistic commercial product scene, clear product focus, vertical-social friendly, no fake brand claims."
+  ].join("\n");
+  const data = await crunRequest(crunCreateTaskPath, {
+    method: "POST",
+    body: crunSeedream5Body(project, prompt)
+  });
+  const taskId = data.task_id || data.taskId || data.id || data.data?.task_id;
+  if (!taskId) return { text: JSON.stringify(data, null, 2), urls: extractImageUrls(data) };
+  await tracker?.({ providerTaskId: taskId, taskId, providerStatus: "submitted", lastPolledAt: new Date().toISOString(), pollCount: 0 });
+  const taskData = await pollCrunTask(taskId, tracker);
+  const urls = extractImageUrls(taskData);
+  if (!urls.length) {
+    const error = new Error("Image generation completed, but no image file was returned. Please try again.");
+    error.status = 502;
+    throw error;
+  }
+  return {
+    text: urls.length ? `Image generated with Pokaya AI.\n\nTask ID: ${taskId}` : `Image task completed with Pokaya AI.\n\nTask ID: ${taskId}`,
+    urls,
+    taskId
+  };
+}
+
 async function generateVideoWithCrunVeo31(project, tracker = null) {
   const prompt = [
     project.image?.prompt || "Create a high-converting TikTok Shop product video.",
@@ -4351,7 +4398,8 @@ function imageProviderOrderForModel(model) {
   if (model === "GPT Image 2") return ["apimart"];
   if (model === "Nano Banana Pro" || model === "Nano Banana 2") return ["grsai", "apimart"];
   if (model === "Grok Imagine") return ["apimart", "wuyin"];
-  if (model === "Seedream 5.0 Lite" || model === "Seedream 4.5") return ["apimart"];
+  if (model === "Seedream 5.0 Lite") return ["crun", "apimart"];
+  if (model === "Seedream 4.5") return ["apimart"];
   return [providerForMediaModel(model)];
 }
 
@@ -4374,6 +4422,10 @@ async function generateImageThroughProvider(provider, model, project, tracker = 
   if (provider === "apimart") {
     const image = await generateImageWithApimart(project, tracker);
     return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "apimart", resolvedProvider: "apimart", providerModel };
+  }
+  if (provider === "crun" && model === "Seedream 5.0 Lite") {
+    const image = await generateImageWithCrunSeedream5(project, tracker);
+    return { title: model, body: image.text, imageUrl: image.urls[0], taskId: image.taskId, provider: "crun", resolvedProvider: "crun", providerModel };
   }
   return null;
 }

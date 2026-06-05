@@ -169,6 +169,12 @@ services:
         value: /api/v1/client/job/CreateTask
       - key: CRUN_TASK_INFO_PATH
         value: /api/v1/client/job/TaskInfo
+      - key: CRUN_SEEDREAM_5_MODEL
+        value: bytedance/seedream-5
+      - key: CRUN_SEEDREAM_5_ENHANCE_PROMPT
+        value: "false"
+      - key: CRUN_SEEDREAM_5_OUTPUT_FORMAT
+        value: jpeg
       - key: CRUN_VEO_3_1_MODEL
         value: google/veo3-1-fast-t2v
       - key: CRUN_VEO_3_1_ASPECT_RATIO
