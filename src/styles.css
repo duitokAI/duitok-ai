@@ -47461,6 +47461,26 @@ html.is-generation-submitting .studio-shell .video-generate-console {
   will-change: auto !important;
 }
 
+/* Image generation menu stability: opening the model menu while jobs are
+   rendering must not resize the composer or ask the media wall to relayout. */
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-generating.has-open-menu,
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-generating.has-open-menu.is-hover-expanded,
+.studio-shell .image-higgsfield-mode > .image-generate-console.is-generating.has-open-menu:not(.is-compact) {
+  animation: none !important;
+  transition: none !important;
+  transform: translateZ(0) !important;
+  will-change: auto !important;
+}
+
+.studio-shell .image-higgsfield-mode:has(.image-generate-console.is-generating.has-open-menu) .studio-result-wall,
+.studio-shell .image-higgsfield-mode:has(.image-generate-console.is-generating.has-open-menu) .studio-wall-grid,
+.studio-shell .image-higgsfield-mode:has(.image-generate-console.is-generating.has-open-menu) .studio-wall-card,
+.studio-shell .image-higgsfield-mode:has(.image-generate-console.is-generating.has-open-menu) .studio-wall-pending {
+  animation: none !important;
+  transition: none !important;
+  overflow-anchor: none !important;
+}
+
 /* Image composer shell: keep the outer frame neutral; coral stays reserved for
    the Generate action, not the full dock outline. */
 .studio-shell .image-higgsfield-mode > .image-generate-console,
