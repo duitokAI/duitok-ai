@@ -49400,6 +49400,26 @@ h3,
   background-image: none !important;
 }
 
+/* Top creation tabs interaction lock: hover should not move, scale, or animate
+   the tabs. Keep the click target stable and use color/border only. */
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button,
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button:hover,
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button:active,
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button:focus,
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button:focus-visible,
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button.active,
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button,
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio) .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button,
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button {
+  transform: none !important;
+  animation: none !important;
+  transition-property: background-color, border-color, color, box-shadow, opacity !important;
+  transition-duration: 80ms !important;
+  transition-timing-function: ease !important;
+  will-change: auto !important;
+}
+
 .studio-shell .image-higgsfield-mode > .studio-wall-zoom-control {
   position: sticky !important;
   top: 10px !important;
