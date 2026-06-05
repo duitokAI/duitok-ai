@@ -47502,8 +47502,10 @@ html.is-generation-submitting .studio-shell .video-generate-console {
 .studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait .generation-credit-refund-note {
   width: max-content !important;
   min-width: max-content !important;
-  max-width: min(100%, 190px) !important;
-  padding-inline: clamp(16px, 5.2cqw, 22px) !important;
+  max-width: min(100%, 172px) !important;
+  min-height: 30px !important;
+  height: 30px !important;
+  padding-inline: clamp(15px, 5cqw, 20px) !important;
   overflow: visible !important;
   text-overflow: clip !important;
 }
@@ -47515,7 +47517,7 @@ html.is-generation-submitting .studio-shell .video-generate-console {
   width: auto !important;
   max-width: none !important;
   overflow: visible !important;
-  font-size: clamp(17px, 6.6cqw, 24px) !important;
+  font-size: clamp(14px, 5.1cqw, 18px) !important;
   line-height: 1 !important;
   text-overflow: clip !important;
   white-space: nowrap !important;
