@@ -600,8 +600,9 @@ app.get("/api/admin/diagnostics/seedream-image", async (req, res, next) => {
       });
     };
     const timeoutMs = Math.min(5 * 60 * 1000, Math.max(30 * 1000, Number(req.query.timeoutMs || staleImageGenerationMs)));
+    const usesDirectApimartDiagnostic = model === "Seedream 5.0 Lite" || model === "Seedream 4.5" || model === "Qwen Image 2.0";
     const generated = await timeoutPromise(
-      model === "Seedream 5.0 Lite" || model === "Seedream 4.5" || model === "Qwen Image 2.0"
+      usesDirectApimartDiagnostic
         ? generateImageWithApimart(project, tracker)
         : generateImageWithFallbacks(project, model, tracker),
       timeoutMs,
@@ -615,7 +616,7 @@ app.get("/api/admin/diagnostics/seedream-image", async (req, res, next) => {
     res.json({
       ok: Boolean(generatedUrls[0]),
       configured: true,
-      provider: generated.provider || providerForMediaModel(model),
+      provider: generated.provider || (usesDirectApimartDiagnostic ? "apimart" : providerForMediaModel(model)),
       model,
       providerModel: imageModelFromProject(project),
       aspectRatio: project.image.aspectRatio,
