@@ -542,8 +542,13 @@ app.get("/api/admin/diagnostics/seedream-image", async (req, res, next) => {
       timeoutMs,
       `${model} diagnostic request timed out after ${formatGenerationDuration(timeoutMs)}.`
     );
+    const generatedUrls = generated.urls?.length
+      ? generated.urls
+      : generated.imageUrl
+        ? [generated.imageUrl]
+        : [];
     res.json({
-      ok: Boolean(generated.urls?.[0]),
+      ok: Boolean(generatedUrls[0]),
       configured: true,
       provider: generated.provider || providerForMediaModel(model),
       model,
@@ -552,8 +557,8 @@ app.get("/api/admin/diagnostics/seedream-image", async (req, res, next) => {
       resolution: imageResolutionFromProject(project),
       taskId: generated.taskId || "",
       durationMs: Date.now() - startedAt,
-      urlCount: generated.urls?.length || 0,
-      firstUrl: generated.urls?.[0] || "",
+      urlCount: generatedUrls.length,
+      firstUrl: generatedUrls[0] || "",
       providerFallbacks: generated.providerFallbacks || [],
       events
     });
