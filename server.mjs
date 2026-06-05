@@ -1254,6 +1254,11 @@ function naturalAgentChatTitleFromMessages(messages = []) {
   return raw.split(/\s+/).filter(Boolean).slice(0, 6).map((word) => /^(ai|ui|ux|api|ugc|prd)$/i.test(word) ? word.toUpperCase() : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(" ").slice(0, 80) || "Agent Chat";
 }
 
+function isAutoAgentChatTitle(value = "") {
+  const title = sanitizeAgentText(value || "").trim();
+  return !title || /^agent\s+chat$/i.test(title) || /^untitled\s+chat$/i.test(title);
+}
+
 function buildAgentMetrics(db, user) {
   const events = (db.agentFeedbackEvents || []).filter((item) => item.userId === user.id);
   const runs = (db.agentRuns || []).filter((item) => item.userId === user.id);
@@ -7409,7 +7414,7 @@ app.post("/api/agent-chats/:id/title", async (req, res, next) => {
         error.status = 404;
         throw error;
       }
-      if (!chat.manualTitle) {
+      if (!chat.manualTitle && isAutoAgentChatTitle(chat.title)) {
         chat.title = naturalAgentChatTitleFromMessages(chat.messages || []);
         chat.updatedAt = new Date().toISOString();
       }

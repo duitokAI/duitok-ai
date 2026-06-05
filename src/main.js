@@ -12420,7 +12420,7 @@ async function persistAgentChatSession(session = {}) {
     if (payload?.state) state.db = payload.state;
     if (payload?.chat) {
       mergeAgentHistorySessionInPlace(payload.chat);
-      if (!session.manualTitle) requestAgentChatTitle(payload.chat.id);
+      if (!session.manualTitle && isAutoAgentHistoryTitle(payload.chat.title)) requestAgentChatTitle(payload.chat.id);
     }
   } catch (error) {
     console.warn("Agent chat sync failed", error);
@@ -12482,6 +12482,11 @@ function naturalAgentHistoryTitle(value = "") {
 
 function normalizeAgentHistoryTitle(value = "") {
   return naturalAgentHistoryTitle(value);
+}
+
+function isAutoAgentHistoryTitle(value = "") {
+  const title = String(value || "").trim();
+  return !title || /^agent\s+chat$/i.test(title) || /^untitled\s+chat$/i.test(title);
 }
 
 function markAgentHistorySelection(id = "") {
