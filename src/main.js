@@ -5679,6 +5679,11 @@ function imagePanel(p) {
   const bulkSelecting = isBulkSelectingResults();
   return `<section class="image-canvas-studio image-higgsfield-mode studio-wall-surface-base studio-media-wall-surface studio-wall-zoomable ${bulkSelecting ? "is-bulk-selecting-results" : ""}" ${studioWallZoomStyleAttr()}>
     ${selectedMode === "Virtualize (Poster/Ad)" ? `<div class="image-studio-legacy">${virtualizePanel()}</div>` : `
+      <div class="image-studio-grid-bg" aria-hidden="true"></div>
+      <div class="image-studio-hero-copy" aria-hidden="true">
+        <span>IMAGE STUDIO</span>
+        <b>IMAGINE IT</b>
+      </div>
       ${studioWallZoomControl()}
       ${studioResultWall(p, meta)}
       ${bulkSelecting ? "" : imageGenerateConsole(p, selectedModel)}

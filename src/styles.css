@@ -895,6 +895,81 @@ body,
   margin-inline: 0;
 }
 
+.image-studio-grid-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(255, 249, 240, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 249, 240, 0.055) 1px, transparent 1px),
+    radial-gradient(circle at 42% 12%, rgba(255, 49, 95, 0.44) 0%, rgba(193, 43, 98, 0.3) 26%, rgba(33, 0, 36, 0) 58%),
+    radial-gradient(circle at 58% 54%, rgba(139, 26, 120, 0.32) 0%, rgba(33, 0, 36, 0) 50%),
+    linear-gradient(118deg, rgba(33, 0, 36, 0.98) 0%, rgba(70, 10, 54, 0.96) 34%, rgba(139, 26, 120, 0.82) 58%, rgba(193, 43, 98, 0.54) 78%, rgba(13, 5, 18, 0.98) 100%);
+  background-size:
+    clamp(44px, 4.7vw, 72px) clamp(44px, 4.7vw, 72px),
+    clamp(44px, 4.7vw, 72px) clamp(44px, 4.7vw, 72px),
+    auto,
+    auto,
+    auto;
+  opacity: 0.98;
+}
+
+.image-studio-grid-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(33, 0, 36, 0.62), transparent 24%, transparent 72%, rgba(12, 4, 18, 0.78)),
+    linear-gradient(180deg, rgba(33, 0, 36, 0.18), transparent 34%, rgba(33, 0, 36, 0.38));
+}
+
+.image-studio-hero-copy {
+  position: absolute;
+  top: clamp(86px, 13vh, 156px);
+  left: 50%;
+  z-index: 1;
+  width: min(820px, calc(100% - 48px));
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+  pointer-events: none;
+  transform: translateX(-50%);
+  text-align: center;
+  color: rgba(255, 249, 240, 0.96);
+}
+
+.image-studio-hero-copy span {
+  color: rgba(255, 249, 240, 0.5);
+  font-size: clamp(13px, 1.28vw, 22px);
+  font-weight: 950;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.image-studio-hero-copy b {
+  max-width: 760px;
+  font-size: clamp(42px, 5.2vw, 82px);
+  font-weight: 950;
+  line-height: 1.04;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  text-shadow: 0 22px 58px rgba(33, 0, 36, 0.34);
+}
+
+.image-higgsfield-mode > .studio-result-wall,
+.image-higgsfield-mode > .image-generate-console,
+.image-higgsfield-mode > .studio-wall-zoom-control,
+.image-higgsfield-mode > .image-studio-legacy {
+  position: relative;
+  z-index: 2;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
 .studio-higgsfield-tabs {
   position: relative;
   z-index: 3;
