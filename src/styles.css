@@ -47560,3 +47560,98 @@ body:has(.studio-shell .video-page-studio),
     min-height: 140px !important;
   }
 }
+
+/* Video empty canvas: match Image Page's full-height studio dock, keeping only
+   a light cinematic hint behind the prompt. */
+html:has(.studio-shell .video-page-studio.is-empty),
+body:has(.studio-shell .video-page-studio.is-empty),
+#app:has(.studio-shell .video-page-studio.is-empty),
+.studio-shell:has(.video-page-studio.is-empty),
+.studio-shell:has(.video-page-studio.is-empty) .workspace,
+.studio-shell .workspace:has(.video-page-studio.is-empty),
+.studio-shell .canvas-card:has(.video-page-studio.is-empty),
+.studio-shell .studio-workbench-card:has(.video-page-studio.is-empty),
+.studio-shell .studio-step-panel:has(.video-page-studio.is-empty),
+.studio-shell .video-page-studio.is-empty {
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  max-height: 100dvh !important;
+  overflow: hidden !important;
+  background:
+    radial-gradient(circle at 86% 8%, rgba(255, 103, 56, 0.18), transparent 32%),
+    linear-gradient(180deg, #210024 0%, #27052e 46%, #210024 100%) !important;
+  background-color: var(--studio-wall-bg, #210024) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio.is-empty) {
+  padding: var(--project-fixed-tabs-height) 0 0 !important;
+}
+
+.studio-shell .video-page-studio.is-empty {
+  min-height: calc(100dvh - var(--project-fixed-tabs-height, 58px)) !important;
+  height: calc(100dvh - var(--project-fixed-tabs-height, 58px)) !important;
+  max-height: calc(100dvh - var(--project-fixed-tabs-height, 58px)) !important;
+  grid-template-rows: minmax(0, 1fr) auto !important;
+  align-content: stretch !important;
+  gap: 0 !important;
+  padding: 0 !important;
+}
+
+.studio-shell .video-page-studio.is-empty > .studio-wall-zoom-control {
+  display: none !important;
+}
+
+.studio-shell .video-page-studio.is-empty > .video-empty-cinema {
+  grid-row: 1 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  align-self: stretch !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: clamp(48px, 8vh, 92px) clamp(22px, 6vw, 84px) clamp(24px, 4vh, 44px) !important;
+  background:
+    linear-gradient(rgba(255, 249, 240, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 249, 240, 0.055) 1px, transparent 1px),
+    radial-gradient(circle at 54% 38%, rgba(255, 103, 56, 0.13), transparent 36%),
+    radial-gradient(circle at 40% 22%, rgba(139, 26, 120, 0.16), transparent 34%) !important;
+  background-size: 74px 74px, 74px 74px, auto, auto !important;
+}
+
+.studio-shell .video-page-studio.is-empty > .video-empty-cinema::before,
+.studio-shell .video-page-studio.is-empty > .video-empty-cinema::after {
+  opacity: 0 !important;
+}
+
+.studio-shell .video-page-studio.is-empty .video-empty-cinema-frame {
+  width: min(760px, 74vw) !important;
+  min-height: 120px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-color: rgba(255, 249, 240, 0.2) !important;
+  background: transparent !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 249, 240, 0.08),
+    0 0 0 1px rgba(255, 103, 56, 0.08) !important;
+}
+
+.studio-shell .video-page-studio.is-empty .video-empty-cinema-frame span {
+  display: none !important;
+}
+
+.studio-shell .video-page-studio.is-empty .video-empty-cinema-frame h2 {
+  color: rgba(255, 249, 240, 0.86) !important;
+  font-size: clamp(24px, 2.6vw, 38px) !important;
+  line-height: 1.18 !important;
+  text-transform: uppercase !important;
+  text-shadow: 0 0 28px rgba(255, 103, 56, 0.14) !important;
+}
+
+.studio-shell .video-page-studio.is-empty > .video-generate-console,
+.studio-shell .video-page-studio.is-empty > .video-generate-console:not(.is-compact) {
+  grid-row: 2 !important;
+  position: relative !important;
+  bottom: auto !important;
+  align-self: end !important;
+  margin: 0 auto max(14px, env(safe-area-inset-bottom)) !important;
+}
