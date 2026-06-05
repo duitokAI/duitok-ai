@@ -39960,9 +39960,9 @@ body:has(.studio-shell .image-higgsfield-mode),
   top: 0 !important;
   right: auto !important;
   bottom: 0 !important;
-  left: var(--studio-sidebar-width, 70px) !important;
+  left: var(--studio-sidebar-width, 304px) !important;
   z-index: 24 !important;
-  width: var(--agent-session-panel-width, min(252px, calc(100vw - 118px))) !important;
+  width: min(var(--agent-session-panel-width, 252px), calc(100vw - var(--studio-sidebar-width, 304px) - 48px)) !important;
   height: 100dvh !important;
   min-height: 0 !important;
   display: grid !important;
@@ -39982,7 +39982,7 @@ body:has(.studio-shell .image-higgsfield-mode),
 
 .studio-shell.sidebar-collapsed .agent-chat-shell.agent-page-panel .agent-chat-toolbar.agent-session-sidebar,
 .studio-shell.sidebar-collapsed .agent-chat-shell.agent-page-panel.agent-layout-fixture-active .agent-chat-toolbar.agent-session-sidebar {
-  left: 70px !important;
+  left: var(--studio-sidebar-width, 76px) !important;
 }
 
 .studio-shell .agent-chat-shell.agent-page-panel .agent-session-actions {
@@ -40260,8 +40260,8 @@ body:has(.studio-shell .image-higgsfield-mode),
   }
 
   .studio-shell .agent-chat-shell.agent-page-panel .agent-chat-toolbar.agent-session-sidebar {
-    width: var(--agent-session-panel-width, 232px) !important;
-    left: 70px !important;
+    width: min(var(--agent-session-panel-width, 232px), calc(100vw - var(--studio-sidebar-width, 304px) - 36px)) !important;
+    left: var(--studio-sidebar-width, 304px) !important;
   }
 
   .studio-shell:not(.sidebar-collapsed) .agent-chat-shell.agent-page-panel .agent-chat-toolbar.agent-session-sidebar {
