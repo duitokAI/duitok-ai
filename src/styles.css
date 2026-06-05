@@ -49812,3 +49812,36 @@ body:has(.studio-shell .image-higgsfield-mode),
   margin: 0 !important;
   z-index: 80 !important;
 }
+
+/* Image zoom thin-rail final lock: keep the preview-size slider as a very thin
+   row like Video Page, after the composer-flow restore above. */
+.studio-shell .image-canvas-studio.image-higgsfield-mode.has-results,
+.studio-shell .image-higgsfield-mode.has-results {
+  display: grid !important;
+  grid-template-rows: 12px auto auto !important;
+  align-content: start !important;
+}
+
+.studio-shell .image-higgsfield-mode.has-results > .studio-wall-zoom-control {
+  position: relative !important;
+  top: -1px !important;
+  right: auto !important;
+  grid-row: 1 !important;
+  justify-self: end !important;
+  align-self: start !important;
+  width: clamp(170px, 14vw, 260px) !important;
+  height: 12px !important;
+  min-height: 12px !important;
+  max-height: 12px !important;
+  margin: 0 clamp(22px, 2.4vw, 44px) 0 0 !important;
+  overflow: visible !important;
+}
+
+.studio-shell .image-higgsfield-mode.has-results > .studio-result-wall {
+  grid-row: 2 !important;
+}
+
+.studio-shell .image-higgsfield-mode.has-results > .image-generate-console,
+.studio-shell .image-canvas-studio.image-higgsfield-mode.has-results.studio-wall-zoomable > section.image-generate-console {
+  grid-row: 3 !important;
+}
