@@ -49351,6 +49351,55 @@ h3,
   background: transparent !important;
 }
 
+/* Image composer flow restore: Image Page should behave like a media wall with
+   the prompt bar after the wall, not as a viewport-fixed dock covering tiles. */
+html:has(.studio-shell .image-higgsfield-mode.has-results),
+body:has(.studio-shell .image-higgsfield-mode.has-results),
+#app:has(.studio-shell .image-higgsfield-mode.has-results),
+.studio-shell:has(.image-higgsfield-mode.has-results),
+.studio-shell:has(.image-higgsfield-mode.has-results) .workspace,
+.studio-shell .workspace:has(.image-higgsfield-mode.has-results),
+.studio-shell .canvas-card:has(.image-higgsfield-mode.has-results),
+.studio-shell .studio-workbench-card:has(.image-higgsfield-mode.has-results),
+.studio-shell .studio-step-panel:has(.image-higgsfield-mode.has-results),
+.studio-shell .image-higgsfield-mode.has-results {
+  height: auto !important;
+  min-height: 100dvh !important;
+  max-height: none !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+}
+
+.studio-shell .image-higgsfield-mode.has-results {
+  display: block !important;
+}
+
+.studio-shell .image-higgsfield-mode.has-results > .studio-result-wall {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.studio-shell .image-higgsfield-mode.has-results > .studio-result-wall > .studio-wall-grid {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact),
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).is-hover-expanded,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-open-menu,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  z-index: 12 !important;
+}
+
 /* Studio top gap lock: keep the creation tabs compact and prevent the Image
    wall zoom slider from taking a grid row above the media wall. */
 .studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .project-step-topbar,
