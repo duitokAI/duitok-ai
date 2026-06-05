@@ -5870,6 +5870,7 @@ function videoGenerateConsole(p) {
           ${icon("plus", 24)}
         </button>
         <textarea data-field="ugc.script" data-video-console-prompt rows="2" placeholder="Describe the video you want to create...">${esc(p.ugc?.script || "")}</textarea>
+        <button class="video-prompt-enhance ${state.promptAdvancedEnabled ? "is-active" : ""}" type="button" data-action="toggle-prompt-advanced" aria-label="${state.promptAdvancedEnabled ? "Enhance on" : "Enhance off"}" aria-pressed="${state.promptAdvancedEnabled ? "true" : "false"}" title="Prompt enhance" ${state.promptAdvancedBusy ? "disabled" : ""}>${icon("wand", 17)}</button>
       </div>
       <div class="video-console-tools">
         ${videoOptionMenu("model", "ugc.provider", videoModelValue(p), [
@@ -11835,7 +11836,7 @@ function optimisticGenerationJobs(name, count, options = {}) {
       step: state.step || "ugc",
       type: "video",
       status: "queued",
-      stage: "queued",
+      stage: options.advancePrompt ? "prompt_advanced" : "queued",
       prompt: options.prompt || "",
       promptSnapshot: options.prompt || "",
       aspectRatio,
@@ -11933,7 +11934,9 @@ function syncImageConsoleBeforeGenerate(name) {
       model: videoModelValue(current),
       aspectRatio: videoAspectRatioValue(current),
       resolution: videoQualityValue(current),
-      duration: videoDurationValue(current).match(/\d+/)?.[0] || "8"
+      duration: videoDurationValue(current).match(/\d+/)?.[0] || "8",
+      audio: videoAudioValue(current),
+      advancePrompt: Boolean(state.promptAdvancedEnabled)
     };
   }
   if (name !== "generate-image") return {};
