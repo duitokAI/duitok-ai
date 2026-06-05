@@ -47311,6 +47311,32 @@ body:has(.studio-shell .video-page-studio),
   overflow-anchor: none !important;
 }
 
+/* Audio background should be a full-bleed studio canvas, not a centered dark
+   rectangle constrained by the default workspace max-width rule. */
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) > *,
+.studio-shell .canvas-card:has(.audio-studio-page),
+.studio-shell .studio-workbench-card:has(.audio-studio-page),
+.studio-shell .studio-step-panel:has(.audio-studio-page),
+.studio-shell .audio-studio-page {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page),
+.studio-shell .canvas-card:has(.audio-studio-page),
+.studio-shell .studio-workbench-card:has(.audio-studio-page),
+.studio-shell .studio-step-panel:has(.audio-studio-page) {
+  background:
+    radial-gradient(circle at 45% 28%, rgba(255, 49, 95, 0.18), transparent 32%),
+    radial-gradient(circle at 62% 36%, rgba(255, 210, 26, 0.12), transparent 28%),
+    linear-gradient(120deg, #101114 0%, #17121d 48%, #101216 100%) !important;
+  background-color: #101114 !important;
+}
+
+.studio-shell .audio-studio-page {
+  background: transparent !important;
+}
+
 /* Audio mobile viewport fit lock. */
 @media (max-width: 720px) {
   .studio-shell .audio-studio-page {
