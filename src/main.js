@@ -6605,7 +6605,7 @@ function autoPanel(p) {
     ${wall ? `<section class="audio-wall-stage">${studioWallZoomControl()}${wall}</section>` : `<section class="audio-wall-stage is-empty">${audioEmptyState()}</section>`}
     <section class="audio-composer" aria-label="Audio composer">
       <div class="audio-mode-dial" role="tablist" aria-label="Audio mode">
-        ${audioModeButton("Voiceover", "mic", "Create spoken narration", mode, false)}
+        ${audioModeButton("Voiceover", "mic", "Create spoken narration", mode)}
         ${audioModeButton("Change Voice", "refresh-cw", "Coming soon", mode, true)}
         ${audioModeButton("Translate", "languages", "Coming soon", mode, true)}
       </div>
@@ -6633,7 +6633,7 @@ function autoPanel(p) {
           ${audioPresetButton("Abang Trust", "Male · MY · confident", voicePreset)}
         </div>
       </details>
-      <button class="audio-generate-button" type="button" data-action="generate-audio" ${promptText.trim() ? "" : "disabled"}>
+      <button class="audio-generate-button ${promptText.trim() ? "" : "is-empty"}" type="button" data-action="generate-audio">
         <b>Generate Audio</b>
         <span>0.20 Credit</span>
       </button>
@@ -6642,7 +6642,7 @@ function autoPanel(p) {
 }
 
 function audioModeButton(value, ic, note, active, disabled = false) {
-  return `<button type="button" class="${active === value ? "active" : ""}" data-field-set="auto.audioMode" data-value="${esc(value)}" ${disabled ? "disabled aria-disabled=\"true\" title=\"Coming soon\"" : ""}>
+  return `<button type="button" class="${active === value ? "active" : ""} ${disabled ? "coming-soon" : ""}" data-field-set="auto.audioMode" data-value="${esc(value)}" ${disabled ? "aria-disabled=\"true\" title=\"Coming soon\"" : ""}>
     ${icon(ic, 18)}
     <span>${esc(value)}</span>
     <small>${esc(note)}</small>
@@ -11409,6 +11409,20 @@ function updateVideoPromptLocal(value = "") {
   });
 }
 
+function updateAudioPromptLocal(value = "") {
+  if (!state.projectId || !state.db) return;
+  state.db = dbWithProjectField(state.db, state.projectId, "auto.audioPrompt", value);
+  document.querySelectorAll(".audio-generate-button").forEach((button) => {
+    button.classList.toggle("is-empty", !String(value || "").trim());
+  });
+}
+
+function updateAudioPromptEditorRows(input) {
+  if (!input) return;
+  input.style.height = "auto";
+  input.style.height = `${Math.min(input.scrollHeight, 76)}px`;
+}
+
 function imageCompactPromptText(value = null) {
   const liveValue = document.querySelector("[data-image-console-prompt]")?.value;
   const text = String(value ?? liveValue ?? project()?.image?.prompt ?? "")
@@ -11679,7 +11693,17 @@ async function action(event, name) {
   if (name === "clear-image-prompt-media") return clearImagePromptMedia();
   if (name === "stop-agent-response") return stopAgentResponse();
   if (name === "clear-clone-reference") return clearCloneReferenceVideo();
+  if (name === "generate-audio") return audioGeneratePlaceholder();
+  if (name === "audio-coming-soon") return notify("Audio backend hookup is the next step. The page UI is ready.");
   if (name?.startsWith("generate") || ["analyze-original", "clone-prompt", "write-story", "decode-viral"].includes(name)) return generate(name, event);
+}
+
+function audioGeneratePlaceholder() {
+  const promptInput = document.querySelector("[data-audio-prompt]");
+  const promptText = String(promptInput?.value || project().auto?.audioPrompt || "").trim();
+  if (!promptText) return notify("Describe the voice first.");
+  updateAudioPromptLocal(promptText);
+  notify("Audio page is ready. Backend generate-audio action still needs to be connected before real clips can be created.");
 }
 
 async function copyActiveResultPrompt() {
@@ -11964,6 +11988,11 @@ function setFieldSetActive(field, value, source = null) {
       if (check) check.innerHTML = active ? icon("check", 18) : "";
     });
     updateVideoCountDom(videoBatchCount(project()));
+  }
+  if (field === "auto.voicePreset") {
+    document.querySelectorAll(".audio-preset-picker summary b").forEach((el) => {
+      el.textContent = value;
+    });
   }
   if (field === "original.provider") {
     const provider = originalProviderValue(value);
