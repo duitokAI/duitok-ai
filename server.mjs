@@ -3916,9 +3916,11 @@ function wuyinPathFromProject(project) {
 function imageCapabilitiesForModel(model = "GPT Image 2") {
   model = internalMediaModel(model);
   const commonRatios = ["9:16", "3:4", "2:3", "1:1", "4:3", "16:9", "3:2"];
+  const imageAspectRatiosAll = ["9:16", "3:4", "2:3", "1:1", "4:3", "16:9", "3:2", "4:5", "5:4", "1:2", "2:1", "1:3", "3:1", "9:21", "21:9"];
+  const nanoBananaAspectRatios = [...imageAspectRatiosAll, "1:4", "4:1", "1:8", "8:1"];
   const capabilities = {
     "GPT Image 2": {
-      aspectRatios: ["9:16", "3:4", "2:3", "1:1", "4:3", "16:9", "3:2", "4:5", "5:4", "1:2", "2:1", "1:3", "3:1", "9:21", "21:9"],
+      aspectRatios: imageAspectRatiosAll,
       resolutions: ["1K", "2K", "4K"]
     },
     "Seedream 5.0 Lite": {
@@ -3934,7 +3936,7 @@ function imageCapabilitiesForModel(model = "GPT Image 2") {
       resolutions: ["1K", "2K", "4K"]
     },
     "Nano Banana 2": {
-      aspectRatios: ["9:16", "3:4", "2:3", "1:1", "4:3", "16:9", "3:2", "4:5", "5:4", "1:4", "4:1", "1:8", "8:1", "21:9"],
+      aspectRatios: nanoBananaAspectRatios,
       resolutions: ["512", "1K", "2K", "4K"]
     },
     "Grok Imagine": {
