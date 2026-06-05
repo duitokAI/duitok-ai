@@ -49520,3 +49520,41 @@ body:has(.studio-shell .image-higgsfield-mode.has-results),
   position: relative;
   z-index: 1;
 }
+
+/* Clone Studio topbar lock: the Clone Prompt page uses the video prompt
+   extractor surface but should keep the same fixed creation tabs as Image. */
+.studio-shell:has(.video-prompt-extractor-page[data-studio-mode="clone"]) {
+  --project-fixed-tabs-height: 72px;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page[data-studio-mode="clone"]) {
+  padding: var(--project-fixed-tabs-height, 72px) 0 56px !important;
+  overflow-x: clip !important;
+  overflow-y: auto !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page[data-studio-mode="clone"]) .project-step-topbar {
+  position: fixed !important;
+  top: 0 !important;
+  left: var(--studio-sidebar-width, 300px) !important;
+  right: 0 !important;
+  z-index: 7200 !important;
+  width: auto !important;
+  max-width: none !important;
+  height: var(--project-fixed-tabs-height, 72px) !important;
+  min-height: var(--project-fixed-tabs-height, 72px) !important;
+  max-height: var(--project-fixed-tabs-height, 72px) !important;
+  margin: 0 !important;
+  padding: 7px 18px 7px 26px !important;
+}
+
+.studio-shell.sidebar-collapsed .workspace:has(.step-tabs):has(.video-prompt-extractor-page[data-studio-mode="clone"]) .project-step-topbar {
+  left: var(--studio-sidebar-width, 76px) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page[data-studio-mode="clone"]) .studio-top-step-tabs {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  height: 58px !important;
+  min-height: 58px !important;
+  max-height: 58px !important;
+}
