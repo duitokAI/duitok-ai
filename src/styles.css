@@ -49055,6 +49055,19 @@ h3,
   align-self: stretch !important;
 }
 
+/* Hidden Original Video / Storytelling tabs leave only four visible tools.
+   Keep the top tab rail to four tracks so Clone Prompt does not expose empty
+   plum-orange columns on its right edge. */
+.studio-shell .workspace:has(.step-tabs) .project-step-topbar > nav.step-tabs.studio-top-step-tabs,
+.studio-shell .workspace:has(.step-tabs):has(.image-higgsfield-mode) .project-step-topbar > nav.step-tabs.studio-top-step-tabs,
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio) .project-step-topbar > nav.step-tabs.studio-top-step-tabs,
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) .project-step-topbar > nav.step-tabs.studio-top-step-tabs,
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .project-step-topbar > nav.step-tabs.studio-top-step-tabs {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  background: transparent !important;
+  background-image: none !important;
+}
+
 .studio-shell .image-higgsfield-mode > .studio-wall-zoom-control {
   position: absolute !important;
   top: 10px !important;
