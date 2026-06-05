@@ -14,14 +14,32 @@
   --success: #40d36e;
   --danger: #ff6a3d;
   --shadow: 0 28px 80px rgba(0, 0, 0, 0.45);
-  font-family:
-    Inter,
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
+  --font-sans: Inter, "PingFang SC", "Microsoft YaHei", "Noto Sans", sans-serif;
+  --text-display-size: 32px;
+  --text-display-line: 40px;
+  --text-display-weight: 700;
+  --text-h1-size: 24px;
+  --text-h1-line: 32px;
+  --text-h1-weight: 700;
+  --text-h2-size: 20px;
+  --text-h2-line: 28px;
+  --text-h2-weight: 600;
+  --text-h3-size: 16px;
+  --text-h3-line: 24px;
+  --text-h3-weight: 600;
+  --text-body-size: 14px;
+  --text-body-line: 22px;
+  --text-body-weight: 400;
+  --text-body-lg-size: 16px;
+  --text-body-lg-line: 24px;
+  --text-body-lg-weight: 400;
+  --text-caption-size: 12px;
+  --text-caption-line: 18px;
+  --text-caption-weight: 400;
+  --text-amount-min: 20px;
+  --text-amount-max: 28px;
+  --text-amount-weight: 700;
+  font-family: var(--font-sans);
 }
 
 html {
@@ -2999,6 +3017,10 @@ body {
   min-width: 320px;
   background: var(--bg);
   color: white;
+  font-family: var(--font-sans);
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
+  line-height: var(--text-body-line);
 }
 
 button,
@@ -3006,6 +3028,7 @@ input,
 select,
 textarea {
   font: inherit;
+  font-family: var(--font-sans);
 }
 
 button {
@@ -16769,7 +16792,7 @@ label {
   padding: 0 22px;
   background: rgba(255, 255, 255, 0.94);
   color: var(--studio-purple-900, #2a0633);
-  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans);
   font-size: 18px;
   font-weight: 900;
   letter-spacing: 0;
@@ -32379,7 +32402,7 @@ label {
   padding: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-family: var(--font-sans) !important;
   line-height: 1 !important;
 }
 
@@ -37164,7 +37187,7 @@ label {
   background: transparent !important;
   box-shadow: none !important;
   color: #5d086c !important;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-family: var(--font-sans) !important;
   font-size: 15px !important;
   font-weight: 950 !important;
   line-height: 1 !important;
@@ -48272,6 +48295,90 @@ body:has(.studio-shell .video-prompt-extractor-page),
   padding: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
+}
+
+/* Global typography system: keep every product surface on the approved
+   Inter/PingFang/Microsoft YaHei/Noto Sans stack while preserving code blocks. */
+body,
+button,
+input,
+select,
+textarea,
+.loading,
+.login-shell,
+.public-shell,
+.studio-shell,
+.settings-modal,
+.result-detail-modal,
+.result-prompt-modal,
+.agent-chat-shell {
+  font-family: var(--font-sans) !important;
+}
+
+body :where(*):not(code):not(pre):not(kbd):not(samp) {
+  font-family: inherit !important;
+}
+
+h1,
+.typography-h1 {
+  font-size: var(--text-h1-size);
+  font-weight: var(--text-h1-weight);
+  line-height: var(--text-h1-line);
+}
+
+h2,
+.typography-h2 {
+  font-size: var(--text-h2-size);
+  font-weight: var(--text-h2-weight);
+  line-height: var(--text-h2-line);
+}
+
+h3,
+.typography-h3 {
+  font-size: var(--text-h3-size);
+  font-weight: var(--text-h3-weight);
+  line-height: var(--text-h3-line);
+}
+
+.typography-display {
+  font-size: var(--text-display-size);
+  font-weight: var(--text-display-weight);
+  line-height: var(--text-display-line);
+}
+
+.typography-body {
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
+  line-height: var(--text-body-line);
+}
+
+.typography-body-lg {
+  font-size: var(--text-body-lg-size);
+  font-weight: var(--text-body-lg-weight);
+  line-height: var(--text-body-lg-line);
+}
+
+.typography-caption {
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
+  line-height: var(--text-caption-line);
+}
+
+.amount,
+.credit-value,
+.billing-amount,
+.price,
+.price b,
+.cost-list b,
+.sidebar-credit-card b,
+.settings-modal .credit-balance-main b,
+.settings-modal .credit-usage-grid b,
+.settings-modal .usage-summary-card b,
+.usage-summary-card b,
+[data-image-credit-label],
+[data-video-credit-label] {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }
 
 /* Clone Prompt dock color parity: this upload bar should read as the same

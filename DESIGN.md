@@ -96,25 +96,28 @@ Pokaya 可以保留深紫和粉色，但必须克制。粉紫只能作为品牌�
 
 ## 4. Typography
 
-Pokaya should use a strong sans-serif system. Avoid default-looking Inter-only pages when possible, but keep fallback safe.
+Pokaya uses one approved sans-serif stack across public pages, auth, Studio, modals, and generated result surfaces.
 
 Recommended stack:
 
 ```css
-font-family: "Satoshi", "Outfit", "Geist", Inter, ui-sans-serif, system-ui, sans-serif;
+font-family: Inter, "PingFang SC", "Microsoft YaHei", "Noto Sans", sans-serif;
 ```
 
-If no custom font is installed, use system sans with heavier hierarchy.
+The Noto Sans family covers additional scripts. Do not introduce page-level custom stacks unless the text is a logo, code block, job id, or tabular numeric amount.
 
 ### Scale
 
-- Display XL: `clamp(48px, 6vw, 84px)`, weight `850-950`, line-height `0.96-1.05`
-- Display LG: `clamp(38px, 4.5vw, 64px)`, weight `850-950`, line-height `1.02`
-- Section H2: `clamp(32px, 3.6vw, 52px)`, weight `850-950`, line-height `1.08`
-- Card title: `20-28px`, weight `800-950`, line-height `1.15`
-- Body: `16-18px`, weight `500-700`, line-height `1.5-1.65`
-- Caption: `12-14px`, weight `700-850`, line-height `1.35`
-- Button: `15-17px`, weight `850-950`
+- Display: `32px / 40px`, weight `700`, for landing hero titles.
+- H1: `24px / 32px`, weight `700`, for page titles.
+- H2: `20px / 28px`, weight `600`, for section titles.
+- H3: `16px / 24px`, weight `600`, for card titles.
+- Body: `14px / 22px`, weight `400`, for desktop default body text.
+- Body-lg: `16px / 24px`, weight `400`, for mobile body text or important readable body.
+- Caption: `12px / 18px`, weight `400`, for helper text, timestamps, and metadata.
+- Amount: `20-28px`, weight `700`, with tabular numbers for money, credits, billing, and usage values.
+
+Existing oversized marketing hero treatments require an explicit `Display+` exception and should not leak into Studio tools.
 
 ### Rules
 
