@@ -6237,7 +6237,7 @@ function ugcPanel(p) {
   const meta = studioStepMeta("ugc");
   const bulkSelecting = isBulkSelectingResults();
   const wall = studioResultWall(p, meta);
-  return `<section class="video-page-studio video-prompt-extractor-page studio-wall-zoomable ${wall ? "" : "is-empty"} ${bulkSelecting ? "is-bulk-selecting-results" : ""}" data-studio-mode="ugc" ${studioWallZoomStyleAttr()}>
+  return `<section class="video-page-studio video-prompt-extractor-page image-higgsfield-mode studio-wall-zoomable ${wall ? "" : "is-empty"} ${bulkSelecting ? "is-bulk-selecting-results" : ""}" data-studio-mode="ugc" ${studioWallZoomStyleAttr()}>
     ${studioWallZoomControl()}
     ${wall || videoEmptyStudioBackdrop()}
     ${bulkSelecting ? "" : videoGenerateConsole(p)}
