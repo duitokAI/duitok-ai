@@ -47116,6 +47116,64 @@ body:has(.studio-shell .video-page-studio),
   cursor: pointer !important;
 }
 
+/* Audio composer color parity: keep both bottom bars in the same warm Image
+   Page console palette, with coral reserved for selected/actions. */
+.studio-shell .audio-studio-page .audio-mode-dial,
+.studio-shell .audio-studio-page .audio-main-bar {
+  background-color: rgba(255, 249, 240, 0.96) !important;
+  background-image:
+    linear-gradient(105deg, rgba(255, 249, 240, 0.98) 0%, rgba(255, 249, 240, 0.94) 32%, rgba(139, 26, 120, 0.18) 58%, rgba(193, 43, 98, 0.24) 76%, rgba(255, 103, 56, 0.42) 100%) !important;
+  border-color: rgba(111, 28, 132, 0.16) !important;
+  color: var(--pokaya-ink, #210024) !important;
+  box-shadow:
+    0 20px 52px rgba(33, 0, 36, 0.28),
+    inset 0 1px 0 rgba(255, 250, 252, 0.82) !important;
+}
+
+.studio-shell .audio-studio-page .audio-mode-dial::before {
+  border-color: rgba(111, 28, 132, 0.18) !important;
+  background:
+    radial-gradient(circle at 34% 38%, rgba(255, 255, 255, 0.92), transparent 8%),
+    radial-gradient(circle at 42% 48%, rgba(255, 103, 56, 0.18), transparent 10%),
+    linear-gradient(145deg, #fff9f0 0%, #f4e7ee 44%, #dec7df 100%) !important;
+  box-shadow:
+    inset 18px 18px 34px rgba(255, 255, 255, 0.7),
+    inset -20px -24px 42px rgba(111, 28, 132, 0.18),
+    10px 0 26px rgba(33, 0, 36, 0.14) !important;
+}
+
+.studio-shell .audio-studio-page .audio-mode-dial::after {
+  background: linear-gradient(90deg, #c12b62 0%, #ff6738 100%) !important;
+  box-shadow: 0 0 18px rgba(255, 103, 56, 0.28) !important;
+}
+
+.studio-shell .audio-studio-page .audio-mode-dial button {
+  color: rgba(33, 0, 36, 0.58) !important;
+}
+
+.studio-shell .audio-studio-page .audio-mode-dial button::before {
+  background: rgba(33, 0, 36, 0.2) !important;
+  box-shadow: 0 0 0 1px rgba(255, 249, 240, 0.72) !important;
+}
+
+.studio-shell .audio-studio-page .audio-mode-dial button::after {
+  background: rgba(111, 28, 132, 0.34) !important;
+}
+
+.studio-shell .audio-studio-page .audio-mode-dial button.active {
+  border-color: rgba(255, 103, 56, 0.44) !important;
+  background: rgba(255, 249, 240, 0.92) !important;
+  color: var(--pokaya-ink, #210024) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 249, 240, 0.78),
+    0 10px 24px rgba(193, 43, 98, 0.18) !important;
+}
+
+.studio-shell .audio-studio-page .audio-mode-dial button.active::before {
+  background: #ff6738 !important;
+  box-shadow: 0 0 10px rgba(255, 103, 56, 0.34) !important;
+}
+
 @media (max-width: 900px) {
   .studio-shell .audio-studio-page .audio-composer {
     height: auto !important;
