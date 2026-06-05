@@ -47575,3 +47575,32 @@ html.is-route-changing .studio-shell .video-generate-console {
   background-image: none !important;
   border-color: transparent !important;
 }
+
+/* Clone Prompt empty-state bottom fill: the sticky extractor dock can leave
+   unused scroll area below the page; keep every exposed ancestor on the same
+   plum/rose surface instead of revealing the workspace's light default. */
+html:has(.studio-shell .video-prompt-extractor-page),
+body:has(.studio-shell .video-prompt-extractor-page),
+#app:has(.studio-shell .video-prompt-extractor-page),
+.studio-shell:has(.video-prompt-extractor-page),
+.studio-shell:has(.video-prompt-extractor-page) .workspace,
+.studio-shell .workspace:has(.video-prompt-extractor-page),
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page),
+.studio-shell .canvas-card:has(.video-prompt-extractor-page),
+.studio-shell .studio-workbench-card:has(.video-prompt-extractor-page),
+.studio-shell .studio-step-panel:has(.video-prompt-extractor-page),
+.studio-shell .video-prompt-extractor-page {
+  min-height: 100dvh !important;
+  background:
+    linear-gradient(115deg, rgba(33, 0, 36, 0.99) 0%, rgba(50, 16, 58, 0.98) 26%, rgba(139, 26, 120, 0.92) 58%, rgba(193, 43, 98, 0.82) 78%, rgba(255, 103, 56, 0.72) 118%) !important;
+  background-color: #32103a !important;
+}
+
+.studio-shell .workspace:has(.video-prompt-extractor-page),
+.studio-shell .workspace:has(.step-tabs):has(.video-prompt-extractor-page) {
+  padding-bottom: 0 !important;
+}
+
+.studio-shell .video-prompt-extractor-page {
+  min-height: calc(100dvh - var(--project-fixed-tabs-height, 58px)) !important;
+}
