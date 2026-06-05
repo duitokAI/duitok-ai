@@ -47441,6 +47441,32 @@ html.is-route-changing .studio-shell .video-generate-console {
   color: #ffffff !important;
 }
 
+/* Failed portrait cards have enough horizontal room for "No Charge"; keep the
+   refund pill content-sized instead of inheriting the compact ellipsis lock. */
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait .generation-credit-refund-note,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait .generation-credit-refund-note,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait .generation-credit-refund-note {
+  width: max-content !important;
+  min-width: max-content !important;
+  max-width: min(100%, 190px) !important;
+  padding-inline: clamp(16px, 5.2cqw, 22px) !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+.studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait .generation-credit-refund-note strong,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait .generation-credit-refund-note strong,
+.studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed.portrait .generation-credit-refund-note strong {
+  display: inline-block !important;
+  width: auto !important;
+  max-width: none !important;
+  overflow: visible !important;
+  font-size: clamp(17px, 6.6cqw, 24px) !important;
+  line-height: 1 !important;
+  text-overflow: clip !important;
+  white-space: nowrap !important;
+}
+
 /* Failed card alert icon: remove the translucent square behind the warning
    glyph, especially on portrait tiles. */
 .studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-pending.failed .studio-wall-pending-spinner,
