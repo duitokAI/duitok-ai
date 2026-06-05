@@ -47015,6 +47015,31 @@ body:has(.studio-shell .video-page-studio),
 }
 
 /* Audio page final viewport fit lock. */
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) {
+  padding-top: var(--project-fixed-tabs-height) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .project-step-topbar {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  left: var(--studio-sidebar-width, 288px) !important;
+  z-index: 6400 !important;
+  pointer-events: auto !important;
+}
+
+.studio-shell.sidebar-collapsed .workspace:has(.step-tabs):has(.audio-studio-page) .project-step-topbar {
+  left: var(--studio-sidebar-width, 70px) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .studio-top-step-tabs,
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .step-tabs,
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .step-tabs button {
+  position: relative !important;
+  z-index: 6401 !important;
+  pointer-events: auto !important;
+}
+
 .studio-shell .audio-studio-page {
   gap: 12px !important;
 }
