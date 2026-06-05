@@ -47494,6 +47494,10 @@ html.is-route-changing .studio-shell .video-generate-console {
 
 /* Video empty page brand theme: use Pokaya plum, rose, and coral instead of the
    cold cinema-blue treatment. */
+.studio-shell .workspace:has(.video-page-studio.is-empty),
+.studio-shell .canvas-card:has(.video-page-studio.is-empty),
+.studio-shell .studio-workbench-card:has(.video-page-studio.is-empty),
+.studio-shell .studio-step-panel:has(.video-page-studio.is-empty),
 .studio-shell .video-page-studio.is-empty,
 .studio-shell .video-page-studio.is-empty > .video-empty-cinema {
   background:
