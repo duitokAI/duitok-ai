@@ -47432,3 +47432,15 @@ html.is-route-changing .studio-shell .video-generate-console {
   min-width: 0 !important;
   max-width: none !important;
 }
+
+/* Image composer shell: keep the outer frame neutral; coral stays reserved for
+   the Generate action, not the full dock outline. */
+.studio-shell .image-higgsfield-mode > .image-generate-console,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact),
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).is-hover-expanded,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-open-menu,
+.studio-shell .image-higgsfield-mode > .image-generate-console:not(.is-compact).has-long-prompt,
+.studio-shell .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console,
+.studio-shell .image-canvas-studio.image-higgsfield-mode.studio-wall-zoomable > section.image-generate-console:not(.is-compact) {
+  border-color: rgba(111, 28, 132, 0.16) !important;
+}
