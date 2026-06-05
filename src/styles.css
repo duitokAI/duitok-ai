@@ -47035,6 +47035,114 @@ body:has(.studio-shell .video-page-studio),
 }
 
 /* Audio page final viewport fit lock. */
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) {
+  padding-top: var(--project-fixed-tabs-height) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .project-step-topbar {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  left: var(--studio-sidebar-width, 288px) !important;
+  z-index: 6400 !important;
+  pointer-events: auto !important;
+}
+
+.studio-shell.sidebar-collapsed .workspace:has(.step-tabs):has(.audio-studio-page) .project-step-topbar {
+  left: var(--studio-sidebar-width, 70px) !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .studio-top-step-tabs,
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .step-tabs,
+.studio-shell .workspace:has(.step-tabs):has(.audio-studio-page) .step-tabs button {
+  position: relative !important;
+  z-index: 6401 !important;
+  pointer-events: auto !important;
+}
+
+/* Collapsed sidebar visibility lock: Audio uses a dark canvas beside the icon
+   rail, so the collapsed nav must keep every icon bright and above its tile. */
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .agent-primary-card,
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .side-primary,
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .side-link,
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .side-support-button {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .agent-primary-card > *,
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .side-primary > *,
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .side-link > *,
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .side-support-button > * {
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .agent-primary-card svg,
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .side-primary svg,
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .side-link svg,
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .side-support-button svg,
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .studio-nav-button .studio-nav-mark,
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .agent-primary-card .agent-primary-icon,
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .side-support-button .support-bubble-icon {
+  color: #fff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  filter: none !important;
+}
+
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .agent-primary-card svg *,
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .side-primary svg *,
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .side-link svg *,
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .side-support-button svg * {
+  stroke: currentColor !important;
+  opacity: 1 !important;
+}
+
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .side-primary:not(.active) svg,
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .side-link:not(.active) svg,
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .side-support-button:not(.active) svg {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .side-primary > i[data-lucide],
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .side-link > i[data-lucide],
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .side-support-button > i[data-lucide] {
+  position: relative !important;
+  z-index: 2 !important;
+  display: grid !important;
+  place-items: center !important;
+  width: 26px !important;
+  min-width: 26px !important;
+  height: 26px !important;
+  min-height: 26px !important;
+  color: rgba(255, 255, 255, 0.92) !important;
+  opacity: 1 !important;
+}
+
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .side-primary > i[data-lucide]::before,
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .side-link > i[data-lucide]::before,
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .side-support-button > i[data-lucide]::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  border: 2px solid currentColor;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.16);
+}
+
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .side-primary > i[data-lucide]::after,
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .side-link > i[data-lucide]::after,
+.studio-shell.sidebar-collapsed .sidebar-scroll-area > .side-support-button > i[data-lucide]::after {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  right: 4px;
+  top: 4px;
+  border-radius: 999px;
+  background: #ff6738;
+}
+
 .studio-shell .audio-studio-page {
   gap: 12px !important;
 }
