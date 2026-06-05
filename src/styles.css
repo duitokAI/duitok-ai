@@ -707,16 +707,6 @@ body,
   color: #fff;
 }
 
-.studio-wall-card:nth-child(2),
-.studio-wall-card:nth-child(7) {
-  grid-row: span 2;
-}
-
-.studio-wall-card:nth-child(3),
-.studio-wall-card:nth-child(8) {
-  grid-column: span 2;
-}
-
 .studio-wall-card .result-preview-trigger,
 .studio-wall-card .result-image,
 .studio-wall-card .result-video,

@@ -4,7 +4,9 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
+ARG POKAYA_FRONTEND_BUILD_REV=20260605-generation-timeline
 COPY . .
+RUN echo "Pokaya frontend build revision: ${POKAYA_FRONTEND_BUILD_REV}"
 RUN npm run build
 
 FROM node:22-alpine AS runner
