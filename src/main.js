@@ -1881,8 +1881,35 @@ function stabilizeImageConsoleExpansion(duration = 900) {
   [40, 120, 260, 600, duration].forEach((delay) => window.setTimeout(restore, delay));
 }
 
+function stabilizeImageConsoleCompact(duration = 900) {
+  const scrollSnapshot = {
+    windowY: window.scrollY || 0,
+    windowX: window.scrollX || 0,
+    workspace: document.querySelector(".workspace")?.scrollTop || 0,
+    shell: document.querySelector(".studio-shell")?.scrollTop || 0
+  };
+  if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+  const restore = () => {
+    window.scrollTo(scrollSnapshot.windowX, scrollSnapshot.windowY);
+    const workspace = document.querySelector(".workspace");
+    const shell = document.querySelector(".studio-shell");
+    if (workspace) workspace.scrollTop = scrollSnapshot.workspace;
+    if (shell) shell.scrollTop = scrollSnapshot.shell;
+    document.querySelectorAll(".image-generate-console").forEach((el) => {
+      el.classList.add("is-compact");
+      el.classList.remove("is-hover-expanded", "has-open-menu");
+    });
+  };
+  restore();
+  requestAnimationFrame(() => {
+    restore();
+    requestAnimationFrame(restore);
+  });
+  [40, 120, 260, 600, duration].forEach((delay) => window.setTimeout(restore, delay));
+}
+
 function lockGenerationSubmitLayout(name = "generate-image", duration = 1600) {
-  if (name === "generate-image") stabilizeImageConsoleExpansion(duration);
+  if (name === "generate-image") stabilizeImageConsoleCompact(duration);
   if (name === "generate-ugc") stabilizeVideoConsoleExpansion(duration);
   document.documentElement.classList.add("is-generation-submitting");
   document.documentElement.classList.add("is-generation-active");
@@ -1921,7 +1948,13 @@ function syncGenerationLayoutLock(db = state.db) {
   document.documentElement.classList.toggle("is-image-generation-active", hasImage);
   document.documentElement.classList.toggle("is-video-generation-active", hasVideo);
   document.documentElement.classList.toggle("is-audio-generation-active", hasAudio);
-  document.querySelectorAll(".image-generate-console, .video-page-studio .video-generate-console").forEach((el) => {
+  if (hasImage) {
+    document.querySelectorAll(".image-generate-console").forEach((el) => {
+      el.classList.add("is-compact");
+      el.classList.remove("is-hover-expanded", "has-open-menu");
+    });
+  }
+  document.querySelectorAll(".video-page-studio .video-generate-console").forEach((el) => {
     el.classList.add("is-hover-expanded");
     el.classList.remove("is-compact");
   });
@@ -14063,6 +14096,120 @@ function patchStudioGenerationCardsFromDb(nextDb) {
   return patched;
 }
 
+function studioWallDomCardKey(card) {
+  if (!card) return "";
+  const resultId = card.getAttribute("data-result-id");
+  if (resultId) return `result:${resultId}`;
+  const jobId = card.getAttribute("data-generation-job-id");
+  if (jobId) return `job:${jobId}`;
+  return "";
+}
+
+function studioWallPendingSignature(card) {
+  if (!card) return "";
+  return [
+    card.getAttribute("data-generation-job-status") || "",
+    card.getAttribute("data-generation-cancel-locked") || "",
+    card.getAttribute("data-aspect-ratio") || "",
+    card.getAttribute("data-media-ratio") || "",
+    card.className || ""
+  ].join("|");
+}
+
+function canPreserveStudioWallCard(existingCard, nextCard) {
+  const key = studioWallDomCardKey(existingCard);
+  if (!key || key !== studioWallDomCardKey(nextCard)) return false;
+  if (key.startsWith("result:")) return true;
+  return studioWallPendingSignature(existingCard) === studioWallPendingSignature(nextCard);
+}
+
+function syncPreservedStudioWallCard(existingCard, nextCard) {
+  const order = nextCard.getAttribute("data-wall-order");
+  if (order !== null) existingCard.setAttribute("data-wall-order", order);
+  else existingCard.removeAttribute("data-wall-order");
+  ["data-aspect-ratio", "data-media-ratio"].forEach((name) => {
+    const value = nextCard.getAttribute(name);
+    if (value === null) existingCard.removeAttribute(name);
+    else existingCard.setAttribute(name, value);
+  });
+  existingCard.className = nextCard.className;
+  existingCard.style.cssText = nextCard.style.cssText;
+  const existingSelect = existingCard.querySelector(".studio-wall-select-toggle");
+  const nextSelect = nextCard.querySelector(".studio-wall-select-toggle");
+  if (existingSelect && nextSelect) {
+    existingSelect.setAttribute("aria-pressed", nextSelect.getAttribute("aria-pressed") || "false");
+    existingSelect.innerHTML = nextSelect.innerHTML;
+  }
+}
+
+function syncStudioWallAttributes(existingWall, nextWall) {
+  [...existingWall.attributes].forEach((attribute) => {
+    if (!nextWall.hasAttribute(attribute.name)) existingWall.removeAttribute(attribute.name);
+  });
+  [...nextWall.attributes].forEach((attribute) => {
+    if (existingWall.getAttribute(attribute.name) !== attribute.value) {
+      existingWall.setAttribute(attribute.name, attribute.value);
+    }
+  });
+}
+
+function directStudioWallChild(wall, selector) {
+  return [...(wall?.children || [])].find((child) => child.matches?.(selector)) || null;
+}
+
+function reconcileStudioResultWall(existingWall, wallHtml) {
+  if (!existingWall || !wallHtml) return false;
+  const template = document.createElement("template");
+  template.innerHTML = wallHtml.trim();
+  const nextWall = template.content.querySelector(".studio-result-wall");
+  if (!nextWall) return false;
+  const existingGrid = directStudioWallChild(existingWall, ".studio-wall-grid");
+  const nextGrid = directStudioWallChild(nextWall, ".studio-wall-grid");
+  if (!existingGrid || !nextGrid) {
+    existingWall.outerHTML = wallHtml;
+    return true;
+  }
+  syncStudioWallAttributes(existingWall, nextWall);
+  const existingByKey = new Map();
+  [...existingGrid.children].forEach((card) => {
+    const key = studioWallDomCardKey(card);
+    if (key && !existingByKey.has(key)) existingByKey.set(key, card);
+  });
+  let changed = existingGrid.children.length !== nextGrid.children.length;
+  let referenceNode = existingGrid.firstElementChild;
+  [...nextGrid.children].forEach((nextCard) => {
+    const key = studioWallDomCardKey(nextCard);
+    const existingCard = key ? existingByKey.get(key) : null;
+    let desiredCard = nextCard;
+    if (existingCard && canPreserveStudioWallCard(existingCard, nextCard)) {
+      syncPreservedStudioWallCard(existingCard, nextCard);
+      desiredCard = existingCard;
+      existingByKey.delete(key);
+    }
+    else {
+      changed = true;
+    }
+    if (desiredCard === referenceNode) {
+      referenceNode = referenceNode.nextElementSibling;
+      return;
+    }
+    existingGrid.insertBefore(desiredCard, referenceNode);
+    changed = true;
+  });
+  while (referenceNode) {
+    const nextReference = referenceNode.nextElementSibling;
+    referenceNode.remove();
+    referenceNode = nextReference;
+    changed = true;
+  }
+  const existingBulkBar = directStudioWallChild(existingWall, ".studio-bulk-selection-bar");
+  const nextBulkBar = directStudioWallChild(nextWall, ".studio-bulk-selection-bar");
+  if (existingBulkBar && nextBulkBar) existingBulkBar.replaceWith(nextBulkBar);
+  else if (existingBulkBar && !nextBulkBar) existingBulkBar.remove();
+  else if (!existingBulkBar && nextBulkBar) existingWall.appendChild(nextBulkBar);
+  return changed;
+}
+
 function withStableStudioWallMutation(callback) {
   const shell = document.querySelector(".image-higgsfield-mode, .video-page-studio, .audio-studio-page, .studio-immersive-page");
   const wall = shell?.querySelector(".studio-result-wall");
@@ -14095,7 +14242,7 @@ function patchStudioResultWallFromDb(nextDb) {
   withStableStudioWallMutation(() => {
     const existingWall = shell.querySelector(".studio-result-wall");
     if (existingWall) {
-      if (wallHtml) existingWall.outerHTML = wallHtml;
+      if (wallHtml) reconcileStudioResultWall(existingWall, wallHtml);
       else existingWall.remove();
     } else if (wallHtml) {
       const dock = shell.querySelector(".image-generate-console, .video-generate-console, .audio-composer, .studio-generate-dock");
