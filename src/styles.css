@@ -50333,3 +50333,41 @@ body:has(.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"].is
   transition: none !important;
   will-change: auto !important;
 }
+
+/* Attachment picker full-page ownership: reference/image pickers must sit above
+   the Studio sidebar, top tabs, media wall, and composer. */
+.studio-shell:has(.attachment-picker-backdrop) > #modal-root {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 25000 !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  pointer-events: none !important;
+  isolation: isolate !important;
+}
+
+.studio-shell:has(.attachment-picker-backdrop) > #modal-root > .attachment-picker-backdrop,
+.studio-shell .attachment-picker-backdrop,
+.attachment-picker-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 25000 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: clamp(18px, 3vw, 46px) !important;
+  overflow: hidden !important;
+  pointer-events: auto !important;
+  background: rgba(5, 3, 8, 0.86) !important;
+}
+
+.studio-shell:has(.attachment-picker-backdrop) .attachment-picker-modal,
+.attachment-picker-backdrop > .attachment-picker-modal {
+  width: min(1360px, calc(100vw - clamp(36px, 6vw, 92px))) !important;
+  max-width: min(1360px, calc(100vw - clamp(36px, 6vw, 92px))) !important;
+  max-height: calc(100dvh - clamp(36px, 6vw, 92px)) !important;
+  margin: 0 !important;
+  transform: none !important;
+}
