@@ -76,6 +76,8 @@ let imageConsoleExpandLockUntil = 0;
 let imageConsoleExpandedUntilUserScroll = false;
 let imageConsoleUserScrollIntentUntil = 0;
 let generationSubmitLayoutLockTimer = null;
+let imageGenerateVisualLockTimer = null;
+let imageGenerateVisualLockRestore = null;
 let videoConsoleExpandLockUntil = 0;
 let videoConsoleExpandedUntilUserScroll = false;
 let videoConsoleUserScrollIntentUntil = 0;
@@ -1921,7 +1923,41 @@ function stabilizeImageConsoleCompact(duration = 900) {
   [40, 120, 260, 600, duration].forEach((delay) => window.setTimeout(restore, delay));
 }
 
+function lockImageGenerateVisualFrame(duration = 900) {
+  const shell = document.querySelector(".image-higgsfield-mode");
+  if (!shell) return;
+  const wall = shell.querySelector(".studio-result-wall");
+  const consoleEl = shell.querySelector(".image-generate-console");
+  if (!imageGenerateVisualLockRestore) {
+    const previousWallMinHeight = wall?.style.minHeight || "";
+    const previousConsoleMinHeight = consoleEl?.style.minHeight || "";
+    const wallHeight = Math.ceil(wall?.getBoundingClientRect().height || 0);
+    const consoleHeight = Math.ceil(consoleEl?.getBoundingClientRect().height || 0);
+    if (wall && wallHeight > 0) wall.style.minHeight = `${wallHeight}px`;
+    if (consoleEl && consoleHeight > 0) consoleEl.style.minHeight = `${consoleHeight}px`;
+    imageGenerateVisualLockRestore = () => {
+      const nextShell = document.querySelector(".image-higgsfield-mode");
+      const nextWall = nextShell?.querySelector(".studio-result-wall");
+      const nextConsole = nextShell?.querySelector(".image-generate-console");
+      if (nextWall) nextWall.style.minHeight = previousWallMinHeight;
+      if (nextConsole) nextConsole.style.minHeight = previousConsoleMinHeight;
+      nextShell?.classList.remove("is-image-generate-visual-locked");
+      imageGenerateVisualLockRestore = null;
+    };
+  }
+  shell.classList.add("is-image-generate-visual-locked");
+  window.clearTimeout(imageGenerateVisualLockTimer);
+  imageGenerateVisualLockTimer = window.setTimeout(() => {
+    imageGenerateVisualLockTimer = null;
+    requestAnimationFrame(() => requestAnimationFrame(() => imageGenerateVisualLockRestore?.()));
+  }, duration);
+}
+
 function lockGenerationSubmitLayout(name = "generate-image", duration = 1600) {
+  if (name === "generate-image") {
+    lockImageGenerateVisualFrame(duration);
+    return;
+  }
   if (name === "generate-ugc") stabilizeVideoConsoleExpansion(duration);
   document.documentElement.classList.add("is-generation-submitting");
   document.documentElement.classList.add("is-generation-active");
@@ -1936,6 +1972,9 @@ function lockGenerationSubmitLayout(name = "generate-image", duration = 1600) {
 function unlockGenerationSubmitLayout() {
   if (generationSubmitLayoutLockTimer) window.clearTimeout(generationSubmitLayoutLockTimer);
   generationSubmitLayoutLockTimer = null;
+  if (imageGenerateVisualLockTimer) window.clearTimeout(imageGenerateVisualLockTimer);
+  imageGenerateVisualLockTimer = null;
+  imageGenerateVisualLockRestore?.();
   document.documentElement.classList.remove("is-generation-submitting");
   syncGenerationLayoutLock();
 }
@@ -1947,16 +1986,16 @@ function hasRunningGenerationJobsForProject(db = state.db, projectId = state.pro
 
 function syncGenerationLayoutLock(db = state.db) {
   if (typeof document === "undefined") return false;
-  const active = Boolean(state.generating || hasRunningGenerationJobsForProject(db));
-  document.documentElement.classList.toggle("is-generation-active", active);
-  if (!active) {
-    document.documentElement.classList.remove("is-image-generation-active", "is-video-generation-active", "is-audio-generation-active");
-    return false;
-  }
   const projectJobs = (db?.generationJobs || []).filter((job) => job.projectId === state.projectId && ["queued", "processing"].includes(job.status));
   const hasImage = (state.generating && state.step === "image") || projectJobs.some((job) => job.type === "image" || job.action === "generate-image");
   const hasVideo = (state.generating && state.step === "ugc") || projectJobs.some((job) => job.type === "video" || job.action === "generate-ugc");
   const hasAudio = (state.generating && state.step === "audio") || projectJobs.some((job) => job.type === "audio" || job.action === "generate-audio");
+  const active = Boolean(state.generating || projectJobs.length);
+  document.documentElement.classList.toggle("is-generation-active", active && (hasVideo || hasAudio || !hasImage));
+  if (!active) {
+    document.documentElement.classList.remove("is-image-generation-active", "is-video-generation-active", "is-audio-generation-active");
+    return false;
+  }
   document.documentElement.classList.toggle("is-image-generation-active", hasImage);
   document.documentElement.classList.toggle("is-video-generation-active", hasVideo);
   document.documentElement.classList.toggle("is-audio-generation-active", hasAudio);
@@ -5736,7 +5775,7 @@ function studioPendingWallCard(job, orderIndex = 0) {
   const processingBody = `
       ${statusIcon}
       <b>${esc(generationJobCenterLabel(job))}</b>`;
-  return `<article class="studio-wall-card studio-wall-pending ${audioJob ? "studio-audio-wall-card studio-audio-wall-pending" : ""} ${aspectClass} ${isFailed ? "failed" : ""}" data-aspect-ratio="${esc(aspectRatio)}" data-media-ratio="${esc(mediaRatio)}" data-wall-order="${esc(orderIndex)}" data-generation-job-id="${esc(job.id)}" data-generation-job-status="${esc(job.status || "queued")}" data-generation-cancel-locked="${cancelState.reason === "provider_billing_locked" ? "true" : "false"}" style="--media-ratio:${esc(mediaRatio)};--wall-aspect-ratio:${esc(aspectRatioToCss(aspectRatio))};aspect-ratio:var(--wall-aspect-ratio);order:${esc(orderIndex)}">
+  return `<article class="studio-wall-card studio-wall-pending ${audioJob ? "studio-audio-wall-card studio-audio-wall-pending" : ""} ${aspectClass} ${isFailed ? "failed" : ""}" data-aspect-ratio="${esc(aspectRatio)}" data-media-ratio="${esc(mediaRatio)}" data-wall-order="${esc(orderIndex)}" data-generation-job-id="${esc(job.id)}" data-generation-client-job-id="${esc(job.clientJobId || job.id || "")}" data-generation-job-status="${esc(job.status || "queued")}" data-generation-cancel-locked="${cancelState.reason === "provider_billing_locked" ? "true" : "false"}" style="--media-ratio:${esc(mediaRatio)};--wall-aspect-ratio:${esc(aspectRatioToCss(aspectRatio))};aspect-ratio:var(--wall-aspect-ratio);order:${esc(orderIndex)}">
     ${audioJob ? audioWallPreview(job, { pending: true }) : ""}
     <div class="studio-wall-pending-controls" aria-label="${esc(statusLabel)}">
       ${isFailed ? `<div class="studio-wall-failed-center">${statusBody}
@@ -7835,7 +7874,8 @@ function pendingResultJobs(projectItem, types) {
   const optimistic = (state.optimisticGenerationJobs || []).filter((job) => job.projectId === projectItem.id);
   const serverJobs = state.db?.generationJobs || [];
   const serverIds = new Set(serverJobs.map((job) => job.id));
-  return [...optimistic.filter((job) => !serverIds.has(job.id)), ...serverJobs]
+  const serverClientIds = new Set(serverJobs.map((job) => job.clientJobId).filter(Boolean));
+  return [...optimistic.filter((job) => !serverIds.has(job.id) && !serverClientIds.has(job.clientJobId || job.id)), ...serverJobs]
     .filter((job) => job.projectId === projectItem.id && !shouldHideGenerationJob(job) && ["queued", "processing", "failed"].includes(job.status))
     .filter((job) => job.type === "video"
       ? step === videoStudioStep(job.step)
@@ -13940,7 +13980,8 @@ function optimisticGenerationJobs(name, count, options = {}) {
   if (name !== "generate-image") return [];
   const current = project();
   const aspectRatio = options.aspectRatio || current.image?.aspectRatio || "9:16";
-  const type = /seedance|veo|sora|video|omni/i.test(String(current.image?.model || "")) ? "video" : "image";
+  const selectedModel = options.model || current.image?.model || "GPT Image 2";
+  const type = /seedance|veo|sora|video|omni/i.test(String(selectedModel || "")) ? "video" : "image";
   const createdAt = new Date().toISOString();
   return Array.from({ length: count }, (_, index) => ({
     id: `optimistic_${Date.now()}_${index}_${Math.random().toString(16).slice(2)}`,
@@ -13952,13 +13993,16 @@ function optimisticGenerationJobs(name, count, options = {}) {
     stage: options.advancePrompt ? "prompt_advanced" : "queued",
     prompt: options.prompt || "",
     promptSnapshot: options.prompt || "",
+    model: selectedModel,
+    resolution: options.resolution || current.image?.resolution || "2K",
     aspectRatio,
     optimistic: true,
+    clientJobId: "",
     createdAt,
     timelineAt: createdAt,
     batchIndex: count > 1 ? index + 1 : undefined,
     batchCount: count > 1 ? count : undefined
-  }));
+  })).map((job) => ({ ...job, clientJobId: job.id }));
 }
 
 function mergeSubmittedGenerationJobs(db, queuedJobs = []) {
@@ -13967,8 +14011,9 @@ function mergeSubmittedGenerationJobs(db, queuedJobs = []) {
   if (!Array.isArray(queuedJobs) || !queuedJobs.length) return cleanDb;
   const existingJobs = cleanDb.generationJobs || [];
   const existingIds = new Set(existingJobs.map((job) => job.id).filter(Boolean));
+  const existingClientIds = new Set(existingJobs.map((job) => job.clientJobId).filter(Boolean));
   const missingJobs = queuedJobs
-    .filter((job) => job?.id && !existingIds.has(job.id) && !shouldHideGenerationJob(job));
+    .filter((job) => job?.id && !existingIds.has(job.id) && !existingClientIds.has(job.clientJobId) && !shouldHideGenerationJob(job));
   if (!missingJobs.length) return cleanDb;
   return {
     ...cleanDb,
@@ -13989,6 +14034,7 @@ async function generate(name, event = null) {
   lockGenerationSubmitLayout(name);
   const count = name === "generate-image" ? imageBatchCount(project()) : name === "generate-ugc" ? videoBatchCount(project()) : 1;
   const optimisticJobs = optimisticGenerationJobs(name, count, generationOptions);
+  const clientJobIds = name === "generate-image" ? optimisticJobs.map((job) => job.id) : [];
   const optimisticIds = new Set(optimisticJobs.map((job) => job.id));
   try {
     markGenerateTriggerSubmitting(event?.currentTarget);
@@ -13996,7 +14042,7 @@ async function generate(name, event = null) {
       generating: true,
       optimisticGenerationJobs: [...(state.optimisticGenerationJobs || []), ...optimisticJobs]
     });
-    const responseDb = await api(`/projects/${state.projectId}/generate`, { method: "POST", body: JSON.stringify({ action: name, step: state.step, count, ...generationOptions }) });
+    const responseDb = await api(`/projects/${state.projectId}/generate`, { method: "POST", body: JSON.stringify({ action: name, step: state.step, count, clientJobIds, ...generationOptions }) });
     const db = mergeSubmittedGenerationJobs(responseDb, responseDb?.queuedGenerationJobs || []);
     lockGenerationSubmitLayout(name, 900);
     set({
@@ -14281,9 +14327,10 @@ function patchStudioGenerationCardsFromDb(nextDb) {
   if (state.page !== "project" || !state.projectId || !nextDb) return false;
   let patched = false;
   const jobs = new Map((nextDb.generationJobs || []).map((job) => [job.id, job]));
+  const jobsByClientId = new Map((nextDb.generationJobs || []).filter((job) => job.clientJobId).map((job) => [job.clientJobId, job]));
   withStableStudioWallMutation(() => {
     document.querySelectorAll(".studio-wall-pending[data-generation-job-id]").forEach((card) => {
-      const job = jobs.get(card.dataset.generationJobId);
+      const job = jobs.get(card.dataset.generationJobId) || jobsByClientId.get(card.dataset.generationClientJobId);
       if (!job || shouldHideGenerationJob(job)) {
         card.remove();
         patched = true;
@@ -14296,7 +14343,11 @@ function patchStudioGenerationCardsFromDb(nextDb) {
       const nextAspectRatio = wallAspectRatioForItem(job);
       if (currentStatus === (job.status || "queued") && currentCancelLocked === nextCancelLocked && currentAspectRatio === nextAspectRatio) return;
       const orderIndex = Number(card.dataset.wallOrder || getComputedStyle(card).order || 0);
-      card.outerHTML = studioPendingWallCard(job, Number.isFinite(orderIndex) ? orderIndex : 0);
+      const template = document.createElement("template");
+      template.innerHTML = studioPendingWallCard(job, Number.isFinite(orderIndex) ? orderIndex : 0);
+      const nextCard = template.content.querySelector(".studio-wall-pending");
+      if (nextCard) syncPreservedStudioWallCard(card, nextCard);
+      else card.outerHTML = studioPendingWallCard(job, Number.isFinite(orderIndex) ? orderIndex : 0);
       patched = true;
     });
   });
@@ -14308,6 +14359,8 @@ function studioWallDomCardKey(card) {
   if (!card) return "";
   const resultId = card.getAttribute("data-result-id");
   if (resultId) return `result:${resultId}`;
+  const clientJobId = card.getAttribute("data-generation-client-job-id");
+  if (clientJobId) return `client-job:${clientJobId}`;
   const jobId = card.getAttribute("data-generation-job-id");
   if (jobId) return `job:${jobId}`;
   return "";
@@ -14328,20 +14381,30 @@ function canPreserveStudioWallCard(existingCard, nextCard) {
   const key = studioWallDomCardKey(existingCard);
   if (!key || key !== studioWallDomCardKey(nextCard)) return false;
   if (key.startsWith("result:")) return true;
+  if (key.startsWith("client-job:")) return true;
   return studioWallPendingSignature(existingCard) === studioWallPendingSignature(nextCard);
 }
 
 function syncPreservedStudioWallCard(existingCard, nextCard) {
-  const order = nextCard.getAttribute("data-wall-order");
-  if (order !== null) existingCard.setAttribute("data-wall-order", order);
-  else existingCard.removeAttribute("data-wall-order");
-  ["data-aspect-ratio", "data-media-ratio"].forEach((name) => {
+  [
+    "data-wall-order",
+    "data-aspect-ratio",
+    "data-media-ratio",
+    "data-generation-job-id",
+    "data-generation-client-job-id",
+    "data-generation-job-status",
+    "data-generation-cancel-locked"
+  ].forEach((name) => {
     const value = nextCard.getAttribute(name);
     if (value === null) existingCard.removeAttribute(name);
     else existingCard.setAttribute(name, value);
   });
   existingCard.className = nextCard.className;
   existingCard.style.cssText = nextCard.style.cssText;
+  if (existingCard.classList.contains("studio-wall-pending") || nextCard.classList.contains("studio-wall-pending")) {
+    existingCard.innerHTML = nextCard.innerHTML;
+    return;
+  }
   const existingSelect = existingCard.querySelector(".studio-wall-select-toggle");
   const nextSelect = nextCard.querySelector(".studio-wall-select-toggle");
   if (existingSelect && nextSelect) {
@@ -14446,7 +14509,7 @@ function reconcileStudioResultWall(existingWall, wallHtml) {
     }
     else {
       changed = true;
-      if (key?.startsWith("job:")) desiredCard.classList.add("is-wall-entering");
+      if (key?.startsWith("job:") || key?.startsWith("client-job:")) desiredCard.classList.add("is-wall-entering");
     }
     if (desiredCard === referenceNode) {
       referenceNode = referenceNode.nextElementSibling;

@@ -2449,6 +2449,7 @@ function publicGenerationJob(job = {}) {
     imageHeight: job.imageHeight,
     batchIndex: job.batchIndex,
     batchCount: job.batchCount,
+    clientJobId: job.clientJobId || "",
     providerBillingLocked: generationJobProviderBillingLocked(job),
     cancelLockedAt: job.cancelLockedAt,
     cancelLockReason: job.cancelLockReason || "",
@@ -5588,6 +5589,9 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
   const promptValue = action === "generate-image" || action === "generate-ugc" ? sanitizeAgentText(options.prompt ?? "").slice(0, 3000) : "";
   const promptOverride = action === "generate-image" ? sanitizeAgentText(options.promptOverride || "").slice(0, 3000) : "";
   const shouldAdvancePrompt = action === "generate-image" && options.advancePrompt === true;
+  const clientJobIds = Array.isArray(options.clientJobIds)
+    ? options.clientJobIds.map((id) => String(id || "").trim()).filter(Boolean).slice(0, batchCount)
+    : [];
   const jobIds = Array.from({ length: batchCount }, () => crypto.randomUUID());
   const payload = await mutateDb(async (currentDb) => {
     const project = findProject(currentDb, projectId, user);
@@ -5673,6 +5677,7 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
       model: requestedModel,
       provider: requestedProvider,
       unit: cost.unit,
+      clientJobId: clientJobIds[index] || undefined,
       internalPromptOverride: promptOverride || undefined,
       internalPromptAdvanced: shouldEnhancePrompt || undefined,
       batchIndex: batchCount > 1 ? index + 1 : undefined,
