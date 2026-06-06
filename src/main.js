@@ -7198,6 +7198,7 @@ function autoPanel(p) {
   const scriptMode = auto.audioScriptMode || "Write for me";
   const voicePreset = auto.voicePreset || "Malay Soft Sell";
   const promptText = auto.audioPrompt || "";
+  const audioProvider = auto.audioProvider || "doubao302";
   const cloneAudioUrl = auto.cloneAudioUrl || "";
   const isVoiceoverMode = mode === "Voiceover";
   const isCloneMode = mode === "Change Voice";
@@ -7218,7 +7219,7 @@ function autoPanel(p) {
         ${audioModeButton("Translate", "languages", "Insert reference", mode)}
       </div>
       <div class="audio-main-bar">
-        ${isVoiceoverMode ? audioPromptWell(promptText, language, scriptMode) : isCloneMode ? audioCloneWell(promptText, cloneAudioUrl) : audioFileInsertWell()}
+        ${isVoiceoverMode ? audioPromptWell(promptText, language, scriptMode, audioProvider) : isCloneMode ? audioCloneWell(promptText, cloneAudioUrl) : audioFileInsertWell()}
         ${mode === "Translate" ? audioLanguagePicker(language) : audioVoicePresetPicker(voicePreset)}
         <button class="audio-generate-button ${isVoiceoverMode && !promptText.trim() ? "is-empty" : ""}" type="button" data-action="generate-audio">
           <b>Generate Audio</b>
@@ -7229,11 +7230,52 @@ function autoPanel(p) {
   </section>`;
 }
 
-function audioPromptWell(promptText, language, scriptMode) {
+function audioProviderOptions() {
+  return [
+    { value: "doubao302", provider: "doubao", title: "Doubao Voice", description: "Default 302 Doubao voiceover" },
+    { value: "seedance", provider: "seedance", title: "Seedance", description: "Video model, use Video page to generate" },
+    { value: "minimax", provider: "minimax", title: "MiniMax", description: "Official MiniMax TTS" },
+    { value: "elevenlabs", provider: "elevenlabs", title: "ElevenLabs", description: "Official ElevenLabs TTS" }
+  ];
+}
+
+function audioProviderLogo(provider) {
+  if (provider === "doubao") return `<span class="provider-logo provider-logo-doubao" aria-hidden="true">${icon("audio-lines", 15)}</span>`;
+  if (provider === "seedance") return `<span class="provider-logo provider-logo-seedance" aria-hidden="true">S</span>`;
+  if (provider === "elevenlabs") return `<span class="provider-logo provider-logo-elevenlabs" aria-hidden="true">E</span>`;
+  return providerLogo(provider);
+}
+
+function audioProviderPicker(selectedProvider = "doubao302") {
+  const providers = audioProviderOptions();
+  const selected = providers.find((item) => item.value === selectedProvider) || providers[0];
+  return `<details class="audio-provider-picker">
+    <summary aria-label="Select audio model">
+      <span class="audio-provider-current-icon" data-audio-provider-current-icon>${audioProviderLogo(selected.provider)}</span>
+      <span class="audio-provider-current-text"><b data-audio-provider-current>${esc(selected.title)}</b></span>
+      ${icon("chevron-down", 14)}
+    </summary>
+    <div class="audio-provider-menu">
+      ${providers.map((item) => {
+        const active = item.value === selected.value;
+        return `<button class="audio-provider-option ${active ? "active" : ""}" type="button" data-field-set="auto.audioProvider" data-value="${esc(item.value)}" data-label="${esc(item.title)}" aria-pressed="${active ? "true" : "false"}">
+          <span class="audio-provider-option-icon">${audioProviderLogo(item.provider)}</span>
+          <span class="audio-provider-option-copy">
+            <b>${esc(item.title)}</b>
+            <small>${esc(item.description)}</small>
+          </span>
+          <span class="audio-provider-option-check" aria-hidden="true">${active ? icon("check", 17) : ""}</span>
+        </button>`;
+      }).join("")}
+    </div>
+  </details>`;
+}
+
+function audioPromptWell(promptText, language, scriptMode, audioProvider = "doubao302") {
   return `<div class="audio-prompt-well">
     <textarea data-field="auto.audioPrompt" data-audio-prompt rows="3" placeholder="Describe the voice, scene, and emotion you imagine...">${esc(promptText)}</textarea>
     <div class="audio-control-row">
-      <span class="audio-model-chip">${icon("audio-lines", 16)} Doubao Voice</span>
+      ${audioProviderPicker(audioProvider)}
       ${audioSegment("auto.audioLanguage", [["Malay", "Malay"], ["English", "English"], ["Chinese", "Chinese"], ["Indonesian", "Indonesian"]], language)}
       ${audioSegment("auto.audioScriptMode", [["Write for me", "Write for me"], ["Use my script", "Use my script"]], scriptMode)}
     </div>
@@ -7334,6 +7376,7 @@ function patchAudioModeDom(mode = project().auto?.audioMode || "Voiceover") {
   const language = auto.audioLanguage || "Malay";
   const scriptMode = auto.audioScriptMode || "Write for me";
   const voicePreset = auto.voicePreset || "Malay Soft Sell";
+  const audioProvider = auto.audioProvider || "doubao302";
   const isVoiceoverMode = mode === "Voiceover";
   const isCloneMode = mode === "Change Voice";
   const cloneUrlInput = document.querySelector("[data-audio-clone-url]");
@@ -7341,7 +7384,7 @@ function patchAudioModeDom(mode = project().auto?.audioMode || "Voiceover") {
   const inputSlot = mainBar.querySelector(".audio-prompt-well, .audio-file-insert-card");
   const pickerSlot = mainBar.querySelector(".audio-preset-picker");
   if (!inputSlot || !pickerSlot) return false;
-  inputSlot.outerHTML = isVoiceoverMode ? audioPromptWell(promptText, language, scriptMode) : isCloneMode ? audioCloneWell(promptText, cloneAudioUrl) : audioFileInsertWell();
+  inputSlot.outerHTML = isVoiceoverMode ? audioPromptWell(promptText, language, scriptMode, audioProvider) : isCloneMode ? audioCloneWell(promptText, cloneAudioUrl) : audioFileInsertWell();
   pickerSlot.outerHTML = mode === "Translate" ? audioLanguagePicker(language) : audioVoicePresetPicker(voicePreset);
   const generateButton = mainBar.querySelector(".audio-generate-button");
   if (generateButton) generateButton.classList.toggle("is-empty", (isVoiceoverMode || isCloneMode) && !promptText.trim());
@@ -12647,6 +12690,8 @@ async function generateAudio(event = null) {
   const current = project();
   const mode = current.auto?.audioMode || "Voiceover";
   if (mode === "Translate") return notify("Audio translate is not connected yet.");
+  const audioProvider = current.auto?.audioProvider || "doubao302";
+  if (mode === "Voiceover" && audioProvider === "seedance") return notify("Seedance is a video model. Use the Video page for Seedance.");
   const promptInput = document.querySelector("[data-audio-prompt]");
   const promptText = String(promptInput?.value || current.auto?.audioPrompt || "").trim();
   if (!promptText) return notify(mode === "Change Voice" ? "Write the clone script first." : "Describe the voice first.");
@@ -12661,9 +12706,10 @@ async function generateAudio(event = null) {
     if (trigger) {
       trigger.disabled = true;
       trigger.classList.add("is-generating");
-      trigger.innerHTML = `<b>Generating...</b><span>${mode === "Change Voice" ? "Wuyin Clone" : "Doubao"}</span>`;
+      const providerTitle = audioProviderOptions().find((item) => item.value === audioProvider)?.title || "Doubao";
+      trigger.innerHTML = `<b>Generating...</b><span>${mode === "Change Voice" ? "Wuyin Clone" : providerTitle}</span>`;
     }
-    notify(mode === "Change Voice" ? "Generating cloned voice..." : "Generating Doubao audio...");
+    notify(mode === "Change Voice" ? "Generating cloned voice..." : "Generating audio...");
     const endpoint = mode === "Change Voice" ? "clone" : "generate";
     const db = await api(`/projects/${state.projectId}/audio/${endpoint}`, {
       method: "POST",
@@ -12671,6 +12717,7 @@ async function generateAudio(event = null) {
       body: JSON.stringify({
         prompt: promptText,
         referenceAudioUrl: cloneAudioUrl,
+        provider: audioProvider,
         voicePreset: current.auto?.voicePreset || "Malay Soft Sell",
         language: current.auto?.audioLanguage || "Malay"
       })
@@ -13014,6 +13061,23 @@ function setFieldSetActive(field, value, source = null) {
     document.querySelectorAll("[data-audio-language-flag]").forEach((el) => {
       el.textContent = audioLanguageFlag(value);
     });
+  }
+  if (field === "auto.audioProvider") {
+    const selected = audioProviderOptions().find((item) => item.value === value) || audioProviderOptions()[0];
+    document.querySelectorAll("[data-audio-provider-current]").forEach((el) => {
+      el.textContent = selected.title;
+    });
+    document.querySelectorAll("[data-audio-provider-current-icon]").forEach((el) => {
+      el.innerHTML = audioProviderLogo(selected.provider);
+    });
+    document.querySelectorAll('[data-field-set="auto.audioProvider"]').forEach((el) => {
+      const active = el.dataset.value === selected.value;
+      el.classList.toggle("active", active);
+      el.setAttribute("aria-pressed", active ? "true" : "false");
+      const check = el.querySelector(".audio-provider-option-check");
+      if (check) check.innerHTML = active ? icon("check", 17) : "";
+    });
+    window.lucide?.createIcons();
   }
   if (field === "original.provider") {
     const provider = originalProviderValue(value);
