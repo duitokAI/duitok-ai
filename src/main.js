@@ -5915,8 +5915,7 @@ function studioDockCredit(meta = {}) {
 }
 
 function imagePanel(p) {
-  const imageModelValues = imageModelOptions().map((item) => item.value);
-  const selectedModel = imageModelValues.includes(p.image.model) ? p.image.model : String(p.image.model || "").toLowerCase().includes("pro") ? "Nano Banana Pro" : "GPT Image 2";
+  const selectedModel = imageModelValue(p);
   const modeOptions = ["Create Image", "Virtualize (Poster/Ad)"];
   const selectedMode = modeOptions.includes(p.image.mode) ? p.image.mode : "Create Image";
   const imageTypes = ["image", "video", "visual_card"];
@@ -6352,6 +6351,14 @@ function imageModelOptions() {
       badge: ""
     }
   ];
+}
+
+function imageModelValue(p = project()) {
+  const imageModelValues = imageModelOptions().map((item) => item.value);
+  const model = p?.image?.model || "";
+  if (imageModelValues.includes(model)) return model;
+  if (String(model).toLowerCase().includes("pro")) return "Nano Banana Pro";
+  return "GPT Image 2";
 }
 
 function imagePromptMediaPreview(item = {}) {
@@ -6814,7 +6821,7 @@ function videoAudioValue(p = project()) {
 }
 
 function videoModelValue(p = project()) {
-  const value = String(p?.ugc?.provider || "Seedance 2.0 Fast");
+  const value = String(p?.ugc?.provider || "Veo 3.1");
   if (value.trim() === "Seedance 2.0") return "Seedance 2.0";
   if (/gemini.*omni|omni.*gemini/i.test(value)) return "Gemini Omni";
   if (/grok.*video|video.*grok|grok.*imagine/i.test(value)) return "Grok Imagine Video";
@@ -6826,7 +6833,7 @@ function videoModelValue(p = project()) {
   if (/hailuo|minimax/i.test(value)) return "MiniMax Hailuo 2.3";
   if (/seedance.*fast|fast.*seedance/i.test(value)) return "Seedance 2.0 Fast";
   if (/seedance/i.test(value)) return "Seedance 2.0 Fast";
-  return "Seedance 2.0 Fast";
+  return "Veo 3.1";
 }
 
 function videoCreditEstimate(p = project()) {
@@ -13939,14 +13946,13 @@ function optimisticGenerationJobs(name, count, options = {}) {
   if (name !== "generate-image") return [];
   const current = project();
   const aspectRatio = options.aspectRatio || current.image?.aspectRatio || "9:16";
-  const type = /seedance|veo|sora|video|omni/i.test(String(current.image?.model || "")) ? "video" : "image";
   const createdAt = new Date().toISOString();
   return Array.from({ length: count }, (_, index) => ({
     id: `optimistic_${Date.now()}_${index}_${Math.random().toString(16).slice(2)}`,
     projectId: state.projectId,
     action: name,
     step: state.step || "image",
-    type,
+    type: "image",
     status: "queued",
     stage: options.advancePrompt ? "prompt_advanced" : "queued",
     prompt: options.prompt || "",
@@ -14076,7 +14082,7 @@ function syncImageConsoleBeforeGenerate(name) {
   const consoleEl = document.querySelector("[data-image-generate-console]");
   const selectedAspectRatio = consoleEl?.querySelector(".image-aspect-ratio-menu summary b")?.textContent?.trim();
   const selectedResolution = consoleEl?.querySelector(".image-resolution-menu summary b")?.textContent?.trim();
-  const selectedModel = latestImageSelection?.model || current.image?.model || "GPT Image 2";
+  const selectedModel = latestImageSelection?.model || imageModelValue(current);
   return {
     prompt: value,
     model: selectedModel,

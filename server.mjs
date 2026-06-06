@@ -2037,6 +2037,28 @@ function isVideoMediaModel(model) {
   return ["Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control", "MiniMax Hailuo 2.3"].includes(internalMediaModel(model));
 }
 
+function isImageMediaModel(model) {
+  return ["GPT Image 2", "Seedream 5.0 Lite", "Qwen Image 2.0", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine"].includes(internalMediaModel(model));
+}
+
+function resolveImageGenerationModel(options = {}, project = {}) {
+  const requested = internalMediaModel(options.model || "");
+  if (isImageMediaModel(requested)) return requested;
+  const persistedImage = internalMediaModel(project?.image?.model || "");
+  if (isImageMediaModel(persistedImage)) return persistedImage;
+  return "GPT Image 2";
+}
+
+function resolveVideoGenerationModel(options = {}, project = {}) {
+  const requested = internalMediaModel(options.model || "");
+  if (isVideoMediaModel(requested)) return requested;
+  const persistedUgc = internalMediaModel(project?.ugc?.provider || "");
+  if (isVideoMediaModel(persistedUgc)) return persistedUgc;
+  const persistedImage = internalMediaModel(project?.image?.model || "");
+  if (isVideoMediaModel(persistedImage)) return persistedImage;
+  return "Veo 3.1";
+}
+
 function imageCreditForModel(model = "") {
   model = internalMediaModel(model);
   if (model === "Nano Banana Pro") return 0.2;
@@ -2759,11 +2781,15 @@ function imageProviderCostFor(project, model, provider) {
 }
 
 function generationCostFor(db, project, action, generated) {
-  const model = internalMediaModel(project.image?.model);
+  const model = action === "generate-ugc" ? resolveVideoGenerationModel({}, project) : resolveImageGenerationModel({}, project);
   const provider = generated.provider || providerForMediaModel(model);
   if (action === "clone-prompt") return { costRm: 0.01, costRmb: 0, costUsd: 0, model: generated.model || grsaiCloneModel, provider: "grsai", unit: "vision" };
+  if (action === "generate-ugc") {
+    const costs = { ...defaultModelCosts(), ...(db.modelCosts || {}) };
+    return { model, provider, ...(costs[model] || { costRm: 0, costRmb: 0, unit: "video" }) };
+  }
   if (action !== "generate-image") return { costRm: 0.01, costRmb: 0, costUsd: 0, model: "APIMart Text", provider: "apimart", unit: "text" };
-  const providerCost = !isVideoMediaModel(model) ? imageProviderCostFor(project, model, provider) : null;
+  const providerCost = imageProviderCostFor(project, model, provider);
   if (providerCost) return { model, provider, ...providerCost };
   const costs = { ...defaultModelCosts(), ...(db.modelCosts || {}) };
   return { model, provider, ...(costs[model] || { costRm: 0, costRmb: 0, unit: "unknown" }) };
@@ -4485,11 +4511,10 @@ function wuyinOmniSizeFromAspectRatio(aspectRatio) {
 
 function generationAspectRatioForProject(project, action = "generate-image", step = "") {
   if (action === "generate-image") {
-    const model = internalMediaModel(project?.image?.model);
-    return isVideoMediaModel(model) ? videoAspectRatioFromProject(project, model) || "16:9" : imageAspectRatioFromProject(project);
+    return imageAspectRatioFromProject(project);
   }
   if (action === "generate-ugc" || step === "ugc") {
-    const model = internalMediaModel(project?.image?.model || project?.ugc?.provider);
+    const model = resolveVideoGenerationModel({}, project);
     return videoAspectRatioFromProject(project, model) || "";
   }
   const originalRatio = String(project?.original?.aspectRatio || "").match(/(\d+)\s*[:/]\s*(\d+)/);
@@ -5343,17 +5368,12 @@ function assertGeneratedVideo(generated, model = "video") {
 async function generateWithProvider(project, action, step, tracker = null) {
   if (action === "clone-prompt") return generateVideoPromptWithGrsai(project);
   if (action === "generate-ugc") {
-    const model = internalMediaModel(project.image?.model || project.ugc?.provider || "Seedance 2.0");
-    if (!isVideoMediaModel(model)) {
-      const error = new Error(`请选择视频模型：${generationModelOptionsText("video")}。`);
-      error.status = 400;
-      throw error;
-    }
+    const model = resolveVideoGenerationModel({}, project);
     return generateVideoThroughProvider(providerForMediaModel(model), model, project, tracker);
   }
   if (action === "generate-image") {
-    const model = internalMediaModel(project.image?.model);
-    if (!allowedMediaModels.has(model)) {
+    const model = resolveImageGenerationModel({}, project);
+    if (!isImageMediaModel(model)) {
       const error = new Error(`请选择支持的模型：${generationModelOptionsText("auto")}。`);
       error.status = 400;
       throw error;
@@ -5617,28 +5637,18 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
       }
     }
     if (action === "generate-ugc") {
-      const persistedVideoModel = isVideoMediaModel(project.image?.model) ? project.image.model : "";
-      const providerLabel = String(options.model || project.ugc?.provider || persistedVideoModel || "Veo 3.1");
-      const selectedModel = /seedance/i.test(providerLabel) ? "Seedance 2.0" : internalMediaModel(providerLabel);
-      if (!isVideoMediaModel(selectedModel)) {
-        const error = new Error(`请选择视频模型：${generationModelOptionsText("video")}。`);
-        error.status = 400;
-        throw error;
-      }
+      const selectedModel = resolveVideoGenerationModel(options, project);
       project.image ||= {};
+      project.ugc ||= {};
       project.image.model = selectedModel;
+      project.ugc.provider = selectedModel;
       project.image.aspectRatio = String(options.aspectRatio || project.ugc?.aspectRatio || project.image.aspectRatio || "16:9").replace(/\s*\(.+\)\s*$/, "");
       project.image.resolution = String(options.resolution || project.ugc?.quality || project.image.resolution || "720p");
       project.image.duration = String(options.duration || project.ugc?.duration || project.image.duration || "8").match(/\d+/)?.[0] || "8";
     }
     if (action === "generate-image") {
       project.image ||= {};
-      const selectedModel = internalMediaModel(options.model || project.image.model || "GPT Image 2");
-      if (!allowedMediaModels.has(selectedModel)) {
-        const error = new Error(`请选择支持的模型：${generationModelOptionsText("auto")}。`);
-        error.status = 400;
-        throw error;
-      }
+      const selectedModel = resolveImageGenerationModel(options, project);
       project.image.model = selectedModel;
       if (options.prompt !== undefined || options.model || options.aspectRatio || options.resolution) {
         delete project.image.editSourceImageUrl;
@@ -5650,17 +5660,18 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
     }
     const creditsToCharge = creditChargeFor(project, action, currentDb);
     assertGenerationAccess(currentDb, user, roundCredits(creditsToCharge * batchCount), batchCount);
-    const cost = generationCostFor(currentDb, project, action, { provider: providerForMediaModel(project.image?.model) });
+    const generationModel = action === "generate-ugc" ? resolveVideoGenerationModel({}, project) : resolveImageGenerationModel({}, project);
+    const cost = generationCostFor(currentDb, project, action, { provider: providerForMediaModel(generationModel) });
     const requestedModel = cost.model;
     const requestedProvider = cost.provider;
     const requestedProviderModel = action === "generate-image"
       ? imageProviderModelFromProject(project, requestedProvider)
       : cost.model;
-    const providerPlanData = action === "generate-image" && !isVideoMediaModel(project.image?.model)
+    const providerPlanData = action === "generate-image"
       ? imageProviderPlanForModel(project.image?.model, project)
       : { providerPlan: [requestedProvider], configuredProviders: providerConfigured(requestedProvider) ? [requestedProvider] : [], skippedProviders: providerConfigured(requestedProvider) ? [] : [requestedProvider] };
     const shouldEnhancePrompt = shouldAdvancePrompt
-      || (action === "generate-image" && !isVideoMediaModel(project.image?.model) && referenceImageUrlsForProject(currentDb, project).length > 0);
+      || (action === "generate-image" && referenceImageUrlsForProject(currentDb, project).length > 0);
     const aspectRatio = generationAspectRatioForProject(project, action, step);
     const createdAt = new Date().toISOString();
     const jobs = jobIds.map((jobId, index) => ({
@@ -5669,7 +5680,7 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
       projectId,
       action,
       step,
-      type: action === "generate-ugc" ? "video" : action === "generate-image" && isVideoMediaModel(project.image?.model) ? "video" : action === "generate-image" ? "image" : "text",
+      type: action === "generate-ugc" ? "video" : action === "generate-image" ? "image" : "text",
       status: "queued",
       stage: shouldEnhancePrompt ? "prompt_advanced" : "queued",
       providerStatus: "queued",
