@@ -5529,7 +5529,12 @@ function studioResultWall(p, meta = {}) {
   const timeline = [
     ...pending.map((job, index) => ({ kind: "pending", item: job, index, time: studioWallTimelineTime(job), rank: studioWallTimelineRank(job, index) })),
     ...items.map((item, index) => ({ kind: "result", item, index, time: studioWallTimelineTime(item), rank: studioWallTimelineRank(item, index) }))
-  ].sort((a, b) => (b.time - a.time) || (a.rank - b.rank));
+  ].sort((a, b) => {
+    const aTail = a.kind === "pending" && a.item?.pinToWallTail && !a.item?.failed;
+    const bTail = b.kind === "pending" && b.item?.pinToWallTail && !b.item?.failed;
+    if (aTail !== bTail) return aTail ? 1 : -1;
+    return (b.time - a.time) || (a.rank - b.rank);
+  });
   const cards = timeline.map((entry, orderIndex) => entry.kind === "pending"
     ? studioPendingWallCard(entry.item, orderIndex)
     : studioWallCard(entry.item, entry.index, orderIndex));
@@ -13774,6 +13779,7 @@ function optimisticGenerationJobs(name, count, options = {}) {
     promptSnapshot: options.prompt || "",
     aspectRatio,
     optimistic: true,
+    pinToWallTail: true,
     createdAt,
     timelineAt: createdAt,
     batchIndex: count > 1 ? index + 1 : undefined,
@@ -13787,7 +13793,9 @@ function mergeSubmittedGenerationJobs(db, queuedJobs = []) {
   if (!Array.isArray(queuedJobs) || !queuedJobs.length) return cleanDb;
   const existingJobs = cleanDb.generationJobs || [];
   const existingIds = new Set(existingJobs.map((job) => job.id).filter(Boolean));
-  const missingJobs = queuedJobs.filter((job) => job?.id && !existingIds.has(job.id) && !shouldHideGenerationJob(job));
+  const missingJobs = queuedJobs
+    .filter((job) => job?.id && !existingIds.has(job.id) && !shouldHideGenerationJob(job))
+    .map((job) => job.action === "generate-image" ? { ...job, pinToWallTail: true } : job);
   if (!missingJobs.length) return cleanDb;
   return {
     ...cleanDb,
@@ -13987,13 +13995,20 @@ function preserveActiveGenerationState(incomingDb, currentDb = state.db, project
   const currentJobs = (currentDb.generationJobs || []).filter((job) => job.projectId === projectId);
   const incomingJobs = (incomingDb.generationJobs || []).filter((job) => job.projectId === projectId);
   const incomingJobIds = new Set(incomingJobs.map((job) => job.id));
+  const tailPinnedJobIds = new Set(currentJobs.filter((job) => job.pinToWallTail).map((job) => job.id).filter(Boolean));
   const incomingProject = (incomingDb.projects || []).find((item) => item.id === projectId);
   const incomingResultJobIds = new Set((incomingProject?.results || []).map((item) => item.generationJobId).filter(Boolean));
   const activeLocalJobs = currentJobs.filter((job) => !shouldHideGenerationJob(job) && ["queued", "processing"].includes(job.status));
   const missingActiveJobs = activeLocalJobs.filter((job) => job.id && !incomingJobIds.has(job.id) && !incomingResultJobIds.has(job.id));
-  if (!missingActiveJobs.length) return incomingDb;
+  const needsTailPinPatch = incomingJobs.some((job) => tailPinnedJobIds.has(job.id) && ["queued", "processing"].includes(job.status) && !job.pinToWallTail);
+  if (!missingActiveJobs.length && !needsTailPinPatch) return incomingDb;
   const currentProject = (currentDb.projects || []).find((item) => item.id === projectId);
-  const projectJobMap = new Map(incomingJobs.map((job) => [job.id, job]));
+  const projectJobMap = new Map(incomingJobs.map((job) => [
+    job.id,
+    tailPinnedJobIds.has(job.id) && ["queued", "processing"].includes(job.status)
+      ? { ...job, pinToWallTail: true }
+      : job
+  ]));
   missingActiveJobs.forEach((job) => projectJobMap.set(job.id, job));
   return {
     ...incomingDb,
