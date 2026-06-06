@@ -568,8 +568,8 @@ body,
 }
 
 .image-generate-console {
-  position: sticky;
-  bottom: 0;
+  position: relative;
+  bottom: auto;
   z-index: 10;
   display: grid;
   grid-template-columns: minmax(118px, 0.42fr) 54px minmax(380px, 1.45fr) minmax(220px, 0.52fr) minmax(210px, 0.48fr) minmax(150px, 0.36fr);
@@ -40101,54 +40101,6 @@ body:has(.studio-shell .image-higgsfield-mode),
   background-clip: border-box !important;
 }
 
-.studio-shell .image-higgsfield-mode > .image-generate-console {
-  overflow: visible !important;
-}
-
-.studio-shell .image-higgsfield-mode > .image-generate-console::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: calc(-1 * max(72px, env(safe-area-inset-bottom)));
-  height: max(72px, env(safe-area-inset-bottom));
-  background: #eadcf1;
-  pointer-events: none;
-}
-
-/* Image composer bottom strip collapse: do not draw a visible base below the
-   rounded composer. The page background is already locked above. */
-.studio-shell .image-higgsfield-mode > .image-generate-console::after {
-  display: none !important;
-  content: none !important;
-  height: 0 !important;
-  bottom: auto !important;
-  background: transparent !important;
-}
-
-.studio-shell .image-canvas-studio.image-higgsfield-mode,
-.studio-shell .image-higgsfield-mode {
-  padding-bottom: 0 !important;
-}
-
-/* Image composer dock position lock: keep the empty result row flexible so the
-   sticky composer sits at the bottom instead of leaving a visible floor below. */
-.studio-shell .image-canvas-studio.image-higgsfield-mode,
-.studio-shell .image-higgsfield-mode {
-  grid-template-rows: auto minmax(0, 1fr) auto !important;
-  align-content: stretch !important;
-}
-
-.studio-shell .image-higgsfield-mode > .studio-result-wall {
-  grid-row: 2 !important;
-  min-height: 0 !important;
-}
-
-.studio-shell .image-higgsfield-mode > .image-generate-console {
-  grid-row: 3 !important;
-  align-self: end !important;
-}
-
 /* Processing wall card: keep it minimal on the main result wall. */
 .studio-shell .image-higgsfield-mode .studio-wall-pending:not(.failed) > .studio-wall-pending-controls,
 .studio-shell .video-prompt-extractor-page .studio-wall-pending:not(.failed) > .studio-wall-pending-controls {
@@ -49413,6 +49365,19 @@ body:has(.studio-shell .image-higgsfield-mode.has-results),
   right: auto !important;
   bottom: auto !important;
   z-index: 12 !important;
+}
+
+.studio-shell .image-higgsfield-mode.is-empty {
+  grid-template-rows: 46px minmax(0, 1fr) auto !important;
+  align-content: stretch !important;
+}
+
+.studio-shell .image-higgsfield-mode.has-results > .image-generate-console,
+.studio-shell .image-higgsfield-mode.has-results > .image-generate-console:not(.is-compact),
+.studio-shell .image-higgsfield-mode.has-results > .image-generate-console:not(.is-compact).is-hover-expanded,
+.studio-shell .image-higgsfield-mode.has-results > .image-generate-console:not(.is-compact).has-open-menu,
+.studio-shell .image-higgsfield-mode.has-results > .image-generate-console:not(.is-compact).has-long-prompt {
+  grid-row: 3 !important;
 }
 
 /* Studio top gap lock: keep the creation tabs compact and prevent the Image
