@@ -2625,8 +2625,14 @@ function videoDurationFor(project, model = project.image?.model) {
   if (model === "Kling V3 Omni") return Number(project.image?.duration || process.env.APIMART_KLING_OMNI_DURATION || 5);
   if (model === "Kling V3 Motion Control") return Number(project.image?.duration || process.env.APIMART_KLING_MOTION_DURATION || 5);
   if (model === "MiniMax Hailuo 2.3") return Number(project.image?.duration || process.env.APIMART_HAILUO_2_3_DURATION || 6);
-  if (model === "Veo 3.1") return 8;
+  if (model === "Veo 3.1") return veo31Duration(project.image?.duration || process.env.CRUN_VEO_3_1_DURATION || 8);
   return 0;
+}
+
+function veo31Duration(value) {
+  const seconds = Number.parseInt(String(value || "").match(/\d+/)?.[0] || "", 10);
+  if ([4, 6, 8].includes(seconds)) return seconds;
+  return 8;
 }
 
 function roundCredits(value) {
@@ -4139,12 +4145,12 @@ function wuyinImageBody(project, prompt) {
 
 function crunVeo31Body(project, prompt) {
   const aspectRatio = String(process.env.CRUN_VEO_3_1_FORCE_ASPECT_RATIO || videoAspectRatioFromProject(project, "Veo 3.1", process.env.CRUN_VEO_3_1_ASPECT_RATIO || "9:16") || "9:16").trim();
-  const duration = Number(process.env.CRUN_VEO_3_1_DURATION || videoDurationFor(project, "Veo 3.1") || 8);
+  const duration = veo31Duration(videoDurationFor(project, "Veo 3.1"));
   return {
     model: crunVeo31Model,
     prompt,
     aspect_ratio: aspectRatio,
-    duration: Number.isFinite(duration) && duration > 0 ? duration : 8
+    duration
   };
 }
 

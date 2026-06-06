@@ -6608,7 +6608,7 @@ function videoModelOptions() {
         modes: ["Text to Video", "Image to Video", "Audio"],
         aspectRatios: ["16:9", "9:16"],
         qualities: ["720p", "1080p"],
-        durations: ["8s"],
+        durations: ["4s", "6s", "8s"],
         audio: ["On", "Off"]
       }
     },
@@ -6738,11 +6738,18 @@ function normalizedVideoSettingForModel(model, field, value) {
     return options.includes(normalized) ? normalized : options[0] || "720p";
   }
   if (field === "ugc.duration") {
-    const range = videoDurationRange(capabilities.durations || ["8s"]);
+    const options = capabilities.durations || ["8s"];
+    const allowed = options
+      .map((item) => Number.parseInt(String(item).match(/\d+/)?.[0] || "", 10))
+      .filter((item) => Number.isFinite(item) && item > 0);
     const seconds = Number.parseInt(String(value || "").match(/\d+/)?.[0] || "", 10);
-    const fallback = Number.parseInt(String((capabilities.durations || ["8s"])[0] || "8s"), 10) || range.min;
+    const fallback = Number.parseInt(String(options[0] || "8s"), 10) || 8;
     const safeSeconds = Number.isFinite(seconds) ? seconds : fallback;
-    return `${Math.min(range.max, Math.max(range.min, Math.round(safeSeconds)))}s`;
+    if (allowed.length) {
+      const closest = allowed.reduce((best, item) => Math.abs(item - safeSeconds) < Math.abs(best - safeSeconds) ? item : best, allowed[0]);
+      return `${closest}s`;
+    }
+    return `${safeSeconds}s`;
   }
   if (field === "ugc.audio") {
     const options = capabilities.audio || ["On", "Off"];
@@ -6942,7 +6949,7 @@ function videoConsoleToolsHtml(p, selectedModel = videoModelValue(p)) {
         ${videoModelPicker(selectedModel)}
         ${videoAspectRatioMenu(videoAspectRatioValue(p), capabilities.aspectRatios || [])}
         ${videoOptionMenu("quality", "ugc.quality", videoQualityValue(p), (capabilities.qualities || []).map(videoQualityOption), "gem", "Select quality")}
-        ${videoDurationSliderMenu(videoDurationValue(p), (capabilities.durations || []).map(videoDurationOption))}
+        ${videoOptionMenu("duration", "ugc.duration", videoDurationValue(p), (capabilities.durations || []).map(videoDurationOption), "clock-3", "Duration")}
         ${videoCountStepper(p)}
         ${(capabilities.audio || []).length ? videoOptionMenu("audio", "ugc.audio", videoAudioValue(p), (capabilities.audio || []).map(videoAudioOption), videoAudioValue(p) === "Off" ? "volume-x" : "volume-2", "Audio") : ""}`;
 }
@@ -6971,7 +6978,7 @@ function videoDurationOption(value) {
     label: value,
     title: value,
     description: {
-      "4s": "Shortest Seedance clip",
+      "4s": "Shortest supported clip",
       "5s": "Quick shot",
       "6s": "Short creative clip",
       "8s": "Standard clip",
