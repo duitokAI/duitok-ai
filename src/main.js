@@ -2148,12 +2148,20 @@ function bindVideoConsoleCompact() {
   const expandForHover = () => {
     hovering = true;
     videoConsoleExpandedUntilUserScroll = true;
+    videoConsoleExpandLockUntil = Date.now() + 900;
     consoleEl.classList.add("is-hover-expanded");
     if (!state.generating && !consoleEl.classList.contains("is-generating")) consoleEl.classList.remove("is-compact");
   };
   const expandForPointerHover = (event) => {
     if (event.pointerType === "touch") return;
     expandForHover();
+  };
+  const expandForPointerDown = () => {
+    hovering = true;
+    videoConsoleExpandedUntilUserScroll = true;
+    videoConsoleExpandLockUntil = Date.now() + 900;
+    consoleEl.classList.add("is-hover-expanded");
+    if (!state.generating && !consoleEl.classList.contains("is-generating")) consoleEl.classList.remove("is-compact");
   };
   const releaseHoverExpansion = () => {
     hovering = false;
@@ -2220,6 +2228,9 @@ function bindVideoConsoleCompact() {
   consoleEl.addEventListener("mouseleave", releaseHoverExpansion);
   consoleEl.addEventListener("pointerenter", expandForPointerHover);
   consoleEl.addEventListener("pointermove", expandForPointerHover);
+  consoleEl.addEventListener("pointerdown", expandForPointerDown);
+  consoleEl.addEventListener("mousedown", expandForPointerDown);
+  consoleEl.addEventListener("touchstart", expandForPointerDown, { passive: true });
   consoleEl.addEventListener("pointerleave", releaseHoverExpansion);
   consoleEl.addEventListener("focusin", expandForHover);
   consoleEl.addEventListener("focusout", restoreAfterFocus);
@@ -2239,6 +2250,9 @@ function bindVideoConsoleCompact() {
     consoleEl.removeEventListener("mouseleave", releaseHoverExpansion);
     consoleEl.removeEventListener("pointerenter", expandForPointerHover);
     consoleEl.removeEventListener("pointermove", expandForPointerHover);
+    consoleEl.removeEventListener("pointerdown", expandForPointerDown);
+    consoleEl.removeEventListener("mousedown", expandForPointerDown);
+    consoleEl.removeEventListener("touchstart", expandForPointerDown);
     consoleEl.removeEventListener("pointerleave", releaseHoverExpansion);
     consoleEl.removeEventListener("focusin", expandForHover);
     consoleEl.removeEventListener("focusout", restoreAfterFocus);
@@ -6448,7 +6462,7 @@ function ugcPanel(p) {
   const meta = studioStepMeta("ugc");
   const bulkSelecting = isBulkSelectingResults();
   const wall = studioResultWall(p, meta);
-  return `<section class="video-page-studio video-prompt-extractor-page studio-wall-surface-base studio-media-wall-surface studio-wall-zoomable ${wall ? "" : "is-empty"} ${bulkSelecting ? "is-bulk-selecting-results" : ""}" data-studio-mode="ugc" ${studioWallZoomStyleAttr()}>
+  return `<section class="video-page-studio video-prompt-extractor-page studio-wall-surface-base studio-media-wall-surface studio-wall-zoomable ${wall ? "has-results" : "is-empty"} ${bulkSelecting ? "is-bulk-selecting-results" : ""}" data-studio-mode="ugc" ${studioWallZoomStyleAttr()}>
     ${studioWallZoomControl()}
     ${wall || videoEmptyStudioBackdrop()}
     ${bulkSelecting ? "" : videoGenerateConsole(p)}
