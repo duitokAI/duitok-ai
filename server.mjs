@@ -96,6 +96,10 @@ const ai302SunoLyricsPath = process.env.AI302_SUNO_LYRICS_PATH || "/suno/submit/
 const ai302SunoFetchPathPrefix = process.env.AI302_SUNO_FETCH_PATH_PREFIX || "/suno/fetch";
 const ai302SunoModel = process.env.AI302_SUNO_MODEL || "chirp-crow";
 const ai302AudioTranslatePath = process.env.AI302_AUDIO_TRANSLATE_PATH || "/302/audio/translate/task";
+const elevenLabsBaseUrl = (process.env.ELEVENLABS_BASE_URL || "https://api.elevenlabs.io").replace(/\/$/, "");
+const elevenLabsTtsModel = process.env.ELEVENLABS_TTS_MODEL || "eleven_multilingual_v2";
+const elevenLabsDefaultVoiceId = process.env.ELEVENLABS_DEFAULT_VOICE_ID || "JBFqnCBsd6RMkjVDRZzb";
+const elevenLabsOutputFormat = process.env.ELEVENLABS_OUTPUT_FORMAT || "mp3_44100_128";
 const webSearchBaseUrl = process.env.WEB_SEARCH_BASE_URL || "https://duckduckgo.com/html/";
 const allowedMediaModels = new Set(["GPT Image 2", "Seedream 5.0 Lite", "Qwen Image 2.0", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control", "MiniMax Hailuo 2.3"]);
 const thumbnailCache = new Map();
@@ -986,6 +990,44 @@ async function readImageDimensions(bytes) {
     console.warn("Image metadata read failed", error.message);
     return {};
   }
+}
+
+async function persistGeneratedAudio(bytes, contentType, { userId, projectId, resultId } = {}) {
+  const audioBytes = Buffer.isBuffer(bytes) ? bytes : Buffer.from(bytes || "");
+  if (!audioBytes.length) {
+    const error = new Error("Generated audio is empty.");
+    error.status = 502;
+    throw error;
+  }
+  const safeContentType = contentType || "audio/mpeg";
+  const extension = extensionFromContentType(safeContentType, "audio.mp3");
+  if (!storageStatus().durableAssets) {
+    if (requireDurableAssets) {
+      const error = new Error("Pokaya media storage is not configured. Generated audio must be mirrored before it can be saved.");
+      error.status = 503;
+      throw error;
+    }
+    return {
+      audioUrl: `data:${safeContentType};base64,${audioBytes.toString("base64")}`,
+      assetStorage: "inline",
+      contentType: safeContentType,
+      bytes: audioBytes.length
+    };
+  }
+  const key = [
+    "generated-assets",
+    userId,
+    projectId,
+    `${resultId}.${extension}`
+  ].map((part) => String(part).replace(/[^a-zA-Z0-9._-]/g, "-")).join("/");
+  const audioUrl = await putR2Object(key, audioBytes, safeContentType);
+  return {
+    audioUrl,
+    assetStorage: "cloudflare-r2",
+    assetStorageKey: key,
+    contentType: safeContentType,
+    bytes: audioBytes.length
+  };
 }
 
 function closestSupportedImageAspectRatio(width, height) {
@@ -2101,6 +2143,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
       costUsd: _costUsd,
       originalImageUrl: _originalImageUrl,
       originalVideoUrl: _originalVideoUrl,
+      originalAudioUrl: _originalAudioUrl,
       assetStorage: _assetStorage,
       assetStorageKey: _assetStorageKey,
       thumbnailStorageKeys: _thumbnailStorageKeys,
@@ -2125,6 +2168,7 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
       assetStorage: safe.imageUrl || safe.videoUrl ? "pokaya-media" : undefined,
       imageUrl: publicMediaMarker(safe.imageUrl),
       videoUrl: publicMediaMarker(safe.videoUrl),
+      audioUrl: safe.audioUrl ? `/api/media/result/${encodeURIComponent(safe.id)}/audio` : undefined,
       model: publicMediaModel(_model),
       title: redactProviderText(safe.title, publicGenerationTitle(publicType)),
       body: redactProviderText(safe.body, publicGenerationBody(publicType))
@@ -2320,6 +2364,9 @@ function publicGenerationResult(result = {}, originJob = null) {
     prompt: redactProviderText(result.prompt || ""),
     imageUrl: publicMediaMarker(result.imageUrl),
     videoUrl: publicMediaMarker(result.videoUrl),
+    audioUrl: result.audioUrl ? `/api/media/result/${encodeURIComponent(result.id)}/audio` : undefined,
+    contentType: result.contentType,
+    durationSeconds: result.durationSeconds,
     visualCard: result.visualCard,
     model: publicMediaModel(result.model),
     resolution: result.resolution,
@@ -2593,6 +2640,16 @@ function requireAi302Config() {
   return apiKey;
 }
 
+function requireElevenLabsConfig() {
+  const apiKey = process.env.ELEVENLABS_API_KEY;
+  if (!apiKey || apiKey.includes("replace_with")) {
+    const error = new Error("ElevenLabs belum configure. Isi ELEVENLABS_API_KEY dalam Environment Variables dulu.");
+    error.status = 503;
+    throw error;
+  }
+  return apiKey;
+}
+
 function providerForMediaModel(model) {
   model = internalMediaModel(model);
   if (model === "GPT Image 2") return process.env.APIMART_API_KEY ? "apimart" : process.env.CRUN_API_KEY ? "crun" : "mock";
@@ -2814,6 +2871,94 @@ async function ai302Request(pathname, options = {}) {
     throw error;
   }
   return payload.data || payload;
+}
+
+async function elevenLabsRequest(pathname, options = {}) {
+  const apiKey = requireElevenLabsConfig();
+  const response = await fetch(`${elevenLabsBaseUrl}${pathname}`, {
+    ...options,
+    headers: {
+      "xi-api-key": apiKey,
+      ...(options.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
+      ...(options.headers || {})
+    },
+    signal: AbortSignal.timeout(Number(process.env.ELEVENLABS_TIMEOUT_MS || 120000))
+  });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}));
+    const detail = payload.detail;
+    const message = typeof detail === "string"
+      ? detail
+      : detail?.message || payload.message || payload.error || `ElevenLabs request failed (${response.status})`;
+    const error = new Error(message);
+    error.status = response.status || 502;
+    throw error;
+  }
+  return response;
+}
+
+function elevenLabsVoicePresetId(preset = "") {
+  const normalized = String(preset || "").trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+  const envKey = normalized ? `ELEVENLABS_VOICE_${normalized}` : "";
+  return (envKey && process.env[envKey]) || process.env.ELEVENLABS_VOICE_ID || elevenLabsDefaultVoiceId;
+}
+
+function elevenLabsLanguageCode(language = "") {
+  const key = String(language || "").trim().toLowerCase();
+  if (key.startsWith("malay")) return "ms";
+  if (key.startsWith("chinese")) return "zh";
+  if (key.startsWith("indo")) return "id";
+  if (key.startsWith("english")) return "en";
+  return "";
+}
+
+async function synthesizeSpeechWithElevenLabs(body = {}) {
+  const text = String(body.text || "").trim();
+  if (!text) {
+    const error = new Error("ElevenLabs text is required.");
+    error.status = 400;
+    throw error;
+  }
+  if (Array.from(text).length > 5000) {
+    const error = new Error("ElevenLabs text must be under 5,000 characters for synchronous generation.");
+    error.status = 400;
+    throw error;
+  }
+  const voiceId = String(body.voiceId || body.voice_id || elevenLabsVoicePresetId(body.voicePreset)).trim();
+  const outputFormat = String(body.outputFormat || body.output_format || elevenLabsOutputFormat);
+  const stability = Number(body.stability ?? 0.5);
+  const similarityBoost = Number(body.similarityBoost ?? body.similarity_boost ?? 0.78);
+  const style = Number(body.style ?? 0);
+  const speed = Number(body.speed ?? 1);
+  const languageCode = String(body.languageCode || body.language_code || elevenLabsLanguageCode(body.language)).trim();
+  const response = await elevenLabsRequest(`/v1/text-to-speech/${encodeURIComponent(voiceId)}?output_format=${encodeURIComponent(outputFormat)}`, {
+    method: "POST",
+    headers: { Accept: "audio/mpeg" },
+    body: JSON.stringify({
+      text,
+      model_id: String(body.modelId || body.model_id || elevenLabsTtsModel),
+      ...(languageCode ? { language_code: languageCode } : {}),
+      voice_settings: {
+        stability: Number.isFinite(stability) ? Math.min(1, Math.max(0, stability)) : 0.5,
+        similarity_boost: Number.isFinite(similarityBoost) ? Math.min(1, Math.max(0, similarityBoost)) : 0.78,
+        style: Number.isFinite(style) ? Math.min(1, Math.max(0, style)) : 0,
+        use_speaker_boost: body.useSpeakerBoost !== false && body.use_speaker_boost !== false,
+        speed: Number.isFinite(speed) ? Math.min(1.2, Math.max(0.7, speed)) : 1
+      }
+    })
+  });
+  const contentType = response.headers.get("content-type") || "audio/mpeg";
+  const bytes = Buffer.from(await response.arrayBuffer());
+  return {
+    provider: "elevenlabs",
+    model: String(body.modelId || body.model_id || elevenLabsTtsModel),
+    voiceId,
+    voicePreset: String(body.voicePreset || ""),
+    textCharacters: Array.from(text).length,
+    contentType,
+    bytes,
+    requestId: response.headers.get("request-id") || ""
+  };
 }
 
 function extractAi302SpeechAudio(payload = {}) {
@@ -9409,6 +9554,90 @@ app.post("/api/tts/doubao-hd", async (req, res, next) => {
   }
 });
 
+app.post("/api/tts/elevenlabs", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    const speech = await synthesizeSpeechWithElevenLabs(req.body || {});
+    const audioBase64 = speech.bytes.toString("base64");
+    await mutateDb(async (db) => {
+      db.usage.unshift(usage(`Generated ElevenLabs audio (${speech.textCharacters} chars)`, 0, user.id));
+      await saveDb(db);
+    });
+    const { bytes: _bytes, ...safeSpeech } = speech;
+    res.json({
+      ...safeSpeech,
+      audioBase64,
+      audioDataUrl: `data:${speech.contentType};base64,${audioBase64}`
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/projects/:id/audio/generate", async (req, res, next) => {
+  try {
+    const { db, user } = await requireAuth(req);
+    const project = findProject(db, req.params.id, user);
+    const text = String(req.body.text || req.body.prompt || project.auto?.audioPrompt || "").trim();
+    if (!text) {
+      const error = new Error("Describe the voice first.");
+      error.status = 400;
+      throw error;
+    }
+    assertGenerationAccess(db, user, 0.2, 1);
+    const voicePreset = String(req.body.voicePreset || project.auto?.voicePreset || "Malay Soft Sell");
+    const language = String(req.body.language || project.auto?.audioLanguage || "Malay");
+    const speech = await synthesizeSpeechWithElevenLabs({
+      ...req.body,
+      text,
+      voicePreset,
+      language
+    });
+    const resultId = crypto.randomUUID();
+    const createdAt = new Date().toISOString();
+    const stored = await persistGeneratedAudio(speech.bytes, speech.contentType, {
+      userId: project.userId || user.id,
+      projectId: project.id,
+      resultId
+    });
+    res.json(await mutateDb(async (currentDb) => {
+      const currentProject = findProject(currentDb, req.params.id, user);
+      currentProject.auto ||= {};
+      currentProject.auto.audioPrompt = text;
+      currentProject.auto.voicePreset = voicePreset;
+      currentProject.auto.audioLanguage = language;
+      currentProject.results ||= [];
+      currentProject.results.push({
+        id: resultId,
+        type: "audio",
+        sourceAction: "generate-audio",
+        sourceStep: "auto",
+        title: voicePreset,
+        body: text,
+        prompt: text,
+        provider: "elevenlabs",
+        model: speech.model,
+        voiceId: speech.voiceId,
+        audioUrl: stored.audioUrl,
+        assetStorage: stored.assetStorage,
+        assetStorageKey: stored.assetStorageKey,
+        contentType: stored.contentType,
+        fileSize: stored.bytes,
+        createdAt,
+        timelineAt: createdAt
+      });
+      const owner = currentDb.users.find((item) => item.id === currentProject.userId) || user;
+      owner.billing ||= defaultBilling();
+      owner.billing.credits = Math.max(0, roundCredits(Number(owner.billing.credits || 0) - 0.2));
+      currentDb.usage.unshift(usage(`Generated ElevenLabs voiceover (${speech.textCharacters} chars)`, 0.2, owner.id));
+      await saveDb(currentDb);
+      return publicState(currentDb, user);
+    }));
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.post("/api/music/suno", async (req, res, next) => {
   try {
     const { user } = await requireAuth(req);
@@ -10078,9 +10307,10 @@ app.get("/api/media/result/:id/:kind", async (req, res, next) => {
       throw error;
     }
     const isVideo = req.params.kind === "video";
-    const downloadFilename = req.query.download === "1" ? safeDownloadFilename(req.query.filename || `pokaya-result.${isVideo ? "mp4" : "png"}`) : "";
+    const isAudio = req.params.kind === "audio";
+    const downloadFilename = req.query.download === "1" ? safeDownloadFilename(req.query.filename || `pokaya-result.${isVideo ? "mp4" : isAudio ? "mp3" : "png"}`) : "";
     const downloadHeaders = downloadFilename ? { "Content-Disposition": `attachment; filename="${downloadFilename}"` } : {};
-    const wantsThumb = !isVideo && req.query.thumb === "1";
+    const wantsThumb = !isVideo && !isAudio && req.query.thumb === "1";
     const thumbWidth = Math.max(160, Math.min(1280, Number(req.query.w || 720) || 720));
     const thumbCacheKey = wantsThumb ? resultThumbnailCacheKey(result, thumbWidth) : "";
     const cachedThumb = getCachedThumbnail(thumbCacheKey);
@@ -10094,7 +10324,7 @@ app.get("/api/media/result/:id/:kind", async (req, res, next) => {
     }
     if (result.assetStorageKey) {
       const r2Response = await getR2Object(result.assetStorageKey);
-      const contentType = r2Response.headers.get("content-type") || (isVideo ? "video/mp4" : "image/png");
+      const contentType = r2Response.headers.get("content-type") || (isVideo ? "video/mp4" : isAudio ? "audio/mpeg" : "image/png");
       if (!wantsThumb) {
         return pipeFetchBody(r2Response, res, {
           contentType,
@@ -10111,8 +10341,24 @@ app.get("/api/media/result/:id/:kind", async (req, res, next) => {
       res.setHeader("Cache-Control", "private, max-age=86400");
       return res.send(bytes);
     }
+    if (isAudio && String(result.audioUrl || "").startsWith("data:")) {
+      const media = dataUrlToMediaBytes(result.audioUrl);
+      if (!media) {
+        const error = new Error("Result audio not found");
+        error.status = 404;
+        throw error;
+      }
+      res.setHeader("Content-Type", media.contentType);
+      res.setHeader("Cache-Control", "private, max-age=300");
+      for (const [key, value] of Object.entries(downloadHeaders)) {
+        if (value) res.setHeader(key, value);
+      }
+      return res.send(media.bytes);
+    }
     const sourceUrl = isVideo
       ? (result.videoUrl || result.originalVideoUrl)
+      : isAudio
+        ? result.audioUrl
       : (result.imageUrl || result.originalImageUrl);
     if (!sourceUrl) {
       const error = new Error("Result media not found");
@@ -10121,7 +10367,7 @@ app.get("/api/media/result/:id/:kind", async (req, res, next) => {
     }
     const response = await fetch(sourceUrl, {
       headers: {
-        Accept: isVideo ? "video/*,*/*;q=0.8" : "image/*,*/*;q=0.8"
+        Accept: isVideo ? "video/*,*/*;q=0.8" : isAudio ? "audio/*,*/*;q=0.8" : "image/*,*/*;q=0.8"
       },
       signal: AbortSignal.timeout(Number(process.env.MEDIA_PROXY_TIMEOUT_MS || 60000))
     });
@@ -10130,7 +10376,7 @@ app.get("/api/media/result/:id/:kind", async (req, res, next) => {
       error.status = 502;
       throw error;
     }
-    const contentType = response.headers.get("content-type") || (isVideo ? "video/mp4" : "image/png");
+    const contentType = response.headers.get("content-type") || (isVideo ? "video/mp4" : isAudio ? "audio/mpeg" : "image/png");
     if (!wantsThumb) {
       return pipeFetchBody(response, res, {
         contentType,

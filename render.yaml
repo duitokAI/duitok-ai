@@ -161,6 +161,16 @@ services:
         value: chirp-crow
       - key: AI302_AUDIO_TRANSLATE_PATH
         value: /302/audio/translate/task
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: ELEVENLABS_BASE_URL
+        value: https://api.elevenlabs.io
+      - key: ELEVENLABS_TTS_MODEL
+        value: eleven_multilingual_v2
+      - key: ELEVENLABS_DEFAULT_VOICE_ID
+        value: JBFqnCBsd6RMkjVDRZzb
+      - key: ELEVENLABS_OUTPUT_FORMAT
+        value: mp3_44100_128
       - key: CRUN_API_KEY
         sync: false
       - key: CRUN_BASE_URL

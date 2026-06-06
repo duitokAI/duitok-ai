@@ -48131,6 +48131,12 @@ body:has(.studio-shell .video-page-studio),
   cursor: pointer !important;
 }
 
+.studio-shell .audio-studio-page .audio-generate-button.is-generating,
+.studio-shell .audio-studio-page .audio-generate-button.is-generating:disabled {
+  cursor: progress !important;
+  opacity: 0.82 !important;
+}
+
 @media (max-width: 900px) {
   .studio-shell .audio-studio-page .audio-composer {
     height: auto !important;

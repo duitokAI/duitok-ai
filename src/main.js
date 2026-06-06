@@ -5792,7 +5792,7 @@ function studioAudioWallCard(item, index = 0) {
     </button>
     ${audioWallPreview(item, { priority: index < 6 })}
     <div class="studio-wall-actions" aria-label="Audio actions">
-      <button type="button" data-action="audio-coming-soon" data-tooltip="Play" aria-label="Play audio">${icon("play", 18)}</button>
+      <button type="button" data-result-action="play-audio" data-result-id="${esc(item.id)}" data-tooltip="Play" aria-label="Play audio" ${downloadable ? "" : "disabled"}>${icon("play", 18)}</button>
       <button type="button" data-result-action="download" data-result-id="${esc(item.id)}" data-result-kind="audio" data-tooltip="Download" aria-label="Download audio" ${downloadable ? "" : "disabled"}>${icon("download", 18)}</button>
       <button type="button" data-result-action="delete" data-result-id="${esc(item.id)}" data-tooltip="Delete" aria-label="Delete">${icon("trash-2", 18)}</button>
     </div>
@@ -7231,7 +7231,7 @@ function audioPromptWell(promptText, language, scriptMode) {
   return `<div class="audio-prompt-well">
     <textarea data-field="auto.audioPrompt" data-audio-prompt rows="3" placeholder="Describe the voice, scene, and emotion you imagine...">${esc(promptText)}</textarea>
     <div class="audio-control-row">
-      <span class="audio-model-chip">${icon("audio-lines", 16)} Pokaya Voice v1</span>
+      <span class="audio-model-chip">${icon("audio-lines", 16)} ElevenLabs Voice</span>
       ${audioSegment("auto.audioLanguage", [["Malay", "Malay"], ["English", "English"], ["Chinese", "Chinese"], ["Indonesian", "Indonesian"]], language)}
       ${audioSegment("auto.audioScriptMode", [["Write for me", "Write for me"], ["Use my script", "Use my script"]], scriptMode)}
     </div>
@@ -7351,7 +7351,7 @@ function audioEmptyState() {
   return `<div class="audio-empty-state">
     ${icon("audio-lines", 30)}
     <strong>Audio generation is ready for backend hookup.</strong>
-    <span>Voiceover UI, presets, language controls, and result space are in place. Connect a generate-audio queue action to create real clips.</span>
+      <span>ElevenLabs voiceover is connected. Generate a clip from the composer below.</span>
   </div>`;
 }
 
@@ -12120,7 +12120,7 @@ function bind() {
     el.addEventListener("keydown", (event) => {
       if (event.key !== "Enter" || (!event.metaKey && !event.ctrlKey) || event.shiftKey || event.altKey || event.isComposing) return;
       event.preventDefault();
-      audioGeneratePlaceholder();
+      generateAudio();
     });
   });
   document.querySelectorAll("[data-result-title]").forEach((el) => {
@@ -12614,7 +12614,7 @@ async function action(event, name) {
   if (name === "clear-image-prompt-media") return clearImagePromptMedia();
   if (name === "stop-agent-response") return stopAgentResponse();
   if (name === "clear-clone-reference") return clearCloneReferenceVideo();
-  if (name === "generate-audio") return audioGeneratePlaceholder();
+  if (name === "generate-audio") return generateAudio(event);
   if (name === "audio-coming-soon") return notify("Audio backend hookup is the next step. The page UI is ready.");
   if (name?.startsWith("generate") || ["analyze-original", "clone-prompt", "write-story", "decode-viral"].includes(name)) return generate(name, event);
 }
@@ -12625,6 +12625,46 @@ function audioGeneratePlaceholder() {
   if (!promptText) return notify("Describe the voice first.");
   updateAudioPromptLocal(promptText);
   notify("Audio page is ready. Backend generate-audio action still needs to be connected before real clips can be created.");
+}
+
+async function generateAudio(event = null) {
+  if (state.audioGenerating) return notify("Audio generation is already running.");
+  const current = project();
+  const promptInput = document.querySelector("[data-audio-prompt]");
+  const promptText = String(promptInput?.value || current.auto?.audioPrompt || "").trim();
+  if (!promptText) return notify("Describe the voice first.");
+  const trigger = event?.currentTarget || document.querySelector('[data-action="generate-audio"]');
+  const previousHtml = trigger?.innerHTML || "";
+  try {
+    state.audioGenerating = true;
+    updateAudioPromptLocal(promptText);
+    if (trigger) {
+      trigger.disabled = true;
+      trigger.classList.add("is-generating");
+      trigger.innerHTML = `<b>Generating...</b><span>ElevenLabs</span>`;
+    }
+    notify("Generating ElevenLabs audio...");
+    const db = await api(`/projects/${state.projectId}/audio/generate`, {
+      method: "POST",
+      timeoutMs: 140000,
+      body: JSON.stringify({
+        prompt: promptText,
+        voicePreset: current.auto?.voicePreset || "Malay Soft Sell",
+        language: current.auto?.audioLanguage || "Malay"
+      })
+    });
+    state.audioGenerating = false;
+    set({ db });
+    notify("Audio generated.");
+  } catch (error) {
+    state.audioGenerating = false;
+    if (trigger) {
+      trigger.disabled = false;
+      trigger.classList.remove("is-generating");
+      trigger.innerHTML = previousHtml;
+    }
+    notify(error.message || "Audio generation failed.");
+  }
 }
 
 async function copyActiveResultPrompt() {
@@ -16064,6 +16104,15 @@ async function resultAction(button) {
       if (kind !== "text") downloadDirect(path, filename, { keepModal: true });
       else await download(path, filename, { keepModal: true });
       await wait(620);
+      return;
+    }
+    if (actionName === "play-audio") {
+      if (!item?.audioUrl) return notify("Audio is not ready yet.");
+      const audio = new Audio(new URL(item.audioUrl.startsWith("/api") ? `${apiBaseUrl}${item.audioUrl}` : item.audioUrl, window.location.origin).toString());
+      if (state.token && item.audioUrl.startsWith("/api")) {
+        audio.src = `${audio.src}${audio.src.includes("?") ? "&" : "?"}token=${encodeURIComponent(state.token)}`;
+      }
+      await audio.play();
       return;
     }
     if (actionName === "delete") {
