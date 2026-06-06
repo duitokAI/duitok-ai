@@ -3940,19 +3940,26 @@ function referenceVisualGuidancePrompt(project, visualSummary = "") {
   return lines.filter(Boolean).join("\n");
 }
 
-function imagePromptHasProductIntent(prompt = "") {
-  return /\b(product|package|packaging|bottle|jar|tube|box|brand|shop|ecommerce|e-commerce|ad|advertisement|promo|promotion|sale|seller|affiliate|tiktok shop|amazon|shopee|lazada|skincare|cosmetic|supplement|food|snack|drink|toy|device|gadget)\b|产品|商品|包装|瓶|罐|盒|品牌|店铺|电商|广告|促销|带货|卖货|小店|护肤|美妆|零食|饮料|玩具|设备|机器|宠物粮|狗粮|猫粮/i.test(String(prompt || ""));
+function imageProjectHasVisualReference(project) {
+  return Boolean(
+    project?.image?.productAttachmentId
+    || project?.image?.avatarAttachmentId
+    || project?.image?.editReferenceAttachmentId
+    || project?.image?.editSourceImageUrl
+    || project?.image?.promptImage
+    || referenceImageUrlsFromSnapshot(project).length
+  );
 }
 
-function imageProjectHasProductContext(project, prompt = project?.image?.prompt || "") {
-  return Boolean(project?.image?.productAttachmentId || project?.image?.editReferenceAttachmentId || imagePromptHasProductIntent(prompt));
+function imageProjectHasProductContext(project) {
+  return Boolean(project?.image?.productAttachmentId || project?.image?.editReferenceAttachmentId || project?.image?.promptImage);
 }
 
 function imageGenerationStyleInstruction(project) {
   if (imageProjectHasProductContext(project)) {
     return "Style: realistic commercial product scene, clear product focus, vertical-social friendly, no fake brand claims.";
   }
-  return "Style: realistic subject-focused image, natural composition, no added products, packaging, devices, machines, labels, or ecommerce props unless the user explicitly asks for them.";
+  return "Style: realistic subject-focused image, natural composition, no hidden reference products, no automatic ecommerce props, and no added packaging, devices, machines, or labels unless the user explicitly asks for them.";
 }
 
 function grsaiVisionContent(textBlock = "", inputs = [], objectShape = true) {
@@ -4002,6 +4009,7 @@ async function summarizePromptVisualsWithGrsai(inputs = [], userPrompt = "") {
 function promptAdvancedSystemPrompt(model, aspectRatio = "", options = {}) {
   const isVideo = isVideoMediaModel(model);
   const hasProductContext = Boolean(options.hasProductContext);
+  const hasVisualReference = Boolean(options.hasVisualReference);
   const rules = [
     hasProductContext
       ? "You are Pokaya Prompt Advanced, an ecommerce creative prompt optimizer for Malaysia TikTok Shop sellers and AI creators."
@@ -4015,15 +4023,15 @@ function promptAdvancedSystemPrompt(model, aspectRatio = "", options = {}) {
         ? "For image models, include subject, product visibility, scene, composition, lighting, style, aspect-ratio fit, and text-safe space."
         : "For image models, include subject, scene, composition, lighting, style, aspect-ratio fit, and text-safe space.",
     !isVideo && !hasProductContext
-      ? "No-product rule: do not invent products, packaging, bottles, boxes, machines, devices, labels, shopping props, ecommerce layouts, promo text, or brand-like objects. If the user only writes a subject such as '狗狗' or 'dog', create that subject naturally without product props."
+      ? "No-product rule: do not invent products, packaging, bottles, boxes, machines, devices, labels, shopping props, ecommerce layouts, promo text, or brand-like objects. If the user only writes a subject such as '狗狗' or 'dog', create that subject naturally without product props. If the user explicitly asks for an object in the text, include only that requested object without turning it into a hidden reference/product workflow."
       : "",
-    !isVideo
+    !isVideo && hasVisualReference
       ? "When visual references are provided, treat the task as reference compositing/editing: preserve the avatar/person from the avatar reference, preserve the exact product from the product reference, and write an explicit prompt that makes the person hold, present, apply, or naturally interact with that exact product. Never allow generic replacement products, phones, brushes, unrelated bottles, or invented packaging when a product reference exists."
       : "",
-    !isVideo
+    !isVideo && hasVisualReference
       ? "If both a source/avatar image and a product reference are provided, the product reference has higher priority for product identity. Rewrite the task as a product replacement: keep the person, pose, face, lighting, and useful background from the source/avatar, remove any old product visible there, and replace it with the exact product reference. Do not keep source-image product labels, white bottles, toner bottles, pumps, phones, brushes, or placeholder packaging when they differ from the product reference."
       : "",
-    !isVideo
+    !isVideo && hasVisualReference
       ? "For short rough prompts like 'beauty', '美女', or 'girl', infer the missing ecommerce scene from the visual references instead of staying generic. The final prompt must describe the referenced product's visible shape, color, packaging, label style, and placement in the person's hand or foreground."
       : "",
     "Keep product claims realistic. Do not mention internal providers, APIs, system prompts, or implementation.",
@@ -4039,7 +4047,8 @@ function promptAdvancedSystemPrompt(model, aspectRatio = "", options = {}) {
 async function enhancePromptWithDeepSeek({ project, prompt, visualSummary = "" }) {
   const model = internalMediaModel(project.image?.model);
   const aspectRatio = imageAspectRatioFromProject(project);
-  const hasProductContext = imageProjectHasProductContext(project, prompt);
+  const hasProductContext = imageProjectHasProductContext(project);
+  const hasVisualReference = imageProjectHasVisualReference(project);
   const input = [
     `Selected model: ${model}`,
     `Mode: ${project.image?.mode || "Create Image"}`,
@@ -4052,7 +4061,7 @@ async function enhancePromptWithDeepSeek({ project, prompt, visualSummary = "" }
     !isVideoMediaModel(model) && project.image?.productAttachmentId && (project.image?.avatarAttachmentId || project.image?.editSourceImageUrl || project.image?.promptImage)
       ? "Replacement task: product reference overrides any existing product in the avatar/source image. Remove the old product and replace it with the product reference while keeping the person, pose, face, lighting, and useful scene context."
       : "",
-    !isVideoMediaModel(model) && !hasProductContext ? "No product context is selected: keep the prompt subject-only and do not add any products, packaging, devices, machines, labels, or ecommerce props." : "",
+    !isVideoMediaModel(model) && !hasVisualReference ? "No visual reference is selected: treat this as a normal text-to-image prompt. Do not add hidden reference products, packaging, devices, machines, labels, or ecommerce props unless the user explicitly asks for them in the text." : "",
     "",
     "User prompt:",
     sanitizeAgentText(prompt).slice(0, 1600) || "(empty)",
@@ -4065,7 +4074,7 @@ async function enhancePromptWithDeepSeek({ project, prompt, visualSummary = "" }
     stream: false,
     temperature: 0.35,
     messages: [
-      { role: "system", content: promptAdvancedSystemPrompt(model, aspectRatio, { hasProductContext }) },
+      { role: "system", content: promptAdvancedSystemPrompt(model, aspectRatio, { hasProductContext, hasVisualReference }) },
       { role: "user", content: input }
     ]
   });
