@@ -50451,3 +50451,76 @@ body:has(.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"].is
 .studio-shell .audio-studio-page.is-empty .audio-composer:not(.is-compact) {
   margin-top: 4px !important;
 }
+
+/* Video empty bottom lock: the empty Video page should fit inside the first
+   Studio viewport with a compact action dock, instead of inheriting the
+   scrollable result-wall height and leaving a large blank band below. */
+.studio-shell .workspace:has(.video-page-studio.is-empty) .canvas-card,
+.studio-shell .workspace:has(.video-page-studio.is-empty) .studio-workbench-card,
+.studio-shell .workspace:has(.video-page-studio.is-empty) .studio-step-panel {
+  box-sizing: border-box !important;
+  min-height: calc(100dvh - 72px) !important;
+  height: calc(100dvh - 72px) !important;
+  max-height: calc(100dvh - 72px) !important;
+  overflow: clip !important;
+}
+
+.studio-shell .video-page-studio.is-empty {
+  box-sizing: border-box !important;
+  min-height: calc(100dvh - 72px) !important;
+  height: calc(100dvh - 72px) !important;
+  max-height: calc(100dvh - 72px) !important;
+  display: grid !important;
+  grid-template-rows: 34px minmax(260px, 1fr) auto !important;
+  row-gap: clamp(8px, 1.1vh, 14px) !important;
+  align-content: stretch !important;
+  padding-bottom: max(12px, env(safe-area-inset-bottom)) !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .video-page-studio.is-empty > .studio-wall-zoom-control {
+  position: absolute !important;
+  top: 12px !important;
+  right: clamp(18px, 2.2vw, 42px) !important;
+  grid-row: auto !important;
+  align-self: start !important;
+  justify-self: end !important;
+  margin: 0 !important;
+}
+
+.studio-shell .video-page-studio.is-empty > .video-empty-cinema {
+  grid-row: 2 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  padding-top: clamp(24px, 3.6vw, 52px) !important;
+  padding-bottom: clamp(18px, 2.8vw, 44px) !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .video-page-studio.is-empty > .video-generate-console,
+.studio-shell .video-page-studio.is-empty > .video-generate-console.is-compact,
+.studio-shell .video-page-studio.is-empty > .video-generate-console.is-hover-expanded,
+.studio-shell .video-page-studio.is-empty > .video-generate-console.has-open-menu,
+.studio-shell .video-page-studio.is-empty > .video-generate-console.has-long-prompt,
+.studio-shell .video-page-studio.is-empty > .video-generate-console:not(.is-compact),
+.studio-shell .video-page-studio.is-empty > .video-generate-console:not(.is-compact).is-hover-expanded,
+.studio-shell .video-page-studio.is-empty > .video-generate-console:not(.is-compact).has-open-menu,
+.studio-shell .video-page-studio.is-empty > .video-generate-console:not(.is-compact).has-long-prompt,
+.studio-shell.sidebar-collapsed .video-page-studio.is-empty > .video-generate-console,
+.studio-shell.sidebar-collapsed .video-page-studio.is-empty > .video-generate-console:not(.is-compact),
+.studio-shell.sidebar-collapsed .video-page-studio.is-empty > .video-generate-console:not(.is-compact).is-hover-expanded,
+.studio-shell.sidebar-collapsed .video-page-studio.is-empty > .video-generate-console:not(.is-compact).has-open-menu {
+  position: relative !important;
+  top: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+  grid-row: 3 !important;
+  align-self: end !important;
+  justify-self: center !important;
+  width: min(1180px, calc(100% - clamp(28px, 6vw, 96px))) !important;
+  max-width: min(1180px, calc(100% - clamp(28px, 6vw, 96px))) !important;
+  margin: 0 auto !important;
+  transform: none !important;
+}
