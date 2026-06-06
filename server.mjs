@@ -4621,9 +4621,14 @@ function crunVeo31Body(project, prompt) {
   const duration = veo31Duration(videoDurationFor(project, "Veo 3.1"));
   return {
     model: crunVeo31Model,
-    prompt,
-    aspect_ratio: aspectRatio,
-    duration
+    callback_url: process.env.CRUN_CALLBACK_URL || "",
+    input: {
+      prompt,
+      duration,
+      resolution: process.env.CRUN_VEO_3_1_RESOLUTION || "720p",
+      translate_prompt: process.env.CRUN_VEO_3_1_TRANSLATE_PROMPT !== "false",
+      aspect_ratio: aspectRatio
+    }
   };
 }
 
