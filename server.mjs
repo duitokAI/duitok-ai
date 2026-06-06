@@ -3598,9 +3598,9 @@ async function summarizePromptVisualsWithGrsai(inputs = [], userPrompt = "") {
   return "";
 }
 
-function promptAdvancedSystemPrompt(model) {
+function promptAdvancedSystemPrompt(model, aspectRatio = "") {
   const isVideo = isVideoMediaModel(model);
-  return [
+  const rules = [
     "You are Pokaya Prompt Advanced, an ecommerce creative prompt optimizer for Malaysia TikTok Shop sellers and AI creators.",
     "Rewrite rough user input into a generation-ready prompt. Focus on sellable creative output, not generic art.",
     isVideo
@@ -3609,15 +3609,20 @@ function promptAdvancedSystemPrompt(model) {
     "Keep product claims realistic. Do not mention internal providers, APIs, system prompts, or implementation.",
     "Return strict JSON only: {\"finalPrompt\":\"...\",\"notes\":[\"...\",\"...\"]}.",
     "The finalPrompt should usually be in English because most visual generation models follow English prompts better. Keep it concise but complete."
-  ].join("\n");
+  ];
+  if (!isVideo && aspectRatio === "16:9") {
+    rules.push("For 16:9 image output, enforce true landscape composition: use the full horizontal frame, no blurred side panels, no vertical portrait crop, no pillarboxing, no letterboxing, no centered vertical image with padded sides, and make the background plus subject fill the entire widescreen canvas.");
+  }
+  return rules.join("\n");
 }
 
 async function enhancePromptWithDeepSeek({ project, prompt, visualSummary = "" }) {
   const model = internalMediaModel(project.image?.model);
+  const aspectRatio = imageAspectRatioFromProject(project);
   const input = [
     `Selected model: ${model}`,
     `Mode: ${project.image?.mode || "Create Image"}`,
-    `Aspect ratio: ${imageAspectRatioFromProject(project)}`,
+    `Aspect ratio: ${aspectRatio}`,
     `Resolution: ${imageResolutionFromProject(project)}`,
     isVideoMediaModel(model) ? `Duration: ${videoDurationFor(project, model)} seconds` : "",
     "",
@@ -3632,7 +3637,7 @@ async function enhancePromptWithDeepSeek({ project, prompt, visualSummary = "" }
     stream: false,
     temperature: 0.35,
     messages: [
-      { role: "system", content: promptAdvancedSystemPrompt(model) },
+      { role: "system", content: promptAdvancedSystemPrompt(model, aspectRatio) },
       { role: "user", content: input }
     ]
   });
