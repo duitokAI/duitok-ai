@@ -49806,6 +49806,25 @@ body:has(.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"]),
   will-change: auto !important;
 }
 
-.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button {
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button::before,
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button::after,
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button:hover::before,
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button:hover::after,
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button:active::before,
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button:active::after,
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button.active::before,
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button.active::after {
+  transform: none !important;
+  animation: none !important;
   transition-property: background-color, border-color, color, box-shadow, opacity !important;
+  will-change: auto !important;
+}
+
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button,
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button:hover,
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button:active,
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button:focus,
+.studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button:focus-visible {
+  transition-property: background-color, border-color, color, box-shadow, opacity !important;
+  scale: 1 !important;
 }
