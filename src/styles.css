@@ -50168,3 +50168,77 @@ body:has(.studio-shell .audio-studio-page.is-empty),
   margin: 8px auto 14px !important;
   transform: none !important;
 }
+
+/* Clone Prompt empty page work-mode final lock: keep the upload/extract dock in
+   the first viewport like Image, Video, and Audio while preserving the grid
+   background as context instead of a full-screen cover. */
+html:has(.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"].is-empty),
+body:has(.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"].is-empty),
+#app:has(.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"].is-empty),
+.studio-shell:has(.video-prompt-extractor-page[data-studio-mode="clone"].is-empty),
+.studio-shell:has(.video-prompt-extractor-page[data-studio-mode="clone"].is-empty) .workspace,
+.studio-shell .workspace:has(.video-prompt-extractor-page[data-studio-mode="clone"].is-empty),
+.studio-shell .canvas-card:has(.video-prompt-extractor-page[data-studio-mode="clone"].is-empty),
+.studio-shell .studio-workbench-card:has(.video-prompt-extractor-page[data-studio-mode="clone"].is-empty),
+.studio-shell .studio-step-panel:has(.video-prompt-extractor-page[data-studio-mode="clone"].is-empty),
+.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"].is-empty {
+  height: auto !important;
+  min-height: 100dvh !important;
+  max-height: none !important;
+  overflow-x: clip !important;
+  overflow-y: visible !important;
+}
+
+.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"].is-empty {
+  display: grid !important;
+  grid-template-rows:
+    36px
+    minmax(300px, calc(100dvh - var(--project-fixed-tabs-height, 88px) - 176px))
+    auto !important;
+  align-content: start !important;
+  position: relative !important;
+  padding-bottom: max(18px, env(safe-area-inset-bottom)) !important;
+}
+
+.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"].is-empty > .studio-wall-zoom-control {
+  grid-row: 1 !important;
+  position: sticky !important;
+  top: 10px !important;
+  justify-self: end !important;
+  align-self: center !important;
+  margin: 0 clamp(18px, 2.2vw, 42px) 0 0 !important;
+  z-index: 80 !important;
+}
+
+.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"].is-empty .clone-studio-hero-copy {
+  top: clamp(132px, 27vh, 218px) !important;
+  width: min(780px, calc(100% - 84px)) !important;
+  gap: 12px !important;
+}
+
+.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"].is-empty .clone-studio-hero-copy b {
+  font-size: clamp(38px, 4.2vw, 62px) !important;
+  line-height: 1.04 !important;
+  letter-spacing: 0 !important;
+}
+
+.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"].is-empty .clone-studio-hero-copy span {
+  font-size: clamp(12px, 1vw, 16px) !important;
+}
+
+.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"].is-empty > .video-prompt-dock,
+.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"].is-empty:not(.video-page-studio) > .video-prompt-dock {
+  position: sticky !important;
+  top: auto !important;
+  bottom: max(14px, env(safe-area-inset-bottom)) !important;
+  left: auto !important;
+  right: auto !important;
+  grid-row: 3 !important;
+  justify-self: center !important;
+  align-self: auto !important;
+  z-index: 24 !important;
+  width: min(1180px, calc(100% - clamp(28px, 6vw, 96px))) !important;
+  max-width: min(1180px, calc(100% - clamp(28px, 6vw, 96px))) !important;
+  margin: 8px auto 14px !important;
+  transform: none !important;
+}
