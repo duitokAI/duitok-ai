@@ -12987,6 +12987,16 @@ function saveProjectFieldQuick(field, value, source = null) {
   const projectId = state.projectId;
   const previousDb = state.db;
   state.db = dbWithProjectField(previousDb, projectId, field, value);
+  if (field === "image.aspectRatio" || field === "image.resolution") {
+    const current = project();
+    latestImageModelQuickSelection = {
+      ...(latestImageModelQuickSelection?.projectId === projectId ? latestImageModelQuickSelection : {}),
+      projectId,
+      model: current.image?.model || "GPT Image 2",
+      aspectRatio: current.image?.aspectRatio || "9:16",
+      resolution: current.image?.resolution || "1K"
+    };
+  }
   setFieldSetActive(field, value, source);
   document.querySelectorAll(`[data-field="${field}"]`).forEach((el) => {
     el.value = value;
@@ -13900,10 +13910,16 @@ function syncImageConsoleBeforeGenerate(name) {
   updateImagePromptLocal(value);
   const current = project();
   const latestImageSelection = latestImageModelQuickSelection?.projectId === state.projectId ? latestImageModelQuickSelection : null;
+  const consoleEl = document.querySelector("[data-image-generate-console]");
+  const selectedAspectRatio = consoleEl?.querySelector(".image-aspect-ratio-menu summary b")?.textContent?.trim();
   return {
     prompt: value,
     model: latestImageSelection?.model || current.image?.model || "GPT Image 2",
-    aspectRatio: latestImageSelection?.aspectRatio || current.image?.aspectRatio || "9:16",
+    aspectRatio: normalizedImageSettingForModel(
+      latestImageSelection?.model || current.image?.model || "GPT Image 2",
+      "image.aspectRatio",
+      selectedAspectRatio || latestImageSelection?.aspectRatio || current.image?.aspectRatio || "9:16"
+    ),
     resolution: latestImageSelection?.resolution || current.image?.resolution || "1K",
     count: imageBatchCount(current),
     advancePrompt: Boolean(state.promptAdvancedEnabled)
