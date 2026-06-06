@@ -13,6 +13,7 @@
     "check:chip": "node scripts/check-chip-config.mjs",
     "check:generation-snapshot": "node scripts/check-generation-job-snapshot.mjs",
     "check:interaction-flicker": "node scripts/check-interaction-flicker.mjs",
+    "check:result-metadata": "node scripts/check-result-metadata-snapshot.mjs",
     "check:provider-leaks": "node scripts/check-provider-leaks.mjs",
     "check:studio-performance": "node scripts/check-interaction-flicker.mjs",
     "generate:agent3d": "node scripts/generate-pokaya-agent-glb.mjs",

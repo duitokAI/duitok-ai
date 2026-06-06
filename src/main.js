@@ -7875,9 +7875,11 @@ function resultMediaLabel(item) {
 }
 
 function resultModelLabel(item) {
-  const model = item.model || item.providerTitle || item.title || "";
+  const job = resultOriginJob(item);
+  const model = item.requestedModel || job?.requestedModel || item.model || job?.model || item.providerTitle || item.title || "";
   if (/gemini|video prompt|extract/i.test(model)) return "POKAYA AI";
   if (/seedream/i.test(model)) return "SEEDREAM 5.0 LITE";
+  if (/qwen|通义|千问/i.test(model)) return "QWEN IMAGE 2.0";
   if (/banana\s*2/i.test(model)) return "NANO BANANA 2";
   if (/nano|banana/i.test(model)) return "NANO BANANA PRO";
   if (/grok imagine/i.test(model)) return "GROK IMAGINE";
@@ -7920,6 +7922,7 @@ function resultModelDisplay(item) {
   if (label === "NANO BANANA PRO") return "Nano Banana Pro";
   if (label === "NANO BANANA 2") return "Nano Banana 2";
   if (label === "SEEDREAM 5.0 LITE") return "Seedream 5.0 Lite";
+  if (label === "QWEN IMAGE 2.0") return "Qwen Image 2.0";
   if (label === "GROK IMAGINE") return "Grok Imagine";
   if (label === "GPT IMAGE 2") return "GPT Image 2";
   return label === "VIDEO MODEL" ? "Video model" : label;
@@ -7929,6 +7932,7 @@ function resultModelProvider(item) {
   const label = resultModelLabel(item || {});
   if (label === "NANO BANANA PRO" || label === "NANO BANANA 2") return "google";
   if (label.startsWith("SEEDREAM")) return "seedream";
+  if (label === "QWEN IMAGE 2.0") return "qwen";
   if (label === "GROK IMAGINE") return "xai";
   return "openai";
 }
@@ -8191,13 +8195,18 @@ function resultResolutionLabel(item) {
   if (item.resolution?.width && item.resolution?.height) return `${item.resolution.width} x ${item.resolution.height}`;
   if (typeof item.resolution === "string" && item.resolution.trim()) return item.resolution.trim();
   if (item.width && item.height) return `${item.width} x ${item.height}`;
-  const projectResolution = resultProject(item)?.image?.resolution;
-  return projectResolution ? String(projectResolution).toUpperCase() : "Unknown";
+  const job = resultOriginJob(item);
+  if (job?.resolution?.width && job?.resolution?.height) return `${job.resolution.width} x ${job.resolution.height}`;
+  if (typeof job?.resolution === "string" && job.resolution.trim()) return job.resolution.trim();
+  return "Unknown";
 }
 
 function resultAspectRatioLabel(item) {
   if (!item) return "Unknown";
-  return wallAspectRatioForItem(item, resultProject(item), "Unknown");
+  if (item?.aspectRatio) return normalizeAspectRatio(item.aspectRatio, "9:16");
+  const job = resultOriginJob(item);
+  if (job?.aspectRatio) return normalizeAspectRatio(job.aspectRatio, "9:16");
+  return "Unknown";
 }
 
 const supportedWallAspectRatios = ["9:16", "3:4", "2:3", "4:5", "1:1", "5:4", "4:3", "3:2", "16:9", "1:2", "2:1", "1:3", "3:1", "1:4", "4:1", "1:8", "8:1", "9:21", "21:9"];
@@ -8255,6 +8264,8 @@ function projectWallAspectRatio(projectItem = project(), type = "image") {
 function wallAspectRatioForItem(item = {}, projectItem = resultProject(item), fallback = "") {
   if (isAudioWallItem(item)) return "16:9";
   if (item?.aspectRatio) return normalizeAspectRatio(item.aspectRatio, fallback || projectWallAspectRatio(projectItem, item.type));
+  const job = resultOriginJob(item);
+  if (job?.aspectRatio) return normalizeAspectRatio(job.aspectRatio, fallback || projectWallAspectRatio(projectItem, item.type));
   if (item?.type === "video" || item?.action === "generate-ugc") return projectWallAspectRatio(projectItem, "video");
   if (item?.type === "text" || item?.type === "story") return projectWallAspectRatio(projectItem, "text");
   return fallback && fallback !== "Unknown" ? normalizeAspectRatio(fallback) : projectWallAspectRatio(projectItem, "image");
