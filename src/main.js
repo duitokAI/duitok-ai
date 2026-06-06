@@ -14044,10 +14044,11 @@ async function generate(name, event = null) {
     const responseDb = await api(`/projects/${state.projectId}/generate`, { method: "POST", body: JSON.stringify({ action: name, step: state.step, count, clientJobIds, ...generationOptions }) });
     const db = mergeSubmittedGenerationJobs(responseDb, responseDb?.queuedGenerationJobs || []);
     lockGenerationSubmitLayout(name, 900);
+    const coveredClientJobIds = new Set((db.generationJobs || []).map((job) => job.clientJobId).filter(Boolean));
     set({
       db,
       generating: false,
-      optimisticGenerationJobs: (state.optimisticGenerationJobs || []).filter((job) => !optimisticIds.has(job.id))
+      optimisticGenerationJobs: (state.optimisticGenerationJobs || []).filter((job) => !optimisticIds.has(job.id) || !coveredClientJobIds.has(job.clientJobId || job.id))
     });
     pollGenerationQueue();
     window.setTimeout(unlockGenerationSubmitLayout, 240);
