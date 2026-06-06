@@ -50392,3 +50392,62 @@ body:has(.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"].is
   margin: 0 !important;
   z-index: 80 !important;
 }
+
+/* Audio Studio copy + composition polish: keep the page in work-mode, make the
+   title read like a compact Studio header, and remove the backend placeholder
+   strip from the empty state. */
+.studio-shell .audio-studio-page.is-empty {
+  grid-template-rows:
+    minmax(280px, calc(100dvh - var(--project-fixed-tabs-height, 88px) - 250px))
+    minmax(0, auto)
+    auto !important;
+}
+
+.studio-shell .audio-studio-page.is-empty .audio-stage-hero {
+  min-height: 280px !important;
+  padding-top: clamp(24px, 3.4vw, 48px) !important;
+  padding-bottom: clamp(12px, 2vw, 30px) !important;
+}
+
+.studio-shell .audio-studio-page.is-empty .audio-title-lockup {
+  max-width: min(720px, calc(100vw - 96px)) !important;
+  gap: 10px !important;
+}
+
+.studio-shell .audio-studio-page.is-empty .audio-title-lockup span {
+  color: rgba(255, 249, 240, 0.54) !important;
+  font-size: clamp(12px, 0.95vw, 15px) !important;
+  font-weight: 950 !important;
+  letter-spacing: 0 !important;
+}
+
+.studio-shell .audio-studio-page.is-empty .audio-title-lockup h1 {
+  font-size: clamp(36px, 3.7vw, 54px) !important;
+  line-height: 1.02 !important;
+  text-wrap: balance !important;
+}
+
+.studio-shell .audio-studio-page.is-empty .audio-title-lockup p {
+  max-width: 540px !important;
+  margin-top: 8px !important;
+  color: rgba(255, 249, 240, 0.42) !important;
+  font-size: clamp(14px, 1.18vw, 17px) !important;
+  line-height: 1.32 !important;
+}
+
+.studio-shell .audio-studio-page.is-empty .audio-wall-stage {
+  max-height: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.studio-shell .audio-studio-page.is-empty .audio-empty-state {
+  display: none !important;
+}
+
+.studio-shell .audio-studio-page.is-empty .audio-composer,
+.studio-shell .audio-studio-page.is-empty .audio-composer:not(.is-compact) {
+  margin-top: 4px !important;
+}

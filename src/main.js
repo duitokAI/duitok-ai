@@ -7084,9 +7084,9 @@ function autoPanel(p) {
     <section class="audio-stage-hero">
       <div class="audio-eq" aria-hidden="true">${Array.from({ length: 34 }, (_, index) => `<i style="--bar:${index % 9}"></i>`).join("")}</div>
       <div class="audio-title-lockup">
-        <span>AUDIO</span>
-        <h1>Ready to give your video a voice?</h1>
-        <p>Generate voiceover direction for TikTok Shop videos, with change voice and translate workflows prepared for the next backend phase.</p>
+        <span>AUDIO STUDIO</span>
+        <h1>GIVE IT A VOICE</h1>
+        <p>Voiceover, change voice, and translate for product videos.</p>
       </div>
     </section>
     ${wall ? `<section class="audio-wall-stage">${studioWallZoomControl()}${wall}</section>` : `<section class="audio-wall-stage is-empty">${audioEmptyState()}</section>`}
