@@ -50380,8 +50380,8 @@ body:has(.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"].is
 }
 
 .studio-shell .video-page-studio.studio-wall-zoomable > .studio-wall-zoom-control {
-  position: absolute !important;
-  top: 12px !important;
+  position: fixed !important;
+  top: 84px !important;
   right: clamp(18px, 2.2vw, 42px) !important;
   grid-row: auto !important;
   justify-self: end !important;
@@ -50480,8 +50480,8 @@ body:has(.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"].is
 }
 
 .studio-shell .video-page-studio.is-empty > .studio-wall-zoom-control {
-  position: absolute !important;
-  top: 12px !important;
+  position: fixed !important;
+  top: 84px !important;
   right: clamp(18px, 2.2vw, 42px) !important;
   grid-row: auto !important;
   align-self: start !important;
