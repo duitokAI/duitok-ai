@@ -1909,7 +1909,6 @@ function stabilizeImageConsoleCompact(duration = 900) {
 }
 
 function lockGenerationSubmitLayout(name = "generate-image", duration = 1600) {
-  if (name === "generate-image") stabilizeImageConsoleCompact(duration);
   if (name === "generate-ugc") stabilizeVideoConsoleExpansion(duration);
   document.documentElement.classList.add("is-generation-submitting");
   document.documentElement.classList.add("is-generation-active");
@@ -1948,12 +1947,6 @@ function syncGenerationLayoutLock(db = state.db) {
   document.documentElement.classList.toggle("is-image-generation-active", hasImage);
   document.documentElement.classList.toggle("is-video-generation-active", hasVideo);
   document.documentElement.classList.toggle("is-audio-generation-active", hasAudio);
-  if (hasImage) {
-    document.querySelectorAll(".image-generate-console").forEach((el) => {
-      el.classList.add("is-compact");
-      el.classList.remove("is-hover-expanded", "has-open-menu");
-    });
-  }
   document.querySelectorAll(".video-page-studio .video-generate-console").forEach((el) => {
     el.classList.add("is-hover-expanded");
     el.classList.remove("is-compact");

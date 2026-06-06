@@ -48498,8 +48498,8 @@ html.is-generation-active .studio-shell :where(.studio-wall-card, .studio-wall-p
   transform: translateZ(0) !important;
 }
 
-/* Image generation keeps the composer in its normal compact geometry.
-   Expanding it during submit moves the sticky bar and reads as a wall flicker. */
+/* Image generation must not resize the composer during submit.
+   The current expanded or compact geometry is preserved to avoid wall flicker. */
 
 html.is-video-generation-active .studio-shell .video-page-studio > .video-generate-console.is-compact,
 html.is-video-generation-active .studio-shell .video-page-studio > .video-generate-console.is-compact.is-hover-expanded,
