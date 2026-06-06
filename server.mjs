@@ -9154,8 +9154,7 @@ app.post("/api/projects/:id/generate", async (req, res) => {
       resolution: req.body.resolution,
       duration: req.body.duration,
       promptOverride: req.body.promptOverride,
-      advancePrompt: req.body.advancePrompt === true,
-      clientJobIds: req.body.clientJobIds
+      advancePrompt: req.body.advancePrompt === true
     });
     res.json({
       ...result.state,
