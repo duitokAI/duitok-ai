@@ -1966,12 +1966,20 @@ function bindImageConsoleCompact() {
   const expandForHover = () => {
     hovering = true;
     imageConsoleExpandedUntilUserScroll = true;
+    imageConsoleExpandLockUntil = Date.now() + 900;
     consoleEl.classList.add("is-hover-expanded");
     if (!state.generating && !consoleEl.classList.contains("is-generating")) consoleEl.classList.remove("is-compact");
   };
   const expandForPointerHover = (event) => {
     if (event.pointerType === "touch") return;
     expandForHover();
+  };
+  const expandForPointerDown = () => {
+    hovering = true;
+    imageConsoleExpandedUntilUserScroll = true;
+    imageConsoleExpandLockUntil = Date.now() + 900;
+    consoleEl.classList.add("is-hover-expanded");
+    if (!state.generating && !consoleEl.classList.contains("is-generating")) consoleEl.classList.remove("is-compact");
   };
   const releaseHoverExpansion = () => {
     hovering = false;
@@ -2027,6 +2035,9 @@ function bindImageConsoleCompact() {
   consoleEl.addEventListener("mouseleave", releaseHoverExpansion);
   consoleEl.addEventListener("pointerenter", expandForPointerHover);
   consoleEl.addEventListener("pointermove", expandForPointerHover);
+  consoleEl.addEventListener("pointerdown", expandForPointerDown);
+  consoleEl.addEventListener("mousedown", expandForPointerDown);
+  consoleEl.addEventListener("touchstart", expandForPointerDown, { passive: true });
   consoleEl.addEventListener("pointerleave", releaseHoverExpansion);
   consoleEl.addEventListener("focusin", expandForHover);
   consoleEl.addEventListener("focusout", restoreAfterFocus);
@@ -2045,6 +2056,9 @@ function bindImageConsoleCompact() {
     consoleEl.removeEventListener("mouseleave", releaseHoverExpansion);
     consoleEl.removeEventListener("pointerenter", expandForPointerHover);
     consoleEl.removeEventListener("pointermove", expandForPointerHover);
+    consoleEl.removeEventListener("pointerdown", expandForPointerDown);
+    consoleEl.removeEventListener("mousedown", expandForPointerDown);
+    consoleEl.removeEventListener("touchstart", expandForPointerDown);
     consoleEl.removeEventListener("pointerleave", releaseHoverExpansion);
     consoleEl.removeEventListener("focusin", expandForHover);
     consoleEl.removeEventListener("focusout", restoreAfterFocus);

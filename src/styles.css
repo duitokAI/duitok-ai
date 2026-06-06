@@ -49329,7 +49329,7 @@ body:has(.studio-shell .image-higgsfield-mode.has-results),
   height: auto !important;
   min-height: 100dvh !important;
   max-height: none !important;
-  overflow-x: hidden !important;
+  overflow-x: clip !important;
   overflow-y: visible !important;
 }
 
@@ -49378,6 +49378,88 @@ body:has(.studio-shell .image-higgsfield-mode.has-results),
 .studio-shell .image-higgsfield-mode.has-results > .image-generate-console:not(.is-compact).has-open-menu,
 .studio-shell .image-higgsfield-mode.has-results > .image-generate-console:not(.is-compact).has-long-prompt {
   grid-row: 3 !important;
+  position: relative !important;
+  top: auto !important;
+  bottom: auto !important;
+  margin-top: 8px !important;
+  margin-bottom: 14px !important;
+  align-self: auto !important;
+  transform: none !important;
+}
+
+/* Image result composer final flow lock: compact rules used to keep a relative
+   bottom offset, which felt like a fixed dock even though computed position was
+   not fixed. Result mode keeps the bar in the content flow for wheel, pointer,
+   and zoom interactions. */
+.studio-shell .image-higgsfield-mode.has-results > .image-generate-console,
+.studio-shell .image-higgsfield-mode.has-results > .image-generate-console.is-compact,
+.studio-shell .image-higgsfield-mode.has-results > .image-generate-console.is-hover-expanded,
+.studio-shell .image-higgsfield-mode.has-results > .image-generate-console.has-open-menu,
+.studio-shell .image-higgsfield-mode.has-results > .image-generate-console.has-long-prompt {
+  position: relative !important;
+  top: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+  inset: auto !important;
+  grid-row: 3 !important;
+  align-self: auto !important;
+  justify-self: center !important;
+  transform: none !important;
+}
+
+.studio-shell .image-higgsfield-mode.has-results > .image-generate-console.is-compact {
+  margin-top: 8px !important;
+  margin-bottom: 14px !important;
+}
+
+/* Image page sidebar continuity: the result wall scrolls with the document, so
+   the rail needs its own viewport paint layer instead of depending on the long
+   workspace height. */
+.studio-shell:has(.image-higgsfield-mode.has-results) .sidebar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 7200 !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+  max-height: 100dvh !important;
+  min-block-size: 100dvh !important;
+  isolation: isolate !important;
+  overflow: hidden !important;
+  background:
+    linear-gradient(180deg, #210024 0%, #32103a 42%, #8b1a78 78%, #c12b62 118%) !important;
+}
+
+.studio-shell:has(.image-higgsfield-mode.has-results) .sidebar::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 0;
+  width: var(--studio-sidebar-width, 300px);
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, #210024 0%, #32103a 42%, #8b1a78 78%, #c12b62 118%);
+  box-shadow: 16px 0 48px rgba(28, 6, 33, 0.16);
+}
+
+.studio-shell.sidebar-collapsed:has(.image-higgsfield-mode.has-results) .sidebar::before {
+  width: var(--studio-sidebar-width, 76px);
+}
+
+.studio-shell:has(.image-higgsfield-mode.has-results) .sidebar-scroll-area {
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  flex: 1 1 auto !important;
+}
+
+.studio-shell:has(.image-higgsfield-mode.has-results) .sidebar > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* Studio top gap lock: keep the creation tabs compact and prevent the Image
