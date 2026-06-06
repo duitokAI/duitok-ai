@@ -1323,6 +1323,13 @@ function updatePromoCountdown() {
   promoCountdownTimer = setInterval(tick, 1000);
 }
 
+function closeImageGenerateConsoleMenus(consoleEl = document.querySelector("[data-image-generate-console]")) {
+  if (!consoleEl) return;
+  consoleEl.querySelectorAll(".image-model-picker[open],.image-resolution-menu[open],.image-aspect-ratio-menu[open]").forEach((el) => el.removeAttribute("open"));
+  consoleEl.classList.remove("has-open-menu");
+  closeAspectRatioPopover();
+}
+
 function isGenericSavedToast(message) {
   const text = String(message || "").trim();
   return text === t("saveDone") || ["Saved.", "已保存。"].includes(text);
@@ -2073,6 +2080,14 @@ function bindImageConsoleCompact() {
     }
   };
   const handleScroll = () => {
+    updateMenuState();
+    if (menuOpen) {
+      hovering = true;
+      imageConsoleExpandedUntilUserScroll = true;
+      imageConsoleExpandLockUntil = Date.now() + 1200;
+      requestSync();
+      return;
+    }
     const hasUserScrollIntent = Date.now() < imageConsoleUserScrollIntentUntil;
     if (hasUserScrollIntent) {
       imageConsoleExpandLockUntil = 0;
@@ -13836,8 +13851,9 @@ async function generate(name, event = null) {
     notify(generationFeedbackCopy("busy"));
     return;
   }
-  lockGenerationSubmitLayout(name);
   const generationOptions = syncImageConsoleBeforeGenerate(name);
+  if (name === "generate-image") closeImageGenerateConsoleMenus();
+  lockGenerationSubmitLayout(name);
   const count = name === "generate-image" ? imageBatchCount(project()) : name === "generate-ugc" ? videoBatchCount(project()) : 1;
   const optimisticJobs = optimisticGenerationJobs(name, count, generationOptions);
   const optimisticIds = new Set(optimisticJobs.map((job) => job.id));
@@ -14297,6 +14313,7 @@ function reconcileStudioResultWall(existingWall, wallHtml) {
     }
     else {
       changed = true;
+      if (key?.startsWith("job:")) desiredCard.classList.add("is-wall-entering");
     }
     if (desiredCard === referenceNode) {
       referenceNode = referenceNode.nextElementSibling;
@@ -14316,7 +14333,12 @@ function reconcileStudioResultWall(existingWall, wallHtml) {
   if (existingBulkBar && nextBulkBar) existingBulkBar.replaceWith(nextBulkBar);
   else if (existingBulkBar && !nextBulkBar) existingBulkBar.remove();
   else if (!existingBulkBar && nextBulkBar) existingWall.appendChild(nextBulkBar);
-  if (changed) animateStudioWallReflow(existingGrid, beforeRects);
+  if (changed) {
+    animateStudioWallReflow(existingGrid, beforeRects);
+    window.setTimeout(() => {
+      existingGrid.querySelectorAll(".is-wall-entering").forEach((card) => card.classList.remove("is-wall-entering"));
+    }, 280);
+  }
   return changed;
 }
 
