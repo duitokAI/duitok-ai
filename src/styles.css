@@ -49967,3 +49967,105 @@ body:has(.studio-shell .video-page-studio.has-results),
   position: relative;
   z-index: 1;
 }
+
+/* Video empty page work-mode final lock: empty Video should behave like Image's
+   working canvas, not like a full-screen cover. Keep the prompt composer in
+   the first viewport and scale the hero copy down so the user can act. */
+html:has(.studio-shell .video-page-studio.is-empty),
+body:has(.studio-shell .video-page-studio.is-empty),
+#app:has(.studio-shell .video-page-studio.is-empty),
+.studio-shell:has(.video-page-studio.is-empty),
+.studio-shell:has(.video-page-studio.is-empty) .workspace,
+.studio-shell .workspace:has(.video-page-studio.is-empty),
+.studio-shell .canvas-card:has(.video-page-studio.is-empty),
+.studio-shell .studio-workbench-card:has(.video-page-studio.is-empty),
+.studio-shell .studio-step-panel:has(.video-page-studio.is-empty),
+.studio-shell .video-page-studio.is-empty {
+  height: auto !important;
+  min-height: 100dvh !important;
+  max-height: none !important;
+  overflow-x: clip !important;
+  overflow-y: visible !important;
+}
+
+.studio-shell .video-page-studio.is-empty {
+  display: grid !important;
+  grid-template-rows: 36px minmax(300px, calc(100dvh - var(--project-fixed-tabs-height, 88px) - 176px)) auto !important;
+  align-content: start !important;
+  position: relative !important;
+}
+
+.studio-shell .video-page-studio.is-empty > .studio-wall-zoom-control {
+  grid-row: 1 !important;
+  position: sticky !important;
+  top: 10px !important;
+  justify-self: end !important;
+  align-self: center !important;
+  margin: 0 clamp(18px, 2.2vw, 42px) 0 0 !important;
+  z-index: 80 !important;
+}
+
+.studio-shell .video-page-studio.is-empty > .video-empty-cinema {
+  grid-row: 2 !important;
+  min-height: 300px !important;
+  height: auto !important;
+  max-height: none !important;
+  padding: clamp(28px, 4.2vw, 58px) clamp(18px, 5vw, 72px) clamp(24px, 4vw, 54px) !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .video-page-studio.is-empty .video-empty-cinema-frame {
+  width: min(760px, calc(100vw - 84px)) !important;
+  padding: 18px clamp(16px, 3vw, 34px) 22px !important;
+  gap: 10px !important;
+}
+
+.studio-shell .video-page-studio.is-empty .video-empty-cinema-frame::before {
+  inset: 12px 0 !important;
+}
+
+.studio-shell .video-page-studio.is-empty .video-empty-cinema-frame::after {
+  inset: 38px -24px !important;
+}
+
+.studio-shell .video-page-studio.is-empty .video-empty-cinema-frame h2 {
+  padding: 4px clamp(12px, 3vw, 24px) !important;
+  font-size: clamp(32px, 4.1vw, 56px) !important;
+  line-height: 1.08 !important;
+  letter-spacing: 0 !important;
+}
+
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio.is-empty)::after,
+.studio-shell.sidebar-collapsed .workspace:has(.step-tabs):has(.video-page-studio.is-empty)::after {
+  content: none !important;
+  display: none !important;
+}
+
+.studio-shell .video-page-studio.is-empty > .video-generate-console,
+.studio-shell .video-page-studio.is-empty > .video-generate-console.is-compact,
+.studio-shell .video-page-studio.is-empty > .video-generate-console.is-hover-expanded,
+.studio-shell .video-page-studio.is-empty > .video-generate-console.has-open-menu,
+.studio-shell .video-page-studio.is-empty > .video-generate-console.has-long-prompt,
+.studio-shell .video-page-studio.is-empty > .video-generate-console:not(.is-compact),
+.studio-shell .video-page-studio.is-empty > .video-generate-console:not(.is-compact).is-hover-expanded,
+.studio-shell .video-page-studio.is-empty > .video-generate-console:not(.is-compact).has-open-menu,
+.studio-shell .video-page-studio.is-empty > .video-generate-console:not(.is-compact).has-long-prompt,
+.studio-shell.sidebar-collapsed .video-page-studio.is-empty > .video-generate-console,
+.studio-shell.sidebar-collapsed .video-page-studio.is-empty > .video-generate-console:not(.is-compact),
+.studio-shell.sidebar-collapsed .video-page-studio.is-empty > .video-generate-console:not(.is-compact).is-hover-expanded,
+.studio-shell.sidebar-collapsed .video-page-studio.is-empty > .video-generate-console:not(.is-compact).has-open-menu {
+  position: sticky !important;
+  top: auto !important;
+  bottom: max(14px, env(safe-area-inset-bottom)) !important;
+  left: auto !important;
+  right: auto !important;
+  grid-row: 3 !important;
+  align-self: auto !important;
+  justify-self: center !important;
+  z-index: 24 !important;
+  width: min(1180px, calc(100% - clamp(28px, 6vw, 96px))) !important;
+  max-width: min(1180px, calc(100% - clamp(28px, 6vw, 96px))) !important;
+  margin-top: 8px !important;
+  margin-bottom: 14px !important;
+  transform: none !important;
+}
