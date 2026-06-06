@@ -49380,9 +49380,9 @@ body:has(.studio-shell .image-higgsfield-mode.has-results),
 .studio-shell .image-higgsfield-mode.has-results > .image-generate-console:not(.is-compact).has-open-menu,
 .studio-shell .image-higgsfield-mode.has-results > .image-generate-console:not(.is-compact).has-long-prompt {
   grid-row: 3 !important;
-  position: relative !important;
+  position: sticky !important;
   top: auto !important;
-  bottom: auto !important;
+  bottom: max(14px, env(safe-area-inset-bottom)) !important;
   margin-top: 8px !important;
   margin-bottom: 14px !important;
   align-self: auto !important;
