@@ -26985,11 +26985,24 @@ label {
 }
 
 .result-lightbox-backdrop {
-  z-index: 5000 !important;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 24000 !important;
   isolation: isolate;
   padding: 0;
   background: rgba(8, 8, 10, 0.96) !important;
   place-items: stretch;
+}
+
+.studio-shell:has(.result-lightbox-backdrop) > #modal-root {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 24000 !important;
+  pointer-events: none;
+}
+
+.studio-shell:has(.result-lightbox-backdrop) > #modal-root > .result-lightbox-backdrop {
+  pointer-events: auto;
 }
 
 .result-lightbox-bg,
@@ -27042,7 +27055,7 @@ label {
 
 .result-lightbox-close {
   position: fixed;
-  z-index: 5002;
+  z-index: 24002;
   top: 22px;
   right: 22px;
   width: 48px !important;
