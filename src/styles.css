@@ -49314,8 +49314,10 @@ h3,
   background: transparent !important;
 }
 
-/* Image composer flow restore: Image Page should behave like a media wall with
-   the prompt bar after the wall, not as a viewport-fixed dock covering tiles. */
+/* Image composer scroll restore: Image Page should keep the prompt bar present
+   inside the working viewport. The page still scrolls through the wall, but the
+   composer remains sticky within the Studio surface instead of only appearing
+   after the last result. */
 html:has(.studio-shell .image-higgsfield-mode.has-results),
 body:has(.studio-shell .image-higgsfield-mode.has-results),
 #app:has(.studio-shell .image-higgsfield-mode.has-results),
@@ -49387,21 +49389,20 @@ body:has(.studio-shell .image-higgsfield-mode.has-results),
   transform: none !important;
 }
 
-/* Image result composer final flow lock: compact rules used to keep a relative
-   bottom offset, which felt like a fixed dock even though computed position was
-   not fixed. Result mode keeps the bar in the content flow for wheel, pointer,
-   and zoom interactions. */
+/* Image result composer final sticky lock: compact rules used to keep a relative
+   bottom offset, while an over-correction made the bar appear only after the
+   entire wall. Result mode keeps it sticky in the page viewport for wheel,
+   pointer, and zoom interactions. */
 .studio-shell .image-higgsfield-mode.has-results > .image-generate-console,
 .studio-shell .image-higgsfield-mode.has-results > .image-generate-console.is-compact,
 .studio-shell .image-higgsfield-mode.has-results > .image-generate-console.is-hover-expanded,
 .studio-shell .image-higgsfield-mode.has-results > .image-generate-console.has-open-menu,
 .studio-shell .image-higgsfield-mode.has-results > .image-generate-console.has-long-prompt {
-  position: relative !important;
+  position: sticky !important;
   top: auto !important;
-  bottom: auto !important;
+  bottom: max(14px, env(safe-area-inset-bottom)) !important;
   left: auto !important;
   right: auto !important;
-  inset: auto !important;
   grid-row: 3 !important;
   align-self: auto !important;
   justify-self: center !important;
