@@ -6880,10 +6880,11 @@ function videoDurationCapabilityChip(durations = []) {
 }
 
 function videoAspectRatioOption(value) {
+  const label = value === "adaptive" ? "Auto" : value;
   return {
     value,
-    label: value,
-    title: value,
+    label,
+    title: label,
     description: {
       "9:16": "Vertical shorts and mobile-first videos",
       "16:9": "Wide cinematic frame",
