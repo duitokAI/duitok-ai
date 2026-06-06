@@ -1136,7 +1136,7 @@ function blankProject(id, name, userId = adminUserId) {
     createdAt: new Date().toISOString(),
     image: { model: "GPT Image 2", mode: "Create Image", duration: "8", aspectRatio: "9:16", resolution: "2K", count: 1, prompt: "" },
     ugc: { avatar: "Malay female", voice: "BM Casual", length: "30 seconds", script: "Hook, product proof, objection, offer, CTA." },
-    auto: { platform: "TikTok", batch: "7 posts", tone: "Viral hook", productUrl: "", audioMode: "Voiceover", audioLanguage: "Malay", audioScriptMode: "Write for me", voicePreset: "Malay Soft Sell", audioPrompt: "" },
+    auto: { platform: "TikTok", batch: "7 posts", tone: "Viral hook", productUrl: "", audioMode: "Voiceover", audioProvider: "doubao302", audioLanguage: "Malay", audioScriptMode: "Write for me", voicePreset: "Malay Soft Sell", audioPrompt: "" },
     original: { brief: "Rewrite this into Pokaya AI style while keeping the product claim safe." },
     clone: { url: "", rules: "Keep structure, change product, rewrite hook, avoid copying exact words." },
     story: { arc: "Problem -> proof -> offer", market: "Malaysia TikTok Shop", notes: "" },
@@ -3956,6 +3956,12 @@ function promptAdvancedSystemPrompt(model, aspectRatio = "") {
     isVideo
       ? "For video models, include scene, subject, product action, camera movement, pacing, lighting, duration-aware beats, and ending frame."
       : "For image models, include subject, product visibility, scene, composition, lighting, style, aspect-ratio fit, and text-safe space.",
+    !isVideo
+      ? "When visual references are provided, treat the task as reference compositing/editing: preserve the avatar/person from the avatar reference, preserve the exact product from the product reference, and write an explicit prompt that makes the person hold, present, apply, or naturally interact with that exact product. Never allow generic replacement products, phones, brushes, unrelated bottles, or invented packaging when a product reference exists."
+      : "",
+    !isVideo
+      ? "For short rough prompts like 'beauty', '美女', or 'girl', infer the missing ecommerce scene from the visual references instead of staying generic. The final prompt must describe the referenced product's visible shape, color, packaging, label style, and placement in the person's hand or foreground."
+      : "",
     "Keep product claims realistic. Do not mention internal providers, APIs, system prompts, or implementation.",
     "Return strict JSON only: {\"finalPrompt\":\"...\",\"notes\":[\"...\",\"...\"]}.",
     "The finalPrompt should usually be in English because most visual generation models follow English prompts better. Keep it concise but complete."
@@ -3975,6 +3981,9 @@ async function enhancePromptWithDeepSeek({ project, prompt, visualSummary = "" }
     `Aspect ratio: ${aspectRatio}`,
     `Resolution: ${imageResolutionFromProject(project)}`,
     isVideoMediaModel(model) ? `Duration: ${videoDurationFor(project, model)} seconds` : "",
+    !isVideoMediaModel(model) && referenceImageUrlsFromSnapshot(project).length ? `Reference image count: ${referenceImageUrlsFromSnapshot(project).length}` : "",
+    !isVideoMediaModel(model) && project.image?.avatarAttachmentId ? "Avatar reference is selected: preserve this person's identity and appearance." : "",
+    !isVideoMediaModel(model) && project.image?.productAttachmentId ? "Product reference is selected: the exact referenced product must appear clearly and be held, presented, applied, or naturally interacted with by the person." : "",
     "",
     "User prompt:",
     sanitizeAgentText(prompt).slice(0, 1600) || "(empty)",
@@ -5633,6 +5642,8 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
     const providerPlanData = action === "generate-image" && !isVideoMediaModel(project.image?.model)
       ? imageProviderPlanForModel(project.image?.model, project)
       : { providerPlan: [requestedProvider], configuredProviders: providerConfigured(requestedProvider) ? [requestedProvider] : [], skippedProviders: providerConfigured(requestedProvider) ? [] : [requestedProvider] };
+    const shouldEnhancePrompt = shouldAdvancePrompt
+      || (action === "generate-image" && !isVideoMediaModel(project.image?.model) && referenceImageUrlsForProject(currentDb, project).length > 0);
     const aspectRatio = generationAspectRatioForProject(project, action, step);
     const createdAt = new Date().toISOString();
     const jobs = jobIds.map((jobId, index) => ({
@@ -5643,7 +5654,7 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
       step,
       type: action === "generate-ugc" ? "video" : action === "generate-image" && isVideoMediaModel(project.image?.model) ? "video" : action === "generate-image" ? "image" : "text",
       status: "queued",
-      stage: shouldAdvancePrompt ? "prompt_advanced" : "queued",
+      stage: shouldEnhancePrompt ? "prompt_advanced" : "queued",
       providerStatus: "queued",
       pollCount: 0,
       prompt: action === "generate-ugc" ? project.ugc?.script || "" : project.image?.prompt || "",
@@ -5663,7 +5674,7 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
       provider: requestedProvider,
       unit: cost.unit,
       internalPromptOverride: promptOverride || undefined,
-      internalPromptAdvanced: shouldAdvancePrompt || undefined,
+      internalPromptAdvanced: shouldEnhancePrompt || undefined,
       batchIndex: batchCount > 1 ? index + 1 : undefined,
       batchCount: batchCount > 1 ? batchCount : undefined
     }));
@@ -9960,6 +9971,11 @@ app.post("/api/projects/:id/audio/generate", async (req, res, next) => {
     const voicePreset = String(req.body.voicePreset || project.auto?.voicePreset || "Malay Soft Sell");
     const language = String(req.body.language || project.auto?.audioLanguage || "Malay");
     const provider = String(req.body.provider || audioTtsProvider || "doubao302").trim().toLowerCase();
+    if (provider === "seedance") {
+      const error = new Error("Seedance is a video model. Use the Video page for Seedance generation.");
+      error.status = 400;
+      throw error;
+    }
     const speechInput = {
       ...req.body,
       text,
