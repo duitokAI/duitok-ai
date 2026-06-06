@@ -50672,3 +50672,178 @@ body:has(.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"].is
 .studio-shell .video-page-studio.is-empty > .studio-wall-zoom-control {
   z-index: 2 !important;
 }
+
+/* Video surface isolation: UGC Video reuses the extractor base class for wall
+   behavior, but it must not inherit Clone Prompt's pale canvas. Keep the Video
+   page on the deep Studio surface in both empty and pending/result states. */
+html:has(.studio-shell .video-page-studio),
+body:has(.studio-shell .video-page-studio),
+#app:has(.studio-shell .video-page-studio),
+.studio-shell:has(.video-page-studio),
+.studio-shell:has(.video-page-studio) .workspace,
+.studio-shell .workspace:has(.video-page-studio),
+.studio-shell .canvas-card:has(.video-page-studio),
+.studio-shell .studio-workbench-card:has(.video-page-studio),
+.studio-shell .studio-step-panel:has(.video-page-studio),
+.studio-shell .video-page-studio,
+.studio-shell .video-page-studio > .studio-result-wall {
+  background:
+    radial-gradient(circle at 78% 14%, rgba(255, 103, 56, 0.18), transparent 34%),
+    radial-gradient(circle at 35% 28%, rgba(139, 26, 120, 0.24), transparent 38%),
+    linear-gradient(135deg, #210024 0%, #32103a 42%, #8b1a78 76%, #210024 100%) !important;
+  background-color: #210024 !important;
+  background-clip: border-box !important;
+}
+
+.studio-shell .video-page-studio.has-results > .studio-result-wall,
+.studio-shell .video-page-studio.has-results > .studio-result-wall > .studio-wall-grid {
+  background:
+    radial-gradient(circle at 18% 4%, rgba(193, 43, 98, 0.14), transparent 28%),
+    linear-gradient(135deg, #210024 0%, #32103a 54%, #140016 100%) !important;
+  background-color: #210024 !important;
+}
+
+.studio-shell .video-page-studio.is-empty > .video-empty-cinema {
+  background: transparent !important;
+  background-image: none !important;
+  background-color: transparent !important;
+}
+
+.studio-shell .video-page-studio .studio-wall-card {
+  background: rgba(33, 0, 36, 0.82) !important;
+}
+
+@media (max-width: 720px) {
+  .studio-shell .video-page-studio > .video-generate-console,
+  .studio-shell .video-page-studio > .video-generate-console.is-compact,
+  .studio-shell .video-page-studio > .video-generate-console.is-hover-expanded,
+  .studio-shell .video-page-studio > .video-generate-console.has-open-menu,
+  .studio-shell .video-page-studio > .video-generate-console.has-long-prompt,
+  .studio-shell .video-page-studio > .video-generate-console:not(.is-compact),
+  .studio-shell .video-page-studio > .video-generate-console:not(.is-compact).is-hover-expanded,
+  .studio-shell .video-page-studio > .video-generate-console:not(.is-compact).has-open-menu,
+  .studio-shell .video-page-studio > .video-generate-console:not(.is-compact).has-long-prompt {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto 58px !important;
+    gap: 8px !important;
+    width: min(320px, calc(100% - 28px)) !important;
+    max-width: min(320px, calc(100% - 28px)) !important;
+    min-height: 174px !important;
+    height: 174px !important;
+    max-height: 174px !important;
+    padding: 9px !important;
+    border-radius: 20px !important;
+  }
+
+  .studio-shell .video-page-studio > .video-generate-console .video-console-main,
+  .studio-shell .video-page-studio > .video-generate-console:not(.is-compact) .video-console-main,
+  .studio-shell .video-page-studio > .video-generate-console.has-long-prompt:not(.is-compact) .video-console-main {
+    min-width: 0 !important;
+    height: 90px !important;
+    min-height: 90px !important;
+    max-height: 90px !important;
+    grid-template-rows: 44px 38px !important;
+    gap: 8px !important;
+  }
+
+  .studio-shell .video-page-studio > .video-generate-console .video-console-prompt {
+    height: 44px !important;
+    min-height: 44px !important;
+    grid-template-columns: 34px minmax(0, 1fr) 34px !important;
+    gap: 8px !important;
+    padding: 0 8px 0 5px !important;
+    border-radius: 15px !important;
+  }
+
+  .studio-shell .video-page-studio > .video-generate-console .video-prompt-insert,
+  .studio-shell .video-page-studio > .video-generate-console .video-prompt-enhance {
+    width: 30px !important;
+    min-width: 30px !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    border-radius: 10px !important;
+  }
+
+  .studio-shell .video-page-studio > .video-generate-console .video-console-prompt textarea {
+    height: 34px !important;
+    min-height: 34px !important;
+    max-height: 34px !important;
+    font-size: 14px !important;
+    line-height: 17px !important;
+  }
+
+  .studio-shell .video-page-studio > .video-generate-console .video-console-tools {
+    height: 38px !important;
+    display: flex !important;
+    gap: 7px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding-bottom: 0 !important;
+    scrollbar-width: thin !important;
+  }
+
+  .studio-shell .video-page-studio > .video-generate-console .video-option-menu,
+  .studio-shell .video-page-studio > .video-generate-console .video-count-stepper {
+    flex: 0 0 106px !important;
+    height: 38px !important;
+  }
+
+  .studio-shell .video-page-studio > .video-generate-console .video-option-model {
+    flex-basis: 148px !important;
+  }
+
+  .studio-shell .video-page-studio > .video-generate-console .video-option-menu summary,
+  .studio-shell .video-page-studio > .video-generate-console .video-count-stepper {
+    height: 38px !important;
+    min-height: 38px !important;
+    grid-template-columns: 18px minmax(0, 1fr) 12px !important;
+    gap: 6px !important;
+    padding: 0 8px !important;
+    border-radius: 14px !important;
+  }
+
+  .studio-shell .video-page-studio > .video-generate-console .video-option-menu summary b,
+  .studio-shell .video-page-studio > .video-generate-console .video-count-stepper span b {
+    font-size: 13px !important;
+  }
+
+  .studio-shell .video-page-studio > .video-generate-console .video-count-stepper {
+    grid-template-columns: 28px minmax(0, 1fr) 28px !important;
+    padding: 0 !important;
+  }
+
+  .studio-shell .video-page-studio > .video-generate-console .video-count-stepper button {
+    width: 28px !important;
+    min-width: 28px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+  }
+
+  .studio-shell .video-page-studio > .video-generate-console .video-console-generate,
+  .studio-shell .video-page-studio > .video-generate-console:not(.is-compact) .video-console-generate,
+  .studio-shell .video-page-studio > .video-generate-console.has-long-prompt:not(.is-compact) .video-console-generate {
+    grid-row: 2 !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: 58px !important;
+    min-height: 58px !important;
+    max-height: 58px !important;
+    grid-template-columns: 22px minmax(0, auto) auto !important;
+    place-items: center !important;
+    justify-content: center !important;
+    align-content: center !important;
+    gap: 8px !important;
+    border-radius: 16px !important;
+  }
+
+  .studio-shell .video-page-studio > .video-generate-console .video-console-generate b,
+  .studio-shell .video-page-studio > .video-generate-console .video-console-generate small {
+    display: block !important;
+    font-size: 14px !important;
+    line-height: 1 !important;
+  }
+
+  .studio-shell .video-page-studio > .video-generate-console .video-console-generate small {
+    font-size: 11px !important;
+  }
+}
