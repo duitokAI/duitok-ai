@@ -49360,7 +49360,7 @@ body:has(.studio-shell .image-higgsfield-mode.has-results),
 
 .studio-shell .image-higgsfield-mode.has-results {
   display: grid !important;
-  grid-template-rows: 36px auto auto !important;
+  grid-template-rows: 12px auto auto !important;
   align-content: start !important;
 }
 
@@ -49556,17 +49556,18 @@ body:has(.studio-shell .image-higgsfield-mode.has-results),
 }
 
 .studio-shell .image-higgsfield-mode > .studio-wall-zoom-control {
-  position: absolute !important;
-  top: 12px !important;
-  right: clamp(18px, 2.2vw, 42px) !important;
-  grid-row: auto !important;
+  position: sticky !important;
+  top: 0 !important;
+  right: auto !important;
+  grid-row: 1 !important;
   justify-self: end !important;
   align-self: start !important;
-  height: 14px !important;
-  min-height: 14px !important;
-  max-height: 14px !important;
+  width: clamp(170px, 14vw, 260px) !important;
+  height: 12px !important;
+  min-height: 12px !important;
+  max-height: 12px !important;
   overflow: visible !important;
-  margin: 0 !important;
+  margin: 0 clamp(22px, 2.4vw, 44px) 0 0 !important;
   z-index: 80 !important;
 }
 
