@@ -6456,6 +6456,15 @@ function selectedImageReference(kind) {
   return hasPending && pending.attachment ? pending.attachment : (state.db.attachments || []).find((item) => item.id === selectedId) || null;
 }
 
+function selectedImageReferenceId(kind) {
+  const field = imageReferenceField(kind);
+  const pending = state.imageReferencePending?.[field];
+  if (pending?.projectId === state.projectId) return pending.id || "";
+  const selectedId = kind === "product" ? project().image?.productAttachmentId || "" : project().image?.avatarAttachmentId || "";
+  if (!selectedId) return "";
+  return (state.db?.attachments || []).some((item) => item.id === selectedId) ? selectedId : "";
+}
+
 function imageReferenceThumb(kind, item, emptyLabel) {
   const label = kind === "avatar" ? "Avatar" : "Product";
   const displayLabel = emptyLabel || label;
@@ -14097,6 +14106,8 @@ function syncImageConsoleBeforeGenerate(name) {
       selectedResolution || latestImageSelection?.resolution || current.image?.resolution || "1K"
     ),
     count: imageBatchCount(current),
+    avatarAttachmentId: selectedImageReferenceId("avatar"),
+    productAttachmentId: selectedImageReferenceId("product"),
     advancePrompt: Boolean(state.promptAdvancedEnabled)
   };
 }

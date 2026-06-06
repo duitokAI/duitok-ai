@@ -5657,6 +5657,12 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
       }
       if (options.aspectRatio) project.image.aspectRatio = String(options.aspectRatio).replace(/\s*\(.+\)\s*$/, "");
       if (options.resolution) project.image.resolution = String(options.resolution);
+      if (Object.hasOwn(options, "avatarAttachmentId")) {
+        project.image.avatarAttachmentId = String(options.avatarAttachmentId || "").trim();
+      }
+      if (Object.hasOwn(options, "productAttachmentId")) {
+        project.image.productAttachmentId = String(options.productAttachmentId || "").trim();
+      }
     }
     const creditsToCharge = creditChargeFor(project, action, currentDb);
     assertGenerationAccess(currentDb, user, roundCredits(creditsToCharge * batchCount), batchCount);
@@ -9160,6 +9166,8 @@ app.post("/api/projects/:id/generate", async (req, res) => {
       resolution: req.body.resolution,
       duration: req.body.duration,
       promptOverride: req.body.promptOverride,
+      avatarAttachmentId: req.body.avatarAttachmentId,
+      productAttachmentId: req.body.productAttachmentId,
       advancePrompt: req.body.advancePrompt === true
     });
     res.json({
