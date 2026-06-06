@@ -6724,10 +6724,11 @@ textarea {
 .result-missing-video-preview {
   gap: 8px;
   background:
-    radial-gradient(circle at 50% 0%, rgba(255, 103, 56, 0.22), transparent 34%),
-    linear-gradient(160deg, #210024 0%, #32103a 52%, #160018 100%);
+    radial-gradient(circle at 50% 0%, rgba(255, 103, 56, 0.18), transparent 34%),
+    linear-gradient(160deg, rgba(33, 0, 36, 0.18) 0%, rgba(50, 16, 58, 0.34) 52%, rgba(22, 0, 24, 0.26) 100%);
   color: rgba(255, 249, 240, 0.92);
   text-align: center;
+  backdrop-filter: blur(2px);
 }
 
 .result-missing-video-preview svg {
@@ -50799,8 +50800,7 @@ body:has(.studio-shell .video-page-studio),
 .studio-shell .canvas-card:has(.video-page-studio),
 .studio-shell .studio-workbench-card:has(.video-page-studio),
 .studio-shell .studio-step-panel:has(.video-page-studio),
-.studio-shell .video-page-studio,
-.studio-shell .video-page-studio > .studio-result-wall {
+.studio-shell .video-page-studio {
   background:
     radial-gradient(circle at 78% 14%, rgba(255, 103, 56, 0.18), transparent 34%),
     radial-gradient(circle at 35% 28%, rgba(139, 26, 120, 0.24), transparent 38%),
@@ -50811,10 +50811,8 @@ body:has(.studio-shell .video-page-studio),
 
 .studio-shell .video-page-studio.has-results > .studio-result-wall,
 .studio-shell .video-page-studio.has-results > .studio-result-wall > .studio-wall-grid {
-  background:
-    radial-gradient(circle at 18% 4%, rgba(193, 43, 98, 0.14), transparent 28%),
-    linear-gradient(135deg, #210024 0%, #32103a 54%, #140016 100%) !important;
-  background-color: #210024 !important;
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
 .studio-shell .video-page-studio.is-empty > .video-empty-cinema {
@@ -50824,7 +50822,7 @@ body:has(.studio-shell .video-page-studio),
 }
 
 .studio-shell .video-page-studio .studio-wall-card {
-  background: rgba(33, 0, 36, 0.82) !important;
+  background: rgba(33, 0, 36, 0.18) !important;
 }
 
 @media (max-width: 720px) {
