@@ -13872,9 +13872,15 @@ function preserveActiveGenerationState(incomingDb, currentDb = state.db, project
   if (!incomingDb || !currentDb || !projectId) return incomingDb || currentDb;
   const currentJobs = (currentDb.generationJobs || []).filter((job) => job.projectId === projectId);
   const incomingJobs = (incomingDb.generationJobs || []).filter((job) => job.projectId === projectId);
-  const hasActiveLocalJobs = currentJobs.some((job) => ["queued", "processing"].includes(job.status));
-  if (!hasActiveLocalJobs || incomingJobs.length >= currentJobs.length) return incomingDb;
+  const incomingJobIds = new Set(incomingJobs.map((job) => job.id));
+  const incomingProject = (incomingDb.projects || []).find((item) => item.id === projectId);
+  const incomingResultJobIds = new Set((incomingProject?.results || []).map((item) => item.generationJobId).filter(Boolean));
+  const activeLocalJobs = currentJobs.filter((job) => !shouldHideGenerationJob(job) && ["queued", "processing"].includes(job.status));
+  const missingActiveJobs = activeLocalJobs.filter((job) => job.id && !incomingJobIds.has(job.id) && !incomingResultJobIds.has(job.id));
+  if (!missingActiveJobs.length) return incomingDb;
   const currentProject = (currentDb.projects || []).find((item) => item.id === projectId);
+  const projectJobMap = new Map(incomingJobs.map((job) => [job.id, job]));
+  missingActiveJobs.forEach((job) => projectJobMap.set(job.id, job));
   return {
     ...incomingDb,
     projects: (incomingDb.projects || []).map((item) => item.id === projectId && currentProject
@@ -13886,7 +13892,7 @@ function preserveActiveGenerationState(incomingDb, currentDb = state.db, project
       : item),
     generationJobs: [
       ...(incomingDb.generationJobs || []).filter((job) => job.projectId !== projectId),
-      ...currentJobs
+      ...projectJobMap.values()
     ],
     billing: incomingDb.billing || currentDb.billing
   };
