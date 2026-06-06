@@ -3869,6 +3869,24 @@ function referenceImageUrlsFromSnapshot(project) {
     .slice(0, 4);
 }
 
+function imageReferencePromptInstruction(project) {
+  const referenceCount = referenceImageUrlsFromSnapshot(project).length;
+  if (!referenceCount) return "";
+  const hasProductReference = Boolean(project?.image?.productAttachmentId);
+  const hasAvatarReference = Boolean(project?.image?.avatarAttachmentId);
+  const lines = ["Reference image requirement: use the attached image reference(s) directly, not just as mood or style inspiration."];
+  if (hasProductReference) {
+    lines.push("The referenced product must be clearly visible in the final image, preferably held, presented, or interacted with by the person in the foreground. Do not replace it with a generic product.");
+  }
+  if (hasAvatarReference) {
+    lines.push("Preserve the avatar reference identity and make the person naturally interact with the referenced product when a product reference is present.");
+  }
+  if (!hasProductReference && !hasAvatarReference) {
+    lines.push("Preserve the main subject, product identity, layout, and commercially useful visual details from the reference image(s).");
+  }
+  return lines.join(" ");
+}
+
 function grsaiVisionContent(textBlock = "", inputs = [], objectShape = true) {
   return [
     { type: "text", text: textBlock },
@@ -4296,8 +4314,9 @@ async function generateImageWithApimart(project, tracker = null) {
   const prompt = [
     project.image?.prompt || "Create a high-converting TikTok Shop product image.",
     `Mode: ${project.image?.mode || "Create Image"}.`,
+    imageReferencePromptInstruction(project),
     "Style: realistic commercial product scene, clear product focus, vertical-social friendly, no fake brand claims."
-  ].join("\n");
+  ].filter(Boolean).join("\n");
   const requestBody = {
     model: imageModelFromProject(project),
     prompt,
@@ -4782,8 +4801,15 @@ async function generateImageWithGrsai(project, tracker = null) {
   const prompt = [
     project.image?.prompt || "Create a high-converting TikTok Shop product image.",
     `Mode: ${project.image?.mode || "Create Image"}.`,
+    imageReferencePromptInstruction(project),
     "Style: realistic commercial product scene, clear product focus, vertical-social friendly, no fake brand claims."
-  ].join("\n");
+  ].filter(Boolean).join("\n");
+  const referenceImageUrls = referenceImageUrlsFromSnapshot(project);
+  await tracker?.({
+    providerStatus: "request_prepared",
+    referenceImageCount: referenceImageUrls.length,
+    referenceImagesSent: referenceImageUrls.length > 0
+  });
   const payload = await grsaiRequest(grsaiDrawPath, {
     body: grsaiImageBody(project, prompt)
   });
@@ -4809,8 +4835,15 @@ async function generateImageWithWuyin(project, tracker = null) {
   const prompt = [
     project.image?.prompt || "Create a high-converting TikTok Shop product image.",
     `Mode: ${project.image?.mode || "Create Image"}.`,
+    imageReferencePromptInstruction(project),
     "Style: realistic commercial product scene, clear product focus, vertical-social friendly, no fake brand claims."
-  ].join("\n");
+  ].filter(Boolean).join("\n");
+  const referenceImageUrls = referenceImageUrlsFromSnapshot(project);
+  await tracker?.({
+    providerStatus: "request_prepared",
+    referenceImageCount: referenceImageUrls.length,
+    referenceImagesSent: referenceImageUrls.length > 0
+  });
   const data = await wuyinRequest(wuyinPathFromProject(project), {
     method: "POST",
     body: wuyinImageBody(project, prompt)
@@ -4836,8 +4869,15 @@ async function generateImageWithCrun(project, tracker = null) {
   const prompt = [
     project.image?.prompt || "Create a high-converting TikTok Shop product image.",
     `Mode: ${project.image?.mode || "Create Image"}.`,
+    imageReferencePromptInstruction(project),
     "Style: realistic commercial product scene, clear product focus, vertical-social friendly, no fake brand claims."
-  ].join("\n");
+  ].filter(Boolean).join("\n");
+  const referenceImageUrls = referenceImageUrlsFromSnapshot(project);
+  await tracker?.({
+    providerStatus: "request_prepared",
+    referenceImageCount: referenceImageUrls.length,
+    referenceImagesSent: referenceImageUrls.length > 0
+  });
   const data = await crunRequest(crunCreateTaskPath, {
     method: "POST",
     body: crunImageBody(project, prompt)
