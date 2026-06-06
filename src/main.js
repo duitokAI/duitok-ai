@@ -7315,7 +7315,6 @@ function audioPromptWell(promptText, language, scriptMode, audioProvider = "doub
     <textarea data-field="auto.audioPrompt" data-audio-prompt rows="3" placeholder="Describe the voice, scene, and emotion you imagine...">${esc(promptText)}</textarea>
     <div class="audio-control-row">
       ${audioProviderPicker(audioProvider)}
-      ${audioSegment("auto.audioLanguage", [["Malay", "Malay"], ["English", "English"], ["Chinese", "Chinese"], ["Indonesian", "Indonesian"]], language)}
       ${audioSegment("auto.audioScriptMode", [["Write for me", "Write for me"], ["Use my script", "Use my script"]], scriptMode)}
     </div>
   </div>`;
