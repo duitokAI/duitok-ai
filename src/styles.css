@@ -47002,6 +47002,29 @@ body:has(.studio-shell .video-page-studio),
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.studio-shell .audio-clone-well {
+  grid-template-rows: 32px minmax(36px, 1fr) auto;
+  gap: 7px;
+}
+
+.studio-shell .audio-clone-well input {
+  width: 100%;
+  min-width: 0;
+  height: 32px;
+  border: 0;
+  outline: 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  padding: 0 10px;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.studio-shell .audio-clone-well input::placeholder {
+  color: rgba(248, 237, 248, 0.44);
+}
+
 .studio-shell .audio-file-insert-card {
   min-width: 0;
   min-height: 128px;
@@ -47911,6 +47934,31 @@ body:has(.studio-shell .video-page-studio),
   overflow: hidden !important;
 }
 
+.studio-shell .audio-studio-page .audio-clone-well {
+  grid-template-rows: 30px minmax(28px, 1fr) 34px !important;
+  gap: 5px !important;
+}
+
+.studio-shell .audio-studio-page .audio-clone-well input {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 30px !important;
+  border: 1px solid rgba(33, 0, 36, 0.08) !important;
+  border-radius: 10px !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  color: var(--pokaya-ink, #210024) !important;
+  padding: 0 10px !important;
+  font-size: 12px !important;
+  line-height: 30px !important;
+  font-weight: 850 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+.studio-shell .audio-studio-page .audio-clone-well input::placeholder {
+  color: rgba(33, 0, 36, 0.38) !important;
+}
+
 .studio-shell .audio-studio-page .audio-file-insert-card {
   box-sizing: border-box !important;
   height: 126px !important;
@@ -47985,6 +48033,16 @@ body:has(.studio-shell .video-page-studio),
   box-shadow: none !important;
   overflow-y: auto !important;
   resize: none !important;
+}
+
+.studio-shell .audio-studio-page .audio-clone-well textarea,
+.studio-shell .workspace:has(.step-tabs) .audio-studio-page .audio-clone-well textarea {
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  padding: 2px 0 !important;
+  font-size: 13px !important;
+  line-height: 16px !important;
 }
 
 .studio-shell .audio-studio-page .audio-prompt-well textarea::placeholder {

@@ -7198,7 +7198,9 @@ function autoPanel(p) {
   const scriptMode = auto.audioScriptMode || "Write for me";
   const voicePreset = auto.voicePreset || "Malay Soft Sell";
   const promptText = auto.audioPrompt || "";
+  const cloneAudioUrl = auto.cloneAudioUrl || "";
   const isVoiceoverMode = mode === "Voiceover";
+  const isCloneMode = mode === "Change Voice";
   return `<section class="audio-studio-page studio-wall-surface-base studio-audio-wall-surface studio-wall-zoomable ${wall ? "" : "is-empty"}" ${studioWallZoomStyleAttr()}>
     <section class="audio-stage-hero">
       <div class="audio-eq" aria-hidden="true">${Array.from({ length: 34 }, (_, index) => `<i style="--bar:${index % 9}"></i>`).join("")}</div>
@@ -7216,7 +7218,7 @@ function autoPanel(p) {
         ${audioModeButton("Translate", "languages", "Insert reference", mode)}
       </div>
       <div class="audio-main-bar">
-        ${isVoiceoverMode ? audioPromptWell(promptText, language, scriptMode) : audioFileInsertWell()}
+        ${isVoiceoverMode ? audioPromptWell(promptText, language, scriptMode) : isCloneMode ? audioCloneWell(promptText, cloneAudioUrl) : audioFileInsertWell()}
         ${mode === "Translate" ? audioLanguagePicker(language) : audioVoicePresetPicker(voicePreset)}
         <button class="audio-generate-button ${isVoiceoverMode && !promptText.trim() ? "is-empty" : ""}" type="button" data-action="generate-audio">
           <b>Generate Audio</b>
@@ -7231,9 +7233,19 @@ function audioPromptWell(promptText, language, scriptMode) {
   return `<div class="audio-prompt-well">
     <textarea data-field="auto.audioPrompt" data-audio-prompt rows="3" placeholder="Describe the voice, scene, and emotion you imagine...">${esc(promptText)}</textarea>
     <div class="audio-control-row">
-      <span class="audio-model-chip">${icon("audio-lines", 16)} MiniMax Voice</span>
+      <span class="audio-model-chip">${icon("audio-lines", 16)} Doubao Voice</span>
       ${audioSegment("auto.audioLanguage", [["Malay", "Malay"], ["English", "English"], ["Chinese", "Chinese"], ["Indonesian", "Indonesian"]], language)}
       ${audioSegment("auto.audioScriptMode", [["Write for me", "Write for me"], ["Use my script", "Use my script"]], scriptMode)}
+    </div>
+  </div>`;
+}
+
+function audioCloneWell(promptText, cloneAudioUrl) {
+  return `<div class="audio-prompt-well audio-clone-well">
+    <input data-field="auto.cloneAudioUrl" data-audio-clone-url type="url" inputmode="url" placeholder="Paste reference audio URL..." value="${esc(cloneAudioUrl)}">
+    <textarea data-field="auto.audioPrompt" data-audio-prompt rows="2" placeholder="Write what the cloned voice should say...">${esc(promptText)}</textarea>
+    <div class="audio-control-row">
+      <span class="audio-model-chip">${icon("refresh-cw", 16)} Wuyin Clone</span>
     </div>
   </div>`;
 }
@@ -7323,13 +7335,16 @@ function patchAudioModeDom(mode = project().auto?.audioMode || "Voiceover") {
   const scriptMode = auto.audioScriptMode || "Write for me";
   const voicePreset = auto.voicePreset || "Malay Soft Sell";
   const isVoiceoverMode = mode === "Voiceover";
+  const isCloneMode = mode === "Change Voice";
+  const cloneUrlInput = document.querySelector("[data-audio-clone-url]");
+  const cloneAudioUrl = String(cloneUrlInput?.value || auto.cloneAudioUrl || "");
   const inputSlot = mainBar.querySelector(".audio-prompt-well, .audio-file-insert-card");
   const pickerSlot = mainBar.querySelector(".audio-preset-picker");
   if (!inputSlot || !pickerSlot) return false;
-  inputSlot.outerHTML = isVoiceoverMode ? audioPromptWell(promptText, language, scriptMode) : audioFileInsertWell();
+  inputSlot.outerHTML = isVoiceoverMode ? audioPromptWell(promptText, language, scriptMode) : isCloneMode ? audioCloneWell(promptText, cloneAudioUrl) : audioFileInsertWell();
   pickerSlot.outerHTML = mode === "Translate" ? audioLanguagePicker(language) : audioVoicePresetPicker(voicePreset);
   const generateButton = mainBar.querySelector(".audio-generate-button");
-  if (generateButton) generateButton.classList.toggle("is-empty", isVoiceoverMode && !promptText.trim());
+  if (generateButton) generateButton.classList.toggle("is-empty", (isVoiceoverMode || isCloneMode) && !promptText.trim());
   bindProjectFieldSetControls(mainBar);
   window.lucide?.createIcons();
   return true;
@@ -12630,9 +12645,14 @@ function audioGeneratePlaceholder() {
 async function generateAudio(event = null) {
   if (state.audioGenerating) return notify("Audio generation is already running.");
   const current = project();
+  const mode = current.auto?.audioMode || "Voiceover";
+  if (mode === "Translate") return notify("Audio translate is not connected yet.");
   const promptInput = document.querySelector("[data-audio-prompt]");
   const promptText = String(promptInput?.value || current.auto?.audioPrompt || "").trim();
-  if (!promptText) return notify("Describe the voice first.");
+  if (!promptText) return notify(mode === "Change Voice" ? "Write the clone script first." : "Describe the voice first.");
+  const cloneUrlInput = document.querySelector("[data-audio-clone-url]");
+  const cloneAudioUrl = String(cloneUrlInput?.value || current.auto?.cloneAudioUrl || "").trim();
+  if (mode === "Change Voice" && !/^https?:\/\//i.test(cloneAudioUrl)) return notify("Paste a reference audio URL first.");
   const trigger = event?.currentTarget || document.querySelector('[data-action="generate-audio"]');
   const previousHtml = trigger?.innerHTML || "";
   try {
@@ -12641,14 +12661,16 @@ async function generateAudio(event = null) {
     if (trigger) {
       trigger.disabled = true;
       trigger.classList.add("is-generating");
-      trigger.innerHTML = `<b>Generating...</b><span>MiniMax</span>`;
+      trigger.innerHTML = `<b>Generating...</b><span>${mode === "Change Voice" ? "Wuyin Clone" : "Doubao"}</span>`;
     }
-    notify("Generating MiniMax audio...");
-    const db = await api(`/projects/${state.projectId}/audio/generate`, {
+    notify(mode === "Change Voice" ? "Generating cloned voice..." : "Generating Doubao audio...");
+    const endpoint = mode === "Change Voice" ? "clone" : "generate";
+    const db = await api(`/projects/${state.projectId}/audio/${endpoint}`, {
       method: "POST",
       timeoutMs: 140000,
       body: JSON.stringify({
         prompt: promptText,
+        referenceAudioUrl: cloneAudioUrl,
         voicePreset: current.auto?.voicePreset || "Malay Soft Sell",
         language: current.auto?.audioLanguage || "Malay"
       })

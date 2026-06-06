@@ -131,36 +131,16 @@ services:
         sync: false
       - key: AI302_BASE_URL
         value: https://api.302.ai
-      - key: AI302_MINIMAX_SPEECH_PATH
-        value: /minimaxi/v1/t2a_v2
-      - key: AI302_MINIMAX_SPEECH_MODEL
-        value: speech-2.8-hd
-      - key: AI302_MINIMAX_SPEECH_VOICE_ID
-        value: male-qn-qingse
-      - key: AI302_MINIMAX_SPEECH_LANGUAGE_BOOST
-        value: auto
-      - key: AI302_MINIMAX_SPEECH_SAMPLE_RATE
-        value: "32000"
-      - key: AI302_MINIMAX_SPEECH_BITRATE
-        value: "128000"
-      - key: AI302_ELEVEN_TTS_MULTILINGUAL_PATH
-        value: /302/submit/elevenlabs/tts-multilingual-v2-sync
-      - key: AI302_ELEVEN_TTS_MULTILINGUAL_VOICE
-        value: Aria
       - key: AI302_DOUBAO_TTS_HD_PATH
         value: /doubao/tts_hd
       - key: AI302_DOUBAO_TTS_HD_VOICE
         value: zh_male_M392_conversation_wvae_bigtts
-      - key: AI302_SUNO_SUBMIT_PATH
-        value: /suno/submit/music
-      - key: AI302_SUNO_LYRICS_PATH
-        value: /suno/submit/lyrics
-      - key: AI302_SUNO_FETCH_PATH_PREFIX
-        value: /suno/fetch
-      - key: AI302_SUNO_MODEL
-        value: chirp-crow
-      - key: AI302_AUDIO_TRANSLATE_PATH
-        value: /302/audio/translate/task
+      - key: AI302_SEEDANCE_CREATE_PATH
+        value: /volcengine/api/v3/contents/generations/tasks
+      - key: AI302_SEEDANCE_TASK_PATH_PREFIX
+        value: /volcengine/api/v3/contents/generations/tasks
+      - key: AI302_SEEDANCE_MODEL
+        value: doubao-seedance-1-0-lite-t2v-250428
       - key: ELEVENLABS_API_KEY
         sync: false
       - key: ELEVENLABS_BASE_URL

@@ -91,6 +91,9 @@ const ai302MinimaxSpeechModel = process.env.AI302_MINIMAX_SPEECH_MODEL || "speec
 const ai302ElevenTtsMultilingualPath = process.env.AI302_ELEVEN_TTS_MULTILINGUAL_PATH || "/302/submit/elevenlabs/tts-multilingual-v2-sync";
 const ai302DoubaoTtsHdPath = process.env.AI302_DOUBAO_TTS_HD_PATH || "/doubao/tts_hd";
 const ai302DoubaoTtsHdVoice = process.env.AI302_DOUBAO_TTS_HD_VOICE || "zh_male_M392_conversation_wvae_bigtts";
+const ai302SeedanceCreatePath = process.env.AI302_SEEDANCE_CREATE_PATH || "/volcengine/api/v3/contents/generations/tasks";
+const ai302SeedanceTaskPathPrefix = process.env.AI302_SEEDANCE_TASK_PATH_PREFIX || "/volcengine/api/v3/contents/generations/tasks";
+const ai302SeedanceModel = process.env.AI302_SEEDANCE_MODEL || "doubao-seedance-1-0-lite-t2v-250428";
 const ai302SunoSubmitPath = process.env.AI302_SUNO_SUBMIT_PATH || "/suno/submit/music";
 const ai302SunoLyricsPath = process.env.AI302_SUNO_LYRICS_PATH || "/suno/submit/lyrics";
 const ai302SunoFetchPathPrefix = process.env.AI302_SUNO_FETCH_PATH_PREFIX || "/suno/fetch";
@@ -100,7 +103,7 @@ const elevenLabsBaseUrl = (process.env.ELEVENLABS_BASE_URL || "https://api.eleve
 const elevenLabsTtsModel = process.env.ELEVENLABS_TTS_MODEL || "eleven_multilingual_v2";
 const elevenLabsDefaultVoiceId = process.env.ELEVENLABS_DEFAULT_VOICE_ID || "JBFqnCBsd6RMkjVDRZzb";
 const elevenLabsOutputFormat = process.env.ELEVENLABS_OUTPUT_FORMAT || "mp3_44100_128";
-const audioTtsProvider = String(process.env.AUDIO_TTS_PROVIDER || "minimax").trim().toLowerCase();
+const audioTtsProvider = String(process.env.AUDIO_TTS_PROVIDER || "doubao302").trim().toLowerCase();
 const minimaxBaseUrl = (process.env.MINIMAX_BASE_URL || "https://api.minimax.io").replace(/\/$/, "");
 const minimaxTtsPath = process.env.MINIMAX_TTS_PATH || "/v1/t2a_v2";
 const minimaxTtsModel = process.env.MINIMAX_TTS_MODEL || "speech-2.8-hd";
@@ -1035,6 +1038,25 @@ async function persistGeneratedAudio(bytes, contentType, { userId, projectId, re
     contentType: safeContentType,
     bytes: audioBytes.length
   };
+}
+
+async function persistRemoteAudio(remoteUrl, { userId, projectId, resultId } = {}) {
+  if (!remoteUrl || !/^https?:\/\//i.test(String(remoteUrl))) {
+    const error = new Error("Audio result URL is missing.");
+    error.status = 502;
+    throw error;
+  }
+  const response = await fetch(remoteUrl, {
+    signal: AbortSignal.timeout(Number(process.env.AUDIO_FETCH_TIMEOUT_MS || 120000))
+  });
+  if (!response.ok) {
+    const error = new Error(`Audio result could not be downloaded (${response.status}).`);
+    error.status = response.status || 502;
+    throw error;
+  }
+  const contentType = response.headers.get("content-type") || audioContentTypeFromFormat(remoteUrl.split("?")[0].split(".").pop() || "mp3");
+  const bytes = Buffer.from(await response.arrayBuffer());
+  return persistGeneratedAudio(bytes, contentType, { userId, projectId, resultId });
 }
 
 function closestSupportedImageAspectRatio(width, height) {
@@ -2654,6 +2676,12 @@ function requireAi302Config() {
   return apiKey;
 }
 
+function ai302LegacyAudioDisabledError() {
+  const error = new Error("302.AI is limited to Doubao TTS HD and Doubao Seedance in this project.");
+  error.status = 410;
+  return error;
+}
+
 function requireElevenLabsConfig() {
   const apiKey = process.env.ELEVENLABS_API_KEY;
   if (!apiKey || apiKey.includes("replace_with")) {
@@ -2681,7 +2709,8 @@ function providerForMediaModel(model) {
   if (model === "Seedream 5.0 Lite") return process.env.CRUN_API_KEY ? "crun" : process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Qwen Image 2.0") return process.env.APIMART_API_KEY ? "apimart" : process.env.CRUN_API_KEY ? "crun" : "mock";
   if (model === "Grok Imagine") return process.env.APIMART_API_KEY ? "apimart" : process.env.CRUN_API_KEY ? "crun" : "mock";
-  if (model === "Seedance 2.0" || model === "Grok Imagine Video" || model === "Wan 2.7" || model === "Kling V3 Omni" || model === "Kling V3 Motion Control" || model === "MiniMax Hailuo 2.3") return process.env.APIMART_API_KEY ? "apimart" : "mock";
+  if (model === "Seedance 2.0") return process.env.AI302_API_KEY ? "ai302" : process.env.APIMART_API_KEY ? "apimart" : "mock";
+  if (model === "Grok Imagine Video" || model === "Wan 2.7" || model === "Kling V3 Omni" || model === "Kling V3 Motion Control" || model === "MiniMax Hailuo 2.3") return process.env.APIMART_API_KEY ? "apimart" : "mock";
   if (model === "Veo 3.1") return process.env.CRUN_API_KEY ? "crun" : "mock";
   if (model === "Sora 2" || model === "Gemini Omni") return process.env.WUYIN_API_KEY ? "wuyin" : "mock";
   return "unsupported";
@@ -4411,6 +4440,7 @@ function generationAspectRatioForProject(project, action = "generate-image", ste
 function generationEndpointFor(provider, project) {
   if (provider === "gemini") return `${geminiGeneratePathPrefix}/${geminiVisionModel}:generateContent`;
   if (provider === "grsai" && project?.clone?.referenceVideo) return grsaiChatPath;
+  if (provider === "ai302" && internalMediaModel(project?.image?.model) === "Seedance 2.0") return ai302SeedanceCreatePath;
   if (provider === "apimart" && ["Seedance 2.0", "Grok Imagine Video", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control", "MiniMax Hailuo 2.3"].includes(internalMediaModel(project?.image?.model))) return apimartVideoPath;
   if (provider === "grsai") return grsaiDrawPath;
   if (provider === "crun") return crunCreateTaskPath;
@@ -4557,6 +4587,18 @@ function apimartSeedanceBody(project, prompt) {
     size,
     duration,
     generate_audio: process.env.APIMART_SEEDANCE_GENERATE_AUDIO !== "false"
+  };
+}
+
+function ai302SeedanceBody(project, prompt) {
+  const content = [{ type: "text", text: prompt }];
+  const referenceUrl = referenceImageUrlsFromSnapshot(project)[0];
+  if (referenceUrl && process.env.AI302_SEEDANCE_ALLOW_IMAGE_REFERENCE === "true") {
+    content.push({ type: "image_url", image_url: { url: referenceUrl } });
+  }
+  return {
+    model: ai302SeedanceModel,
+    content
   };
 }
 
@@ -4971,6 +5013,61 @@ async function generateVideoWithApimartSeedance(project, tracker = null) {
   };
 }
 
+async function pollAi302SeedanceTask(taskId, tracker = null) {
+  const maxAttempts = Number(process.env.AI302_SEEDANCE_POLL_ATTEMPTS || 60);
+  const delayMs = Number(process.env.AI302_SEEDANCE_POLL_MS || 5000);
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, delayMs));
+    const data = await ai302Request(`${ai302SeedanceTaskPathPrefix}/${encodeURIComponent(taskId)}`);
+    const status = String(data.status || data.state || data.task_status || "").toLowerCase();
+    await tracker?.({
+      providerTaskId: taskId,
+      taskId,
+      lastPolledAt: new Date().toISOString(),
+      pollCount: attempt + 1,
+      providerStatus: status || "unknown"
+    });
+    if (["succeeded", "success", "completed", "done"].includes(status)) return data;
+    if (["failed", "fail", "error", "cancelled", "canceled"].includes(status)) {
+      const message = readableProviderError(
+        data.error?.message || data.fail_reason || data.failReason || data.failure_reason || data.message || data.detail,
+        `302.AI Seedance task ${status}`
+      );
+      const error = new Error(message);
+      error.status = 502;
+      throw error;
+    }
+  }
+  const error = new Error("302.AI Seedance task is still processing. Please try again later.");
+  error.status = 202;
+  throw error;
+}
+
+async function generateVideoWithAi302Seedance(project, tracker = null) {
+  const prompt = [
+    videoPromptFromProject(project, "Create a high-converting TikTok Shop product video."),
+    `Mode: ${project.image?.mode || "Create Video"}.`,
+    "Style: realistic short-form ecommerce video, native-looking TikTok Shop pacing, clear product focus, no fake brand claims."
+  ].join("\n");
+  const data = await ai302Request(ai302SeedanceCreatePath, {
+    method: "POST",
+    body: JSON.stringify(ai302SeedanceBody(project, prompt))
+  });
+  const task = Array.isArray(data) ? data[0] : data;
+  const taskId = task?.id || task?.task_id || task?.taskId;
+  if (!taskId) return { text: JSON.stringify(data, null, 2), urls: extractVideoUrls(data) };
+  await tracker?.({ providerTaskId: taskId, taskId, providerStatus: "submitted", lastPolledAt: new Date().toISOString(), pollCount: 0 });
+  const taskData = await pollAi302SeedanceTask(taskId, tracker);
+  const urls = extractVideoUrls(taskData);
+  const directVideoUrl = taskData.content?.video_url || taskData.content?.videoUrl || taskData.video_url || taskData.videoUrl;
+  const allUrls = [...new Set([...(directVideoUrl ? [directVideoUrl] : []), ...urls])];
+  return {
+    text: allUrls.length ? `Video generated with Doubao Seedance.\n\nTask ID: ${taskId}` : `Doubao Seedance task completed.\n\nTask ID: ${taskId}`,
+    urls: allUrls,
+    taskId
+  };
+}
+
 async function generateVideoWithApimartGrok(project, tracker = null) {
   const prompt = [
     videoPromptFromProject(project, "Create a high-converting TikTok Shop product video."),
@@ -5102,6 +5199,11 @@ function videoPromptFromProject(project = {}, fallback = "Create a high-converti
 
 async function generateVideoThroughProvider(provider, model, project, tracker = null) {
   let video = null;
+  if (provider === "ai302" && model === "Seedance 2.0") {
+    await tracker?.({ provider: "ai302", providerStatus: "provider_selected" });
+    video = await generateVideoWithAi302Seedance(project, tracker);
+    return assertGeneratedVideo({ title: "Seedance 2.0", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "ai302" }, model);
+  }
   if (provider === "apimart" && model === "Seedance 2.0") {
     await tracker?.({ provider: "apimart", providerStatus: "provider_selected" });
     video = await generateVideoWithApimartSeedance(project, tracker);
@@ -5176,6 +5278,11 @@ async function generateWithProvider(project, action, step, tracker = null) {
     if (!isVideoMediaModel(model)) {
       const image = await generateImageWithFallbacks(project, model, tracker);
       if (image) return image;
+    }
+    if (provider === "ai302" && model === "Seedance 2.0") {
+      await tracker?.({ provider: "ai302", providerStatus: "provider_selected" });
+      const video = await generateVideoWithAi302Seedance(project, tracker);
+      return { title: "Seedance 2.0", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "ai302" };
     }
     if (provider === "apimart" && model === "Seedance 2.0") {
       await tracker?.({ provider: "apimart", providerStatus: "provider_selected" });
@@ -9685,13 +9792,8 @@ app.post("/api/attachments", async (req, res) => {
 
 app.post("/api/speech/minimax", async (req, res, next) => {
   try {
-    const { user } = await requireAuth(req);
-    const speech = await synthesizeSpeechWithAi302(req.body || {});
-    await mutateDb(async (db) => {
-      db.usage.unshift(usage(`Generated MiniMax Speech audio (${speech.textCharacters} chars)`, 0, user.id));
-      await saveDb(db);
-    });
-    res.json(speech);
+    await requireAuth(req);
+    throw ai302LegacyAudioDisabledError();
   } catch (error) {
     next(error);
   }
@@ -9699,13 +9801,8 @@ app.post("/api/speech/minimax", async (req, res, next) => {
 
 app.post("/api/tts/multilingual", async (req, res, next) => {
   try {
-    const { user } = await requireAuth(req);
-    const speech = await synthesizeTtsMultilingualWithAi302(req.body || {});
-    await mutateDb(async (db) => {
-      db.usage.unshift(usage(`Generated TTS-Multilingual-v2 audio (${speech.textCharacters} chars)`, 0, user.id));
-      await saveDb(db);
-    });
-    res.json(speech);
+    await requireAuth(req);
+    throw ai302LegacyAudioDisabledError();
   } catch (error) {
     next(error);
   }
@@ -9778,16 +9875,39 @@ app.post("/api/projects/:id/audio/generate", async (req, res, next) => {
     assertGenerationAccess(db, user, 0.2, 1);
     const voicePreset = String(req.body.voicePreset || project.auto?.voicePreset || "Malay Soft Sell");
     const language = String(req.body.language || project.auto?.audioLanguage || "Malay");
-    const provider = String(req.body.provider || audioTtsProvider || "minimax").trim().toLowerCase();
+    const provider = String(req.body.provider || audioTtsProvider || "doubao302").trim().toLowerCase();
     const speechInput = {
       ...req.body,
       text,
       voicePreset,
       language
     };
-    const speech = provider === "elevenlabs"
-      ? await synthesizeSpeechWithElevenLabs(speechInput)
-      : await synthesizeSpeechWithMiniMax(speechInput);
+    let speech = null;
+    if (provider === "elevenlabs") {
+      speech = await synthesizeSpeechWithElevenLabs(speechInput);
+    } else if (provider === "minimax") {
+      speech = await synthesizeSpeechWithMiniMax(speechInput);
+    } else {
+      const doubao = await synthesizeDoubaoTtsHdWithAi302(speechInput);
+      if (!doubao.audioBase64) {
+        const error = new Error(doubao.message || "Doubao TTS did not return audio.");
+        error.status = 502;
+        throw error;
+      }
+      const bytes = Buffer.from(doubao.audioBase64, "base64");
+      speech = {
+        provider: "302ai-doubao",
+        model: doubao.model,
+        voiceId: String(speechInput.voiceType || speechInput.voice_type || ai302DoubaoTtsHdVoice),
+        voicePreset,
+        textCharacters: doubao.textCharacters,
+        contentType: doubao.contentType,
+        bytes,
+        durationMs: doubao.durationMs,
+        fileSize: bytes.length,
+        traceId: doubao.reqid
+      };
+    }
     const resultId = crypto.randomUUID();
     const createdAt = new Date().toISOString();
     const stored = await persistGeneratedAudio(speech.bytes, speech.contentType, {
@@ -9824,7 +9944,78 @@ app.post("/api/projects/:id/audio/generate", async (req, res, next) => {
       const owner = currentDb.users.find((item) => item.id === currentProject.userId) || user;
       owner.billing ||= defaultBilling();
       owner.billing.credits = Math.max(0, roundCredits(Number(owner.billing.credits || 0) - 0.2));
-      currentDb.usage.unshift(usage(`Generated ${speech.provider === "elevenlabs" ? "ElevenLabs" : "MiniMax"} voiceover (${speech.textCharacters} chars)`, 0.2, owner.id));
+      const providerLabel = speech.provider === "elevenlabs" ? "ElevenLabs" : speech.provider === "minimax" ? "MiniMax" : "Doubao";
+      currentDb.usage.unshift(usage(`Generated ${providerLabel} voiceover (${speech.textCharacters} chars)`, 0.2, owner.id));
+      await saveDb(currentDb);
+      return publicState(currentDb, user);
+    }));
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/projects/:id/audio/clone", async (req, res, next) => {
+  try {
+    const { db, user } = await requireAuth(req);
+    const project = findProject(db, req.params.id, user);
+    const text = String(req.body.text || req.body.prompt || project.auto?.audioPrompt || "").trim();
+    const referenceAudioUrl = String(req.body.audioUrl || req.body.audio_url || req.body.referenceAudioUrl || project.auto?.cloneAudioUrl || "").trim();
+    if (!referenceAudioUrl || !/^https?:\/\//i.test(referenceAudioUrl)) {
+      const error = new Error("Paste a reference audio URL first.");
+      error.status = 400;
+      throw error;
+    }
+    if (!text) {
+      const error = new Error("Write the clone script first.");
+      error.status = 400;
+      throw error;
+    }
+    assertGenerationAccess(db, user, 0.2, 1);
+    const voicePreset = String(req.body.voicePreset || project.auto?.voicePreset || "Voice Clone");
+    const cloned = await cloneVoiceWithWuyin({ audioUrl: referenceAudioUrl, text, name: voicePreset });
+    if (!cloned.demoAudioUrl) {
+      const error = new Error("Voice clone completed, but no demo audio was returned.");
+      error.status = 502;
+      throw error;
+    }
+    const resultId = crypto.randomUUID();
+    const createdAt = new Date().toISOString();
+    const stored = await persistRemoteAudio(cloned.demoAudioUrl, {
+      userId: project.userId || user.id,
+      projectId: project.id,
+      resultId
+    });
+    res.json(await mutateDb(async (currentDb) => {
+      const currentProject = findProject(currentDb, req.params.id, user);
+      currentProject.auto ||= {};
+      currentProject.auto.audioPrompt = text;
+      currentProject.auto.cloneAudioUrl = referenceAudioUrl;
+      currentProject.auto.voicePreset = voicePreset;
+      currentProject.results ||= [];
+      currentProject.results.push({
+        id: resultId,
+        type: "audio",
+        sourceAction: "clone-voice",
+        sourceStep: "auto",
+        title: `Clone · ${voicePreset}`,
+        body: text,
+        prompt: text,
+        provider: cloned.provider,
+        model: cloned.model,
+        voiceId: cloned.voiceId,
+        sourceAudioUrl: referenceAudioUrl,
+        audioUrl: stored.audioUrl,
+        assetStorage: stored.assetStorage,
+        assetStorageKey: stored.assetStorageKey,
+        contentType: stored.contentType,
+        fileSize: stored.bytes,
+        createdAt,
+        timelineAt: createdAt
+      });
+      const owner = currentDb.users.find((item) => item.id === currentProject.userId) || user;
+      owner.billing ||= defaultBilling();
+      owner.billing.credits = Math.max(0, roundCredits(Number(owner.billing.credits || 0) - 0.2));
+      currentDb.usage.unshift(usage(`Generated Wuyin voice clone (${cloned.textCharacters} chars)`, 0.2, owner.id));
       await saveDb(currentDb);
       return publicState(currentDb, user);
     }));
@@ -9835,13 +10026,8 @@ app.post("/api/projects/:id/audio/generate", async (req, res, next) => {
 
 app.post("/api/music/suno", async (req, res, next) => {
   try {
-    const { user } = await requireAuth(req);
-    const music = await submitSunoWithAi302(req.body || {});
-    await mutateDb(async (db) => {
-      db.usage.unshift(usage(`Submitted Suno V5.5 music task (${music.mode})`, 0, user.id));
-      await saveDb(db);
-    });
-    res.json(music);
+    await requireAuth(req);
+    throw ai302LegacyAudioDisabledError();
   } catch (error) {
     next(error);
   }
@@ -9849,13 +10035,8 @@ app.post("/api/music/suno", async (req, res, next) => {
 
 app.get("/api/music/suno/:taskId", async (req, res, next) => {
   try {
-    const { user } = await requireAuth(req);
-    const music = await fetchSunoWithAi302(req.params.taskId);
-    await mutateDb(async (db) => {
-      db.usage.unshift(usage(`Checked Suno V5.5 music task: ${music.taskId || req.params.taskId}`, 0, user.id));
-      await saveDb(db);
-    });
-    res.json(music);
+    await requireAuth(req);
+    throw ai302LegacyAudioDisabledError();
   } catch (error) {
     next(error);
   }
@@ -9863,13 +10044,8 @@ app.get("/api/music/suno/:taskId", async (req, res, next) => {
 
 app.post("/api/audio/translation", async (req, res, next) => {
   try {
-    const { user } = await requireAuth(req);
-    const task = await submitAudioTranslationWithAi302(req.body || {});
-    await mutateDb(async (db) => {
-      db.usage.unshift(usage(`Submitted 302.AI audio translation task: ${task.targetLanguage || "target"}`, 0, user.id));
-      await saveDb(db);
-    });
-    res.json(task);
+    await requireAuth(req);
+    throw ai302LegacyAudioDisabledError();
   } catch (error) {
     next(error);
   }
@@ -9891,13 +10067,8 @@ app.post("/api/voice/clone-sync", async (req, res, next) => {
 
 app.get("/api/audio/translation/:taskId", async (req, res, next) => {
   try {
-    const { user } = await requireAuth(req);
-    const task = await fetchAudioTranslationWithAi302(req.params.taskId);
-    await mutateDb(async (db) => {
-      db.usage.unshift(usage(`Checked 302.AI audio translation task: ${task.taskId || req.params.taskId}`, 0, user.id));
-      await saveDb(db);
-    });
-    res.json(task);
+    await requireAuth(req);
+    throw ai302LegacyAudioDisabledError();
   } catch (error) {
     next(error);
   }
