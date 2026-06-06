@@ -50825,6 +50825,21 @@ body:has(.studio-shell .video-page-studio),
   background: rgba(33, 0, 36, 0.18) !important;
 }
 
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-card,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-card .result-preview-trigger,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-card .result-text-preview,
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-card .result-missing-video-preview {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-card .result-missing-video-preview {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 103, 56, 0.12), transparent 35%),
+    linear-gradient(160deg, rgba(33, 0, 36, 0.08) 0%, rgba(50, 16, 58, 0.18) 52%, rgba(22, 0, 24, 0.12) 100%) !important;
+  backdrop-filter: blur(1.5px) !important;
+}
+
 @media (max-width: 720px) {
   .studio-shell .video-page-studio > .video-generate-console,
   .studio-shell .video-page-studio > .video-generate-console.is-compact,
