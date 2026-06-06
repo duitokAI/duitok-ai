@@ -50371,3 +50371,24 @@ body:has(.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"].is
   margin: 0 !important;
   transform: none !important;
 }
+
+/* Video zoom slider final lock: attach the preview-size control to the Video
+   canvas instead of letting it occupy or follow the top-tab row. */
+.studio-shell .video-page-studio.studio-wall-zoomable {
+  position: relative !important;
+}
+
+.studio-shell .video-page-studio.studio-wall-zoomable > .studio-wall-zoom-control {
+  position: absolute !important;
+  top: 12px !important;
+  right: clamp(18px, 2.2vw, 42px) !important;
+  grid-row: auto !important;
+  justify-self: end !important;
+  align-self: start !important;
+  height: 14px !important;
+  min-height: 14px !important;
+  max-height: 14px !important;
+  overflow: visible !important;
+  margin: 0 !important;
+  z-index: 80 !important;
+}
