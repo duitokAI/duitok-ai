@@ -50636,3 +50636,39 @@ body:has(.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"].is
   margin: 0 auto !important;
   transform: none !important;
 }
+
+/* Video empty background seam lock: keep one continuous canvas behind the grid.
+   Ancestor/hero backgrounds used to stack into visible horizontal bands. */
+.studio-shell .workspace:has(.video-page-studio.is-empty),
+.studio-shell .workspace:has(.step-tabs):has(.video-page-studio.is-empty),
+.studio-shell .workspace:has(.video-page-studio.is-empty) .canvas-card,
+.studio-shell .workspace:has(.video-page-studio.is-empty) .studio-workbench-card,
+.studio-shell .workspace:has(.video-page-studio.is-empty) .studio-step-panel {
+  background-image: none !important;
+  background-color: transparent !important;
+}
+
+.studio-shell .video-page-studio.is-empty {
+  background:
+    radial-gradient(circle at 73% 38%, rgba(255, 103, 56, 0.18), transparent 34%),
+    radial-gradient(circle at 48% 64%, rgba(193, 43, 98, 0.18), transparent 42%),
+    radial-gradient(circle at 20% 28%, rgba(139, 26, 120, 0.2), transparent 36%),
+    linear-gradient(135deg, #210024 0%, #32103a 42%, #8b1a78 72%, #210024 100%) !important;
+  background-color: #210024 !important;
+}
+
+.studio-shell .video-page-studio.is-empty > .video-empty-cinema::before {
+  content: none !important;
+  display: none !important;
+}
+
+.studio-shell .video-page-studio.is-empty::after {
+  z-index: 1 !important;
+  opacity: 0.46 !important;
+}
+
+.studio-shell .video-page-studio.is-empty > .video-empty-cinema,
+.studio-shell .video-page-studio.is-empty > .video-generate-console,
+.studio-shell .video-page-studio.is-empty > .studio-wall-zoom-control {
+  z-index: 2 !important;
+}
