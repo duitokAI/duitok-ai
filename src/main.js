@@ -5706,10 +5706,15 @@ function isVideoStudioResult(item = {}) {
   return Boolean(item.videoUrl || item.type === "video" || item.type === "ugc" || item.sourceAction === "generate-ugc" || item.sourceStep === "ugc");
 }
 
+function isMissingVideoFileResult(item = {}) {
+  return isVideoStudioResult(item) && !item.videoUrl && Boolean(item.body || item.providerBody || item.prompt || item.title);
+}
+
 function studioResultIsDisplayable(item = {}) {
   if (item.type === "audio" || item.audioUrl) return true;
   if (item.imageUrl || item.videoUrl || item.visualCard || item.type === "visual_card") return true;
-  if (item.type === "text" && !isVideoStudioResult(item) && (item.body || item.providerBody || item.prompt)) return true;
+  if (isMissingVideoFileResult(item)) return true;
+  if (item.type === "text" && (item.body || item.providerBody || item.prompt)) return true;
   return false;
 }
 
@@ -8430,11 +8435,13 @@ function resultPreview(item, options = {}) {
   const videoPoster = videoSrc ? `<div class="result-video-shell result-video-poster" aria-hidden="true"><span class="result-video-poster-icon">${icon("video", 30)}</span><span class="result-play-button">${icon("play", 26)}<span>点击查看</span></span></div>` : "";
   const videoTriggerMedia = options.wall ? videoPoster : `<div class="result-video-shell"><video class="result-video" src="${videoSrc}" preload="${videoPreload}" playsinline muted onloadedmetadata="${esc(ratioSync)}"></video><span class="result-play-button">${icon("play", 26)}<span>点击查看</span></span></div>`;
   const videoTrigger = videoSrc ? `<button type="button" class="result-preview-trigger result-video-trigger" data-result-preview="${esc(item.id)}" aria-label="Open full video preview">${videoTriggerMedia}</button>` : "";
-  const textLabel = isVideoStudioResult(item) ? "Video task" : "Text result";
-  const text = !image && !video ? `<div class="result-text-preview">${icon("file-text", 30)}<span>${esc(textLabel)}</span></div>` : "";
+  const missingVideo = !image && !video && isMissingVideoFileResult(item)
+    ? `<div class="result-text-preview result-missing-video-preview">${icon("video-off", 30)}<b>Video file missing</b><span>Provider did not return a video file. Please retry.</span></div>`
+    : "";
+  const text = !image && !video && !missingVideo ? `<div class="result-text-preview">${icon("file-text", 30)}<span>Text result</span></div>` : "";
   if (options.clickable && imageSrc) return `<button type="button" class="result-preview-trigger" data-result-preview="${esc(item.id)}" aria-label="Open full image preview">${image}</button>`;
   if (options.clickable && videoSrc) return videoTrigger;
-  return `${image}${video}${text}`;
+  return `${image}${video}${missingVideo}${text}`;
 }
 
 function studioWallThumbnailWidth() {

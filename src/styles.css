@@ -6721,6 +6721,37 @@ textarea {
   font-weight: 900;
 }
 
+.result-missing-video-preview {
+  gap: 8px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 103, 56, 0.22), transparent 34%),
+    linear-gradient(160deg, #210024 0%, #32103a 52%, #160018 100%);
+  color: rgba(255, 249, 240, 0.92);
+  text-align: center;
+}
+
+.result-missing-video-preview svg {
+  color: rgba(255, 103, 56, 0.92);
+}
+
+.result-missing-video-preview b,
+.result-missing-video-preview span {
+  display: block;
+}
+
+.result-missing-video-preview b {
+  font-size: 15px;
+  line-height: 1.15;
+}
+
+.result-missing-video-preview span {
+  max-width: 220px;
+  color: rgba(255, 249, 240, 0.66);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.28;
+}
+
 .result-card {
   overflow: hidden;
   border-color: rgba(93, 8, 108, 0.12);
