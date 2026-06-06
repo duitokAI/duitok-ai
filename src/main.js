@@ -5709,7 +5709,7 @@ function isVideoStudioResult(item = {}) {
 function studioResultIsDisplayable(item = {}) {
   if (item.type === "audio" || item.audioUrl) return true;
   if (item.imageUrl || item.videoUrl || item.visualCard || item.type === "visual_card") return true;
-  if ((item.type === "text" || isVideoStudioResult(item)) && (item.body || item.providerBody || item.prompt)) return true;
+  if (item.type === "text" && !isVideoStudioResult(item) && (item.body || item.providerBody || item.prompt)) return true;
   return false;
 }
 

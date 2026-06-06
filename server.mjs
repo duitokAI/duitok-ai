@@ -4508,7 +4508,7 @@ async function generateImageWithCrun(project, tracker = null) {
 
 async function generateVideoWithCrunVeo31(project, tracker = null) {
   const prompt = [
-    project.image?.prompt || "Create a high-converting TikTok Shop product video.",
+    videoPromptFromProject(project, "Create a high-converting TikTok Shop product video."),
     `Mode: ${project.image?.mode || "Create Video"}.`,
     "Style: realistic short-form ecommerce video, native-looking TikTok Shop pacing, clear product focus, no fake brand claims."
   ].join("\n");
@@ -4530,7 +4530,7 @@ async function generateVideoWithCrunVeo31(project, tracker = null) {
 
 async function generateVideoWithWuyin(project, tracker = null) {
   const prompt = [
-    project.image?.prompt || "Create a high-converting TikTok Shop product video.",
+    videoPromptFromProject(project, "Create a high-converting TikTok Shop product video."),
     `Mode: ${project.image?.mode || "Create Video"}.`,
     "Style: realistic short-form ecommerce video, native-looking TikTok Shop pacing, clear product focus, no fake brand claims."
   ].join("\n");
@@ -4639,7 +4639,7 @@ async function generateImageWithFallbacks(project, model, tracker = null) {
 
 async function generateVideoWithApimartSeedance(project, tracker = null) {
   const prompt = [
-    project.image?.prompt || "Create a high-converting TikTok Shop product video.",
+    videoPromptFromProject(project, "Create a high-converting TikTok Shop product video."),
     `Mode: ${project.image?.mode || "Create Video"}.`,
     "Style: realistic short-form ecommerce video, native-looking TikTok Shop pacing, clear product focus, no fake brand claims."
   ].join("\n");
@@ -4662,7 +4662,7 @@ async function generateVideoWithApimartSeedance(project, tracker = null) {
 
 async function generateVideoWithApimartGrok(project, tracker = null) {
   const prompt = [
-    project.image?.prompt || "Create a high-converting TikTok Shop product video.",
+    videoPromptFromProject(project, "Create a high-converting TikTok Shop product video."),
     `Mode: ${project.image?.mode || "Create Video"}.`,
     "Style: cinematic short-form video, clear subject focus, smooth motion, no fake brand claims."
   ].join("\n");
@@ -4685,7 +4685,7 @@ async function generateVideoWithApimartGrok(project, tracker = null) {
 
 async function generateVideoWithApimartWan(project, tracker = null) {
   const prompt = [
-    project.image?.prompt || "Create a high-converting TikTok Shop product video.",
+    videoPromptFromProject(project, "Create a high-converting TikTok Shop product video."),
     `Mode: ${project.image?.mode || "Create Video"}.`,
     "Style: polished ecommerce short video, coherent motion, cinematic product focus, no fake brand claims."
   ].join("\n");
@@ -4708,7 +4708,7 @@ async function generateVideoWithApimartWan(project, tracker = null) {
 
 async function generateVideoWithApimartKlingOmni(project, tracker = null) {
   const prompt = [
-    project.image?.prompt || "Create a cinematic ecommerce product video.",
+    videoPromptFromProject(project, "Create a cinematic ecommerce product video."),
     `Mode: ${project.image?.mode || "Create Video"}.`,
     "Style: cinematic short-form motion, coherent scene, clear product or subject focus, no fake brand claims."
   ].join("\n");
@@ -4731,7 +4731,7 @@ async function generateVideoWithApimartKlingOmni(project, tracker = null) {
 
 async function generateVideoWithApimartKlingMotion(project, tracker = null) {
   const prompt = [
-    project.image?.prompt || "Make the subject follow the reference motion.",
+    videoPromptFromProject(project, "Make the subject follow the reference motion."),
     `Mode: ${project.image?.mode || "Motion Control"}.`,
     "Style: smooth motion transfer, stable character identity, cinematic lighting, no fake brand claims."
   ].join("\n");
@@ -4754,7 +4754,7 @@ async function generateVideoWithApimartKlingMotion(project, tracker = null) {
 
 async function generateVideoWithApimartHailuo23(project, tracker = null) {
   const prompt = [
-    project.image?.prompt || "Create a high-quality ecommerce product video.",
+    videoPromptFromProject(project, "Create a high-quality ecommerce product video."),
     `Mode: ${project.image?.mode || "Create Video"}.`,
     "Style: smooth cinematic motion, realistic lighting, strong product or subject focus, no fake brand claims."
   ].join("\n");
@@ -4785,8 +4785,75 @@ async function generateWithApimart(project, action, step) {
   return { title: fallbackTitle.replace(/^(Image|UGC|Auto|Original|Clone|Story|Viral)/, "APIMart $1"), body };
 }
 
+function videoPromptFromProject(project = {}, fallback = "Create a high-converting TikTok Shop product video.") {
+  return project.ugc?.script || project.image?.prompt || fallback;
+}
+
+async function generateVideoThroughProvider(provider, model, project, tracker = null) {
+  let video = null;
+  if (provider === "apimart" && model === "Seedance 2.0") {
+    await tracker?.({ provider: "apimart", providerStatus: "provider_selected" });
+    video = await generateVideoWithApimartSeedance(project, tracker);
+    return assertGeneratedVideo({ title: "Seedance 2.0", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" }, model);
+  }
+  if (provider === "apimart" && model === "Grok Imagine Video") {
+    await tracker?.({ provider: "apimart", providerStatus: "provider_selected" });
+    video = await generateVideoWithApimartGrok(project, tracker);
+    return assertGeneratedVideo({ title: "Grok Imagine Video", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" }, model);
+  }
+  if (provider === "apimart" && model === "Wan 2.7") {
+    await tracker?.({ provider: "apimart", providerStatus: "provider_selected" });
+    video = await generateVideoWithApimartWan(project, tracker);
+    return assertGeneratedVideo({ title: "Wan 2.7", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" }, model);
+  }
+  if (provider === "apimart" && model === "Kling V3 Omni") {
+    await tracker?.({ provider: "apimart", providerStatus: "provider_selected" });
+    video = await generateVideoWithApimartKlingOmni(project, tracker);
+    return assertGeneratedVideo({ title: "Kling V3 Omni", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" }, model);
+  }
+  if (provider === "apimart" && model === "Kling V3 Motion Control") {
+    await tracker?.({ provider: "apimart", providerStatus: "provider_selected" });
+    video = await generateVideoWithApimartKlingMotion(project, tracker);
+    return assertGeneratedVideo({ title: "Kling V3 Motion Control", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" }, model);
+  }
+  if (provider === "apimart" && model === "MiniMax Hailuo 2.3") {
+    await tracker?.({ provider: "apimart", providerStatus: "provider_selected" });
+    video = await generateVideoWithApimartHailuo23(project, tracker);
+    return assertGeneratedVideo({ title: "MiniMax Hailuo 2.3", body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "apimart" }, model);
+  }
+  if (provider === "crun" && model === "Veo 3.1") {
+    await tracker?.({ provider: "crun", providerStatus: "provider_selected" });
+    video = await generateVideoWithCrunVeo31(project, tracker);
+    return assertGeneratedVideo({ title: model, body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "crun" }, model);
+  }
+  if (provider === "wuyin" && (model === "Sora 2" || model === "Gemini Omni")) {
+    await tracker?.({ provider: "wuyin", providerStatus: "provider_selected" });
+    video = await generateVideoWithWuyin(project, tracker);
+    return assertGeneratedVideo({ title: model, body: video.text, videoUrl: video.urls[0], taskId: video.taskId, provider: "wuyin" }, model);
+  }
+  const error = new Error(`No configured video provider for ${model}.`);
+  error.status = 503;
+  throw error;
+}
+
+function assertGeneratedVideo(generated, model = "video") {
+  if (generated?.videoUrl) return generated;
+  const error = new Error(`${model} completed, but no video file was returned. Please try again.`);
+  error.status = 502;
+  throw error;
+}
+
 async function generateWithProvider(project, action, step, tracker = null) {
   if (action === "clone-prompt") return generateVideoPromptWithGrsai(project);
+  if (action === "generate-ugc") {
+    const model = internalMediaModel(project.image?.model || project.ugc?.provider || "Seedance 2.0");
+    if (!isVideoMediaModel(model)) {
+      const error = new Error(`请选择视频模型：${generationModelOptionsText("video")}。`);
+      error.status = 400;
+      throw error;
+    }
+    return generateVideoThroughProvider(providerForMediaModel(model), model, project, tracker);
+  }
   if (action === "generate-image") {
     const model = internalMediaModel(project.image?.model);
     if (!allowedMediaModels.has(model)) {
