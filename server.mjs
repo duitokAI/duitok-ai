@@ -5605,7 +5605,8 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
       }
     }
     if (action === "generate-ugc") {
-      const providerLabel = String(options.model || project.ugc?.provider || project.image?.model || "Seedance 2.0");
+      const persistedVideoModel = isVideoMediaModel(project.image?.model) ? project.image.model : "";
+      const providerLabel = String(options.model || project.ugc?.provider || persistedVideoModel || "Veo 3.1");
       const selectedModel = /seedance/i.test(providerLabel) ? "Seedance 2.0" : internalMediaModel(providerLabel);
       if (!isVideoMediaModel(selectedModel)) {
         const error = new Error(`请选择视频模型：${generationModelOptionsText("video")}。`);
