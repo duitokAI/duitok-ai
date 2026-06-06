@@ -48473,6 +48473,136 @@ html.is-generation-submitting .studio-shell .video-generate-console {
   will-change: auto !important;
 }
 
+html.is-generation-active,
+html.is-generation-active body,
+html.is-generation-active #app,
+html.is-generation-active .studio-shell,
+html.is-generation-active .workspace,
+html.is-generation-active .studio-result-wall,
+html.is-generation-active .studio-wall-grid,
+html.is-generation-active .studio-wall-card,
+html.is-generation-active .studio-wall-pending,
+html.is-generation-active .image-generate-console,
+html.is-generation-active .video-generate-console,
+html.is-generation-active .audio-composer {
+  overflow-anchor: none !important;
+}
+
+html.is-generation-active .studio-shell :where(.studio-result-wall, .studio-wall-grid, .studio-wall-card, .studio-wall-pending, .image-generate-console, .video-generate-console, .audio-composer) {
+  animation: none !important;
+  transition: none !important;
+}
+
+html.is-generation-active .studio-shell :where(.studio-wall-card, .studio-wall-pending) {
+  contain: layout paint !important;
+  transform: translateZ(0) !important;
+}
+
+html.is-image-generation-active .studio-shell .image-generate-console.is-compact,
+html.is-image-generation-active .studio-shell .image-generate-console.is-compact.is-hover-expanded,
+html.is-image-generation-active .studio-shell .image-generate-console.is-compact.has-open-menu {
+  grid-template-areas:
+    "prompt prompt generate"
+    "tools refs generate" !important;
+  grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.64fr) clamp(168px, 13vw, 238px) !important;
+  align-items: stretch !important;
+  gap: 12px !important;
+  width: min(1900px, calc(100% - clamp(38px, 4.4vw, 96px))) !important;
+  max-width: min(1900px, calc(100% - clamp(38px, 4.4vw, 96px))) !important;
+  margin-top: 8px !important;
+  margin-bottom: 14px !important;
+  padding: 14px !important;
+  border-radius: 28px !important;
+  transform: translateZ(0) !important;
+}
+
+html.is-image-generation-active .studio-shell .image-generate-console.is-compact .image-console-tools,
+html.is-image-generation-active .studio-shell .image-generate-console.is-compact .image-console-references {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+html.is-image-generation-active .studio-shell .image-generate-console.is-compact .image-console-prompt textarea {
+  min-height: 116px !important;
+  max-height: 132px !important;
+  padding: 18px 20px !important;
+  color: var(--pokaya-ink, #210024) !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  border-radius: 20px !important;
+  overflow-y: auto !important;
+}
+
+html.is-image-generation-active .studio-shell .image-generate-console.is-compact .image-console-tools label,
+html.is-image-generation-active .studio-shell .image-generate-console.is-compact .image-console-tools span,
+html.is-image-generation-active .studio-shell .image-generate-console.is-compact .image-count-stepper,
+html.is-image-generation-active .studio-shell .image-generate-console.is-compact .image-reference-thumb {
+  min-height: 76px !important;
+  width: auto !important;
+  min-width: 0 !important;
+  height: auto !important;
+  display: grid !important;
+  border-radius: 16px !important;
+}
+
+html.is-image-generation-active .studio-shell .image-generate-console.is-compact .image-reference-thumb {
+  grid-template-columns: 54px minmax(0, 1fr) !important;
+  align-content: center !important;
+  padding: 10px 12px !important;
+}
+
+html.is-image-generation-active .studio-shell .image-generate-console.is-compact .image-reference-thumb img,
+html.is-image-generation-active .studio-shell .image-generate-console.is-compact .image-reference-thumb .attachment-placeholder,
+html.is-image-generation-active .studio-shell .image-generate-console.is-compact .image-reference-thumb > span:not(.image-reference-clear) {
+  width: 54px !important;
+  height: 54px !important;
+  border-radius: 15px !important;
+}
+
+html.is-image-generation-active .studio-shell .image-generate-console.is-compact .image-reference-thumb b,
+html.is-image-generation-active .studio-shell .image-generate-console.is-compact .image-reference-thumb small,
+html.is-image-generation-active .studio-shell .image-generate-console.is-compact .image-console-generate b,
+html.is-image-generation-active .studio-shell .image-generate-console.is-compact .image-console-generate small {
+  display: block !important;
+}
+
+html.is-image-generation-active .studio-shell .image-generate-console.is-compact .image-console-generate {
+  width: auto !important;
+  min-width: 168px !important;
+  min-height: 204px !important;
+  padding: 12px !important;
+  border-radius: 20px !important;
+}
+
+html.is-video-generation-active .studio-shell .video-page-studio > .video-generate-console.is-compact,
+html.is-video-generation-active .studio-shell .video-page-studio > .video-generate-console.is-compact.is-hover-expanded,
+html.is-video-generation-active .studio-shell .video-page-studio > .video-generate-console.is-compact.has-open-menu {
+  height: 120px !important;
+  min-height: 120px !important;
+  max-height: 120px !important;
+  grid-template-columns: minmax(0, 1fr) 188px !important;
+  grid-template-rows: 100px !important;
+  gap: 12px !important;
+  padding: 10px !important;
+  transform: translateZ(0) !important;
+}
+
+html.is-video-generation-active .studio-shell .video-page-studio > .video-generate-console.is-compact .video-console-main {
+  height: 100px !important;
+  min-height: 100px !important;
+  max-height: 100px !important;
+  grid-template-rows: 50px 42px !important;
+}
+
+html.is-video-generation-active .studio-shell .video-page-studio > .video-generate-console.is-compact .video-console-prompt,
+html.is-video-generation-active .studio-shell .video-page-studio > .video-generate-console.is-compact .video-console-tools {
+  display: grid !important;
+}
+
+html.is-video-generation-active .studio-shell .video-page-studio > .video-generate-console.is-compact .video-console-compact-summary {
+  display: none !important;
+}
+
 /* Global Studio interaction stability baseline. Buttons, menus, cards and
    composers must not resize when clicked, selected, opened, or disabled. */
 .studio-shell,

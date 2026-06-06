@@ -1584,6 +1584,7 @@ function set(patch) {
   rememberAgentSessionListScroll();
   if (agentInputFocus && !Object.prototype.hasOwnProperty.call(statePatch, "agentInput")) state.agentInput = agentInputFocus.value;
   Object.assign(state, statePatch);
+  syncGenerationLayoutLock(state.db);
   if (deferForAgentComposition) {
     state.agentRenderAfterComposition = true;
     return;
@@ -1884,10 +1885,12 @@ function lockGenerationSubmitLayout(name = "generate-image", duration = 1600) {
   if (name === "generate-image") stabilizeImageConsoleExpansion(duration);
   if (name === "generate-ugc") stabilizeVideoConsoleExpansion(duration);
   document.documentElement.classList.add("is-generation-submitting");
+  document.documentElement.classList.add("is-generation-active");
   window.clearTimeout(generationSubmitLayoutLockTimer);
   generationSubmitLayoutLockTimer = window.setTimeout(() => {
     document.documentElement.classList.remove("is-generation-submitting");
     generationSubmitLayoutLockTimer = null;
+    syncGenerationLayoutLock();
   }, duration);
 }
 
@@ -1895,6 +1898,34 @@ function unlockGenerationSubmitLayout() {
   if (generationSubmitLayoutLockTimer) window.clearTimeout(generationSubmitLayoutLockTimer);
   generationSubmitLayoutLockTimer = null;
   document.documentElement.classList.remove("is-generation-submitting");
+  syncGenerationLayoutLock();
+}
+
+function hasRunningGenerationJobsForProject(db = state.db, projectId = state.projectId) {
+  if (!db || !projectId) return false;
+  return (db.generationJobs || []).some((job) => job.projectId === projectId && ["queued", "processing"].includes(job.status));
+}
+
+function syncGenerationLayoutLock(db = state.db) {
+  if (typeof document === "undefined") return false;
+  const active = Boolean(state.generating || hasRunningGenerationJobsForProject(db));
+  document.documentElement.classList.toggle("is-generation-active", active);
+  if (!active) {
+    document.documentElement.classList.remove("is-image-generation-active", "is-video-generation-active", "is-audio-generation-active");
+    return false;
+  }
+  const projectJobs = (db?.generationJobs || []).filter((job) => job.projectId === state.projectId && ["queued", "processing"].includes(job.status));
+  const hasImage = (state.generating && state.step === "image") || projectJobs.some((job) => job.type === "image" || job.action === "generate-image");
+  const hasVideo = (state.generating && state.step === "ugc") || projectJobs.some((job) => job.type === "video" || job.action === "generate-ugc");
+  const hasAudio = (state.generating && state.step === "audio") || projectJobs.some((job) => job.type === "audio" || job.action === "generate-audio");
+  document.documentElement.classList.toggle("is-image-generation-active", hasImage);
+  document.documentElement.classList.toggle("is-video-generation-active", hasVideo);
+  document.documentElement.classList.toggle("is-audio-generation-active", hasAudio);
+  document.querySelectorAll(".image-generate-console, .video-page-studio .video-generate-console").forEach((el) => {
+    el.classList.add("is-hover-expanded");
+    el.classList.remove("is-compact");
+  });
+  return true;
 }
 
 function bindImageConsoleCompact() {
@@ -1945,6 +1976,13 @@ function bindImageConsoleCompact() {
   };
   const sync = () => {
     ticking = false;
+    if (syncGenerationLayoutLock()) {
+      compact = false;
+      consoleEl.classList.add("is-hover-expanded");
+      consoleEl.classList.remove("is-compact");
+      updateMenuState();
+      return;
+    }
     const scrollY = scrollOffset();
     const nextCompact = compact ? scrollY > expandAt : scrollY > compactAt;
     if (nextCompact !== compact) compact = nextCompact;
@@ -2127,6 +2165,13 @@ function bindVideoConsoleCompact() {
   };
   const sync = () => {
     ticking = false;
+    if (syncGenerationLayoutLock()) {
+      compact = false;
+      consoleEl.classList.add("is-hover-expanded");
+      consoleEl.classList.remove("is-compact");
+      updateMenuState();
+      return;
+    }
     const scrollY = scrollOffset();
     const nextCompact = compact ? scrollY > expandAt : scrollY > compactAt;
     if (nextCompact !== compact) compact = nextCompact;
@@ -2479,6 +2524,7 @@ function render() {
   assetLibraryInfiniteScrollCleanup = null;
   initDelegatedEvents();
   app.innerHTML = state.loading ? `<main class="loading">${icon("loader-circle")} Loading...</main>` : routeShell(route());
+  syncGenerationLayoutLock(state.db);
   applyStudioChineseLocalization();
   bind();
   hydrateIconsSoon();
@@ -2491,6 +2537,7 @@ function render() {
   bindAssetLibraryInfiniteScroll();
   bindCollapsedSidebarTooltips();
   bindResultActionTooltips();
+  syncGenerationLayoutLock(state.db);
   scrollToSopAnchor();
   scheduleAssetLibraryThumbWarmup();
   scheduleAssetLibraryDeferredMediaHydration();
@@ -5625,7 +5672,7 @@ function studioPendingWallCard(job, orderIndex = 0) {
   const processingBody = `
       ${statusIcon}
       <b>${esc(generationJobCenterLabel(job))}</b>`;
-  return `<article class="studio-wall-card studio-wall-pending ${audioJob ? "studio-audio-wall-card studio-audio-wall-pending" : ""} ${aspectClass} ${isFailed ? "failed" : ""}" data-aspect-ratio="${esc(aspectRatio)}" data-media-ratio="${esc(mediaRatio)}" data-generation-job-id="${esc(job.id)}" data-generation-job-status="${esc(job.status || "queued")}" data-generation-cancel-locked="${cancelState.reason === "provider_billing_locked" ? "true" : "false"}" style="--media-ratio:${esc(mediaRatio)};--wall-aspect-ratio:${esc(aspectRatioToCss(aspectRatio))};aspect-ratio:var(--wall-aspect-ratio)">
+  return `<article class="studio-wall-card studio-wall-pending ${audioJob ? "studio-audio-wall-card studio-audio-wall-pending" : ""} ${aspectClass} ${isFailed ? "failed" : ""}" data-aspect-ratio="${esc(aspectRatio)}" data-media-ratio="${esc(mediaRatio)}" data-wall-order="${esc(orderIndex)}" data-generation-job-id="${esc(job.id)}" data-generation-job-status="${esc(job.status || "queued")}" data-generation-cancel-locked="${cancelState.reason === "provider_billing_locked" ? "true" : "false"}" style="--media-ratio:${esc(mediaRatio)};--wall-aspect-ratio:${esc(aspectRatioToCss(aspectRatio))};aspect-ratio:var(--wall-aspect-ratio);order:${esc(orderIndex)}">
     ${audioJob ? audioWallPreview(job, { pending: true }) : ""}
     <div class="studio-wall-pending-controls" aria-label="${esc(statusLabel)}">
       ${isFailed ? `<div class="studio-wall-failed-center">${statusBody}
@@ -5636,7 +5683,7 @@ function studioPendingWallCard(job, orderIndex = 0) {
   </article>`;
 }
 
-function studioWallCard(item, index = 0) {
+function studioWallCard(item, index = 0, orderIndex = index) {
   if (isAudioWallItem(item)) return studioAudioWallCard(item, index);
   const promptText = resultPromptText(item).replaceAll("\n", " ").trim();
   const canSaveReference = Boolean(item.imageUrl || item.videoUrl);
@@ -5647,7 +5694,7 @@ function studioWallCard(item, index = 0) {
   const isNew = Date.now() - Date.parse(item.createdAt || 0) < 120000;
   const selected = selectedResultIdSet().has(item.id);
   const bulkSelecting = isBulkSelectingResults();
-  return `<article class="studio-wall-card ${isNew ? "is-new" : ""} ${selected ? "is-selected" : ""} ${bulkSelecting ? "is-bulk-selecting" : ""}" data-aspect-ratio="${esc(aspectRatio)}" data-media-ratio="${esc(mediaRatio)}" data-result-id="${esc(item.id)}" style="--media-ratio:${esc(mediaRatio)};--wall-aspect-ratio:${esc(aspectRatioToCss(aspectRatio))}">
+  return `<article class="studio-wall-card ${isNew ? "is-new" : ""} ${selected ? "is-selected" : ""} ${bulkSelecting ? "is-bulk-selecting" : ""}" data-aspect-ratio="${esc(aspectRatio)}" data-media-ratio="${esc(mediaRatio)}" data-wall-order="${esc(orderIndex)}" data-result-id="${esc(item.id)}" style="--media-ratio:${esc(mediaRatio)};--wall-aspect-ratio:${esc(aspectRatioToCss(aspectRatio))};order:${esc(orderIndex)}">
     ${isNew ? `<span class="studio-wall-new-badge">New</span>` : ""}
     <button type="button" class="studio-wall-select-toggle" data-result-select="${esc(item.id)}" aria-label="${selected ? "Unselect result" : "Select result"}" aria-pressed="${selected ? "true" : "false"}">
       ${selected ? icon("check", 17) : ""}
@@ -13803,15 +13850,18 @@ async function pollGenerationQueue(attempt = 0) {
   state.queuePolling = true;
   try {
     const nextDb = await fetchGenerationRefreshDb();
+    syncGenerationLayoutLock(nextDb);
     const shouldRender = shouldRenderGenerationRefresh(state.db, nextDb);
     if (shouldRender) {
       const patchedWall = patchStudioResultWallFromDb(nextDb);
       if (!patchedWall) set({ db: nextDb });
+      else syncGenerationLayoutLock(nextDb);
     }
     else {
       state.db = nextDb;
       patchStudioGenerationCardsFromDb(nextDb);
       updateGenerationStatusInDom(nextDb);
+      syncGenerationLayoutLock(nextDb);
     }
     const db = nextDb;
     const hasRunning = db.generationJobs.some((job) => ["queued", "processing"].includes(job.status));
@@ -13823,6 +13873,7 @@ async function pollGenerationQueue(attempt = 0) {
     notify(error.message);
   }
   state.queuePolling = false;
+  syncGenerationLayoutLock(state.db);
 }
 
 async function fetchGenerationRefreshDb() {
@@ -13997,7 +14048,7 @@ function patchStudioGenerationCardsFromDb(nextDb) {
 }
 
 function withStableStudioWallMutation(callback) {
-  const shell = document.querySelector(".image-higgsfield-mode, .studio-immersive-page");
+  const shell = document.querySelector(".image-higgsfield-mode, .video-page-studio, .audio-studio-page, .studio-immersive-page");
   const wall = shell?.querySelector(".studio-result-wall");
   if (!wall) return callback();
   const previousMinHeight = wall.style.minHeight;
@@ -14019,7 +14070,7 @@ function withStableStudioWallMutation(callback) {
 
 function patchStudioResultWallFromDb(nextDb) {
   if (state.page !== "project" || !state.projectId || !nextDb) return false;
-  const shell = document.querySelector(".image-higgsfield-mode, .studio-immersive-page");
+  const shell = document.querySelector(".image-higgsfield-mode, .video-page-studio, .audio-studio-page, .studio-immersive-page");
   if (!shell) return false;
   const nextProject = (nextDb.projects || []).find((item) => item.id === state.projectId);
   if (!nextProject) return false;
@@ -14031,7 +14082,7 @@ function patchStudioResultWallFromDb(nextDb) {
       if (wallHtml) existingWall.outerHTML = wallHtml;
       else existingWall.remove();
     } else if (wallHtml) {
-      const dock = shell.querySelector(".image-generate-console, .studio-generate-dock");
+      const dock = shell.querySelector(".image-generate-console, .video-generate-console, .audio-composer, .studio-generate-dock");
       if (dock) dock.insertAdjacentHTML("beforebegin", wallHtml);
       else shell.insertAdjacentHTML("afterbegin", wallHtml);
     }
