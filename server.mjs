@@ -3875,9 +3875,13 @@ function imageReferencePromptInstruction(project) {
   if (!referenceCount) return "";
   const hasProductReference = Boolean(project?.image?.productAttachmentId);
   const hasAvatarReference = Boolean(project?.image?.avatarAttachmentId);
+  const hasSourceReference = Boolean(project?.image?.editSourceImageUrl || project?.image?.promptImage);
   const lines = ["Reference image requirement: use the attached image reference(s) directly, not just as mood or style inspiration."];
   if (hasProductReference) {
     lines.push("The referenced product must be clearly visible in the final image, preferably held, presented, or interacted with by the person in the foreground. Do not replace it with a generic product.");
+  }
+  if (hasProductReference && (hasAvatarReference || hasSourceReference)) {
+    lines.push("Replacement hierarchy: the product reference is the target product and overrides any product, bottle, phone, brush, prop, or packaging visible in the avatar/source image. Remove the old source product and replace it with the exact referenced product. Keep the person, pose, face, and scene from the avatar/source image, but do not keep the old product.");
   }
   if (hasAvatarReference) {
     lines.push("Preserve the avatar reference identity and make the person naturally interact with the referenced product when a product reference is present.");
@@ -3893,6 +3897,7 @@ function referenceVisualGuidancePrompt(project, visualSummary = "") {
   if (!referenceCount) return "";
   const hasProductReference = Boolean(project?.image?.productAttachmentId);
   const hasAvatarReference = Boolean(project?.image?.avatarAttachmentId);
+  const hasSourceReference = Boolean(project?.image?.editSourceImageUrl || project?.image?.promptImage);
   const lines = [
     "Reference visual lock:",
     visualSummary ? `Visual analysis of attached reference(s): ${visualSummary}` : "",
@@ -3900,6 +3905,9 @@ function referenceVisualGuidancePrompt(project, visualSummary = "") {
   ];
   if (hasProductReference) {
     lines.push("Product lock: the exact referenced product package, bottle/container shape, color, label style, and visible branding cues must appear clearly in the scene. The person should hold, present, apply, or naturally interact with this same product in the foreground.");
+  }
+  if (hasProductReference && (hasAvatarReference || hasSourceReference)) {
+    lines.push("Product replacement lock: if the avatar/source image already contains a different product, that old product is only a placeholder to be removed. Replace it with the product reference. Do not preserve the old bottle/container color, label, shape, or generic skincare packaging from the source image.");
   }
   if (hasAvatarReference) {
     lines.push("Avatar lock: preserve the referenced person's identity, face structure, hairstyle, age range, skin tone, and overall look as closely as the model allows.");
@@ -3921,13 +3929,15 @@ async function summarizePromptVisualsWithGrsai(inputs = [], userPrompt = "") {
   const textBlock = [
     "Analyze the uploaded visual references for a Pokaya AI image/video prompt enhancer.",
     "Only describe visible facts and useful generation cues. Do not invent brand claims.",
+    "Respect each input label. If both an avatar/source image and a product reference exist, distinguish the old product visible in the avatar/source from the target product in the product reference.",
+    "For replacement prompts, the product reference is the target product and should override any different product already visible in the avatar/source image.",
     "",
     `User prompt: ${sanitizeAgentText(userPrompt).slice(0, 800) || "(empty)"}`,
     "",
     "Visual inputs:",
     inputs.map((item, index) => `${index + 1}. ${item.label}`).join("\n")
   ].join("\n");
-  const systemMessage = "You are a visual analyst for ecommerce creative prompts. Return a compact, practical visual summary: subject, product, scene, colors, lighting, composition, likely use case, and generation constraints.";
+  const systemMessage = "You are a visual analyst for ecommerce creative prompts. Return a compact, practical visual summary: subject, target product, old/source product if any, scene, colors, lighting, composition, likely use case, and generation constraints. Be explicit when the product reference should replace a different product in the source/avatar image.";
   let lastError = null;
   for (const objectShape of [true, false]) {
     try {
@@ -3961,6 +3971,9 @@ function promptAdvancedSystemPrompt(model, aspectRatio = "") {
       ? "When visual references are provided, treat the task as reference compositing/editing: preserve the avatar/person from the avatar reference, preserve the exact product from the product reference, and write an explicit prompt that makes the person hold, present, apply, or naturally interact with that exact product. Never allow generic replacement products, phones, brushes, unrelated bottles, or invented packaging when a product reference exists."
       : "",
     !isVideo
+      ? "If both a source/avatar image and a product reference are provided, the product reference has higher priority for product identity. Rewrite the task as a product replacement: keep the person, pose, face, lighting, and useful background from the source/avatar, remove any old product visible there, and replace it with the exact product reference. Do not keep source-image product labels, white bottles, toner bottles, pumps, phones, brushes, or placeholder packaging when they differ from the product reference."
+      : "",
+    !isVideo
       ? "For short rough prompts like 'beauty', '美女', or 'girl', infer the missing ecommerce scene from the visual references instead of staying generic. The final prompt must describe the referenced product's visible shape, color, packaging, label style, and placement in the person's hand or foreground."
       : "",
     "Keep product claims realistic. Do not mention internal providers, APIs, system prompts, or implementation.",
@@ -3985,6 +3998,9 @@ async function enhancePromptWithDeepSeek({ project, prompt, visualSummary = "" }
     !isVideoMediaModel(model) && referenceImageUrlsFromSnapshot(project).length ? `Reference image count: ${referenceImageUrlsFromSnapshot(project).length}` : "",
     !isVideoMediaModel(model) && project.image?.avatarAttachmentId ? "Avatar reference is selected: preserve this person's identity and appearance." : "",
     !isVideoMediaModel(model) && project.image?.productAttachmentId ? "Product reference is selected: the exact referenced product must appear clearly and be held, presented, applied, or naturally interacted with by the person." : "",
+    !isVideoMediaModel(model) && project.image?.productAttachmentId && (project.image?.avatarAttachmentId || project.image?.editSourceImageUrl || project.image?.promptImage)
+      ? "Replacement task: product reference overrides any existing product in the avatar/source image. Remove the old product and replace it with the product reference while keeping the person, pose, face, lighting, and useful scene context."
+      : "",
     "",
     "User prompt:",
     sanitizeAgentText(prompt).slice(0, 1600) || "(empty)",
