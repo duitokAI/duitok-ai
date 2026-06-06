@@ -1323,7 +1323,13 @@ function updatePromoCountdown() {
   promoCountdownTimer = setInterval(tick, 1000);
 }
 
+function isGenericSavedToast(message) {
+  const text = String(message || "").trim();
+  return text === t("saveDone") || ["Saved.", "已保存。"].includes(text);
+}
+
 function notify(message) {
+  if (isGenericSavedToast(message)) return;
   toast.textContent = message;
   toast.classList.add("show");
   clearTimeout(notify.timer);
