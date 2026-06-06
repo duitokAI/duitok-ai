@@ -14188,6 +14188,55 @@ function directStudioWallChild(wall, selector) {
   return [...(wall?.children || [])].find((child) => child.matches?.(selector)) || null;
 }
 
+function studioWallCardRectSnapshot(grid) {
+  const rects = new Map();
+  [...(grid?.children || [])].forEach((card) => {
+    const key = studioWallDomCardKey(card);
+    if (!key) return;
+    const rect = card.getBoundingClientRect();
+    rects.set(key, {
+      left: rect.left,
+      top: rect.top,
+      width: rect.width,
+      height: rect.height
+    });
+  });
+  return rects;
+}
+
+function animateStudioWallReflow(grid, beforeRects) {
+  if (!grid || !beforeRects?.size) return;
+  if (window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) return;
+  const animatedCards = [];
+  [...grid.children].forEach((card) => {
+    const key = studioWallDomCardKey(card);
+    const before = key ? beforeRects.get(key) : null;
+    if (!before) return;
+    const after = card.getBoundingClientRect();
+    const dx = before.left - after.left;
+    const dy = before.top - after.top;
+    if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+    card.classList.add("is-wall-reflowing");
+    card.style.setProperty("--studio-wall-reflow-x", `${dx}px`);
+    card.style.setProperty("--studio-wall-reflow-y", `${dy}px`);
+    animatedCards.push(card);
+  });
+  if (!animatedCards.length) return;
+  requestAnimationFrame(() => {
+    animatedCards.forEach((card) => {
+      card.style.setProperty("--studio-wall-reflow-x", "0px");
+      card.style.setProperty("--studio-wall-reflow-y", "0px");
+    });
+    window.setTimeout(() => {
+      animatedCards.forEach((card) => {
+        card.classList.remove("is-wall-reflowing");
+        card.style.removeProperty("--studio-wall-reflow-x");
+        card.style.removeProperty("--studio-wall-reflow-y");
+      });
+    }, 220);
+  });
+}
+
 function reconcileStudioResultWall(existingWall, wallHtml) {
   if (!existingWall || !wallHtml) return false;
   const template = document.createElement("template");
@@ -14200,6 +14249,7 @@ function reconcileStudioResultWall(existingWall, wallHtml) {
     existingWall.outerHTML = wallHtml;
     return true;
   }
+  const beforeRects = studioWallCardRectSnapshot(existingGrid);
   syncStudioWallAttributes(existingWall, nextWall);
   const existingByKey = new Map();
   [...existingGrid.children].forEach((card) => {
@@ -14238,6 +14288,7 @@ function reconcileStudioResultWall(existingWall, wallHtml) {
   if (existingBulkBar && nextBulkBar) existingBulkBar.replaceWith(nextBulkBar);
   else if (existingBulkBar && !nextBulkBar) existingBulkBar.remove();
   else if (!existingBulkBar && nextBulkBar) existingWall.appendChild(nextBulkBar);
+  if (changed) animateStudioWallReflow(existingGrid, beforeRects);
   return changed;
 }
 

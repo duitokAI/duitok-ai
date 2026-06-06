@@ -48498,6 +48498,16 @@ html.is-generation-active .studio-shell :where(.studio-wall-card, .studio-wall-p
   transform: translateZ(0) !important;
 }
 
+.studio-shell .studio-wall-card.is-wall-reflowing,
+html.is-generation-active .studio-shell .studio-wall-card.is-wall-reflowing,
+.studio-shell .image-higgsfield-mode.is-studio-wall-patching .studio-wall-card.is-wall-reflowing,
+.studio-shell .studio-immersive-page.is-studio-wall-patching .studio-wall-card.is-wall-reflowing {
+  transform: translate3d(var(--studio-wall-reflow-x, 0px), var(--studio-wall-reflow-y, 0px), 0) !important;
+  transition: transform 180ms cubic-bezier(0.2, 0, 0.16, 1) !important;
+  will-change: transform !important;
+  z-index: 1;
+}
+
 /* Image generation must not resize the composer during submit.
    The current expanded or compact geometry is preserved to avoid wall flicker. */
 
