@@ -1986,6 +1986,9 @@ function bindImageConsoleCompact() {
     menuOpen = allMenus.some((el) => el.hasAttribute("open")) || Boolean(document.querySelector(".floating-aspect-ratio-options"));
     consoleEl.classList.toggle("has-open-menu", menuOpen);
     if (menuOpen) {
+      hovering = true;
+      imageConsoleExpandedUntilUserScroll = true;
+      imageConsoleExpandLockUntil = Date.now() + 1200;
       consoleEl.classList.add("is-hover-expanded");
       if (!state.generating && !consoleEl.classList.contains("is-generating")) consoleEl.classList.remove("is-compact");
     }
@@ -2052,8 +2055,13 @@ function bindImageConsoleCompact() {
     if (!state.generating && !consoleEl.classList.contains("is-generating")) consoleEl.classList.remove("is-compact");
   };
   const releaseHoverExpansion = () => {
-    hovering = false;
     updateMenuState();
+    if (menuOpen) {
+      hovering = true;
+      requestSync();
+      return;
+    }
+    hovering = false;
     requestSync();
   };
   const markUserScrollIntent = () => {
@@ -13911,15 +13919,21 @@ function syncImageConsoleBeforeGenerate(name) {
   const latestImageSelection = latestImageModelQuickSelection?.projectId === state.projectId ? latestImageModelQuickSelection : null;
   const consoleEl = document.querySelector("[data-image-generate-console]");
   const selectedAspectRatio = consoleEl?.querySelector(".image-aspect-ratio-menu summary b")?.textContent?.trim();
+  const selectedResolution = consoleEl?.querySelector(".image-resolution-menu summary b")?.textContent?.trim();
+  const selectedModel = latestImageSelection?.model || current.image?.model || "GPT Image 2";
   return {
     prompt: value,
-    model: latestImageSelection?.model || current.image?.model || "GPT Image 2",
+    model: selectedModel,
     aspectRatio: normalizedImageSettingForModel(
-      latestImageSelection?.model || current.image?.model || "GPT Image 2",
+      selectedModel,
       "image.aspectRatio",
       selectedAspectRatio || latestImageSelection?.aspectRatio || current.image?.aspectRatio || "9:16"
     ),
-    resolution: latestImageSelection?.resolution || current.image?.resolution || "1K",
+    resolution: normalizedImageSettingForModel(
+      selectedModel,
+      "image.resolution",
+      selectedResolution || latestImageSelection?.resolution || current.image?.resolution || "1K"
+    ),
     count: imageBatchCount(current),
     advancePrompt: Boolean(state.promptAdvancedEnabled)
   };

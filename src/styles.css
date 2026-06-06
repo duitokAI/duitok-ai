@@ -48611,6 +48611,21 @@ html.is-video-generation-active .studio-shell .video-page-studio > .video-genera
   contain: none !important;
 }
 
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-open-menu,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-open-menu.is-hover-expanded,
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-open-menu:not(.is-compact) {
+  overflow: visible !important;
+  z-index: 80 !important;
+  transform: none !important;
+}
+
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-open-menu .image-resolution-menu[open],
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-open-menu .image-aspect-ratio-menu[open],
+.studio-shell .image-higgsfield-mode > .image-generate-console.has-open-menu .image-model-picker[open] {
+  position: relative !important;
+  z-index: 82 !important;
+}
+
 /* Image generation menu stability: opening the model menu while jobs are
    rendering must not resize the composer or ask the media wall to relayout. */
 .studio-shell .image-higgsfield-mode > .image-generate-console.is-generating.has-open-menu,
