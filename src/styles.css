@@ -48755,26 +48755,6 @@ html.is-generation-submitting .studio-shell .video-generate-console {
   will-change: auto !important;
 }
 
-.studio-shell .image-higgsfield-mode.is-image-generate-visual-locked,
-.studio-shell .image-higgsfield-mode.is-image-generate-visual-locked .studio-result-wall,
-.studio-shell .image-higgsfield-mode.is-image-generate-visual-locked .studio-wall-grid,
-.studio-shell .image-higgsfield-mode.is-image-generate-visual-locked .studio-wall-card,
-.studio-shell .image-higgsfield-mode.is-image-generate-visual-locked .studio-wall-pending,
-.studio-shell .image-higgsfield-mode.is-image-generate-visual-locked .image-generate-console {
-  overflow-anchor: none !important;
-}
-
-.studio-shell .image-higgsfield-mode.is-image-generate-visual-locked .studio-result-wall,
-.studio-shell .image-higgsfield-mode.is-image-generate-visual-locked .studio-wall-grid,
-.studio-shell .image-higgsfield-mode.is-image-generate-visual-locked .studio-wall-card,
-.studio-shell .image-higgsfield-mode.is-image-generate-visual-locked .studio-wall-pending,
-.studio-shell .image-higgsfield-mode.is-image-generate-visual-locked .image-generate-console {
-  animation: none !important;
-  transition: none !important;
-  transform: translateZ(0) !important;
-  will-change: auto !important;
-}
-
 html.is-generation-active,
 html.is-generation-active body,
 html.is-generation-active #app,
