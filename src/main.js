@@ -13994,6 +13994,11 @@ function mergeSubmittedGenerationJobs(db, queuedJobs = []) {
 }
 
 async function generate(name, event = null) {
+  const trigger = event?.currentTarget;
+  const triggerOnVideoPage = Boolean(trigger?.closest?.(".video-page-studio"));
+  const triggerOnImagePage = Boolean(trigger?.closest?.(".image-higgsfield-mode"));
+  if (name === "generate-image" && (state.step === "ugc" || triggerOnVideoPage)) name = "generate-ugc";
+  if (name === "generate-ugc" && state.step === "image" && triggerOnImagePage) name = "generate-image";
   if (state.generating && name !== "generate-image") {
     notify(generationFeedbackCopy("busy"));
     return;
