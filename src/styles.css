@@ -50169,7 +50169,6 @@ body:has(.studio-shell .audio-studio-page.is-empty),
   transform: none !important;
 }
 
-<<<<<<< Updated upstream
 /* Clone Prompt empty page work-mode final lock: keep the upload/extract dock in
    the first viewport like Image, Video, and Audio while preserving the grid
    background as context instead of a full-screen cover. */
@@ -50242,7 +50241,8 @@ body:has(.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"].is
   max-width: min(1180px, calc(100% - clamp(28px, 6vw, 96px))) !important;
   margin: 8px auto 14px !important;
   transform: none !important;
-=======
+}
+
 /* Final top tab interaction lock: the main Studio navigation tabs must never
    shrink, scale, press inward, or shift on hover/click. */
 .studio-shell .project-step-topbar > nav.step-tabs.studio-top-step-tabs > button,
@@ -50332,5 +50332,4 @@ body:has(.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"].is
   animation: none !important;
   transition: none !important;
   will-change: auto !important;
->>>>>>> Stashed changes
 }
