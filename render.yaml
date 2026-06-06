@@ -171,6 +171,28 @@ services:
         value: JBFqnCBsd6RMkjVDRZzb
       - key: ELEVENLABS_OUTPUT_FORMAT
         value: mp3_44100_128
+      - key: AUDIO_TTS_PROVIDER
+        value: minimax
+      - key: MINIMAX_API_KEY
+        sync: false
+      - key: MINIMAX_BASE_URL
+        value: https://api.minimax.io
+      - key: MINIMAX_TTS_PATH
+        value: /v1/t2a_v2
+      - key: MINIMAX_TTS_MODEL
+        value: speech-2.8-hd
+      - key: MINIMAX_DEFAULT_VOICE_ID
+        value: English_expressive_narrator
+      - key: MINIMAX_OUTPUT_FORMAT
+        value: hex
+      - key: MINIMAX_AUDIO_FORMAT
+        value: mp3
+      - key: MINIMAX_LANGUAGE_BOOST
+        value: auto
+      - key: MINIMAX_SAMPLE_RATE
+        value: "32000"
+      - key: MINIMAX_BITRATE
+        value: "128000"
       - key: CRUN_API_KEY
         sync: false
       - key: CRUN_BASE_URL

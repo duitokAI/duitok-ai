@@ -7231,7 +7231,7 @@ function audioPromptWell(promptText, language, scriptMode) {
   return `<div class="audio-prompt-well">
     <textarea data-field="auto.audioPrompt" data-audio-prompt rows="3" placeholder="Describe the voice, scene, and emotion you imagine...">${esc(promptText)}</textarea>
     <div class="audio-control-row">
-      <span class="audio-model-chip">${icon("audio-lines", 16)} ElevenLabs Voice</span>
+      <span class="audio-model-chip">${icon("audio-lines", 16)} MiniMax Voice</span>
       ${audioSegment("auto.audioLanguage", [["Malay", "Malay"], ["English", "English"], ["Chinese", "Chinese"], ["Indonesian", "Indonesian"]], language)}
       ${audioSegment("auto.audioScriptMode", [["Write for me", "Write for me"], ["Use my script", "Use my script"]], scriptMode)}
     </div>
@@ -7351,7 +7351,7 @@ function audioEmptyState() {
   return `<div class="audio-empty-state">
     ${icon("audio-lines", 30)}
     <strong>Audio generation is ready for backend hookup.</strong>
-      <span>ElevenLabs voiceover is connected. Generate a clip from the composer below.</span>
+      <span>MiniMax voiceover is connected. Generate a clip from the composer below.</span>
   </div>`;
 }
 
@@ -12641,9 +12641,9 @@ async function generateAudio(event = null) {
     if (trigger) {
       trigger.disabled = true;
       trigger.classList.add("is-generating");
-      trigger.innerHTML = `<b>Generating...</b><span>ElevenLabs</span>`;
+      trigger.innerHTML = `<b>Generating...</b><span>MiniMax</span>`;
     }
-    notify("Generating ElevenLabs audio...");
+    notify("Generating MiniMax audio...");
     const db = await api(`/projects/${state.projectId}/audio/generate`, {
       method: "POST",
       timeoutMs: 140000,

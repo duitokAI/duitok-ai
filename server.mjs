@@ -100,6 +100,13 @@ const elevenLabsBaseUrl = (process.env.ELEVENLABS_BASE_URL || "https://api.eleve
 const elevenLabsTtsModel = process.env.ELEVENLABS_TTS_MODEL || "eleven_multilingual_v2";
 const elevenLabsDefaultVoiceId = process.env.ELEVENLABS_DEFAULT_VOICE_ID || "JBFqnCBsd6RMkjVDRZzb";
 const elevenLabsOutputFormat = process.env.ELEVENLABS_OUTPUT_FORMAT || "mp3_44100_128";
+const audioTtsProvider = String(process.env.AUDIO_TTS_PROVIDER || "minimax").trim().toLowerCase();
+const minimaxBaseUrl = (process.env.MINIMAX_BASE_URL || "https://api.minimax.io").replace(/\/$/, "");
+const minimaxTtsPath = process.env.MINIMAX_TTS_PATH || "/v1/t2a_v2";
+const minimaxTtsModel = process.env.MINIMAX_TTS_MODEL || "speech-2.8-hd";
+const minimaxDefaultVoiceId = process.env.MINIMAX_DEFAULT_VOICE_ID || "English_expressive_narrator";
+const minimaxOutputFormat = process.env.MINIMAX_OUTPUT_FORMAT || "hex";
+const minimaxAudioFormat = process.env.MINIMAX_AUDIO_FORMAT || "mp3";
 const webSearchBaseUrl = process.env.WEB_SEARCH_BASE_URL || "https://duckduckgo.com/html/";
 const allowedMediaModels = new Set(["GPT Image 2", "Seedream 5.0 Lite", "Qwen Image 2.0", "Nano Banana Pro", "Nano Banana 2", "Grok Imagine", "Seedance 2.0", "Veo 3.1", "Sora 2", "Gemini Omni", "Grok Imagine Video", "Wan 2.7", "Kling V3 Omni", "Kling V3 Motion Control", "MiniMax Hailuo 2.3"]);
 const thumbnailCache = new Map();
@@ -2177,10 +2184,17 @@ function publicState(db, user = db.users?.find((item) => item.id === adminUserId
   const sanitizeProject = (project) => {
     const projectJobs = (db.generationJobs || []).filter((job) => job.projectId === project.id && (isAdmin || job.userId === user.id));
     const jobsByResultId = new Map(projectJobs.filter((job) => job.resultId).map((job) => [job.resultId, job]));
+    const {
+      editSourceImageUrl: _editSourceImageUrl,
+      editReferenceAttachmentId: _editReferenceAttachmentId,
+      referenceImageUrls: _referenceImageUrls,
+      apimartReferenceImageUrls: _apimartReferenceImageUrls,
+      ...publicImage
+    } = project.image || {};
     return {
       ...project,
       image: {
-        ...(project.image || {}),
+        ...publicImage,
         model: publicMediaModel(project.image?.model)
       },
       agentMemory: sanitizeAgentObject(project.agentMemory || {}),
@@ -2650,6 +2664,16 @@ function requireElevenLabsConfig() {
   return apiKey;
 }
 
+function requireMiniMaxConfig() {
+  const apiKey = process.env.MINIMAX_API_KEY;
+  if (!apiKey || apiKey.includes("replace_with")) {
+    const error = new Error("MiniMax belum configure. Isi MINIMAX_API_KEY dalam Environment Variables dulu.");
+    error.status = 503;
+    throw error;
+  }
+  return apiKey;
+}
+
 function providerForMediaModel(model) {
   model = internalMediaModel(model);
   if (model === "GPT Image 2") return process.env.APIMART_API_KEY ? "apimart" : process.env.CRUN_API_KEY ? "crun" : "mock";
@@ -2897,10 +2921,41 @@ async function elevenLabsRequest(pathname, options = {}) {
   return response;
 }
 
+async function minimaxRequest(pathname, options = {}) {
+  const apiKey = requireMiniMaxConfig();
+  const response = await fetch(`${minimaxBaseUrl}${pathname}`, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      ...(options.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
+      ...(options.headers || {})
+    },
+    signal: AbortSignal.timeout(Number(process.env.MINIMAX_TIMEOUT_MS || 120000))
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || (payload.base_resp?.status_code && Number(payload.base_resp.status_code) !== 0)) {
+    const message = payload.base_resp?.status_msg || payload.message || payload.error?.message || payload.error || `MiniMax request failed (${response.status})`;
+    const error = new Error(message);
+    error.status = response.status || 502;
+    throw error;
+  }
+  return payload;
+}
+
 function elevenLabsVoicePresetId(preset = "") {
   const normalized = String(preset || "").trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_+|_+$/g, "");
   const envKey = normalized ? `ELEVENLABS_VOICE_${normalized}` : "";
   return (envKey && process.env[envKey]) || process.env.ELEVENLABS_VOICE_ID || elevenLabsDefaultVoiceId;
+}
+
+function envSlug(value = "") {
+  return String(value || "").trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+}
+
+function minimaxVoicePresetId(preset = "") {
+  const normalized = envSlug(preset);
+  const envKey = normalized ? `MINIMAX_VOICE_${normalized}` : "";
+  return (envKey && process.env[envKey]) || process.env.MINIMAX_VOICE_ID || minimaxDefaultVoiceId;
 }
 
 function elevenLabsLanguageCode(language = "") {
@@ -2910,6 +2965,14 @@ function elevenLabsLanguageCode(language = "") {
   if (key.startsWith("indo")) return "id";
   if (key.startsWith("english")) return "en";
   return "";
+}
+
+function audioContentTypeFromFormat(format = "mp3") {
+  const normalized = String(format || "").toLowerCase();
+  if (normalized === "wav") return "audio/wav";
+  if (normalized === "flac") return "audio/flac";
+  if (normalized === "pcm") return "audio/L16";
+  return "audio/mpeg";
 }
 
 async function synthesizeSpeechWithElevenLabs(body = {}) {
@@ -2958,6 +3021,68 @@ async function synthesizeSpeechWithElevenLabs(body = {}) {
     contentType,
     bytes,
     requestId: response.headers.get("request-id") || ""
+  };
+}
+
+async function synthesizeSpeechWithMiniMax(body = {}) {
+  const text = String(body.text || "").trim();
+  if (!text) {
+    const error = new Error("MiniMax text is required.");
+    error.status = 400;
+    throw error;
+  }
+  if (Array.from(text).length > 10000) {
+    const error = new Error("MiniMax text must be under 10,000 characters for synchronous generation.");
+    error.status = 400;
+    throw error;
+  }
+  const format = ["mp3", "wav", "flac", "pcm"].includes(String(body.format || body.audioFormat || minimaxAudioFormat).toLowerCase())
+    ? String(body.format || body.audioFormat || minimaxAudioFormat).toLowerCase()
+    : "mp3";
+  const speed = Number(body.speed || 1);
+  const pitch = Number(body.pitch || 0);
+  const volume = Number(body.volume || body.vol || 1);
+  const payload = await minimaxRequest(minimaxTtsPath, {
+    method: "POST",
+    body: JSON.stringify({
+      model: String(body.model || body.modelId || minimaxTtsModel),
+      text,
+      stream: false,
+      language_boost: body.languageBoost || body.language_boost || process.env.MINIMAX_LANGUAGE_BOOST || "auto",
+      output_format: String(body.outputFormat || body.output_format || minimaxOutputFormat),
+      voice_setting: {
+        voice_id: String(body.voiceId || body.voice_id || minimaxVoicePresetId(body.voicePreset)),
+        speed: Number.isFinite(speed) ? Math.min(2, Math.max(0.5, speed)) : 1,
+        vol: Number.isFinite(volume) ? Math.min(10, Math.max(0.1, volume)) : 1,
+        pitch: Number.isFinite(pitch) ? Math.min(12, Math.max(-12, pitch)) : 0,
+        ...(body.emotion ? { emotion: String(body.emotion) } : {})
+      },
+      audio_setting: {
+        sample_rate: Number(body.sampleRate || body.sample_rate || process.env.MINIMAX_SAMPLE_RATE || 32000),
+        bitrate: Number(body.bitrate || process.env.MINIMAX_BITRATE || 128000),
+        format,
+        channel: Number(body.channel || 1)
+      }
+    })
+  });
+  const audioHex = String(payload.data?.audio || payload.audio || "");
+  if (!audioHex) {
+    const error = new Error(payload.base_resp?.status_msg || "MiniMax did not return audio.");
+    error.status = 502;
+    throw error;
+  }
+  const bytes = Buffer.from(audioHex, "hex");
+  return {
+    provider: "minimax",
+    model: String(body.model || body.modelId || minimaxTtsModel),
+    voiceId: String(body.voiceId || body.voice_id || minimaxVoicePresetId(body.voicePreset)),
+    voicePreset: String(body.voicePreset || ""),
+    textCharacters: Number(payload.extra_info?.usage_characters || Array.from(text).length),
+    contentType: audioContentTypeFromFormat(payload.extra_info?.audio_format || format),
+    bytes,
+    traceId: String(payload.trace_id || ""),
+    durationMs: Number(payload.extra_info?.audio_length || 0),
+    fileSize: Number(payload.extra_info?.audio_size || bytes.length)
   };
 }
 
@@ -3677,28 +3802,42 @@ function projectAttachmentVisual(db, attachmentId, label) {
   return url ? { label: `${label}: ${attachment.name || "saved reference"}`, url } : null;
 }
 
-function projectPromptVisualInputs(db, project) {
-  return [
-    project.image?.promptImage?.dataUrl ? { label: `Prompt image: ${project.image.promptImage.name || "uploaded image"}`, dataUrl: project.image.promptImage.dataUrl } : null,
-    projectAttachmentVisual(db, project.image?.avatarAttachmentId, "Avatar reference"),
-    projectAttachmentVisual(db, project.image?.productAttachmentId, "Product reference")
-  ].filter(Boolean).slice(0, 4);
+function projectPromptImageVisual(project) {
+  const promptImage = project?.image?.promptImage || {};
+  const url = promptImage.dataUrl || promptImage.url || "";
+  return /^data:image\//i.test(url) || /^https?:\/\//i.test(url)
+    ? { label: `Prompt image: ${promptImage.name || "uploaded image"}`, dataUrl: promptImage.dataUrl, url: promptImage.url }
+    : null;
 }
 
-function apimartReferenceImageUrlsForProject(db, project) {
+function projectReferenceImageVisuals(db, project) {
   return [
-    projectAttachmentVisual(db, project.image?.avatarAttachmentId, "Avatar reference"),
-    projectAttachmentVisual(db, project.image?.productAttachmentId, "Product reference")
-  ]
+    project?.image?.editSourceImageUrl ? { label: "Edit source image", url: project.image.editSourceImageUrl } : null,
+    projectPromptImageVisual(project),
+    projectAttachmentVisual(db, project?.image?.avatarAttachmentId, "Avatar reference"),
+    projectAttachmentVisual(db, project?.image?.productAttachmentId, "Product reference"),
+    projectAttachmentVisual(db, project?.image?.editReferenceAttachmentId, "Extra edit reference")
+  ].filter(Boolean);
+}
+
+function projectReferenceImageUrlsFromVisuals(visuals = [], limit = 4) {
+  return [...new Set((visuals || [])
     .map((item) => item?.dataUrl || item?.url || "")
-    .filter((url) => /^data:image\//i.test(url) || /^https?:\/\//i.test(url))
-    .slice(0, 2);
+    .filter((url) => /^data:image\//i.test(String(url)) || /^https?:\/\//i.test(String(url))))].slice(0, limit);
 }
 
-function apimartReferenceImageUrlsFromSnapshot(project) {
-  return (Array.isArray(project?.image?.apimartReferenceImageUrls) ? project.image.apimartReferenceImageUrls : [])
+function projectPromptVisualInputs(db, project) {
+  return projectReferenceImageVisuals(db, project).slice(0, 4);
+}
+
+function referenceImageUrlsForProject(db, project) {
+  return projectReferenceImageUrlsFromVisuals(projectReferenceImageVisuals(db, project));
+}
+
+function referenceImageUrlsFromSnapshot(project) {
+  return (Array.isArray(project?.image?.referenceImageUrls) ? project.image.referenceImageUrls : [])
     .filter((url) => /^data:image\//i.test(String(url)) || /^https?:\/\//i.test(String(url)))
-    .slice(0, 2);
+    .slice(0, 4);
 }
 
 function grsaiVisionContent(textBlock = "", inputs = [], objectShape = true) {
@@ -9574,6 +9713,26 @@ app.post("/api/tts/elevenlabs", async (req, res, next) => {
   }
 });
 
+app.post("/api/tts/minimax", async (req, res, next) => {
+  try {
+    const { user } = await requireAuth(req);
+    const speech = await synthesizeSpeechWithMiniMax(req.body || {});
+    const audioBase64 = speech.bytes.toString("base64");
+    await mutateDb(async (db) => {
+      db.usage.unshift(usage(`Generated MiniMax audio (${speech.textCharacters} chars)`, 0, user.id));
+      await saveDb(db);
+    });
+    const { bytes: _bytes, ...safeSpeech } = speech;
+    res.json({
+      ...safeSpeech,
+      audioBase64,
+      audioDataUrl: `data:${speech.contentType};base64,${audioBase64}`
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.post("/api/projects/:id/audio/generate", async (req, res, next) => {
   try {
     const { db, user } = await requireAuth(req);
@@ -9587,12 +9746,16 @@ app.post("/api/projects/:id/audio/generate", async (req, res, next) => {
     assertGenerationAccess(db, user, 0.2, 1);
     const voicePreset = String(req.body.voicePreset || project.auto?.voicePreset || "Malay Soft Sell");
     const language = String(req.body.language || project.auto?.audioLanguage || "Malay");
-    const speech = await synthesizeSpeechWithElevenLabs({
+    const provider = String(req.body.provider || audioTtsProvider || "minimax").trim().toLowerCase();
+    const speechInput = {
       ...req.body,
       text,
       voicePreset,
       language
-    });
+    };
+    const speech = provider === "elevenlabs"
+      ? await synthesizeSpeechWithElevenLabs(speechInput)
+      : await synthesizeSpeechWithMiniMax(speechInput);
     const resultId = crypto.randomUUID();
     const createdAt = new Date().toISOString();
     const stored = await persistGeneratedAudio(speech.bytes, speech.contentType, {
@@ -9615,7 +9778,7 @@ app.post("/api/projects/:id/audio/generate", async (req, res, next) => {
         title: voicePreset,
         body: text,
         prompt: text,
-        provider: "elevenlabs",
+        provider: speech.provider,
         model: speech.model,
         voiceId: speech.voiceId,
         audioUrl: stored.audioUrl,
@@ -9629,7 +9792,7 @@ app.post("/api/projects/:id/audio/generate", async (req, res, next) => {
       const owner = currentDb.users.find((item) => item.id === currentProject.userId) || user;
       owner.billing ||= defaultBilling();
       owner.billing.credits = Math.max(0, roundCredits(Number(owner.billing.credits || 0) - 0.2));
-      currentDb.usage.unshift(usage(`Generated ElevenLabs voiceover (${speech.textCharacters} chars)`, 0.2, owner.id));
+      currentDb.usage.unshift(usage(`Generated ${speech.provider === "elevenlabs" ? "ElevenLabs" : "MiniMax"} voiceover (${speech.textCharacters} chars)`, 0.2, owner.id));
       await saveDb(currentDb);
       return publicState(currentDb, user);
     }));
