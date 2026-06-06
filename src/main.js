@@ -5687,10 +5687,14 @@ function studioResultBelongsToStep(item = {}, step = state.step, types = []) {
   return types.includes(item.type);
 }
 
+function isVideoStudioResult(item = {}) {
+  return Boolean(item.videoUrl || item.type === "video" || item.type === "ugc" || item.sourceAction === "generate-ugc" || item.sourceStep === "ugc");
+}
+
 function studioResultIsDisplayable(item = {}) {
   if (item.type === "audio" || item.audioUrl) return true;
   if (item.imageUrl || item.videoUrl || item.visualCard || item.type === "visual_card") return true;
-  if (item.type === "text" && (item.body || item.providerBody || item.prompt)) return true;
+  if ((item.type === "text" || isVideoStudioResult(item)) && (item.body || item.providerBody || item.prompt)) return true;
   return false;
 }
 
@@ -7885,6 +7889,7 @@ function resultCard(item) {
 
 function resultMediaLabel(item) {
   if (item.videoUrl) return "Generated video";
+  if (isVideoStudioResult(item)) return "Generated video task";
   if (item.imageUrl || item.visualCard) return "Generated image";
   return "Generated text";
 }
@@ -7892,6 +7897,7 @@ function resultMediaLabel(item) {
 function resultModelLabel(item) {
   const job = resultOriginJob(item);
   const model = item.requestedModel || job?.requestedModel || item.model || job?.model || item.providerTitle || item.title || "";
+  if (isVideoStudioResult(item)) return "VIDEO MODEL";
   if (/gemini|video prompt|extract/i.test(model)) return "POKAYA AI";
   if (/seedream/i.test(model)) return "SEEDREAM 5.0 LITE";
   if (/qwen|通义|千问/i.test(model)) return "QWEN IMAGE 2.0";
@@ -7907,7 +7913,7 @@ function normalizedResultTitle(value = "") {
 }
 
 function resultShortId(item = {}) {
-  const prefix = item.videoUrl || item.type === "video" ? "VID" : item.audioUrl || item.type === "audio" ? "AUD" : item.imageUrl || item.visualCard || item.type === "image" ? "IMG" : "GEN";
+  const prefix = isVideoStudioResult(item) ? "VID" : item.audioUrl || item.type === "audio" ? "AUD" : item.imageUrl || item.visualCard || item.type === "image" ? "IMG" : "GEN";
   const source = String(item.id || item.providerTaskId || item.taskId || item.createdAt || "result")
     .replace(/[^a-z0-9]/gi, "")
     .toUpperCase();
@@ -7919,6 +7925,7 @@ function isDefaultResultTitle(title = "", item = {}) {
   if (!value) return true;
   const providerTitle = normalizedResultTitle(item.providerTitle);
   if (providerTitle && value.toLowerCase() === providerTitle.toLowerCase()) return true;
+  if (isVideoStudioResult(item) && /^GEN-[A-Z0-9]{6}$/i.test(value)) return true;
   if (/^(pokaya\s+ai\s+)?(image|video|result)$/i.test(value)) return true;
   if (/^(pokaya\s+image|pokaya\s+image\s+pro|pokaya\s+ai\s+image|pokaya\s+ai\s+video|pokaya\s+ai\s+result)$/i.test(value)) return true;
   if (/^(generated\s+asset|generated\s+image|generated\s+video|generated\s+text|untitled\s+image|untitled\s+video)$/i.test(value)) return true;
@@ -8408,7 +8415,8 @@ function resultPreview(item, options = {}) {
   const videoPoster = videoSrc ? `<div class="result-video-shell result-video-poster" aria-hidden="true"><span class="result-video-poster-icon">${icon("video", 30)}</span><span class="result-play-button">${icon("play", 26)}<span>点击查看</span></span></div>` : "";
   const videoTriggerMedia = options.wall ? videoPoster : `<div class="result-video-shell"><video class="result-video" src="${videoSrc}" preload="${videoPreload}" playsinline muted onloadedmetadata="${esc(ratioSync)}"></video><span class="result-play-button">${icon("play", 26)}<span>点击查看</span></span></div>`;
   const videoTrigger = videoSrc ? `<button type="button" class="result-preview-trigger result-video-trigger" data-result-preview="${esc(item.id)}" aria-label="Open full video preview">${videoTriggerMedia}</button>` : "";
-  const text = !image && !video ? `<div class="result-text-preview">${icon("file-text", 30)}<span>Text result</span></div>` : "";
+  const textLabel = isVideoStudioResult(item) ? "Video task" : "Text result";
+  const text = !image && !video ? `<div class="result-text-preview">${icon("file-text", 30)}<span>${esc(textLabel)}</span></div>` : "";
   if (options.clickable && imageSrc) return `<button type="button" class="result-preview-trigger" data-result-preview="${esc(item.id)}" aria-label="Open full image preview">${image}</button>`;
   if (options.clickable && videoSrc) return videoTrigger;
   return `${image}${video}${text}`;
