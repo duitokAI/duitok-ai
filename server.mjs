@@ -4978,7 +4978,7 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
   const promptOverride = action === "generate-image" ? sanitizeAgentText(options.promptOverride || "").slice(0, 3000) : "";
   const shouldAdvancePrompt = action === "generate-image" && options.advancePrompt === true;
   const jobIds = Array.from({ length: batchCount }, () => crypto.randomUUID());
-  const state = await mutateDb(async (currentDb) => {
+  const payload = await mutateDb(async (currentDb) => {
     const project = findProject(currentDb, projectId, user);
     if (promptValue) {
       if (action === "generate-ugc") {
@@ -5063,10 +5063,13 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
     currentDb.generationJobs.unshift(...jobs);
     currentDb.usage.unshift(usage(batchCount > 1 ? `Queued ${batchCount} generations` : "Queued generation", 0, project.userId));
     await saveDb(currentDb);
-    return publicState(currentDb, user);
+    return {
+      state: publicState(currentDb, user),
+      queuedGenerationJobs: jobs.map(publicGenerationJob)
+    };
   });
   kickGenerationQueue();
-  return { jobId: jobIds[0], jobIds, state };
+  return { jobId: jobIds[0], jobIds, state: payload.state, queuedGenerationJobs: payload.queuedGenerationJobs };
 }
 
 async function kickGenerationQueue() {
@@ -8474,7 +8477,10 @@ app.post("/api/projects/:id/generate", async (req, res) => {
       promptOverride: req.body.promptOverride,
       advancePrompt: req.body.advancePrompt === true
     });
-    res.json(result.state);
+    res.json({
+      ...result.state,
+      queuedGenerationJobs: result.queuedGenerationJobs || []
+    });
   } catch (error) {
     const { user } = await requireAuth(req).catch(() => ({ user: null }));
     if (user && ![402, 403, 404, 429].includes(error.status)) {

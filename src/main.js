@@ -13734,6 +13734,23 @@ function optimisticGenerationJobs(name, count, options = {}) {
   }));
 }
 
+function mergeSubmittedGenerationJobs(db, queuedJobs = []) {
+  if (!db) return db;
+  const { queuedGenerationJobs: _queuedGenerationJobs, ...cleanDb } = db;
+  if (!Array.isArray(queuedJobs) || !queuedJobs.length) return cleanDb;
+  const existingJobs = cleanDb.generationJobs || [];
+  const existingIds = new Set(existingJobs.map((job) => job.id).filter(Boolean));
+  const missingJobs = queuedJobs.filter((job) => job?.id && !existingIds.has(job.id) && !shouldHideGenerationJob(job));
+  if (!missingJobs.length) return cleanDb;
+  return {
+    ...cleanDb,
+    generationJobs: [
+      ...missingJobs,
+      ...existingJobs
+    ]
+  };
+}
+
 async function generate(name, event = null) {
   if (state.generating && name !== "generate-image") {
     notify(generationFeedbackCopy("busy"));
@@ -13750,7 +13767,8 @@ async function generate(name, event = null) {
       generating: true,
       optimisticGenerationJobs: [...(state.optimisticGenerationJobs || []), ...optimisticJobs]
     });
-    const db = await api(`/projects/${state.projectId}/generate`, { method: "POST", body: JSON.stringify({ action: name, step: state.step, count, ...generationOptions }) });
+    const responseDb = await api(`/projects/${state.projectId}/generate`, { method: "POST", body: JSON.stringify({ action: name, step: state.step, count, ...generationOptions }) });
+    const db = mergeSubmittedGenerationJobs(responseDb, responseDb?.queuedGenerationJobs || []);
     lockGenerationSubmitLayout(name, 900);
     set({
       db,
