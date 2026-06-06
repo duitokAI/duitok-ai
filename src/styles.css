@@ -48201,6 +48201,15 @@ body:has(.studio-shell .video-page-studio),
   max-width: 220px !important;
 }
 
+.studio-shell .audio-studio-page .audio-prompt-well:has(.audio-provider-picker[open]),
+.studio-shell .audio-studio-page .audio-control-row:has(.audio-provider-picker[open]) {
+  overflow: visible !important;
+}
+
+.studio-shell .audio-studio-page .audio-provider-picker[open] {
+  z-index: 46 !important;
+}
+
 .studio-shell .audio-studio-page .audio-provider-picker summary {
   grid-template-columns: 24px minmax(0, 1fr) 13px !important;
   gap: 8px !important;
@@ -48234,6 +48243,7 @@ body:has(.studio-shell .video-page-studio),
   background: rgba(255, 249, 240, 0.98) !important;
   border-color: rgba(33, 0, 36, 0.12) !important;
   box-shadow: 0 22px 70px rgba(33, 0, 36, 0.24) !important;
+  z-index: 47 !important;
 }
 
 .studio-shell .audio-studio-page .audio-provider-option {
