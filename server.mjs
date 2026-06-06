@@ -3887,6 +3887,25 @@ function imageReferencePromptInstruction(project) {
   return lines.join(" ");
 }
 
+function referenceVisualGuidancePrompt(project, visualSummary = "") {
+  const referenceCount = referenceImageUrlsFromSnapshot(project).length;
+  if (!referenceCount) return "";
+  const hasProductReference = Boolean(project?.image?.productAttachmentId);
+  const hasAvatarReference = Boolean(project?.image?.avatarAttachmentId);
+  const lines = [
+    "Reference visual lock:",
+    visualSummary ? `Visual analysis of attached reference(s): ${visualSummary}` : "",
+    "The final image must follow the attached reference image(s), not substitute generic objects."
+  ];
+  if (hasProductReference) {
+    lines.push("Product lock: the exact referenced product package, bottle/container shape, color, label style, and visible branding cues must appear clearly in the scene. The person should hold, present, apply, or naturally interact with this same product in the foreground.");
+  }
+  if (hasAvatarReference) {
+    lines.push("Avatar lock: preserve the referenced person's identity, face structure, hairstyle, age range, skin tone, and overall look as closely as the model allows.");
+  }
+  return lines.filter(Boolean).join("\n");
+}
+
 function grsaiVisionContent(textBlock = "", inputs = [], objectShape = true) {
   return [
     { type: "text", text: textBlock },
@@ -5694,7 +5713,8 @@ async function processGenerationJob(jobId) {
       return {
         job: structuredClone(job),
         project: structuredClone(project),
-        referenceImageUrls: referenceImageUrlsForProject(db, project)
+        referenceImageUrls: referenceImageUrlsForProject(db, project),
+        referenceImageVisuals: projectReferenceImageVisuals(db, project)
       };
     });
     if (!snapshot) return;
@@ -5705,6 +5725,30 @@ async function processGenerationJob(jobId) {
     }
     if (snapshot.job.internalPromptOverride && snapshot.project?.image) {
       snapshot.project.image.prompt = snapshot.job.internalPromptOverride;
+    }
+    if (snapshot.referenceImageVisuals?.length && snapshot.project?.image && snapshot.job.action === "generate-image" && snapshot.job.type === "image") {
+      try {
+        const currentPrompt = snapshot.project.image.prompt || "";
+        const visualSummary = hasGrsaiConfig()
+          ? await summarizePromptVisualsWithGrsai(snapshot.referenceImageVisuals, currentPrompt)
+          : "";
+        const guidance = referenceVisualGuidancePrompt(snapshot.project, visualSummary);
+        if (guidance && !currentPrompt.includes("Reference visual lock:")) {
+          snapshot.project.image.prompt = [currentPrompt, guidance].filter(Boolean).join("\n\n");
+          await mutateDb(async (db) => {
+            const job = db.generationJobs.find((item) => item.id === jobId);
+            if (job) {
+              job.prompt = snapshot.project.image.prompt;
+              job.referenceImageCount = snapshot.referenceImageUrls?.length || snapshot.referenceImageVisuals.length;
+              job.referenceImagesSent = Boolean(job.referenceImageCount);
+              job.referenceVisualGuidance = true;
+            }
+            await saveDb(db);
+          });
+        }
+      } catch (error) {
+        console.warn("Reference visual guidance skipped for generation job", jobId, error.message);
+      }
     }
     if (snapshot.job.internalPromptAdvanced && snapshot.project?.image) {
       try {
