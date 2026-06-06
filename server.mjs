@@ -935,6 +935,9 @@ async function mirrorAssetToStorage(sourceUrl, { userId, projectId, resultId, ty
     if (!response.ok) throw new Error(`Asset download failed: ${response.status}`);
     const contentType = response.headers.get("content-type") || (type === "video" ? "video/mp4" : "image/png");
     const bytes = Buffer.from(await response.arrayBuffer());
+    const imageMetadata = type === "image" && contentType.startsWith("image/")
+      ? await readImageDimensions(bytes)
+      : {};
     const extension = extensionFromContentType(contentType, sourceUrl);
     const key = [
       "generated-assets",
@@ -953,7 +956,8 @@ async function mirrorAssetToStorage(sourceUrl, { userId, projectId, resultId, ty
       storageKey: key,
       thumbnailStorageKeys,
       bytes: bytes.length,
-      contentType
+      contentType,
+      ...imageMetadata
     };
   } catch (error) {
     console.error("R2 asset mirror failed", error);
@@ -963,6 +967,36 @@ async function mirrorAssetToStorage(sourceUrl, { userId, projectId, resultId, ty
     }
     return { url: sourceUrl, originalUrl: sourceUrl, storage: "external", storageError: error.message };
   }
+}
+
+async function readImageDimensions(bytes) {
+  try {
+    const metadata = await sharp(bytes, { animated: false, limitInputPixels: 80_000_000 }).metadata();
+    const width = Number(metadata.width || 0);
+    const height = Number(metadata.height || 0);
+    if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) return {};
+    return {
+      width,
+      height,
+      imageWidth: width,
+      imageHeight: height,
+      intrinsicAspectRatio: closestSupportedImageAspectRatio(width, height)
+    };
+  } catch (error) {
+    console.warn("Image metadata read failed", error.message);
+    return {};
+  }
+}
+
+function closestSupportedImageAspectRatio(width, height) {
+  const ratio = Number(width) / Number(height);
+  if (!Number.isFinite(ratio) || ratio <= 0) return "";
+  return supportedImageAspectRatios
+    .map((value) => {
+      const [w, h] = value.split(":").map(Number);
+      return { value, delta: Math.abs(ratio - w / h) };
+    })
+    .sort((a, b) => a.delta - b.delta)[0]?.value || "";
 }
 
 function dataUrlToMediaBytes(dataUrl = "") {
@@ -2290,6 +2324,11 @@ function publicGenerationResult(result = {}, originJob = null) {
     model: publicMediaModel(result.model),
     resolution: result.resolution,
     aspectRatio: result.aspectRatio,
+    requestedAspectRatio: result.requestedAspectRatio,
+    width: result.width,
+    height: result.height,
+    imageWidth: result.imageWidth,
+    imageHeight: result.imageHeight,
     generationJobId: result.generationJobId || originJob?.id,
     timelineAt: result.timelineAt || originJob?.createdAt || result.createdAt,
     batchIndex: result.batchIndex || originJob?.batchIndex,
@@ -2320,6 +2359,11 @@ function publicGenerationJob(job = {}) {
     textOutput: redactProviderText(job.textOutput, publicGenerationBody(job.type)),
     errorMessage: job.status === "failed" ? publicGenerationError() : redactProviderText(job.errorMessage || ""),
     aspectRatio: job.aspectRatio,
+    requestedAspectRatio: job.requestedAspectRatio,
+    width: job.width,
+    height: job.height,
+    imageWidth: job.imageWidth,
+    imageHeight: job.imageHeight,
     batchIndex: job.batchIndex,
     batchCount: job.batchCount,
     providerBillingLocked: generationJobProviderBillingLocked(job),
@@ -4087,11 +4131,14 @@ function generationEndpointFor(provider, project) {
 
 function grsaiImageBody(project, prompt) {
   const resolution = imageResolutionFromProject(project);
+  const aspectRatio = imageAspectRatioFromProject(project);
   return {
     model: grsaiImageModelFromProject(project),
     prompt,
-    aspectRatio: imageAspectRatioFromProject(project),
+    aspectRatio,
+    aspect_ratio: aspectRatio,
     imageSize: resolution,
+    image_size: resolution,
     shutProgress: true
   };
 }
@@ -5268,6 +5315,10 @@ async function completeQueuedGeneration(jobId, generated) {
       resultId,
       type: assetType
     });
+    const requestedAspectRatio = job.aspectRatio || generationAspectRatioForProject(jobProject, job.action, job.step);
+    const resultAspectRatio = assetType === "image"
+      ? mirrored.intrinsicAspectRatio || requestedAspectRatio
+      : requestedAspectRatio;
     const result = {
       id: resultId,
       type: resultTypeForGeneration(job.action, job.step, generated),
@@ -5299,7 +5350,12 @@ async function completeQueuedGeneration(jobId, generated) {
       provider: resolvedProvider,
       model: requestedModel,
       resolution: job.resolution || jobProject.image?.resolution || imageResolutionFromProject(jobProject),
-      aspectRatio: job.aspectRatio || generationAspectRatioForProject(jobProject, job.action, job.step),
+      aspectRatio: resultAspectRatio,
+      requestedAspectRatio,
+      width: mirrored.width,
+      height: mirrored.height,
+      imageWidth: mirrored.imageWidth,
+      imageHeight: mirrored.imageHeight,
       costRm: cost.costRm,
       costUsd: cost.costUsd,
       createdAt: completedAt
@@ -5330,7 +5386,12 @@ async function completeQueuedGeneration(jobId, generated) {
       prompt: generated.prompt || job.prompt || "",
       providerErrorMessage: undefined,
       providerFallbacks: generated.providerFallbacks,
-      aspectRatio: job.aspectRatio || generationAspectRatioForProject(jobProject, job.action, job.step),
+      aspectRatio: resultAspectRatio,
+      requestedAspectRatio,
+      width: mirrored.width,
+      height: mirrored.height,
+      imageWidth: mirrored.imageWidth,
+      imageHeight: mirrored.imageHeight,
       ...cost,
       requestedModel,
       requestedProvider: job.requestedProvider || job.provider,
