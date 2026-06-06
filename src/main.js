@@ -13750,7 +13750,6 @@ async function generate(name, event = null) {
       generating: true,
       optimisticGenerationJobs: [...(state.optimisticGenerationJobs || []), ...optimisticJobs]
     });
-    notify(generationOptions.advancePrompt ? "Queued. Prompt Enhance will run before generation." : generationFeedbackCopy("submitting"));
     const db = await api(`/projects/${state.projectId}/generate`, { method: "POST", body: JSON.stringify({ action: name, step: state.step, count, ...generationOptions }) });
     lockGenerationSubmitLayout(name, 900);
     set({
@@ -13758,7 +13757,6 @@ async function generate(name, event = null) {
       generating: false,
       optimisticGenerationJobs: (state.optimisticGenerationJobs || []).filter((job) => !optimisticIds.has(job.id))
     });
-    notify(generationFeedbackCopy("queued", count));
     pollGenerationQueue();
     window.setTimeout(unlockGenerationSubmitLayout, 240);
   } catch (error) {
