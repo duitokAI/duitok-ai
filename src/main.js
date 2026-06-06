@@ -6472,7 +6472,8 @@ function ugcPanel(p) {
 function videoEmptyStudioBackdrop() {
   return `<section class="video-empty-cinema" aria-label="Video studio">
     <div class="video-empty-cinema-frame">
-      <h2>What would you shoot<br>with infinite budget?</h2>
+      <span>VIDEO STUDIO</span>
+      <h2>BRING IT TO LIFE</h2>
     </div>
   </section>`;
 }
