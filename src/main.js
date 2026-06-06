@@ -1694,7 +1694,7 @@ function shouldPatchBulkSelectionOnly(patch = {}) {
 
 function patchBulkSelectionDom() {
   const wall = document.querySelector(".studio-result-wall");
-  const surface = document.querySelector(".studio-wall-surface-base, .image-higgsfield-mode, .video-page-studio");
+  const surface = wall?.closest?.(".studio-wall-surface-base, .image-higgsfield-mode, .video-page-studio");
   if (!wall || !surface) return false;
   const ids = selectedResultIdSet();
   const selecting = ids.size > 0;

@@ -37622,6 +37622,16 @@ label {
   padding-bottom: 0 !important;
 }
 
+.studio-shell .image-canvas-studio.is-bulk-selecting-results > .image-generate-console,
+.studio-shell .image-canvas-studio.is-bulk-selecting-results > .image-generate-console.is-compact,
+.studio-shell .image-canvas-studio.is-bulk-selecting-results > .image-generate-console.is-hover-expanded,
+.studio-shell .image-canvas-studio.is-bulk-selecting-results > .image-generate-console.has-open-menu,
+.studio-shell .image-canvas-studio.is-bulk-selecting-results > .image-generate-console.has-long-prompt {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 .studio-shell .image-canvas-studio.is-bulk-selecting-results .studio-bulk-selection-bar {
   position: fixed !important;
   right: max(24px, env(safe-area-inset-right)) !important;
