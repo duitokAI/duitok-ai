@@ -50079,3 +50079,92 @@ body:has(.studio-shell .video-page-studio.is-empty),
   margin-bottom: 14px !important;
   transform: none !important;
 }
+
+/* Audio empty page work-mode final lock: match the Video/Image empty canvas
+   behavior. The Audio hero stays as context, but the composer must be visible
+   in the first viewport instead of being pushed below a cover-like panel. */
+html:has(.studio-shell .audio-studio-page.is-empty),
+body:has(.studio-shell .audio-studio-page.is-empty),
+#app:has(.studio-shell .audio-studio-page.is-empty),
+.studio-shell:has(.audio-studio-page.is-empty),
+.studio-shell:has(.audio-studio-page.is-empty) .workspace,
+.studio-shell .workspace:has(.audio-studio-page.is-empty),
+.studio-shell .canvas-card:has(.audio-studio-page.is-empty),
+.studio-shell .studio-workbench-card:has(.audio-studio-page.is-empty),
+.studio-shell .studio-step-panel:has(.audio-studio-page.is-empty),
+.studio-shell .audio-studio-page.is-empty {
+  height: auto !important;
+  min-height: 100dvh !important;
+  max-height: none !important;
+  overflow-x: clip !important;
+  overflow-y: visible !important;
+}
+
+.studio-shell .audio-studio-page.is-empty {
+  display: grid !important;
+  grid-template-rows:
+    minmax(300px, calc(100dvh - var(--project-fixed-tabs-height, 88px) - 220px))
+    minmax(0, auto)
+    auto !important;
+  align-content: start !important;
+  gap: 8px !important;
+  padding-bottom: max(18px, env(safe-area-inset-bottom)) !important;
+}
+
+.studio-shell .audio-studio-page.is-empty .audio-stage-hero {
+  grid-row: 1 !important;
+  min-height: 300px !important;
+  height: auto !important;
+  max-height: none !important;
+  padding: clamp(28px, 4vw, 58px) clamp(18px, 5vw, 72px) clamp(18px, 3vw, 44px) !important;
+  align-content: center !important;
+}
+
+.studio-shell .audio-studio-page.is-empty .audio-title-lockup {
+  max-width: min(780px, calc(100vw - 84px)) !important;
+  transform: none !important;
+}
+
+.studio-shell .audio-studio-page.is-empty .audio-title-lockup h1 {
+  font-size: clamp(34px, 4vw, 58px) !important;
+  line-height: 1.08 !important;
+  letter-spacing: 0 !important;
+  margin: 0 !important;
+}
+
+.studio-shell .audio-studio-page.is-empty .audio-title-lockup p {
+  max-width: 680px !important;
+  margin: 14px auto 0 !important;
+  font-size: clamp(15px, 1.5vw, 19px) !important;
+  line-height: 1.35 !important;
+}
+
+.studio-shell .audio-studio-page.is-empty .audio-wall-stage {
+  grid-row: 2 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: 64px !important;
+  overflow: hidden !important;
+}
+
+.studio-shell .audio-studio-page.is-empty .audio-empty-state {
+  width: min(980px, calc(100% - clamp(42px, 8vw, 160px))) !important;
+  margin: 0 auto !important;
+}
+
+.studio-shell .audio-studio-page.is-empty .audio-composer,
+.studio-shell .audio-studio-page.is-empty .audio-composer:not(.is-compact) {
+  position: sticky !important;
+  top: auto !important;
+  bottom: max(14px, env(safe-area-inset-bottom)) !important;
+  left: auto !important;
+  right: auto !important;
+  grid-row: 3 !important;
+  justify-self: center !important;
+  align-self: auto !important;
+  z-index: 24 !important;
+  width: min(1180px, calc(100% - clamp(28px, 6vw, 96px))) !important;
+  max-width: min(1180px, calc(100% - clamp(28px, 6vw, 96px))) !important;
+  margin: 8px auto 14px !important;
+  transform: none !important;
+}
