@@ -12354,6 +12354,8 @@ function updateVideoPromptEditorRows(input) {
 function updatePromptEditorRows(input, consoleSelector = ".image-generate-console") {
   const consoleEl = input?.closest?.(consoleSelector);
   if (!input || !consoleEl) return;
+  const promptText = String(input.value || "");
+  const explicitLongPrompt = promptText.length > 120 || promptText.includes("\n");
   const styles = window.getComputedStyle(input);
   const lineHeight = Number.parseFloat(styles.lineHeight) || 20;
   const paddingTop = Number.parseFloat(styles.paddingTop) || 0;
@@ -12372,16 +12374,16 @@ function updatePromptEditorRows(input, consoleSelector = ".image-generate-consol
   mirror.style.whiteSpace = "pre-wrap";
   mirror.style.wordBreak = "normal";
   mirror.style.overflowWrap = "break-word";
-  mirror.textContent = input.value || " ";
+  mirror.textContent = promptText || " ";
   document.body.appendChild(mirror);
   const contentHeight = Math.max(0, mirror.scrollHeight - paddingTop - paddingBottom);
   mirror.remove();
   const rawRows = Math.max(1, Math.ceil(contentHeight / lineHeight));
-  const visibleRows = Math.max(1, Math.min(6, rawRows));
+  const visibleRows = explicitLongPrompt ? Math.max(2, Math.min(6, rawRows)) : 1;
   consoleEl.style.setProperty("--image-prompt-lines", String(visibleRows));
   consoleEl.style.setProperty("--video-prompt-lines", String(visibleRows));
-  consoleEl.classList.toggle("has-long-prompt", rawRows > 1);
-  consoleEl.classList.toggle("has-scroll-prompt", rawRows > 6);
+  consoleEl.classList.toggle("has-long-prompt", explicitLongPrompt);
+  consoleEl.classList.toggle("has-scroll-prompt", explicitLongPrompt && rawRows > 6);
 }
 
 function fillImagePrompt(value = "") {
