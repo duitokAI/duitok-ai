@@ -4275,7 +4275,7 @@ async function generateImageWithApimart(project, tracker = null) {
     n: 1,
     size: aspectRatio
   };
-  const referenceImageUrls = model === "GPT Image 2" ? apimartReferenceImageUrlsFromSnapshot(project) : [];
+  const referenceImageUrls = referenceImageUrlsFromSnapshot(project);
   if (referenceImageUrls.length) requestBody.image_urls = referenceImageUrls;
   if (resolution && model !== "Grok Imagine") requestBody.resolution = resolution;
   await tracker?.({
@@ -4421,7 +4421,8 @@ function generationEndpointFor(provider, project) {
 function grsaiImageBody(project, prompt) {
   const resolution = imageResolutionFromProject(project);
   const aspectRatio = imageAspectRatioFromProject(project);
-  return {
+  const referenceImageUrls = referenceImageUrlsFromSnapshot(project);
+  const body = {
     model: grsaiImageModelFromProject(project),
     prompt,
     aspectRatio,
@@ -4430,6 +4431,13 @@ function grsaiImageBody(project, prompt) {
     image_size: resolution,
     shutProgress: true
   };
+  if (referenceImageUrls.length) {
+    body.image_url = referenceImageUrls[0];
+    body.image_urls = referenceImageUrls;
+    body.reference_image = referenceImageUrls[0];
+    body.reference_images = referenceImageUrls;
+  }
+  return body;
 }
 
 function wuyinImageBody(project, prompt) {
@@ -4437,6 +4445,17 @@ function wuyinImageBody(project, prompt) {
   const aspectRatio = imageAspectRatioFromProject(project);
   const videoAspectRatio = videoAspectRatioFromProject(project, model);
   const imageSize = process.env.WUYIN_IMAGE_SIZE || "1K";
+  const referenceImageUrls = referenceImageUrlsFromSnapshot(project);
+  const withImageReferences = (body) => {
+    if (!referenceImageUrls.length) return body;
+    return {
+      ...body,
+      image_url: referenceImageUrls[0],
+      image_urls: referenceImageUrls,
+      reference_image: referenceImageUrls[0],
+      reference_images: referenceImageUrls
+    };
+  };
   if (model === "Veo 3.1") {
     return {
       model: wuyinVideoModel,
@@ -4471,12 +4490,12 @@ function wuyinImageBody(project, prompt) {
     };
   }
   if (model === "Grok Imagine") {
-    return {
+    return withImageReferences({
       prompt,
       aspect_ratio: aspectRatio
-    };
+    });
   }
-  return { prompt, size: imageSize, aspectRatio };
+  return withImageReferences({ prompt, size: imageSize, aspectRatio });
 }
 
 function crunVeo31Body(project, prompt) {
@@ -4504,16 +4523,24 @@ function crunImageModelFromProject(project) {
 function crunImageBody(project, prompt) {
   const aspectRatio = imageAspectRatioFromProject(project);
   const resolution = imageResolutionFromProject(project);
+  const referenceImageUrls = referenceImageUrlsFromSnapshot(project);
+  const input = {
+    prompt,
+    aspect_ratio: aspectRatio,
+    resolution,
+    num_outputs: 1,
+    enhance_prompt: process.env.CRUN_IMAGE_ENHANCE_PROMPT === "true",
+    output_format: process.env.CRUN_IMAGE_OUTPUT_FORMAT || "jpeg"
+  };
+  if (referenceImageUrls.length) {
+    input.image_url = referenceImageUrls[0];
+    input.image_urls = referenceImageUrls;
+    input.reference_image = referenceImageUrls[0];
+    input.reference_images = referenceImageUrls;
+  }
   return {
     model: crunImageModelFromProject(project),
-    input: {
-      prompt,
-      aspect_ratio: aspectRatio,
-      resolution,
-      num_outputs: 1,
-      enhance_prompt: process.env.CRUN_IMAGE_ENHANCE_PROMPT === "true",
-      output_format: process.env.CRUN_IMAGE_OUTPUT_FORMAT || "jpeg"
-    }
+    input
   };
 }
 
@@ -4854,7 +4881,7 @@ function imageProviderOrderForModel(model) {
 
 function imageProviderPlanForModel(model, project = null) {
   model = internalMediaModel(model);
-  const requiresApimartFirst = model === "GPT Image 2" && apimartReferenceImageUrlsFromSnapshot(project).length > 0;
+  const requiresApimartFirst = model === "GPT Image 2" && referenceImageUrlsFromSnapshot(project).length > 0;
   const providerPlan = requiresApimartFirst
     ? ["apimart", ...imageProviderOrderForModel(model).filter((provider) => provider !== "apimart")]
     : imageProviderOrderForModel(model);
@@ -5421,6 +5448,11 @@ async function enqueueGeneration(projectId, action, step, user, options = {}) {
         throw error;
       }
       project.image.model = selectedModel;
+      if (options.prompt !== undefined || options.model || options.aspectRatio || options.resolution) {
+        delete project.image.editSourceImageUrl;
+        delete project.image.editReferenceAttachmentId;
+        if (project.image.mode === "Edit Image") project.image.mode = "Create Image";
+      }
       if (options.aspectRatio) project.image.aspectRatio = String(options.aspectRatio).replace(/\s*\(.+\)\s*$/, "");
       if (options.resolution) project.image.resolution = String(options.resolution);
     }
@@ -5515,14 +5547,14 @@ async function processGenerationJob(jobId) {
       return {
         job: structuredClone(job),
         project: structuredClone(project),
-        apimartReferenceImageUrls: apimartReferenceImageUrlsForProject(db, project)
+        referenceImageUrls: referenceImageUrlsForProject(db, project)
       };
     });
     if (!snapshot) return;
     if (await stopCancelledGenerationJob(jobId, "local_only")) return;
     applyGenerationJobSnapshot(snapshot.project, snapshot.job);
-    if (snapshot.apimartReferenceImageUrls?.length && snapshot.project?.image) {
-      snapshot.project.image.apimartReferenceImageUrls = snapshot.apimartReferenceImageUrls;
+    if (snapshot.referenceImageUrls?.length && snapshot.project?.image) {
+      snapshot.project.image.referenceImageUrls = snapshot.referenceImageUrls;
     }
     if (snapshot.job.internalPromptOverride && snapshot.project?.image) {
       snapshot.project.image.prompt = snapshot.job.internalPromptOverride;
@@ -9965,7 +9997,7 @@ app.post("/api/results/:id/edit-image", async (req, res, next) => {
     await mutateDb(async (db) => {
       const { project, result } = findResultWithProject(db, req.params.id, user);
       projectId = project.id;
-      if (!result.imageUrl && !result.videoUrl) {
+      if (!result.imageUrl) {
         const error = new Error("This result has no media to edit.");
         error.status = 400;
         throw error;
@@ -9981,6 +10013,8 @@ app.post("/api/results/:id/edit-image", async (req, res, next) => {
       project.image ||= {};
       project.image.model = model;
       project.image.mode = "Edit Image";
+      project.image.editSourceImageUrl = result.originalImageUrl || result.imageUrl;
+      project.image.editReferenceAttachmentId = referenceAttachmentId || "";
       project.image.prompt = [
         "Edit the existing generated image as the main visual reference.",
         `Original asset name: ${result.title || "Pokaya asset"}.`,
