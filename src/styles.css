@@ -50585,6 +50585,9 @@ body:has(.studio-shell .video-prompt-extractor-page[data-studio-mode="clone"].is
   padding-top: clamp(24px, 3.6vw, 52px) !important;
   padding-bottom: clamp(18px, 2.8vw, 44px) !important;
   overflow: hidden !important;
+  background: transparent !important;
+  background-image: none !important;
+  background-color: transparent !important;
 }
 
 .studio-shell .video-page-studio.is-empty > .video-empty-cinema::after {
