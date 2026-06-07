@@ -47204,8 +47204,7 @@ body:has(.studio-shell .video-page-studio),
   gap: 2px;
 }
 
-.studio-shell .audio-provider-option-copy b,
-.studio-shell .audio-provider-option-copy small {
+.studio-shell .audio-provider-option-copy b {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -47216,6 +47215,12 @@ body:has(.studio-shell .video-page-studio),
   color: rgba(248, 237, 248, 0.54);
   font-size: 12px;
   font-weight: 800;
+  line-height: 1.28;
+  overflow: hidden;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .studio-shell .audio-provider-option-check {
