@@ -146,7 +146,7 @@ services:
       - key: ELEVENLABS_BASE_URL
         value: https://api.elevenlabs.io
       - key: ELEVENLABS_TTS_MODEL
-        value: eleven_multilingual_v2
+        value: eleven_v3
       - key: ELEVENLABS_DEFAULT_VOICE_ID
         value: JBFqnCBsd6RMkjVDRZzb
       - key: ELEVENLABS_OUTPUT_FORMAT
