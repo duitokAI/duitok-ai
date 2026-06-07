@@ -2642,7 +2642,7 @@ function handleDelegatedPreviewWarm(event) {
 }
 
 function handleDelegatedClick(event) {
-  const target = event.target.closest?.("[data-page],[data-step],[data-step-open],[data-project],[data-studio-wall-more],[data-result-select],[data-bulk-result-action],[data-result-action],[data-result-preview],[data-result-prompt],[data-result-add-project],[data-video-play],[data-image-canvas-result],[data-image-model-option],[data-video-model-option],[data-generation-cancel],[data-generation-retry],[data-generation-edit],[data-settings-section],[data-agent-history-restore],[data-agent-history-restore-row],[data-agent-history-pin],[data-agent-history-archive]");
+  const target = event.target.closest?.('[data-action="generate-audio"],[data-action="audio-coming-soon"],[data-page],[data-step],[data-step-open],[data-project],[data-studio-wall-more],[data-result-select],[data-bulk-result-action],[data-result-action],[data-result-preview],[data-result-prompt],[data-result-add-project],[data-video-play],[data-image-canvas-result],[data-image-model-option],[data-video-model-option],[data-generation-cancel],[data-generation-retry],[data-generation-edit],[data-settings-section],[data-agent-history-restore],[data-agent-history-restore-row],[data-agent-history-pin],[data-agent-history-archive]');
   if (!target || !app.contains(target)) return;
 
   if (target.dataset.agentHistoryRestore) {
@@ -2663,6 +2663,15 @@ function handleDelegatedClick(event) {
     event.preventDefault();
     event.stopPropagation();
     return archiveAgentHistory(target.dataset.agentHistoryArchive);
+  }
+  if (target.dataset.action === "generate-audio") {
+    event.preventDefault();
+    if (state.audioGenerating) return;
+    return generateAudio(event);
+  }
+  if (target.dataset.action === "audio-coming-soon") {
+    event.preventDefault();
+    return notify("Audio backend hookup is the next step. The page UI is ready.");
   }
   if (target.dataset.page) return scheduleNavigation({ page: target.dataset.page });
   if (target.dataset.step) return scheduleNavigation({ step: target.dataset.step });
@@ -7233,9 +7242,9 @@ function autoPanel(p) {
       <div class="audio-main-bar">
         ${isVoiceoverMode ? audioPromptWell(promptText, language, scriptMode, audioProvider) : isCloneMode ? audioCloneWell(promptText, cloneAudioUrl) : audioFileInsertWell()}
         ${mode === "Translate" ? audioLanguagePicker(language) : audioVoicePresetPicker(voicePreset)}
-        <button class="audio-generate-button ${isVoiceoverMode && !promptText.trim() ? "is-empty" : ""}" type="button" data-action="generate-audio">
-          <b>Generate Audio</b>
-          <span>0.20 Credit</span>
+        <button class="audio-generate-button ${isVoiceoverMode && !promptText.trim() ? "is-empty" : ""} ${state.audioGenerating ? "is-generating" : ""}" type="button" data-action="generate-audio" ${state.audioGenerating ? "disabled" : ""}>
+          <b>${state.audioGenerating ? "Generating..." : "Generate Audio"}</b>
+          <span>${state.audioGenerating ? "Voice is being created" : "0.20 Credit"}</span>
         </button>
       </div>
     </section>
@@ -12726,15 +12735,17 @@ async function generateAudio(event = null) {
   if (mode === "Change Voice" && !/^https?:\/\//i.test(cloneAudioUrl)) return notify("Paste a reference audio URL first.");
   const trigger = event?.currentTarget || document.querySelector('[data-action="generate-audio"]');
   const previousHtml = trigger?.innerHTML || "";
+  const providerTitle = mode === "Change Voice"
+    ? "Pokaya Clone Voice"
+    : audioProviderOptions().find((item) => item.value === audioProvider)?.title || "Voice model";
+  const optimisticJobs = optimisticGenerationJobs("generate-audio", 1, { prompt: promptText, providerTitle });
+  const optimisticIds = new Set(optimisticJobs.map((job) => job.id));
   try {
-    state.audioGenerating = true;
     updateAudioPromptLocal(promptText);
-    if (trigger) {
-      trigger.disabled = true;
-      trigger.classList.add("is-generating");
-      const providerTitle = audioProviderOptions().find((item) => item.value === audioProvider)?.title || "Doubao";
-      trigger.innerHTML = `<b>Generating...</b><span>${mode === "Change Voice" ? "Pokaya Clone Voice" : providerTitle}</span>`;
-    }
+    set({
+      audioGenerating: true,
+      optimisticGenerationJobs: [...(state.optimisticGenerationJobs || []), ...optimisticJobs]
+    });
     notify(mode === "Change Voice" ? "Generating cloned voice..." : "Generating audio...");
     const endpoint = mode === "Change Voice" ? "clone" : "generate";
     const db = await api(`/projects/${state.projectId}/audio/${endpoint}`, {
@@ -12748,11 +12759,17 @@ async function generateAudio(event = null) {
         language: current.auto?.audioLanguage || "Malay"
       })
     });
-    state.audioGenerating = false;
-    set({ db });
+    set({
+      db,
+      audioGenerating: false,
+      optimisticGenerationJobs: (state.optimisticGenerationJobs || []).filter((job) => !optimisticIds.has(job.id))
+    });
     notify("Audio generated.");
   } catch (error) {
-    state.audioGenerating = false;
+    set({
+      audioGenerating: false,
+      optimisticGenerationJobs: (state.optimisticGenerationJobs || []).filter((job) => !optimisticIds.has(job.id))
+    });
     if (trigger) {
       trigger.disabled = false;
       trigger.classList.remove("is-generating");
@@ -13941,6 +13958,24 @@ function markGenerateTriggerSubmitting(trigger) {
 }
 
 function optimisticGenerationJobs(name, count, options = {}) {
+  if (name === "generate-audio") {
+    const createdAt = new Date().toISOString();
+    return [{
+      id: `optimistic_${Date.now()}_audio_${Math.random().toString(16).slice(2)}`,
+      projectId: state.projectId,
+      action: name,
+      step: "auto",
+      type: "audio",
+      status: "processing",
+      stage: "audio_generating",
+      prompt: options.prompt || "",
+      promptSnapshot: options.prompt || "",
+      providerTitle: options.providerTitle || "Voice model",
+      optimistic: true,
+      createdAt,
+      timelineAt: createdAt
+    }];
+  }
   if (name === "generate-ugc") {
     const current = project();
     const aspectRatio = options.aspectRatio || current.ugc?.aspectRatio || current.image?.aspectRatio || "16:9";
