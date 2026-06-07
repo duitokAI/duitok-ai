@@ -22697,6 +22697,16 @@ label {
   display: none !important;
 }
 
+.studio-shell .result-video-wall-preview .result-play-button {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.28)) !important;
+}
+
+.studio-shell .result-video-wall-preview .result-play-button svg {
+  width: 42px !important;
+  height: 42px !important;
+  padding: 11px !important;
+}
+
 .studio-shell .empty-result {
   min-height: 92px !important;
   margin-top: 18px !important;
