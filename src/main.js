@@ -2642,7 +2642,7 @@ function handleDelegatedPreviewWarm(event) {
 }
 
 function handleDelegatedClick(event) {
-  const target = event.target.closest?.("[data-page],[data-step],[data-step-open],[data-project],[data-studio-wall-more],[data-result-select],[data-bulk-result-action],[data-result-action],[data-result-preview],[data-result-prompt],[data-result-add-project],[data-image-canvas-result],[data-image-model-option],[data-video-model-option],[data-generation-cancel],[data-generation-retry],[data-generation-edit],[data-settings-section],[data-agent-history-restore],[data-agent-history-restore-row],[data-agent-history-pin],[data-agent-history-archive]");
+  const target = event.target.closest?.("[data-page],[data-step],[data-step-open],[data-project],[data-studio-wall-more],[data-result-select],[data-bulk-result-action],[data-result-action],[data-result-preview],[data-result-prompt],[data-result-add-project],[data-video-play],[data-image-canvas-result],[data-image-model-option],[data-video-model-option],[data-generation-cancel],[data-generation-retry],[data-generation-edit],[data-settings-section],[data-agent-history-restore],[data-agent-history-restore-row],[data-agent-history-pin],[data-agent-history-archive]");
   if (!target || !app.contains(target)) return;
 
   if (target.dataset.agentHistoryRestore) {
@@ -2678,6 +2678,11 @@ function handleDelegatedClick(event) {
   }
   if (target.dataset.resultPrompt) return set({ modal: "resultPrompt", activeResultId: target.dataset.resultPrompt });
   if (target.dataset.resultAddProject) return addResultToProject(target.dataset.resultAddProject);
+  if (target.dataset.videoPlay) {
+    event.preventDefault();
+    event.stopPropagation();
+    return playResultVideo(target);
+  }
   if (target.dataset.imageCanvasResult) return set({ imageCanvasSelectedResultId: target.dataset.imageCanvasResult });
   if (target.dataset.imageModelOption) {
     if (!state.generating && !document.documentElement.classList.contains("is-generation-submitting")) stabilizeImageConsoleExpansion(1000);

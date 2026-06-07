@@ -22693,6 +22693,10 @@ label {
   padding: 14px !important;
 }
 
+.studio-shell .result-video-shell.is-playing .result-play-button {
+  display: none !important;
+}
+
 .studio-shell .empty-result {
   min-height: 92px !important;
   margin-top: 18px !important;
