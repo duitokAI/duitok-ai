@@ -6020,7 +6020,7 @@ function imageBatchCount(p = project()) {
 }
 
 function imageModelCapabilities(model = "GPT Image 2") {
-  const imageAspectRatiosAll = ["9:16", "3:4", "2:3", "1:1", "4:3", "16:9", "3:2", "4:5", "5:4", "1:2", "2:1", "1:3", "3:1", "9:21", "21:9", "1:4", "4:1", "1:8", "8:1"];
+  const imageAspectRatiosAll = ["9:16", "3:4", "2:3", "1:1", "4:3", "16:9", "3:2", "4:5", "5:4", "1:2", "2:1", "9:21", "21:9"];
   const capabilities = {
     "GPT Image 2": {
       aspectRatios: imageAspectRatiosAll,
@@ -6172,16 +6172,10 @@ function aspectRatioDescription(value = "9:16") {
     "4:3": "Classic landscape product frames",
     "1:2": "Tall poster and story layouts",
     "2:1": "Wide hero or banner layouts",
-    "1:3": "Ultra-tall vertical layouts",
-    "3:1": "Ultra-wide strip compositions",
     "16:9": "Wide banners and video covers",
     "3:2": "Photo-style horizontal images",
     "9:21": "Full-screen tall mobile canvas",
-    "21:9": "Cinematic panoramic canvas",
-    "1:4": "Narrow vertical slice",
-    "4:1": "Wide horizontal slice",
-    "1:8": "Extreme vertical strip",
-    "8:1": "Extreme horizontal strip"
+    "21:9": "Cinematic panoramic canvas"
   };
   return descriptions[value] || "Custom image composition";
 }
@@ -8322,7 +8316,7 @@ function resultAspectRatioLabel(item) {
   return "Unknown";
 }
 
-const supportedWallAspectRatios = ["9:16", "3:4", "2:3", "4:5", "1:1", "5:4", "4:3", "3:2", "16:9", "1:2", "2:1", "1:3", "3:1", "1:4", "4:1", "1:8", "8:1", "9:21", "21:9"];
+const supportedWallAspectRatios = ["9:16", "3:4", "2:3", "4:5", "1:1", "5:4", "4:3", "3:2", "16:9", "1:2", "2:1", "9:21", "21:9"];
 
 function normalizeAspectRatio(value, fallback = "9:16") {
   const raw = String(value || "").trim();
