@@ -44755,7 +44755,7 @@ body:has(.studio-shell .video-page-studio),
 .studio-shell .image-higgsfield-mode .studio-wall-card,
 .studio-shell .video-page-studio .studio-wall-card,
 .studio-shell .video-prompt-extractor-page .studio-wall-card {
-  flex: var(--media-ratio, 1) 1 calc(var(--studio-wall-row-height) * var(--media-ratio, 1)) !important;
+  flex: 0 0 calc(var(--studio-wall-row-height) * var(--media-ratio, 1)) !important;
   aspect-ratio: auto !important;
   width: auto !important;
   min-width: 0 !important;
@@ -45157,7 +45157,7 @@ body:has(.studio-shell .video-page-studio),
 .studio-shell .image-higgsfield-mode > .studio-result-wall > .studio-wall-grid > .studio-wall-card,
 .studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-card,
 .studio-shell .video-prompt-extractor-page > .studio-result-wall > .studio-wall-grid > .studio-wall-card {
-  flex: var(--media-ratio, 1) 1 calc(var(--studio-wall-row-height) * var(--media-ratio, 1)) !important;
+  flex: 0 0 calc(var(--studio-wall-row-height) * var(--media-ratio, 1)) !important;
   width: auto !important;
   min-width: 0 !important;
   max-width: none !important;
