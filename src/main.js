@@ -7982,7 +7982,7 @@ function resultMediaLabel(item) {
 function resultModelLabel(item) {
   const job = resultOriginJob(item);
   const model = item.requestedModel || job?.requestedModel || item.model || job?.model || item.providerTitle || item.title || "";
-  if (isVideoStudioResult(item)) return "VIDEO MODEL";
+  if (isVideoStudioResult(item)) return videoResultModelLabel(model);
   if (/gemini|video prompt|extract/i.test(model)) return "POKAYA AI";
   if (/seedream/i.test(model)) return "SEEDREAM 5.0 LITE";
   if (/qwen|通义|千问/i.test(model)) return "QWEN IMAGE 2.0";
@@ -7991,6 +7991,22 @@ function resultModelLabel(item) {
   if (/grok imagine/i.test(model)) return "GROK IMAGINE";
   if (/gpt/i.test(model)) return "GPT IMAGE 2";
   return item.videoUrl ? "VIDEO MODEL" : "GPT IMAGE 2";
+}
+
+function videoResultModelLabel(model = "") {
+  const value = String(model || "").trim();
+  const option = videoModelOptions().find((item) => item.value.toLowerCase() === value.toLowerCase() || item.title.toLowerCase() === value.toLowerCase());
+  if (option) return option.title;
+  if (/veo\s*3(?:\.1)?/i.test(value)) return "Veo 3.1";
+  if (/sora\s*2/i.test(value)) return "Sora 2";
+  if (/seedance/i.test(value)) return "Seedance 2.0";
+  if (/gemini|omni/i.test(value)) return "Gemini Omni";
+  if (/grok/i.test(value)) return "Grok Imagine Video";
+  if (/wan/i.test(value)) return "Wan 2.7";
+  if (/kling.*motion/i.test(value)) return "Kling V3 Motion Control";
+  if (/kling/i.test(value)) return "Kling V3 Omni";
+  if (/hailuo|minimax/i.test(value)) return "MiniMax Hailuo 2.3";
+  return "Video model";
 }
 
 function normalizedResultTitle(value = "") {
@@ -8452,9 +8468,11 @@ function resultOriginJob(item) {
 }
 
 function resultOriginLabel(item) {
+  if (isVideoStudioResult(item)) return "Video Studio";
   if (state.activeResultId === item?.id && state.resultDetailSource === "agent") return "Pokaya Agent";
   const job = resultOriginJob(item);
   if (!job) return "Image Page";
+  if (job.action === "generate-ugc") return "Video Studio";
   return job.action === "generate-image" ? "Image Page" : "Pokaya Agent";
 }
 
