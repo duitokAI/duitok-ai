@@ -5012,9 +5012,9 @@ async function generateImageWithCrun(project, tracker = null) {
 
 async function generateVideoWithCrunVeo31(project, tracker = null) {
   const prompt = [
-    videoPromptFromProject(project, "Create a high-converting TikTok Shop product video."),
+    videoPromptFromProject(project),
     `Mode: ${project.image?.mode || "Create Video"}.`,
-    "Style: realistic short-form ecommerce video, native-looking TikTok Shop pacing, clear product focus, no fake brand claims."
+    videoStyleInstructionForProject(project)
   ].join("\n");
   const data = await crunRequest(crunCreateTaskPath, {
     method: "POST",
@@ -5034,9 +5034,9 @@ async function generateVideoWithCrunVeo31(project, tracker = null) {
 
 async function generateVideoWithWuyin(project, tracker = null) {
   const prompt = [
-    videoPromptFromProject(project, "Create a high-converting TikTok Shop product video."),
+    videoPromptFromProject(project),
     `Mode: ${project.image?.mode || "Create Video"}.`,
-    "Style: realistic short-form ecommerce video, native-looking TikTok Shop pacing, clear product focus, no fake brand claims."
+    videoStyleInstructionForProject(project)
   ].join("\n");
   const data = await wuyinRequest(wuyinPathFromProject(project), {
     method: "POST",
@@ -5143,9 +5143,9 @@ async function generateImageWithFallbacks(project, model, tracker = null) {
 
 async function generateVideoWithApimartSeedance(project, tracker = null) {
   const prompt = [
-    videoPromptFromProject(project, "Create a high-converting TikTok Shop product video."),
+    videoPromptFromProject(project),
     `Mode: ${project.image?.mode || "Create Video"}.`,
-    "Style: realistic short-form ecommerce video, native-looking TikTok Shop pacing, clear product focus, no fake brand claims."
+    videoStyleInstructionForProject(project)
   ].join("\n");
   const data = await apimartRequest(apimartVideoPath, {
     method: "POST",
@@ -5196,9 +5196,9 @@ async function pollAi302SeedanceTask(taskId, tracker = null) {
 
 async function generateVideoWithAi302Seedance(project, tracker = null) {
   const prompt = [
-    videoPromptFromProject(project, "Create a high-converting TikTok Shop product video."),
+    videoPromptFromProject(project),
     `Mode: ${project.image?.mode || "Create Video"}.`,
-    "Style: realistic short-form ecommerce video, native-looking TikTok Shop pacing, clear product focus, no fake brand claims."
+    videoStyleInstructionForProject(project)
   ].join("\n");
   const data = await ai302Request(ai302SeedanceCreatePath, {
     method: "POST",
@@ -5221,7 +5221,7 @@ async function generateVideoWithAi302Seedance(project, tracker = null) {
 
 async function generateVideoWithApimartGrok(project, tracker = null) {
   const prompt = [
-    videoPromptFromProject(project, "Create a high-converting TikTok Shop product video."),
+    videoPromptFromProject(project),
     `Mode: ${project.image?.mode || "Create Video"}.`,
     "Style: cinematic short-form video, clear subject focus, smooth motion, no fake brand claims."
   ].join("\n");
@@ -5244,9 +5244,9 @@ async function generateVideoWithApimartGrok(project, tracker = null) {
 
 async function generateVideoWithApimartWan(project, tracker = null) {
   const prompt = [
-    videoPromptFromProject(project, "Create a high-converting TikTok Shop product video."),
+    videoPromptFromProject(project),
     `Mode: ${project.image?.mode || "Create Video"}.`,
-    "Style: polished ecommerce short video, coherent motion, cinematic product focus, no fake brand claims."
+    videoStyleInstructionForProject(project)
   ].join("\n");
   const data = await apimartRequest(apimartVideoPath, {
     method: "POST",
@@ -5267,9 +5267,9 @@ async function generateVideoWithApimartWan(project, tracker = null) {
 
 async function generateVideoWithApimartKlingOmni(project, tracker = null) {
   const prompt = [
-    videoPromptFromProject(project, "Create a cinematic ecommerce product video."),
+    videoPromptFromProject(project),
     `Mode: ${project.image?.mode || "Create Video"}.`,
-    "Style: cinematic short-form motion, coherent scene, clear product or subject focus, no fake brand claims."
+    videoStyleInstructionForProject(project)
   ].join("\n");
   const data = await apimartRequest(apimartVideoPath, {
     method: "POST",
@@ -5313,9 +5313,9 @@ async function generateVideoWithApimartKlingMotion(project, tracker = null) {
 
 async function generateVideoWithApimartHailuo23(project, tracker = null) {
   const prompt = [
-    videoPromptFromProject(project, "Create a high-quality ecommerce product video."),
+    videoPromptFromProject(project),
     `Mode: ${project.image?.mode || "Create Video"}.`,
-    "Style: smooth cinematic motion, realistic lighting, strong product or subject focus, no fake brand claims."
+    videoStyleInstructionForProject(project)
   ].join("\n");
   const data = await apimartRequest(apimartVideoPath, {
     method: "POST",
@@ -5344,8 +5344,25 @@ async function generateWithApimart(project, action, step) {
   return { title: fallbackTitle.replace(/^(Image|UGC|Auto|Original|Clone|Story|Viral)/, "APIMart $1"), body };
 }
 
-function videoPromptFromProject(project = {}, fallback = "Create a high-converting TikTok Shop product video.") {
+function videoPromptFromProject(project = {}, fallback = "Create a natural short video.") {
   return project.ugc?.script || project.image?.prompt || fallback;
+}
+
+function videoPromptHasCommerceIntent(project = {}) {
+  const text = [
+    project.ugc?.script,
+    project.image?.prompt,
+    project.original?.brief,
+    project.story?.notes
+  ].filter(Boolean).join("\n");
+  return /(tiktok\s*shop|shopee|shop\b|e-?commerce|affiliate|review|testimonial|product|produk|brand|promo|promotion|discount|voucher|price|cta|unboxing|广告|带货|卖货|种草|产品|商品|品牌|促销|折扣|价格|下单|购买|链接|开箱|测评|口播|卖点)/i.test(text);
+}
+
+function videoStyleInstructionForProject(project = {}) {
+  if (videoPromptHasCommerceIntent(project)) {
+    return "Style: realistic short-form ecommerce video, native-looking TikTok Shop pacing, clear product focus only when requested, no fake brand claims.";
+  }
+  return "Style: natural realistic short video, everyday scene, subject-focused motion, no product placement, no shopping CTA, no promotional text, no fake brand claims.";
 }
 
 async function generateVideoThroughProvider(provider, model, project, tracker = null) {
