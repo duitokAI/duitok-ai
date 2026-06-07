@@ -6026,6 +6026,8 @@ function imageBatchCount(p = project()) {
 
 function imageModelCapabilities(model = "GPT Image 2") {
   const imageAspectRatiosAll = ["1:1", "3:2", "2:3", "16:9", "9:16", "4:3", "3:4", "21:9"];
+  const qwenImageAspectRatios = ["1:1", "3:2", "2:3", "16:9", "9:16", "4:3", "3:4"];
+  const grokImageAspectRatios = ["1:1", "3:2", "2:3", "16:9", "9:16"];
   const capabilities = {
     "GPT Image 2": {
       aspectRatios: imageAspectRatiosAll,
@@ -6036,7 +6038,7 @@ function imageModelCapabilities(model = "GPT Image 2") {
       resolutions: ["2K", "3K"]
     },
     "Qwen Image 2.0": {
-      aspectRatios: imageAspectRatiosAll,
+      aspectRatios: qwenImageAspectRatios,
       resolutions: ["1K", "2K"]
     },
     "Nano Banana Pro": {
@@ -6048,7 +6050,7 @@ function imageModelCapabilities(model = "GPT Image 2") {
       resolutions: ["512", "1K", "2K", "4K"]
     },
     "Grok Imagine": {
-      aspectRatios: imageAspectRatiosAll,
+      aspectRatios: grokImageAspectRatios,
       resolutions: ["1K"]
     }
   };
