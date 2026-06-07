@@ -899,7 +899,7 @@ async function putR2Object(key, bytes, contentType) {
   return r2ObjectUrl(key);
 }
 
-async function getR2Object(key) {
+async function getR2Object(key, extraHeaders = {}) {
   const bucket = process.env.R2_BUCKET;
   const accessKey = process.env.R2_ACCESS_KEY_ID;
   const secretKey = process.env.R2_SECRET_ACCESS_KEY;
@@ -925,7 +925,8 @@ async function getR2Object(key) {
     headers: {
       Authorization: `AWS4-HMAC-SHA256 Credential=${accessKey}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`,
       "X-Amz-Content-Sha256": payloadHash,
-      "X-Amz-Date": amzDate
+      "X-Amz-Date": amzDate,
+      ...extraHeaders
     }
   });
   if (!response.ok) {
@@ -10853,6 +10854,10 @@ app.get("/api/media/result/:id/:kind", async (req, res, next) => {
     }
     const isVideo = req.params.kind === "video";
     const isAudio = req.params.kind === "audio";
+    const rangeHeader = (isVideo || isAudio) && /^bytes=\d*-\d*$/i.test(String(req.get("range") || ""))
+      ? String(req.get("range"))
+      : "";
+    const mediaRangeHeaders = rangeHeader ? { Range: rangeHeader } : {};
     const downloadFilename = req.query.download === "1" ? safeDownloadFilename(req.query.filename || `pokaya-result.${isVideo ? "mp4" : isAudio ? "mp3" : "png"}`) : "";
     const downloadHeaders = downloadFilename ? { "Content-Disposition": `attachment; filename="${downloadFilename}"` } : {};
     const wantsThumb = !isVideo && !isAudio && req.query.thumb === "1";
@@ -10868,7 +10873,7 @@ app.get("/api/media/result/:id/:kind", async (req, res, next) => {
       return sendThumbnail(res, thumb, thumbCacheKey);
     }
     if (result.assetStorageKey) {
-      const r2Response = await getR2Object(result.assetStorageKey);
+      const r2Response = await getR2Object(result.assetStorageKey, mediaRangeHeaders);
       const contentType = r2Response.headers.get("content-type") || (isVideo ? "video/mp4" : isAudio ? "audio/mpeg" : "image/png");
       if (!wantsThumb) {
         return pipeFetchBody(r2Response, res, {
@@ -10912,7 +10917,8 @@ app.get("/api/media/result/:id/:kind", async (req, res, next) => {
     }
     const response = await fetch(sourceUrl, {
       headers: {
-        Accept: isVideo ? "video/*,*/*;q=0.8" : isAudio ? "audio/*,*/*;q=0.8" : "image/*,*/*;q=0.8"
+        Accept: isVideo ? "video/*,*/*;q=0.8" : isAudio ? "audio/*,*/*;q=0.8" : "image/*,*/*;q=0.8",
+        ...mediaRangeHeaders
       },
       signal: AbortSignal.timeout(Number(process.env.MEDIA_PROXY_TIMEOUT_MS || 60000))
     });
@@ -10996,11 +11002,17 @@ function safeDownloadFilename(value = "pokaya-result") {
 }
 
 function pipeFetchBody(response, res, { contentType = "application/octet-stream", cacheControl = "", headers = {} } = {}) {
+  if (response.status === 206) res.status(206);
+  if (response.status === 416) res.status(416);
   res.setHeader("Content-Type", contentType);
   if (cacheControl) res.setHeader("Cache-Control", cacheControl);
   for (const [key, value] of Object.entries(headers)) {
     if (value) res.setHeader(key, value);
   }
+  const contentRange = response.headers.get("content-range");
+  const acceptRanges = response.headers.get("accept-ranges");
+  if (contentRange) res.setHeader("Content-Range", contentRange);
+  if (acceptRanges) res.setHeader("Accept-Ranges", acceptRanges);
   const contentLength = response.headers.get("content-length");
   if (contentLength) res.setHeader("Content-Length", contentLength);
   if (!response.body) return res.end();

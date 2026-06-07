@@ -16060,8 +16060,11 @@ function playResultVideo(button) {
   const video = shell?.querySelector("video");
   if (!video) return;
   video.controls = true;
-  video.play().catch(() => null);
   shell.classList.add("is-playing");
+  video.play().catch((error) => {
+    shell.classList.remove("is-playing");
+    notify(error?.name === "NotAllowedError" ? "请再点一次播放。" : "视频文件加载失败，请稍后再试。");
+  });
 }
 
 function findAssetResult(id) {
