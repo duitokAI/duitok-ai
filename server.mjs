@@ -2710,7 +2710,7 @@ function ai302LegacyAudioDisabledError() {
 function requireElevenLabsConfig() {
   const apiKey = process.env.ELEVENLABS_API_KEY;
   if (!apiKey || apiKey.includes("replace_with")) {
-    const error = new Error("ElevenLabs belum configure. Isi ELEVENLABS_API_KEY dalam Environment Variables dulu.");
+    const error = new Error("Pokaya Voice belum configure. Please finish voice setup in server environment first.");
     error.status = 503;
     throw error;
   }

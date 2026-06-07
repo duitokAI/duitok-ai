@@ -51190,3 +51190,47 @@ body:has(.studio-shell .video-page-studio),
     font-size: 11px !important;
   }
 }
+
+/* Keep the Audio composer visible after a pending/result card appears.
+   Without this override the page exits .is-empty and the composer falls below the wall. */
+.studio-shell .audio-studio-page .audio-composer,
+.studio-shell .audio-studio-page .audio-composer:not(.is-compact) {
+  position: fixed !important;
+  bottom: max(14px, env(safe-area-inset-bottom)) !important;
+  top: auto !important;
+  left: calc(392px + clamp(14px, 3vw, 44px)) !important;
+  right: clamp(14px, 3vw, 44px) !important;
+  z-index: 64 !important;
+  justify-self: center !important;
+  align-self: end !important;
+  width: auto !important;
+  max-width: min(1180px, calc(100% - clamp(28px, 6vw, 96px))) !important;
+  margin: 8px auto max(14px, env(safe-area-inset-bottom)) !important;
+}
+
+.studio-shell .audio-studio-page .audio-wall-stage {
+  padding-bottom: clamp(150px, 18vh, 230px) !important;
+}
+
+.studio-shell.sidebar-collapsed .audio-studio-page .audio-composer,
+.studio-shell.sidebar-collapsed .audio-studio-page .audio-composer:not(.is-compact) {
+  left: calc(88px + clamp(14px, 3vw, 44px)) !important;
+}
+
+@media (max-width: 720px) {
+  .studio-shell .audio-studio-page .audio-composer,
+  .studio-shell .audio-studio-page .audio-composer:not(.is-compact) {
+    left: 14px !important;
+    right: 14px !important;
+  }
+
+  .studio-shell .audio-studio-page .audio-wall-stage {
+    padding-bottom: 188px !important;
+  }
+}
+
+/* Video Studio only: keep mixed portrait/landscape video tiles packed by their
+   requested aspect ratio. Image Studio intentionally keeps its flexible row-fill. */
+.studio-shell .video-page-studio > .studio-result-wall > .studio-wall-grid > .studio-wall-card {
+  flex: 0 0 calc(var(--studio-wall-row-height) * var(--media-ratio, 1)) !important;
+}
