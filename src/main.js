@@ -7248,16 +7248,14 @@ function autoPanel(p) {
 
 function audioProviderOptions() {
   return [
-    { value: "doubao302", provider: "doubao", title: "Doubao Voice", description: "Default 302 Doubao voiceover" },
-    { value: "seedance", provider: "seedance", title: "Seedance", description: "Video model, use Video page to generate" },
-    { value: "minimax", provider: "minimax", title: "MiniMax", description: "Official MiniMax TTS" },
-    { value: "elevenlabs", provider: "elevenlabs", title: "ElevenLabs", description: "Official ElevenLabs TTS" }
+    { value: "elevenlabs", provider: "elevenlabs", title: "Eleven v3", description: "Expressive AI voice with emotion control" },
+    { value: "minimax", provider: "minimax", title: "MiniMax Speech 2.8 HD", description: "Studio-quality text-to-speech" },
+    { value: "doubao302", provider: "doubao", title: "Seed Speech", description: "ByteDance multilingual text-to-speech" }
   ];
 }
 
 function audioProviderLogo(provider) {
   if (provider === "doubao") return `<span class="provider-logo provider-logo-doubao" aria-hidden="true">${icon("audio-lines", 15)}</span>`;
-  if (provider === "seedance") return `<span class="provider-logo provider-logo-seedance" aria-hidden="true">S</span>`;
   if (provider === "elevenlabs") return `<span class="provider-logo provider-logo-elevenlabs" aria-hidden="true">E</span>`;
   return providerLogo(provider);
 }
@@ -7423,8 +7421,8 @@ function audioMiniWaveform() {
 function audioEmptyState() {
   return `<div class="audio-empty-state">
     ${icon("audio-lines", 30)}
-    <strong>Audio generation is ready for backend hookup.</strong>
-      <span>MiniMax voiceover is connected. Generate a clip from the composer below.</span>
+    <strong>Audio generation is ready.</strong>
+      <span>Choose a voice model and generate a clip from the composer below.</span>
   </div>`;
 }
 
@@ -12706,7 +12704,6 @@ async function generateAudio(event = null) {
   const mode = current.auto?.audioMode || "Voiceover";
   if (mode === "Translate") return notify("Audio translate is not connected yet.");
   const audioProvider = current.auto?.audioProvider || "doubao302";
-  if (mode === "Voiceover" && audioProvider === "seedance") return notify("Seedance is a video model. Use the Video page for Seedance.");
   const promptInput = document.querySelector("[data-audio-prompt]");
   const promptText = String(promptInput?.value || current.auto?.audioPrompt || "").trim();
   if (!promptText) return notify(mode === "Change Voice" ? "Write the clone script first." : "Describe the voice first.");
