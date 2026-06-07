@@ -7300,7 +7300,7 @@ function audioCloneWell(promptText, cloneAudioUrl) {
     <input data-field="auto.cloneAudioUrl" data-audio-clone-url type="url" inputmode="url" placeholder="Paste reference audio URL..." value="${esc(cloneAudioUrl)}">
     <textarea data-field="auto.audioPrompt" data-audio-prompt rows="2" placeholder="Write what the cloned voice should say...">${esc(promptText)}</textarea>
     <div class="audio-control-row">
-      <span class="audio-model-chip">${icon("refresh-cw", 16)} Wuyin Clone</span>
+      <span class="audio-model-chip">${icon("refresh-cw", 16)} Pokaya Clone Voice</span>
     </div>
   </div>`;
 }
@@ -12719,7 +12719,7 @@ async function generateAudio(event = null) {
       trigger.disabled = true;
       trigger.classList.add("is-generating");
       const providerTitle = audioProviderOptions().find((item) => item.value === audioProvider)?.title || "Doubao";
-      trigger.innerHTML = `<b>Generating...</b><span>${mode === "Change Voice" ? "Wuyin Clone" : providerTitle}</span>`;
+      trigger.innerHTML = `<b>Generating...</b><span>${mode === "Change Voice" ? "Pokaya Clone Voice" : providerTitle}</span>`;
     }
     notify(mode === "Change Voice" ? "Generating cloned voice..." : "Generating audio...");
     const endpoint = mode === "Change Voice" ? "clone" : "generate";
