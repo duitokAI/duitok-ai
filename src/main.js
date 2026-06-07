@@ -8513,10 +8513,10 @@ function resultPreview(item, options = {}) {
   const imagePriority = options.full || options.priority ? "high" : options.wall ? "auto" : "low";
   const imageDecoding = options.full ? "sync" : "async";
   const image = imageSrc ? `<img class="result-image" src="${imageSrc}"${imageSrcset} alt="${esc(resultTitle(item))}" loading="${eagerMedia ? "eager" : "lazy"}" decoding="${imageDecoding}" fetchpriority="${imagePriority}" draggable="false" onload="${esc(ratioSync)}" onerror="${esc(imageError)}">` : "";
-  const videoPreload = eagerMedia ? "metadata" : "none";
+  const videoPreload = eagerMedia || options.wall ? "metadata" : "none";
+  const videoPosterFallback = "this.closest('.result-video-shell')?.classList.add('is-preview-unavailable')";
   const video = videoSrc ? `<div class="result-video-shell"><video class="result-video" src="${videoSrc}" preload="${videoPreload}" playsinline onloadedmetadata="${esc(ratioSync)}"></video><button type="button" class="result-play-button" data-video-play="${esc(item.id)}">${icon("play", 26)}<span>点击播放</span></button></div>` : "";
-  const videoPoster = videoSrc ? `<div class="result-video-shell result-video-poster" aria-hidden="true"><span class="result-video-poster-icon">${icon("video", 30)}</span><span class="result-play-button">${icon("play", 26)}<span>点击查看</span></span></div>` : "";
-  const videoTriggerMedia = options.wall ? videoPoster : `<div class="result-video-shell"><video class="result-video" src="${videoSrc}" preload="${videoPreload}" playsinline muted onloadedmetadata="${esc(ratioSync)}"></video><span class="result-play-button">${icon("play", 26)}<span>点击查看</span></span></div>`;
+  const videoTriggerMedia = `<div class="result-video-shell ${options.wall ? "result-video-wall-preview" : ""}"><video class="result-video" src="${esc(videoSrc)}" preload="${videoPreload}" playsinline muted onloadedmetadata="${esc(ratioSync)}" onerror="${esc(videoPosterFallback)}"></video><span class="result-play-button">${icon("play", 26)}<span>点击查看</span></span><span class="result-video-poster-icon" aria-hidden="true">${icon("video", 30)}</span></div>`;
   const videoTrigger = videoSrc ? `<button type="button" class="result-preview-trigger result-video-trigger" data-result-preview="${esc(item.id)}" aria-label="Open full video preview">${videoTriggerMedia}</button>` : "";
   const missingVideo = !image && !video && isMissingVideoFileResult(item)
     ? `<div class="result-text-preview result-missing-video-preview">${icon("video-off", 30)}<b>Video file missing</b><span>Provider did not return a video file. Please retry.</span></div>`

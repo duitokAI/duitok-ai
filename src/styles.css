@@ -33533,13 +33533,24 @@ label {
 }
 
 .studio-shell .result-video-poster-icon {
-  display: grid;
+  display: none;
   place-items: center;
   width: 56px;
   height: 56px;
   border-radius: 999px;
   color: rgba(255, 255, 255, 0.7);
   background: rgba(255, 255, 255, 0.1);
+}
+
+.studio-shell .result-video-shell.is-preview-unavailable .result-video {
+  opacity: 0;
+}
+
+.studio-shell .result-video-shell.is-preview-unavailable .result-video-poster-icon {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  display: grid;
+  transform: translate(-50%, -50%);
 }
 
 .studio-shell .studio-wall-more {
