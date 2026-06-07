@@ -5747,17 +5747,25 @@ function studioPendingWallCard(job, orderIndex = 0) {
       ${statusIcon}
       <b>${esc(statusLabel)}</b>
       <small>${esc(isFailed ? (job.errorMessage || "Please adjust the prompt and try again.") : promptPreview ? promptPreview.slice(0, 110) : generationJobStageHelp(job))}</small>`;
+  const audioFailedBody = `
+      ${statusIcon}
+      <b>${esc(statusLabel)}</b>
+      <small>${esc(job.errorMessage || "Voice setup needs attention. Please try again after setup is ready.")}</small>`;
   const processingBody = `
       ${statusIcon}
       <b>${esc(generationJobCenterLabel(job))}</b>`;
+  const audioFooter = audioJob
+    ? `<footer><b>${esc(promptPreview || "Generated audio")}</b><span>${esc(isFailed ? "Failed" : "Generating")}</span></footer>`
+    : "";
   return `<article class="studio-wall-card studio-wall-pending ${audioJob ? "studio-audio-wall-card studio-audio-wall-pending" : ""} ${aspectClass} ${isFailed ? "failed" : ""}" data-aspect-ratio="${esc(aspectRatio)}" data-media-ratio="${esc(mediaRatio)}" data-wall-order="${esc(orderIndex)}" data-generation-job-id="${esc(job.id)}" data-generation-job-status="${esc(job.status || "queued")}" data-generation-cancel-locked="${cancelState.reason === "provider_billing_locked" ? "true" : "false"}" style="--media-ratio:${esc(mediaRatio)};--wall-aspect-ratio:${esc(aspectRatioToCss(aspectRatio))};aspect-ratio:var(--wall-aspect-ratio);order:${esc(orderIndex)}">
-    ${audioJob ? audioWallPreview(job, { pending: true }) : ""}
+    ${audioJob ? audioWallPreview(job, { pending: !isFailed, failed: isFailed }) : ""}
     <div class="studio-wall-pending-controls" aria-label="${esc(statusLabel)}">
-      ${isFailed ? `<div class="studio-wall-failed-center">${statusBody}
+      ${isFailed && audioJob ? `<div class="studio-wall-failed-center">${audioFailedBody}<p class="generation-credit-refund-note"><strong>No Charge</strong></p></div>` : isFailed ? `<div class="studio-wall-failed-center">${statusBody}
         <p class="generation-credit-refund-note"><strong>No Charge</strong></p>
         <div class="studio-wall-failed-actions"><button type="button" data-generation-retry="${esc(job.id)}">${icon("refresh-cw", 14)} Retry</button><button type="button" data-generation-edit="${esc(job.id)}">${icon("pencil-line", 14)} Edit</button></div>
       </div>` : `${processingBody}${cancelState.canCancel ? `<button type="button" data-generation-cancel="${esc(job.id)}" aria-label="Cancel generation" title="Cancel generation">${icon("circle-x", 22)}</button>` : ""}`}
     </div>
+    ${audioFooter}
   </article>`;
 }
 
@@ -5815,7 +5823,7 @@ function studioAudioWallCard(item, index = 0) {
 }
 
 function audioPromptText(item = {}) {
-  return String(item.title || item.prompt || item.body || item.promptSnapshot || "Generated audio").replaceAll("\n", " ").trim();
+  return String(item.prompt || item.body || item.promptSnapshot || item.title || "Generated audio").replaceAll("\n", " ").trim();
 }
 
 function audioDurationLabel(item = {}) {
@@ -5833,6 +5841,7 @@ function audioWallPreview(item = {}, options = {}) {
   return `<div class="studio-audio-wall-preview" aria-label="${esc(promptText)}">
     <div class="studio-audio-waveform" aria-hidden="true">${bars}</div>
     ${options.pending ? `<span class="studio-audio-generating-badge">${icon("loader-circle", 15)} Generating</span>` : ""}
+    ${options.failed ? `<span class="studio-audio-generating-badge failed">${icon("triangle-alert", 15)} Failed</span>` : ""}
   </div>`;
 }
 
@@ -7894,6 +7903,7 @@ function generationJobStatusLabel(job = {}) {
   if (job.stage === "prompt_advanced") return "Optimizing prompt";
   if (job.stage === "provider_submitted") return job.type === "video" ? "Generating video" : "Generating image";
   if (job.stage === "saving_asset") return "Saving result";
+  if (job.type === "audio" && job.status === "processing") return "Generating voice";
   if (job.status === "processing") return "Processing";
   return job.status || "Queued";
 }
@@ -7908,6 +7918,7 @@ function generationJobStageHelp(job = {}) {
 function generationJobCenterLabel(job = {}) {
   if (job.stage === "saving_asset") return "Saving";
   if (job.stage === "prompt_advanced") return "Optimizing";
+  if (job.type === "audio") return "Generating...";
   return "Generating";
 }
 
@@ -12768,7 +12779,15 @@ async function generateAudio(event = null) {
   } catch (error) {
     set({
       audioGenerating: false,
-      optimisticGenerationJobs: (state.optimisticGenerationJobs || []).filter((job) => !optimisticIds.has(job.id))
+      optimisticGenerationJobs: (state.optimisticGenerationJobs || []).map((job) => optimisticIds.has(job.id)
+        ? {
+            ...job,
+            status: "failed",
+            stage: "failed",
+            errorMessage: error.message || "Audio generation failed.",
+            updatedAt: new Date().toISOString()
+          }
+        : job)
     });
     if (trigger) {
       trigger.disabled = false;
@@ -13968,6 +13987,7 @@ function optimisticGenerationJobs(name, count, options = {}) {
       type: "audio",
       status: "processing",
       stage: "audio_generating",
+      aspectRatio: "16:9",
       prompt: options.prompt || "",
       promptSnapshot: options.prompt || "",
       providerTitle: options.providerTitle || "Voice model",
