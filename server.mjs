@@ -140,7 +140,7 @@ const storedGenerationJobLimit = Math.max(0, Number(process.env.STORED_GENERATIO
 const storedApiCallLimit = Math.max(0, Number(process.env.STORED_API_CALL_LIMIT || 6000));
 const storedUsageLimit = Math.max(0, Number(process.env.STORED_USAGE_LIMIT || 6000));
 const storedAdminAuditLimit = Math.max(0, Number(process.env.STORED_ADMIN_AUDIT_LIMIT || 6000));
-const supportedImageAspectRatios = ["9:16", "3:4", "2:3", "1:1", "4:3", "16:9", "3:2", "4:5", "5:4", "1:2", "2:1", "9:21", "21:9"];
+const supportedImageAspectRatios = ["1:1", "3:2", "2:3", "16:9", "9:16", "4:3", "3:4", "21:9"];
 const publicMediaModelMap = {
   "GPT Image 2": "GPT Image 2",
   "Seedream 5.0 Lite": "Seedream 5.0 Lite",
