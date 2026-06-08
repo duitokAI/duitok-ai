@@ -160,6 +160,15 @@ const state = {
   step: "image",
   projectId: null,
   modal: null,
+  taskView: "list",
+  taskActiveId: null,
+  taskTab: "prog",
+  taskFilters: { search: "", sort: "newest", platform: [], type: [], reward: [], brand: [] },
+  taskFilterPopover: null,
+  taskFilterDraft: [],
+  taskModal: null,
+  taskBrandSearch: "",
+  taskOrderId: null,
   search: "",
   adminUserId: null,
   adminSearch: "",
@@ -451,6 +460,7 @@ const copy = {
     newProject: "New project",
     search: "Cari",
     projects: "Studio",
+    taskCenter: "Pusat Tugas",
     publicTools: "Public Tools",
     contentLibrary: "Content Library",
     logout: "Sign out",
@@ -742,6 +752,7 @@ const copy = {
     newProject: "新项目",
     search: "搜索",
     projects: "创作中心",
+    taskCenter: "任务中心",
     publicTools: "公开工具",
     contentLibrary: "内容库",
     logout: "退出登录",
@@ -1032,6 +1043,7 @@ const copy = {
     newProject: "New project",
     search: "Search",
     projects: "Studio",
+    taskCenter: "Task Center",
     publicTools: "Public Tools",
     contentLibrary: "Content Library",
     logout: "Sign out",
@@ -4187,6 +4199,7 @@ function studio() {
         <div class="sidebar-scroll-area">
           <button class="side-primary ${state.page === "dashboard" ? "active" : ""}" data-page="dashboard" aria-label="${esc(t("dashboard"))}">${icon("layout-dashboard", 22)} <span>${t("dashboard")}</span></button>
           <button class="side-primary studio-nav-button ${state.page === "project" ? "active" : ""}" data-page="project" aria-label="${esc(t("projects"))}">${studioMark()} <span>${t("projects")}</span></button>
+          <button class="side-link ${state.page === "tasks" ? "active" : ""}" data-page="tasks" aria-label="${esc(t("taskCenter"))}">${icon("list-checks")} <span>${t("taskCenter")}</span></button>
           ${isOwnerAdminAccount() ? `<button class="side-link ${state.page === "admin" ? "active" : ""}" data-page="admin" aria-label="Admin CRM">${icon("shield-check")} <span>Admin CRM</span></button>` : ""}
           <button class="side-link ${state.page === "library" ? "active" : ""}" data-page="library" aria-label="${esc(t("contentLibrary"))}">${icon("folder")} <span>${t("contentLibrary")}</span></button>
         <div class="side-section account">${icon("wallet-cards", 18)} ${t("business")}</div>
@@ -4329,6 +4342,7 @@ function page() {
   if (state.page === "dashboard") return dashboardOverview();
   if (state.page === "project") return projectPage();
   if (state.page === "library") return contentLibraryPage();
+  if (state.page === "tasks") return taskCenterPage();
   if (state.page === "sop") return sopPage();
   if (state.page !== "dashboard") return accountPage();
 }
@@ -4914,6 +4928,515 @@ function paymentRow(payment, adminActions = false) {
     adminActions && payment.status !== "paid" ? `<button class="dark-button mini-button" data-admin-clean-payment="${payment.id}">${icon("trash-2", 15)} Cleanup</button>` : ""
   ].filter(Boolean).join(" · ");
   return [payment.orderId, status, detail || (payment.createdAt ? new Date(payment.createdAt).toLocaleString() : "")];
+}
+
+// ============================================================
+// Task Center module (任务中心) — ported from Paydirt prototype
+// ============================================================
+const TASK_FEED = [
+  { id: 1, t: "Summer glow skincare routine — 30s GRWM video", brand: "Lumi Beauty", brandSlug: "lumi-beauty", plat: ["tiktok", "ig"], type: "video", reward: 45, slots: 78, total: 100, h: 8, ribbon: "hot", img: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600&q=70" },
+  { id: 2, t: "Unbox our new matcha kit", brand: "Aoi Tea Co.", brandSlug: "aoi-tea-co", plat: ["xhs", "ig"], type: "video", reward: 30, slots: 12, total: 60, h: 3, ribbon: "gone", img: "https://images.unsplash.com/photo-1536013455962-2c97c19b6fc6?w=600&q=70" },
+  { id: 3, t: "Street style haul featuring our denim line", brand: "Nori Apparel", brandSlug: "nori-apparel", plat: ["tiktok", "yt"], type: "video", reward: 80, slots: 40, total: 120, h: 36, ribbon: "", img: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&q=70" },
+  { id: 4, t: "Coffee shop ASMR — 15s reel", brand: "Brew & Co.", brandSlug: "brew-co", plat: ["ig"], type: "video", reward: 25, slots: 90, total: 100, h: 5, ribbon: "new", img: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&q=70" },
+  { id: 5, t: "Gaming chair setup tour for our launch", brand: "Pixel Gear", brandSlug: "pixel-gear", plat: ["yt", "tiktok"], type: "video", reward: 120, slots: 22, total: 50, h: 48, ribbon: "hot", img: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&q=70" },
+  { id: 6, t: "Healthy meal prep with our protein blend", brand: "FitFuel", brandSlug: "fitfuel", plat: ["ig", "tiktok"], type: "photo", reward: 55, slots: 60, total: 80, h: 12, ribbon: "", img: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=600&q=70" },
+  { id: 7, t: "Plant parent corner ft. our ceramic pots", brand: "Terra Home", brandSlug: "terra-home", plat: ["xhs"], type: "photo", reward: 35, slots: 8, total: 40, h: 2, ribbon: "gone", img: "https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=600&q=70" },
+  { id: 8, t: "Sneaker drop hype reel — show your kicks", brand: "Velocity", brandSlug: "velocity", plat: ["tiktok", "ig"], type: "copy", reward: 95, slots: 33, total: 70, h: 20, ribbon: "new", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=70" }
+];
+
+const TASK_FILTER_DEFS = {
+  platform: { title: "Platform · select any", opts: [
+    { id: "tiktok", label: "▶ TikTok" }, { id: "ig", label: "IG" }, { id: "yt", label: "▶ YouTube" },
+    { id: "xhs", label: "小 XHS" }, { id: "x", label: "X" }, { id: "fb", label: "f Facebook" }
+  ]},
+  type: { title: "Content type · select any", opts: [
+    { id: "video", label: "🎬 Video" }, { id: "photo", label: "📸 Photo" },
+    { id: "poster", label: "🖼 Poster" }, { id: "copy", label: "✍ Copy / caption" }
+  ]},
+  reward: { title: "Reward range · select any", opts: [
+    { id: "r1", label: "Under $30", min: 0, max: 29 },
+    { id: "r2", label: "$30 – $100", min: 30, max: 100 },
+    { id: "r3", label: "$100 – $300", min: 101, max: 300 },
+    { id: "r4", label: "Over $300", min: 301, max: 99999 }
+  ]},
+  brand: { title: "Brand · select any", opts: [...new Map(TASK_FEED.map((c) => [c.brandSlug, { id: c.brandSlug, label: c.brand }])).values()].sort((a, b) => a.label.localeCompare(b.label)) }
+};
+
+const TASK_MY_ORDERS = {
+  prog: [
+    { id: 1, title: "Summer glow skincare routine", brand: "Lumi Beauty", plat: "tiktok", reward: 45, h: 5, thumb: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=200&q=70" },
+    { id: 5, title: "Gaming chair setup tour", brand: "Pixel Gear", plat: "yt", reward: 120, h: 40, thumb: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=200&q=70" }
+  ],
+  rev: [
+    { id: 6, title: "Healthy meal prep reel", brand: "FitFuel", plat: "ig", reward: 55, decisionH: 31, thumb: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=200&q=70" }
+  ],
+  appr: [
+    { id: 4, title: "Coffee shop ASMR reel", brand: "Brew & Co.", reward: 25, paidDays: 2, thumb: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=200&q=70" }
+  ],
+  rej: [
+    { id: 8, title: "Sneaker drop hype reel", brand: "Velocity", reward: 95, reason: "Missing #VelocityDrop · 1 revision left", thumb: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&q=70" }
+  ]
+};
+
+function taskPlatHTML(list) {
+  const labels = { tiktok: "T", ig: "IG", fb: "f", x: "X", yt: "▶", xhs: "小" };
+  return `<span class="tc-plat-row">${list.map((p) => `<span class="tc-plat ${p}">${labels[p] || p}</span>`).join("")}</span>`;
+}
+
+function taskRibbonHTML(kind) {
+  if (kind === "hot") return `<span class="tc-ribbon hot">🔥 HOT</span>`;
+  if (kind === "new") return `<span class="tc-ribbon new">✦ NEW</span>`;
+  if (kind === "gone") return `<span class="tc-ribbon gone">⏳ Almost gone</span>`;
+  return "";
+}
+
+function taskFmtCountdown(hoursLeft) {
+  if (hoursLeft <= 0) return "Ended";
+  if (hoursLeft >= 24) return `${Math.floor(hoursLeft / 24)}d ${hoursLeft % 24}h`;
+  return `${hoursLeft}h`;
+}
+
+function taskFeedCardHTML(c) {
+  const pct = Math.round((c.slots / c.total) * 100);
+  return `<a class="tc-card" data-task-open="${c.id}" href="javascript:void(0)">
+    ${taskRibbonHTML(c.ribbon)}
+    <img class="tc-cover" loading="lazy" src="${esc(c.img)}" alt="${esc(c.t)}" onerror="this.style.opacity='0.001'">
+    <div class="tc-body">
+      <div class="tc-title">${esc(c.t)}</div>
+      <div class="tc-brand-row">
+        <span class="tc-brand-logo"></span>
+        <span class="tc-brand-name">${esc(c.brand)}</span>
+        ${taskPlatHTML(c.plat)}
+      </div>
+      <div class="tc-meta">
+        <span class="tc-reward"><span class="tc-cur">$</span>${c.reward}</span>
+        <span class="tc-countdown">⏱ ${taskFmtCountdown(c.h)}</span>
+      </div>
+      <div class="tc-slots">
+        <div class="tc-bar"><i style="width:${pct}%"></i></div>
+        <div class="tc-lab"><span>${c.slots}/${c.total} claimed</span><span>${100 - pct}% left</span></div>
+      </div>
+    </div>
+  </a>`;
+}
+
+function taskFilteredFeed() {
+  const f = state.taskFilters || {};
+  const q = String(f.search || "").trim().toLowerCase();
+  let list = TASK_FEED.filter((c) => {
+    if (q && !`${c.t} ${c.brand}`.toLowerCase().includes(q)) return false;
+    if (f.platform?.length && !f.platform.some((p) => c.plat.includes(p))) return false;
+    if (f.type?.length && !f.type.includes(c.type)) return false;
+    if (f.brand?.length && !f.brand.includes(c.brandSlug)) return false;
+    if (f.reward?.length) {
+      const hit = f.reward.some((rid) => {
+        const b = TASK_FILTER_DEFS.reward.opts.find((o) => o.id === rid);
+        return b && c.reward >= b.min && c.reward <= b.max;
+      });
+      if (!hit) return false;
+    }
+    return true;
+  });
+  const sorters = {
+    newest: (a, b) => b.id - a.id,
+    "reward-h": (a, b) => b.reward - a.reward,
+    "reward-l": (a, b) => a.reward - b.reward,
+    ending: (a, b) => a.h - b.h,
+    slots: (a, b) => (b.total - b.slots) - (a.total - a.slots)
+  };
+  list.sort(sorters[f.sort] || sorters.newest);
+  return list;
+}
+
+function taskCenterPage() {
+  const view = state.taskView || "list";
+  if (view === "detail") return taskDetailView();
+  if (view === "order") return taskOrderView();
+  if (view === "mine") return taskMineView();
+  return taskListView();
+}
+
+function taskListView() {
+  const f = state.taskFilters;
+  const list = taskFilteredFeed();
+  const popoverGroup = state.taskFilterPopover;
+  const draft = state.taskFilterDraft || [];
+  const fdrop = (g, label) => {
+    const c = (f[g] || []).length;
+    const has = c > 0;
+    const open = popoverGroup === g;
+    return `<button class="tc-fdrop ${has ? "has" : ""} ${open ? "open" : ""}" data-task-fopen="${g}">${esc(label)} <span class="tc-count">${c}</span> <span class="tc-caret">▾</span></button>`;
+  };
+  const popover = popoverGroup ? (() => {
+    const cfg = TASK_FILTER_DEFS[popoverGroup];
+    const draftSet = new Set(draft);
+    const committed = new Set(f[popoverGroup] || []);
+    const same = draftSet.size === committed.size && [...draftSet].every((x) => committed.has(x));
+    const search = String(state.taskBrandSearch || "").toLowerCase();
+    const optsFiltered = popoverGroup === "brand" && search
+      ? cfg.opts.filter((o) => o.label.toLowerCase().includes(search))
+      : cfg.opts;
+    return `<div class="tc-fpop">
+      <div class="tc-fpop-head"><span>${esc(cfg.title)}</span><button class="tc-fpop-close" data-task-fclose>✕ Close</button></div>
+      ${popoverGroup === "brand" ? `<input class="tc-fchip-search" placeholder="Search brand…" value="${esc(state.taskBrandSearch || "")}" data-task-brand-search autofocus>` : ""}
+      <div class="tc-fchips">
+        ${optsFiltered.map((o) => `<button class="tc-fchip ${draftSet.has(o.id) ? "on" : ""}" data-task-fchip="${o.id}">${esc(o.label)}</button>`).join("")}
+      </div>
+      <div class="tc-fpop-foot">
+        <span class="tc-draft-count"><b>${draftSet.size}</b> selected</span>
+        <button class="tc-btn-clear" data-task-fclear>Clear group</button>
+        <button class="tc-btn-apply" data-task-fapply ${same ? "disabled" : ""}>Apply →</button>
+      </div>
+    </div>`;
+  })() : "";
+  const activePills = ["platform", "type", "reward", "brand"].flatMap((g) =>
+    (f[g] || []).map((id) => {
+      const opt = TASK_FILTER_DEFS[g].opts.find((o) => o.id === id);
+      return opt ? `<button class="tc-factive-pill" data-task-fremove="${g}:${id}">${esc(opt.label)} <span class="tc-x">×</span></button>` : "";
+    })
+  ).join("");
+  return `<section class="tc-shell">
+    <div class="tc-hero">
+      <div>
+        <h1>任务广场</h1>
+        <p class="tc-sub">— 浏览实时任务,选符合你受众的领取。</p>
+      </div>
+      <button class="tc-btn tc-btn-secondary tc-btn-sm" data-task-view="mine">📋 我的任务</button>
+    </div>
+    <div class="tc-search">
+      ${icon("search", 18)}
+      <input placeholder="搜索品牌、产品、标签…" value="${esc(f.search || "")}" data-task-search>
+    </div>
+    <div class="tc-fbar">
+      <div class="tc-fbar-inner">
+        ${fdrop("platform", "平台")}
+        ${fdrop("type", "内容类型")}
+        ${fdrop("reward", "奖励")}
+        ${fdrop("brand", "品牌")}
+        <button class="tc-freset" data-task-freset>⟲ 重置</button>
+        <span class="tc-fsort">
+          <span class="tc-fsort-lab">排序</span>
+          <select data-task-fsort>
+            <option value="newest" ${f.sort === "newest" ? "selected" : ""}>最新</option>
+            <option value="reward-h" ${f.sort === "reward-h" ? "selected" : ""}>奖励高到低</option>
+            <option value="reward-l" ${f.sort === "reward-l" ? "selected" : ""}>奖励低到高</option>
+            <option value="ending" ${f.sort === "ending" ? "selected" : ""}>即将截止</option>
+            <option value="slots" ${f.sort === "slots" ? "selected" : ""}>剩余名额最多</option>
+          </select>
+        </span>
+      </div>
+      ${popover}
+    </div>
+    <div class="tc-fresult">
+      <span class="tc-fresult-count"><b>${list.length}</b> 个匹配任务</span>
+      <span class="tc-factive">${activePills}</span>
+    </div>
+    ${list.length ? `<div class="tc-feed">${list.map(taskFeedCardHTML).join("")}</div>
+      <div class="tc-load-more"><button class="tc-btn tc-btn-secondary" data-task-loadmore>加载更多</button></div>`
+      : `<div class="tc-empty">
+          <div class="tc-ill">🪧</div>
+          <h3>没有匹配的任务</h3>
+          <p>试着移除一个筛选,或放宽奖励范围。</p>
+          <button class="tc-btn tc-btn-secondary tc-btn-sm" data-task-freset>⟲ 清除筛选</button>
+        </div>`}
+  </section>`;
+}
+
+function taskDetailView() {
+  const c = TASK_FEED.find((x) => x.id === state.taskActiveId) || TASK_FEED[0];
+  const pct = Math.round((c.slots / c.total) * 100);
+  const modal = state.taskModal;
+  return `<section class="tc-shell">
+    <button class="tc-back" data-task-view="list">← 返回任务列表</button>
+    <div class="tc-detail">
+      <div class="tc-detail-main">
+        <div class="tc-panel">
+          <div class="tc-detail-head">
+            <span class="tc-brand-logo-lg">${esc(c.brand[0])}</span>
+            <div style="flex:1;min-width:0;">
+              <h1>${esc(c.t)}</h1>
+              <div class="tc-brand-row" style="margin-top:8px;">
+                <span class="tc-brand-name">${esc(c.brand)}</span>
+                ${taskPlatHTML(c.plat)}
+              </div>
+            </div>
+          </div>
+          <div class="tc-detail-stats">
+            <div><div class="tc-stat-lab">奖励</div><span class="tc-reward" style="font-size:17px;">$${c.reward}</span></div>
+            <div><div class="tc-stat-lab">剩余名额</div><div class="tc-stat-val pink">${c.total - c.slots} / ${c.total}</div></div>
+            <div><div class="tc-stat-lab">截止</div><div class="tc-stat-val warn">${taskFmtCountdown(c.h)}</div></div>
+          </div>
+          <div class="tc-slot-bar"><i style="width:${pct}%"></i></div>
+          <div class="tc-tag-row">
+            <span class="tc-tag soft">Lv2 required</span>
+            <span class="tc-tag plain">${c.plat.includes("tiktok") ? "TikTok 账号必须" : "需绑定社媒账号"}</span>
+            <span class="tc-tag plain">18+ regions</span>
+          </div>
+        </div>
+
+        <div class="tc-panel">
+          <h2 class="tc-h2">✅ 任务要求</h2>
+          <ul class="tc-checklist">
+            <li><span class="tc-tick">✓</span><div><b>平台:</b> ${c.plat.map((p) => p.toUpperCase()).join(" 或 ")}</div></li>
+            <li><span class="tc-tick">✓</span><div><b>标签:</b> <span class="tc-tag soft">#${c.brand.replace(/\s+/g, "")}</span> 必带</div></li>
+            <li><span class="tc-tick">✓</span><div><b>提及:</b> 在文案中 @${c.brandSlug.replace(/-/g, "")}</div></li>
+            <li><span class="tc-tick">✓</span><div><b>时长:</b> 20–40 秒,9:16 竖屏</div></li>
+            <li><span class="tc-tick">✓</span><div><b>必备元素:</b> 产品出镜至少 3 秒,正面清晰</div></li>
+            <li><span class="tc-tick">✓</span><div><b>保留:</b> 帖子保留至少 30 天</div></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="tc-sec-head"><h2>🎞️ 样例参考</h2></div>
+          <div class="tc-hscroll">
+            <img src="https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&q=70" alt="" onerror="this.style.opacity='0.001'">
+            <img src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=300&q=70" alt="" onerror="this.style.opacity='0.001'">
+            <img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300&q=70" alt="" onerror="this.style.opacity='0.001'">
+          </div>
+        </div>
+
+        <div class="tc-panel tc-asset">
+          <span class="tc-asset-ic">📦</span>
+          <div style="flex:1;">
+            <b>品牌素材包</b>
+            <div class="tc-cap">Logo、产品图、品牌色卡 · 24 MB</div>
+          </div>
+          <button class="tc-btn tc-btn-secondary tc-btn-sm" data-task-action="download-assets">下载</button>
+        </div>
+
+        <div>
+          <details class="tc-acc" open>
+            <summary>📋 审核标准 <span>＋</span></summary>
+            <div class="tc-acc-body">审核会检查:必带标签和提及是否齐全、产品是否清晰出镜、时长是否符合、无竞品出现、内容为原创(非复用)。一般 48 小时内出结果。</div>
+          </details>
+          <details class="tc-acc">
+            <summary>⚠️ 违规后果 <span>＋</span></summary>
+            <div class="tc-acc-body">30 天内删除帖子、缺标签或不实声明可能被驳回、扣回奖励,并影响信用分。</div>
+          </details>
+        </div>
+      </div>
+
+      <aside class="tc-aside">
+        <div class="tc-earn-lab">最高可获得</div>
+        <div class="tc-earn-amt">$${c.reward}.00</div>
+        <div class="tc-checks">
+          <span><span class="tc-ok">✓</span> 已登录</span>
+          <span><span class="tc-ok">✓</span> 社媒已绑定</span>
+          <span><span class="tc-ok">✓</span> 等级达标 (Lv2)</span>
+        </div>
+        <button class="tc-btn tc-btn-primary tc-btn-block tc-btn-lg" style="margin-top:14px;" data-task-action="claim">领取任务</button>
+        <button class="tc-btn tc-btn-secondary tc-btn-block tc-btn-sm" style="margin-top:8px;" data-task-action="share">分享</button>
+        <p class="tc-foot-note">领取后需在 72 小时内完成</p>
+      </aside>
+    </div>
+
+    <div class="tc-modal-mask ${modal === "confirm" ? "show" : ""}" data-task-modal-bg>
+      <div class="tc-modal">
+        <h2>确认领取此任务?</h2>
+        <p>领取后你有 <b>72 小时</b> 发布帖子并提交凭证。中途放弃会影响信用分。</p>
+        <div class="tc-mb">
+          <div class="tc-row-between"><span>奖励</span><b style="color:var(--pink);font-size:18px;">$${c.reward}.00</b></div>
+          <div class="tc-row-between" style="margin-top:8px;"><span>截止</span><b style="font-family:JetBrains Mono,monospace;">72h from now</b></div>
+        </div>
+        <div class="tc-foot">
+          <button class="tc-btn tc-btn-secondary" data-task-modal-close>取消</button>
+          <button class="tc-btn tc-btn-primary" data-task-action="confirm-claim">确认 & 开始</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tc-modal-mask tc-modal-success ${modal === "claimSuccess" ? "show" : ""}" data-task-modal-bg>
+      <div class="tc-modal">
+        <div class="tc-ok-circle">✓</div>
+        <h2 style="text-align:center;">任务已领取!</h2>
+        <p style="text-align:center;margin-top:6px;">名额已锁,72 小时内提交凭证以确认奖励。</p>
+        <div class="tc-mb" style="text-align:left;">
+          <div class="tc-row-between"><span>奖励锁定</span><b style="color:var(--pink);font-size:17px;">$${c.reward}.00</b></div>
+          <div class="tc-row-between" style="margin-top:8px;"><span>截止</span><b style="font-family:JetBrains Mono,monospace;">${(() => { const d = new Date(Date.now() + 72 * 3600 * 1000); return `${d.getMonth() + 1}月${d.getDate()}日 ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; })()}</b></div>
+          <div class="tc-row-between" style="margin-top:8px;"><span>订单号</span><b style="font-family:JetBrains Mono,monospace;font-size:12px;">#${c.brandSlug.toUpperCase().slice(0, 3)}-${1000 + c.id * 31}</b></div>
+        </div>
+        <button class="tc-btn tc-btn-primary tc-btn-block tc-btn-lg" style="margin-top:18px;" data-task-action="goto-order">开始制作 →</button>
+        <button class="tc-btn tc-btn-secondary tc-btn-block tc-btn-sm" style="margin-top:8px;" data-task-modal-close>稍后</button>
+      </div>
+    </div>
+  </section>`;
+}
+
+function taskOrderView() {
+  const c = TASK_FEED.find((x) => x.id === state.taskOrderId) || TASK_FEED[0];
+  return `<section class="tc-shell" style="max-width:780px;">
+    <button class="tc-back" data-task-view="mine">← 返回我的任务</button>
+    <div class="tc-cd-banner warn">
+      <span>⏱ 剩余提交时间</span>
+      <span class="tc-cd-time">${taskFmtCountdown(c.h)}</span>
+    </div>
+
+    <div class="tc-panel" style="margin-top:14px;">
+      <div class="tc-order-head">
+        <span class="tc-brand-logo-md">${esc(c.brand[0])}</span>
+        <div style="flex:1;min-width:0;">
+          <b>${esc(c.t)}</b>
+          <div class="tc-cap">${esc(c.brand)} · ${c.plat.map((p) => p.toUpperCase()).join(" / ")}</div>
+        </div>
+        <span class="tc-reward">$${c.reward}</span>
+      </div>
+    </div>
+
+    <div class="tc-panel" style="margin-top:14px;">
+      <div class="tc-timeline">
+        <div class="tc-tstep done">
+          <div class="tc-node">✓</div>
+          <div class="tc-step-body">
+            <h4>1 · 创作内容</h4>
+            <p>使用 Pokaya Studio 按品牌素材生成内容。</p>
+            <button class="tc-btn tc-btn-secondary tc-btn-sm" style="margin-top:8px;" data-page="project">打开 Pokaya Studio →</button>
+          </div>
+        </div>
+        <div class="tc-tstep done">
+          <div class="tc-node">✓</div>
+          <div class="tc-step-body">
+            <h4>2 · 发布到平台</h4>
+            <p>发布后,完成自检。</p>
+            <div class="tc-self-check">
+              <span><span class="tc-ok">✓</span> 已加 #${c.brand.replace(/\s+/g, "")} 标签</span>
+              <span><span class="tc-ok">✓</span> 已 @${c.brandSlug.replace(/-/g, "")}</span>
+              <span><span class="tc-warn">⚠</span> 产品出镜 ≥3 秒 — 请再次确认!</span>
+            </div>
+          </div>
+        </div>
+        <div class="tc-tstep active">
+          <div class="tc-node">3</div>
+          <div class="tc-step-body">
+            <h4>3 · 提交凭证</h4>
+            <p>粘贴帖子链接并上传截图。</p>
+            <span class="tc-step-label">帖子链接</span>
+            <div class="tc-input">
+              <span>🔗</span>
+              <input id="tc-link" placeholder="https://tiktok.com/@you/video/…">
+            </div>
+            <span class="tc-step-label">截图凭证</span>
+            <label class="tc-uploader">
+              <div class="tc-up-ic">📸</div>
+              <b>点击上传</b>
+              <div class="tc-cap">支持多张,自动压缩</div>
+              <input type="file" accept="image/*" multiple hidden>
+            </label>
+            <button class="tc-btn tc-btn-primary tc-btn-block tc-btn-lg" style="margin-top:14px;" data-task-action="submit-proof">提交审核</button>
+            <button class="tc-btn tc-btn-danger tc-btn-block tc-btn-sm" style="margin-top:6px;" data-task-action="abandon">放弃任务</button>
+          </div>
+        </div>
+        <div class="tc-tstep">
+          <div class="tc-node">4</div>
+          <div class="tc-step-body">
+            <h4>4 · 等待审核</h4>
+            <p>商家通常在 48 小时内审核,有结果会通知你。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tc-modal-mask ${state.taskModal === "abandon" ? "show" : ""}" data-task-modal-bg>
+      <div class="tc-modal">
+        <h2>⚠️ 放弃此任务?</h2>
+        <p>名额会释放,<b>信用分会下降</b>。此操作不可撤销。</p>
+        <div class="tc-foot">
+          <button class="tc-btn tc-btn-primary" data-task-modal-close>继续完成</button>
+          <button class="tc-btn tc-btn-danger" data-task-action="abandon-confirm">放弃</button>
+        </div>
+      </div>
+    </div>
+  </section>`;
+}
+
+function taskMineView() {
+  const tab = state.taskTab || "prog";
+  const counts = { prog: TASK_MY_ORDERS.prog.length, rev: TASK_MY_ORDERS.rev.length, appr: TASK_MY_ORDERS.appr.length, rej: TASK_MY_ORDERS.rej.length };
+  const tabs = [
+    ["prog", "进行中", counts.prog],
+    ["rev", "审核中", counts.rev],
+    ["appr", "已通过", counts.appr],
+    ["rej", "已驳回", counts.rej]
+  ];
+  const orders = TASK_MY_ORDERS[tab] || [];
+  const renderRow = (o) => {
+    if (tab === "prog") {
+      return `<a class="tc-order-card" data-task-order="${o.id}">
+        <img class="tc-thumb" src="${esc(o.thumb)}" alt="" onerror="this.style.opacity='0.001'">
+        <div class="tc-grow">
+          <div class="tc-row-title">${esc(o.title)}</div>
+          <div class="tc-row-meta">
+            <b>${esc(o.brand)}</b>
+            <span class="tc-plat ${o.plat}">${({ tiktok: "T", ig: "IG", yt: "▶", xhs: "小" })[o.plat] || ""}</span>
+            <span class="tc-tag progress">● 进行中</span>
+            <span class="tc-countdown">⏱ ${taskFmtCountdown(o.h)}</span>
+          </div>
+        </div>
+        <div class="tc-row-right">
+          <span class="tc-reward">$${o.reward}</span>
+          <button class="tc-btn tc-btn-primary tc-btn-sm" data-task-order="${o.id}">立即提交</button>
+        </div>
+      </a>`;
+    }
+    if (tab === "rev") {
+      return `<a class="tc-order-card" data-task-order="${o.id}">
+        <img class="tc-thumb" src="${esc(o.thumb)}" alt="" onerror="this.style.opacity='0.001'">
+        <div class="tc-grow">
+          <div class="tc-row-title">${esc(o.title)}</div>
+          <div class="tc-row-meta">
+            <b>${esc(o.brand)}</b>
+            <span class="tc-plat ${o.plat}">${({ tiktok: "T", ig: "IG", yt: "▶", xhs: "小" })[o.plat] || ""}</span>
+            <span class="tc-tag review">● 审核中</span>
+            <span class="tc-countdown">${o.decisionH}h 内出结果</span>
+          </div>
+        </div>
+        <span class="tc-reward">$${o.reward}</span>
+      </a>`;
+    }
+    if (tab === "appr") {
+      return `<a class="tc-order-card" data-task-order="${o.id}">
+        <img class="tc-thumb" src="${esc(o.thumb)}" alt="" onerror="this.style.opacity='0.001'">
+        <div class="tc-grow">
+          <div class="tc-row-title">${esc(o.title)}</div>
+          <div class="tc-row-meta">
+            <b>${esc(o.brand)}</b>
+            <span class="tc-tag approved">✓ 已通过</span>
+            <span style="color:var(--muted);font-size:12px;">已到账 · ${o.paidDays} 天前</span>
+          </div>
+        </div>
+        <span class="tc-reward">$${o.reward}</span>
+      </a>`;
+    }
+    return `<a class="tc-order-card" style="border-color:var(--danger,#ff6a3d);">
+      <img class="tc-thumb" src="${esc(o.thumb)}" alt="" onerror="this.style.opacity='0.001'">
+      <div class="tc-grow">
+        <div class="tc-row-title">${esc(o.title)}</div>
+        <div class="tc-row-meta">
+          <b>${esc(o.brand)}</b>
+          <span class="tc-tag rejected">✗ 已驳回</span>
+          <span style="color:var(--muted);font-size:12px;">${esc(o.reason)}</span>
+        </div>
+      </div>
+      <div class="tc-row-right">
+        <span class="tc-reward">$${o.reward}</span>
+        <button class="tc-btn tc-btn-primary tc-btn-sm" data-task-action="revise">修改 →</button>
+      </div>
+    </a>`;
+  };
+  return `<section class="tc-shell" style="max-width:920px;">
+    <div class="tc-hero">
+      <div>
+        <h1>我的任务</h1>
+        <p class="tc-sub">— 从领取到结款,每一单都在这里。</p>
+      </div>
+      <button class="tc-btn tc-btn-primary tc-btn-sm" data-task-view="list">+ 领新任务</button>
+    </div>
+    <div class="tc-status-tabs">
+      ${tabs.map(([id, label, n]) => `<button class="${tab === id ? "on" : ""}" data-task-tab="${id}">${esc(label)} <span class="tc-badge">${n}</span></button>`).join("")}
+    </div>
+    <div style="margin-top:18px;">
+      ${orders.length ? orders.map(renderRow).join("") : `<div class="tc-empty"><div class="tc-ill">📭</div><h3>暂无任务</h3><p>到任务广场领一个看看?</p><button class="tc-btn tc-btn-primary tc-btn-sm" data-task-view="list">→ 任务广场</button></div>`}
+    </div>
+  </section>`;
 }
 
 function contentLibraryPage() {
@@ -12002,7 +12525,129 @@ function agentConfirmationCard(run) {
     </div>`;
 }
 
+function bindTaskCenter() {
+  document.querySelectorAll("[data-task-view]").forEach((el) => el.addEventListener("click", (event) => {
+    event.preventDefault();
+    const view = el.dataset.taskView;
+    const patch = { taskView: view, taskModal: null };
+    if (view === "list") { patch.taskActiveId = null; patch.taskOrderId = null; }
+    if (view === "mine") { patch.taskTab = state.taskTab || "prog"; }
+    set(patch);
+  }));
+  document.querySelectorAll("[data-task-open]").forEach((el) => el.addEventListener("click", (event) => {
+    event.preventDefault();
+    set({ taskView: "detail", taskActiveId: Number(el.dataset.taskOpen), taskModal: null });
+  }));
+  document.querySelectorAll("[data-task-order]").forEach((el) => el.addEventListener("click", (event) => {
+    event.preventDefault();
+    set({ taskView: "order", taskOrderId: Number(el.dataset.taskOrder), taskModal: null });
+  }));
+  document.querySelectorAll("[data-task-tab]").forEach((el) => el.addEventListener("click", (event) => {
+    event.preventDefault();
+    set({ taskTab: el.dataset.taskTab });
+  }));
+  const searchEl = document.querySelector("[data-task-search]");
+  if (searchEl) {
+    searchEl.addEventListener("input", (event) => {
+      clearTimeout(bindTaskCenter._searchTimer);
+      const v = event.currentTarget.value || "";
+      bindTaskCenter._searchTimer = setTimeout(() => set({ taskFilters: { ...state.taskFilters, search: v } }), 180);
+    });
+  }
+  document.querySelectorAll("[data-task-fsort]").forEach((el) => el.addEventListener("change", (event) => {
+    set({ taskFilters: { ...state.taskFilters, sort: event.currentTarget.value } });
+  }));
+  document.querySelectorAll("[data-task-fopen]").forEach((el) => el.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const g = el.dataset.taskFopen;
+    if (state.taskFilterPopover === g) {
+      set({ taskFilterPopover: null, taskFilterDraft: [], taskBrandSearch: "" });
+    } else {
+      set({ taskFilterPopover: g, taskFilterDraft: [...(state.taskFilters[g] || [])], taskBrandSearch: "" });
+    }
+  }));
+  document.querySelectorAll("[data-task-fclose]").forEach((el) => el.addEventListener("click", (event) => {
+    event.preventDefault();
+    set({ taskFilterPopover: null, taskFilterDraft: [], taskBrandSearch: "" });
+  }));
+  document.querySelectorAll("[data-task-fchip]").forEach((el) => el.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const id = el.dataset.taskFchip;
+    const draft = [...(state.taskFilterDraft || [])];
+    const idx = draft.indexOf(id);
+    if (idx >= 0) draft.splice(idx, 1); else draft.push(id);
+    set({ taskFilterDraft: draft });
+  }));
+  document.querySelectorAll("[data-task-fclear]").forEach((el) => el.addEventListener("click", (event) => {
+    event.preventDefault();
+    set({ taskFilterDraft: [] });
+  }));
+  document.querySelectorAll("[data-task-fapply]").forEach((el) => el.addEventListener("click", (event) => {
+    event.preventDefault();
+    const g = state.taskFilterPopover;
+    if (!g) return;
+    set({ taskFilters: { ...state.taskFilters, [g]: [...(state.taskFilterDraft || [])] }, taskFilterPopover: null, taskFilterDraft: [], taskBrandSearch: "" });
+    notify((state.taskFilterDraft || []).length ? `已应用 ${g} 筛选` : `${g} 筛选已清除`);
+  }));
+  document.querySelectorAll("[data-task-freset]").forEach((el) => el.addEventListener("click", (event) => {
+    event.preventDefault();
+    set({ taskFilters: { search: "", sort: "newest", platform: [], type: [], reward: [], brand: [] }, taskFilterPopover: null, taskFilterDraft: [], taskBrandSearch: "" });
+  }));
+  document.querySelectorAll("[data-task-fremove]").forEach((el) => el.addEventListener("click", (event) => {
+    event.preventDefault();
+    const [g, id] = String(el.dataset.taskFremove || "").split(":");
+    if (!g || !id) return;
+    const cur = state.taskFilters[g] || [];
+    set({ taskFilters: { ...state.taskFilters, [g]: cur.filter((x) => x !== id) } });
+  }));
+  const brandSearch = document.querySelector("[data-task-brand-search]");
+  if (brandSearch) {
+    brandSearch.addEventListener("input", (event) => {
+      clearTimeout(bindTaskCenter._brandTimer);
+      const v = event.currentTarget.value || "";
+      bindTaskCenter._brandTimer = setTimeout(() => set({ taskBrandSearch: v }), 120);
+    });
+  }
+  document.querySelectorAll("[data-task-action]").forEach((el) => el.addEventListener("click", (event) => {
+    event.preventDefault();
+    const action = el.dataset.taskAction;
+    if (action === "claim") return set({ taskModal: "confirm" });
+    if (action === "confirm-claim") return set({ taskModal: "claimSuccess" });
+    if (action === "goto-order") return set({ taskView: "order", taskOrderId: state.taskActiveId, taskModal: null });
+    if (action === "share") return notify("链接已复制 — 分享给朋友吧 🔗");
+    if (action === "download-assets") return notify("品牌素材包开始下载…");
+    if (action === "submit-proof") {
+      const link = document.getElementById("tc-link");
+      if (!link || !link.value.trim()) return notify("请先粘贴帖子链接");
+      notify("已提交! 等待审核 ⏳");
+      setTimeout(() => set({ taskView: "mine", taskTab: "rev", taskModal: null }), 600);
+      return;
+    }
+    if (action === "abandon") return set({ taskModal: "abandon" });
+    if (action === "abandon-confirm") {
+      set({ taskModal: null });
+      notify("任务已放弃");
+      return;
+    }
+    if (action === "revise") return notify("修改流程稍后接入");
+  }));
+  document.querySelectorAll("[data-task-modal-close]").forEach((el) => el.addEventListener("click", (event) => {
+    event.preventDefault();
+    set({ taskModal: null });
+  }));
+  document.querySelectorAll("[data-task-modal-bg]").forEach((el) => el.addEventListener("click", (event) => {
+    if (event.target === el) set({ taskModal: null });
+  }));
+  document.querySelectorAll("[data-task-loadmore]").forEach((el) => el.addEventListener("click", (event) => {
+    event.preventDefault();
+    notify("已经是全部任务啦 — demo 数据只有 8 条");
+  }));
+}
+
 function bind() {
+  bindTaskCenter();
   document.querySelectorAll("[data-sop-target]").forEach((el) => el.addEventListener("click", () => {
     const sopTopic = el.dataset.sopTarget || "dashboard";
     if (el.dataset.sopModal === "true") return set({ sopTopic, modal: "sop" });
