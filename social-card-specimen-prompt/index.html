@@ -778,30 +778,49 @@
     .specimen .photo-hero,
     .specimen .photo-grid figure,
     .specimen .photo-row figure,
-    .specimen .mini-photo {
+    .specimen .mini-photo,
+    .specimen .frame-img {
+      position: relative;
       overflow: hidden;
       border: 1px solid rgba(var(--ink-rgb), .22);
       background: #050505;
       box-shadow: 0 24px 80px rgba(0, 0, 0, .34);
     }
+    .specimen .photo-hero::before,
+    .specimen .photo-grid figure::before,
+    .specimen .photo-row figure::before,
+    .specimen .mini-photo::before,
+    .specimen .frame-img::before {
+      content: "";
+      position: absolute;
+      inset: -24px;
+      background-image: var(--bg-img);
+      background-size: cover;
+      background-position: center;
+      filter: blur(18px);
+      opacity: .42;
+      transform: scale(1.08);
+      z-index: 0;
+    }
     .specimen .photo-hero img,
     .specimen .photo-grid img,
     .specimen .photo-row img,
     .specimen .mini-photo img,
-    .specimen .frame-img img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .specimen .frame-img img { width: 100%; height: 100%; object-fit: contain; display: block; position: relative; z-index: 1; }
     .specimen .photo-hero { height: 650px; }
     .specimen .photo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
     .specimen .photo-grid figure { height: 300px; position: relative; display: flex; flex-direction: column; }
     .specimen .photo-grid figure img { height: 246px; }
     .specimen .photo-grid figcaption,
     .specimen .photo-row figcaption {
-      position: static;
+      position: relative;
       height: 54px;
       padding: 12px 16px 0;
       font-family: var(--serif-zh); font-size: 22px;
       color: var(--ink);
       background: rgba(0,0,0,.72);
       text-shadow: none;
+      z-index: 2;
     }
     .specimen .photo-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
     .specimen .photo-row figure { height: 285px; position: relative; display: flex; flex-direction: column; }
@@ -851,16 +870,16 @@
         <div class="issue-row">
           <span>GPT-IMAGE 2</span><span class="dot"></span><span>SPECIMEN PROMPT</span><span>01 / 07</span>
         </div>
-        <p class="kicker">Prompt Cookbook · 黑丝绒标本图</p>
-        <h1 class="h-display">把任何食物<br>拍成博物标本</h1>
-        <p class="h-sub">不是写“高级摄影”，而是规定视角、结构、光线和标注。</p>
+        <p class="kicker">Prompt Cookbook · 小白照填版</p>
+        <h1 class="h-display">复制这段提示词<br>改括号就能用</h1>
+        <p class="h-sub">不用会写 prompt。你只要把方括号里的内容换成自己的食物。</p>
         <figure class="frame-img r-16x10">
           <img src="assets/abalone.png" alt="鲍鱼解剖风格案例" style="object-position:center 42%">
         </figure>
-        <p class="lead">这套 prompt 的本质：让 AI 同时扮演博物学家、摄影师、解剖师和版式编辑。</p>
+        <p class="lead">想做这种“食物解剖图”？照着后面的模板填空，然后丢给 GPT-Image 2。</p>
       </div>
       <div class="issue-strip">
-        <span>Creators Desk · Private Notes</span>
+        <span>Creators Desk · Prompt Notes</span>
         <span>—</span>
         <span>鲍鱼 / 鸡蛋 / 小龙虾 / 草莓 / 蒲公英 / 榴莲</span>
       </div>
@@ -871,20 +890,20 @@
       <div class="grain"></div>
       <div class="content">
         <div class="issue-row">
-          <span>FORMULA</span><span class="dot"></span><span>四层结构</span><span>02 / 07</span>
+          <span>STEP 01</span><span class="dot"></span><span>先选一个食物</span><span>02 / 07</span>
         </div>
-        <h1 class="h-display">先别急着换食物<br>先锁死画面公式</h1>
+        <h1 class="h-display">第一步<br>只换食物名称</h1>
         <div class="split">
           <figure class="mini-photo"><img src="assets/egg.png" alt="鸡蛋解剖风格案例" style="object-position:center 40%"></figure>
           <div class="rule-list">
-            <div class="rule-item"><b>01</b><div><h3>标本视角</h3><p>“博物学大师发现野外标本”，让画面有收藏和发现感。</p></div></div>
-            <div class="rule-item"><b>02</b><div><h3>暴力截面</h3><p>“剖开至核心”，逼模型给出完整、锋利、可读的内部结构。</p></div></div>
-            <div class="rule-item"><b>03</b><div><h3>卡拉瓦乔光</h3><p>黑底强侧光，让材质发亮，而不是普通棚拍。</p></div></div>
-            <div class="rule-item"><b>04</b><div><h3>三行标注</h3><p>结构名、成分数据、人话解释，决定它像“科学图鉴”。</p></div></div>
+            <div class="rule-item"><b>01</b><div><h3>先写一个具体食物</h3><p>比如：鸡蛋、草莓、榴莲、鲍鱼、小龙虾。</p></div></div>
+            <div class="rule-item"><b>02</b><div><h3>不要写太大的类别</h3><p>不要写“水果”。要写“草莓”“石榴”“牛油果”。</p></div></div>
+            <div class="rule-item"><b>03</b><div><h3>简单食物也可以</h3><p>越常见，用户越容易看懂效果，比如鸡蛋。</p></div></div>
+            <div class="rule-item"><b>04</b><div><h3>直接替换这里</h3><p>把[食物名称]全部换成同一个名字。</p></div></div>
           </div>
         </div>
       </div>
-      <div class="issue-strip"><span>Prompt logic</span><span>—</span><span>视角 / 截面 / 光线 / 标注</span></div>
+      <div class="issue-strip"><span>Simple rule</span><span>—</span><span>先别改别的，只换食物名</span></div>
     </section>
 
     <section class="poster xhs specimen" id="xhs-03">
@@ -892,17 +911,17 @@
       <div class="grain"></div>
       <div class="content">
         <div class="issue-row">
-          <span>VARIABLES</span><span class="dot"></span><span>只替换这 6 处</span><span>03 / 07</span>
+          <span>STEP 02</span><span class="dot"></span><span>写外面和里面</span><span>03 / 07</span>
         </div>
-        <h1 class="h-display">真正要填的<br>不是整段 prompt</h1>
+        <h1 class="h-display">第二步<br>填两个描述</h1>
         <figure class="photo-hero"><img src="assets/strawberry.png" alt="草莓解剖风格案例" style="object-position:center 46%"></figure>
         <div class="rule-list">
-          <div class="rule-item"><b>A</b><div><h3>食物名称 + 外表面</h3><p>颜色、质感、纹理必须具体：粗糙、湿润、斑驳、透明、纤维化。</p></div></div>
-          <div class="rule-item"><b>B</b><div><h3>核心结构 + 横截面细节</h3><p>写 1-2 个最有视觉张力的内部特征，别写一堆百科词。</p></div></div>
-          <div class="rule-item"><b>C</b><div><h3>6 个标注点</h3><p>每个标注都要能指向结构边缘，不要让文字漂在空中。</p></div></div>
+          <div class="rule-item"><b>A</b><div><h3>外表面长什么样</h3><p>例：红色、有籽、湿润、有光泽。</p></div></div>
+          <div class="rule-item"><b>B</b><div><h3>切开后看见什么</h3><p>例：白色髓心、果肉纹理、汁液层。</p></div></div>
+          <div class="rule-item"><b>C</b><div><h3>不会写就写大白话</h3><p>不要怕不专业，先把你看见的东西写出来。</p></div></div>
         </div>
       </div>
-      <div class="issue-strip"><span>Template variables</span><span>—</span><span>名称 / 外观 / 核心 / 细节 / 标注 / 副标题</span></div>
+      <div class="issue-strip"><span>Fill blanks</span><span>—</span><span>外面怎么长 / 里面有什么</span></div>
     </section>
 
     <section class="poster xhs specimen" id="xhs-04">
@@ -910,9 +929,9 @@
       <div class="grain"></div>
       <div class="content">
         <div class="issue-row">
-          <span>REFERENCE WALL</span><span class="dot"></span><span>案例墙</span><span>04 / 07</span>
+          <span>EXAMPLES</span><span class="dot"></span><span>照着这种感觉做</span><span>04 / 07</span>
         </div>
-        <h1 class="h-display">判断成片好不好<br>看这 6 个信号</h1>
+        <h1 class="h-display">这些图不是教材<br>只是给你看效果</h1>
         <div class="photo-grid">
           <figure><img src="assets/abalone.png" alt="鲍鱼案例"><figcaption>01 鲍鱼：外壳与软体反差</figcaption></figure>
           <figure><img src="assets/egg.png" alt="鸡蛋案例"><figcaption>02 鸡蛋：透明膜与蛋黄核心</figcaption></figure>
@@ -922,7 +941,7 @@
           <figure><img src="assets/durian.png" alt="榴莲案例"><figcaption>06 榴莲：刺壳与果肉分房</figcaption></figure>
         </div>
       </div>
-      <div class="issue-strip"><span>Good output signals</span><span>—</span><span>完整标本 / 半原状半剖开 / 标注贴边 / 黑丝绒背景</span></div>
+      <div class="issue-strip"><span>Look for this</span><span>—</span><span>黑底 / 切开 / 有标注 / 像收藏品</span></div>
     </section>
 
     <section class="poster xhs specimen" id="xhs-05">
@@ -930,25 +949,25 @@
       <div class="grain"></div>
       <div class="content">
         <div class="issue-row">
-          <span>ANNOTATION</span><span class="dot"></span><span>标注不是装饰</span><span>05 / 07</span>
+          <span>STEP 03</span><span class="dot"></span><span>标注这样写</span><span>05 / 07</span>
         </div>
-        <h1 class="h-display">标注写不好<br>画面就不像图鉴</h1>
+        <h1 class="h-display">第三步<br>写 6 个小标注</h1>
         <div class="split">
           <figure class="mini-photo"><img src="assets/lobster.png" alt="小龙虾解剖风格案例" style="object-position:center 44%"></figure>
           <div>
-            <p class="callout">每处标注固定三行：<br>结构名称 / 成分数据 / 一句人话。</p>
-            <div class="prompt-box">复眼
-成分：几丁质 + 蛋白质
-功能：捕捉光影，感知危险与猎物
+            <p class="callout">每个标注都按这个格式：<br>名字 / 成分 / 作用。</p>
+            <div class="prompt-box">蛋壳
+成分：碳酸钙
+作用：保护里面的蛋黄和蛋白
 
-鳃
-成分：蛋白质 + 血红素
-功能：水中呼吸的核心，提取溶解氧</div>
-            <p class="small-note">写法要“像科学，但不冷冰冰”。数据给可信感，人话给传播感。</p>
+蛋黄
+成分：脂肪 + 蛋白质
+作用：提供主要营养和颜色</div>
+            <p class="small-note">不会写成分就写常识，大概也可以。重点是让画面有标注。</p>
           </div>
         </div>
       </div>
-      <div class="issue-strip"><span>Annotation rule</span><span>—</span><span>结构名 / 成分 / 功能解释</span></div>
+      <div class="issue-strip"><span>Annotation</span><span>—</span><span>名字 / 成分 / 作用</span></div>
     </section>
 
     <section class="poster xhs specimen" id="xhs-06">
@@ -956,17 +975,17 @@
       <div class="grain"></div>
       <div class="content">
         <div class="issue-row">
-          <span>FAILURE MODES</span><span class="dot"></span><span>常见失败点</span><span>06 / 07</span>
+          <span>USE CASES</span><span class="dot"></span><span>这些图能用来干嘛</span><span>06 / 07</span>
         </div>
-        <h1 class="h-display">这类图最容易<br>坏在三个地方</h1>
+        <h1 class="h-display">做出来以后<br>可以这样用</h1>
         <figure class="photo-hero"><img src="assets/durian.png" alt="榴莲解剖风格案例" style="object-position:center 46%"></figure>
         <div class="rule-list">
-          <div class="rule-item"><b>01</b><div><h3>只像食物摄影</h3><p>补上“完整标本、一半原状、一半剖开至核心”。</p></div></div>
-          <div class="rule-item"><b>02</b><div><h3>标注漂浮</h3><p>强调“标注文字紧贴结构边缘，细线连接，不悬空”。</p></div></div>
-          <div class="rule-item"><b>03</b><div><h3>内部太干净</h3><p>加入湿润、纤维、薄膜、颗粒、汁液、粗糙等物理质感。</p></div></div>
+          <div class="rule-item"><b>01</b><div><h3>发到私域群</h3><p>先发案例图，再把完整 prompt 发给大家照着改。</p></div></div>
+          <div class="rule-item"><b>02</b><div><h3>做小红书教程</h3><p>一张图一个食物，很适合做“AI 作图玩法”。</p></div></div>
+          <div class="rule-item"><b>03</b><div><h3>做系列素材</h3><p>食物、植物、海鲜、甜品都能做成一组。</p></div></div>
         </div>
       </div>
-      <div class="issue-strip"><span>Fixes</span><span>—</span><span>标本构图 / 贴边标注 / 材质真相</span></div>
+      <div class="issue-strip"><span>Use cases</span><span>—</span><span>私域互动 / 小红书教程 / 素材系列</span></div>
     </section>
 
     <section class="poster xhs specimen" id="xhs-07">
@@ -974,22 +993,25 @@
       <div class="grain"></div>
       <div class="content">
         <div class="issue-row">
-          <span>COPY BLOCK</span><span class="dot"></span><span>直接复制这一段</span><span>07 / 07</span>
+          <span>FINAL CHECK</span><span class="dot"></span><span>发图前检查</span><span>07 / 07</span>
         </div>
-        <h1 class="h-display">通用模板<br>换括号就能用</h1>
+        <h1 class="h-display">不用放全文<br>只告诉他改哪</h1>
         <div class="photo-row">
           <figure><img src="assets/dandelion.png" alt="蒲公英案例"><figcaption>植物也能用</figcaption></figure>
           <figure><img src="assets/egg.png" alt="鸡蛋案例"><figcaption>简单食材更清楚</figcaption></figure>
           <figure><img src="assets/abalone.png" alt="鲍鱼案例"><figcaption>复杂结构更惊艳</figcaption></figure>
         </div>
-        <div class="prompt-box">一颗/一块/一枚【食物名称】，以博物学大师发现野外标本的方式解剖。
-一半保持原状，展示【外表面质感/颜色/纹理】；另一半剖开至核心，呈现【1-2 个内部视觉特征】。
-黑丝绒背景，卡拉瓦乔式强侧光，内部结构以自身材质发光。
-主标题：【食物名称】·解剖。副标题：【不超过 15 字的本质句】。
-标注 6 处，每处三行：结构名称 / 成分数据 / 一句人话解释。</div>
-        <p class="small-note">如果要发私域，可以先发案例图，再把模板丢给用户，让他只填括号。</p>
+        <div class="prompt-box">让用户只改这 5 个地方：
+1. 食物名称
+2. 外面长什么样
+3. 切开后看见什么
+4. 一句短短的副标题
+5. 6 个小标注
+
+完整 prompt 放在群消息正文里。</div>
+        <p class="small-note">图片负责降低理解成本。正文负责承载完整提示词。</p>
       </div>
-      <div class="issue-strip"><span>Reusable prompt</span><span>—</span><span>换食物、换结构、换标注即可</span></div>
+      <div class="issue-strip"><span>Beginner checklist</span><span>—</span><span>看图理解，正文复制</span></div>
     </section>
 
   </main>
@@ -997,6 +1019,13 @@
   <!-- Magazine WebGL background (deterministic ink-flow) -->
   <script src="assets/magazine-bg-webgl.js"></script>
   <script>
+    document.querySelectorAll(".specimen figure").forEach(function (figure) {
+      var img = figure.querySelector("img");
+      if (img && img.getAttribute("src")) {
+        figure.style.setProperty("--bg-img", "url('" + img.getAttribute("src") + "')");
+      }
+    });
+
     (function () {
       function cssVarRgb(name, fallback) {
         var raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
