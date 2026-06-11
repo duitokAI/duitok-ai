@@ -854,6 +854,11 @@
       line-height: 1.42;
     }
     .specimen .issue-strip { color: var(--muted); }
+    .specimen.cover-page .content { gap: 18px; }
+    .specimen.cover-page .h-display { font-size: 64px; line-height: 1.02; max-width: 860px; }
+    .specimen.cover-page .h-sub { font-size: 27px; line-height: 1.35; }
+    .specimen.cover-page .frame-img { height: 760px; margin-top: 12px; }
+    .specimen.cover-page .lead { font-size: 31px; line-height: 1.45; }
   </style>
 </head>
 <body>
@@ -863,7 +868,7 @@
   -->
   <main class="sheet">
 
-    <section class="poster xhs specimen" id="xhs-01">
+    <section class="poster xhs specimen cover-page" id="xhs-01">
       <canvas class="mag-bg" data-bg="ink-flow"></canvas>
       <div class="grain"></div>
       <div class="content">
@@ -871,8 +876,8 @@
           <span>GPT-IMAGE 2</span><span class="dot"></span><span>SPECIMEN PROMPT</span><span>01 / 07</span>
         </div>
         <p class="kicker">Prompt Cookbook · 小白照填版</p>
-        <h1 class="h-display">复制这段提示词<br>改括号就能用</h1>
-        <p class="h-sub">不用会写 prompt。你只要把方括号里的内容换成自己的食物。</p>
+        <h1 class="h-display">做这种食物解剖图</h1>
+        <p class="h-sub">复制我的 prompt，把方括号里的内容换成自己的食物。</p>
         <figure class="frame-img r-16x10">
           <img src="assets/abalone.png" alt="鲍鱼解剖风格案例" style="object-position:center 42%">
         </figure>
