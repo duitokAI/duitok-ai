@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>小黑风格 Prompt 教程图</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #f4f4f4;
+      font-family: "PingFang SC", "Noto Sans SC", -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    .frame {
+      width: 1600px;
+      height: 900px;
+      background: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+    svg { width: 100%; height: 100%; display: block; }
+    .line { fill: none; stroke: #111; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+    .thin { fill: none; stroke: #111; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    .dash { stroke-dasharray: 12 12; }
+    .orange { stroke: #ff7a1a; }
+    .red { stroke: #e72922; }
+    .blue { stroke: #2487e8; }
+    .txt { font-size: 34px; font-weight: 700; fill: #111; }
+    .small { font-size: 26px; font-weight: 600; fill: #111; }
+    .note-red { fill: #e72922; font-weight: 800; }
+    .note-blue { fill: #2487e8; font-weight: 800; }
+    .note-orange { fill: #ff7a1a; font-weight: 800; }
+    .paper { fill: #fff; stroke: #111; stroke-width: 4; }
+    .machine { fill: #fff; stroke: #111; stroke-width: 5; }
+    .xiaohei { fill: #111; stroke: #111; stroke-width: 3; }
+    .eye { fill: #fff; }
+  </style>
+</head>
+<body>
+  <section class="frame" id="xiaohei-demo">
+    <svg viewBox="0 0 1600 900" aria-label="小黑风格 prompt 教程图">
+      <!-- prompt paper -->
+      <g transform="translate(110 180) rotate(-4)">
+        <rect class="paper" x="0" y="0" width="330" height="460" rx="16"/>
+        <text class="txt" x="42" y="70">完整 prompt</text>
+        <line class="thin" x1="42" y1="115" x2="270" y2="115"/>
+        <line class="thin" x1="42" y1="165" x2="270" y2="165"/>
+        <line class="thin" x1="42" y1="215" x2="270" y2="215"/>
+        <line class="thin" x1="42" y1="265" x2="270" y2="265"/>
+        <line class="thin" x1="42" y1="315" x2="270" y2="315"/>
+        <ellipse class="red" cx="245" cy="112" rx="44" ry="18"/>
+        <ellipse class="red" cx="98" cy="214" rx="44" ry="18"/>
+        <ellipse class="red" cx="222" cy="314" rx="44" ry="18"/>
+        <text class="small note-red" x="52" y="395">只改 5 个空</text>
+      </g>
+
+      <!-- flow arrow -->
+      <path class="line orange" d="M470 410 C560 360, 620 350, 700 385"/>
+      <path class="line orange" d="M676 356 L708 389 L660 396"/>
+
+      <!-- machine -->
+      <g transform="translate(650 160)">
+        <rect class="machine" x="0" y="80" width="420" height="500" rx="38"/>
+        <text class="txt" x="68" y="148">填空机器</text>
+        <rect class="paper" x="60" y="190" width="300" height="245" rx="18"/>
+        <text class="small" x="100" y="245">对象名称</text>
+        <text class="small" x="100" y="298">外面样子</text>
+        <text class="small" x="100" y="351">里面结构</text>
+        <text class="small" x="100" y="404">六个标注</text>
+        <circle class="red" cx="78" cy="236" r="12"/>
+        <circle class="red" cx="78" cy="289" r="12"/>
+        <circle class="red" cx="78" cy="342" r="12"/>
+        <circle class="red" cx="78" cy="395" r="12"/>
+
+        <!-- xiaohei operating levers -->
+        <ellipse class="xiaohei" cx="222" cy="510" rx="56" ry="74"/>
+        <circle class="eye" cx="203" cy="492" r="8"/>
+        <circle class="eye" cx="238" cy="492" r="8"/>
+        <path class="thin" d="M190 578 L172 622"/>
+        <path class="thin" d="M250 578 L270 622"/>
+        <path class="thin" d="M270 492 C310 470, 324 438, 338 404"/>
+        <path class="thin" d="M178 493 C140 470, 130 438, 122 404"/>
+        <line class="thin blue" x1="338" y1="404" x2="360" y2="365"/>
+        <line class="thin blue" x1="122" y1="404" x2="100" y2="365"/>
+      </g>
+
+      <!-- output arrow -->
+      <path class="line orange" d="M1088 410 C1160 360, 1214 354, 1285 385"/>
+      <path class="line orange" d="M1260 356 L1293 389 L1245 396"/>
+
+      <!-- output cards -->
+      <g transform="translate(1220 130)">
+        <g transform="rotate(3)">
+          <rect class="paper" x="0" y="0" width="260" height="170" rx="14"/>
+          <circle class="thin" cx="84" cy="88" r="46"/>
+          <line class="thin" x1="145" y1="58" x2="228" y2="58"/>
+          <line class="thin" x1="145" y1="92" x2="218" y2="92"/>
+          <text class="small" x="28" y="146">草莓·解剖</text>
+        </g>
+        <g transform="translate(34 210) rotate(-4)">
+          <rect class="paper" x="0" y="0" width="260" height="170" rx="14"/>
+          <rect class="thin" x="42" y="48" width="70" height="74" rx="22"/>
+          <line class="thin" x1="145" y1="58" x2="228" y2="58"/>
+          <line class="thin" x1="145" y1="92" x2="218" y2="92"/>
+          <text class="small" x="28" y="146">耳机·解剖</text>
+        </g>
+        <g transform="translate(-8 420) rotate(2)">
+          <rect class="paper" x="0" y="0" width="260" height="170" rx="14"/>
+          <rect class="thin" x="38" y="54" width="90" height="54" rx="8"/>
+          <line class="thin" x1="145" y1="58" x2="228" y2="58"/>
+          <line class="thin" x1="145" y1="92" x2="218" y2="92"/>
+          <text class="small" x="28" y="146">键盘·解剖</text>
+        </g>
+      </g>
+
+      <!-- handwritten notes -->
+      <text class="small note-blue" x="190" y="720">小白也能用</text>
+      <path class="thin blue" d="M250 690 C340 650, 404 625, 472 585"/>
+      <text class="small note-red" x="690" y="760">不要重写，只填空</text>
+      <text class="small note-orange" x="1110" y="720">输出一组标本图</text>
+    </svg>
+  </section>
+</body>
+</html>
