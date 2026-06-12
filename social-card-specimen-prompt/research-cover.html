@@ -11,413 +11,441 @@
       min-height: 100vh;
       display: grid;
       place-items: center;
-      background: #160018;
-      font-family: Impact, "Arial Black", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      background: #0b000d;
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
     }
     .poster {
+      --ink: #fff8f5;
+      --muted: rgba(255,248,245,.66);
+      --line: rgba(255,103,56,.46);
+      --orange: #ff6738;
+      --rose: #c12b62;
+      --magenta: #8b1a78;
+      --plum: #210024;
+
       width: 1080px;
       height: 1440px;
       position: relative;
       overflow: hidden;
-      color: #fff8f5;
+      color: var(--ink);
       background:
-        radial-gradient(circle at 78% 12%, rgba(255, 103, 56, .22), transparent 18%),
-        radial-gradient(circle at 18% 72%, rgba(193, 43, 98, .18), transparent 28%),
-        linear-gradient(180deg, #09000b 0%, #210024 48%, #070008 100%);
-      padding: 58px 66px 54px;
+        radial-gradient(circle at 75% 18%, rgba(255,103,56,.24), transparent 20%),
+        radial-gradient(circle at 20% 82%, rgba(193,43,98,.23), transparent 30%),
+        linear-gradient(135deg, #070008 0%, #210024 46%, #120017 100%);
+      padding: 56px 66px 54px;
     }
     .poster::before {
       content: "";
       position: absolute;
       inset: 0;
       background:
-        repeating-linear-gradient(0deg, transparent 0 39px, rgba(255, 103, 56, .07) 40px 41px),
-        repeating-linear-gradient(90deg, transparent 0 39px, rgba(193, 43, 98, .055) 40px 41px);
-      opacity: .4;
-      mask-image: linear-gradient(90deg, rgba(0,0,0,.9), rgba(0,0,0,.18) 42%, rgba(0,0,0,.12));
+        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255,255,255,.028) 1px, transparent 1px);
+      background-size: 42px 42px;
+      opacity: .34;
+      mask-image: linear-gradient(180deg, rgba(0,0,0,.85), rgba(0,0,0,.16) 70%, rgba(0,0,0,.55));
     }
     .poster::after {
       content: "";
       position: absolute;
-      inset: 24px;
-      border: 1px solid rgba(255, 103, 56, .62);
-      clip-path: polygon(0 0, 48px 0, 48px 10px, 10px 10px, 10px 48px, 0 48px, 0 0,
-        100% 0, calc(100% - 48px) 0, calc(100% - 48px) 10px, calc(100% - 10px) 10px, calc(100% - 10px) 48px, 100% 48px,
-        100% 100%, calc(100% - 48px) 100%, calc(100% - 48px) calc(100% - 10px), calc(100% - 10px) calc(100% - 10px), calc(100% - 10px) calc(100% - 48px), 100% calc(100% - 48px),
-        0 100%, 48px 100%, 48px calc(100% - 10px), 10px calc(100% - 10px), 10px calc(100% - 48px), 0 calc(100% - 48px));
+      inset: 26px;
+      border: 1px solid rgba(255,103,56,.52);
       pointer-events: none;
     }
-    .content { position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; }
-    .topline {
+    .content {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    .top {
+      height: 76px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 76px;
-      border-bottom: 2px solid rgba(255, 103, 56, .64);
+      border-bottom: 2px solid var(--line);
     }
     .kicker {
       display: flex;
       align-items: center;
       gap: 14px;
-      color: #ff6738;
-      font-size: 21px;
-      letter-spacing: .34em;
-      font-weight: 800;
+      color: var(--orange);
+      font-family: "Arial Narrow", "Arial Black", Impact, Arial, sans-serif;
+      font-size: 22px;
+      font-weight: 900;
       font-style: italic;
+      letter-spacing: .38em;
       text-transform: uppercase;
     }
-    .corner-mark {
-      width: 16px;
-      height: 16px;
-      background: #ff6738;
+    .slash {
+      width: 17px;
+      height: 17px;
+      background: linear-gradient(135deg, var(--orange), var(--rose));
       clip-path: polygon(0 0, 100% 0, 0 100%);
     }
     .brand {
       display: flex;
       align-items: center;
       gap: 12px;
-      color: rgba(255,248,245,.88);
-      font-size: 18px;
-      font-weight: 850;
-      letter-spacing: .08em;
+      font-family: "Arial Narrow", "Arial Black", Impact, Arial, sans-serif;
+      font-size: 21px;
+      font-weight: 900;
+      letter-spacing: .04em;
     }
     .brand img {
-      width: 34px;
-      height: 34px;
-      border-radius: 9px;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
       background: #fff;
-      padding: 5px;
+      padding: 6px;
     }
     .hero {
       position: relative;
+      min-height: 500px;
       padding-top: 54px;
-      min-height: 418px;
     }
-    .title-main {
-      margin: 0;
-      font-size: 82px;
-      line-height: .9;
-      font-weight: 950;
-      letter-spacing: -0.045em;
+    .title-en {
+      margin: 0 0 18px;
+      font-family: "Arial Narrow", Impact, "Arial Black", Arial, sans-serif;
+      font-size: 92px;
+      line-height: .82;
+      font-weight: 900;
+      letter-spacing: -0.055em;
       color: #fff;
-      font-family: Impact, "Arial Black", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
-    }
-    .title-main .line2 {
-      display: block;
-      margin-top: 22px;
-      font-size: 126px;
-      letter-spacing: -0.075em;
       transform: scaleX(.92);
       transform-origin: left center;
       width: max-content;
+      text-transform: uppercase;
     }
-    .title-main .line3 {
-      display: block;
-      margin-top: 14px;
-      font-size: 96px;
-      letter-spacing: -0.055em;
+    .title-cn {
+      margin: 0;
+      font-family: "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", sans-serif;
+      font-size: 136px;
+      line-height: .94;
+      font-weight: 900;
+      letter-spacing: -0.08em;
+      color: #fff;
       transform: scaleX(.94);
       transform-origin: left center;
       width: max-content;
     }
-    .accent { color: #ff6738; }
-    .underline {
+    .title-cn .hot {
+      color: var(--orange);
+      text-shadow: 0 10px 32px rgba(255,103,56,.22);
+    }
+    .title-sub {
       display: inline-block;
-      position: relative;
+      margin-top: 16px;
+      padding: 8px 18px 10px;
+      background: linear-gradient(90deg, var(--magenta), var(--rose), var(--orange));
+      color: #fff;
+      font-size: 64px;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: -0.055em;
     }
-    .underline::after {
-      content: "";
-      position: absolute;
-      left: 4px;
-      right: -8px;
-      bottom: -8px;
-      height: 12px;
-      background: linear-gradient(90deg, #c12b62, #ff6738);
-      transform: skewX(-18deg);
-      z-index: -1;
-      opacity: .95;
-    }
-    .subtitle {
-      margin: 34px 0 0;
-      font-size: 34px;
-      line-height: 1.35;
+    .hero-copy {
+      margin: 28px 0 0;
+      max-width: 750px;
+      font-size: 30px;
+      line-height: 1.34;
       font-weight: 800;
-      color: rgba(255,248,245,.9);
-      font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      color: rgba(255,248,245,.88);
     }
-    .subtitle strong { color: #ff6738; }
-    .radar {
+    .hero-copy strong { color: var(--orange); white-space: nowrap; }
+    .orbital {
       position: absolute;
-      right: 0;
-      top: 34px;
-      width: 230px;
-      height: 230px;
+      right: 4px;
+      top: 70px;
+      width: 238px;
+      height: 238px;
       border-radius: 50%;
-      border: 2px solid rgba(255, 103, 56, .45);
-      opacity: .92;
+      border: 2px solid rgba(255,103,56,.38);
+      opacity: .9;
     }
-    .radar::before,
-    .radar::after {
+    .orbital::before,
+    .orbital::after {
       content: "";
       position: absolute;
-      inset: 34px;
       border-radius: 50%;
-      border: 2px solid rgba(193, 43, 98, .56);
+      border: 2px solid rgba(193,43,98,.52);
     }
-    .radar::after {
-      inset: 78px;
-      background: radial-gradient(circle, #ff6738 0 8px, transparent 9px);
+    .orbital::before { inset: 38px; }
+    .orbital::after {
+      inset: 86px;
+      background: radial-gradient(circle, var(--orange) 0 9px, transparent 10px);
     }
-    .sweep {
+    .orbital .arm {
       position: absolute;
       left: 50%;
       top: 50%;
-      width: 112px;
+      width: 120px;
       height: 2px;
-      background: linear-gradient(90deg, #ff6738, transparent);
+      background: linear-gradient(90deg, var(--orange), transparent);
       transform-origin: left center;
-      transform: rotate(-28deg);
+      transform: rotate(-30deg);
     }
     .spark {
       position: absolute;
-      right: 226px;
-      top: 78px;
-      width: 50px;
-      height: 50px;
-      background: #ff6738;
+      right: 256px;
+      top: 128px;
+      width: 58px;
+      height: 58px;
+      background: var(--orange);
       clip-path: polygon(50% 0, 61% 36%, 100% 50%, 61% 64%, 50% 100%, 39% 64%, 0 50%, 39% 36%);
     }
-    .banner {
-      margin-top: 8px;
-      border: 2px solid #ff6738;
-      border-radius: 22px;
-      min-height: 94px;
+    .replace {
       display: grid;
-      grid-template-columns: 230px 1fr;
+      grid-template-columns: 220px 1fr;
       align-items: center;
-      background: linear-gradient(90deg, rgba(139,26,120,.32), rgba(255,103,56,.12));
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
+      min-height: 122px;
+      border: 2px solid var(--orange);
+      background: rgba(255,103,56,.07);
+      box-shadow: inset 0 0 34px rgba(193,43,98,.16);
     }
-    .banner-left {
+    .replace-label {
       height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-right: 2px solid rgba(255, 103, 56, .64);
-      color: #ff6738;
-      font-size: 39px;
-      font-weight: 950;
-      letter-spacing: -0.04em;
-    }
-    .banner-right {
-      padding: 0 28px;
-      font-size: 34px;
-      line-height: 1.2;
-      font-weight: 900;
-      font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
-    }
-    .grid {
-      margin-top: 26px;
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-    }
-    .card {
-      min-height: 164px;
-      border: 2px solid rgba(255, 103, 56, .58);
-      border-radius: 20px;
-      padding: 20px 18px;
-      position: relative;
-      background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(193,43,98,.085));
-    }
-    .card-num {
-      position: absolute;
-      right: 18px;
-      top: 14px;
-      color: rgba(255,255,255,.18);
+      place-items: center;
+      border-right: 2px solid rgba(255,103,56,.72);
+      color: var(--orange);
       font-size: 42px;
-      font-weight: 950;
+      line-height: 1.04;
+      font-weight: 900;
+      letter-spacing: -0.05em;
     }
-    .icon {
-      width: 42px;
-      height: 42px;
-      margin-bottom: 18px;
-      color: #ff6738;
+    .replace-main {
+      padding: 0 30px;
     }
-    .card-title {
-      font-size: 30px;
-      line-height: 1.08;
-      font-weight: 950;
-      margin-bottom: 10px;
-      font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+    .replace-main h2 {
+      margin: 0 0 12px;
+      font-size: 34px;
+      line-height: 1.1;
+      font-weight: 900;
+      letter-spacing: -0.035em;
     }
-    .card-sub {
-      color: rgba(255,248,245,.58);
-      font-size: 16px;
-      letter-spacing: .08em;
+    .tokens {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .token {
+      padding: 7px 13px 8px;
+      border: 1px solid rgba(255,103,56,.55);
+      color: rgba(255,248,245,.86);
+      font-size: 22px;
+      line-height: 1;
       font-weight: 800;
+      background: rgba(0,0,0,.18);
+    }
+    .matrix {
+      margin-top: 28px;
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 24px;
+      align-items: stretch;
+    }
+    .scene-panel {
+      border: 1px solid rgba(255,103,56,.42);
+      background: rgba(0,0,0,.22);
+      padding: 24px 24px 22px;
+    }
+    .panel-title {
+      margin: 0 0 20px;
+      color: var(--orange);
+      font-family: "Arial Narrow", Impact, "Arial Black", Arial, sans-serif;
+      font-size: 22px;
+      letter-spacing: .2em;
+      font-style: italic;
+      text-transform: uppercase;
+    }
+    .scene-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .scene {
+      min-height: 88px;
+      border: 1px solid rgba(255,103,56,.32);
+      padding: 15px 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(193,43,98,.08));
+    }
+    .scene strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 25px;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: -0.035em;
+    }
+    .scene span {
+      display: block;
+      color: var(--muted);
+      font-family: "Arial Narrow", Impact, Arial, sans-serif;
+      font-size: 15px;
+      letter-spacing: .08em;
+      font-weight: 900;
       text-transform: uppercase;
     }
     .quote {
-      margin-top: 32px;
-      border: 2px solid rgba(255, 103, 56, .78);
-      border-radius: 24px;
-      padding: 28px 30px;
-      min-height: 174px;
-      display: grid;
-      grid-template-columns: 122px 1fr 80px;
-      align-items: center;
-      background: rgba(0,0,0,.62);
-      box-shadow: 0 0 0 1px rgba(255,255,255,.08), inset 0 0 42px rgba(193,43,98,.18);
+      position: relative;
+      border: 1px solid rgba(255,103,56,.46);
+      background:
+        linear-gradient(135deg, rgba(139,26,120,.44), rgba(255,103,56,.11)),
+        rgba(0,0,0,.25);
+      padding: 30px 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
-    .quote-mark {
-      color: #ff6738;
-      font-size: 100px;
+    .quote::before {
+      content: "“";
+      position: absolute;
+      top: 18px;
+      right: 24px;
+      color: var(--orange);
+      font-size: 82px;
       line-height: 1;
-      font-weight: 950;
+      font-weight: 900;
     }
-    .quote-text {
+    .quote p {
+      margin: 0;
       font-size: 42px;
-      line-height: 1.24;
-      font-weight: 950;
-      font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      line-height: 1.22;
+      font-weight: 900;
+      letter-spacing: -0.055em;
     }
-    .quote-text .accent { text-decoration: underline; text-decoration-thickness: 5px; text-underline-offset: 7px; }
+    .quote .hot {
+      color: var(--orange);
+      text-decoration: underline;
+      text-decoration-thickness: 5px;
+      text-underline-offset: 7px;
+    }
+    .quote small {
+      display: block;
+      margin-top: 22px;
+      color: var(--muted);
+      font-size: 21px;
+      line-height: 1.4;
+      font-weight: 700;
+    }
     .bottom {
       margin-top: auto;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 18px;
+      gap: 16px;
     }
     .chip {
-      height: 78px;
-      border: 1px solid rgba(255, 103, 56, .62);
-      border-radius: 16px;
+      height: 76px;
       display: flex;
       align-items: center;
-      gap: 13px;
+      gap: 12px;
+      border: 1px solid rgba(255,103,56,.48);
       padding: 0 16px;
-      background: rgba(255,255,255,.025);
+      background: rgba(0,0,0,.18);
     }
-    .chip-sign {
-      width: 28px;
-      height: 28px;
-      border: 3px solid #ff6738;
+    .chip-mark {
+      width: 25px;
+      height: 25px;
+      border: 3px solid var(--orange);
       flex: 0 0 auto;
     }
-    .chip:nth-child(1) .chip-sign { border-radius: 50%; }
-    .chip:nth-child(2) .chip-sign { transform: rotate(45deg); }
-    .chip:nth-child(3) .chip-sign { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; border: 0; }
-    .chip:nth-child(3) .chip-sign::before,
-    .chip:nth-child(3) .chip-sign::after {
-      content: "";
-      background: #ff6738;
-      box-shadow: 16px 0 #ff6738, 0 16px #ff6738, 16px 16px #ff6738;
-      width: 8px;
-      height: 8px;
+    .chip:nth-child(1) .chip-mark { border-radius: 50%; }
+    .chip:nth-child(2) .chip-mark { transform: rotate(45deg); }
+    .chip:nth-child(3) .chip-mark {
+      border: 0;
+      background:
+        linear-gradient(var(--orange), var(--orange)) 0 0 / 7px 7px no-repeat,
+        linear-gradient(var(--orange), var(--orange)) 13px 0 / 7px 7px no-repeat,
+        linear-gradient(var(--orange), var(--orange)) 0 13px / 7px 7px no-repeat,
+        linear-gradient(var(--orange), var(--orange)) 13px 13px / 7px 7px no-repeat;
     }
     .chip-title {
       font-size: 19px;
       line-height: 1.1;
       font-weight: 900;
-      font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
     }
     .chip-sub {
       margin-top: 3px;
-      color: rgba(255,248,245,.52);
+      color: rgba(255,248,245,.5);
+      font-family: "Arial Narrow", Impact, Arial, sans-serif;
       font-size: 12px;
-      letter-spacing: .08em;
-      font-weight: 800;
+      letter-spacing: .06em;
+      font-weight: 900;
       text-transform: uppercase;
     }
     .side-label {
       position: absolute;
-      left: 18px;
-      bottom: 186px;
+      left: 20px;
+      bottom: 170px;
       writing-mode: vertical-rl;
-      color: rgba(255, 103, 56, .74);
-      font-size: 15px;
-      letter-spacing: .22em;
-      font-weight: 800;
+      color: rgba(255,103,56,.66);
+      font-family: "Arial Narrow", Impact, Arial, sans-serif;
+      font-size: 16px;
+      letter-spacing: .2em;
+      font-weight: 900;
     }
-    svg { display: block; width: 100%; height: 100%; stroke: currentColor; fill: none; stroke-width: 2.4; }
   </style>
 </head>
 <body>
   <section class="poster" id="research-cover">
-    <div class="side-label">GPT IMAGE 2 PROMPT RESEARCH</div>
+    <div class="side-label">GPT IMAGE 2 PROMPT SYSTEM</div>
     <div class="content">
-      <header class="topline">
-        <div class="kicker"><span class="corner-mark"></span>PROMPT RESEARCH</div>
+      <header class="top">
+        <div class="kicker"><span class="slash"></span>PROMPT RESEARCH</div>
         <div class="brand"><img src="assets/creators-desk-logo.png" alt="">CREATORS DESK</div>
       </header>
 
       <section class="hero">
         <div class="spark"></div>
-        <div class="radar"><div class="sweep"></div></div>
-        <h1 class="title-main">
-          GPT Image 2
-          <span class="line2"><span class="accent">万物</span><span class="underline">解剖</span></span>
-          <span class="line3">提示词模板</span>
+        <div class="orbital"><div class="arm"></div></div>
+        <h1>
+          <div class="title-en">GPT IMAGE 2</div>
+          <div class="title-cn"><span class="hot">万物</span>解剖</div>
+          <div class="title-sub">提示词研究</div>
         </h1>
-        <p class="subtitle">不会写 Prompt 也能做出 <strong>博物标本级</strong> 视觉图</p>
+        <p class="hero-copy">不会写 Prompt，也能做出 <strong>博物标本级</strong> 视觉图。</p>
       </section>
 
-      <section class="banner">
-        <div class="banner-left">只改 5 处</div>
-        <div class="banner-right">把对象、外观、内部、截面、标注<br>替换成你的内容就能用</div>
-      </section>
-
-      <section class="grid">
-        <div class="card">
-          <div class="card-num">01</div>
-          <div class="icon"><svg viewBox="0 0 48 48"><path d="M10 18h28v22H10z"/><path d="M17 18v-5a7 7 0 0 1 14 0v5"/><path d="M31 30h8v8h-8z"/></svg></div>
-          <div class="card-title">食物植物</div>
-          <div class="card-sub">FOOD / PLANT</div>
-        </div>
-        <div class="card">
-          <div class="card-num">02</div>
-          <div class="icon"><svg viewBox="0 0 48 48"><path d="M24 5l17 10v18L24 43 7 33V15z"/><path d="M24 14v20M14 20l20 12M34 20 14 32"/></svg></div>
-          <div class="card-title">产品拆解</div>
-          <div class="card-sub">GADGET / TOOL</div>
-        </div>
-        <div class="card">
-          <div class="card-num">03</div>
-          <div class="icon"><svg viewBox="0 0 48 48"><path d="M8 26h9l18 10V12L17 22H8z"/><path d="M39 18l5-4M40 24h6M39 30l5 4"/></svg></div>
-          <div class="card-title">商品种草</div>
-          <div class="card-sub">PRODUCT NOTE</div>
-        </div>
-        <div class="card">
-          <div class="card-num">04</div>
-          <div class="icon"><svg viewBox="0 0 48 48"><path d="M8 22 24 8l16 14v18H13V25"/><path d="M21 40V28h10v12"/></svg></div>
-          <div class="card-title">海报封面</div>
-          <div class="card-sub">COVER VISUAL</div>
-        </div>
-        <div class="card">
-          <div class="card-num">05</div>
-          <div class="icon"><svg viewBox="0 0 48 48"><path d="M8 10h14a7 7 0 0 1 7 7v23H15a7 7 0 0 0-7 7z"/><path d="M40 10H29a7 7 0 0 0-7 7"/></svg></div>
-          <div class="card-title">科普解释</div>
-          <div class="card-sub">EXPLAINER</div>
-        </div>
-        <div class="card">
-          <div class="card-num">06</div>
-          <div class="icon"><svg viewBox="0 0 48 48"><path d="M24 5 41 15v18L24 43 7 33V15z"/><path d="M7 15l17 10 17-10M24 25v18"/></svg></div>
-          <div class="card-title">私域素材</div>
-          <div class="card-sub">COMMUNITY POST</div>
+      <section class="replace">
+        <div class="replace-label">只改<br>5 处</div>
+        <div class="replace-main">
+          <h2>不用重写提示词，把这 5 个信息换成你的内容</h2>
+          <div class="tokens">
+            <span class="token">对象</span>
+            <span class="token">外观</span>
+            <span class="token">内部结构</span>
+            <span class="token">截面细节</span>
+            <span class="token">结构标注</span>
+          </div>
         </div>
       </section>
 
-      <section class="quote">
-        <div class="quote-mark">“</div>
-        <div class="quote-text">不是学写提示词，<br>是把 <span class="accent">5 处关键词</span> 换成你的</div>
-        <div class="quote-mark">”</div>
+      <section class="matrix">
+        <div class="scene-panel">
+          <h2 class="panel-title">SCENARIO MAP</h2>
+          <div class="scene-list">
+            <div class="scene"><strong>食物植物</strong><span>food / plant</span></div>
+            <div class="scene"><strong>产品拆解</strong><span>gadget / tool</span></div>
+            <div class="scene"><strong>商品种草</strong><span>product note</span></div>
+            <div class="scene"><strong>海报封面</strong><span>cover visual</span></div>
+            <div class="scene"><strong>科普解释</strong><span>explainer</span></div>
+            <div class="scene"><strong>私域素材</strong><span>community post</span></div>
+          </div>
+        </div>
+
+        <aside class="quote">
+          <p>不是学写提示词，<br>是把 <span class="hot">关键词</span><br>换成你的。</p>
+          <small>案例图单独发。封面只负责让用户先看懂：这是一套可复制的出图结构。</small>
+        </aside>
       </section>
 
       <footer class="bottom">
-        <div class="chip"><div class="chip-sign"></div><div><div class="chip-title">复制即用</div><div class="chip-sub">COPY READY</div></div></div>
-        <div class="chip"><div class="chip-sign"></div><div><div class="chip-title">不用重写</div><div class="chip-sub">NO WRITING</div></div></div>
-        <div class="chip"><div class="chip-sign"></div><div><div class="chip-title">万物可套</div><div class="chip-sub">ANY OBJECT</div></div></div>
-        <div class="chip"><div class="chip-sign"></div><div><div class="chip-title">案例单发</div><div class="chip-sub">NEXT PAGE</div></div></div>
+        <div class="chip"><div class="chip-mark"></div><div><div class="chip-title">复制即用</div><div class="chip-sub">copy ready</div></div></div>
+        <div class="chip"><div class="chip-mark"></div><div><div class="chip-title">不用重写</div><div class="chip-sub">no writing</div></div></div>
+        <div class="chip"><div class="chip-mark"></div><div><div class="chip-title">万物可套</div><div class="chip-sub">any object</div></div></div>
+        <div class="chip"><div class="chip-mark"></div><div><div class="chip-title">案例单发</div><div class="chip-sub">next page</div></div></div>
       </footer>
     </div>
   </section>
