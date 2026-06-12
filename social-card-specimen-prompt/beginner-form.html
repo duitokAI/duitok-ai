@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>万物标本解剖图 Prompt · 小白填空说明书</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #e9e9e4;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      color: #181816;
+    }
+    .sheet {
+      width: 1080px;
+      height: 1440px;
+      background:
+        linear-gradient(#f8f6ef 0 0),
+        repeating-linear-gradient(0deg, rgba(24,24,22,.06) 0 1px, transparent 1px 48px);
+      position: relative;
+      overflow: hidden;
+      padding: 48px 64px 48px;
+      box-shadow: 0 30px 100px rgba(0,0,0,.22);
+    }
+    .sheet::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(0deg, transparent 0 46px, rgba(24,24,22,.045) 47px 48px),
+        repeating-linear-gradient(90deg, transparent 0 46px, rgba(24,24,22,.025) 47px 48px);
+      opacity: .7;
+      pointer-events: none;
+    }
+    .content { position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; }
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3px solid #181816;
+      padding-bottom: 14px;
+    }
+    .brand {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: .04em;
+    }
+    .tag {
+      border: 2px solid #181816;
+      border-radius: 999px;
+      padding: 8px 16px;
+      font-size: 22px;
+      font-weight: 800;
+      background: #fff;
+    }
+    h1 {
+      margin: 28px 0 14px;
+      font-size: 72px;
+      line-height: 1.03;
+      letter-spacing: -0.01em;
+      font-weight: 900;
+    }
+    .highlight {
+      background: linear-gradient(transparent 48%, #ffe66a 48% 86%, transparent 86%);
+      padding: 0 4px;
+    }
+    .sub {
+      margin: 0 0 20px;
+      font-size: 31px;
+      line-height: 1.38;
+      font-weight: 600;
+    }
+    .hero {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 26px;
+      align-items: stretch;
+      margin-bottom: 22px;
+    }
+    .photo {
+      position: relative;
+      background: #111;
+      border: 4px solid #181816;
+      min-height: 460px;
+      overflow: hidden;
+      transform: rotate(-1.2deg);
+      box-shadow: 10px 12px 0 #181816;
+    }
+    .photo::before {
+      content: "";
+      position: absolute;
+      inset: -24px;
+      background: url("assets/abalone.png") center / cover;
+      filter: blur(18px);
+      opacity: .5;
+      transform: scale(1.08);
+    }
+    .photo img {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+    .note {
+      border: 4px solid #181816;
+      background: #fff;
+      padding: 24px 24px;
+      box-shadow: 8px 8px 0 #ff4b2f;
+      transform: rotate(1deg);
+    }
+    .note h2 {
+      margin: 0 0 18px;
+      font-size: 35px;
+      line-height: 1.1;
+      font-weight: 900;
+    }
+    .note p {
+      margin: 0 0 16px;
+      font-size: 27px;
+      line-height: 1.38;
+      font-weight: 650;
+    }
+    .red {
+      color: #e52b1e;
+      font-weight: 900;
+    }
+    .form {
+      border: 4px solid #181816;
+      background: #fffdfa;
+      padding: 20px 26px 18px;
+      display: grid;
+      gap: 8px;
+    }
+    .form-title {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 32px;
+      font-weight: 900;
+      margin-bottom: 4px;
+    }
+    .stamp {
+      color: #fff;
+      background: #e52b1e;
+      padding: 6px 12px;
+      transform: rotate(-2deg);
+      display: inline-block;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 210px 1fr;
+      min-height: 52px;
+      border-top: 2px dashed rgba(24,24,22,.35);
+      align-items: center;
+      gap: 18px;
+      font-size: 27px;
+    }
+    .row:first-of-type { border-top: 0; }
+    .label {
+      font-weight: 900;
+      color: #e52b1e;
+    }
+    .value {
+      color: #36332d;
+      font-weight: 650;
+    }
+    .footer {
+      margin-top: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 22px;
+      border-top: 3px solid #181816;
+      font-size: 24px;
+      font-weight: 850;
+    }
+    .arrow {
+      position: absolute;
+      right: 338px;
+      top: 404px;
+      width: 170px;
+      height: 100px;
+      border-top: 8px solid #e52b1e;
+      border-right: 8px solid #e52b1e;
+      transform: rotate(18deg);
+      border-radius: 0 32px 0 0;
+      z-index: 2;
+    }
+    .arrow::after {
+      content: "";
+      position: absolute;
+      right: -16px;
+      top: 78px;
+      width: 0;
+      height: 0;
+      border-left: 22px solid #e52b1e;
+      border-top: 16px solid transparent;
+      border-bottom: 16px solid transparent;
+      transform: rotate(48deg);
+    }
+  </style>
+</head>
+<body>
+  <section class="sheet" id="beginner-form">
+    <div class="arrow"></div>
+    <div class="content">
+      <div class="top">
+        <div class="brand">CREATORS DESK / PROMPT NOTE</div>
+        <div class="tag">小白填空版</div>
+      </div>
+      <h1>用这段 Prompt<br>把<span class="highlight">任何东西</span><br>做成解剖图</h1>
+      <p class="sub">食物只是例子。植物、耳机、键盘、香水瓶、玩具都可以。</p>
+      <div class="hero">
+        <figure class="photo">
+          <img src="assets/abalone.png" alt="鲍鱼标本解剖图案例">
+        </figure>
+        <aside class="note">
+          <h2>不要学写 Prompt</h2>
+          <p>你只要把正文里的完整 prompt 复制走。</p>
+          <p>然后改掉 <span class="red">5 个空</span>。</p>
+          <p>图看懂玩法，正文复制模板。</p>
+        </aside>
+      </div>
+      <div class="form">
+        <div class="form-title"><span class="stamp">只改这里</span><span>照着填就行</span></div>
+        <div class="row"><div class="label">1. 对象名称</div><div class="value">草莓 / 耳机 / 键盘 / 香水瓶</div></div>
+        <div class="row"><div class="label">2. 外面样子</div><div class="value">颜色、材质、纹理、形状</div></div>
+        <div class="row"><div class="label">3. 里面结构</div><div class="value">果肉、芯片、电池、齿轮、导线</div></div>
+        <div class="row"><div class="label">4. 一句副标题</div><div class="value">像给这个东西起一句短诗</div></div>
+        <div class="row"><div class="label">5. 六个标注</div><div class="value">名字 / 材质或成分 / 作用</div></div>
+      </div>
+      <div class="footer">
+        <span>完整 prompt 放在群消息正文里</span>
+        <span>复制 -> 改空 -> 生成</span>
+      </div>
+    </div>
+  </section>
+</body>
+</html>
