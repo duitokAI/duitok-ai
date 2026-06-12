@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>GPT Image 2 Specimen Prompt Research Cover</title>
+  <title>GPT Image 2 Xiaohongshu Prompt Cover</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -11,18 +11,18 @@
       min-height: 100vh;
       display: grid;
       place-items: center;
-      background: #090c10;
+      background: #f2f3f5;
       font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
     }
     .poster {
-      --ink: #fff7ec;
-      --muted: rgba(255,247,236,.64);
-      --line: rgba(127, 231, 230, .38);
-      --accent: #ff5a3d;
-      --accent-soft: #ff8a63;
-      --cyan: #7fe7e6;
-      --steel: #111820;
-      --charcoal: #070a0f;
+      --ink: #18151d;
+      --muted: #68606f;
+      --paper: #fffaf7;
+      --soft: #f7f0fb;
+      --hot: #ff4f38;
+      --pink: #c12b62;
+      --plum: #32103a;
+      --blue: #13b8c5;
 
       width: 1080px;
       height: 1440px;
@@ -30,28 +30,31 @@
       overflow: hidden;
       color: var(--ink);
       background:
-        radial-gradient(circle at 76% 16%, rgba(127,231,230,.18), transparent 20%),
-        radial-gradient(circle at 18% 78%, rgba(255,90,61,.15), transparent 30%),
-        linear-gradient(135deg, #05070a 0%, #101923 48%, #07090d 100%);
-      padding: 56px 66px 54px;
+        radial-gradient(circle at 88% 8%, rgba(255,79,56,.22), transparent 22%),
+        radial-gradient(circle at 8% 28%, rgba(19,184,197,.14), transparent 24%),
+        linear-gradient(180deg, #fffefe 0%, #fbf7ff 54%, #fff6f2 100%);
+      padding: 54px 62px 50px;
     }
     .poster::before {
       content: "";
       position: absolute;
       inset: 0;
       background:
-        linear-gradient(90deg, rgba(127,231,230,.04) 1px, transparent 1px),
-        linear-gradient(0deg, rgba(255,247,236,.028) 1px, transparent 1px);
-      background-size: 42px 42px;
-      opacity: .34;
-      mask-image: linear-gradient(180deg, rgba(0,0,0,.85), rgba(0,0,0,.16) 70%, rgba(0,0,0,.55));
-    }
-    .poster::after {
-      content: "";
-      position: absolute;
-      inset: 26px;
-      border: 1px solid rgba(127,231,230,.34);
+        linear-gradient(90deg, rgba(50,16,58,.045) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(50,16,58,.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: .55;
       pointer-events: none;
+    }
+    .blob {
+      position: absolute;
+      right: -80px;
+      top: 180px;
+      width: 330px;
+      height: 330px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(255,79,56,.2), rgba(193,43,98,.14));
+      filter: blur(2px);
     }
     .content {
       position: relative;
@@ -61,392 +64,369 @@
       flex-direction: column;
     }
     .top {
-      height: 76px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 2px solid var(--line);
-    }
-    .kicker {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      color: var(--cyan);
-      font-family: "Arial Narrow", "Arial Black", Impact, Arial, sans-serif;
-      font-size: 22px;
-      font-weight: 900;
-      font-style: italic;
-      letter-spacing: .38em;
-      text-transform: uppercase;
-    }
-    .slash {
-      width: 17px;
-      height: 17px;
-      background: linear-gradient(135deg, var(--cyan), var(--accent));
-      clip-path: polygon(0 0, 100% 0, 0 100%);
+      height: 58px;
     }
     .brand {
       display: flex;
       align-items: center;
       gap: 12px;
-      font-family: "Arial Narrow", "Arial Black", Impact, Arial, sans-serif;
-      font-size: 21px;
+      font-size: 20px;
       font-weight: 900;
-      letter-spacing: .04em;
+      color: var(--plum);
+      letter-spacing: .02em;
     }
     .brand img {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
-      background: #fff;
-      padding: 6px;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      box-shadow: 0 10px 24px rgba(50,16,58,.12);
     }
-    .hero {
-      position: relative;
-      min-height: 500px;
-      padding-top: 54px;
-    }
-    .title-en {
-      margin: 0 0 18px;
-      font-family: "Arial Narrow", Impact, "Arial Black", Arial, sans-serif;
-      font-size: 92px;
-      line-height: .82;
-      font-weight: 900;
-      letter-spacing: -0.055em;
+    .tag {
+      padding: 9px 18px 10px;
+      border-radius: 999px;
+      background: #18151d;
       color: #fff;
-      transform: scaleX(.92);
-      transform-origin: left center;
-      width: max-content;
-      text-transform: uppercase;
-    }
-    .title-cn {
-      margin: 0;
-      font-family: "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", sans-serif;
-      font-size: 136px;
-      line-height: .94;
-      font-weight: 900;
-      letter-spacing: -0.08em;
-      color: #fff;
-      transform: scaleX(.94);
-      transform-origin: left center;
-      width: max-content;
-    }
-    .title-cn .hot {
-      color: var(--accent);
-      text-shadow: 0 10px 32px rgba(255,90,61,.22);
-    }
-    .title-sub {
-      display: inline-block;
-      margin-top: 16px;
-      padding: 8px 18px 10px;
-      background: linear-gradient(90deg, #fff7ec 0%, #ffe4d6 52%, var(--accent-soft) 100%);
-      color: #0b1016;
-      font-size: 64px;
+      font-size: 20px;
       line-height: 1;
       font-weight: 900;
-      letter-spacing: -0.055em;
     }
-    .hero-copy {
-      margin: 28px 0 0;
-      max-width: 750px;
-      font-size: 30px;
-      line-height: 1.34;
-      font-weight: 800;
-      color: rgba(255,247,236,.88);
+    .hero {
+      padding-top: 54px;
+      min-height: 520px;
+      position: relative;
     }
-    .hero-copy strong { color: var(--cyan); white-space: nowrap; }
-    .orbital {
-      position: absolute;
-      right: 4px;
-      top: 70px;
-      width: 238px;
-      height: 238px;
-      border-radius: 50%;
-      border: 2px solid rgba(127,231,230,.32);
-      opacity: .9;
-    }
-    .orbital::before,
-    .orbital::after {
-      content: "";
-      position: absolute;
-      border-radius: 50%;
-      border: 2px solid rgba(255,90,61,.42);
-    }
-    .orbital::before { inset: 38px; }
-    .orbital::after {
-      inset: 86px;
-      background: radial-gradient(circle, var(--accent) 0 9px, transparent 10px);
-    }
-    .orbital .arm {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 120px;
-      height: 2px;
-      background: linear-gradient(90deg, var(--accent), transparent);
-      transform-origin: left center;
-      transform: rotate(-30deg);
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 16px 12px;
+      background: rgba(19,184,197,.12);
+      border: 1px solid rgba(19,184,197,.32);
+      color: #087b86;
+      border-radius: 999px;
+      font-size: 23px;
+      font-weight: 900;
     }
     .spark {
-      position: absolute;
-      right: 256px;
-      top: 128px;
-      width: 58px;
-      height: 58px;
-      background: var(--accent);
+      width: 18px;
+      height: 18px;
+      background: var(--blue);
       clip-path: polygon(50% 0, 61% 36%, 100% 50%, 61% 64%, 50% 100%, 39% 64%, 0 50%, 39% 36%);
     }
-    .replace {
+    h1 {
+      margin: 28px 0 0;
+      max-width: 850px;
+      font-size: 104px;
+      line-height: .98;
+      font-weight: 950;
+      letter-spacing: -0.075em;
+      color: var(--ink);
+    }
+    h1 .hot {
+      color: var(--hot);
+      position: relative;
+      display: inline-block;
+    }
+    h1 .hot::after {
+      content: "";
+      position: absolute;
+      left: 4px;
+      right: 0;
+      bottom: 3px;
+      height: 18px;
+      background: rgba(255,79,56,.18);
+      z-index: -1;
+      transform: skewX(-12deg);
+    }
+    .subtitle {
+      margin: 28px 0 0;
+      max-width: 800px;
+      font-size: 34px;
+      line-height: 1.38;
+      font-weight: 800;
+      color: var(--muted);
+    }
+    .subtitle strong { color: var(--pink); }
+    .visual-note {
+      position: absolute;
+      right: 8px;
+      top: 132px;
+      width: 220px;
+      height: 220px;
+      border-radius: 34px;
+      background:
+        linear-gradient(135deg, #18151d, #32103a);
+      color: #fff;
+      padding: 24px;
       display: grid;
-      grid-template-columns: 220px 1fr;
-      align-items: center;
-      min-height: 122px;
-      border: 2px solid rgba(127,231,230,.48);
-      background: rgba(127,231,230,.055);
-      box-shadow: inset 0 0 34px rgba(127,231,230,.08);
+      align-content: space-between;
+      transform: rotate(3deg);
+      box-shadow: 0 28px 60px rgba(50,16,58,.18);
+    }
+    .visual-note::before {
+      content: "";
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 3px solid var(--hot);
+      box-shadow: inset 0 0 0 18px transparent, 0 0 0 13px rgba(255,79,56,.12);
+    }
+    .visual-note span {
+      font-size: 25px;
+      line-height: 1.18;
+      font-weight: 900;
+    }
+    .replace {
+      border-radius: 28px;
+      background: #fff;
+      border: 1px solid rgba(50,16,58,.1);
+      box-shadow: 0 22px 54px rgba(50,16,58,.1);
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 190px 1fr;
+      gap: 22px;
+      align-items: stretch;
     }
     .replace-label {
-      height: 100%;
+      border-radius: 22px;
+      background: linear-gradient(135deg, var(--pink), var(--hot));
+      color: #fff;
       display: grid;
       place-items: center;
-      border-right: 2px solid rgba(127,231,230,.42);
-      color: var(--accent);
+      text-align: center;
       font-size: 42px;
-      line-height: 1.04;
-      font-weight: 900;
+      line-height: 1.05;
+      font-weight: 950;
       letter-spacing: -0.05em;
     }
-    .replace-main {
-      padding: 0 30px;
-    }
     .replace-main h2 {
-      margin: 0 0 12px;
-      font-size: 34px;
-      line-height: 1.1;
-      font-weight: 900;
-      letter-spacing: -0.035em;
+      margin: 0 0 18px;
+      font-size: 33px;
+      line-height: 1.18;
+      font-weight: 950;
+      letter-spacing: -0.04em;
     }
     .tokens {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
       gap: 10px;
     }
     .token {
-      padding: 7px 13px 8px;
-      border: 1px solid rgba(127,231,230,.38);
-      color: rgba(255,247,236,.88);
-      font-size: 22px;
-      line-height: 1;
-      font-weight: 800;
-      background: rgba(0,0,0,.18);
+      min-height: 50px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: #f6f2f7;
+      color: var(--plum);
+      font-size: 20px;
+      font-weight: 900;
+      white-space: nowrap;
     }
-    .matrix {
+    .steps {
       margin-top: 28px;
       display: grid;
-      grid-template-columns: 1.05fr .95fr;
-      gap: 24px;
-      align-items: stretch;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
     }
-    .scene-panel {
-      border: 1px solid rgba(127,231,230,.32);
-      background: rgba(0,0,0,.24);
-      padding: 24px 24px 22px;
+    .step {
+      min-height: 156px;
+      border-radius: 24px;
+      background: #fff;
+      border: 1px solid rgba(50,16,58,.1);
+      padding: 22px 20px;
+      box-shadow: 0 16px 34px rgba(50,16,58,.075);
+      position: relative;
     }
-    .panel-title {
-      margin: 0 0 20px;
-      color: var(--cyan);
-      font-family: "Arial Narrow", Impact, "Arial Black", Arial, sans-serif;
-      font-size: 22px;
-      letter-spacing: .2em;
-      font-style: italic;
+    .step-num {
+      color: rgba(255,79,56,.2);
+      font-size: 48px;
+      line-height: 1;
+      font-weight: 950;
+      position: absolute;
+      right: 18px;
+      top: 16px;
+    }
+    .step h3 {
+      margin: 0 0 13px;
+      font-size: 30px;
+      line-height: 1.08;
+      font-weight: 950;
+      letter-spacing: -0.04em;
+      color: var(--ink);
+    }
+    .step p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 21px;
+      line-height: 1.35;
+      font-weight: 700;
+    }
+    .scene-band {
+      margin-top: 30px;
+      border-radius: 30px;
+      background: #18151d;
+      color: #fff;
+      padding: 26px 26px 28px;
+      box-shadow: 0 24px 52px rgba(24,21,29,.18);
+    }
+    .scene-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .scene-head h2 {
+      margin: 0;
+      font-size: 33px;
+      line-height: 1;
+      font-weight: 950;
+      letter-spacing: -0.04em;
+    }
+    .scene-head span {
+      color: rgba(255,255,255,.58);
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: .08em;
       text-transform: uppercase;
     }
-    .scene-list {
+    .scenes {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
     }
     .scene {
-      min-height: 88px;
-      border: 1px solid rgba(127,231,230,.24);
-      padding: 15px 16px;
-      background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(127,231,230,.045));
-    }
-    .scene strong {
-      display: block;
-      margin-bottom: 8px;
-      font-size: 25px;
-      line-height: 1;
+      border-radius: 16px;
+      background: rgba(255,255,255,.08);
+      min-height: 74px;
+      display: grid;
+      place-items: center;
+      color: rgba(255,255,255,.92);
+      font-size: 23px;
       font-weight: 900;
-      letter-spacing: -0.035em;
-    }
-    .scene span {
-      display: block;
-      color: var(--muted);
-      font-family: "Arial Narrow", Impact, Arial, sans-serif;
-      font-size: 15px;
-      letter-spacing: .08em;
-      font-weight: 900;
-      text-transform: uppercase;
     }
     .quote {
-      position: relative;
-      border: 1px solid rgba(255,90,61,.38);
-      background:
-        linear-gradient(135deg, rgba(255,90,61,.16), rgba(127,231,230,.07)),
-        rgba(0,0,0,.25);
-      padding: 30px 30px;
+      margin-top: 28px;
+      border-radius: 28px;
+      background: linear-gradient(135deg, rgba(19,184,197,.14), rgba(255,79,56,.12));
+      border: 1px solid rgba(50,16,58,.08);
+      padding: 24px 28px;
       display: flex;
-      flex-direction: column;
-      justify-content: center;
+      align-items: center;
+      gap: 18px;
     }
-    .quote::before {
-      content: "“";
-      position: absolute;
-      top: 18px;
-      right: 24px;
-      color: var(--accent);
-      font-size: 82px;
-      line-height: 1;
-      font-weight: 900;
+    .quote-mark {
+      color: var(--hot);
+      font-size: 70px;
+      line-height: .8;
+      font-weight: 950;
     }
     .quote p {
       margin: 0;
-      font-size: 42px;
+      color: var(--ink);
+      font-size: 31px;
       line-height: 1.22;
-      font-weight: 900;
-      letter-spacing: -0.055em;
+      font-weight: 950;
+      letter-spacing: -0.04em;
     }
-    .quote .hot {
-      color: var(--accent);
-      text-decoration: underline;
-      text-decoration-thickness: 5px;
-      text-underline-offset: 7px;
-    }
-    .quote small {
-      display: block;
-      margin-top: 22px;
-      color: var(--muted);
-      font-size: 21px;
-      line-height: 1.4;
-      font-weight: 700;
-    }
-    .bottom {
+    .quote strong { color: var(--hot); }
+    .footer {
+      display: none;
       margin-top: auto;
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-    }
-    .chip {
-      height: 76px;
-      display: flex;
       align-items: center;
-      gap: 12px;
-      border: 1px solid rgba(127,231,230,.28);
-      padding: 0 16px;
-      background: rgba(0,0,0,.18);
+      justify-content: space-between;
+      padding-top: 20px;
+      color: rgba(50,16,58,.62);
+      font-size: 18px;
+      font-weight: 850;
     }
-    .chip-mark {
-      width: 25px;
-      height: 25px;
-      border: 3px solid var(--accent);
-      flex: 0 0 auto;
+    .footer .dots {
+      display: flex;
+      gap: 8px;
     }
-    .chip:nth-child(1) .chip-mark { border-radius: 50%; }
-    .chip:nth-child(2) .chip-mark { transform: rotate(45deg); }
-    .chip:nth-child(3) .chip-mark {
-      border: 0;
-      background:
-        linear-gradient(var(--accent), var(--accent)) 0 0 / 7px 7px no-repeat,
-        linear-gradient(var(--accent), var(--accent)) 13px 0 / 7px 7px no-repeat,
-        linear-gradient(var(--accent), var(--accent)) 0 13px / 7px 7px no-repeat,
-        linear-gradient(var(--accent), var(--accent)) 13px 13px / 7px 7px no-repeat;
+    .footer .dots span {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--hot);
     }
-    .chip-title {
-      font-size: 19px;
-      line-height: 1.1;
-      font-weight: 900;
-    }
-    .chip-sub {
-      margin-top: 3px;
-      color: rgba(255,247,236,.5);
-      font-family: "Arial Narrow", Impact, Arial, sans-serif;
-      font-size: 12px;
-      letter-spacing: .06em;
-      font-weight: 900;
-      text-transform: uppercase;
-    }
-    .side-label {
-      position: absolute;
-      left: 20px;
-      bottom: 170px;
-      writing-mode: vertical-rl;
-      color: rgba(127,231,230,.56);
-      font-family: "Arial Narrow", Impact, Arial, sans-serif;
-      font-size: 16px;
-      letter-spacing: .2em;
-      font-weight: 900;
-    }
+    .footer .dots span:nth-child(2) { background: var(--pink); }
+    .footer .dots span:nth-child(3) { background: var(--blue); }
   </style>
 </head>
 <body>
   <section class="poster" id="research-cover">
-    <div class="side-label">GPT IMAGE 2 PROMPT SYSTEM</div>
+    <div class="blob"></div>
     <div class="content">
       <header class="top">
-        <div class="kicker"><span class="slash"></span>PROMPT RESEARCH</div>
         <div class="brand"><img src="assets/creators-desk-logo.png" alt="">CREATORS DESK</div>
+        <div class="tag">小白填空版</div>
       </header>
 
       <section class="hero">
-        <div class="spark"></div>
-        <div class="orbital"><div class="arm"></div></div>
-        <h1>
-          <div class="title-en">GPT IMAGE 2</div>
-          <div class="title-cn"><span class="hot">万物</span>解剖</div>
-          <div class="title-sub">提示词研究</div>
-        </h1>
-        <p class="hero-copy">不会写 Prompt，也能做出 <strong>博物标本级</strong> 视觉图。</p>
+        <div class="eyebrow"><span class="spark"></span>GPT Image 2 出图教程</div>
+        <div class="visual-note"><span>Prompt<br>Research</span></div>
+        <h1>用这套 Prompt<br>把<span class="hot">任何东西</span><br>做成解剖图</h1>
+        <p class="subtitle">不会写 Prompt？直接改这套 <strong>万物解剖模板</strong>。</p>
       </section>
 
       <section class="replace">
         <div class="replace-label">只改<br>5 处</div>
         <div class="replace-main">
-          <h2>不用重写提示词，把这 5 个信息换成你的内容</h2>
+          <h2>把这 5 个信息换成你的内容，就能直接拿去生成</h2>
           <div class="tokens">
-            <span class="token">对象</span>
-            <span class="token">外观</span>
-            <span class="token">内部结构</span>
-            <span class="token">截面细节</span>
-            <span class="token">结构标注</span>
+            <div class="token">对象</div>
+            <div class="token">外观</div>
+            <div class="token">内部</div>
+            <div class="token">截面</div>
+            <div class="token">标注</div>
           </div>
         </div>
       </section>
 
-      <section class="matrix">
-        <div class="scene-panel">
-          <h2 class="panel-title">SCENARIO MAP</h2>
-          <div class="scene-list">
-            <div class="scene"><strong>食物植物</strong><span>food / plant</span></div>
-            <div class="scene"><strong>产品拆解</strong><span>gadget / tool</span></div>
-            <div class="scene"><strong>商品种草</strong><span>product note</span></div>
-            <div class="scene"><strong>海报封面</strong><span>cover visual</span></div>
-            <div class="scene"><strong>科普解释</strong><span>explainer</span></div>
-            <div class="scene"><strong>私域素材</strong><span>community post</span></div>
-          </div>
+      <section class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <h3>复制模板</h3>
+          <p>正文里放完整 Prompt，用户不用自己组织语言。</p>
         </div>
-
-        <aside class="quote">
-          <p>不是学写提示词，<br>是把 <span class="hot">关键词</span><br>换成你的。</p>
-          <small>案例图单独发。封面只负责让用户先看懂：这是一套可复制的出图结构。</small>
-        </aside>
+        <div class="step">
+          <div class="step-num">02</div>
+          <h3>替换关键词</h3>
+          <p>把对象、外观、内部结构等 5 处改成自己的。</p>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <h3>直接出图</h3>
+          <p>案例图单独发，让用户先看到最后效果。</p>
+        </div>
       </section>
 
-      <footer class="bottom">
-        <div class="chip"><div class="chip-mark"></div><div><div class="chip-title">复制即用</div><div class="chip-sub">copy ready</div></div></div>
-        <div class="chip"><div class="chip-mark"></div><div><div class="chip-title">不用重写</div><div class="chip-sub">no writing</div></div></div>
-        <div class="chip"><div class="chip-mark"></div><div><div class="chip-title">万物可套</div><div class="chip-sub">any object</div></div></div>
-        <div class="chip"><div class="chip-mark"></div><div><div class="chip-title">案例单发</div><div class="chip-sub">next page</div></div></div>
+      <section class="scene-band">
+        <div class="scene-head">
+          <h2>可以用来做什么？</h2>
+          <span>ANY OBJECT</span>
+        </div>
+        <div class="scenes">
+          <div class="scene">食物植物</div>
+          <div class="scene">产品拆解</div>
+          <div class="scene">商品种草</div>
+          <div class="scene">科普解释</div>
+          <div class="scene">海报封面</div>
+          <div class="scene">私域素材</div>
+        </div>
+      </section>
+
+      <section class="quote">
+        <div class="quote-mark">“</div>
+        <p>小白不用学写 Prompt，<br>只要把 <strong>5 个关键词</strong> 换成自己的。</p>
+      </section>
+
+      <footer class="footer">
+        <span>PROMPT RESEARCH / GPT IMAGE 2</span>
+        <div class="dots"><span></span><span></span><span></span></div>
       </footer>
     </div>
   </section>
