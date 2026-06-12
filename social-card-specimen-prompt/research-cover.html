@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GPT Image 2 Specimen Prompt Research Cover</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #101010;
+      font-family: Inter, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+    }
+    .poster {
+      width: 1080px;
+      height: 1440px;
+      position: relative;
+      overflow: hidden;
+      color: #f8f7ef;
+      background:
+        radial-gradient(circle at 78% 12%, rgba(255, 213, 28, .18), transparent 18%),
+        radial-gradient(circle at 18% 72%, rgba(255, 213, 28, .08), transparent 28%),
+        linear-gradient(180deg, #050505 0%, #080808 58%, #030303 100%);
+      padding: 58px 66px 54px;
+    }
+    .poster::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(0deg, transparent 0 39px, rgba(255, 213, 28, .08) 40px 41px),
+        repeating-linear-gradient(90deg, transparent 0 39px, rgba(255, 213, 28, .055) 40px 41px);
+      opacity: .32;
+      mask-image: linear-gradient(90deg, rgba(0,0,0,.9), rgba(0,0,0,.18) 42%, rgba(0,0,0,.12));
+    }
+    .poster::after {
+      content: "";
+      position: absolute;
+      inset: 24px;
+      border: 1px solid rgba(255, 213, 28, .52);
+      clip-path: polygon(0 0, 48px 0, 48px 10px, 10px 10px, 10px 48px, 0 48px, 0 0,
+        100% 0, calc(100% - 48px) 0, calc(100% - 48px) 10px, calc(100% - 10px) 10px, calc(100% - 10px) 48px, 100% 48px,
+        100% 100%, calc(100% - 48px) 100%, calc(100% - 48px) calc(100% - 10px), calc(100% - 10px) calc(100% - 10px), calc(100% - 10px) calc(100% - 48px), 100% calc(100% - 48px),
+        0 100%, 48px 100%, 48px calc(100% - 10px), 10px calc(100% - 10px), 10px calc(100% - 48px), 0 calc(100% - 48px));
+      pointer-events: none;
+    }
+    .content { position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; }
+    .topline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 76px;
+      border-bottom: 2px solid rgba(255, 213, 28, .52);
+    }
+    .kicker {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: #ffd51c;
+      font-size: 21px;
+      letter-spacing: .34em;
+      font-weight: 800;
+      font-style: italic;
+      text-transform: uppercase;
+    }
+    .corner-mark {
+      width: 16px;
+      height: 16px;
+      background: #ffd51c;
+      clip-path: polygon(0 0, 100% 0, 0 100%);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: rgba(248,247,239,.86);
+      font-size: 18px;
+      font-weight: 850;
+      letter-spacing: .08em;
+    }
+    .brand img {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: #fff;
+      padding: 5px;
+    }
+    .hero {
+      position: relative;
+      padding-top: 54px;
+      min-height: 418px;
+    }
+    .title-main {
+      margin: 0;
+      font-size: 82px;
+      line-height: .98;
+      font-weight: 950;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+    .title-main .line2 {
+      display: block;
+      margin-top: 22px;
+      font-size: 112px;
+      letter-spacing: -0.04em;
+    }
+    .yellow { color: #ffd51c; }
+    .underline {
+      display: inline-block;
+      position: relative;
+    }
+    .underline::after {
+      content: "";
+      position: absolute;
+      left: 4px;
+      right: -8px;
+      bottom: -8px;
+      height: 12px;
+      background: #ffd51c;
+      transform: skewX(-18deg);
+      z-index: -1;
+      opacity: .95;
+    }
+    .subtitle {
+      margin: 34px 0 0;
+      font-size: 34px;
+      line-height: 1.35;
+      font-weight: 800;
+      color: rgba(248,247,239,.9);
+    }
+    .subtitle strong { color: #ffd51c; }
+    .radar {
+      position: absolute;
+      right: 0;
+      top: 34px;
+      width: 230px;
+      height: 230px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 213, 28, .38);
+      opacity: .92;
+    }
+    .radar::before,
+    .radar::after {
+      content: "";
+      position: absolute;
+      inset: 34px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 213, 28, .42);
+    }
+    .radar::after {
+      inset: 78px;
+      background: radial-gradient(circle, #ffd51c 0 8px, transparent 9px);
+    }
+    .sweep {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 112px;
+      height: 2px;
+      background: linear-gradient(90deg, #ffd51c, transparent);
+      transform-origin: left center;
+      transform: rotate(-28deg);
+    }
+    .spark {
+      position: absolute;
+      right: 226px;
+      top: 78px;
+      width: 50px;
+      height: 50px;
+      background: #ffd51c;
+      clip-path: polygon(50% 0, 61% 36%, 100% 50%, 61% 64%, 50% 100%, 39% 64%, 0 50%, 39% 36%);
+    }
+    .banner {
+      margin-top: 8px;
+      border: 2px solid #ffd51c;
+      border-radius: 22px;
+      min-height: 94px;
+      display: grid;
+      grid-template-columns: 230px 1fr;
+      align-items: center;
+      background: rgba(255, 213, 28, .055);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
+    }
+    .banner-left {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-right: 2px solid rgba(255, 213, 28, .55);
+      color: #ffd51c;
+      font-size: 42px;
+      font-weight: 950;
+    }
+    .banner-right {
+      padding: 0 28px;
+      font-size: 37px;
+      line-height: 1.2;
+      font-weight: 900;
+    }
+    .grid {
+      margin-top: 26px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .card {
+      min-height: 164px;
+      border: 2px solid rgba(255, 213, 28, .58);
+      border-radius: 20px;
+      padding: 20px 18px;
+      position: relative;
+      background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,213,28,.035));
+    }
+    .card-num {
+      position: absolute;
+      right: 18px;
+      top: 14px;
+      color: rgba(255,255,255,.18);
+      font-size: 42px;
+      font-weight: 950;
+    }
+    .icon {
+      width: 42px;
+      height: 42px;
+      margin-bottom: 18px;
+      color: #ffd51c;
+    }
+    .card-title {
+      font-size: 30px;
+      line-height: 1.08;
+      font-weight: 950;
+      margin-bottom: 10px;
+    }
+    .card-sub {
+      color: rgba(248,247,239,.58);
+      font-size: 16px;
+      letter-spacing: .08em;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .quote {
+      margin-top: 32px;
+      border: 2px solid rgba(255, 213, 28, .7);
+      border-radius: 24px;
+      padding: 28px 30px;
+      min-height: 174px;
+      display: grid;
+      grid-template-columns: 122px 1fr 80px;
+      align-items: center;
+      background: rgba(0,0,0,.62);
+      box-shadow: 0 0 0 1px rgba(255,255,255,.08), inset 0 0 32px rgba(255,213,28,.06);
+    }
+    .quote-mark {
+      color: #ffd51c;
+      font-size: 100px;
+      line-height: 1;
+      font-weight: 950;
+    }
+    .quote-text {
+      font-size: 42px;
+      line-height: 1.24;
+      font-weight: 950;
+    }
+    .quote-text .yellow { text-decoration: underline; text-decoration-thickness: 5px; text-underline-offset: 7px; }
+    .bottom {
+      margin-top: auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+    .chip {
+      height: 78px;
+      border: 1px solid rgba(255, 213, 28, .56);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 0 16px;
+      background: rgba(255,255,255,.025);
+    }
+    .chip-sign {
+      width: 28px;
+      height: 28px;
+      border: 3px solid #ffd51c;
+      flex: 0 0 auto;
+    }
+    .chip:nth-child(1) .chip-sign { border-radius: 50%; }
+    .chip:nth-child(2) .chip-sign { transform: rotate(45deg); }
+    .chip:nth-child(3) .chip-sign { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; border: 0; }
+    .chip:nth-child(3) .chip-sign::before,
+    .chip:nth-child(3) .chip-sign::after {
+      content: "";
+      background: #ffd51c;
+      box-shadow: 16px 0 #ffd51c, 0 16px #ffd51c, 16px 16px #ffd51c;
+      width: 8px;
+      height: 8px;
+    }
+    .chip-title {
+      font-size: 19px;
+      line-height: 1.1;
+      font-weight: 900;
+    }
+    .chip-sub {
+      margin-top: 3px;
+      color: rgba(248,247,239,.52);
+      font-size: 12px;
+      letter-spacing: .08em;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .side-label {
+      position: absolute;
+      left: 18px;
+      bottom: 186px;
+      writing-mode: vertical-rl;
+      color: rgba(255, 213, 28, .68);
+      font-size: 15px;
+      letter-spacing: .22em;
+      font-weight: 800;
+    }
+    svg { display: block; width: 100%; height: 100%; stroke: currentColor; fill: none; stroke-width: 2.4; }
+  </style>
+</head>
+<body>
+  <section class="poster" id="research-cover">
+    <div class="side-label">GPT IMAGE 2 PROMPT RESEARCH</div>
+    <div class="content">
+      <header class="topline">
+        <div class="kicker"><span class="corner-mark"></span>PROMPT RESEARCH</div>
+        <div class="brand"><img src="assets/creators-desk-logo.png" alt="">CREATORS DESK</div>
+      </header>
+
+      <section class="hero">
+        <div class="spark"></div>
+        <div class="radar"><div class="sweep"></div></div>
+        <h1 class="title-main">
+          GPT Image 2
+          <span class="line2"><span class="yellow">万物</span><span class="underline">解剖</span></span>
+          Prompt
+        </h1>
+        <p class="subtitle">把任何对象做成 <strong>博物标本级</strong> 视觉说明图</p>
+      </section>
+
+      <section class="banner">
+        <div class="banner-left">5 个空</div>
+        <div class="banner-right">对象 / 外表 / 内部 / 截面 / 标注<br>改完就能直接生成</div>
+      </section>
+
+      <section class="grid">
+        <div class="card">
+          <div class="card-num">01</div>
+          <div class="icon"><svg viewBox="0 0 48 48"><path d="M10 18h28v22H10z"/><path d="M17 18v-5a7 7 0 0 1 14 0v5"/><path d="M31 30h8v8h-8z"/></svg></div>
+          <div class="card-title">商品种草</div>
+          <div class="card-sub">PRODUCT NOTE</div>
+        </div>
+        <div class="card">
+          <div class="card-num">02</div>
+          <div class="icon"><svg viewBox="0 0 48 48"><path d="M24 5l17 10v18L24 43 7 33V15z"/><path d="M24 14v20M14 20l20 12M34 20 14 32"/></svg></div>
+          <div class="card-title">产品拆解</div>
+          <div class="card-sub">BREAKDOWN</div>
+        </div>
+        <div class="card">
+          <div class="card-num">03</div>
+          <div class="icon"><svg viewBox="0 0 48 48"><path d="M8 26h9l18 10V12L17 22H8z"/><path d="M39 18l5-4M40 24h6M39 30l5 4"/></svg></div>
+          <div class="card-title">广告创意</div>
+          <div class="card-sub">CAMPAIGN IDEA</div>
+        </div>
+        <div class="card">
+          <div class="card-num">04</div>
+          <div class="icon"><svg viewBox="0 0 48 48"><path d="M8 22 24 8l16 14v18H13V25"/><path d="M21 40V28h10v12"/></svg></div>
+          <div class="card-title">空间物件</div>
+          <div class="card-sub">OBJECT STUDY</div>
+        </div>
+        <div class="card">
+          <div class="card-num">05</div>
+          <div class="icon"><svg viewBox="0 0 48 48"><path d="M8 10h14a7 7 0 0 1 7 7v23H15a7 7 0 0 0-7 7z"/><path d="M40 10H29a7 7 0 0 0-7 7"/></svg></div>
+          <div class="card-title">教学教程</div>
+          <div class="card-sub">TUTORIAL</div>
+        </div>
+        <div class="card">
+          <div class="card-num">06</div>
+          <div class="icon"><svg viewBox="0 0 48 48"><path d="M24 5 41 15v18L24 43 7 33V15z"/><path d="M7 15l17 10 17-10M24 25v18"/></svg></div>
+          <div class="card-title">IP 视觉</div>
+          <div class="card-sub">VISUAL SYSTEM</div>
+        </div>
+      </section>
+
+      <section class="quote">
+        <div class="quote-mark">“</div>
+        <div class="quote-text">从一段模板开始，<br><span class="yellow">任何东西</span> 都能被讲清楚</div>
+        <div class="quote-mark">”</div>
+      </section>
+
+      <footer class="bottom">
+        <div class="chip"><div class="chip-sign"></div><div><div class="chip-title">小白可用</div><div class="chip-sub">NO WRITING</div></div></div>
+        <div class="chip"><div class="chip-sign"></div><div><div class="chip-title">结构固定</div><div class="chip-sub">TEMPLATE</div></div></div>
+        <div class="chip"><div class="chip-sign"></div><div><div class="chip-title">多场景适配</div><div class="chip-sub">ANY OBJECT</div></div></div>
+        <div class="chip"><div class="chip-sign"></div><div><div class="chip-title">出图更稳</div><div class="chip-sub">REPEATABLE</div></div></div>
+      </footer>
+    </div>
+  </section>
+</body>
+</html>
