@@ -11,19 +11,19 @@
       min-height: 100vh;
       display: grid;
       place-items: center;
-      background: #101010;
-      font-family: Inter, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      background: #160018;
+      font-family: Impact, "Arial Black", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
     }
     .poster {
       width: 1080px;
       height: 1440px;
       position: relative;
       overflow: hidden;
-      color: #f8f7ef;
+      color: #fff8f5;
       background:
-        radial-gradient(circle at 78% 12%, rgba(255, 213, 28, .18), transparent 18%),
-        radial-gradient(circle at 18% 72%, rgba(255, 213, 28, .08), transparent 28%),
-        linear-gradient(180deg, #050505 0%, #080808 58%, #030303 100%);
+        radial-gradient(circle at 78% 12%, rgba(255, 103, 56, .22), transparent 18%),
+        radial-gradient(circle at 18% 72%, rgba(193, 43, 98, .18), transparent 28%),
+        linear-gradient(180deg, #09000b 0%, #210024 48%, #070008 100%);
       padding: 58px 66px 54px;
     }
     .poster::before {
@@ -31,16 +31,16 @@
       position: absolute;
       inset: 0;
       background:
-        repeating-linear-gradient(0deg, transparent 0 39px, rgba(255, 213, 28, .08) 40px 41px),
-        repeating-linear-gradient(90deg, transparent 0 39px, rgba(255, 213, 28, .055) 40px 41px);
-      opacity: .32;
+        repeating-linear-gradient(0deg, transparent 0 39px, rgba(255, 103, 56, .07) 40px 41px),
+        repeating-linear-gradient(90deg, transparent 0 39px, rgba(193, 43, 98, .055) 40px 41px);
+      opacity: .4;
       mask-image: linear-gradient(90deg, rgba(0,0,0,.9), rgba(0,0,0,.18) 42%, rgba(0,0,0,.12));
     }
     .poster::after {
       content: "";
       position: absolute;
       inset: 24px;
-      border: 1px solid rgba(255, 213, 28, .52);
+      border: 1px solid rgba(255, 103, 56, .62);
       clip-path: polygon(0 0, 48px 0, 48px 10px, 10px 10px, 10px 48px, 0 48px, 0 0,
         100% 0, calc(100% - 48px) 0, calc(100% - 48px) 10px, calc(100% - 10px) 10px, calc(100% - 10px) 48px, 100% 48px,
         100% 100%, calc(100% - 48px) 100%, calc(100% - 48px) calc(100% - 10px), calc(100% - 10px) calc(100% - 10px), calc(100% - 10px) calc(100% - 48px), 100% calc(100% - 48px),
@@ -53,13 +53,13 @@
       align-items: center;
       justify-content: space-between;
       height: 76px;
-      border-bottom: 2px solid rgba(255, 213, 28, .52);
+      border-bottom: 2px solid rgba(255, 103, 56, .64);
     }
     .kicker {
       display: flex;
       align-items: center;
       gap: 14px;
-      color: #ffd51c;
+      color: #ff6738;
       font-size: 21px;
       letter-spacing: .34em;
       font-weight: 800;
@@ -69,14 +69,14 @@
     .corner-mark {
       width: 16px;
       height: 16px;
-      background: #ffd51c;
+      background: #ff6738;
       clip-path: polygon(0 0, 100% 0, 0 100%);
     }
     .brand {
       display: flex;
       align-items: center;
       gap: 12px;
-      color: rgba(248,247,239,.86);
+      color: rgba(255,248,245,.88);
       font-size: 18px;
       font-weight: 850;
       letter-spacing: .08em;
@@ -96,18 +96,31 @@
     .title-main {
       margin: 0;
       font-size: 82px;
-      line-height: .98;
+      line-height: .9;
       font-weight: 950;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.045em;
       color: #fff;
+      font-family: Impact, "Arial Black", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
     }
     .title-main .line2 {
       display: block;
       margin-top: 22px;
-      font-size: 112px;
-      letter-spacing: -0.04em;
+      font-size: 126px;
+      letter-spacing: -0.075em;
+      transform: scaleX(.92);
+      transform-origin: left center;
+      width: max-content;
     }
-    .yellow { color: #ffd51c; }
+    .title-main .line3 {
+      display: block;
+      margin-top: 14px;
+      font-size: 96px;
+      letter-spacing: -0.055em;
+      transform: scaleX(.94);
+      transform-origin: left center;
+      width: max-content;
+    }
+    .accent { color: #ff6738; }
     .underline {
       display: inline-block;
       position: relative;
@@ -119,7 +132,7 @@
       right: -8px;
       bottom: -8px;
       height: 12px;
-      background: #ffd51c;
+      background: linear-gradient(90deg, #c12b62, #ff6738);
       transform: skewX(-18deg);
       z-index: -1;
       opacity: .95;
@@ -129,9 +142,10 @@
       font-size: 34px;
       line-height: 1.35;
       font-weight: 800;
-      color: rgba(248,247,239,.9);
+      color: rgba(255,248,245,.9);
+      font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
     }
-    .subtitle strong { color: #ffd51c; }
+    .subtitle strong { color: #ff6738; }
     .radar {
       position: absolute;
       right: 0;
@@ -139,7 +153,7 @@
       width: 230px;
       height: 230px;
       border-radius: 50%;
-      border: 2px solid rgba(255, 213, 28, .38);
+      border: 2px solid rgba(255, 103, 56, .45);
       opacity: .92;
     }
     .radar::before,
@@ -148,11 +162,11 @@
       position: absolute;
       inset: 34px;
       border-radius: 50%;
-      border: 2px solid rgba(255, 213, 28, .42);
+      border: 2px solid rgba(193, 43, 98, .56);
     }
     .radar::after {
       inset: 78px;
-      background: radial-gradient(circle, #ffd51c 0 8px, transparent 9px);
+      background: radial-gradient(circle, #ff6738 0 8px, transparent 9px);
     }
     .sweep {
       position: absolute;
@@ -160,7 +174,7 @@
       top: 50%;
       width: 112px;
       height: 2px;
-      background: linear-gradient(90deg, #ffd51c, transparent);
+      background: linear-gradient(90deg, #ff6738, transparent);
       transform-origin: left center;
       transform: rotate(-28deg);
     }
@@ -170,18 +184,18 @@
       top: 78px;
       width: 50px;
       height: 50px;
-      background: #ffd51c;
+      background: #ff6738;
       clip-path: polygon(50% 0, 61% 36%, 100% 50%, 61% 64%, 50% 100%, 39% 64%, 0 50%, 39% 36%);
     }
     .banner {
       margin-top: 8px;
-      border: 2px solid #ffd51c;
+      border: 2px solid #ff6738;
       border-radius: 22px;
       min-height: 94px;
       display: grid;
       grid-template-columns: 230px 1fr;
       align-items: center;
-      background: rgba(255, 213, 28, .055);
+      background: linear-gradient(90deg, rgba(139,26,120,.32), rgba(255,103,56,.12));
       box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
     }
     .banner-left {
@@ -189,16 +203,18 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      border-right: 2px solid rgba(255, 213, 28, .55);
-      color: #ffd51c;
-      font-size: 42px;
+      border-right: 2px solid rgba(255, 103, 56, .64);
+      color: #ff6738;
+      font-size: 39px;
       font-weight: 950;
+      letter-spacing: -0.04em;
     }
     .banner-right {
       padding: 0 28px;
-      font-size: 37px;
+      font-size: 34px;
       line-height: 1.2;
       font-weight: 900;
+      font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
     }
     .grid {
       margin-top: 26px;
@@ -208,11 +224,11 @@
     }
     .card {
       min-height: 164px;
-      border: 2px solid rgba(255, 213, 28, .58);
+      border: 2px solid rgba(255, 103, 56, .58);
       border-radius: 20px;
       padding: 20px 18px;
       position: relative;
-      background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,213,28,.035));
+      background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(193,43,98,.085));
     }
     .card-num {
       position: absolute;
@@ -226,16 +242,17 @@
       width: 42px;
       height: 42px;
       margin-bottom: 18px;
-      color: #ffd51c;
+      color: #ff6738;
     }
     .card-title {
       font-size: 30px;
       line-height: 1.08;
       font-weight: 950;
       margin-bottom: 10px;
+      font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
     }
     .card-sub {
-      color: rgba(248,247,239,.58);
+      color: rgba(255,248,245,.58);
       font-size: 16px;
       letter-spacing: .08em;
       font-weight: 800;
@@ -243,7 +260,7 @@
     }
     .quote {
       margin-top: 32px;
-      border: 2px solid rgba(255, 213, 28, .7);
+      border: 2px solid rgba(255, 103, 56, .78);
       border-radius: 24px;
       padding: 28px 30px;
       min-height: 174px;
@@ -251,10 +268,10 @@
       grid-template-columns: 122px 1fr 80px;
       align-items: center;
       background: rgba(0,0,0,.62);
-      box-shadow: 0 0 0 1px rgba(255,255,255,.08), inset 0 0 32px rgba(255,213,28,.06);
+      box-shadow: 0 0 0 1px rgba(255,255,255,.08), inset 0 0 42px rgba(193,43,98,.18);
     }
     .quote-mark {
-      color: #ffd51c;
+      color: #ff6738;
       font-size: 100px;
       line-height: 1;
       font-weight: 950;
@@ -263,8 +280,9 @@
       font-size: 42px;
       line-height: 1.24;
       font-weight: 950;
+      font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
     }
-    .quote-text .yellow { text-decoration: underline; text-decoration-thickness: 5px; text-underline-offset: 7px; }
+    .quote-text .accent { text-decoration: underline; text-decoration-thickness: 5px; text-underline-offset: 7px; }
     .bottom {
       margin-top: auto;
       display: grid;
@@ -273,7 +291,7 @@
     }
     .chip {
       height: 78px;
-      border: 1px solid rgba(255, 213, 28, .56);
+      border: 1px solid rgba(255, 103, 56, .62);
       border-radius: 16px;
       display: flex;
       align-items: center;
@@ -284,7 +302,7 @@
     .chip-sign {
       width: 28px;
       height: 28px;
-      border: 3px solid #ffd51c;
+      border: 3px solid #ff6738;
       flex: 0 0 auto;
     }
     .chip:nth-child(1) .chip-sign { border-radius: 50%; }
@@ -293,8 +311,8 @@
     .chip:nth-child(3) .chip-sign::before,
     .chip:nth-child(3) .chip-sign::after {
       content: "";
-      background: #ffd51c;
-      box-shadow: 16px 0 #ffd51c, 0 16px #ffd51c, 16px 16px #ffd51c;
+      background: #ff6738;
+      box-shadow: 16px 0 #ff6738, 0 16px #ff6738, 16px 16px #ff6738;
       width: 8px;
       height: 8px;
     }
@@ -302,10 +320,11 @@
       font-size: 19px;
       line-height: 1.1;
       font-weight: 900;
+      font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
     }
     .chip-sub {
       margin-top: 3px;
-      color: rgba(248,247,239,.52);
+      color: rgba(255,248,245,.52);
       font-size: 12px;
       letter-spacing: .08em;
       font-weight: 800;
@@ -316,7 +335,7 @@
       left: 18px;
       bottom: 186px;
       writing-mode: vertical-rl;
-      color: rgba(255, 213, 28, .68);
+      color: rgba(255, 103, 56, .74);
       font-size: 15px;
       letter-spacing: .22em;
       font-weight: 800;
@@ -338,67 +357,67 @@
         <div class="radar"><div class="sweep"></div></div>
         <h1 class="title-main">
           GPT Image 2
-          <span class="line2"><span class="yellow">万物</span><span class="underline">解剖</span></span>
-          Prompt
+          <span class="line2"><span class="accent">万物</span><span class="underline">解剖</span></span>
+          <span class="line3">提示词模板</span>
         </h1>
-        <p class="subtitle">把任何对象做成 <strong>博物标本级</strong> 视觉说明图</p>
+        <p class="subtitle">不会写 Prompt 也能做出 <strong>博物标本级</strong> 视觉图</p>
       </section>
 
       <section class="banner">
-        <div class="banner-left">5 个空</div>
-        <div class="banner-right">对象 / 外表 / 内部 / 截面 / 标注<br>改完就能直接生成</div>
+        <div class="banner-left">只改 5 处</div>
+        <div class="banner-right">把对象、外观、内部、截面、标注<br>替换成你的内容就能用</div>
       </section>
 
       <section class="grid">
         <div class="card">
           <div class="card-num">01</div>
           <div class="icon"><svg viewBox="0 0 48 48"><path d="M10 18h28v22H10z"/><path d="M17 18v-5a7 7 0 0 1 14 0v5"/><path d="M31 30h8v8h-8z"/></svg></div>
-          <div class="card-title">商品种草</div>
-          <div class="card-sub">PRODUCT NOTE</div>
+          <div class="card-title">食物植物</div>
+          <div class="card-sub">FOOD / PLANT</div>
         </div>
         <div class="card">
           <div class="card-num">02</div>
           <div class="icon"><svg viewBox="0 0 48 48"><path d="M24 5l17 10v18L24 43 7 33V15z"/><path d="M24 14v20M14 20l20 12M34 20 14 32"/></svg></div>
           <div class="card-title">产品拆解</div>
-          <div class="card-sub">BREAKDOWN</div>
+          <div class="card-sub">GADGET / TOOL</div>
         </div>
         <div class="card">
           <div class="card-num">03</div>
           <div class="icon"><svg viewBox="0 0 48 48"><path d="M8 26h9l18 10V12L17 22H8z"/><path d="M39 18l5-4M40 24h6M39 30l5 4"/></svg></div>
-          <div class="card-title">广告创意</div>
-          <div class="card-sub">CAMPAIGN IDEA</div>
+          <div class="card-title">商品种草</div>
+          <div class="card-sub">PRODUCT NOTE</div>
         </div>
         <div class="card">
           <div class="card-num">04</div>
           <div class="icon"><svg viewBox="0 0 48 48"><path d="M8 22 24 8l16 14v18H13V25"/><path d="M21 40V28h10v12"/></svg></div>
-          <div class="card-title">空间物件</div>
-          <div class="card-sub">OBJECT STUDY</div>
+          <div class="card-title">海报封面</div>
+          <div class="card-sub">COVER VISUAL</div>
         </div>
         <div class="card">
           <div class="card-num">05</div>
           <div class="icon"><svg viewBox="0 0 48 48"><path d="M8 10h14a7 7 0 0 1 7 7v23H15a7 7 0 0 0-7 7z"/><path d="M40 10H29a7 7 0 0 0-7 7"/></svg></div>
-          <div class="card-title">教学教程</div>
-          <div class="card-sub">TUTORIAL</div>
+          <div class="card-title">科普解释</div>
+          <div class="card-sub">EXPLAINER</div>
         </div>
         <div class="card">
           <div class="card-num">06</div>
           <div class="icon"><svg viewBox="0 0 48 48"><path d="M24 5 41 15v18L24 43 7 33V15z"/><path d="M7 15l17 10 17-10M24 25v18"/></svg></div>
-          <div class="card-title">IP 视觉</div>
-          <div class="card-sub">VISUAL SYSTEM</div>
+          <div class="card-title">私域素材</div>
+          <div class="card-sub">COMMUNITY POST</div>
         </div>
       </section>
 
       <section class="quote">
         <div class="quote-mark">“</div>
-        <div class="quote-text">从一段模板开始，<br><span class="yellow">任何东西</span> 都能被讲清楚</div>
+        <div class="quote-text">不是学写提示词，<br>是把 <span class="accent">5 处关键词</span> 换成你的</div>
         <div class="quote-mark">”</div>
       </section>
 
       <footer class="bottom">
-        <div class="chip"><div class="chip-sign"></div><div><div class="chip-title">小白可用</div><div class="chip-sub">NO WRITING</div></div></div>
-        <div class="chip"><div class="chip-sign"></div><div><div class="chip-title">结构固定</div><div class="chip-sub">TEMPLATE</div></div></div>
-        <div class="chip"><div class="chip-sign"></div><div><div class="chip-title">多场景适配</div><div class="chip-sub">ANY OBJECT</div></div></div>
-        <div class="chip"><div class="chip-sign"></div><div><div class="chip-title">出图更稳</div><div class="chip-sub">REPEATABLE</div></div></div>
+        <div class="chip"><div class="chip-sign"></div><div><div class="chip-title">复制即用</div><div class="chip-sub">COPY READY</div></div></div>
+        <div class="chip"><div class="chip-sign"></div><div><div class="chip-title">不用重写</div><div class="chip-sub">NO WRITING</div></div></div>
+        <div class="chip"><div class="chip-sign"></div><div><div class="chip-title">万物可套</div><div class="chip-sub">ANY OBJECT</div></div></div>
+        <div class="chip"><div class="chip-sign"></div><div><div class="chip-title">案例单发</div><div class="chip-sub">NEXT PAGE</div></div></div>
       </footer>
     </div>
   </section>
