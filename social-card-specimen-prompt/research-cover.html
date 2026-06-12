@@ -12,7 +12,7 @@
       display: grid;
       place-items: center;
       background: #f2f3f5;
-      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+      font-family: "PingFang SC", "PingFang HK", "PingFang TC", "Hiragino Sans GB", sans-serif;
     }
     .poster {
       --ink: #18151d;
@@ -23,6 +23,7 @@
       --pink: #c12b62;
       --plum: #32103a;
       --blue: #13b8c5;
+      --brand-font: "PingFang SC", "PingFang HK", "PingFang TC", "Hiragino Sans GB", sans-serif;
 
       width: 1080px;
       height: 1440px;
@@ -34,6 +35,7 @@
         radial-gradient(circle at 8% 28%, rgba(19,184,197,.14), transparent 24%),
         linear-gradient(180deg, #fffefe 0%, #fbf7ff 54%, #fff6f2 100%);
       padding: 54px 62px 50px;
+      font-family: var(--brand-font);
     }
     .poster::before {
       content: "";
@@ -143,7 +145,7 @@
       font-size: 104px;
       line-height: .98;
       font-weight: 950;
-      letter-spacing: -0.075em;
+      letter-spacing: -0.055em;
       color: var(--ink);
     }
     h1 .hot {
@@ -228,7 +230,7 @@
       font-size: 33px;
       line-height: 1.18;
       font-weight: 950;
-      letter-spacing: -0.04em;
+      letter-spacing: -0.025em;
     }
     .tokens {
       display: grid;
@@ -275,7 +277,7 @@
       font-size: 30px;
       line-height: 1.08;
       font-weight: 950;
-      letter-spacing: -0.04em;
+      letter-spacing: -0.025em;
       color: var(--ink);
     }
     .step p {
@@ -350,7 +352,7 @@
       font-size: 31px;
       line-height: 1.22;
       font-weight: 950;
-      letter-spacing: -0.04em;
+      letter-spacing: -0.025em;
     }
     .quote strong { color: var(--hot); }
     .footer {
