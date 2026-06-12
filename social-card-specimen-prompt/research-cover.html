@@ -110,6 +110,27 @@
       font-size: 23px;
       font-weight: 900;
     }
+    .eyebrow-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .tip-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 11px 15px 12px;
+      border-radius: 999px;
+      background: #18151d;
+      color: #fff;
+      font-size: 23px;
+      line-height: 1;
+      font-weight: 950;
+      letter-spacing: -0.02em;
+    }
+    .tip-chip span {
+      color: var(--hot);
+      margin-left: 4px;
+    }
     .spark {
       width: 18px;
       height: 18px;
@@ -366,7 +387,10 @@
       </header>
 
       <section class="hero">
-        <div class="eyebrow"><span class="spark"></span>GPT Image 2 出图教程</div>
+        <div class="eyebrow-wrap">
+          <div class="tip-chip">TIP <span>01</span></div>
+          <div class="eyebrow"><span class="spark"></span>GPT Image 2 出图教程</div>
+        </div>
         <div class="visual-note"><span>Prompt<br>Research</span></div>
         <h1>用这套 Prompt<br>把<span class="hot">任何东西</span><br>做成解剖图</h1>
         <p class="subtitle">不会写 Prompt？直接改这套 <strong>万物解剖模板</strong>。</p>
