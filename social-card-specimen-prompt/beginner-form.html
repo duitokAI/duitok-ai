@@ -18,12 +18,12 @@
       width: 1080px;
       height: 1440px;
       background:
-        radial-gradient(circle at 0% 0%, rgba(139, 26, 120, .11), transparent 34%),
-        radial-gradient(circle at 100% 100%, rgba(255, 103, 56, .12), transparent 34%),
-        linear-gradient(180deg, #ffffff 0%, #fbf9fc 62%, #fff6f2 100%);
+        linear-gradient(135deg, rgba(139, 26, 120, .10) 0%, transparent 28%),
+        linear-gradient(315deg, rgba(255, 103, 56, .13) 0%, transparent 30%),
+        linear-gradient(180deg, #ffffff 0%, #fbf9fc 58%, #fff7f3 100%);
       position: relative;
       overflow: hidden;
-      padding: 48px 64px 48px;
+      padding: 54px 64px 52px;
       box-shadow: 0 30px 100px rgba(33,0,36,.16);
     }
     .sheet::before {
@@ -33,7 +33,7 @@
       background:
         repeating-linear-gradient(0deg, transparent 0 46px, rgba(50,16,58,.04) 47px 48px),
         repeating-linear-gradient(90deg, transparent 0 46px, rgba(50,16,58,.025) 47px 48px);
-      opacity: .55;
+      opacity: .35;
       pointer-events: none;
     }
     .content { position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; }
@@ -42,7 +42,7 @@
       justify-content: space-between;
       align-items: center;
       border-bottom: 2px solid rgba(50,16,58,.18);
-      padding-bottom: 14px;
+      padding-bottom: 16px;
     }
     .brand-lockup {
       display: flex;
@@ -73,9 +73,9 @@
       background: linear-gradient(135deg, #8b1a78 0%, #c12b62 52%, #ff6738 100%);
     }
     h1 {
-      margin: 28px 0 14px;
-      font-size: 72px;
-      line-height: 1.03;
+      margin: 32px 0 12px;
+      font-size: 60px;
+      line-height: 1.04;
       letter-spacing: -0.01em;
       font-weight: 900;
       color: #210024;
@@ -89,27 +89,27 @@
       -webkit-box-decoration-break: clone;
     }
     .sub {
-      margin: 0 0 20px;
-      font-size: 31px;
+      margin: 0 0 24px;
+      font-size: 29px;
       line-height: 1.38;
       font-weight: 600;
       color: #4b3d4f;
     }
     .hero {
       display: grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap: 26px;
+      grid-template-columns: 1.22fr .78fr;
+      gap: 24px;
       align-items: stretch;
-      margin-bottom: 22px;
+      margin-bottom: 26px;
     }
     .photo {
       position: relative;
       background: #111;
-      border: 2px solid rgba(50,16,58,.2);
-      min-height: 460px;
+      border: 1px solid rgba(50,16,58,.14);
+      border-radius: 28px;
+      min-height: 470px;
       overflow: hidden;
-      transform: rotate(-1.2deg);
-      box-shadow: 10px 12px 0 rgba(193,43,98,.22);
+      box-shadow: 0 28px 70px rgba(50,16,58,.18);
     }
     .photo::before {
       content: "";
@@ -117,7 +117,7 @@
       inset: -24px;
       background: url("assets/abalone.png") center / cover;
       filter: blur(18px);
-      opacity: .5;
+      opacity: .46;
       transform: scale(1.08);
     }
     .photo img {
@@ -129,59 +129,84 @@
       display: block;
     }
     .note {
-      border: 2px solid rgba(50,16,58,.2);
-      background: #fff;
-      padding: 24px 24px;
-      box-shadow: 8px 8px 0 rgba(255,103,56,.28);
-      transform: rotate(1deg);
+      border: 0;
+      border-radius: 28px;
+      color: #fff;
+      background:
+        linear-gradient(145deg, rgba(33,0,36,.98), rgba(139,26,120,.96) 48%, rgba(255,103,56,.94));
+      padding: 28px 26px;
+      box-shadow: 0 28px 64px rgba(139,26,120,.24);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
     .note h2 {
       margin: 0 0 18px;
-      font-size: 35px;
+      font-size: 32px;
       line-height: 1.1;
       font-weight: 900;
     }
     .note p {
-      margin: 0 0 16px;
-      font-size: 27px;
+      margin: 0 0 14px;
+      font-size: 24px;
       line-height: 1.38;
       font-weight: 650;
+      color: rgba(255,255,255,.88);
     }
     .red {
-      color: #c12b62;
+      color: #fff;
+      background: rgba(255,255,255,.18);
+      border-radius: 10px;
+      padding: 0 8px 2px;
       font-weight: 900;
+    }
+    .note-steps {
+      display: grid;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .note-step {
+      border: 1px solid rgba(255,255,255,.22);
+      border-radius: 16px;
+      padding: 13px 14px;
+      font-size: 23px;
+      line-height: 1.28;
+      font-weight: 800;
+      background: rgba(255,255,255,.09);
     }
     .form {
       border: 1px solid rgba(50,16,58,.12);
-      border-radius: 10px;
-      background: rgba(255,255,255,.84);
-      padding: 20px 26px 18px;
+      border-radius: 28px;
+      background: rgba(255,255,255,.92);
+      padding: 17px 24px 15px;
       display: grid;
-      gap: 8px;
+      gap: 10px;
+      box-shadow: 0 20px 54px rgba(50,16,58,.08);
     }
     .form-title {
       display: flex;
       align-items: center;
       gap: 14px;
-      font-size: 32px;
+      font-size: 27px;
       font-weight: 900;
       margin-bottom: 4px;
     }
     .stamp {
       color: #fff;
       background: linear-gradient(135deg, #8b1a78 0%, #c12b62 58%, #ff6738 100%);
-      padding: 6px 12px;
+      padding: 7px 13px;
+      border-radius: 12px;
       transform: rotate(-1deg);
       display: inline-block;
     }
     .row {
       display: grid;
-      grid-template-columns: 210px 1fr;
-      min-height: 52px;
-      border-top: 2px dashed rgba(50,16,58,.18);
+      grid-template-columns: 196px 1fr;
+      min-height: 42px;
+      border-top: 1px dashed rgba(50,16,58,.18);
       align-items: center;
       gap: 18px;
-      font-size: 27px;
+      font-size: 22px;
     }
     .row:first-of-type { border-top: 0; }
     .label {
@@ -193,13 +218,13 @@
       font-weight: 650;
     }
     .footer {
+      display: none;
       margin-top: auto;
-      display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-top: 22px;
+      padding-top: 16px;
       border-top: 2px solid rgba(50,16,58,.18);
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 850;
       color: #4b3d4f;
     }
@@ -222,10 +247,15 @@
           <img src="assets/abalone.png" alt="鲍鱼标本解剖图案例">
         </figure>
         <aside class="note">
-          <h2>不要学写 Prompt</h2>
-          <p>你只要把正文里的完整 prompt 复制走。</p>
-          <p>然后改掉 <span class="red">5 个空</span>。</p>
-          <p>图看懂玩法，正文复制模板。</p>
+          <div>
+            <h2>不用学写 Prompt</h2>
+            <p>用户只要跟着卡片，把正文里的模板改成自己的对象。</p>
+          </div>
+          <div class="note-steps">
+            <div class="note-step">1. 先看案例图</div>
+            <div class="note-step">2. 只改 <span class="red">5 个空</span></div>
+            <div class="note-step">3. 复制正文去生成</div>
+          </div>
         </aside>
       </div>
       <div class="form">
