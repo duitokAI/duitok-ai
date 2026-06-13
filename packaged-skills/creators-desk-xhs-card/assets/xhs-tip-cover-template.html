@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GPT Image 2 Product Visual Cover</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #f2f3f5;
+      font-family: "PingFang SC", "PingFang HK", "PingFang TC", "Hiragino Sans GB", sans-serif;
+    }
+    .poster {
+      --ink: #18151d;
+      --muted: #68606f;
+      --paper: #fffaf7;
+      --soft: #f7f0fb;
+      --hot: #ff4f38;
+      --pink: #c12b62;
+      --plum: #32103a;
+      --blue: #13b8c5;
+      --brand-font: "PingFang SC", "PingFang HK", "PingFang TC", "Hiragino Sans GB", sans-serif;
+
+      width: 1080px;
+      height: 1440px;
+      position: relative;
+      overflow: hidden;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 88% 8%, rgba(255,79,56,.22), transparent 22%),
+        radial-gradient(circle at 8% 28%, rgba(19,184,197,.14), transparent 24%),
+        linear-gradient(180deg, #fffefe 0%, #fbf7ff 54%, #fff6f2 100%);
+      padding: 54px 62px 50px;
+      font-family: var(--brand-font);
+    }
+    .poster::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(50,16,58,.045) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(50,16,58,.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: .55;
+      pointer-events: none;
+    }
+    .blob {
+      position: absolute;
+      right: -80px;
+      top: 180px;
+      width: 330px;
+      height: 330px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(255,79,56,.2), rgba(193,43,98,.14));
+      filter: blur(2px);
+    }
+    .content {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 58px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--plum);
+      letter-spacing: .02em;
+    }
+    .brand img {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      box-shadow: 0 10px 24px rgba(50,16,58,.12);
+    }
+    .tag {
+      padding: 9px 18px 10px;
+      border-radius: 999px;
+      background: #18151d;
+      color: #fff;
+      font-size: 20px;
+      line-height: 1;
+      font-weight: 900;
+    }
+    .hero {
+      padding-top: 54px;
+      min-height: 488px;
+      position: relative;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 16px 12px;
+      background: rgba(19,184,197,.12);
+      border: 1px solid rgba(19,184,197,.32);
+      color: #087b86;
+      border-radius: 999px;
+      font-size: 23px;
+      font-weight: 900;
+    }
+    .eyebrow-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .tip-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 11px 15px 12px;
+      border-radius: 999px;
+      background: #18151d;
+      color: #fff;
+      font-size: 23px;
+      line-height: 1;
+      font-weight: 950;
+      letter-spacing: -0.02em;
+    }
+    .tip-chip span {
+      color: var(--hot);
+      margin-left: 4px;
+    }
+    .spark {
+      width: 18px;
+      height: 18px;
+      background: var(--blue);
+      clip-path: polygon(50% 0, 61% 36%, 100% 50%, 61% 64%, 50% 100%, 39% 64%, 0 50%, 39% 36%);
+    }
+    h1 {
+      margin: 28px 0 0;
+      max-width: 850px;
+      font-size: 104px;
+      line-height: .98;
+      font-weight: 950;
+      letter-spacing: -0.055em;
+      color: var(--ink);
+    }
+    h1 .hot {
+      color: var(--hot);
+      position: relative;
+      display: inline-block;
+    }
+    h1 .hot::after {
+      content: "";
+      position: absolute;
+      left: 4px;
+      right: 0;
+      bottom: 3px;
+      height: 18px;
+      background: rgba(255,79,56,.18);
+      z-index: -1;
+      transform: skewX(-12deg);
+    }
+    .subtitle {
+      margin: 28px 0 0;
+      max-width: 800px;
+      font-size: 34px;
+      line-height: 1.38;
+      font-weight: 800;
+      color: var(--muted);
+    }
+    .subtitle strong { color: var(--pink); }
+    .replace {
+      border-radius: 28px;
+      background: #fff;
+      border: 1px solid rgba(50,16,58,.1);
+      box-shadow: 0 22px 54px rgba(50,16,58,.1);
+      padding: 22px;
+      display: grid;
+      grid-template-columns: 190px 1fr;
+      gap: 22px;
+      align-items: stretch;
+    }
+    .replace-label {
+      border-radius: 22px;
+      background: linear-gradient(135deg, var(--pink), var(--hot));
+      color: #fff;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      font-size: 42px;
+      line-height: 1.05;
+      font-weight: 950;
+      letter-spacing: -0.05em;
+    }
+    .replace-main h2 {
+      margin: 0 0 18px;
+      font-size: 33px;
+      line-height: 1.18;
+      font-weight: 950;
+      letter-spacing: -0.025em;
+    }
+    .tokens {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+    .token {
+      min-height: 50px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: #f6f2f7;
+      color: var(--plum);
+      font-size: 20px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .steps {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+    .step {
+      min-height: 146px;
+      border-radius: 24px;
+      background: #fff;
+      border: 1px solid rgba(50,16,58,.1);
+      padding: 22px 20px;
+      box-shadow: 0 16px 34px rgba(50,16,58,.075);
+      position: relative;
+    }
+    .step-num {
+      color: rgba(255,79,56,.2);
+      font-size: 48px;
+      line-height: 1;
+      font-weight: 950;
+      position: absolute;
+      right: 18px;
+      top: 16px;
+    }
+    .step h3 {
+      margin: 0 0 13px;
+      font-size: 30px;
+      line-height: 1.08;
+      font-weight: 950;
+      letter-spacing: -0.025em;
+      color: var(--ink);
+    }
+    .step p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 21px;
+      line-height: 1.35;
+      font-weight: 700;
+    }
+    .scene-band {
+      margin-top: 24px;
+      border-radius: 30px;
+      background: #18151d;
+      color: #fff;
+      padding: 24px 26px 26px;
+      box-shadow: 0 24px 52px rgba(24,21,29,.18);
+    }
+    .scene-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .scene-head h2 {
+      margin: 0;
+      font-size: 33px;
+      line-height: 1;
+      font-weight: 950;
+      letter-spacing: -0.04em;
+    }
+    .scene-head span {
+      color: rgba(255,255,255,.58);
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .scenes {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .scene {
+      border-radius: 16px;
+      background: rgba(255,255,255,.08);
+      min-height: 74px;
+      display: grid;
+      place-items: center;
+      color: rgba(255,255,255,.92);
+      font-size: 23px;
+      font-weight: 900;
+    }
+    .quote {
+      margin-top: 22px;
+      border-radius: 28px;
+      background: linear-gradient(135deg, rgba(19,184,197,.14), rgba(255,79,56,.12));
+      border: 1px solid rgba(50,16,58,.08);
+      padding: 20px 28px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .quote-mark {
+      color: var(--hot);
+      font-size: 70px;
+      line-height: .8;
+      font-weight: 950;
+    }
+    .quote p {
+      margin: 0;
+      color: var(--ink);
+      font-size: 31px;
+      line-height: 1.22;
+      font-weight: 950;
+      letter-spacing: -0.025em;
+    }
+    .quote strong { color: var(--hot); }
+    .footer {
+      display: none;
+      margin-top: auto;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 20px;
+      color: rgba(50,16,58,.62);
+      font-size: 18px;
+      font-weight: 850;
+    }
+    .footer .dots {
+      display: flex;
+      gap: 8px;
+    }
+    .footer .dots span {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--hot);
+    }
+    .footer .dots span:nth-child(2) { background: var(--pink); }
+    .footer .dots span:nth-child(3) { background: var(--blue); }
+  </style>
+</head>
+<body>
+  <section class="poster" id="research-cover">
+    <div class="blob"></div>
+    <div class="content">
+      <header class="top">
+        <div class="brand"><img src="assets/creators-desk-logo.png" alt="">CREATORS DESK</div>
+        <div class="tag">小白填空版</div>
+      </header>
+
+      <section class="hero">
+        <div class="eyebrow-wrap">
+          <div class="tip-chip">TIP <span>02</span></div>
+          <div class="eyebrow"><span class="spark"></span>GPT Image 2 产品图教程</div>
+        </div>
+        <h1>用 AI 把<span class="hot">烂产品图</span><br>做成商业海报</h1>
+        <p class="subtitle">不是提示词合集，而是一套普通人也能复用的 <strong>低成本产品视觉生产线</strong>。</p>
+      </section>
+
+      <section class="replace">
+        <div class="replace-label">核心<br>3 件事</div>
+        <div class="replace-main">
+          <h2>商业级产品图，重点不是炫，而是能看懂、能信、能卖</h2>
+          <div class="tokens">
+            <div class="token">结构不乱</div>
+            <div class="token">光影可信</div>
+            <div class="token">场景融合</div>
+            <div class="token">画面能卖</div>
+            <div class="token">批量延展</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <h3>先精修产品</h3>
+          <p>不要急着做海报，先把基础素材变干净、变高级。</p>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <h3>再融入场景</h3>
+          <p>透视、色温、阴影、反光统一，产品才不像硬贴上去。</p>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <h3>最后批量延展</h3>
+          <p>一个高质量模板，可以继续换型号、换颜色、换构图。</p>
+        </div>
+      </section>
+
+      <section class="scene-band">
+        <div class="scene-head">
+          <h2>可以用来做什么？</h2>
+          <span>PRODUCT VISUAL</span>
+        </div>
+        <div class="scenes">
+          <div class="scene">电商主图</div>
+          <div class="scene">产品海报</div>
+          <div class="scene">小红书封面</div>
+          <div class="scene">产品详情页</div>
+          <div class="scene">发布会 KV</div>
+          <div class="scene">接单素材</div>
+        </div>
+      </section>
+
+      <section class="quote">
+        <div class="quote-mark">“</div>
+        <p>真正值钱的不是生成一张好看的图，<br>而是搭一套 <strong>产品视觉生产线</strong>。</p>
+      </section>
+
+      <footer class="footer">
+        <span>PROMPT RESEARCH / GPT IMAGE 2</span>
+        <div class="dots"><span></span><span></span><span></span></div>
+      </footer>
+    </div>
+  </section>
+</body>
+</html>
