@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Creators Desk News Card - AI IPO Wave</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #f2f3f5;
+      font-family: "PingFang SC", "PingFang HK", "PingFang TC", "Hiragino Sans GB", sans-serif;
+    }
+    .poster {
+      --ink: #18151d;
+      --muted: #68606f;
+      --paper: #fffaf7;
+      --hot: #ff4f38;
+      --pink: #c12b62;
+      --plum: #32103a;
+      --cyan: #13b8c5;
+      width: 1080px;
+      height: 1440px;
+      position: relative;
+      overflow: hidden;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 86% 10%, rgba(255,79,56,.18), transparent 20%),
+        radial-gradient(circle at 7% 38%, rgba(19,184,197,.12), transparent 26%),
+        linear-gradient(180deg, #fffefe 0%, #fbf8ff 56%, #fff6f1 100%);
+      padding: 54px 62px 52px;
+    }
+    .poster::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(50,16,58,.045) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(50,16,58,.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: .58;
+      pointer-events: none;
+    }
+    .ring {
+      position: absolute;
+      right: -28px;
+      top: 176px;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,79,56,.28);
+    }
+    .ring::before,
+    .ring::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      inset: 56px;
+      border: 2px solid rgba(193,43,98,.28);
+    }
+    .ring::after {
+      inset: 118px;
+      background: var(--hot);
+      border: 0;
+      box-shadow: 0 0 0 36px rgba(255,79,56,.1);
+    }
+    .content {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 58px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--plum);
+      letter-spacing: .02em;
+    }
+    .brand img {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      box-shadow: 0 10px 24px rgba(50,16,58,.12);
+    }
+    .tag {
+      padding: 10px 18px;
+      border-radius: 999px;
+      background: #18151d;
+      color: #fff;
+      font-size: 20px;
+      line-height: 1;
+      font-weight: 900;
+    }
+    .hero {
+      padding-top: 54px;
+      min-height: 540px;
+    }
+    .eyebrow-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .news-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 11px 15px 12px;
+      border-radius: 999px;
+      background: #18151d;
+      color: #fff;
+      font-size: 23px;
+      line-height: 1;
+      font-weight: 950;
+      letter-spacing: -0.02em;
+    }
+    .news-chip span {
+      color: var(--hot);
+      margin-left: 5px;
+    }
+    .topic {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 16px 12px;
+      background: rgba(19,184,197,.12);
+      border: 1px solid rgba(19,184,197,.32);
+      color: #087b86;
+      border-radius: 999px;
+      font-size: 23px;
+      font-weight: 900;
+    }
+    .spark {
+      width: 18px;
+      height: 18px;
+      background: var(--cyan);
+      clip-path: polygon(50% 0, 61% 36%, 100% 50%, 61% 64%, 50% 100%, 39% 64%, 0 50%, 39% 36%);
+    }
+    h1 {
+      margin: 28px 0 0;
+      max-width: 780px;
+      font-size: 94px;
+      line-height: .96;
+      font-weight: 950;
+      letter-spacing: -0.055em;
+      color: var(--ink);
+    }
+    h1 .hot {
+      color: var(--hot);
+      position: relative;
+      display: inline-block;
+    }
+    h1 .hot::after {
+      content: "";
+      position: absolute;
+      left: 4px;
+      right: 0;
+      bottom: 2px;
+      height: 18px;
+      background: rgba(255,79,56,.18);
+      z-index: -1;
+      transform: skewX(-12deg);
+    }
+    .subtitle {
+      margin: 22px 0 0;
+      max-width: 840px;
+      font-size: 31px;
+      line-height: 1.38;
+      font-weight: 800;
+      color: var(--muted);
+    }
+    .subtitle strong { color: var(--pink); }
+    .lead {
+      border-radius: 28px;
+      background: #fff;
+      border: 1px solid rgba(50,16,58,.1);
+      box-shadow: 0 22px 54px rgba(50,16,58,.1);
+      padding: 22px;
+      display: grid;
+      grid-template-columns: 190px 1fr;
+      gap: 22px;
+      align-items: stretch;
+    }
+    .lead-label {
+      border-radius: 22px;
+      background: linear-gradient(135deg, var(--pink), var(--hot));
+      color: #fff;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      font-size: 40px;
+      line-height: 1.05;
+      font-weight: 950;
+      letter-spacing: -0.05em;
+    }
+    .lead-main h2 {
+      margin: 0 0 17px;
+      font-size: 33px;
+      line-height: 1.18;
+      font-weight: 950;
+      letter-spacing: -0.025em;
+    }
+    .tokens {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+    .token {
+      min-height: 50px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: #f6f2f7;
+      color: var(--plum);
+      font-size: 20px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .briefs {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+    .brief {
+      min-height: 154px;
+      border-radius: 24px;
+      background: #fff;
+      border: 1px solid rgba(50,16,58,.1);
+      padding: 22px 20px;
+      box-shadow: 0 16px 34px rgba(50,16,58,.075);
+      position: relative;
+    }
+    .brief-num {
+      color: rgba(255,79,56,.2);
+      font-size: 48px;
+      line-height: 1;
+      font-weight: 950;
+      position: absolute;
+      right: 18px;
+      top: 16px;
+    }
+    .brief h3 {
+      margin: 0 0 14px;
+      font-size: 30px;
+      line-height: 1.08;
+      font-weight: 950;
+      letter-spacing: -0.025em;
+      color: var(--ink);
+    }
+    .brief p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 20px;
+      line-height: 1.35;
+      font-weight: 720;
+    }
+    .market-band {
+      margin-top: 24px;
+      border-radius: 30px;
+      background: #18151d;
+      color: #fff;
+      padding: 24px 26px 26px;
+      box-shadow: 0 24px 52px rgba(24,21,29,.18);
+    }
+    .market-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .market-head h2 {
+      margin: 0;
+      font-size: 33px;
+      line-height: 1;
+      font-weight: 950;
+      letter-spacing: -0.04em;
+    }
+    .market-head span {
+      color: rgba(255,255,255,.58);
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .markets {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .market {
+      border-radius: 16px;
+      background: rgba(255,255,255,.08);
+      min-height: 74px;
+      display: grid;
+      place-items: center;
+      color: rgba(255,255,255,.92);
+      font-size: 23px;
+      font-weight: 900;
+      text-align: center;
+    }
+    .quote {
+      margin-top: 22px;
+      border-radius: 28px;
+      background: linear-gradient(135deg, rgba(19,184,197,.14), rgba(255,79,56,.12));
+      border: 1px solid rgba(50,16,58,.08);
+      padding: 20px 28px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .quote-mark {
+      color: var(--hot);
+      font-size: 70px;
+      line-height: .8;
+      font-weight: 950;
+    }
+    .quote p {
+      margin: 0;
+      color: var(--ink);
+      font-size: 31px;
+      line-height: 1.22;
+      font-weight: 950;
+      letter-spacing: -0.025em;
+    }
+    .quote strong { color: var(--hot); }
+  </style>
+</head>
+<body>
+  <section class="poster" id="research-cover">
+    <div class="ring"></div>
+    <div class="content">
+      <header class="top">
+        <div class="brand"><img src="assets/creators-desk-logo.png" alt="">CREATORS DESK</div>
+        <div class="tag">新闻速读</div>
+      </header>
+
+      <section class="hero">
+        <div class="eyebrow-wrap">
+          <div class="news-chip">NEWS <span>01</span></div>
+          <div class="topic"><span class="spark"></span>AI 财经观察</div>
+        </div>
+        <h1>AI 新创<br><span class="hot">上市潮</span><br>要来了？</h1>
+        <p class="subtitle">e南洋报道称，Anthropic、SpaceX、OpenAI 的 IPO 动向，正在把 AI 叙事推向 <strong>公开市场</strong>。</p>
+      </section>
+
+      <section class="lead">
+        <div class="lead-label">新闻<br>看点</div>
+        <div class="lead-main">
+          <h2>这不是单家公司上市，而是 AI 产业从融资热，走向市场定价。</h2>
+          <div class="tokens">
+            <div class="token">Anthropic</div>
+            <div class="token">SpaceX</div>
+            <div class="token">OpenAI</div>
+            <div class="token">IPO</div>
+            <div class="token">估值重排</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="briefs">
+        <div class="brief">
+          <div class="brief-num">01</div>
+          <h3>谁要上场？</h3>
+          <p>报道称 Anthropic 已提交 IPO，SpaceX、OpenAI 也被市场高度关注。</p>
+        </div>
+        <div class="brief">
+          <div class="brief-num">02</div>
+          <h3>为什么重要？</h3>
+          <p>AI 独角兽若集中上市，会让资本重新给 AI 公司定价。</p>
+        </div>
+        <div class="brief">
+          <div class="brief-num">03</div>
+          <h3>看什么信号？</h3>
+          <p>看估值、商业化收入、企业客户，以及是否能持续增长。</p>
+        </div>
+      </section>
+
+      <section class="market-band">
+        <div class="market-head">
+          <h2>普通人可以关注什么？</h2>
+          <span>AI MARKET</span>
+        </div>
+        <div class="markets">
+          <div class="market">AI 工具公司</div>
+          <div class="market">算力与芯片</div>
+          <div class="market">企业软件</div>
+          <div class="market">自动化岗位</div>
+          <div class="market">内容生产链</div>
+          <div class="market">AI 应用创业</div>
+        </div>
+      </section>
+
+      <section class="quote">
+        <div class="quote-mark">“</div>
+        <p>AI 的故事，正在从<strong>融资新闻</strong>，<br>变成公开市场要回答的生意题。</p>
+      </section>
+    </div>
+  </section>
+</body>
+</html>
