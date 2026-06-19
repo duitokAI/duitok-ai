@@ -5491,7 +5491,7 @@ function creatorsDeskRegisterForm() {
     <label>${cdText("email")}<input name="email" type="email" autocomplete="email" value="${esc(draft.email || "")}" placeholder="you@example.com" required></label>
     <label>${cdText("phone")}<input name="phone" inputmode="tel" autocomplete="tel" value="${esc(draft.phone || "")}" placeholder="+60 12 345 6789" required></label>
     <label>${cdText("password")}<input name="password" type="password" autocomplete="new-password" value="${esc(draft.password || "")}" minlength="6" placeholder="${esc(cdText("passwordPlaceholder"))}" required></label>
-    <button class="gold-button" type="submit" data-creators-auth-submit>${cdText("register")} ${icon("user-plus", 18)}</button>
+    <button class="gold-button" type="submit">${cdText("register")} ${icon("user-plus", 18)}</button>
     <div class="login-links creators-desk-auth-links"><button class="text-button login-register-link" type="button" data-creators-auth-mode="login">${cdText("hasAccount")}</button></div>
   </form>`;
 }
@@ -5502,7 +5502,7 @@ function creatorsDeskLoginForm() {
     <label>${cdText("phone")}<input name="phone" inputmode="tel" autocomplete="tel" value="${esc(draft.phone || state.creatorsDeskLoginPhone || "")}" placeholder="+60 12 345 6789" required></label>
     <label>${cdText("password")}<input name="password" type="password" autocomplete="current-password" value="${esc(draft.password || "")}" required></label>
     ${state.creatorsDeskAuthError ? `<div class="creators-desk-auth-error" role="alert">${esc(state.creatorsDeskAuthError)}</div>` : ""}
-    <button class="gold-button" type="submit" data-creators-auth-submit>${cdText("login")} ${icon("log-in", 18)}</button>
+    <button class="gold-button" type="submit">${cdText("login")} ${icon("log-in", 18)}</button>
     <div class="login-links creators-desk-auth-links"><button class="text-button login-register-link" type="button" data-creators-auth-mode="register">${cdText("noAccount")}</button></div>
   </form>`;
 }
@@ -5540,7 +5540,7 @@ function loginCreatorsDeskAccount(data = {}) {
   localStorage.setItem(storageKeys.creatorsDeskSession, JSON.stringify(session));
   state.creatorsDeskSession = session;
   window.history.pushState({}, "", "/task-center");
-  return set({ creatorsDeskAuthMode: "login", creatorsDeskLoginPhone: phone, creatorsDeskAuthDraft: { email: "", phone, password: "" }, creatorsDeskAuthError: "" });
+  return set({ creatorsDeskSession: session, creatorsDeskAuthMode: "login", creatorsDeskLoginPhone: phone, creatorsDeskAuthDraft: { email: "", phone, password: "" }, creatorsDeskAuthError: "" });
 }
 
 function logoutCreatorsDeskAccount() {
@@ -13541,13 +13541,15 @@ function bindStandaloneTaskPages() {
       clearCreatorsDeskAuthError();
     });
   });
-  document.querySelectorAll("[data-creators-auth-submit]").forEach((button) => {
+  document.querySelectorAll(".creators-desk-auth-form button[type='submit']").forEach((button) => {
     button.addEventListener("click", (event) => {
       const form = event.currentTarget.closest("form");
-      if (!form || !form.matches(".creators-desk-auth-form")) return;
+      if (!form) return;
       event.preventDefault();
       if (!form.checkValidity()) return form.reportValidity();
-      form.requestSubmit();
+      const data = Object.fromEntries(new FormData(form));
+      if (form.dataset.form === "creators-desk-register") return registerCreatorsDeskAccount(data);
+      if (form.dataset.form === "creators-desk-login") return loginCreatorsDeskAccount(data);
     });
   });
   document.querySelectorAll("[data-creators-auth-mode]").forEach((el) => el.addEventListener("click", () => {
