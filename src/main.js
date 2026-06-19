@@ -5039,7 +5039,7 @@ const creatorsDeskCopy = {
     noAccessTitle: "没有后台权限",
     noAccessBody: "这个审核后台只开放给有权限的账户。普通创作者可以继续使用 Task Center 领取和提交任务。",
     backTaskCenter: "返回 Task Center",
-    authRegisterTitle: "成为 Creators Desk 创作者",
+    authRegisterTitle: "成为 AI 创作者",
     authLoginTitle: "欢迎回来",
     authRegisterSubtitle: "领取品牌任务，用 AI 完成内容创作，通过审核后获得奖励。",
     authLoginSubtitle: "用手机号和密码登录，继续查看任务和审核进度。",
