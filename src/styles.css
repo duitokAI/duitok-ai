@@ -52519,3 +52519,391 @@ body:has(.studio-shell .video-page-studio),
     width: 100%;
   }
 }
+
+@media (max-width: 700px) {
+  .creators-auth-shell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    min-height: 100svh;
+    padding: max(10px, env(safe-area-inset-top)) 12px 24px;
+    overflow-x: hidden;
+  }
+
+  .creators-auth-top,
+  .creators-desk-auth-top {
+    width: 100%;
+    min-height: auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+  }
+
+  .creators-desk-brand-lockup .brand-core {
+    max-width: 100%;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .creators-desk-brand-icon {
+    width: 54px !important;
+    height: 54px !important;
+    border-radius: 16px;
+  }
+
+  .creators-desk-wordmark {
+    max-width: calc(100vw - 92px);
+    font-size: 34px !important;
+    line-height: 1 !important;
+  }
+
+  .creators-desk-wordmark span {
+    white-space: nowrap;
+  }
+
+  .creators-lang-switch.dark {
+    position: static;
+    right: auto;
+    top: auto;
+    z-index: auto;
+    max-width: 100%;
+    min-height: 44px;
+    padding: 5px;
+    box-sizing: border-box;
+  }
+
+  .creators-lang-label {
+    gap: 6px;
+    margin: 0 2px 0 4px;
+    font-size: 11px;
+  }
+
+  .creators-lang-switch.dark button {
+    min-height: 34px;
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+
+  .creators-desk-auth-card {
+    width: 100%;
+    max-width: 560px;
+    border-radius: 22px;
+    padding: 24px 20px;
+    box-sizing: border-box;
+  }
+
+  .creators-auth-head h1,
+  .creators-auth-shell[data-lang="en"] .creators-auth-head h1 {
+    font-size: 32px;
+    line-height: 1.14;
+  }
+
+  .creators-auth-head p {
+    font-size: 17px;
+    line-height: 1.45;
+  }
+
+  .creators-auth-switch {
+    margin: 18px 0 14px;
+  }
+
+  .creators-auth-switch button {
+    min-height: 44px;
+    font-size: 14px;
+  }
+
+  .creators-desk-auth-form {
+    gap: 14px;
+  }
+
+  .creators-auth-form label {
+    gap: 9px;
+    font-size: 17px;
+  }
+
+  .creators-auth-form input,
+  .login-form input {
+    min-height: 58px;
+    border-radius: 18px;
+    font-size: 16px;
+  }
+
+  .login-form .gold-button {
+    min-height: 62px;
+    font-size: 18px;
+  }
+
+  .creators-desk-auth-links {
+    font-size: 14px;
+  }
+
+  .standalone-task-shell {
+    padding: 12px 12px 36px;
+    overflow-x: hidden;
+  }
+
+  .standalone-task-nav {
+    width: 100%;
+    margin-bottom: 16px;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .standalone-task-nav > div {
+    width: 100%;
+    justify-content: space-between;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .standalone-task-brand {
+    justify-content: flex-start;
+  }
+
+  .standalone-task-brand span {
+    font-size: 18px;
+  }
+
+  .standalone-task-nav a:not(.standalone-task-brand),
+  .standalone-task-logout {
+    flex: 0 0 auto;
+  }
+
+  .tc-shell {
+    width: 100%;
+    max-width: none;
+    padding: 0;
+  }
+
+  .tc-shell .tc-hero {
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .tc-shell .tc-hero h1 {
+    font-size: 32px;
+    line-height: 1.05;
+  }
+
+  .tc-shell .tc-hero .tc-sub {
+    font-size: 14px;
+  }
+
+  .tc-shell .tc-hero .tc-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .tc-search {
+    border-radius: 16px;
+    padding: 8px 12px;
+  }
+
+  .tc-fbar {
+    margin-top: 10px;
+    padding: 10px 0;
+  }
+
+  .tc-fbar-inner {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tc-fbar-inner::-webkit-scrollbar,
+  .standalone-task-nav > div::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tc-fdrop,
+  .tc-fsort,
+  .tc-freset {
+    flex: 0 0 auto;
+  }
+
+  .tc-fsort {
+    margin-left: 0;
+  }
+
+  .tc-fpop {
+    margin-top: 8px;
+    padding: 14px;
+  }
+
+  .tc-fpop-foot {
+    flex-wrap: wrap;
+  }
+
+  .tc-btn-clear,
+  .tc-btn-apply {
+    flex: 1 1 120px;
+    text-align: center;
+  }
+
+  .tc-fresult {
+    align-items: flex-start;
+    margin-top: 12px;
+  }
+
+  .tc-factive {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .tc-feed {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .tc-card {
+    border-radius: 16px;
+  }
+
+  .tc-card .tc-cover {
+    max-height: 210px;
+    aspect-ratio: 16 / 10;
+  }
+
+  .tc-card .tc-body {
+    padding: 13px;
+  }
+
+  .tc-detail {
+    gap: 14px;
+  }
+
+  .tc-panel,
+  .tc-aside {
+    border-radius: 16px;
+    padding: 16px;
+  }
+
+  .tc-detail-head {
+    gap: 12px;
+  }
+
+  .tc-detail-head .tc-brand-logo-lg {
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+  }
+
+  .tc-detail-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .tc-detail-stats .tc-stat-val {
+    font-size: 18px;
+  }
+
+  .tc-asset {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .tc-asset .tc-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .tc-aside {
+    position: static;
+  }
+
+  .tc-modal-mask {
+    align-items: flex-end;
+    padding: 12px;
+  }
+
+  .tc-modal {
+    max-height: calc(100svh - 24px);
+    overflow: auto;
+    border-radius: 18px;
+    padding: 20px;
+  }
+
+  .tc-modal .tc-foot {
+    flex-direction: column-reverse;
+  }
+
+  .tc-cd-banner {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .tc-order-head {
+    align-items: flex-start;
+  }
+
+  .tc-order-head .tc-reward {
+    margin-left: auto;
+  }
+
+  .tc-input {
+    padding: 9px 12px;
+  }
+
+  .tc-input input {
+    min-width: 0;
+  }
+
+  .tc-status-tabs {
+    width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tc-status-tabs button {
+    flex: 0 0 auto;
+  }
+
+  .tc-order-card {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .tc-order-card .tc-thumb {
+    width: 56px;
+    height: 56px;
+  }
+
+  .tc-order-card .tc-row-right {
+    width: 100%;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 380px) {
+  .creators-desk-brand-icon {
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  .creators-desk-wordmark {
+    font-size: 30px !important;
+  }
+
+  .creators-lang-label {
+    font-size: 10px;
+  }
+
+  .creators-lang-switch.dark button {
+    padding: 6px 8px;
+  }
+
+  .creators-auth-head h1,
+  .creators-auth-shell[data-lang="en"] .creators-auth-head h1 {
+    font-size: 29px;
+  }
+}

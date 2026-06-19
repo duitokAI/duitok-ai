@@ -5204,6 +5204,7 @@ const creatorsDeskCopy = {
     notifyPhoneExists: "这个手机号已经注册，请直接登录。",
     notifyAccountCreated: "账户已创建。请用手机号和密码登录。",
     notifyLoginFailed: "手机号或密码不正确。",
+    notifyLocalAccountMissing: "这个手机上还没有这个账号。请先在当前手机创建账户；跨设备账号同步还没接入。",
     notifyNoSubmission: "未选择提交记录。",
     notifyRejectReason: "请填写驳回原因。",
     notifyApproved: "已通过。Touch 'n Go 将在 7 天后发放。",
@@ -5409,6 +5410,7 @@ const creatorsDeskCopy = {
     notifyPhoneExists: "This phone number is already registered. Please log in.",
     notifyAccountCreated: "Account created. Please log in with your phone number and password.",
     notifyLoginFailed: "Phone number or password is incorrect.",
+    notifyLocalAccountMissing: "This account has not been created on this phone yet. Create it on this device first; cross-device account sync is not connected yet.",
     notifyNoSubmission: "No submission selected.",
     notifyRejectReason: "Please add a reject reason.",
     notifyApproved: "Approved. Touch 'n Go is scheduled for 7 days later.",
@@ -5607,9 +5609,10 @@ function loginCreatorsDeskAccount(data = {}) {
   const password = String(data.password || "");
   const validationMessage = creatorsDeskLoginValidationMessage(data);
   if (validationMessage) return creatorsDeskSetAuthError(validationMessage, { ...(state.creatorsDeskAuthDraft || {}), phone, password });
-  const account = creatorsDeskAccounts().find((item) => item.phone === phone && item.password === password);
+  const accountByPhone = creatorsDeskAccounts().find((item) => item.phone === phone);
+  const account = accountByPhone?.password === password ? accountByPhone : null;
   if (!account) {
-    const message = cdText("notifyLoginFailed");
+    const message = accountByPhone ? cdText("notifyLoginFailed") : cdText("notifyLocalAccountMissing");
     notify(message);
     return set({ creatorsDeskAuthError: message, creatorsDeskAuthDraft: { ...(state.creatorsDeskAuthDraft || {}), phone, password } });
   }
