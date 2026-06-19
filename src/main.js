@@ -27,7 +27,8 @@ const storageKeys = {
   agentActiveRun: "pokaya-agent-active-run",
   standaloneTaskSubmissions: "pokaya-standalone-task-submissions",
   creatorsDeskAccounts: "creators-desk-accounts",
-  creatorsDeskSession: "creators-desk-session"
+  creatorsDeskSession: "creators-desk-session",
+  creatorsDeskLang: "creators-desk-lang"
 };
 const studioWallZoomMin = 2;
 const studioWallZoomMax = 4;
@@ -178,6 +179,7 @@ const state = {
   standaloneAdminFilter: "all",
   standaloneAdminSelectedId: "",
   creatorsDeskSession: readStoredJson(storageKeys.creatorsDeskSession, null),
+  creatorsDeskLang: localStorage.getItem(storageKeys.creatorsDeskLang) || "zh",
   creatorsDeskAuthMode: readStoredJson(storageKeys.creatorsDeskAccounts, []).length ? "login" : "register",
   creatorsDeskLoginPhone: "",
   creatorsDeskAuthDraft: { email: "", phone: "", password: "" },
@@ -5412,7 +5414,7 @@ const creatorsDeskCopy = {
 };
 
 function cdLang() {
-  return state.lang === "en" ? "en" : "zh";
+  return state.creatorsDeskLang === "en" ? "en" : "zh";
 }
 
 function cdText(key, vars = {}) {
@@ -14263,8 +14265,8 @@ async function action(event, name) {
   }
   if (name === "creators-desk-language") {
     const lang = event.currentTarget.dataset.lang === "en" ? "en" : "zh";
-    localStorage.setItem(storageKeys.lang, lang);
-    return set({ lang });
+    localStorage.setItem(storageKeys.creatorsDeskLang, lang);
+    return set({ creatorsDeskLang: lang });
   }
   if (name === "creators-desk-logout") return logoutCreatorsDeskAccount();
   if (name === "reload-page") return window.location.reload();
