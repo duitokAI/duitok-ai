@@ -7,6 +7,7 @@ const isStudioPath = () => window.location.pathname.startsWith("/studio") || win
 const pathIs = (path) => window.location.pathname === path;
 const ownerAdminEmails = new Set(["admin@pokaya.ai"]);
 const creatorsDeskAdminEmails = new Set(["tinzixian05@gmail.com", "abc0163100131@gmail.com", "admin@creatorsdesk.local", "admin@creatorsdesk.co", "admin@pokaya.ai"]);
+const creatorsDeskVisibleAdminEmails = new Set(["tinzixian05@gmail.com", "abc0163100131@gmail.com"]);
 const whatsappGroupUrl = "https://chat.whatsapp.com/ERz2477U1gJFJHFsXtiMJH?mode=gi_t";
 const supportWhatsappUrl = "https://wa.me/60163100131";
 const promoCycleMs = 5 * 60 * 60 * 1000;
@@ -5014,6 +5015,25 @@ function creatorsDeskIsAdminAccount(account = creatorsDeskCurrentAccount()) {
   return Boolean(account?.role === "admin" || creatorsDeskAdminEmails.has(String(account?.email || "").toLowerCase()));
 }
 
+function creatorsDeskKnownAccounts() {
+  const accounts = creatorsDeskAccounts();
+  const byEmail = new Map(accounts.map((account) => [String(account.email || "").toLowerCase(), account]));
+  creatorsDeskVisibleAdminEmails.forEach((email) => {
+    const key = String(email || "").toLowerCase();
+    if (!key || byEmail.has(key)) return;
+    accounts.push({
+      id: `admin-whitelist-${key}`,
+      email: key,
+      phone: "",
+      password: "",
+      role: "admin",
+      createdAt: "",
+      pendingAccount: true
+    });
+  });
+  return accounts;
+}
+
 const creatorsDeskCopy = {
   zh: {
     noAccessTitle: "没有后台权限",
@@ -5200,14 +5220,18 @@ const creatorsDeskCopy = {
     creatorUsers: "创作者用户",
     adminUsers: "管理员",
     userAccounts: "用户账户",
-    userAccountsBody: "这里显示这个本地 Creators Desk 站点已创建的账户资料。",
+    userAccountsBody: "这里显示这个 Creators Desk 站点已创建的账户，以及已授权但还没创建账户的管理员。",
     noUsers: "还没有用户账户",
     noUsersBody: "用户完成创建账户后，会出现在这里。",
     role: "权限",
     accountId: "账户 ID",
+    adminAuthorized: "已授权管理员",
+    accountNotCreated: "尚未创建账户",
+    notCreated: "未创建",
     createdAt: "创建时间",
     passwordStatus: "密码状态",
     passwordSet: "已设置",
+    passwordNotSet: "未设置",
     submissions: "提交数",
     currentSession: "当前登录",
     adminRole: "Admin",
@@ -5398,14 +5422,18 @@ const creatorsDeskCopy = {
     creatorUsers: "Creator users",
     adminUsers: "Admins",
     userAccounts: "User accounts",
-    userAccountsBody: "Account records created on this local Creators Desk site.",
+    userAccountsBody: "Accounts created on this Creators Desk site, plus authorized admins who have not created an account yet.",
     noUsers: "No user accounts yet",
     noUsersBody: "Users will appear here after creating an account.",
     role: "Role",
     accountId: "Account ID",
+    adminAuthorized: "Authorized admin",
+    accountNotCreated: "Account not created yet",
+    notCreated: "Not created",
     createdAt: "Created at",
     passwordStatus: "Password status",
     passwordSet: "Set",
+    passwordNotSet: "Not set",
     submissions: "Submissions",
     currentSession: "Current session",
     adminRole: "Admin",
@@ -5669,7 +5697,12 @@ function standaloneTaskTopbar(label = "Task Center") {
 
 function adminVerifyPage() {
   const all = standaloneTaskSubmissions().sort((a, b) => Date.parse(b.submittedAt || "") - Date.parse(a.submittedAt || ""));
-  const accounts = creatorsDeskAccounts().sort((a, b) => Date.parse(b.createdAt || "") - Date.parse(a.createdAt || ""));
+  const createdAccounts = creatorsDeskAccounts();
+  const accounts = creatorsDeskKnownAccounts().sort((a, b) => {
+    const roleSort = Number(creatorsDeskIsAdminAccount(b)) - Number(creatorsDeskIsAdminAccount(a));
+    if (roleSort) return roleSort;
+    return Date.parse(b.createdAt || "") - Date.parse(a.createdAt || "");
+  });
   const filter = state.standaloneAdminFilter || "all";
   const visible = filter === "all" ? all : all.filter((item) => item.status === filter);
   const selected = all.find((item) => item.id === state.standaloneAdminSelectedId) || visible[0] || all[0] || null;
@@ -5681,9 +5714,9 @@ function adminVerifyPage() {
     rejected: all.filter((item) => item.status === "rejected").length
   };
   const userCounts = {
-    total: accounts.length,
+    total: createdAccounts.length,
     admin: accounts.filter((account) => creatorsDeskIsAdminAccount(account)).length,
-    creator: accounts.filter((account) => !creatorsDeskIsAdminAccount(account)).length
+    creator: createdAccounts.filter((account) => !creatorsDeskIsAdminAccount(account)).length
   };
   return creatorsDeskAdminGuard(`<main class="standalone-task-shell standalone-admin-shell">
     ${standaloneTaskTopbar("Admin Verify")}
@@ -5746,18 +5779,21 @@ function standaloneAdminAccountsPanel(accounts = [], userCounts = {}, submission
 
 function standaloneAdminAccountRow(account = {}, submissions = []) {
   const isAdmin = creatorsDeskIsAdminAccount(account);
+  const pending = Boolean(account.pendingAccount);
   const session = state.creatorsDeskSession;
   const submissionCount = submissions.filter((item) => item.accountId === account.id || item.creatorEmail === account.email || item.creatorPhone === account.phone).length;
+  const accountLabel = pending ? cdText("adminAuthorized") : session?.accountId === account.id ? cdText("currentSession") : cdText("accountId");
+  const accountDetail = pending ? cdText("accountNotCreated") : esc(account.id || "-");
   return `<div class="standalone-user-row" role="row">
     <span>
       <b>${esc(account.email || "-")}</b>
-      <small>${session?.accountId === account.id ? cdText("currentSession") : cdText("accountId")}: ${esc(account.id || "-")}</small>
+      <small>${accountLabel}: ${accountDetail}</small>
     </span>
     <span>${esc(account.phone || "-")}</span>
     <span><i class="${isAdmin ? "admin" : ""}">${isAdmin ? cdText("adminRole") : cdText("creatorRole")}</i></span>
-    <span>${standaloneDateTime(account.createdAt)}</span>
+    <span>${pending ? cdText("notCreated") : standaloneDateTime(account.createdAt)}</span>
     <span><strong>${submissionCount}</strong></span>
-    <span>${account.password ? cdText("passwordSet") : "-"}</span>
+    <span>${account.password ? cdText("passwordSet") : cdText("passwordNotSet")}</span>
   </div>`;
 }
 
