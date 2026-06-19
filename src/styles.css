@@ -51480,14 +51480,18 @@ body:has(.studio-shell .video-page-studio),
 .creators-auth-shell {
   min-height: 100vh;
   min-height: 100svh;
+  height: 100vh;
+  height: 100svh;
   position: relative;
   isolation: isolate;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   overflow-anchor: none;
   display: grid;
   align-content: start;
   justify-items: center;
-  gap: clamp(18px, 3vh, 32px);
-  padding: clamp(22px, 4vw, 46px) clamp(18px, 5vw, 72px) 40px;
+  gap: clamp(12px, 2vh, 20px);
+  padding: clamp(16px, 2.4vw, 28px) clamp(18px, 5vw, 72px) 28px;
   color: #fff;
   font-family: Poppins, "Avenir Next", "Nunito Sans", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
   background:
@@ -51512,7 +51516,7 @@ body:has(.studio-shell .video-page-studio),
   align-items: center;
   justify-content: center;
   gap: 24px;
-  min-height: clamp(58px, 5.8vw, 84px);
+  min-height: clamp(50px, 5vw, 70px);
 }
 
 .creators-auth-brand {
@@ -51523,8 +51527,8 @@ body:has(.studio-shell .video-page-studio),
 }
 
 .creators-auth-brand img {
-  width: clamp(42px, 4vw, 58px);
-  height: clamp(42px, 4vw, 58px);
+  width: clamp(40px, 3.6vw, 52px);
+  height: clamp(40px, 3.6vw, 52px);
   border-radius: 17px;
   object-fit: cover;
   background: rgba(255, 255, 255, 0.06);
@@ -51536,7 +51540,7 @@ body:has(.studio-shell .video-page-studio),
 
 .creators-auth-brand span {
   font-family: Poppins, "Avenir Next", "Nunito Sans", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif !important;
-  font-size: clamp(36px, 4vw, 54px);
+  font-size: clamp(32px, 3.6vw, 46px);
   line-height: 1;
   font-weight: 800;
   letter-spacing: 0;
@@ -51619,7 +51623,10 @@ body:has(.studio-shell .video-page-studio),
 }
 
 .creators-auth-card {
-  width: min(100%, 680px);
+  width: min(100%, 640px);
+  max-height: calc(100svh - clamp(50px, 5vw, 70px) - clamp(12px, 2vh, 20px) - clamp(44px, 4.8vw, 56px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
   contain: layout paint;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 28px;
@@ -51629,14 +51636,14 @@ body:has(.studio-shell .video-page-studio),
     0 34px 86px rgba(95, 0, 103, 0.16),
     0 14px 42px rgba(255, 49, 95, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  padding: clamp(24px, 4vw, 42px);
+  padding: clamp(22px, 3vw, 34px);
 }
 
 .creators-auth-head h1 {
   font-family: Poppins, "Avenir Next", "Nunito Sans", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif !important;
   margin: 0;
   color: #fff;
-  font-size: 42px;
+  font-size: 38px;
   line-height: 1.14;
   font-weight: 800;
   letter-spacing: 0;
@@ -51645,15 +51652,15 @@ body:has(.studio-shell .video-page-studio),
 }
 
 .creators-auth-shell[data-lang="en"] .creators-auth-head h1 {
-  font-size: clamp(30px, 3.2vw, 38px);
+  font-size: clamp(28px, 3vw, 36px);
   max-width: 560px;
 }
 
 .creators-auth-head p {
-  margin: 10px 0 0;
+  margin: 8px 0 0;
   max-width: 620px;
   color: rgba(255, 255, 255, 0.66);
-  font-size: clamp(16px, 1.8vw, 20px);
+  font-size: clamp(15px, 1.55vw, 18px);
   line-height: 1.5;
   font-weight: 700;
 }
@@ -51662,7 +51669,7 @@ body:has(.studio-shell .video-page-studio),
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
-  margin: 26px 0 22px;
+  margin: 20px 0 18px;
   padding: 6px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 9999px;
@@ -51688,13 +51695,13 @@ body:has(.studio-shell .video-page-studio),
 
 .creators-auth-form {
   display: grid;
-  gap: 16px;
+  gap: 13px;
   min-width: 0;
 }
 
 .creators-auth-form label {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
   color: #fff;
   font-size: 15px;
@@ -51705,7 +51712,7 @@ body:has(.studio-shell .video-page-studio),
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  min-height: 54px;
+  min-height: 50px;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 17px;
   background: rgba(16, 6, 18, 0.76);
@@ -51743,8 +51750,8 @@ body:has(.studio-shell .video-page-studio),
 }
 
 .creators-auth-primary {
-  min-height: 58px;
-  margin-top: 10px;
+  min-height: 54px;
+  margin-top: 8px;
   border: 0;
   border-radius: 9999px;
   background: linear-gradient(90deg, #ff4f7b 0%, #ff765d 100%);
