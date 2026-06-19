@@ -51825,6 +51825,20 @@ body:has(.studio-shell .video-page-studio),
   white-space: normal;
 }
 
+.creators-desk-auth-error {
+  display: flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 78, 120, 0.42);
+  border-radius: 12px;
+  background: rgba(255, 78, 120, 0.12);
+  color: #ffd5de;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
 @media (max-width: 620px) {
   .creators-auth-top {
     align-items: flex-start;

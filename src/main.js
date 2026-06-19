@@ -181,6 +181,7 @@ const state = {
   creatorsDeskAuthMode: readStoredJson(storageKeys.creatorsDeskAccounts, []).length ? "login" : "register",
   creatorsDeskLoginPhone: "",
   creatorsDeskAuthDraft: { email: "", phone: "", password: "" },
+  creatorsDeskAuthError: "",
   search: "",
   adminUserId: null,
   adminSearch: "",
@@ -2671,6 +2672,11 @@ function stabilizeCreatorsDeskInputFocus(input) {
   };
   focusIfPageDroppedIt(true);
   [0, 16, 50, 100].forEach((delay) => window.setTimeout(() => focusIfPageDroppedIt(false), delay));
+}
+
+function clearCreatorsDeskAuthError() {
+  state.creatorsDeskAuthError = "";
+  document.querySelector(".creators-desk-auth-error")?.remove();
 }
 
 function handleDelegatedPointerDown(event) {
@@ -5478,7 +5484,7 @@ function creatorsDeskRegisterForm() {
     <label>${cdText("email")}<input name="email" type="email" autocomplete="email" value="${esc(draft.email || "")}" placeholder="you@example.com" required></label>
     <label>${cdText("phone")}<input name="phone" inputmode="tel" autocomplete="tel" value="${esc(draft.phone || "")}" placeholder="+60 12 345 6789" required></label>
     <label>${cdText("password")}<input name="password" type="password" autocomplete="new-password" value="${esc(draft.password || "")}" minlength="6" placeholder="${esc(cdText("passwordPlaceholder"))}" required></label>
-    <button class="gold-button" type="submit">${cdText("register")} ${icon("user-plus", 18)}</button>
+    <button class="gold-button" type="submit" data-creators-auth-submit>${cdText("register")} ${icon("user-plus", 18)}</button>
     <div class="login-links creators-desk-auth-links"><button class="text-button login-register-link" type="button" data-creators-auth-mode="login">${cdText("hasAccount")}</button></div>
   </form>`;
 }
@@ -5488,7 +5494,8 @@ function creatorsDeskLoginForm() {
   return `<form class="login-form creators-desk-auth-form" data-form="creators-desk-login">
     <label>${cdText("phone")}<input name="phone" inputmode="tel" autocomplete="tel" value="${esc(draft.phone || state.creatorsDeskLoginPhone || "")}" placeholder="+60 12 345 6789" required></label>
     <label>${cdText("password")}<input name="password" type="password" autocomplete="current-password" value="${esc(draft.password || "")}" required></label>
-    <button class="gold-button" type="submit">${cdText("login")} ${icon("log-in", 18)}</button>
+    ${state.creatorsDeskAuthError ? `<div class="creators-desk-auth-error" role="alert">${esc(state.creatorsDeskAuthError)}</div>` : ""}
+    <button class="gold-button" type="submit" data-creators-auth-submit>${cdText("login")} ${icon("log-in", 18)}</button>
     <div class="login-links creators-desk-auth-links"><button class="text-button login-register-link" type="button" data-creators-auth-mode="register">${cdText("noAccount")}</button></div>
   </form>`;
 }
@@ -5510,26 +5517,30 @@ function registerCreatorsDeskAccount(data = {}) {
   };
   writeCreatorsDeskAccounts([account, ...accounts]);
   notify(cdText("notifyAccountCreated"));
-  return set({ creatorsDeskAuthMode: "login", creatorsDeskLoginPhone: phone, creatorsDeskAuthDraft: { email: "", phone, password: "" } });
+  return set({ creatorsDeskAuthMode: "login", creatorsDeskLoginPhone: phone, creatorsDeskAuthDraft: { email: "", phone, password: "" }, creatorsDeskAuthError: "" });
 }
 
 function loginCreatorsDeskAccount(data = {}) {
   const phone = creatorsDeskNormalizePhone(data.phone);
   const password = String(data.password || "");
   const account = creatorsDeskAccounts().find((item) => item.phone === phone && item.password === password);
-  if (!account) return notify(cdText("notifyLoginFailed"));
+  if (!account) {
+    const message = cdText("notifyLoginFailed");
+    notify(message);
+    return set({ creatorsDeskAuthError: message, creatorsDeskAuthDraft: { ...(state.creatorsDeskAuthDraft || {}), phone, password } });
+  }
   const session = { accountId: account.id, phone: account.phone, loginAt: new Date().toISOString() };
   localStorage.setItem(storageKeys.creatorsDeskSession, JSON.stringify(session));
   state.creatorsDeskSession = session;
   window.history.pushState({}, "", "/task-center");
-  return set({ creatorsDeskAuthMode: "login", creatorsDeskLoginPhone: phone, creatorsDeskAuthDraft: { email: "", phone, password: "" } });
+  return set({ creatorsDeskAuthMode: "login", creatorsDeskLoginPhone: phone, creatorsDeskAuthDraft: { email: "", phone, password: "" }, creatorsDeskAuthError: "" });
 }
 
 function logoutCreatorsDeskAccount() {
   localStorage.removeItem(storageKeys.creatorsDeskSession);
   state.creatorsDeskSession = null;
   window.history.pushState({}, "", "/");
-  return set({ creatorsDeskAuthMode: creatorsDeskAccounts().length ? "login" : "register", creatorsDeskAuthDraft: { email: "", phone: "", password: "" } });
+  return set({ creatorsDeskAuthMode: creatorsDeskAccounts().length ? "login" : "register", creatorsDeskAuthDraft: { email: "", phone: "", password: "" }, creatorsDeskAuthError: "" });
 }
 
 function readStandaloneSubmissions() {
@@ -13507,18 +13518,33 @@ function bindTaskCenter() {
 function bindStandaloneTaskPages() {
   document.querySelectorAll(".creators-desk-auth-form input").forEach((input) => {
     const stabilize = () => stabilizeCreatorsDeskInputFocus(input);
-    input.addEventListener("pointerdown", stabilize);
-    input.addEventListener("mousedown", stabilize);
-    input.addEventListener("click", stabilize);
+    const prepareEdit = () => {
+      clearCreatorsDeskAuthError();
+      stabilize();
+    };
+    input.addEventListener("pointerdown", prepareEdit);
+    input.addEventListener("mousedown", prepareEdit);
+    input.addEventListener("click", prepareEdit);
+    input.addEventListener("focus", clearCreatorsDeskAuthError);
     input.addEventListener("input", () => {
       state.creatorsDeskAuthDraft = {
         ...(state.creatorsDeskAuthDraft || {}),
         [input.name]: input.value
       };
+      clearCreatorsDeskAuthError();
+    });
+  });
+  document.querySelectorAll("[data-creators-auth-submit]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      const form = event.currentTarget.closest("form");
+      if (!form || !form.matches(".creators-desk-auth-form")) return;
+      event.preventDefault();
+      if (!form.checkValidity()) return form.reportValidity();
+      form.requestSubmit();
     });
   });
   document.querySelectorAll("[data-creators-auth-mode]").forEach((el) => el.addEventListener("click", () => {
-    set({ creatorsDeskAuthMode: el.dataset.creatorsAuthMode || "login" });
+    set({ creatorsDeskAuthMode: el.dataset.creatorsAuthMode || "login", creatorsDeskAuthError: "" });
   }));
   document.querySelectorAll("[data-standalone-admin-filter]").forEach((el) => el.addEventListener("click", () => {
     set({ standaloneAdminFilter: el.dataset.standaloneAdminFilter || "all", standaloneAdminSelectedId: "" });
