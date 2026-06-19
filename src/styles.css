@@ -51490,8 +51490,8 @@ body:has(.studio-shell .video-page-studio),
   display: grid;
   align-content: start;
   justify-items: center;
-  gap: clamp(12px, 2vh, 20px);
-  padding: clamp(16px, 2.4vw, 28px) clamp(18px, 5vw, 72px) 28px;
+  gap: clamp(8px, 1.4vh, 12px);
+  padding: clamp(14px, 1.8vw, 20px) clamp(18px, 5vw, 72px) 18px;
   color: #fff;
   font-family: Poppins, "Avenir Next", "Nunito Sans", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
   background:
@@ -51516,7 +51516,7 @@ body:has(.studio-shell .video-page-studio),
   align-items: center;
   justify-content: center;
   gap: 24px;
-  min-height: clamp(50px, 5vw, 70px);
+  min-height: clamp(48px, 4.2vw, 56px);
 }
 
 .creators-auth-brand {
@@ -51624,7 +51624,7 @@ body:has(.studio-shell .video-page-studio),
 
 .creators-auth-card {
   width: min(100%, 640px);
-  max-height: calc(100svh - clamp(50px, 5vw, 70px) - clamp(12px, 2vh, 20px) - clamp(44px, 4.8vw, 56px));
+  max-height: calc(100svh - clamp(48px, 4.2vw, 56px) - clamp(8px, 1.4vh, 12px) - clamp(32px, 3.6vw, 38px));
   overflow-y: auto;
   overscroll-behavior: contain;
   contain: layout paint;
@@ -51636,14 +51636,14 @@ body:has(.studio-shell .video-page-studio),
     0 34px 86px rgba(95, 0, 103, 0.16),
     0 14px 42px rgba(255, 49, 95, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  padding: clamp(22px, 3vw, 34px);
+  padding: clamp(20px, 2.5vw, 26px);
 }
 
 .creators-auth-head h1 {
   font-family: Poppins, "Avenir Next", "Nunito Sans", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif !important;
   margin: 0;
   color: #fff;
-  font-size: 38px;
+  font-size: 34px;
   line-height: 1.14;
   font-weight: 800;
   letter-spacing: 0;
@@ -51652,7 +51652,7 @@ body:has(.studio-shell .video-page-studio),
 }
 
 .creators-auth-shell[data-lang="en"] .creators-auth-head h1 {
-  font-size: clamp(28px, 3vw, 36px);
+  font-size: clamp(26px, 2.7vw, 32px);
   max-width: 560px;
 }
 
@@ -51660,7 +51660,7 @@ body:has(.studio-shell .video-page-studio),
   margin: 8px 0 0;
   max-width: 620px;
   color: rgba(255, 255, 255, 0.66);
-  font-size: clamp(15px, 1.55vw, 18px);
+  font-size: clamp(14px, 1.35vw, 16px);
   line-height: 1.5;
   font-weight: 700;
 }
@@ -51669,7 +51669,7 @@ body:has(.studio-shell .video-page-studio),
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
-  margin: 20px 0 18px;
+  margin: 16px 0 12px;
   padding: 6px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 9999px;
@@ -51695,16 +51695,16 @@ body:has(.studio-shell .video-page-studio),
 
 .creators-auth-form {
   display: grid;
-  gap: 13px;
+  gap: 10px;
   min-width: 0;
 }
 
 .creators-auth-form label {
   display: grid;
-  gap: 8px;
+  gap: 7px;
   min-width: 0;
   color: #fff;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 800;
 }
 
@@ -51712,7 +51712,7 @@ body:has(.studio-shell .video-page-studio),
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  min-height: 50px;
+  min-height: 46px;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 17px;
   background: rgba(16, 6, 18, 0.76);
@@ -51750,8 +51750,8 @@ body:has(.studio-shell .video-page-studio),
 }
 
 .creators-auth-primary {
-  min-height: 54px;
-  margin-top: 8px;
+  min-height: 50px;
+  margin-top: 6px;
   border: 0;
   border-radius: 9999px;
   background: linear-gradient(90deg, #ff4f7b 0%, #ff765d 100%);
