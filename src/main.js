@@ -1393,6 +1393,28 @@ async function api(path, options = {}) {
   return res.headers.get("content-type")?.includes("application/json") ? res.json() : res;
 }
 
+async function creatorsDeskApi(path, options = {}) {
+  const { timeoutMs = 0, headers: optionHeaders = {}, ...fetchOptions } = options;
+  const token = state.creatorsDeskSession?.token || readStoredJson(storageKeys.creatorsDeskSession, null)?.token || "";
+  const headers = { "Content-Type": "application/json", ...optionHeaders };
+  if (token) headers["X-Creators-Desk-Token"] = token;
+  const controller = timeoutMs ? new AbortController() : null;
+  const timeout = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
+  const res = await fetch(`${apiBaseUrl}/api/creators-desk${path}`, {
+    headers,
+    ...fetchOptions,
+    signal: controller?.signal || fetchOptions.signal
+  }).finally(() => {
+    if (timeout) clearTimeout(timeout);
+  });
+  if (!res.ok) {
+    const error = new Error((await res.json().catch(() => ({}))).error || "Request failed");
+    error.status = res.status;
+    throw error;
+  }
+  return res.headers.get("content-type")?.includes("application/json") ? res.json() : res;
+}
+
 async function boot() {
   state.studioBootError = "";
   render();
@@ -1406,6 +1428,7 @@ async function boot() {
   if (window.location.pathname === "/admin" || window.location.pathname.startsWith("/admin/")) state.page = "admin";
   if (window.location.pathname.startsWith("/studio/agent")) state.page = "agent";
   if (isStudioPath()) await ensureStudioData();
+  if (isCreatorsDeskPath()) await hydrateCreatorsDeskCloudAuth();
   state.loading = false;
   render();
   showPaymentReturnNotice();
@@ -2588,6 +2611,10 @@ function dbWithoutResult(db, resultId) {
 function routeShell(content) {
   const dock = pathIs("/login") ? `<div class="global-lang-dock">${languageSwitch()}</div>` : "";
   return `${dock}${content}`;
+}
+
+function isCreatorsDeskPath() {
+  return pathIs("/") || pathIs("/task-center") || pathIs("/admin-verify");
 }
 
 function render() {
@@ -4997,8 +5024,31 @@ function creatorsDeskAccounts() {
   return readStoredJson(storageKeys.creatorsDeskAccounts, []);
 }
 
+function creatorsDeskPublicAccount(account = {}) {
+  return {
+    id: account.id || "",
+    email: String(account.email || "").trim().toLowerCase(),
+    phone: creatorsDeskNormalizePhone(account.phone),
+    role: account.role || (creatorsDeskAdminEmails.has(String(account.email || "").trim().toLowerCase()) ? "admin" : "creator"),
+    createdAt: account.createdAt || "",
+    updatedAt: account.updatedAt || "",
+    passwordSet: Boolean(account.passwordSet || account.password || account.passwordHash)
+  };
+}
+
 function writeCreatorsDeskAccounts(accounts = []) {
-  localStorage.setItem(storageKeys.creatorsDeskAccounts, JSON.stringify(accounts));
+  localStorage.setItem(storageKeys.creatorsDeskAccounts, JSON.stringify(accounts.map(creatorsDeskPublicAccount).filter((account) => account.id && account.phone)));
+}
+
+function cacheCreatorsDeskAccountPayload(payload = {}) {
+  if (Array.isArray(payload.accounts) && payload.accounts.length) {
+    writeCreatorsDeskAccounts(payload.accounts);
+    return;
+  }
+  if (payload.account?.id) {
+    const cached = creatorsDeskAccounts().filter((account) => account.id !== payload.account.id);
+    writeCreatorsDeskAccounts([payload.account, ...cached]);
+  }
 }
 
 function creatorsDeskNormalizePhone(value = "") {
@@ -5032,6 +5082,57 @@ function creatorsDeskKnownAccounts() {
     });
   });
   return accounts;
+}
+
+function persistCreatorsDeskSession(payload = {}) {
+  cacheCreatorsDeskAccountPayload(payload);
+  const session = {
+    ...(payload.session || {}),
+    accountId: payload.session?.accountId || payload.account?.id || "",
+    phone: payload.session?.phone || payload.account?.phone || "",
+    email: payload.session?.email || payload.account?.email || "",
+    loginAt: payload.session?.loginAt || new Date().toISOString()
+  };
+  if (!session.accountId || !session.token) return null;
+  localStorage.setItem(storageKeys.creatorsDeskSession, JSON.stringify(session));
+  state.creatorsDeskSession = session;
+  return session;
+}
+
+async function hydrateCreatorsDeskCloudAuth() {
+  const legacyAccounts = readStoredJson(storageKeys.creatorsDeskAccounts, []).filter((account) => account?.password && account?.phone && account?.email);
+  if (legacyAccounts.length) {
+    try {
+      const migrated = await creatorsDeskApi("/migrate", {
+        method: "POST",
+        body: JSON.stringify({ accounts: legacyAccounts })
+      });
+      cacheCreatorsDeskAccountPayload(migrated);
+      const legacySessionAccount = state.creatorsDeskSession?.accountId
+        ? legacyAccounts.find((account) => account.id === state.creatorsDeskSession.accountId)
+        : null;
+      if (legacySessionAccount && !state.creatorsDeskSession?.token) {
+        const payload = await creatorsDeskApi("/login", {
+          method: "POST",
+          body: JSON.stringify({ phone: legacySessionAccount.phone, password: legacySessionAccount.password })
+        });
+        persistCreatorsDeskSession(payload);
+        return;
+      }
+    } catch (error) {
+      console.warn("Creators Desk local account migration failed", error);
+    }
+  }
+
+  if (!state.creatorsDeskSession?.token) return;
+  try {
+    const payload = await creatorsDeskApi("/session");
+    persistCreatorsDeskSession({ ...payload, session: { ...(state.creatorsDeskSession || {}), ...(payload.session || {}) } });
+  } catch (error) {
+    localStorage.removeItem(storageKeys.creatorsDeskSession);
+    state.creatorsDeskSession = null;
+    state.creatorsDeskAuthError = "";
+  }
 }
 
 const creatorsDeskCopy = {
@@ -5201,10 +5302,10 @@ const creatorsDeskCopy = {
     noTasks: "暂无任务",
     goClaimTask: "到任务广场领一个看看？",
     notifyFillAccount: "请填写邮箱、手机号和至少 6 位密码。",
-    notifyPhoneExists: "这个手机号已经注册，请直接登录。",
+    notifyPhoneExists: "这个手机号或邮箱已经注册，请直接登录。",
     notifyAccountCreated: "账户已创建。请用手机号和密码登录。",
     notifyLoginFailed: "手机号或密码不正确。",
-    notifyLocalAccountMissing: "这个手机上还没有这个账号。请先在当前手机创建账户；跨设备账号同步还没接入。",
+    notifyLocalAccountMissing: "没有找到这个账号，请先创建账户。",
     notifyNoSubmission: "未选择提交记录。",
     notifyRejectReason: "请填写驳回原因。",
     notifyApproved: "已通过。Touch 'n Go 将在 7 天后发放。",
@@ -5407,10 +5508,10 @@ const creatorsDeskCopy = {
     noTasks: "No tasks yet",
     goClaimTask: "Go claim a task from the marketplace.",
     notifyFillAccount: "Please enter email, phone number, and a password with at least 6 characters.",
-    notifyPhoneExists: "This phone number is already registered. Please log in.",
+    notifyPhoneExists: "This phone number or email is already registered. Please log in.",
     notifyAccountCreated: "Account created. Please log in with your phone number and password.",
     notifyLoginFailed: "Phone number or password is incorrect.",
-    notifyLocalAccountMissing: "This account has not been created on this phone yet. Create it on this device first; cross-device account sync is not connected yet.",
+    notifyLocalAccountMissing: "Account not found. Please create an account first.",
     notifyNoSubmission: "No submission selected.",
     notifyRejectReason: "Please add a reject reason.",
     notifyApproved: "Approved. Touch 'n Go is scheduled for 7 days later.",
@@ -5582,45 +5683,47 @@ function creatorsDeskLoginValidationMessage(data = {}) {
   return creatorsDeskAuthMissingMessage(missing);
 }
 
-function registerCreatorsDeskAccount(data = {}) {
+async function registerCreatorsDeskAccount(data = {}) {
   const email = String(data.email || "").trim().toLowerCase();
   const phone = creatorsDeskNormalizePhone(data.phone);
   const password = String(data.password || "");
   const draft = { email: String(data.email || "").trim(), phone, password };
   const validationMessage = creatorsDeskRegisterValidationMessage(data);
   if (validationMessage) return creatorsDeskSetAuthError(validationMessage, draft);
-  const accounts = creatorsDeskAccounts();
-  if (accounts.some((account) => account.phone === phone)) return notify(cdText("notifyPhoneExists"));
-  const account = {
-    id: `cd-${Date.now()}`,
-    email,
-    phone,
-    password,
-    role: creatorsDeskAdminEmails.has(email) ? "admin" : "creator",
-    createdAt: new Date().toISOString()
-  };
-  writeCreatorsDeskAccounts([account, ...accounts]);
-  notify(cdText("notifyAccountCreated"));
-  return set({ creatorsDeskAuthMode: "login", creatorsDeskLoginPhone: phone, creatorsDeskAuthDraft: { email: "", phone, password: "" }, creatorsDeskAuthError: "" });
+  try {
+    const payload = await creatorsDeskApi("/register", {
+      method: "POST",
+      body: JSON.stringify({ email, phone, password })
+    });
+    cacheCreatorsDeskAccountPayload(payload);
+    notify(cdText("notifyAccountCreated"));
+    return set({ creatorsDeskAuthMode: "login", creatorsDeskLoginPhone: phone, creatorsDeskAuthDraft: { email: "", phone, password: "" }, creatorsDeskAuthError: "" });
+  } catch (error) {
+    const message = error.status === 409 ? cdText("notifyPhoneExists") : error.message;
+    notify(message);
+    return set({ creatorsDeskAuthError: message, creatorsDeskAuthDraft: draft });
+  }
 }
 
-function loginCreatorsDeskAccount(data = {}) {
+async function loginCreatorsDeskAccount(data = {}) {
   const phone = creatorsDeskNormalizePhone(data.phone);
   const password = String(data.password || "");
   const validationMessage = creatorsDeskLoginValidationMessage(data);
   if (validationMessage) return creatorsDeskSetAuthError(validationMessage, { ...(state.creatorsDeskAuthDraft || {}), phone, password });
-  const accountByPhone = creatorsDeskAccounts().find((item) => item.phone === phone);
-  const account = accountByPhone?.password === password ? accountByPhone : null;
-  if (!account) {
-    const message = accountByPhone ? cdText("notifyLoginFailed") : cdText("notifyLocalAccountMissing");
+  try {
+    const payload = await creatorsDeskApi("/login", {
+      method: "POST",
+      body: JSON.stringify({ phone, password })
+    });
+    const session = persistCreatorsDeskSession(payload);
+    if (!session) throw new Error("Login session could not be created.");
+    window.history.pushState({}, "", "/task-center");
+    return set({ creatorsDeskSession: session, creatorsDeskAuthMode: "login", creatorsDeskLoginPhone: phone, creatorsDeskAuthDraft: { email: "", phone, password: "" }, creatorsDeskAuthError: "" });
+  } catch (error) {
+    const message = error.status === 404 ? cdText("notifyLocalAccountMissing") : error.status === 401 ? cdText("notifyLoginFailed") : error.message;
     notify(message);
     return set({ creatorsDeskAuthError: message, creatorsDeskAuthDraft: { ...(state.creatorsDeskAuthDraft || {}), phone, password } });
   }
-  const session = { accountId: account.id, phone: account.phone, loginAt: new Date().toISOString() };
-  localStorage.setItem(storageKeys.creatorsDeskSession, JSON.stringify(session));
-  state.creatorsDeskSession = session;
-  window.history.pushState({}, "", "/task-center");
-  return set({ creatorsDeskSession: session, creatorsDeskAuthMode: "login", creatorsDeskLoginPhone: phone, creatorsDeskAuthDraft: { email: "", phone, password: "" }, creatorsDeskAuthError: "" });
 }
 
 function logoutCreatorsDeskAccount() {
@@ -5843,7 +5946,7 @@ function standaloneAdminAccountRow(account = {}, submissions = []) {
     <span><i class="${isAdmin ? "admin" : ""}">${isAdmin ? cdText("adminRole") : cdText("creatorRole")}</i></span>
     <span>${pending ? cdText("notCreated") : standaloneDateTime(account.createdAt)}</span>
     <span><strong>${submissionCount}</strong></span>
-    <span>${account.password ? cdText("passwordSet") : cdText("passwordNotSet")}</span>
+    <span>${account.passwordSet || account.password ? cdText("passwordSet") : cdText("passwordNotSet")}</span>
   </div>`;
 }
 

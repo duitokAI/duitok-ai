@@ -263,9 +263,9 @@ app.use((req, res, next) => {
     res.setHeader("Vary", "Origin");
   }
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,DELETE,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Signature");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Signature,X-Creators-Desk-Token");
   res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
-  if (/^\/api\/(?:state|export|admin|media|agent|projects)/.test(req.path)) {
+  if (/^\/api\/(?:state|export|admin|media|agent|projects|creators-desk)/.test(req.path)) {
     res.setHeader("Cache-Control", "no-store");
   }
   if (req.method === "OPTIONS") return res.sendStatus(204);
@@ -1227,6 +1227,58 @@ function publicUser(user) {
   };
 }
 
+function creatorsDeskAdminEmailList() {
+  return (process.env.CREATORS_DESK_ADMIN_EMAILS || "tinzixian05@gmail.com,abc0163100131@gmail.com,admin@creatorsdesk.local,admin@creatorsdesk.co,admin@pokaya.ai")
+    .split(",")
+    .map((item) => item.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+function creatorsDeskIsAdminEmail(email = "") {
+  return creatorsDeskAdminEmailList().includes(String(email || "").trim().toLowerCase());
+}
+
+function normalizeCreatorsDeskPhone(value = "") {
+  return String(value || "").replace(/[^\d+]/g, "").trim();
+}
+
+function publicCreatorsDeskAccount(account = {}) {
+  return {
+    id: account.id,
+    email: account.email || "",
+    phone: account.phone || "",
+    role: account.role || (creatorsDeskIsAdminEmail(account.email) ? "admin" : "creator"),
+    createdAt: account.createdAt || "",
+    updatedAt: account.updatedAt || "",
+    passwordSet: Boolean(account.passwordHash || account.password)
+  };
+}
+
+function signCreatorsDeskToken(account = {}) {
+  const payload = Buffer.from(JSON.stringify({
+    accountId: account.id,
+    phone: account.phone || "",
+    exp: Date.now() + Number(process.env.CREATORS_DESK_TOKEN_TTL_MS || 30 * 24 * 60 * 60 * 1000)
+  })).toString("base64url");
+  const signature = crypto.createHmac("sha256", authSecret).update(`creators-desk:${payload}`).digest("base64url");
+  return `${payload}.${signature}`;
+}
+
+function verifyCreatorsDeskToken(token = "", db = {}) {
+  if (!token || !token.includes(".")) return null;
+  const [payload, signature] = token.split(".");
+  const expected = crypto.createHmac("sha256", authSecret).update(`creators-desk:${payload}`).digest("base64url");
+  if (signature.length !== expected.length || !crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) return null;
+  const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+  if (data.exp && Date.now() > Number(data.exp)) return null;
+  return (db.creatorsDesk?.accounts || []).find((account) => account.id === data.accountId) || null;
+}
+
+function creatorsDeskTokenFromRequest(req) {
+  return String(req.get("x-creators-desk-token") || "").trim()
+    || String(req.get("authorization") || "").replace(/^Bearer\s+/i, "").trim();
+}
+
 function defaultAgentPreferenceMemory() {
   return {
     preferredLanguages: [],
@@ -1574,6 +1626,7 @@ const seed = {
   agentFeedbackEvents: [],
   agentPreferenceMemory: {},
   agentTemplates: [],
+  creatorsDesk: { accounts: [] },
   supportTickets: []
 };
 
@@ -1593,6 +1646,21 @@ function normalizeDb(db) {
     agentPermissions: { ...defaultAgentPermissions(), ...(user.agentPermissions || {}) }
   }));
   if (!db.users.some((user) => user.email === "admin@pokaya.ai")) db.users.unshift(structuredClone(seed.users[0]));
+  db.creatorsDesk ||= structuredClone(seed.creatorsDesk);
+  db.creatorsDesk.accounts ||= [];
+  db.creatorsDesk.accounts = db.creatorsDesk.accounts.map((account) => {
+    const email = String(account.email || "").trim().toLowerCase();
+    const phone = normalizeCreatorsDeskPhone(account.phone);
+    return {
+      ...account,
+      id: account.id || `cd-${crypto.randomUUID()}`,
+      email,
+      phone,
+      role: creatorsDeskIsAdminEmail(email) ? "admin" : account.role || "creator",
+      createdAt: account.createdAt || new Date().toISOString(),
+      updatedAt: account.updatedAt || account.createdAt || new Date().toISOString()
+    };
+  }).filter((account) => account.email && account.phone);
   db.liveCount ||= seed.liveCount;
   db.projects ||= structuredClone(seed.projects);
   db.projects = db.projects.map((project) => ({
@@ -8666,6 +8734,157 @@ app.patch("/api/account/password", async (req, res, next) => {
       return publicState(db, { ...target, __adminVerified: user.__adminVerified });
     });
     res.json({ ok: true });
+  } catch (error) {
+    next(error);
+  }
+});
+
+function creatorsDeskAccountsPayload(db, account) {
+  const isAdmin = account && (account.role === "admin" || creatorsDeskIsAdminEmail(account.email));
+  return isAdmin ? (db.creatorsDesk?.accounts || []).map(publicCreatorsDeskAccount) : [publicCreatorsDeskAccount(account)].filter((item) => item.id);
+}
+
+async function requireCreatorsDeskAccount(req) {
+  const db = await ensureDb();
+  const account = verifyCreatorsDeskToken(creatorsDeskTokenFromRequest(req), db);
+  if (!account) {
+    const error = new Error("Creators Desk login required.");
+    error.status = 401;
+    throw error;
+  }
+  return { db, account };
+}
+
+app.get("/api/creators-desk/session", async (req, res, next) => {
+  try {
+    const { db, account } = await requireCreatorsDeskAccount(req);
+    const publicAccount = publicCreatorsDeskAccount(account);
+    res.json({
+      account: publicAccount,
+      session: {
+        accountId: publicAccount.id,
+        phone: publicAccount.phone,
+        email: publicAccount.email,
+        token: creatorsDeskTokenFromRequest(req)
+      },
+      accounts: creatorsDeskAccountsPayload(db, account)
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/creators-desk/accounts", async (req, res, next) => {
+  try {
+    const { db, account } = await requireCreatorsDeskAccount(req);
+    if (account.role !== "admin" && !creatorsDeskIsAdminEmail(account.email)) {
+      return res.status(403).json({ error: "Admin access required." });
+    }
+    res.json({ accounts: (db.creatorsDesk?.accounts || []).map(publicCreatorsDeskAccount) });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/creators-desk/register", async (req, res, next) => {
+  try {
+    const email = String(req.body.email || "").trim().toLowerCase();
+    const phone = normalizeCreatorsDeskPhone(req.body.phone);
+    const password = String(req.body.password || "");
+    if (!email || !phone || password.length < 6) return res.status(400).json({ error: "Email, phone, and a password with at least 6 characters are required." });
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: "Please enter a valid email address." });
+
+    const payload = await mutateDb(async (db) => {
+      db.creatorsDesk ||= { accounts: [] };
+      db.creatorsDesk.accounts ||= [];
+      const duplicate = db.creatorsDesk.accounts.find((account) => account.phone === phone || account.email === email);
+      if (duplicate) {
+        const error = new Error(duplicate.phone === phone ? "This phone number is already registered. Please log in." : "This email is already registered. Please log in.");
+        error.status = 409;
+        throw error;
+      }
+      const now = new Date().toISOString();
+      const account = {
+        id: `cd-${crypto.randomUUID()}`,
+        email,
+        phone,
+        passwordHash: hashPassword(password),
+        role: creatorsDeskIsAdminEmail(email) ? "admin" : "creator",
+        createdAt: now,
+        updatedAt: now
+      };
+      db.creatorsDesk.accounts.unshift(account);
+      await saveDb(db);
+      return { account: publicCreatorsDeskAccount(account) };
+    });
+    res.json(payload);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/creators-desk/login", async (req, res, next) => {
+  try {
+    const phone = normalizeCreatorsDeskPhone(req.body.phone);
+    const password = String(req.body.password || "");
+    if (!phone || !password) return res.status(400).json({ error: "Phone number and password are required." });
+
+    const db = await ensureDb();
+    const account = (db.creatorsDesk?.accounts || []).find((item) => item.phone === phone);
+    if (!account) return res.status(404).json({ error: "Account not found. Please create an account first." });
+    if (!verifyPassword(password, account.passwordHash || account.password)) return res.status(401).json({ error: "Phone number or password is incorrect." });
+    if (!account.passwordHash) {
+      account.passwordHash = hashPassword(password);
+      delete account.password;
+      account.updatedAt = new Date().toISOString();
+      await saveDb(db);
+    }
+    const publicAccount = publicCreatorsDeskAccount(account);
+    const session = {
+      accountId: account.id,
+      phone: account.phone,
+      email: account.email,
+      token: signCreatorsDeskToken(account),
+      loginAt: new Date().toISOString()
+    };
+    res.json({ account: publicAccount, session, accounts: creatorsDeskAccountsPayload(db, account) });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/creators-desk/migrate", async (req, res, next) => {
+  try {
+    const incoming = Array.isArray(req.body.accounts) ? req.body.accounts : [];
+    if (!incoming.length) return res.json({ accounts: [] });
+    const payload = await mutateDb(async (db) => {
+      db.creatorsDesk ||= { accounts: [] };
+      db.creatorsDesk.accounts ||= [];
+      const created = [];
+      for (const raw of incoming.slice(0, 50)) {
+        const email = String(raw.email || "").trim().toLowerCase();
+        const phone = normalizeCreatorsDeskPhone(raw.phone);
+        const password = String(raw.password || "");
+        if (!email || !phone || password.length < 6 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) continue;
+        const existing = db.creatorsDesk.accounts.find((account) => account.phone === phone || account.email === email);
+        if (existing) continue;
+        const now = raw.createdAt || new Date().toISOString();
+        const account = {
+          id: raw.id && !db.creatorsDesk.accounts.some((item) => item.id === raw.id) ? String(raw.id) : `cd-${crypto.randomUUID()}`,
+          email,
+          phone,
+          passwordHash: hashPassword(password),
+          role: creatorsDeskIsAdminEmail(email) ? "admin" : "creator",
+          createdAt: now,
+          updatedAt: new Date().toISOString()
+        };
+        db.creatorsDesk.accounts.unshift(account);
+        created.push(publicCreatorsDeskAccount(account));
+      }
+      if (created.length) await saveDb(db);
+      return { accounts: (db.creatorsDesk.accounts || []).map(publicCreatorsDeskAccount), created };
+    });
+    res.json(payload);
   } catch (error) {
     next(error);
   }
