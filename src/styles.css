@@ -51480,12 +51480,11 @@ body:has(.studio-shell .video-page-studio),
 .creators-auth-shell {
   min-height: 100vh;
   min-height: 100svh;
-  height: 100vh;
-  height: 100svh;
+  height: auto;
   position: relative;
   isolation: isolate;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  overflow-y: visible;
+  overscroll-behavior: auto;
   overflow-anchor: none;
   display: grid;
   align-content: start;
@@ -51624,10 +51623,9 @@ body:has(.studio-shell .video-page-studio),
 
 .creators-auth-card {
   width: min(100%, 640px);
-  max-height: calc(100svh - clamp(48px, 4.2vw, 56px) - clamp(8px, 1.4vh, 12px) - clamp(32px, 3.6vw, 38px));
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  contain: layout paint;
+  max-height: none;
+  overflow: visible;
+  contain: none;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 28px;
   background:

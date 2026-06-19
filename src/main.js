@@ -2642,10 +2642,36 @@ function hydrateIconsSoon() {
 function initDelegatedEvents() {
   if (app.dataset.delegatedEvents === "true") return;
   app.dataset.delegatedEvents = "true";
+  app.addEventListener("pointerdown", focusCreatorsDeskAuthTarget, { capture: true, passive: true });
+  app.addEventListener("mousedown", focusCreatorsDeskAuthTarget, true);
+  app.addEventListener("touchstart", focusCreatorsDeskAuthTarget, { capture: true, passive: true });
+  app.addEventListener("click", focusCreatorsDeskAuthTarget, true);
   app.addEventListener("click", handleDelegatedClick);
   app.addEventListener("pointerdown", handleDelegatedPointerDown, { passive: true });
   app.addEventListener("pointerover", handleDelegatedPreviewWarm, { passive: true });
   app.addEventListener("focusin", handleDelegatedPreviewWarm);
+}
+
+function focusCreatorsDeskAuthTarget(event) {
+  const target = event.target;
+  const input = target.closest?.(".creators-auth-form input") || target.closest?.(".creators-auth-form label")?.querySelector("input");
+  if (!input) return;
+  focusCreatorsDeskAuthInput(input);
+}
+
+function focusCreatorsDeskAuthInput(input) {
+  if (!input) return;
+  const inputName = input.getAttribute("name");
+  const inputType = input.getAttribute("type");
+  const selector = inputName
+    ? `.creators-auth-form input[name="${CSS.escape(inputName)}"]`
+    : `.creators-auth-form input${inputType ? `[type="${CSS.escape(inputType)}"]` : ""}`;
+  const focusLiveInput = () => {
+    const liveInput = document.querySelector(selector) || input;
+    if (liveInput instanceof HTMLElement && document.activeElement !== liveInput) liveInput.focus({ preventScroll: true });
+  };
+  focusLiveInput();
+  [0, 16, 50, 100].forEach((delay) => window.setTimeout(focusLiveInput, delay));
 }
 
 function handleDelegatedPointerDown(event) {
@@ -13477,6 +13503,19 @@ function bindTaskCenter() {
 }
 
 function bindStandaloneTaskPages() {
+  document.querySelectorAll(".creators-auth-form input").forEach((input) => {
+    const focusInput = () => focusCreatorsDeskAuthInput(input);
+    input.addEventListener("pointerdown", focusInput);
+    input.addEventListener("mousedown", focusInput);
+    input.addEventListener("touchstart", focusInput, { passive: true });
+    input.addEventListener("click", focusInput);
+  });
+  document.querySelectorAll(".creators-auth-form label").forEach((label) => {
+    label.addEventListener("click", () => {
+      const input = label.querySelector("input");
+      focusCreatorsDeskAuthInput(input);
+    });
+  });
   document.querySelectorAll("[data-creators-auth-mode]").forEach((el) => el.addEventListener("click", () => {
     set({ creatorsDeskAuthMode: el.dataset.creatorsAuthMode || "login" });
   }));
