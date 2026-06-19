@@ -1192,7 +1192,7 @@ function verifyPassword(password, stored) {
 }
 
 const pokayaAdminPasswordHash = process.env.POKAYA_ADMIN_PASSWORD_HASH
-  || "7c1f19b46dd95b4dd2cbd8bcad412ba5:5d34e187d7e8abff1f1dba17f6c9afc3092a743c604bc1f5c8de7dda22f986aa8e386f09e217eafbe97a62cf9bc140c88317d263ad94ad2b784180cc1f0d767b";
+  || "f856c30ca2472d5778faa2830f088763:7a4a8d745891e02265c462060c29b9d211a358959177103e9fececc119b57233fc4dfb6faa575d59265b3463c78b1db04a2e9fca24f00e34e0fe36195e9f5de1";
 
 function requestOrigin(req) {
   const configured = (process.env.PUBLIC_APP_URL || process.env.APP_URL || "").replace(/\/$/, "");
