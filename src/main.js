@@ -5216,6 +5216,9 @@ const creatorsDeskCopy = {
     notifySubmitted: "已提交，等待审核。",
     notifyTaskAbandoned: "任务已放弃。",
     notifyReviseSoon: "修改流程稍后接入。",
+    notifyMissingFields: "请填写：{fields}。",
+    notifyInvalidEmail: "请输入有效的邮箱地址。",
+    notifyPasswordTooShort: "密码至少需要 6 个字符。",
     usersCreated: "已创建用户",
     creatorUsers: "创作者用户",
     adminUsers: "管理员",
@@ -5418,6 +5421,9 @@ const creatorsDeskCopy = {
     notifySubmitted: "Submitted. Waiting for review.",
     notifyTaskAbandoned: "Task abandoned.",
     notifyReviseSoon: "Revision flow will be connected soon.",
+    notifyMissingFields: "Please fill in: {fields}.",
+    notifyInvalidEmail: "Please enter a valid email address.",
+    notifyPasswordTooShort: "Password must be at least 6 characters.",
     usersCreated: "Users created",
     creatorUsers: "Creator users",
     adminUsers: "Admins",
@@ -5517,10 +5523,11 @@ function creatorsDeskAuthBrand() {
 
 function creatorsDeskRegisterForm() {
   const draft = state.creatorsDeskAuthDraft || {};
-  return `<form class="login-form creators-desk-auth-form" data-form="creators-desk-register">
+  return `<form class="login-form creators-desk-auth-form" data-form="creators-desk-register" novalidate>
     <label>${cdText("email")}<input name="email" type="email" autocomplete="email" value="${esc(draft.email || "")}" placeholder="you@example.com" required></label>
     <label>${cdText("phone")}<input name="phone" inputmode="tel" autocomplete="tel" value="${esc(draft.phone || "")}" placeholder="+60 12 345 6789" required></label>
     <label>${cdText("password")}<input name="password" type="password" autocomplete="new-password" value="${esc(draft.password || "")}" minlength="6" placeholder="${esc(cdText("passwordPlaceholder"))}" required></label>
+    ${state.creatorsDeskAuthError ? `<div class="creators-desk-auth-error" role="alert">${esc(state.creatorsDeskAuthError)}</div>` : ""}
     <button class="gold-button" type="submit">${cdText("register")} ${icon("user-plus", 18)}</button>
     <div class="login-links creators-desk-auth-links"><button class="text-button login-register-link" type="button" data-creators-auth-mode="login">${cdText("hasAccount")}</button></div>
   </form>`;
@@ -5528,7 +5535,7 @@ function creatorsDeskRegisterForm() {
 
 function creatorsDeskLoginForm() {
   const draft = state.creatorsDeskAuthDraft || {};
-  return `<form class="login-form creators-desk-auth-form" data-form="creators-desk-login">
+  return `<form class="login-form creators-desk-auth-form" data-form="creators-desk-login" novalidate>
     <label>${cdText("phone")}<input name="phone" inputmode="tel" autocomplete="tel" value="${esc(draft.phone || state.creatorsDeskLoginPhone || "")}" placeholder="+60 12 345 6789" required></label>
     <label>${cdText("password")}<input name="password" type="password" autocomplete="current-password" value="${esc(draft.password || "")}" required></label>
     ${state.creatorsDeskAuthError ? `<div class="creators-desk-auth-error" role="alert">${esc(state.creatorsDeskAuthError)}</div>` : ""}
@@ -5537,11 +5544,49 @@ function creatorsDeskLoginForm() {
   </form>`;
 }
 
+function creatorsDeskAuthMissingMessage(fields = []) {
+  return fields.length ? cdText("notifyMissingFields", { fields: fields.join(cdLang() === "zh" ? "、" : ", ") }) : "";
+}
+
+function creatorsDeskEmailLooksValid(email = "") {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || "").trim());
+}
+
+function creatorsDeskSetAuthError(message = "", draft = state.creatorsDeskAuthDraft || {}) {
+  if (message) notify(message);
+  return set({ creatorsDeskAuthError: message, creatorsDeskAuthDraft: draft });
+}
+
+function creatorsDeskRegisterValidationMessage(data = {}) {
+  const email = String(data.email || "").trim();
+  const phone = creatorsDeskNormalizePhone(data.phone);
+  const password = String(data.password || "");
+  const missing = [];
+  if (!email) missing.push(cdText("email"));
+  if (!phone) missing.push(cdText("phone"));
+  if (!password) missing.push(cdText("password"));
+  if (missing.length) return creatorsDeskAuthMissingMessage(missing);
+  if (!creatorsDeskEmailLooksValid(email)) return cdText("notifyInvalidEmail");
+  if (password.length < 6) return cdText("notifyPasswordTooShort");
+  return "";
+}
+
+function creatorsDeskLoginValidationMessage(data = {}) {
+  const phone = creatorsDeskNormalizePhone(data.phone);
+  const password = String(data.password || "");
+  const missing = [];
+  if (!phone) missing.push(cdText("phone"));
+  if (!password) missing.push(cdText("password"));
+  return creatorsDeskAuthMissingMessage(missing);
+}
+
 function registerCreatorsDeskAccount(data = {}) {
   const email = String(data.email || "").trim().toLowerCase();
   const phone = creatorsDeskNormalizePhone(data.phone);
   const password = String(data.password || "");
-  if (!email || !phone || password.length < 6) return notify(cdText("notifyFillAccount"));
+  const draft = { email: String(data.email || "").trim(), phone, password };
+  const validationMessage = creatorsDeskRegisterValidationMessage(data);
+  if (validationMessage) return creatorsDeskSetAuthError(validationMessage, draft);
   const accounts = creatorsDeskAccounts();
   if (accounts.some((account) => account.phone === phone)) return notify(cdText("notifyPhoneExists"));
   const account = {
@@ -5560,6 +5605,8 @@ function registerCreatorsDeskAccount(data = {}) {
 function loginCreatorsDeskAccount(data = {}) {
   const phone = creatorsDeskNormalizePhone(data.phone);
   const password = String(data.password || "");
+  const validationMessage = creatorsDeskLoginValidationMessage(data);
+  if (validationMessage) return creatorsDeskSetAuthError(validationMessage, { ...(state.creatorsDeskAuthDraft || {}), phone, password });
   const account = creatorsDeskAccounts().find((item) => item.phone === phone && item.password === password);
   if (!account) {
     const message = cdText("notifyLoginFailed");
@@ -13632,7 +13679,6 @@ function bindStandaloneTaskPages() {
       const form = event.currentTarget.closest("form");
       if (!form) return;
       event.preventDefault();
-      if (!form.checkValidity()) return form.reportValidity();
       const data = Object.fromEntries(new FormData(form));
       if (form.dataset.form === "creators-desk-register") return registerCreatorsDeskAccount(data);
       if (form.dataset.form === "creators-desk-login") return loginCreatorsDeskAccount(data);
