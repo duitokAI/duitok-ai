@@ -2640,47 +2640,37 @@ function hydrateIconsSoon() {
   }
 }
 
-let creatorsDeskAuthFocusToken = 0;
-
 function initDelegatedEvents() {
   if (app.dataset.delegatedEvents === "true") return;
   app.dataset.delegatedEvents = "true";
-  app.addEventListener("pointerdown", focusCreatorsDeskAuthTarget, { capture: true, passive: true });
-  app.addEventListener("mousedown", focusCreatorsDeskAuthTarget, true);
-  app.addEventListener("touchstart", focusCreatorsDeskAuthTarget, { capture: true, passive: true });
-  app.addEventListener("click", focusCreatorsDeskAuthTarget, true);
   app.addEventListener("click", handleDelegatedClick);
   app.addEventListener("pointerdown", handleDelegatedPointerDown, { passive: true });
   app.addEventListener("pointerover", handleDelegatedPreviewWarm, { passive: true });
   app.addEventListener("focusin", handleDelegatedPreviewWarm);
 }
 
-function focusCreatorsDeskAuthTarget(event) {
-  const target = event.target;
-  const input = target.closest?.(".creators-auth-form input") || target.closest?.(".creators-auth-form label")?.querySelector("input");
-  if (!input) return;
-  focusCreatorsDeskAuthInput(input);
-}
+let creatorsDeskInputFocusToken = 0;
 
-function focusCreatorsDeskAuthInput(input) {
-  if (!input) return;
-  const focusToken = ++creatorsDeskAuthFocusToken;
-  const inputName = input.getAttribute("name");
-  const inputType = input.getAttribute("type");
-  const selector = inputName
-    ? `.creators-auth-form input[name="${CSS.escape(inputName)}"]`
-    : `.creators-auth-form input${inputType ? `[type="${CSS.escape(inputType)}"]` : ""}`;
-  const focusLiveInput = (force = false) => {
-    if (focusToken !== creatorsDeskAuthFocusToken) return;
-    const liveInput = document.querySelector(selector) || input;
+function stabilizeCreatorsDeskInputFocus(input) {
+  if (!(input instanceof HTMLElement)) return;
+  const token = ++creatorsDeskInputFocusToken;
+  const formName = input.closest("form")?.dataset.form || "";
+  const inputName = input.getAttribute("name") || "";
+  const selector = formName && inputName
+    ? `form[data-form="${CSS.escape(formName)}"] input[name="${CSS.escape(inputName)}"]`
+    : "";
+  const focusIfPageDroppedIt = (force = false) => {
+    if (token !== creatorsDeskInputFocusToken || !selector) return;
+    const liveInput = document.querySelector(selector);
+    if (!(liveInput instanceof HTMLElement)) return;
     const active = document.activeElement;
-    const activeAuthInput = active?.closest?.(".creators-auth-form input");
-    if (!force && activeAuthInput && activeAuthInput !== liveInput) return;
-    if (!force && active && active !== document.body && active !== document.documentElement && !active.closest?.(".creators-auth-form")) return;
-    if (liveInput instanceof HTMLElement && document.activeElement !== liveInput) liveInput.focus({ preventScroll: true });
+    const activeCreatorsInput = active?.closest?.(".creators-desk-auth-form input");
+    if (!force && activeCreatorsInput && activeCreatorsInput !== liveInput) return;
+    if (!force && active && active !== document.body && active !== document.documentElement) return;
+    if (document.activeElement !== liveInput) liveInput.focus({ preventScroll: true });
   };
-  focusLiveInput(true);
-  [0, 16, 50, 100].forEach((delay) => window.setTimeout(() => focusLiveInput(false), delay));
+  focusIfPageDroppedIt(true);
+  [0, 16, 50, 100].forEach((delay) => window.setTimeout(() => focusIfPageDroppedIt(false), delay));
 }
 
 function handleDelegatedPointerDown(event) {
@@ -5459,20 +5449,17 @@ function creatorsDeskNoAccessPage() {
 function creatorsDeskAuthPage() {
   const mode = state.creatorsDeskAuthMode || "register";
   const isRegister = mode === "register";
-  return `<main class="creators-auth-shell" data-lang="${cdLang()}">
-    <section class="creators-auth-top">
-      <div class="creators-auth-brand">
-        <img src="/creators-desk-icon.png" alt="" width="64" height="64">
-        <span>Creators <b>Desk</b></span>
-      </div>
+  return `<main class="login-shell creators-desk-auth-shell" data-lang="${cdLang()}">
+    <section class="login-brand creators-desk-auth-top">
+      ${creatorsDeskAuthBrand()}
       ${creatorsDeskLanguageSwitch("dark")}
     </section>
-    <section class="creators-auth-card">
-      <div class="creators-auth-head">
+    <section class="login-card creators-desk-auth-card">
+      <div class="login-copy creators-desk-auth-head">
         <h1>${isRegister ? cdText("authRegisterTitle") : cdText("authLoginTitle")}</h1>
         <p>${isRegister ? cdText("authRegisterSubtitle") : cdText("authLoginSubtitle")}</p>
       </div>
-      <div class="creators-auth-switch" role="tablist" aria-label="Creators Desk auth mode">
+      <div class="creators-auth-switch creators-desk-auth-switch" role="tablist" aria-label="Creators Desk auth mode">
         <button class="${isRegister ? "active" : ""}" type="button" data-creators-auth-mode="register">${cdText("register")}</button>
         <button class="${!isRegister ? "active" : ""}" type="button" data-creators-auth-mode="login">${cdText("login")}</button>
       </div>
@@ -5481,24 +5468,28 @@ function creatorsDeskAuthPage() {
   </main>`;
 }
 
+function creatorsDeskAuthBrand() {
+  return `<div class="brand-lockup creators-desk-brand-lockup"><span class="brand-core" aria-label="Creators Desk"><img class="brand-logo-mascot creators-desk-brand-icon" src="/creators-desk-icon.png" width="64" height="64" alt="" aria-hidden="true" loading="eager" decoding="sync"><span class="brand-wordmark creators-desk-wordmark"><span>Creators</span><span>Desk</span></span></span></div>`;
+}
+
 function creatorsDeskRegisterForm() {
   const draft = state.creatorsDeskAuthDraft || {};
-  return `<form class="creators-auth-form" data-form="creators-desk-register">
+  return `<form class="login-form creators-desk-auth-form" data-form="creators-desk-register">
     <label>${cdText("email")}<input name="email" type="email" autocomplete="email" value="${esc(draft.email || "")}" placeholder="you@example.com" required></label>
     <label>${cdText("phone")}<input name="phone" inputmode="tel" autocomplete="tel" value="${esc(draft.phone || "")}" placeholder="+60 12 345 6789" required></label>
     <label>${cdText("password")}<input name="password" type="password" autocomplete="new-password" value="${esc(draft.password || "")}" minlength="6" placeholder="${esc(cdText("passwordPlaceholder"))}" required></label>
-    <button class="creators-auth-primary" type="submit">${cdText("register")} ${icon("user-plus", 18)}</button>
-    <button class="creators-auth-link" type="button" data-creators-auth-mode="login">${cdText("hasAccount")}</button>
+    <button class="gold-button" type="submit">${cdText("register")} ${icon("user-plus", 18)}</button>
+    <div class="login-links creators-desk-auth-links"><button class="text-button login-register-link" type="button" data-creators-auth-mode="login">${cdText("hasAccount")}</button></div>
   </form>`;
 }
 
 function creatorsDeskLoginForm() {
   const draft = state.creatorsDeskAuthDraft || {};
-  return `<form class="creators-auth-form" data-form="creators-desk-login">
+  return `<form class="login-form creators-desk-auth-form" data-form="creators-desk-login">
     <label>${cdText("phone")}<input name="phone" inputmode="tel" autocomplete="tel" value="${esc(draft.phone || state.creatorsDeskLoginPhone || "")}" placeholder="+60 12 345 6789" required></label>
     <label>${cdText("password")}<input name="password" type="password" autocomplete="current-password" value="${esc(draft.password || "")}" required></label>
-    <button class="creators-auth-primary" type="submit">${cdText("login")} ${icon("log-in", 18)}</button>
-    <button class="creators-auth-link" type="button" data-creators-auth-mode="register">${cdText("noAccount")}</button>
+    <button class="gold-button" type="submit">${cdText("login")} ${icon("log-in", 18)}</button>
+    <div class="login-links creators-desk-auth-links"><button class="text-button login-register-link" type="button" data-creators-auth-mode="register">${cdText("noAccount")}</button></div>
   </form>`;
 }
 
@@ -13514,23 +13505,16 @@ function bindTaskCenter() {
 }
 
 function bindStandaloneTaskPages() {
-  document.querySelectorAll(".creators-auth-form input").forEach((input) => {
-    const focusInput = () => focusCreatorsDeskAuthInput(input);
-    input.addEventListener("pointerdown", focusInput);
-    input.addEventListener("mousedown", focusInput);
-    input.addEventListener("touchstart", focusInput, { passive: true });
-    input.addEventListener("click", focusInput);
+  document.querySelectorAll(".creators-desk-auth-form input").forEach((input) => {
+    const stabilize = () => stabilizeCreatorsDeskInputFocus(input);
+    input.addEventListener("pointerdown", stabilize);
+    input.addEventListener("mousedown", stabilize);
+    input.addEventListener("click", stabilize);
     input.addEventListener("input", () => {
       state.creatorsDeskAuthDraft = {
         ...(state.creatorsDeskAuthDraft || {}),
         [input.name]: input.value
       };
-    });
-  });
-  document.querySelectorAll(".creators-auth-form label").forEach((label) => {
-    label.addEventListener("click", () => {
-      const input = label.querySelector("input");
-      focusCreatorsDeskAuthInput(input);
     });
   });
   document.querySelectorAll("[data-creators-auth-mode]").forEach((el) => el.addEventListener("click", () => {

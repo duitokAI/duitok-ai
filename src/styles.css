@@ -51782,6 +51782,49 @@ body:has(.studio-shell .video-page-studio),
   padding: 12px;
 }
 
+.creators-desk-auth-shell {
+  font-family: Poppins, "Avenir Next", "Nunito Sans", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+}
+
+.creators-desk-auth-top {
+  position: relative;
+  width: min(100%, 1320px);
+}
+
+.creators-desk-brand-lockup .brand-core {
+  gap: 14px;
+}
+
+.creators-desk-brand-icon {
+  object-fit: cover;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.creators-desk-wordmark span:first-child,
+.creators-desk-wordmark span:last-child {
+  color: #f7f7f3;
+}
+
+.creators-desk-auth-card {
+  width: min(680px, calc(100vw - 32px));
+}
+
+.creators-desk-auth-form {
+  gap: 16px;
+}
+
+.creators-desk-auth-links {
+  gap: 0;
+  margin-top: -4px;
+  font-size: 15px;
+}
+
+.creators-desk-auth-links .text-button {
+  white-space: normal;
+}
+
 @media (max-width: 620px) {
   .creators-auth-top {
     align-items: flex-start;
