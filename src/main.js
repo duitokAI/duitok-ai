@@ -6,7 +6,7 @@ const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
 const isStudioPath = () => window.location.pathname.startsWith("/studio") || window.location.pathname === "/admin" || window.location.pathname.startsWith("/admin/");
 const pathIs = (path) => window.location.pathname === path;
 const ownerAdminEmails = new Set(["admin@pokaya.ai"]);
-const creatorsDeskAdminEmails = new Set(["tinzixian05@gmail.com", "admin@creatorsdesk.local", "admin@creatorsdesk.co", "admin@pokaya.ai"]);
+const creatorsDeskAdminEmails = new Set(["tinzixian05@gmail.com", "abc0163100131@gmail.com", "admin@creatorsdesk.local", "admin@creatorsdesk.co", "admin@pokaya.ai"]);
 const whatsappGroupUrl = "https://chat.whatsapp.com/ERz2477U1gJFJHFsXtiMJH?mode=gi_t";
 const supportWhatsappUrl = "https://wa.me/60163100131";
 const promoCycleMs = 5 * 60 * 60 * 1000;
