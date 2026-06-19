@@ -3,9 +3,10 @@ import "./styles.css";
 const app = document.querySelector("#app");
 const toast = document.querySelector("#toast");
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
-const isStudioPath = () => window.location.pathname.startsWith("/studio") || window.location.pathname.startsWith("/admin");
+const isStudioPath = () => window.location.pathname.startsWith("/studio") || window.location.pathname === "/admin" || window.location.pathname.startsWith("/admin/");
 const pathIs = (path) => window.location.pathname === path;
 const ownerAdminEmails = new Set(["admin@pokaya.ai"]);
+const creatorsDeskAdminEmails = new Set(["tinzixian05@gmail.com", "admin@creatorsdesk.local", "admin@creatorsdesk.co", "admin@pokaya.ai"]);
 const whatsappGroupUrl = "https://chat.whatsapp.com/ERz2477U1gJFJHFsXtiMJH?mode=gi_t";
 const supportWhatsappUrl = "https://wa.me/60163100131";
 const promoCycleMs = 5 * 60 * 60 * 1000;
@@ -23,7 +24,10 @@ const storageKeys = {
   agentHistoryBackup: "pokaya-agent-history-backup",
   agentDraftId: "pokaya-agent-draft-id",
   agentDraftInputs: "pokaya-agent-draft-inputs",
-  agentActiveRun: "pokaya-agent-active-run"
+  agentActiveRun: "pokaya-agent-active-run",
+  standaloneTaskSubmissions: "pokaya-standalone-task-submissions",
+  creatorsDeskAccounts: "creators-desk-accounts",
+  creatorsDeskSession: "creators-desk-session"
 };
 const studioWallZoomMin = 2;
 const studioWallZoomMax = 4;
@@ -169,6 +173,13 @@ const state = {
   taskModal: null,
   taskBrandSearch: "",
   taskOrderId: null,
+  standaloneTaskView: "list",
+  standaloneTaskActiveId: 1,
+  standaloneAdminFilter: "all",
+  standaloneAdminSelectedId: "",
+  creatorsDeskSession: readStoredJson(storageKeys.creatorsDeskSession, null),
+  creatorsDeskAuthMode: readStoredJson(storageKeys.creatorsDeskAccounts, []).length ? "login" : "register",
+  creatorsDeskLoginPhone: "",
   search: "",
   adminUserId: null,
   adminSearch: "",
@@ -1387,7 +1398,7 @@ async function boot() {
     showPaymentReturnNotice();
     return;
   }
-  if (window.location.pathname.startsWith("/admin")) state.page = "admin";
+  if (window.location.pathname === "/admin" || window.location.pathname.startsWith("/admin/")) state.page = "admin";
   if (window.location.pathname.startsWith("/studio/agent")) state.page = "agent";
   if (isStudioPath()) await ensureStudioData();
   state.loading = false;
@@ -3054,6 +3065,9 @@ function applyStudioChineseLocalization() {
 
 function route() {
   if (isStudioPath()) return studio();
+  if (pathIs("/")) return standaloneTaskCenterPage();
+  if (pathIs("/task-center")) return standaloneTaskCenterPage();
+  if (pathIs("/admin-verify")) return adminVerifyPage();
   if (pathIs("/login")) return login();
   if (pathIs("/register")) return registerPage();
   if (pathIs("/affiliate")) return affiliatePage();
@@ -4933,6 +4947,817 @@ function paymentRow(payment, adminActions = false) {
 // ============================================================
 // Task Center module (任务中心) — ported from Paydirt prototype
 // ============================================================
+function standaloneTaskById(id = state.standaloneTaskActiveId) {
+  const key = String(id || "");
+  return TASK_FEED.find((item) => String(item.id) === key) || TASK_FEED[0];
+}
+
+function creatorsDeskAccounts() {
+  return readStoredJson(storageKeys.creatorsDeskAccounts, []);
+}
+
+function writeCreatorsDeskAccounts(accounts = []) {
+  localStorage.setItem(storageKeys.creatorsDeskAccounts, JSON.stringify(accounts));
+}
+
+function creatorsDeskNormalizePhone(value = "") {
+  return String(value || "").replace(/[^\d+]/g, "").trim();
+}
+
+function creatorsDeskCurrentAccount() {
+  const session = state.creatorsDeskSession;
+  if (!session?.accountId) return null;
+  return creatorsDeskAccounts().find((account) => account.id === session.accountId) || null;
+}
+
+function creatorsDeskIsAdminAccount(account = creatorsDeskCurrentAccount()) {
+  return Boolean(account?.role === "admin" || creatorsDeskAdminEmails.has(String(account?.email || "").toLowerCase()));
+}
+
+const creatorsDeskCopy = {
+  zh: {
+    noAccessTitle: "没有后台权限",
+    noAccessBody: "这个审核后台只开放给有权限的账户。普通创作者可以继续使用 Task Center 领取和提交任务。",
+    backTaskCenter: "返回 Task Center",
+    authRegisterTitle: "成为 Creators Desk 创作者",
+    authLoginTitle: "欢迎回来",
+    authRegisterSubtitle: "领取品牌任务，用 AI 完成内容创作，通过审核后获得奖励。",
+    authLoginSubtitle: "用手机号和密码登录，继续查看任务和审核进度。",
+    register: "创建账户",
+    login: "登录",
+    email: "邮箱",
+    phone: "手机号",
+    password: "密码",
+    passwordPlaceholder: "至少 6 个字符",
+    hasAccount: "已经有账号？用手机号登录",
+    noAccount: "还没有账号？先创建账户",
+    logout: "退出",
+    adminVerify: "Admin Verify",
+    adminKicker: "本地审核后台",
+    adminTitle: "审核 Instagram 提交链接",
+    adminBody: "通过有效链接，或填写原因后驳回。通过后会显示 7 天后的 Touch 'n Go 奖励发放时间。",
+    pending: "待审核",
+    approved: "已通过",
+    rejected: "已驳回",
+    all: "全部",
+    noSubmissions: "这里还没有提交",
+    submitFromTaskCenter: "先从 Task Center 提交一个链接。",
+    noSubmissionSelected: "未选择提交记录",
+    reviewQueueEmpty: "这个浏览器里的审核队列还是空的。",
+    openTaskCenter: "打开 Task Center",
+    creator: "创作者",
+    creatorSubmission: "创作者提交",
+    instagramHandle: "Instagram 账号",
+    submitted: "提交时间",
+    deadline: "截止时间",
+    payout: "奖励发放",
+    hoursFromClaim: "领取后 {hours} 小时",
+    notScheduled: "未安排",
+    tngOn: "Touch 'n Go 于 {date}",
+    openInstagram: "打开 Instagram 提交链接",
+    creatorNote: "创作者备注",
+    commonRejectReasons: "常见驳回原因",
+    rejectReason: "驳回原因",
+    rejectPlaceholder: "例如：缺少品牌标签，或帖子是私密状态",
+    rejectWithReason: "填写原因并驳回",
+    approveScheduleTng: "通过并安排 TNG",
+    approvedPayout: "已于 {reviewed} 通过。Touch 'n Go 奖励将于 {payout} 发放。",
+    missingHashtag: "缺少品牌标签",
+    wrongInstagramLink: "Instagram 链接不正确",
+    privatePost: "帖子为私密状态",
+    productNotVisible: "产品没有清晰出镜",
+    deletedPost: "帖子已删除",
+    taskMarket: "Task Center",
+    taskMarketSub: "浏览实时任务，选择适合你受众的品牌任务。",
+    myTasks: "我的任务",
+    searchPlaceholder: "搜索品牌、产品、标签…",
+    platform: "平台",
+    contentType: "内容类型",
+    reward: "奖励",
+    brand: "品牌",
+    reset: "重置",
+    sort: "排序",
+    newest: "最新",
+    rewardHigh: "奖励高到低",
+    rewardLow: "奖励低到高",
+    endingSoon: "即将截止",
+    slotsMost: "剩余名额最多",
+    matchedTasks: "{count} 个匹配任务",
+    loadMore: "加载更多",
+    emptyTasksTitle: "没有匹配的任务",
+    emptyTasksBody: "试着移除一个筛选，或放宽奖励范围。",
+    clearFilters: "清除筛选",
+    selected: "已选择",
+    clearGroup: "清除这组",
+    apply: "应用",
+    close: "关闭",
+    searchBrand: "搜索品牌…",
+    filterPlatformTitle: "平台 · 可多选",
+    filterTypeTitle: "内容类型 · 可多选",
+    filterRewardTitle: "奖励范围 · 可多选",
+    filterBrandTitle: "品牌 · 可多选",
+    under30: "$30 以下",
+    between30And100: "$30 – $100",
+    between100And300: "$100 – $300",
+    over300: "$300 以上",
+    copyCaption: "文案 / Caption",
+    claimed: "已领取",
+    left: "剩余",
+    ended: "已结束",
+    almostGone: "快满额",
+    backTaskList: "返回任务列表",
+    slotsLeft: "剩余名额",
+    socialRequired: "需绑定社媒账号",
+    taskRequirements: "任务要求",
+    requiredPlatform: "平台",
+    hashtag: "标签",
+    mention: "提及",
+    duration: "时长",
+    requiredElements: "必备元素",
+    keepPost: "保留",
+    platformOr: "或",
+    hashtagRequired: "必带",
+    mentionInCaption: "在文案中",
+    durationRule: "20–40 秒，9:16 竖屏",
+    productVisibleRule: "产品出镜至少 3 秒，正面清晰",
+    keepPostRule: "帖子保留至少 30 天",
+    examples: "样例参考",
+    brandAssets: "品牌素材包",
+    brandAssetsMeta: "Logo、产品图、品牌色卡 · 24 MB",
+    download: "下载",
+    reviewStandards: "审核标准",
+    reviewStandardsBody: "审核会检查：必带标签和提及是否齐全、产品是否清晰出镜、时长是否符合、无竞品出现、内容为原创。一般 48 小时内出结果。",
+    violation: "违规后果",
+    violationBody: "30 天内删除帖子、缺标签或不实声明可能被驳回、扣回奖励，并影响信用分。",
+    maxEarn: "最高可获得",
+    loggedIn: "已登录",
+    socialConnected: "社媒已绑定",
+    levelQualified: "等级达标 (Lv2)",
+    claimTask: "领取任务",
+    share: "分享",
+    completeWithin72: "领取后需在 72 小时内完成",
+    confirmClaimTitle: "确认领取此任务？",
+    confirmClaimBody: "领取后你有 72 小时发布帖子并提交凭证。中途放弃会影响信用分。",
+    cancel: "取消",
+    confirmStart: "确认并开始",
+    taskClaimed: "任务已领取",
+    taskClaimedBody: "名额已锁，72 小时内提交凭证以确认奖励。",
+    rewardLocked: "奖励锁定",
+    orderNo: "订单号",
+    startCreating: "开始制作",
+    later: "稍后",
+    backMyTasks: "返回我的任务",
+    remainingSubmitTime: "剩余提交时间",
+    createContent: "创作内容",
+    createContentBody: "使用 Creators Desk Studio 按品牌素材生成内容。",
+    openStudio: "打开 Creators Desk Studio",
+    publishPlatform: "发布到平台",
+    publishPlatformBody: "发布后，完成自检。",
+    hashtagAdded: "已加 #{brand} 标签",
+    mentionedBrand: "已 @{brand}",
+    productCheck: "产品出镜 ≥3 秒，请再次确认",
+    submitProof: "提交凭证",
+    submitProofBody: "粘贴帖子链接并上传截图。",
+    postLink: "帖子链接",
+    screenshotProof: "截图凭证",
+    clickUpload: "点击上传",
+    uploadMeta: "支持多张，自动压缩",
+    submitReview: "提交审核",
+    abandonTask: "放弃任务",
+    waitReview: "等待审核",
+    waitReviewBody: "商家通常在 48 小时内审核，有结果会通知你。",
+    abandonTitle: "放弃此任务？",
+    abandonBody: "名额会释放，信用分会下降。此操作不可撤销。",
+    continueTask: "继续完成",
+    abandon: "放弃",
+    inProgress: "进行中",
+    inReview: "审核中",
+    paidAgo: "已到账 · {days} 天前",
+    resultInHours: "{hours}h 内出结果",
+    submitNow: "立即提交",
+    revise: "修改",
+    myTasksSub: "从领取到结款，每一单都在这里。",
+    claimNewTask: "领新任务",
+    noTasks: "暂无任务",
+    goClaimTask: "到任务广场领一个看看？",
+    notifyFillAccount: "请填写邮箱、手机号和至少 6 位密码。",
+    notifyPhoneExists: "这个手机号已经注册，请直接登录。",
+    notifyAccountCreated: "账户已创建。请用手机号和密码登录。",
+    notifyLoginFailed: "手机号或密码不正确。",
+    notifyNoSubmission: "未选择提交记录。",
+    notifyRejectReason: "请填写驳回原因。",
+    notifyApproved: "已通过。Touch 'n Go 将在 7 天后发放。",
+    notifyRejected: "已填写原因并驳回。",
+    notifyFilterApplied: "已应用 {group} 筛选",
+    notifyFilterCleared: "{group} 筛选已清除",
+    notifyShareCopied: "链接已复制，可以分享给朋友。",
+    notifyDownloadAssets: "品牌素材包开始下载。",
+    notifyPasteLink: "请先粘贴帖子链接。",
+    notifySubmitted: "已提交，等待审核。",
+    notifyTaskAbandoned: "任务已放弃。",
+    notifyReviseSoon: "修改流程稍后接入。",
+    usersCreated: "已创建用户",
+    creatorUsers: "创作者用户",
+    adminUsers: "管理员",
+    userAccounts: "用户账户",
+    userAccountsBody: "这里显示这个本地 Creators Desk 站点已创建的账户资料。",
+    noUsers: "还没有用户账户",
+    noUsersBody: "用户完成创建账户后，会出现在这里。",
+    role: "权限",
+    accountId: "账户 ID",
+    createdAt: "创建时间",
+    passwordStatus: "密码状态",
+    passwordSet: "已设置",
+    submissions: "提交数",
+    currentSession: "当前登录",
+    adminRole: "Admin",
+    creatorRole: "Creator"
+  },
+  en: {
+    noAccessTitle: "No Admin Access",
+    noAccessBody: "This review console is only available to approved admin accounts. Creators can continue using Task Center to claim and submit tasks.",
+    backTaskCenter: "Back to Task Center",
+    authRegisterTitle: "Become a Creators Desk Creator",
+    authLoginTitle: "Welcome back",
+    authRegisterSubtitle: "Claim brand tasks, create content with AI, and receive rewards after approval.",
+    authLoginSubtitle: "Log in with your phone number and password to continue.",
+    register: "Create account",
+    login: "Log in",
+    email: "Email",
+    phone: "Phone number",
+    password: "Password",
+    passwordPlaceholder: "At least 6 characters",
+    hasAccount: "Already have an account? Log in with phone",
+    noAccount: "No account yet? Create one first",
+    logout: "Log out",
+    adminVerify: "Admin Verify",
+    adminKicker: "Local review console",
+    adminTitle: "Review Instagram submissions",
+    adminBody: "Approve a valid link or reject it with a reason. Approved submissions show a Touch 'n Go payout scheduled 7 days after approval.",
+    pending: "Pending",
+    approved: "Approved",
+    rejected: "Rejected",
+    all: "All",
+    noSubmissions: "No submissions here",
+    submitFromTaskCenter: "Submit a link from Task Center first.",
+    noSubmissionSelected: "No submission selected",
+    reviewQueueEmpty: "The review queue is empty in this browser.",
+    openTaskCenter: "Open Task Center",
+    creator: "Creator",
+    creatorSubmission: "Creator submission",
+    instagramHandle: "Instagram handle",
+    submitted: "Submitted",
+    deadline: "Deadline",
+    payout: "Payout",
+    hoursFromClaim: "{hours} hours from claim",
+    notScheduled: "Not scheduled",
+    tngOn: "Touch 'n Go on {date}",
+    openInstagram: "Open Instagram submission",
+    creatorNote: "Creator note",
+    commonRejectReasons: "Common reject reasons",
+    rejectReason: "Reject reason",
+    rejectPlaceholder: "Example: Missing brand hashtag or the post is private",
+    rejectWithReason: "Reject with reason",
+    approveScheduleTng: "Approve and schedule TNG",
+    approvedPayout: "Approved on {reviewed}. Touch 'n Go payout is scheduled for {payout}.",
+    missingHashtag: "Missing brand hashtag",
+    wrongInstagramLink: "Wrong Instagram link",
+    privatePost: "Private post",
+    productNotVisible: "Product not visible",
+    deletedPost: "Deleted post",
+    taskMarket: "Task Center",
+    taskMarketSub: "Browse live brand tasks and choose the ones that fit your audience.",
+    myTasks: "My Tasks",
+    searchPlaceholder: "Search brands, products, tags…",
+    platform: "Platform",
+    contentType: "Content type",
+    reward: "Reward",
+    brand: "Brand",
+    reset: "Reset",
+    sort: "Sort",
+    newest: "Newest",
+    rewardHigh: "Reward high to low",
+    rewardLow: "Reward low to high",
+    endingSoon: "Ending soon",
+    slotsMost: "Most slots left",
+    matchedTasks: "{count} matching tasks",
+    loadMore: "Load more",
+    emptyTasksTitle: "No matching tasks",
+    emptyTasksBody: "Try removing a filter or widening the reward range.",
+    clearFilters: "Clear filters",
+    selected: "selected",
+    clearGroup: "Clear group",
+    apply: "Apply",
+    close: "Close",
+    searchBrand: "Search brand…",
+    filterPlatformTitle: "Platform · select any",
+    filterTypeTitle: "Content type · select any",
+    filterRewardTitle: "Reward range · select any",
+    filterBrandTitle: "Brand · select any",
+    under30: "Under $30",
+    between30And100: "$30 – $100",
+    between100And300: "$100 – $300",
+    over300: "Over $300",
+    copyCaption: "Copy / caption",
+    claimed: "claimed",
+    left: "left",
+    ended: "Ended",
+    almostGone: "Almost gone",
+    backTaskList: "Back to task list",
+    slotsLeft: "Slots left",
+    socialRequired: "Social account required",
+    taskRequirements: "Task requirements",
+    requiredPlatform: "Platform",
+    hashtag: "Hashtag",
+    mention: "Mention",
+    duration: "Duration",
+    requiredElements: "Required elements",
+    keepPost: "Keep post",
+    platformOr: "or",
+    hashtagRequired: "required",
+    mentionInCaption: "in the caption",
+    durationRule: "20–40 seconds, 9:16 vertical",
+    productVisibleRule: "Product visible for at least 3 seconds, front-facing and clear",
+    keepPostRule: "Keep the post live for at least 30 days",
+    examples: "Examples",
+    brandAssets: "Brand asset pack",
+    brandAssetsMeta: "Logo, product images, brand colors · 24 MB",
+    download: "Download",
+    reviewStandards: "Review standards",
+    reviewStandardsBody: "Review checks required hashtags and mentions, clear product visibility, duration, no competitor products, and original content. Results usually arrive within 48 hours.",
+    violation: "Violation rules",
+    violationBody: "Deleting the post within 30 days, missing tags, or making unsupported claims may lead to rejection, reward reversal, and lower trust score.",
+    maxEarn: "Maximum reward",
+    loggedIn: "Logged in",
+    socialConnected: "Social account connected",
+    levelQualified: "Level qualified (Lv2)",
+    claimTask: "Claim task",
+    share: "Share",
+    completeWithin72: "Complete within 72 hours after claiming",
+    confirmClaimTitle: "Claim this task?",
+    confirmClaimBody: "After claiming, you have 72 hours to publish the post and submit proof. Abandoning midway may affect your trust score.",
+    cancel: "Cancel",
+    confirmStart: "Confirm and start",
+    taskClaimed: "Task claimed",
+    taskClaimedBody: "Your slot is locked. Submit proof within 72 hours to confirm the reward.",
+    rewardLocked: "Reward locked",
+    orderNo: "Order no.",
+    startCreating: "Start creating",
+    later: "Later",
+    backMyTasks: "Back to My Tasks",
+    remainingSubmitTime: "Time left to submit",
+    createContent: "Create content",
+    createContentBody: "Use Creators Desk Studio to generate content from the brand assets.",
+    openStudio: "Open Creators Desk Studio",
+    publishPlatform: "Publish to platform",
+    publishPlatformBody: "After publishing, complete the self-check.",
+    hashtagAdded: "#{brand} hashtag added",
+    mentionedBrand: "@{brand} mentioned",
+    productCheck: "Product visible for 3+ seconds, please confirm again",
+    submitProof: "Submit proof",
+    submitProofBody: "Paste the post link and upload screenshots.",
+    postLink: "Post link",
+    screenshotProof: "Screenshot proof",
+    clickUpload: "Click to upload",
+    uploadMeta: "Multiple images supported, auto-compressed",
+    submitReview: "Submit for review",
+    abandonTask: "Abandon task",
+    waitReview: "Wait for review",
+    waitReviewBody: "Brands usually review within 48 hours. You will be notified when there is a result.",
+    abandonTitle: "Abandon this task?",
+    abandonBody: "The slot will be released and your trust score will drop. This cannot be undone.",
+    continueTask: "Continue task",
+    abandon: "Abandon",
+    inProgress: "In progress",
+    inReview: "In review",
+    paidAgo: "Paid · {days} days ago",
+    resultInHours: "Result within {hours}h",
+    submitNow: "Submit now",
+    revise: "Revise",
+    myTasksSub: "Track every task from claim to payout.",
+    claimNewTask: "Claim new task",
+    noTasks: "No tasks yet",
+    goClaimTask: "Go claim a task from the marketplace.",
+    notifyFillAccount: "Please enter email, phone number, and a password with at least 6 characters.",
+    notifyPhoneExists: "This phone number is already registered. Please log in.",
+    notifyAccountCreated: "Account created. Please log in with your phone number and password.",
+    notifyLoginFailed: "Phone number or password is incorrect.",
+    notifyNoSubmission: "No submission selected.",
+    notifyRejectReason: "Please add a reject reason.",
+    notifyApproved: "Approved. Touch 'n Go is scheduled for 7 days later.",
+    notifyRejected: "Rejected with reason.",
+    notifyFilterApplied: "{group} filter applied",
+    notifyFilterCleared: "{group} filter cleared",
+    notifyShareCopied: "Link copied. Ready to share.",
+    notifyDownloadAssets: "Brand asset pack download started.",
+    notifyPasteLink: "Please paste the post link first.",
+    notifySubmitted: "Submitted. Waiting for review.",
+    notifyTaskAbandoned: "Task abandoned.",
+    notifyReviseSoon: "Revision flow will be connected soon.",
+    usersCreated: "Users created",
+    creatorUsers: "Creator users",
+    adminUsers: "Admins",
+    userAccounts: "User accounts",
+    userAccountsBody: "Account records created on this local Creators Desk site.",
+    noUsers: "No user accounts yet",
+    noUsersBody: "Users will appear here after creating an account.",
+    role: "Role",
+    accountId: "Account ID",
+    createdAt: "Created at",
+    passwordStatus: "Password status",
+    passwordSet: "Set",
+    submissions: "Submissions",
+    currentSession: "Current session",
+    adminRole: "Admin",
+    creatorRole: "Creator"
+  }
+};
+
+function cdLang() {
+  return state.lang === "en" ? "en" : "zh";
+}
+
+function cdText(key, vars = {}) {
+  const lang = cdLang();
+  const text = creatorsDeskCopy[lang]?.[key] || creatorsDeskCopy.zh[key] || key;
+  return Object.entries(vars).reduce((value, [name, replacement]) => value.replaceAll(`{${name}}`, String(replacement)), text);
+}
+
+function creatorsDeskLanguageSwitch(tone = "light") {
+  const lang = cdLang();
+  if (tone === "dark") {
+    return `<div class="creators-lang-switch dark" role="group" aria-label="Language">
+      <span class="creators-lang-label">${icon("globe-2", 16)} LANGUAGE</span>
+      <button class="${lang === "zh" ? "active" : ""}" type="button" data-action="creators-desk-language" data-lang="zh">中文</button>
+      <button class="${lang === "en" ? "active" : ""}" type="button" data-action="creators-desk-language" data-lang="en">English</button>
+    </div>`;
+  }
+  return `<div class="creators-lang-switch ${tone === "dark" ? "dark" : ""}" role="group" aria-label="Language">
+    <button class="${lang === "zh" ? "active" : ""}" type="button" data-action="creators-desk-language" data-lang="zh">中文</button>
+    <button class="${lang === "en" ? "active" : ""}" type="button" data-action="creators-desk-language" data-lang="en">English</button>
+  </div>`;
+}
+
+function creatorsDeskAuthed(content) {
+  if (!state.creatorsDeskSession?.accountId || !creatorsDeskCurrentAccount()) return creatorsDeskAuthPage();
+  return content;
+}
+
+function creatorsDeskAdminGuard(content) {
+  if (!state.creatorsDeskSession?.accountId || !creatorsDeskCurrentAccount()) return creatorsDeskAuthPage();
+  if (!creatorsDeskIsAdminAccount()) return creatorsDeskNoAccessPage();
+  return content;
+}
+
+function creatorsDeskNoAccessPage() {
+  return `<main class="standalone-task-shell">
+    ${standaloneTaskTopbar("Task Center")}
+    <section class="standalone-no-access">
+      ${icon("shield-alert", 30)}
+      <h1>${cdText("noAccessTitle")}</h1>
+      <p>${cdText("noAccessBody")}</p>
+      <a class="standalone-primary-button" href="/task-center">${icon("list-checks", 17)} ${cdText("backTaskCenter")}</a>
+    </section>
+  </main>`;
+}
+
+function creatorsDeskAuthPage() {
+  const mode = state.creatorsDeskAuthMode || "register";
+  const isRegister = mode === "register";
+  return `<main class="creators-auth-shell" data-lang="${cdLang()}">
+    <section class="creators-auth-top">
+      <div class="creators-auth-brand">
+        <img src="/creators-desk-icon.png" alt="" width="64" height="64">
+        <span>Creators <b>Desk</b></span>
+      </div>
+      ${creatorsDeskLanguageSwitch("dark")}
+    </section>
+    <section class="creators-auth-card">
+      <div class="creators-auth-head">
+        <h1>${isRegister ? cdText("authRegisterTitle") : cdText("authLoginTitle")}</h1>
+        <p>${isRegister ? cdText("authRegisterSubtitle") : cdText("authLoginSubtitle")}</p>
+      </div>
+      <div class="creators-auth-switch" role="tablist" aria-label="Creators Desk auth mode">
+        <button class="${isRegister ? "active" : ""}" type="button" data-creators-auth-mode="register">${cdText("register")}</button>
+        <button class="${!isRegister ? "active" : ""}" type="button" data-creators-auth-mode="login">${cdText("login")}</button>
+      </div>
+      ${isRegister ? creatorsDeskRegisterForm() : creatorsDeskLoginForm()}
+    </section>
+  </main>`;
+}
+
+function creatorsDeskRegisterForm() {
+  return `<form class="creators-auth-form" data-form="creators-desk-register">
+    <label>${cdText("email")}<input name="email" type="email" autocomplete="email" placeholder="you@example.com" required></label>
+    <label>${cdText("phone")}<input name="phone" inputmode="tel" autocomplete="tel" placeholder="+60 12 345 6789" required></label>
+    <label>${cdText("password")}<input name="password" type="password" autocomplete="new-password" minlength="6" placeholder="${esc(cdText("passwordPlaceholder"))}" required></label>
+    <button class="creators-auth-primary" type="submit">${cdText("register")} ${icon("user-plus", 18)}</button>
+    <button class="creators-auth-link" type="button" data-creators-auth-mode="login">${cdText("hasAccount")}</button>
+  </form>`;
+}
+
+function creatorsDeskLoginForm() {
+  return `<form class="creators-auth-form" data-form="creators-desk-login">
+    <label>${cdText("phone")}<input name="phone" inputmode="tel" autocomplete="tel" value="${esc(state.creatorsDeskLoginPhone || "")}" placeholder="+60 12 345 6789" required></label>
+    <label>${cdText("password")}<input name="password" type="password" autocomplete="current-password" required></label>
+    <button class="creators-auth-primary" type="submit">${cdText("login")} ${icon("log-in", 18)}</button>
+    <button class="creators-auth-link" type="button" data-creators-auth-mode="register">${cdText("noAccount")}</button>
+  </form>`;
+}
+
+function registerCreatorsDeskAccount(data = {}) {
+  const email = String(data.email || "").trim().toLowerCase();
+  const phone = creatorsDeskNormalizePhone(data.phone);
+  const password = String(data.password || "");
+  if (!email || !phone || password.length < 6) return notify(cdText("notifyFillAccount"));
+  const accounts = creatorsDeskAccounts();
+  if (accounts.some((account) => account.phone === phone)) return notify(cdText("notifyPhoneExists"));
+  const account = {
+    id: `cd-${Date.now()}`,
+    email,
+    phone,
+    password,
+    role: creatorsDeskAdminEmails.has(email) ? "admin" : "creator",
+    createdAt: new Date().toISOString()
+  };
+  writeCreatorsDeskAccounts([account, ...accounts]);
+  notify(cdText("notifyAccountCreated"));
+  return set({ creatorsDeskAuthMode: "login", creatorsDeskLoginPhone: phone });
+}
+
+function loginCreatorsDeskAccount(data = {}) {
+  const phone = creatorsDeskNormalizePhone(data.phone);
+  const password = String(data.password || "");
+  const account = creatorsDeskAccounts().find((item) => item.phone === phone && item.password === password);
+  if (!account) return notify(cdText("notifyLoginFailed"));
+  const session = { accountId: account.id, phone: account.phone, loginAt: new Date().toISOString() };
+  localStorage.setItem(storageKeys.creatorsDeskSession, JSON.stringify(session));
+  state.creatorsDeskSession = session;
+  window.history.pushState({}, "", "/task-center");
+  return set({ creatorsDeskAuthMode: "login", creatorsDeskLoginPhone: phone });
+}
+
+function logoutCreatorsDeskAccount() {
+  localStorage.removeItem(storageKeys.creatorsDeskSession);
+  state.creatorsDeskSession = null;
+  window.history.pushState({}, "", "/");
+  return set({ creatorsDeskAuthMode: creatorsDeskAccounts().length ? "login" : "register" });
+}
+
+function readStandaloneSubmissions() {
+  return readStoredJson(storageKeys.standaloneTaskSubmissions, []);
+}
+
+function writeStandaloneSubmissions(items = []) {
+  localStorage.setItem(storageKeys.standaloneTaskSubmissions, JSON.stringify(items));
+}
+
+function standaloneTaskSubmissions(taskId = "") {
+  const list = readStandaloneSubmissions();
+  return taskId ? list.filter((item) => item.taskId === taskId) : list;
+}
+
+function standaloneSubmissionStatusMeta(status = "pending") {
+  return {
+    pending: { label: cdText("pending"), iconName: "clock-3" },
+    approved: { label: cdText("approved"), iconName: "circle-check" },
+    rejected: { label: cdText("rejected"), iconName: "circle-x" }
+  }[status] || { label: status, iconName: "circle-help" };
+}
+
+function standaloneDateTime(value = "") {
+  if (!value) return "-";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "-" : date.toLocaleString("en-MY", { dateStyle: "medium", timeStyle: "short" });
+}
+
+function standaloneDateOnly(value = "") {
+  if (!value) return "-";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "-" : date.toLocaleDateString("en-MY", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+function instagramHandleFromUrl(url = "") {
+  const match = String(url || "").match(/instagram\.com\/([^/?#]+)/i);
+  const value = match?.[1] || "instagram-user";
+  return value.startsWith("@") ? value : `@${value}`;
+}
+
+function saveStandaloneTaskSubmission(taskId, instagramUrl) {
+  const task = standaloneTaskById(taskId);
+  const account = creatorsDeskCurrentAccount();
+  const now = new Date();
+  const item = {
+    id: `sub-${Date.now()}`,
+    taskId: Number(task.id),
+    accountId: account?.id || "",
+    creatorName: account?.email || account?.phone || "Local creator",
+    creatorEmail: account?.email || "",
+    creatorPhone: account?.phone || "",
+    instagramHandle: instagramHandleFromUrl(instagramUrl),
+    instagramUrl,
+    note: "",
+    status: "pending",
+    reward: Number(task.reward || 0),
+    deadlineHours: 72,
+    submittedAt: now.toISOString(),
+    reviewedAt: "",
+    payoutAt: "",
+    rejectReason: ""
+  };
+  writeStandaloneSubmissions([item, ...readStandaloneSubmissions()]);
+  state.standaloneAdminSelectedId = item.id;
+  return item;
+}
+
+function reviewStandaloneSubmission(submissionId, decision, rejectReason = "") {
+  const list = readStandaloneSubmissions();
+  const now = new Date();
+  const payoutDate = new Date(now);
+  payoutDate.setDate(payoutDate.getDate() + 7);
+  const next = list.map((item) => {
+    if (item.id !== submissionId) return item;
+    if (decision === "approve") {
+      return {
+        ...item,
+        status: "approved",
+        reviewedAt: now.toISOString(),
+        payoutAt: payoutDate.toISOString(),
+        rejectReason: ""
+      };
+    }
+    return {
+      ...item,
+      status: "rejected",
+      reviewedAt: now.toISOString(),
+      payoutAt: "",
+      rejectReason
+    };
+  });
+  writeStandaloneSubmissions(next);
+}
+
+function standaloneTaskCenterPage() {
+  return creatorsDeskAuthed(`<main class="standalone-task-shell standalone-task-repo-shell">
+    ${standaloneTaskTopbar("Task Center")}
+    ${taskCenterPage()}
+  </main>`);
+}
+
+function standaloneTaskTopbar(label = "Task Center") {
+  const isAdmin = creatorsDeskIsAdminAccount();
+  return `<nav class="standalone-task-nav">
+    <a class="standalone-task-brand" href="/task-center">
+      <img src="/creators-desk-icon.png" alt="" width="34" height="34">
+      <span>Creators Desk</span>
+    </a>
+    <div>
+      ${creatorsDeskLanguageSwitch("light")}
+      ${isAdmin ? `<a class="${pathIs("/admin-verify") ? "active" : ""}" href="/admin-verify">${icon("shield-check", 16)} ${cdText("adminVerify")}</a>` : ""}
+      ${state.creatorsDeskSession?.accountId ? `<button class="standalone-task-logout" type="button" data-action="creators-desk-logout">${icon("log-out", 16)} ${cdText("logout")}</button>` : ""}
+    </div>
+  </nav>`;
+}
+
+function adminVerifyPage() {
+  const all = standaloneTaskSubmissions().sort((a, b) => Date.parse(b.submittedAt || "") - Date.parse(a.submittedAt || ""));
+  const accounts = creatorsDeskAccounts().sort((a, b) => Date.parse(b.createdAt || "") - Date.parse(a.createdAt || ""));
+  const filter = state.standaloneAdminFilter || "all";
+  const visible = filter === "all" ? all : all.filter((item) => item.status === filter);
+  const selected = all.find((item) => item.id === state.standaloneAdminSelectedId) || visible[0] || all[0] || null;
+  const task = selected ? standaloneTaskById(selected.taskId) : null;
+  const counts = {
+    all: all.length,
+    pending: all.filter((item) => item.status === "pending").length,
+    approved: all.filter((item) => item.status === "approved").length,
+    rejected: all.filter((item) => item.status === "rejected").length
+  };
+  const userCounts = {
+    total: accounts.length,
+    admin: accounts.filter((account) => creatorsDeskIsAdminAccount(account)).length,
+    creator: accounts.filter((account) => !creatorsDeskIsAdminAccount(account)).length
+  };
+  return creatorsDeskAdminGuard(`<main class="standalone-task-shell standalone-admin-shell">
+    ${standaloneTaskTopbar("Admin Verify")}
+    <section class="standalone-admin-header">
+      <div>
+        <span class="standalone-kicker">${icon("shield-check", 15)} ${cdText("adminKicker")}</span>
+        <h1>${cdText("adminTitle")}</h1>
+        <p>${cdText("adminBody")}</p>
+      </div>
+      <div class="standalone-admin-metrics">
+        <p><span>${cdText("pending")}</span><b>${counts.pending}</b></p>
+        <p><span>${cdText("approved")}</span><b>${counts.approved}</b></p>
+        <p><span>${cdText("rejected")}</span><b>${counts.rejected}</b></p>
+        <p><span>${cdText("usersCreated")}</span><b>${userCounts.total}</b></p>
+      </div>
+    </section>
+
+    <section class="standalone-admin-layout">
+      <aside class="standalone-admin-list">
+        <div class="standalone-admin-tabs">
+          ${["all", "pending", "approved", "rejected"].map((id) => `<button class="${filter === id ? "active" : ""}" type="button" data-standalone-admin-filter="${id}">${cdText(id)} <small>${counts[id] || 0}</small></button>`).join("")}
+        </div>
+        ${visible.length ? visible.map((item) => standaloneAdminSubmissionButton(item, selected?.id)).join("") : `<div class="standalone-empty-state">${icon("inbox", 26)}<b>${cdText("noSubmissions")}</b><span>${cdText("submitFromTaskCenter")}</span></div>`}
+      </aside>
+
+      <section class="standalone-admin-detail">
+        ${selected && task ? standaloneAdminReviewPanel(selected, task) : `<div class="standalone-empty-state">${icon("clipboard-list", 30)}<b>${cdText("noSubmissionSelected")}</b><span>${cdText("reviewQueueEmpty")}</span><a class="standalone-secondary-link" href="/task-center">${cdText("openTaskCenter")}</a></div>`}
+      </section>
+    </section>
+    ${standaloneAdminAccountsPanel(accounts, userCounts, all)}
+  </main>`);
+}
+
+function standaloneAdminAccountsPanel(accounts = [], userCounts = {}, submissions = []) {
+  return `<section class="standalone-admin-users">
+    <header>
+      <div>
+        <span class="standalone-kicker">${icon("users", 15)} ${cdText("usersCreated")}</span>
+        <h2>${cdText("userAccounts")}</h2>
+        <p>${cdText("userAccountsBody")}</p>
+      </div>
+      <div class="standalone-user-metrics">
+        <p><span>${cdText("creatorUsers")}</span><b>${userCounts.creator || 0}</b></p>
+        <p><span>${cdText("adminUsers")}</span><b>${userCounts.admin || 0}</b></p>
+      </div>
+    </header>
+    ${accounts.length ? `<div class="standalone-user-table" role="table" aria-label="${esc(cdText("userAccounts"))}">
+      <div class="standalone-user-head" role="row">
+        <span>${cdText("email")}</span>
+        <span>${cdText("phone")}</span>
+        <span>${cdText("role")}</span>
+        <span>${cdText("createdAt")}</span>
+        <span>${cdText("submissions")}</span>
+        <span>${cdText("passwordStatus")}</span>
+      </div>
+      ${accounts.map((account) => standaloneAdminAccountRow(account, submissions)).join("")}
+    </div>` : `<div class="standalone-empty-state">${icon("user-plus", 26)}<b>${cdText("noUsers")}</b><span>${cdText("noUsersBody")}</span></div>`}
+  </section>`;
+}
+
+function standaloneAdminAccountRow(account = {}, submissions = []) {
+  const isAdmin = creatorsDeskIsAdminAccount(account);
+  const session = state.creatorsDeskSession;
+  const submissionCount = submissions.filter((item) => item.accountId === account.id || item.creatorEmail === account.email || item.creatorPhone === account.phone).length;
+  return `<div class="standalone-user-row" role="row">
+    <span>
+      <b>${esc(account.email || "-")}</b>
+      <small>${session?.accountId === account.id ? cdText("currentSession") : cdText("accountId")}: ${esc(account.id || "-")}</small>
+    </span>
+    <span>${esc(account.phone || "-")}</span>
+    <span><i class="${isAdmin ? "admin" : ""}">${isAdmin ? cdText("adminRole") : cdText("creatorRole")}</i></span>
+    <span>${standaloneDateTime(account.createdAt)}</span>
+    <span><strong>${submissionCount}</strong></span>
+    <span>${account.password ? cdText("passwordSet") : "-"}</span>
+  </div>`;
+}
+
+function standaloneAdminSubmissionButton(item, activeId) {
+  const task = standaloneTaskById(item.taskId);
+  const meta = standaloneSubmissionStatusMeta(item.status);
+  return `<button class="standalone-admin-row ${item.id === activeId ? "active" : ""}" type="button" data-standalone-admin-select="${esc(item.id)}">
+    <span class="standalone-status-pill">${icon(meta.iconName, 14)} ${esc(meta.label)}</span>
+    <b>${esc(item.creatorName || item.instagramHandle || cdText("creator"))}</b>
+    <small>${esc(task.brand)} · ${esc(task.t)}</small>
+    <time>${standaloneDateTime(item.submittedAt)}</time>
+  </button>`;
+}
+
+function standaloneAdminReviewPanel(item, task) {
+  const meta = standaloneSubmissionStatusMeta(item.status);
+  const rejectChecks = ["missingHashtag", "wrongInstagramLink", "privatePost", "productNotVisible", "deletedPost"].map((key) => cdText(key));
+  return `<article class="standalone-review-card" data-status="${esc(item.status)}">
+    <header>
+      <span class="standalone-status-pill">${icon(meta.iconName, 15)} ${esc(meta.label)}</span>
+      <h2>${esc(item.creatorName || cdText("creatorSubmission"))}</h2>
+      <p>${esc(task.t)} · ${esc(task.brand)} · RM ${Number(task.reward || 0).toFixed(2)}</p>
+    </header>
+    <div class="standalone-review-grid">
+      <p><span>${cdText("instagramHandle")}</span><b>${esc(item.instagramHandle || "-")}</b></p>
+      <p><span>${cdText("submitted")}</span><b>${standaloneDateTime(item.submittedAt)}</b></p>
+      <p><span>${cdText("deadline")}</span><b>${cdText("hoursFromClaim", { hours: item.deadlineHours || 72 })}</b></p>
+      <p><span>${cdText("payout")}</span><b>${item.payoutAt ? cdText("tngOn", { date: standaloneDateOnly(item.payoutAt) }) : cdText("notScheduled")}</b></p>
+    </div>
+    <a class="standalone-review-link" href="${esc(item.instagramUrl)}" target="_blank" rel="noopener noreferrer">${icon("external-link", 16)} ${cdText("openInstagram")}</a>
+    ${item.note ? `<section class="standalone-review-note"><b>${cdText("creatorNote")}</b><p>${esc(item.note)}</p></section>` : ""}
+    <section class="standalone-review-checks">
+      <b>${cdText("commonRejectReasons")}</b>
+      <div>${rejectChecks.map((check) => `<span>${esc(check)}</span>`).join("")}</div>
+    </section>
+    ${item.rejectReason ? `<section class="standalone-review-note reject"><b>${cdText("rejectReason")}</b><p>${esc(item.rejectReason)}</p></section>` : ""}
+    ${item.status === "approved" ? `<section class="standalone-payout-box">${icon("wallet-cards", 18)} <span>${cdText("approvedPayout", { reviewed: standaloneDateTime(item.reviewedAt), payout: standaloneDateOnly(item.payoutAt) })}</span></section>` : ""}
+    <form class="standalone-admin-actions" data-form="standalone-admin-review">
+      <input type="hidden" name="submissionId" value="${esc(item.id)}">
+      <label>${cdText("rejectReason")}<textarea name="rejectReason" rows="3" placeholder="${esc(cdText("rejectPlaceholder"))}">${esc(item.rejectReason || "")}</textarea></label>
+      <div>
+        <button class="standalone-secondary-button" type="submit" name="decision" value="reject">${icon("x", 16)} ${cdText("rejectWithReason")}</button>
+        <button class="standalone-primary-button" type="submit" name="decision" value="approve">${icon("check", 16)} ${cdText("approveScheduleTng")}</button>
+      </div>
+    </form>
+  </article>`;
+}
+
 const TASK_FEED = [
   { id: 1, t: "Summer glow skincare routine — 30s GRWM video", brand: "Lumi Beauty", brandSlug: "lumi-beauty", plat: ["tiktok", "ig"], type: "video", reward: 45, slots: 78, total: 100, h: 8, ribbon: "hot", img: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600&q=70" },
   { id: 2, t: "Unbox our new matcha kit", brand: "Aoi Tea Co.", brandSlug: "aoi-tea-co", plat: ["xhs", "ig"], type: "video", reward: 30, slots: 12, total: 60, h: 3, ribbon: "gone", img: "https://images.unsplash.com/photo-1536013455962-2c97c19b6fc6?w=600&q=70" },
@@ -4944,23 +5769,25 @@ const TASK_FEED = [
   { id: 8, t: "Sneaker drop hype reel — show your kicks", brand: "Velocity", brandSlug: "velocity", plat: ["tiktok", "ig"], type: "copy", reward: 95, slots: 33, total: 70, h: 20, ribbon: "new", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=70" }
 ];
 
-const TASK_FILTER_DEFS = {
-  platform: { title: "Platform · select any", opts: [
+function taskFilterDefs() {
+  return {
+  platform: { title: cdText("filterPlatformTitle"), opts: [
     { id: "tiktok", label: "▶ TikTok" }, { id: "ig", label: "IG" }, { id: "yt", label: "▶ YouTube" },
     { id: "xhs", label: "小 XHS" }, { id: "x", label: "X" }, { id: "fb", label: "f Facebook" }
   ]},
-  type: { title: "Content type · select any", opts: [
+  type: { title: cdText("filterTypeTitle"), opts: [
     { id: "video", label: "🎬 Video" }, { id: "photo", label: "📸 Photo" },
-    { id: "poster", label: "🖼 Poster" }, { id: "copy", label: "✍ Copy / caption" }
+    { id: "poster", label: "🖼 Poster" }, { id: "copy", label: `✍ ${cdText("copyCaption")}` }
   ]},
-  reward: { title: "Reward range · select any", opts: [
-    { id: "r1", label: "Under $30", min: 0, max: 29 },
-    { id: "r2", label: "$30 – $100", min: 30, max: 100 },
-    { id: "r3", label: "$100 – $300", min: 101, max: 300 },
-    { id: "r4", label: "Over $300", min: 301, max: 99999 }
+  reward: { title: cdText("filterRewardTitle"), opts: [
+    { id: "r1", label: cdText("under30"), min: 0, max: 29 },
+    { id: "r2", label: cdText("between30And100"), min: 30, max: 100 },
+    { id: "r3", label: cdText("between100And300"), min: 101, max: 300 },
+    { id: "r4", label: cdText("over300"), min: 301, max: 99999 }
   ]},
-  brand: { title: "Brand · select any", opts: [...new Map(TASK_FEED.map((c) => [c.brandSlug, { id: c.brandSlug, label: c.brand }])).values()].sort((a, b) => a.label.localeCompare(b.label)) }
-};
+  brand: { title: cdText("filterBrandTitle"), opts: [...new Map(TASK_FEED.map((c) => [c.brandSlug, { id: c.brandSlug, label: c.brand }])).values()].sort((a, b) => a.label.localeCompare(b.label)) }
+  };
+}
 
 const TASK_MY_ORDERS = {
   prog: [
@@ -4986,12 +5813,12 @@ function taskPlatHTML(list) {
 function taskRibbonHTML(kind) {
   if (kind === "hot") return `<span class="tc-ribbon hot">🔥 HOT</span>`;
   if (kind === "new") return `<span class="tc-ribbon new">✦ NEW</span>`;
-  if (kind === "gone") return `<span class="tc-ribbon gone">⏳ Almost gone</span>`;
+  if (kind === "gone") return `<span class="tc-ribbon gone">⏳ ${cdText("almostGone")}</span>`;
   return "";
 }
 
 function taskFmtCountdown(hoursLeft) {
-  if (hoursLeft <= 0) return "Ended";
+  if (hoursLeft <= 0) return cdText("ended");
   if (hoursLeft >= 24) return `${Math.floor(hoursLeft / 24)}d ${hoursLeft % 24}h`;
   return `${hoursLeft}h`;
 }
@@ -5014,7 +5841,7 @@ function taskFeedCardHTML(c) {
       </div>
       <div class="tc-slots">
         <div class="tc-bar"><i style="width:${pct}%"></i></div>
-        <div class="tc-lab"><span>${c.slots}/${c.total} claimed</span><span>${100 - pct}% left</span></div>
+        <div class="tc-lab"><span>${c.slots}/${c.total} ${cdText("claimed")}</span><span>${100 - pct}% ${cdText("left")}</span></div>
       </div>
     </div>
   </a>`;
@@ -5030,7 +5857,7 @@ function taskFilteredFeed() {
     if (f.brand?.length && !f.brand.includes(c.brandSlug)) return false;
     if (f.reward?.length) {
       const hit = f.reward.some((rid) => {
-        const b = TASK_FILTER_DEFS.reward.opts.find((o) => o.id === rid);
+        const b = taskFilterDefs().reward.opts.find((o) => o.id === rid);
         return b && c.reward >= b.min && c.reward <= b.max;
       });
       if (!hit) return false;
@@ -5058,6 +5885,7 @@ function taskCenterPage() {
 
 function taskListView() {
   const f = state.taskFilters;
+  const filterDefs = taskFilterDefs();
   const list = taskFilteredFeed();
   const popoverGroup = state.taskFilterPopover;
   const draft = state.taskFilterDraft || [];
@@ -5068,7 +5896,7 @@ function taskListView() {
     return `<button class="tc-fdrop ${has ? "has" : ""} ${open ? "open" : ""}" data-task-fopen="${g}">${esc(label)} <span class="tc-count">${c}</span> <span class="tc-caret">▾</span></button>`;
   };
   const popover = popoverGroup ? (() => {
-    const cfg = TASK_FILTER_DEFS[popoverGroup];
+    const cfg = filterDefs[popoverGroup];
     const draftSet = new Set(draft);
     const committed = new Set(f[popoverGroup] || []);
     const same = draftSet.size === committed.size && [...draftSet].every((x) => committed.has(x));
@@ -5077,67 +5905,67 @@ function taskListView() {
       ? cfg.opts.filter((o) => o.label.toLowerCase().includes(search))
       : cfg.opts;
     return `<div class="tc-fpop">
-      <div class="tc-fpop-head"><span>${esc(cfg.title)}</span><button class="tc-fpop-close" data-task-fclose>✕ Close</button></div>
-      ${popoverGroup === "brand" ? `<input class="tc-fchip-search" placeholder="Search brand…" value="${esc(state.taskBrandSearch || "")}" data-task-brand-search autofocus>` : ""}
+      <div class="tc-fpop-head"><span>${esc(cfg.title)}</span><button class="tc-fpop-close" data-task-fclose>✕ ${cdText("close")}</button></div>
+      ${popoverGroup === "brand" ? `<input class="tc-fchip-search" placeholder="${esc(cdText("searchBrand"))}" value="${esc(state.taskBrandSearch || "")}" data-task-brand-search autofocus>` : ""}
       <div class="tc-fchips">
         ${optsFiltered.map((o) => `<button class="tc-fchip ${draftSet.has(o.id) ? "on" : ""}" data-task-fchip="${o.id}">${esc(o.label)}</button>`).join("")}
       </div>
       <div class="tc-fpop-foot">
-        <span class="tc-draft-count"><b>${draftSet.size}</b> selected</span>
-        <button class="tc-btn-clear" data-task-fclear>Clear group</button>
-        <button class="tc-btn-apply" data-task-fapply ${same ? "disabled" : ""}>Apply →</button>
+        <span class="tc-draft-count"><b>${draftSet.size}</b> ${cdText("selected")}</span>
+        <button class="tc-btn-clear" data-task-fclear>${cdText("clearGroup")}</button>
+        <button class="tc-btn-apply" data-task-fapply ${same ? "disabled" : ""}>${cdText("apply")} →</button>
       </div>
     </div>`;
   })() : "";
   const activePills = ["platform", "type", "reward", "brand"].flatMap((g) =>
     (f[g] || []).map((id) => {
-      const opt = TASK_FILTER_DEFS[g].opts.find((o) => o.id === id);
+      const opt = filterDefs[g].opts.find((o) => o.id === id);
       return opt ? `<button class="tc-factive-pill" data-task-fremove="${g}:${id}">${esc(opt.label)} <span class="tc-x">×</span></button>` : "";
     })
   ).join("");
   return `<section class="tc-shell">
     <div class="tc-hero">
       <div>
-        <h1>任务广场</h1>
-        <p class="tc-sub">— 浏览实时任务,选符合你受众的领取。</p>
+        <h1>${cdText("taskMarket")}</h1>
+        <p class="tc-sub">${cdText("taskMarketSub")}</p>
       </div>
-      <button class="tc-btn tc-btn-secondary tc-btn-sm" data-task-view="mine">📋 我的任务</button>
+      <button class="tc-btn tc-btn-secondary tc-btn-sm" data-task-view="mine">📋 ${cdText("myTasks")}</button>
     </div>
     <div class="tc-search">
       ${icon("search", 18)}
-      <input placeholder="搜索品牌、产品、标签…" value="${esc(f.search || "")}" data-task-search>
+      <input placeholder="${esc(cdText("searchPlaceholder"))}" value="${esc(f.search || "")}" data-task-search>
     </div>
     <div class="tc-fbar">
       <div class="tc-fbar-inner">
-        ${fdrop("platform", "平台")}
-        ${fdrop("type", "内容类型")}
-        ${fdrop("reward", "奖励")}
-        ${fdrop("brand", "品牌")}
-        <button class="tc-freset" data-task-freset>⟲ 重置</button>
+        ${fdrop("platform", cdText("platform"))}
+        ${fdrop("type", cdText("contentType"))}
+        ${fdrop("reward", cdText("reward"))}
+        ${fdrop("brand", cdText("brand"))}
+        <button class="tc-freset" data-task-freset>⟲ ${cdText("reset")}</button>
         <span class="tc-fsort">
-          <span class="tc-fsort-lab">排序</span>
+          <span class="tc-fsort-lab">${cdText("sort")}</span>
           <select data-task-fsort>
-            <option value="newest" ${f.sort === "newest" ? "selected" : ""}>最新</option>
-            <option value="reward-h" ${f.sort === "reward-h" ? "selected" : ""}>奖励高到低</option>
-            <option value="reward-l" ${f.sort === "reward-l" ? "selected" : ""}>奖励低到高</option>
-            <option value="ending" ${f.sort === "ending" ? "selected" : ""}>即将截止</option>
-            <option value="slots" ${f.sort === "slots" ? "selected" : ""}>剩余名额最多</option>
+            <option value="newest" ${f.sort === "newest" ? "selected" : ""}>${cdText("newest")}</option>
+            <option value="reward-h" ${f.sort === "reward-h" ? "selected" : ""}>${cdText("rewardHigh")}</option>
+            <option value="reward-l" ${f.sort === "reward-l" ? "selected" : ""}>${cdText("rewardLow")}</option>
+            <option value="ending" ${f.sort === "ending" ? "selected" : ""}>${cdText("endingSoon")}</option>
+            <option value="slots" ${f.sort === "slots" ? "selected" : ""}>${cdText("slotsMost")}</option>
           </select>
         </span>
       </div>
       ${popover}
     </div>
     <div class="tc-fresult">
-      <span class="tc-fresult-count"><b>${list.length}</b> 个匹配任务</span>
+      <span class="tc-fresult-count">${cdText("matchedTasks", { count: `<b>${list.length}</b>` })}</span>
       <span class="tc-factive">${activePills}</span>
     </div>
     ${list.length ? `<div class="tc-feed">${list.map(taskFeedCardHTML).join("")}</div>
-      <div class="tc-load-more"><button class="tc-btn tc-btn-secondary" data-task-loadmore>加载更多</button></div>`
+      <div class="tc-load-more"><button class="tc-btn tc-btn-secondary" data-task-loadmore>${cdText("loadMore")}</button></div>`
       : `<div class="tc-empty">
           <div class="tc-ill">🪧</div>
-          <h3>没有匹配的任务</h3>
-          <p>试着移除一个筛选,或放宽奖励范围。</p>
-          <button class="tc-btn tc-btn-secondary tc-btn-sm" data-task-freset>⟲ 清除筛选</button>
+          <h3>${cdText("emptyTasksTitle")}</h3>
+          <p>${cdText("emptyTasksBody")}</p>
+          <button class="tc-btn tc-btn-secondary tc-btn-sm" data-task-freset>⟲ ${cdText("clearFilters")}</button>
         </div>`}
   </section>`;
 }
@@ -5147,7 +5975,7 @@ function taskDetailView() {
   const pct = Math.round((c.slots / c.total) * 100);
   const modal = state.taskModal;
   return `<section class="tc-shell">
-    <button class="tc-back" data-task-view="list">← 返回任务列表</button>
+    <button class="tc-back" data-task-view="list">← ${cdText("backTaskList")}</button>
     <div class="tc-detail">
       <div class="tc-detail-main">
         <div class="tc-panel">
@@ -5162,32 +5990,32 @@ function taskDetailView() {
             </div>
           </div>
           <div class="tc-detail-stats">
-            <div><div class="tc-stat-lab">奖励</div><span class="tc-reward" style="font-size:17px;">$${c.reward}</span></div>
-            <div><div class="tc-stat-lab">剩余名额</div><div class="tc-stat-val pink">${c.total - c.slots} / ${c.total}</div></div>
-            <div><div class="tc-stat-lab">截止</div><div class="tc-stat-val warn">${taskFmtCountdown(c.h)}</div></div>
+            <div><div class="tc-stat-lab">${cdText("reward")}</div><span class="tc-reward" style="font-size:17px;">$${c.reward}</span></div>
+            <div><div class="tc-stat-lab">${cdText("slotsLeft")}</div><div class="tc-stat-val pink">${c.total - c.slots} / ${c.total}</div></div>
+            <div><div class="tc-stat-lab">${cdText("deadline")}</div><div class="tc-stat-val warn">${taskFmtCountdown(c.h)}</div></div>
           </div>
           <div class="tc-slot-bar"><i style="width:${pct}%"></i></div>
           <div class="tc-tag-row">
             <span class="tc-tag soft">Lv2 required</span>
-            <span class="tc-tag plain">${c.plat.includes("tiktok") ? "TikTok 账号必须" : "需绑定社媒账号"}</span>
+            <span class="tc-tag plain">${c.plat.includes("tiktok") ? "TikTok account required" : cdText("socialRequired")}</span>
             <span class="tc-tag plain">18+ regions</span>
           </div>
         </div>
 
         <div class="tc-panel">
-          <h2 class="tc-h2">✅ 任务要求</h2>
+          <h2 class="tc-h2">✅ ${cdText("taskRequirements")}</h2>
           <ul class="tc-checklist">
-            <li><span class="tc-tick">✓</span><div><b>平台:</b> ${c.plat.map((p) => p.toUpperCase()).join(" 或 ")}</div></li>
-            <li><span class="tc-tick">✓</span><div><b>标签:</b> <span class="tc-tag soft">#${c.brand.replace(/\s+/g, "")}</span> 必带</div></li>
-            <li><span class="tc-tick">✓</span><div><b>提及:</b> 在文案中 @${c.brandSlug.replace(/-/g, "")}</div></li>
-            <li><span class="tc-tick">✓</span><div><b>时长:</b> 20–40 秒,9:16 竖屏</div></li>
-            <li><span class="tc-tick">✓</span><div><b>必备元素:</b> 产品出镜至少 3 秒,正面清晰</div></li>
-            <li><span class="tc-tick">✓</span><div><b>保留:</b> 帖子保留至少 30 天</div></li>
+            <li><span class="tc-tick">✓</span><div><b>${cdText("requiredPlatform")}:</b> ${c.plat.map((p) => p.toUpperCase()).join(` ${cdText("platformOr")} `)}</div></li>
+            <li><span class="tc-tick">✓</span><div><b>${cdText("hashtag")}:</b> <span class="tc-tag soft">#${c.brand.replace(/\s+/g, "")}</span> ${cdText("hashtagRequired")}</div></li>
+            <li><span class="tc-tick">✓</span><div><b>${cdText("mention")}:</b> ${cdText("mentionInCaption")} @${c.brandSlug.replace(/-/g, "")}</div></li>
+            <li><span class="tc-tick">✓</span><div><b>${cdText("duration")}:</b> ${cdText("durationRule")}</div></li>
+            <li><span class="tc-tick">✓</span><div><b>${cdText("requiredElements")}:</b> ${cdText("productVisibleRule")}</div></li>
+            <li><span class="tc-tick">✓</span><div><b>${cdText("keepPost")}:</b> ${cdText("keepPostRule")}</div></li>
           </ul>
         </div>
 
         <div>
-          <div class="tc-sec-head"><h2>🎞️ 样例参考</h2></div>
+          <div class="tc-sec-head"><h2>🎞️ ${cdText("examples")}</h2></div>
           <div class="tc-hscroll">
             <img src="https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&q=70" alt="" onerror="this.style.opacity='0.001'">
             <img src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=300&q=70" alt="" onerror="this.style.opacity='0.001'">
@@ -5198,49 +6026,49 @@ function taskDetailView() {
         <div class="tc-panel tc-asset">
           <span class="tc-asset-ic">📦</span>
           <div style="flex:1;">
-            <b>品牌素材包</b>
-            <div class="tc-cap">Logo、产品图、品牌色卡 · 24 MB</div>
+            <b>${cdText("brandAssets")}</b>
+            <div class="tc-cap">${cdText("brandAssetsMeta")}</div>
           </div>
-          <button class="tc-btn tc-btn-secondary tc-btn-sm" data-task-action="download-assets">下载</button>
+          <button class="tc-btn tc-btn-secondary tc-btn-sm" data-task-action="download-assets">${cdText("download")}</button>
         </div>
 
         <div>
           <details class="tc-acc" open>
-            <summary>📋 审核标准 <span>＋</span></summary>
-            <div class="tc-acc-body">审核会检查:必带标签和提及是否齐全、产品是否清晰出镜、时长是否符合、无竞品出现、内容为原创(非复用)。一般 48 小时内出结果。</div>
+            <summary>📋 ${cdText("reviewStandards")} <span>＋</span></summary>
+            <div class="tc-acc-body">${cdText("reviewStandardsBody")}</div>
           </details>
           <details class="tc-acc">
-            <summary>⚠️ 违规后果 <span>＋</span></summary>
-            <div class="tc-acc-body">30 天内删除帖子、缺标签或不实声明可能被驳回、扣回奖励,并影响信用分。</div>
+            <summary>⚠️ ${cdText("violation")} <span>＋</span></summary>
+            <div class="tc-acc-body">${cdText("violationBody")}</div>
           </details>
         </div>
       </div>
 
       <aside class="tc-aside">
-        <div class="tc-earn-lab">最高可获得</div>
+        <div class="tc-earn-lab">${cdText("maxEarn")}</div>
         <div class="tc-earn-amt">$${c.reward}.00</div>
         <div class="tc-checks">
-          <span><span class="tc-ok">✓</span> 已登录</span>
-          <span><span class="tc-ok">✓</span> 社媒已绑定</span>
-          <span><span class="tc-ok">✓</span> 等级达标 (Lv2)</span>
+          <span><span class="tc-ok">✓</span> ${cdText("loggedIn")}</span>
+          <span><span class="tc-ok">✓</span> ${cdText("socialConnected")}</span>
+          <span><span class="tc-ok">✓</span> ${cdText("levelQualified")}</span>
         </div>
-        <button class="tc-btn tc-btn-primary tc-btn-block tc-btn-lg" style="margin-top:14px;" data-task-action="claim">领取任务</button>
-        <button class="tc-btn tc-btn-secondary tc-btn-block tc-btn-sm" style="margin-top:8px;" data-task-action="share">分享</button>
-        <p class="tc-foot-note">领取后需在 72 小时内完成</p>
+        <button class="tc-btn tc-btn-primary tc-btn-block tc-btn-lg" style="margin-top:14px;" data-task-action="claim">${cdText("claimTask")}</button>
+        <button class="tc-btn tc-btn-secondary tc-btn-block tc-btn-sm" style="margin-top:8px;" data-task-action="share">${cdText("share")}</button>
+        <p class="tc-foot-note">${cdText("completeWithin72")}</p>
       </aside>
     </div>
 
     <div class="tc-modal-mask ${modal === "confirm" ? "show" : ""}" data-task-modal-bg>
       <div class="tc-modal">
-        <h2>确认领取此任务?</h2>
-        <p>领取后你有 <b>72 小时</b> 发布帖子并提交凭证。中途放弃会影响信用分。</p>
+        <h2>${cdText("confirmClaimTitle")}</h2>
+        <p>${cdText("confirmClaimBody")}</p>
         <div class="tc-mb">
-          <div class="tc-row-between"><span>奖励</span><b style="color:var(--pink);font-size:18px;">$${c.reward}.00</b></div>
-          <div class="tc-row-between" style="margin-top:8px;"><span>截止</span><b style="font-family:JetBrains Mono,monospace;">72h from now</b></div>
+          <div class="tc-row-between"><span>${cdText("reward")}</span><b style="color:var(--pink);font-size:18px;">$${c.reward}.00</b></div>
+          <div class="tc-row-between" style="margin-top:8px;"><span>${cdText("deadline")}</span><b style="font-family:JetBrains Mono,monospace;">72h from now</b></div>
         </div>
         <div class="tc-foot">
-          <button class="tc-btn tc-btn-secondary" data-task-modal-close>取消</button>
-          <button class="tc-btn tc-btn-primary" data-task-action="confirm-claim">确认 & 开始</button>
+          <button class="tc-btn tc-btn-secondary" data-task-modal-close>${cdText("cancel")}</button>
+          <button class="tc-btn tc-btn-primary" data-task-action="confirm-claim">${cdText("confirmStart")}</button>
         </div>
       </div>
     </div>
@@ -5248,15 +6076,15 @@ function taskDetailView() {
     <div class="tc-modal-mask tc-modal-success ${modal === "claimSuccess" ? "show" : ""}" data-task-modal-bg>
       <div class="tc-modal">
         <div class="tc-ok-circle">✓</div>
-        <h2 style="text-align:center;">任务已领取!</h2>
-        <p style="text-align:center;margin-top:6px;">名额已锁,72 小时内提交凭证以确认奖励。</p>
+        <h2 style="text-align:center;">${cdText("taskClaimed")}</h2>
+        <p style="text-align:center;margin-top:6px;">${cdText("taskClaimedBody")}</p>
         <div class="tc-mb" style="text-align:left;">
-          <div class="tc-row-between"><span>奖励锁定</span><b style="color:var(--pink);font-size:17px;">$${c.reward}.00</b></div>
-          <div class="tc-row-between" style="margin-top:8px;"><span>截止</span><b style="font-family:JetBrains Mono,monospace;">${(() => { const d = new Date(Date.now() + 72 * 3600 * 1000); return `${d.getMonth() + 1}月${d.getDate()}日 ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; })()}</b></div>
-          <div class="tc-row-between" style="margin-top:8px;"><span>订单号</span><b style="font-family:JetBrains Mono,monospace;font-size:12px;">#${c.brandSlug.toUpperCase().slice(0, 3)}-${1000 + c.id * 31}</b></div>
+          <div class="tc-row-between"><span>${cdText("rewardLocked")}</span><b style="color:var(--pink);font-size:17px;">$${c.reward}.00</b></div>
+          <div class="tc-row-between" style="margin-top:8px;"><span>${cdText("deadline")}</span><b style="font-family:JetBrains Mono,monospace;">${(() => { const d = new Date(Date.now() + 72 * 3600 * 1000); return cdLang() === "en" ? d.toLocaleString("en-MY", { month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit" }) : `${d.getMonth() + 1}月${d.getDate()}日 ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; })()}</b></div>
+          <div class="tc-row-between" style="margin-top:8px;"><span>${cdText("orderNo")}</span><b style="font-family:JetBrains Mono,monospace;font-size:12px;">#${c.brandSlug.toUpperCase().slice(0, 3)}-${1000 + c.id * 31}</b></div>
         </div>
-        <button class="tc-btn tc-btn-primary tc-btn-block tc-btn-lg" style="margin-top:18px;" data-task-action="goto-order">开始制作 →</button>
-        <button class="tc-btn tc-btn-secondary tc-btn-block tc-btn-sm" style="margin-top:8px;" data-task-modal-close>稍后</button>
+        <button class="tc-btn tc-btn-primary tc-btn-block tc-btn-lg" style="margin-top:18px;" data-task-action="goto-order">${cdText("startCreating")} →</button>
+        <button class="tc-btn tc-btn-secondary tc-btn-block tc-btn-sm" style="margin-top:8px;" data-task-modal-close>${cdText("later")}</button>
       </div>
     </div>
   </section>`;
@@ -5265,9 +6093,9 @@ function taskDetailView() {
 function taskOrderView() {
   const c = TASK_FEED.find((x) => x.id === state.taskOrderId) || TASK_FEED[0];
   return `<section class="tc-shell" style="max-width:780px;">
-    <button class="tc-back" data-task-view="mine">← 返回我的任务</button>
+    <button class="tc-back" data-task-view="mine">← ${cdText("backMyTasks")}</button>
     <div class="tc-cd-banner warn">
-      <span>⏱ 剩余提交时间</span>
+      <span>⏱ ${cdText("remainingSubmitTime")}</span>
       <span class="tc-cd-time">${taskFmtCountdown(c.h)}</span>
     </div>
 
@@ -5287,49 +6115,49 @@ function taskOrderView() {
         <div class="tc-tstep done">
           <div class="tc-node">✓</div>
           <div class="tc-step-body">
-            <h4>1 · 创作内容</h4>
-            <p>使用 Pokaya Studio 按品牌素材生成内容。</p>
-            <button class="tc-btn tc-btn-secondary tc-btn-sm" style="margin-top:8px;" data-page="project">打开 Pokaya Studio →</button>
+            <h4>1 · ${cdText("createContent")}</h4>
+            <p>${cdText("createContentBody")}</p>
+            <button class="tc-btn tc-btn-secondary tc-btn-sm" style="margin-top:8px;" data-page="project">${cdText("openStudio")} →</button>
           </div>
         </div>
         <div class="tc-tstep done">
           <div class="tc-node">✓</div>
           <div class="tc-step-body">
-            <h4>2 · 发布到平台</h4>
-            <p>发布后,完成自检。</p>
+            <h4>2 · ${cdText("publishPlatform")}</h4>
+            <p>${cdText("publishPlatformBody")}</p>
             <div class="tc-self-check">
-              <span><span class="tc-ok">✓</span> 已加 #${c.brand.replace(/\s+/g, "")} 标签</span>
-              <span><span class="tc-ok">✓</span> 已 @${c.brandSlug.replace(/-/g, "")}</span>
-              <span><span class="tc-warn">⚠</span> 产品出镜 ≥3 秒 — 请再次确认!</span>
+              <span><span class="tc-ok">✓</span> ${cdText("hashtagAdded", { brand: c.brand.replace(/\s+/g, "") })}</span>
+              <span><span class="tc-ok">✓</span> ${cdText("mentionedBrand", { brand: c.brandSlug.replace(/-/g, "") })}</span>
+              <span><span class="tc-warn">⚠</span> ${cdText("productCheck")}</span>
             </div>
           </div>
         </div>
         <div class="tc-tstep active">
           <div class="tc-node">3</div>
           <div class="tc-step-body">
-            <h4>3 · 提交凭证</h4>
-            <p>粘贴帖子链接并上传截图。</p>
-            <span class="tc-step-label">帖子链接</span>
+            <h4>3 · ${cdText("submitProof")}</h4>
+            <p>${cdText("submitProofBody")}</p>
+            <span class="tc-step-label">${cdText("postLink")}</span>
             <div class="tc-input">
               <span>🔗</span>
-              <input id="tc-link" placeholder="https://tiktok.com/@you/video/…">
+              <input id="tc-link" placeholder="https://www.instagram.com/reel/...">
             </div>
-            <span class="tc-step-label">截图凭证</span>
+            <span class="tc-step-label">${cdText("screenshotProof")}</span>
             <label class="tc-uploader">
               <div class="tc-up-ic">📸</div>
-              <b>点击上传</b>
-              <div class="tc-cap">支持多张,自动压缩</div>
+              <b>${cdText("clickUpload")}</b>
+              <div class="tc-cap">${cdText("uploadMeta")}</div>
               <input type="file" accept="image/*" multiple hidden>
             </label>
-            <button class="tc-btn tc-btn-primary tc-btn-block tc-btn-lg" style="margin-top:14px;" data-task-action="submit-proof">提交审核</button>
-            <button class="tc-btn tc-btn-danger tc-btn-block tc-btn-sm" style="margin-top:6px;" data-task-action="abandon">放弃任务</button>
+            <button class="tc-btn tc-btn-primary tc-btn-block tc-btn-lg" style="margin-top:14px;" data-task-action="submit-proof">${cdText("submitReview")}</button>
+            <button class="tc-btn tc-btn-danger tc-btn-block tc-btn-sm" style="margin-top:6px;" data-task-action="abandon">${cdText("abandonTask")}</button>
           </div>
         </div>
         <div class="tc-tstep">
           <div class="tc-node">4</div>
           <div class="tc-step-body">
-            <h4>4 · 等待审核</h4>
-            <p>商家通常在 48 小时内审核,有结果会通知你。</p>
+            <h4>4 · ${cdText("waitReview")}</h4>
+            <p>${cdText("waitReviewBody")}</p>
           </div>
         </div>
       </div>
@@ -5337,11 +6165,11 @@ function taskOrderView() {
 
     <div class="tc-modal-mask ${state.taskModal === "abandon" ? "show" : ""}" data-task-modal-bg>
       <div class="tc-modal">
-        <h2>⚠️ 放弃此任务?</h2>
-        <p>名额会释放,<b>信用分会下降</b>。此操作不可撤销。</p>
+        <h2>⚠️ ${cdText("abandonTitle")}</h2>
+        <p>${cdText("abandonBody")}</p>
         <div class="tc-foot">
-          <button class="tc-btn tc-btn-primary" data-task-modal-close>继续完成</button>
-          <button class="tc-btn tc-btn-danger" data-task-action="abandon-confirm">放弃</button>
+          <button class="tc-btn tc-btn-primary" data-task-modal-close>${cdText("continueTask")}</button>
+          <button class="tc-btn tc-btn-danger" data-task-action="abandon-confirm">${cdText("abandon")}</button>
         </div>
       </div>
     </div>
@@ -5352,10 +6180,10 @@ function taskMineView() {
   const tab = state.taskTab || "prog";
   const counts = { prog: TASK_MY_ORDERS.prog.length, rev: TASK_MY_ORDERS.rev.length, appr: TASK_MY_ORDERS.appr.length, rej: TASK_MY_ORDERS.rej.length };
   const tabs = [
-    ["prog", "进行中", counts.prog],
-    ["rev", "审核中", counts.rev],
-    ["appr", "已通过", counts.appr],
-    ["rej", "已驳回", counts.rej]
+    ["prog", cdText("inProgress"), counts.prog],
+    ["rev", cdText("inReview"), counts.rev],
+    ["appr", cdText("approved"), counts.appr],
+    ["rej", cdText("rejected"), counts.rej]
   ];
   const orders = TASK_MY_ORDERS[tab] || [];
   const renderRow = (o) => {
@@ -5367,13 +6195,13 @@ function taskMineView() {
           <div class="tc-row-meta">
             <b>${esc(o.brand)}</b>
             <span class="tc-plat ${o.plat}">${({ tiktok: "T", ig: "IG", yt: "▶", xhs: "小" })[o.plat] || ""}</span>
-            <span class="tc-tag progress">● 进行中</span>
+            <span class="tc-tag progress">● ${cdText("inProgress")}</span>
             <span class="tc-countdown">⏱ ${taskFmtCountdown(o.h)}</span>
           </div>
         </div>
         <div class="tc-row-right">
           <span class="tc-reward">$${o.reward}</span>
-          <button class="tc-btn tc-btn-primary tc-btn-sm" data-task-order="${o.id}">立即提交</button>
+          <button class="tc-btn tc-btn-primary tc-btn-sm" data-task-order="${o.id}">${cdText("submitNow")}</button>
         </div>
       </a>`;
     }
@@ -5385,8 +6213,8 @@ function taskMineView() {
           <div class="tc-row-meta">
             <b>${esc(o.brand)}</b>
             <span class="tc-plat ${o.plat}">${({ tiktok: "T", ig: "IG", yt: "▶", xhs: "小" })[o.plat] || ""}</span>
-            <span class="tc-tag review">● 审核中</span>
-            <span class="tc-countdown">${o.decisionH}h 内出结果</span>
+            <span class="tc-tag review">● ${cdText("inReview")}</span>
+            <span class="tc-countdown">${cdText("resultInHours", { hours: o.decisionH })}</span>
           </div>
         </div>
         <span class="tc-reward">$${o.reward}</span>
@@ -5399,8 +6227,8 @@ function taskMineView() {
           <div class="tc-row-title">${esc(o.title)}</div>
           <div class="tc-row-meta">
             <b>${esc(o.brand)}</b>
-            <span class="tc-tag approved">✓ 已通过</span>
-            <span style="color:var(--muted);font-size:12px;">已到账 · ${o.paidDays} 天前</span>
+            <span class="tc-tag approved">✓ ${cdText("approved")}</span>
+            <span style="color:var(--muted);font-size:12px;">${cdText("paidAgo", { days: o.paidDays })}</span>
           </div>
         </div>
         <span class="tc-reward">$${o.reward}</span>
@@ -5412,29 +6240,29 @@ function taskMineView() {
         <div class="tc-row-title">${esc(o.title)}</div>
         <div class="tc-row-meta">
           <b>${esc(o.brand)}</b>
-          <span class="tc-tag rejected">✗ 已驳回</span>
+          <span class="tc-tag rejected">✗ ${cdText("rejected")}</span>
           <span style="color:var(--muted);font-size:12px;">${esc(o.reason)}</span>
         </div>
       </div>
       <div class="tc-row-right">
         <span class="tc-reward">$${o.reward}</span>
-        <button class="tc-btn tc-btn-primary tc-btn-sm" data-task-action="revise">修改 →</button>
+        <button class="tc-btn tc-btn-primary tc-btn-sm" data-task-action="revise">${cdText("revise")} →</button>
       </div>
     </a>`;
   };
   return `<section class="tc-shell" style="max-width:920px;">
     <div class="tc-hero">
       <div>
-        <h1>我的任务</h1>
-        <p class="tc-sub">— 从领取到结款,每一单都在这里。</p>
+        <h1>${cdText("myTasks")}</h1>
+        <p class="tc-sub">${cdText("myTasksSub")}</p>
       </div>
-      <button class="tc-btn tc-btn-primary tc-btn-sm" data-task-view="list">+ 领新任务</button>
+      <button class="tc-btn tc-btn-primary tc-btn-sm" data-task-view="list">+ ${cdText("claimNewTask")}</button>
     </div>
     <div class="tc-status-tabs">
       ${tabs.map(([id, label, n]) => `<button class="${tab === id ? "on" : ""}" data-task-tab="${id}">${esc(label)} <span class="tc-badge">${n}</span></button>`).join("")}
     </div>
     <div style="margin-top:18px;">
-      ${orders.length ? orders.map(renderRow).join("") : `<div class="tc-empty"><div class="tc-ill">📭</div><h3>暂无任务</h3><p>到任务广场领一个看看?</p><button class="tc-btn tc-btn-primary tc-btn-sm" data-task-view="list">→ 任务广场</button></div>`}
+      ${orders.length ? orders.map(renderRow).join("") : `<div class="tc-empty"><div class="tc-ill">📭</div><h3>${cdText("noTasks")}</h3><p>${cdText("goClaimTask")}</p><button class="tc-btn tc-btn-primary tc-btn-sm" data-task-view="list">→ ${cdText("taskMarket")}</button></div>`}
     </div>
   </section>`;
 }
@@ -12589,7 +13417,8 @@ function bindTaskCenter() {
     const g = state.taskFilterPopover;
     if (!g) return;
     set({ taskFilters: { ...state.taskFilters, [g]: [...(state.taskFilterDraft || [])] }, taskFilterPopover: null, taskFilterDraft: [], taskBrandSearch: "" });
-    notify((state.taskFilterDraft || []).length ? `已应用 ${g} 筛选` : `${g} 筛选已清除`);
+    const groupName = ({ platform: cdText("platform"), type: cdText("contentType"), reward: cdText("reward"), brand: cdText("brand") })[g] || g;
+    notify((state.taskFilterDraft || []).length ? cdText("notifyFilterApplied", { group: groupName }) : cdText("notifyFilterCleared", { group: groupName }));
   }));
   document.querySelectorAll("[data-task-freset]").forEach((el) => el.addEventListener("click", (event) => {
     event.preventDefault();
@@ -12616,22 +13445,23 @@ function bindTaskCenter() {
     if (action === "claim") return set({ taskModal: "confirm" });
     if (action === "confirm-claim") return set({ taskModal: "claimSuccess" });
     if (action === "goto-order") return set({ taskView: "order", taskOrderId: state.taskActiveId, taskModal: null });
-    if (action === "share") return notify("链接已复制 — 分享给朋友吧 🔗");
-    if (action === "download-assets") return notify("品牌素材包开始下载…");
+    if (action === "share") return notify(cdText("notifyShareCopied"));
+    if (action === "download-assets") return notify(cdText("notifyDownloadAssets"));
     if (action === "submit-proof") {
       const link = document.getElementById("tc-link");
-      if (!link || !link.value.trim()) return notify("请先粘贴帖子链接");
-      notify("已提交! 等待审核 ⏳");
+      if (!link || !link.value.trim()) return notify(cdText("notifyPasteLink"));
+      saveStandaloneTaskSubmission(state.taskOrderId || state.taskActiveId || 1, link.value.trim());
+      notify(cdText("notifySubmitted"));
       setTimeout(() => set({ taskView: "mine", taskTab: "rev", taskModal: null }), 600);
       return;
     }
     if (action === "abandon") return set({ taskModal: "abandon" });
     if (action === "abandon-confirm") {
       set({ taskModal: null });
-      notify("任务已放弃");
+      notify(cdText("notifyTaskAbandoned"));
       return;
     }
-    if (action === "revise") return notify("修改流程稍后接入");
+    if (action === "revise") return notify(cdText("notifyReviseSoon"));
   }));
   document.querySelectorAll("[data-task-modal-close]").forEach((el) => el.addEventListener("click", (event) => {
     event.preventDefault();
@@ -12646,8 +13476,21 @@ function bindTaskCenter() {
   }));
 }
 
+function bindStandaloneTaskPages() {
+  document.querySelectorAll("[data-creators-auth-mode]").forEach((el) => el.addEventListener("click", () => {
+    set({ creatorsDeskAuthMode: el.dataset.creatorsAuthMode || "login" });
+  }));
+  document.querySelectorAll("[data-standalone-admin-filter]").forEach((el) => el.addEventListener("click", () => {
+    set({ standaloneAdminFilter: el.dataset.standaloneAdminFilter || "all", standaloneAdminSelectedId: "" });
+  }));
+  document.querySelectorAll("[data-standalone-admin-select]").forEach((el) => el.addEventListener("click", () => {
+    set({ standaloneAdminSelectedId: el.dataset.standaloneAdminSelect || "" });
+  }));
+}
+
 function bind() {
   bindTaskCenter();
+  bindStandaloneTaskPages();
   document.querySelectorAll("[data-sop-target]").forEach((el) => el.addEventListener("click", () => {
     const sopTopic = el.dataset.sopTarget || "dashboard";
     if (el.dataset.sopModal === "true") return set({ sopTopic, modal: "sop" });
@@ -13295,6 +14138,12 @@ async function action(event, name) {
     window.history.pushState({}, "", "/studio");
     return render();
   }
+  if (name === "creators-desk-language") {
+    const lang = event.currentTarget.dataset.lang === "en" ? "en" : "zh";
+    localStorage.setItem(storageKeys.lang, lang);
+    return set({ lang });
+  }
+  if (name === "creators-desk-logout") return logoutCreatorsDeskAccount();
   if (name === "reload-page") return window.location.reload();
   if (name === "toggle-sidebar") {
     const sidebarCollapsed = !state.sidebarCollapsed;
@@ -13455,6 +14304,18 @@ async function submit(event) {
   event.preventDefault();
   if (event.currentTarget.dataset.form === "agent" && state.agentInputComposing) return;
   const data = Object.fromEntries(new FormData(event.currentTarget));
+  if (event.currentTarget.dataset.form === "creators-desk-register") return registerCreatorsDeskAccount(data);
+  if (event.currentTarget.dataset.form === "creators-desk-login") return loginCreatorsDeskAccount(data);
+  if (event.currentTarget.dataset.form === "standalone-admin-review") {
+    const decision = event.submitter?.value || "";
+    const submissionId = String(data.submissionId || "");
+    const rejectReason = String(data.rejectReason || "").trim();
+    if (!submissionId) return notify(cdText("notifyNoSubmission"));
+    if (decision === "reject" && !rejectReason) return notify(cdText("notifyRejectReason"));
+    reviewStandaloneSubmission(submissionId, decision, rejectReason);
+    notify(decision === "approve" ? cdText("notifyApproved") : cdText("notifyRejected"));
+    return set({ standaloneAdminFilter: decision === "approve" ? "approved" : "rejected", standaloneAdminSelectedId: submissionId });
+  }
   if (event.currentTarget.dataset.form === "login") {
     try {
       if (data.adminKey) {
