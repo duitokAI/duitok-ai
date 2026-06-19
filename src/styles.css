@@ -51455,6 +51455,9 @@ body:has(.studio-shell .video-page-studio),
 .tc-order-card .tc-row-title { font-weight:700; color:var(--purple); font-size:15px; line-height:1.3; }
 .tc-order-card .tc-row-meta { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px; font-size:12px; color:var(--muted); }
 .tc-order-card .tc-row-right { display:flex; flex-direction:column; gap:8px; align-items:flex-end; flex-shrink:0; }
+.tc-reject-reason { display:grid; gap:4px; margin-top:10px; padding:10px 12px; border:1px solid rgba(255,106,61,.2); border-radius:12px; background:rgba(255,106,61,.07); color:var(--muted); font-size:12px; line-height:1.35; }
+.tc-reject-reason b { color:var(--purple); font-size:12px; }
+.tc-reject-reason a { color:var(--purple); font-weight:800; text-decoration:none; }
 
 /* Modal */
 .tc-modal-mask { position:fixed; inset:0; background:rgba(38,0,50,0.55); backdrop-filter:blur(6px); display:none; align-items:center; justify-content:center; z-index:1000; padding:20px; }

@@ -5851,6 +5851,52 @@ const TASK_MY_ORDERS = {
   ]
 };
 
+function taskCurrentAccountSubmissions() {
+  const account = creatorsDeskCurrentAccount();
+  if (!account) return [];
+  return standaloneTaskSubmissions().filter((item) => (
+    item.accountId === account.id ||
+    (account.email && item.creatorEmail === account.email) ||
+    (account.phone && item.creatorPhone === account.phone)
+  ));
+}
+
+function taskSubmissionOrder(item = {}) {
+  const task = standaloneTaskById(item.taskId);
+  const decisionHours = item.submittedAt
+    ? Math.max(1, 48 - Math.floor((Date.now() - Date.parse(item.submittedAt || "")) / 3600000))
+    : 48;
+  return {
+    id: `submission-${item.id}`,
+    taskId: Number(item.taskId || task.id),
+    submissionId: item.id,
+    title: task.t || `Task #${item.taskId}`,
+    brand: task.brand || "",
+    plat: Array.isArray(task.plat) ? task.plat[0] : "ig",
+    reward: Number(item.reward || task.reward || 0),
+    decisionH: decisionHours,
+    paidDays: item.reviewedAt ? Math.max(0, Math.floor((Date.now() - Date.parse(item.reviewedAt)) / 86400000)) : 0,
+    reason: item.rejectReason || cdText("missingHashtag"),
+    status: item.status || "pending",
+    instagramUrl: item.instagramUrl || "",
+    reviewedAt: item.reviewedAt || "",
+    thumb: task.img || ""
+  };
+}
+
+function taskMyOrders() {
+  const dynamic = { prog: [], rev: [], appr: [], rej: [] };
+  taskCurrentAccountSubmissions().forEach((item) => {
+    const key = item.status === "approved" ? "appr" : item.status === "rejected" ? "rej" : "rev";
+    dynamic[key].push(taskSubmissionOrder(item));
+  });
+  const dynamicTaskIds = new Set(Object.values(dynamic).flat().map((item) => String(item.taskId)));
+  return Object.fromEntries(Object.entries(TASK_MY_ORDERS).map(([key, rows]) => [
+    key,
+    [...dynamic[key], ...rows.filter((row) => !dynamicTaskIds.has(String(row.id)))]
+  ]));
+}
+
 function taskPlatHTML(list) {
   const labels = { tiktok: "T", ig: "IG", fb: "f", x: "X", yt: "▶", xhs: "小" };
   return `<span class="tc-plat-row">${list.map((p) => `<span class="tc-plat ${p}">${labels[p] || p}</span>`).join("")}</span>`;
@@ -6224,14 +6270,15 @@ function taskOrderView() {
 
 function taskMineView() {
   const tab = state.taskTab || "prog";
-  const counts = { prog: TASK_MY_ORDERS.prog.length, rev: TASK_MY_ORDERS.rev.length, appr: TASK_MY_ORDERS.appr.length, rej: TASK_MY_ORDERS.rej.length };
+  const myOrders = taskMyOrders();
+  const counts = { prog: myOrders.prog.length, rev: myOrders.rev.length, appr: myOrders.appr.length, rej: myOrders.rej.length };
   const tabs = [
     ["prog", cdText("inProgress"), counts.prog],
     ["rev", cdText("inReview"), counts.rev],
     ["appr", cdText("approved"), counts.appr],
     ["rej", cdText("rejected"), counts.rej]
   ];
-  const orders = TASK_MY_ORDERS[tab] || [];
+  const orders = myOrders[tab] || [];
   const renderRow = (o) => {
     if (tab === "prog") {
       return `<a class="tc-order-card" data-task-order="${o.id}">
@@ -6280,7 +6327,7 @@ function taskMineView() {
         <span class="tc-reward">$${o.reward}</span>
       </a>`;
     }
-    return `<a class="tc-order-card" style="border-color:var(--danger,#ff6a3d);">
+    return `<article class="tc-order-card" style="border-color:var(--danger,#ff6a3d);">
       <img class="tc-thumb" src="${esc(o.thumb)}" alt="" onerror="this.style.opacity='0.001'">
       <div class="tc-grow">
         <div class="tc-row-title">${esc(o.title)}</div>
@@ -6289,12 +6336,13 @@ function taskMineView() {
           <span class="tc-tag rejected">✗ ${cdText("rejected")}</span>
           <span style="color:var(--muted);font-size:12px;">${esc(o.reason)}</span>
         </div>
+        ${o.submissionId ? `<div class="tc-reject-reason"><b>${cdText("rejectReason")}</b><span>${esc(o.reason)}</span>${o.instagramUrl ? `<a href="${esc(o.instagramUrl)}" target="_blank" rel="noopener noreferrer">${cdText("openInstagram")} →</a>` : ""}</div>` : ""}
       </div>
       <div class="tc-row-right">
         <span class="tc-reward">$${o.reward}</span>
         <button class="tc-btn tc-btn-primary tc-btn-sm" data-task-action="revise">${cdText("revise")} →</button>
       </div>
-    </a>`;
+    </article>`;
   };
   return `<section class="tc-shell" style="max-width:920px;">
     <div class="tc-hero">
