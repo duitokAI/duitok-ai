@@ -239,6 +239,8 @@ services:
         value: admin@pokaya.ai
       - key: ADMIN_API_KEY
         sync: false
+      - key: POKAYA_ADMIN_PASSWORD_HASH
+        value: f856c30ca2472d5778faa2830f088763:7a4a8d745891e02265c462060c29b9d211a358959177103e9fececc119b57233fc4dfb6faa575d59265b3463c78b1db04a2e9fca24f00e34e0fe36195e9f5de1
       - key: R2_ACCOUNT_ID
         sync: false
       - key: R2_ENDPOINT
