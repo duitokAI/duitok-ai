@@ -180,6 +180,7 @@ const state = {
   creatorsDeskSession: readStoredJson(storageKeys.creatorsDeskSession, null),
   creatorsDeskAuthMode: readStoredJson(storageKeys.creatorsDeskAccounts, []).length ? "login" : "register",
   creatorsDeskLoginPhone: "",
+  creatorsDeskAuthDraft: { email: "", phone: "", password: "" },
   search: "",
   adminUserId: null,
   adminSearch: "",
@@ -2639,6 +2640,8 @@ function hydrateIconsSoon() {
   }
 }
 
+let creatorsDeskAuthFocusToken = 0;
+
 function initDelegatedEvents() {
   if (app.dataset.delegatedEvents === "true") return;
   app.dataset.delegatedEvents = "true";
@@ -2661,17 +2664,23 @@ function focusCreatorsDeskAuthTarget(event) {
 
 function focusCreatorsDeskAuthInput(input) {
   if (!input) return;
+  const focusToken = ++creatorsDeskAuthFocusToken;
   const inputName = input.getAttribute("name");
   const inputType = input.getAttribute("type");
   const selector = inputName
     ? `.creators-auth-form input[name="${CSS.escape(inputName)}"]`
     : `.creators-auth-form input${inputType ? `[type="${CSS.escape(inputType)}"]` : ""}`;
-  const focusLiveInput = () => {
+  const focusLiveInput = (force = false) => {
+    if (focusToken !== creatorsDeskAuthFocusToken) return;
     const liveInput = document.querySelector(selector) || input;
+    const active = document.activeElement;
+    const activeAuthInput = active?.closest?.(".creators-auth-form input");
+    if (!force && activeAuthInput && activeAuthInput !== liveInput) return;
+    if (!force && active && active !== document.body && active !== document.documentElement && !active.closest?.(".creators-auth-form")) return;
     if (liveInput instanceof HTMLElement && document.activeElement !== liveInput) liveInput.focus({ preventScroll: true });
   };
-  focusLiveInput();
-  [0, 16, 50, 100].forEach((delay) => window.setTimeout(focusLiveInput, delay));
+  focusLiveInput(true);
+  [0, 16, 50, 100].forEach((delay) => window.setTimeout(() => focusLiveInput(false), delay));
 }
 
 function handleDelegatedPointerDown(event) {
@@ -5473,19 +5482,21 @@ function creatorsDeskAuthPage() {
 }
 
 function creatorsDeskRegisterForm() {
+  const draft = state.creatorsDeskAuthDraft || {};
   return `<form class="creators-auth-form" data-form="creators-desk-register">
-    <label>${cdText("email")}<input name="email" type="email" autocomplete="email" placeholder="you@example.com" required></label>
-    <label>${cdText("phone")}<input name="phone" inputmode="tel" autocomplete="tel" placeholder="+60 12 345 6789" required></label>
-    <label>${cdText("password")}<input name="password" type="password" autocomplete="new-password" minlength="6" placeholder="${esc(cdText("passwordPlaceholder"))}" required></label>
+    <label>${cdText("email")}<input name="email" type="email" autocomplete="email" value="${esc(draft.email || "")}" placeholder="you@example.com" required></label>
+    <label>${cdText("phone")}<input name="phone" inputmode="tel" autocomplete="tel" value="${esc(draft.phone || "")}" placeholder="+60 12 345 6789" required></label>
+    <label>${cdText("password")}<input name="password" type="password" autocomplete="new-password" value="${esc(draft.password || "")}" minlength="6" placeholder="${esc(cdText("passwordPlaceholder"))}" required></label>
     <button class="creators-auth-primary" type="submit">${cdText("register")} ${icon("user-plus", 18)}</button>
     <button class="creators-auth-link" type="button" data-creators-auth-mode="login">${cdText("hasAccount")}</button>
   </form>`;
 }
 
 function creatorsDeskLoginForm() {
+  const draft = state.creatorsDeskAuthDraft || {};
   return `<form class="creators-auth-form" data-form="creators-desk-login">
-    <label>${cdText("phone")}<input name="phone" inputmode="tel" autocomplete="tel" value="${esc(state.creatorsDeskLoginPhone || "")}" placeholder="+60 12 345 6789" required></label>
-    <label>${cdText("password")}<input name="password" type="password" autocomplete="current-password" required></label>
+    <label>${cdText("phone")}<input name="phone" inputmode="tel" autocomplete="tel" value="${esc(draft.phone || state.creatorsDeskLoginPhone || "")}" placeholder="+60 12 345 6789" required></label>
+    <label>${cdText("password")}<input name="password" type="password" autocomplete="current-password" value="${esc(draft.password || "")}" required></label>
     <button class="creators-auth-primary" type="submit">${cdText("login")} ${icon("log-in", 18)}</button>
     <button class="creators-auth-link" type="button" data-creators-auth-mode="register">${cdText("noAccount")}</button>
   </form>`;
@@ -5508,7 +5519,7 @@ function registerCreatorsDeskAccount(data = {}) {
   };
   writeCreatorsDeskAccounts([account, ...accounts]);
   notify(cdText("notifyAccountCreated"));
-  return set({ creatorsDeskAuthMode: "login", creatorsDeskLoginPhone: phone });
+  return set({ creatorsDeskAuthMode: "login", creatorsDeskLoginPhone: phone, creatorsDeskAuthDraft: { email: "", phone, password: "" } });
 }
 
 function loginCreatorsDeskAccount(data = {}) {
@@ -5520,14 +5531,14 @@ function loginCreatorsDeskAccount(data = {}) {
   localStorage.setItem(storageKeys.creatorsDeskSession, JSON.stringify(session));
   state.creatorsDeskSession = session;
   window.history.pushState({}, "", "/task-center");
-  return set({ creatorsDeskAuthMode: "login", creatorsDeskLoginPhone: phone });
+  return set({ creatorsDeskAuthMode: "login", creatorsDeskLoginPhone: phone, creatorsDeskAuthDraft: { email: "", phone, password: "" } });
 }
 
 function logoutCreatorsDeskAccount() {
   localStorage.removeItem(storageKeys.creatorsDeskSession);
   state.creatorsDeskSession = null;
   window.history.pushState({}, "", "/");
-  return set({ creatorsDeskAuthMode: creatorsDeskAccounts().length ? "login" : "register" });
+  return set({ creatorsDeskAuthMode: creatorsDeskAccounts().length ? "login" : "register", creatorsDeskAuthDraft: { email: "", phone: "", password: "" } });
 }
 
 function readStandaloneSubmissions() {
@@ -13509,6 +13520,12 @@ function bindStandaloneTaskPages() {
     input.addEventListener("mousedown", focusInput);
     input.addEventListener("touchstart", focusInput, { passive: true });
     input.addEventListener("click", focusInput);
+    input.addEventListener("input", () => {
+      state.creatorsDeskAuthDraft = {
+        ...(state.creatorsDeskAuthDraft || {}),
+        [input.name]: input.value
+      };
+    });
   });
   document.querySelectorAll(".creators-auth-form label").forEach((label) => {
     label.addEventListener("click", () => {
