@@ -2660,18 +2660,25 @@ function stabilizeCreatorsDeskInputFocus(input) {
   const selector = formName && inputName
     ? `form[data-form="${CSS.escape(formName)}"] input[name="${CSS.escape(inputName)}"]`
     : "";
-  const focusIfPageDroppedIt = (force = false) => {
+  const focusIfPageDroppedIt = () => {
     if (token !== creatorsDeskInputFocusToken || !selector) return;
     const liveInput = document.querySelector(selector);
     if (!(liveInput instanceof HTMLElement)) return;
     const active = document.activeElement;
     const activeCreatorsInput = active?.closest?.(".creators-desk-auth-form input");
-    if (!force && activeCreatorsInput && activeCreatorsInput !== liveInput) return;
-    if (!force && active && active !== document.body && active !== document.documentElement) return;
-    if (document.activeElement !== liveInput) liveInput.focus({ preventScroll: true });
+    if (activeCreatorsInput && activeCreatorsInput !== liveInput) return;
+    if (active && active !== document.body && active !== document.documentElement) return;
+    if (document.activeElement !== liveInput) {
+      liveInput.focus({ preventScroll: true });
+      const end = typeof liveInput.value === "string" ? liveInput.value.length : 0;
+      try {
+        liveInput.setSelectionRange(end, end);
+      } catch {
+        // Some input types do not support selection ranges.
+      }
+    }
   };
-  focusIfPageDroppedIt(true);
-  [0, 16, 50, 100].forEach((delay) => window.setTimeout(() => focusIfPageDroppedIt(false), delay));
+  [0, 16, 50, 100].forEach((delay) => window.setTimeout(focusIfPageDroppedIt, delay));
 }
 
 function clearCreatorsDeskAuthError() {
