@@ -5177,7 +5177,7 @@ const creatorsDeskCopy = {
     noAccessTitle: "No Admin Access",
     noAccessBody: "This review console is only available to approved admin accounts. Creators can continue using Task Center to claim and submit tasks.",
     backTaskCenter: "Back to Task Center",
-    authRegisterTitle: "Become a Creators Desk Creator",
+    authRegisterTitle: "Become a AI Creator",
     authLoginTitle: "Welcome back",
     authRegisterSubtitle: "Claim brand tasks, create content with AI, and receive rewards after approval.",
     authLoginSubtitle: "Log in with your phone number and password to continue.",
