@@ -51789,6 +51789,8 @@ body:has(.studio-shell .video-page-studio),
 .creators-desk-auth-top {
   position: relative;
   width: min(100%, 1320px);
+  display: flex;
+  justify-content: center;
 }
 
 .creators-desk-brand-lockup .brand-core {
