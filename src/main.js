@@ -2,7 +2,8 @@ import "./styles.css";
 
 const app = document.querySelector("#app");
 const toast = document.querySelector("#toast");
-const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
+const creatorsDeskApiOrigin = ["creatorsdesk.ai", "www.creatorsdesk.ai"].includes(window.location.hostname) ? "https://pokaya.ai" : "";
+const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || creatorsDeskApiOrigin).replace(/\/$/, "");
 const isStudioPath = () => window.location.pathname.startsWith("/studio") || window.location.pathname === "/admin" || window.location.pathname.startsWith("/admin/");
 const pathIs = (path) => window.location.pathname === path;
 const ownerAdminEmails = new Set(["admin@pokaya.ai"]);

@@ -250,8 +250,8 @@ const postgresPool = databaseUrl
       ssl: process.env.POSTGRES_SSL === "false" ? false : { rejectUnauthorized: false }
     })
   : null;
-const allowedOrigins = (process.env.CORS_ORIGINS || process.env.PUBLIC_APP_URL || "")
-  .split(",")
+const defaultAllowedOrigins = ["https://pokaya.ai", "https://www.pokaya.ai", "https://creatorsdesk.ai", "https://www.creatorsdesk.ai"];
+const allowedOrigins = [...(process.env.CORS_ORIGINS || process.env.PUBLIC_APP_URL || "").split(","), ...defaultAllowedOrigins]
   .map((origin) => origin.trim().replace(/\/$/, ""))
   .filter(Boolean);
 

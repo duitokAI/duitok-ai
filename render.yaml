@@ -34,7 +34,7 @@ services:
       - key: PUBLIC_APP_URL
         sync: false
       - key: CORS_ORIGINS
-        value: https://pokaya.ai,https://www.pokaya.ai
+        value: https://pokaya.ai,https://www.pokaya.ai,https://creatorsdesk.ai,https://www.creatorsdesk.ai
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_CLIENT_SECRET
