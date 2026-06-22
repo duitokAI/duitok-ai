@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>配套 II AI 工具价格表</title>
+  <style>
+    :root {
+      --bg: #121015;
+      --panel: #1b171f;
+      --panel-2: #231c29;
+      --line: rgba(255, 255, 255, 0.1);
+      --text: #f7f1fb;
+      --muted: #b8aebf;
+      --orange: #ff6738;
+      --rose: #c12b62;
+      --plum: #32103a;
+      --gold: #f8c06a;
+      --green: #70d18f;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 48px;
+      background: #08070a;
+      font-family: Inter, "SF Pro Display", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      color: var(--text);
+    }
+
+    .card {
+      width: 1920px;
+      height: 1080px;
+      margin: 0 0 48px;
+      padding: 58px 68px 48px;
+      background:
+        linear-gradient(140deg, rgba(193, 43, 98, 0.22), transparent 34%),
+        linear-gradient(315deg, rgba(255, 103, 56, 0.18), transparent 35%),
+        var(--bg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .kicker {
+      color: var(--orange);
+      font-weight: 800;
+      font-size: 24px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      margin-bottom: 14px;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 32px;
+      margin-bottom: 34px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 58px;
+      line-height: 1.05;
+      font-weight: 850;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 24px;
+      line-height: 1.4;
+      max-width: 920px;
+    }
+
+    .formula {
+      min-width: 430px;
+      padding: 20px 24px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      border-radius: 8px;
+      text-align: right;
+    }
+
+    .formula strong {
+      display: block;
+      color: var(--gold);
+      font-size: 27px;
+      margin-bottom: 6px;
+    }
+
+    .formula span {
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      background: rgba(10, 8, 12, 0.64);
+      border: 1px solid var(--line);
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 20px 22px;
+      text-align: left;
+      vertical-align: middle;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    th {
+      color: #fff7f2;
+      background: linear-gradient(90deg, rgba(50, 16, 58, 0.95), rgba(139, 26, 120, 0.55));
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    td {
+      font-size: 26px;
+      color: var(--text);
+      font-weight: 640;
+    }
+
+    tr:nth-child(even) td {
+      background: rgba(255, 255, 255, 0.026);
+    }
+
+    .num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      color: #fff;
+    }
+
+    .usd {
+      color: var(--green);
+    }
+
+    .provider {
+      color: #ffe1d7;
+    }
+
+    .note {
+      position: absolute;
+      left: 68px;
+      right: 68px;
+      bottom: 34px;
+      color: var(--muted);
+      font-size: 19px;
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 18px;
+    }
+
+    .compact th, .compact td {
+      padding: 13px 16px;
+    }
+
+    .compact td {
+      font-size: 21px;
+    }
+
+    .compact th {
+      font-size: 17px;
+    }
+
+    .w-tool { width: 22%; }
+    .w-en { width: 25%; }
+    .w-credit { width: 12%; }
+    .w-usd { width: 13%; }
+    .w-model { width: 15%; }
+    .w-provider { width: 13%; }
+
+    .video .w-tool { width: 18%; }
+    .video .w-en { width: 18%; }
+    .video .w-second { width: 10%; }
+    .video .w-sec-credit { width: 10%; }
+    .video .w-duration { width: 8%; }
+    .video .w-total { width: 10%; }
+    .video .w-usd { width: 10%; }
+    .video .w-model { width: 11%; }
+    .video .w-provider { width: 9%; }
+
+    #image-card td {
+      font-size: 24px;
+    }
+
+    #image-card .w-tool { width: 22%; }
+    #image-card .w-en { width: 25%; }
+    #image-card .w-credit { width: 10%; }
+    #image-card .w-usd { width: 12%; }
+    #image-card .w-model { width: 18%; }
+    #image-card .w-provider { width: 13%; }
+
+    #image-card th,
+    #image-card td,
+    #video-card th,
+    #video-card td {
+      text-overflow: clip;
+    }
+
+    #video-card {
+      padding-top: 48px;
+      padding-bottom: 28px;
+    }
+
+    #video-card .title-row {
+      margin-bottom: 24px;
+    }
+
+    #video-card h1 {
+      font-size: 52px;
+    }
+
+    #video-card .subtitle {
+      font-size: 22px;
+      max-width: 980px;
+    }
+
+    #video-card .formula {
+      min-width: 520px;
+    }
+
+    #video-card .formula strong {
+      font-size: 25px;
+    }
+
+    #video-card .formula span {
+      font-size: 17px;
+    }
+
+    #video-card .compact th,
+    #video-card .compact td {
+      padding: 8px 12px;
+    }
+
+    #video-card .compact th {
+      font-size: 15px;
+    }
+
+    #video-card .compact td {
+      font-size: 18px;
+    }
+
+    #video-card .note {
+      bottom: 18px;
+      font-size: 16px;
+      padding-top: 10px;
+    }
+
+    #video-card.video .w-tool { width: 16%; }
+    #video-card.video .w-en { width: 17%; }
+    #video-card.video .w-second { width: 9%; }
+    #video-card.video .w-sec-credit { width: 8%; }
+    #video-card.video .w-duration { width: 7%; }
+    #video-card.video .w-total { width: 8%; }
+    #video-card.video .w-usd { width: 8%; }
+    #video-card.video .w-model { width: 17%; }
+    #video-card.video .w-provider { width: 10%; }
+  </style>
+</head>
+<body>
+  <section class="card" id="prompt-card">
+    <div class="kicker">Package II · Prompt Tools</div>
+    <div class="title-row">
+      <div>
+        <h1>文案 / Prompt 工具</h1>
+        <p class="subtitle">前期内容生产工具：用于生成短视频开头、脚本、字幕、分镜和产品卖点，不直接生成图片或视频。</p>
+      </div>
+      <div class="formula">
+        <strong>Business 口径：1 credit = $0.00495</strong>
+        <span>$99 / 月 = 20,000 credits</span>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th class="w-tool">工具</th>
+          <th class="w-en">英文名称</th>
+          <th class="w-credit num">消耗积分</th>
+          <th class="w-usd num">折算美元</th>
+          <th class="w-model">AI 模型</th>
+          <th class="w-provider">供应商</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Hook 生成器</td><td>Hook Generator</td><td class="num">20</td><td class="num usd">$0.099</td><td>DeepSeek</td><td class="provider">DeepSeek</td></tr>
+        <tr><td>脚本生成器</td><td>Script Generator</td><td class="num">40</td><td class="num usd">$0.198</td><td>DeepSeek</td><td class="provider">DeepSeek</td></tr>
+        <tr><td>字幕与标签生成器</td><td>Caption & Hashtag Generator</td><td class="num">10</td><td class="num usd">$0.050</td><td>DeepSeek</td><td class="provider">DeepSeek</td></tr>
+        <tr><td>分镜生成器</td><td>Shot List Generator</td><td class="num">30</td><td class="num usd">$0.149</td><td>DeepSeek</td><td class="provider">DeepSeek</td></tr>
+        <tr><td>产品卖点分析器</td><td>Product Angle Analyzer</td><td class="num">20</td><td class="num usd">$0.099</td><td>DeepSeek</td><td class="provider">DeepSeek</td></tr>
+      </tbody>
+    </table>
+    <div class="note">
+      <span>建议展示顺序：产品卖点分析 → Hook → 脚本 → 分镜 → 字幕与标签。</span>
+      <span>整套工作流：120 credits ≈ $0.594。</span>
+    </div>
+  </section>
+
+  <section class="card" id="image-card">
+    <div class="kicker">Package II · Image Models</div>
+    <div class="title-row">
+      <div>
+        <h1>图片生成工具</h1>
+        <p class="subtitle">图片模型按单张计费，折算美元对齐展示售价；供应商按当前项目接入和成本优先级选择。</p>
+      </div>
+      <div class="formula">
+        <strong>每张图片独立扣 credits</strong>
+        <span>价格已按 Business 最低 credit 单价保护利润</span>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th class="w-tool">工具</th>
+          <th class="w-en">英文名称</th>
+          <th class="w-credit num">积分 / 张</th>
+          <th class="w-usd num">折算美元</th>
+          <th class="w-model">AI 模型</th>
+          <th class="w-provider">推荐中转站</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>GPT 图片生成器</td><td>GPT Image Generator</td><td class="num">21</td><td class="num usd">$0.104</td><td>GPT Image 2</td><td class="provider">APIMart</td></tr>
+        <tr><td>Seedream 图片生成器</td><td>Seedream Image Generator</td><td class="num">11</td><td class="num usd">$0.054</td><td>Seedream 5.0 Lite</td><td class="provider">CRUN</td></tr>
+        <tr><td>Qwen 图片生成器</td><td>Qwen Image Generator</td><td class="num">11</td><td class="num usd">$0.054</td><td>Qwen Image 2.0</td><td class="provider">APIMart</td></tr>
+        <tr><td>Nano Banana Pro 图片生成器</td><td>Nano Banana Pro Image Generator</td><td class="num">11</td><td class="num usd">$0.054</td><td>Nano Banana Pro</td><td class="provider">GRS AI</td></tr>
+        <tr><td>Nano Banana 2 图片生成器</td><td>Nano Banana 2 Image Generator</td><td class="num">11</td><td class="num usd">$0.054</td><td>Nano Banana 2</td><td class="provider">GRS AI</td></tr>
+        <tr><td>Grok 图片生成器</td><td>Grok Image Generator</td><td class="num">6</td><td class="num usd">$0.030</td><td>Grok Imagine</td><td class="provider">APIMart</td></tr>
+      </tbody>
+    </table>
+    <div class="note">
+      <span>图片侧核心利润来自 GPT Image / Nano Banana 系列的稳定使用。</span>
+      <span>低价模型可作为拉新和批量测试入口。</span>
+    </div>
+  </section>
+
+  <section class="card video" id="video-card">
+    <div class="kicker">Package II · Video Models</div>
+    <div class="title-row">
+      <div>
+        <h1>视频生成工具（按秒计费）</h1>
+        <p class="subtitle">视频模型统一按“每秒积分 × 时长”计算，默认时长只是展示口径，实际生成时可按秒数自动扩展。</p>
+      </div>
+      <div class="formula">
+        <strong>公式：每秒价格 ÷ $0.00495 = 每秒积分</strong>
+        <span>每秒积分向上取整，避免 Business 用户跑亏</span>
+      </div>
+    </div>
+    <table class="compact">
+      <thead>
+        <tr>
+          <th class="w-tool">工具</th>
+          <th class="w-en">英文名称</th>
+          <th class="w-second num">每秒价格</th>
+          <th class="w-sec-credit num">每秒积分</th>
+          <th class="w-duration num">默认时长</th>
+          <th class="w-total num">默认消耗</th>
+          <th class="w-usd num">折算美元</th>
+          <th class="w-model">AI 模型</th>
+          <th class="w-provider">中转站</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Seedance 视频</td><td>Seedance Video</td><td class="num">$0.220/s</td><td class="num">45</td><td class="num">5s</td><td class="num">225</td><td class="num usd">$1.114</td><td>Seedance 2.0</td><td class="provider">AI302 / APIMart</td></tr>
+        <tr><td>Seedance Fast 视频</td><td>Seedance Fast</td><td class="num">$0.170/s</td><td class="num">35</td><td class="num">5s</td><td class="num">175</td><td class="num usd">$0.866</td><td>Seedance 2.0 Fast</td><td class="provider">AI302 / APIMart</td></tr>
+        <tr><td>Veo 720p 视频</td><td>Veo 720p Video</td><td class="num">$0.1375/s</td><td class="num">28</td><td class="num">4s</td><td class="num">112</td><td class="num usd">$0.554</td><td>Veo 3.1 Fast 720p</td><td class="provider">CRUN</td></tr>
+        <tr><td>Veo 1080p 视频</td><td>Veo 1080p Video</td><td class="num">$0.1375/s</td><td class="num">28</td><td class="num">4s</td><td class="num">112</td><td class="num usd">$0.554</td><td>Veo 3.1 Fast 1080p</td><td class="provider">CRUN</td></tr>
+        <tr><td>Sora 视频</td><td>Sora Video</td><td class="num">$0.125/s</td><td class="num">26</td><td class="num">4s</td><td class="num">104</td><td class="num usd">$0.515</td><td>Sora 2</td><td class="provider">APIMart</td></tr>
+        <tr><td>Gemini Omni 视频</td><td>Gemini Omni Video</td><td class="num">$0.020/s</td><td class="num">5</td><td class="num">10s</td><td class="num">50</td><td class="num usd">$0.248</td><td>Gemini Omni</td><td class="provider">APIMart</td></tr>
+        <tr><td>Grok 视频</td><td>Grok Video</td><td class="num">$0.050/s</td><td class="num">11</td><td class="num">10s</td><td class="num">110</td><td class="num usd">$0.545</td><td>Grok Imagine Video</td><td class="provider">APIMart</td></tr>
+        <tr><td>Wan 720p 视频</td><td>Wan 720p Video</td><td class="num">$0.0875/s</td><td class="num">18</td><td class="num">8s</td><td class="num">144</td><td class="num usd">$0.713</td><td>Wan 2.7 720p</td><td class="provider">CRUN</td></tr>
+        <tr><td>Wan 1080p 视频</td><td>Wan 1080p Video</td><td class="num">$0.125/s</td><td class="num">26</td><td class="num">8s</td><td class="num">208</td><td class="num usd">$1.030</td><td>Wan 2.7 1080p</td><td class="provider">CRUN</td></tr>
+        <tr><td>Kling Omni 视频</td><td>Kling Omni Video</td><td class="num">$0.090/s</td><td class="num">19</td><td class="num">5s</td><td class="num">95</td><td class="num usd">$0.470</td><td>Kling V3 Omni</td><td class="provider">APIMart</td></tr>
+        <tr><td>Kling 动作控制视频</td><td>Kling Motion Control</td><td class="num">$0.124/s</td><td class="num">26</td><td class="num">5s</td><td class="num">130</td><td class="num usd">$0.644</td><td>Kling V3 Motion Control</td><td class="provider">APIMart</td></tr>
+        <tr><td>Hailuo Fast 768p 视频</td><td>Hailuo Fast 768p</td><td class="num">$0.033/s</td><td class="num">7</td><td class="num">6s</td><td class="num">42</td><td class="num usd">$0.208</td><td>Hailuo 2.3 Fast 768p</td><td class="provider">APIMart</td></tr>
+        <tr><td>Hailuo Fast 1080p 视频</td><td>Hailuo Fast 1080p</td><td class="num">$0.058/s</td><td class="num">12</td><td class="num">6s</td><td class="num">72</td><td class="num usd">$0.356</td><td>Hailuo 2.3 Fast 1080p</td><td class="provider">APIMart</td></tr>
+        <tr><td>Hailuo 768p 视频</td><td>Hailuo 768p Video</td><td class="num">$0.050/s</td><td class="num">11</td><td class="num">6s</td><td class="num">66</td><td class="num usd">$0.327</td><td>Hailuo 2.3 768p</td><td class="provider">APIMart</td></tr>
+        <tr><td>Hailuo 1080p 视频</td><td>Hailuo 1080p Video</td><td class="num">$0.083/s</td><td class="num">17</td><td class="num">6s</td><td class="num">102</td><td class="num usd">$0.505</td><td>Hailuo 2.3 1080p</td><td class="provider">APIMart</td></tr>
+      </tbody>
+    </table>
+    <div class="note">
+      <span>展示口径：视频按每秒积分计费，默认消耗 = 每秒积分 × 默认时长。</span>
+      <span>用户生成更长视频时，按时长自动线性增加 credits。</span>
+    </div>
+  </section>
+</body>
+</html>
