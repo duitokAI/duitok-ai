@@ -74,7 +74,7 @@
     }
 
     .summary {
-      min-width: 470px;
+      min-width: 535px;
       padding: 18px 22px;
       background: rgba(255, 255, 255, 0.065);
       border: 1px solid rgba(255, 255, 255, 0.13);
@@ -157,12 +157,13 @@
       color: var(--muted);
     }
 
-    .w-model { width: 22%; }
-    .w-res { width: 11%; }
-    .w-cost { width: 16%; }
-    .w-higgs { width: 16%; }
-    .w-price { width: 18%; }
-    .w-margin { width: 17%; }
+    .w-model { width: 19%; }
+    .w-res { width: 8%; }
+    .w-cost { width: 14%; }
+    .w-higgs { width: 13%; }
+    .w-price { width: 14%; }
+    .w-credit { width: 17%; }
+    .w-margin { width: 15%; }
 
     .notes {
       margin-top: 18px;
@@ -191,12 +192,12 @@
       <div>
         <div class="kicker">Package II · Image Pricing Rule</div>
         <h1>图片模型定价：按 Higgsfield 价格的 50%</h1>
-        <p class="subtitle">每个 resolution 保留当前最高成本；大部分模型按 Higgsfield 50% 定价，Seedream 与 Qwen 使用固定例外价。</p>
+        <p class="subtitle">每个 resolution 保留当前最高成本；大部分模型按 Higgsfield 50% 定价，并用最低 credit 单价换算平台扣费。</p>
       </div>
       <div class="summary">
-        <strong>定价规则：Higgsfield × 50%</strong>
-        <span>Seedream = Higgsfield 同价；Qwen Image = $0.0500</span>
-        <span>毛利 = 你的定价 - 当前最高成本</span>
+        <strong>Credits 定价用 $100 / 15,000</strong>
+        <span>最低单价：1 credit = $0.00667</span>
+        <span>平台扣费 = ceil(建议售价 × 150)</span>
       </div>
     </div>
 
@@ -208,30 +209,31 @@
           <th class="w-cost num">最高成本 USD / 张</th>
           <th class="w-higgs num">Higgsfield USD / 张</th>
           <th class="w-price num">建议定价 USD / 张</th>
+          <th class="w-credit num">Creators Studio Credits / 张</th>
           <th class="w-margin num">毛利 USD / 张</th>
         </tr>
       </thead>
       <tbody>
-        <tr><td>GPT Image 2</td><td class="num">1K</td><td class="num cost">$0.0060</td><td class="num higgs">$0.200</td><td class="num price">$0.1000</td><td class="num cost">$0.0940</td></tr>
-        <tr><td>GPT Image 2</td><td class="num">2K</td><td class="num cost">$0.0120</td><td class="num higgs">$0.350</td><td class="num price">$0.1750</td><td class="num cost">$0.1630</td></tr>
-        <tr><td>GPT Image 2</td><td class="num">4K</td><td class="num cost">$0.0180</td><td class="num higgs">$0.600</td><td class="num price">$0.3000</td><td class="num cost">$0.2820</td></tr>
-        <tr><td>Seedream 5.0 Lite</td><td class="num">2K</td><td class="num cost">$0.0313</td><td class="num higgs">$0.050</td><td class="num price">$0.0500</td><td class="num cost">$0.0187</td></tr>
-        <tr><td>Seedream 5.0 Lite</td><td class="num">3K</td><td class="num cost">$0.0313</td><td class="num higgs">$0.050</td><td class="num price">$0.0500</td><td class="num cost">$0.0187</td></tr>
-        <tr><td>Qwen Image 2.0</td><td class="num">1K</td><td class="num cost">$0.0223</td><td class="num muted">-</td><td class="num price">$0.0500</td><td class="num cost">$0.0277</td></tr>
-        <tr><td>Qwen Image 2.0</td><td class="num">2K</td><td class="num cost">$0.0223</td><td class="num muted">-</td><td class="num price">$0.0500</td><td class="num cost">$0.0277</td></tr>
-        <tr><td>Nano Banana Pro</td><td class="num">1K</td><td class="num cost">$0.0400</td><td class="num higgs">$0.100</td><td class="num price">$0.0500</td><td class="num cost">$0.0100</td></tr>
-        <tr><td>Nano Banana Pro</td><td class="num">2K</td><td class="num cost">$0.0400</td><td class="num higgs">$0.100</td><td class="num price">$0.0500</td><td class="num cost">$0.0100</td></tr>
-        <tr><td>Nano Banana Pro</td><td class="num">4K</td><td class="num cost">$0.0500</td><td class="num higgs">$0.200</td><td class="num price">$0.1000</td><td class="num cost">$0.0500</td></tr>
-        <tr><td>Nano Banana 2</td><td class="num">1K</td><td class="num cost">$0.0300</td><td class="num higgs">$0.075</td><td class="num price">$0.0375</td><td class="num cost">$0.0075</td></tr>
-        <tr><td>Nano Banana 2</td><td class="num">2K</td><td class="num cost">$0.0400</td><td class="num higgs">$0.100</td><td class="num price">$0.0500</td><td class="num cost">$0.0100</td></tr>
-        <tr><td>Nano Banana 2</td><td class="num">4K</td><td class="num cost">$0.0600</td><td class="num higgs">$0.150</td><td class="num price">$0.0750</td><td class="num cost">$0.0150</td></tr>
-        <tr><td>Grok Imagine</td><td class="num">1K / default</td><td class="num cost">$0.0179</td><td class="num higgs">$0.050</td><td class="num price">$0.0250</td><td class="num cost">$0.0071</td></tr>
+        <tr><td>GPT Image 2</td><td class="num">1K</td><td class="num cost">$0.0060</td><td class="num higgs">$0.200</td><td class="num price">$0.1000</td><td class="num price">15</td><td class="num cost">$0.0940</td></tr>
+        <tr><td>GPT Image 2</td><td class="num">2K</td><td class="num cost">$0.0120</td><td class="num higgs">$0.350</td><td class="num price">$0.1750</td><td class="num price">27</td><td class="num cost">$0.1630</td></tr>
+        <tr><td>GPT Image 2</td><td class="num">4K</td><td class="num cost">$0.0180</td><td class="num higgs">$0.600</td><td class="num price">$0.3000</td><td class="num price">45</td><td class="num cost">$0.2820</td></tr>
+        <tr><td>Seedream 5.0 Lite</td><td class="num">2K</td><td class="num cost">$0.0313</td><td class="num higgs">$0.050</td><td class="num price">$0.0500</td><td class="num price">8</td><td class="num cost">$0.0187</td></tr>
+        <tr><td>Seedream 5.0 Lite</td><td class="num">3K</td><td class="num cost">$0.0313</td><td class="num higgs">$0.050</td><td class="num price">$0.0500</td><td class="num price">8</td><td class="num cost">$0.0187</td></tr>
+        <tr><td>Qwen Image 2.0</td><td class="num">1K</td><td class="num cost">$0.0223</td><td class="num muted">-</td><td class="num price">$0.0500</td><td class="num price">8</td><td class="num cost">$0.0277</td></tr>
+        <tr><td>Qwen Image 2.0</td><td class="num">2K</td><td class="num cost">$0.0223</td><td class="num muted">-</td><td class="num price">$0.0500</td><td class="num price">8</td><td class="num cost">$0.0277</td></tr>
+        <tr><td>Nano Banana Pro</td><td class="num">1K</td><td class="num cost">$0.0400</td><td class="num higgs">$0.100</td><td class="num price">$0.0500</td><td class="num price">8</td><td class="num cost">$0.0100</td></tr>
+        <tr><td>Nano Banana Pro</td><td class="num">2K</td><td class="num cost">$0.0400</td><td class="num higgs">$0.100</td><td class="num price">$0.0500</td><td class="num price">8</td><td class="num cost">$0.0100</td></tr>
+        <tr><td>Nano Banana Pro</td><td class="num">4K</td><td class="num cost">$0.0500</td><td class="num higgs">$0.200</td><td class="num price">$0.1000</td><td class="num price">15</td><td class="num cost">$0.0500</td></tr>
+        <tr><td>Nano Banana 2</td><td class="num">1K</td><td class="num cost">$0.0300</td><td class="num higgs">$0.075</td><td class="num price">$0.0375</td><td class="num price">6</td><td class="num cost">$0.0075</td></tr>
+        <tr><td>Nano Banana 2</td><td class="num">2K</td><td class="num cost">$0.0400</td><td class="num higgs">$0.100</td><td class="num price">$0.0500</td><td class="num price">8</td><td class="num cost">$0.0100</td></tr>
+        <tr><td>Nano Banana 2</td><td class="num">4K</td><td class="num cost">$0.0600</td><td class="num higgs">$0.150</td><td class="num price">$0.0750</td><td class="num price">12</td><td class="num cost">$0.0150</td></tr>
+        <tr><td>Grok Imagine</td><td class="num">1K / default</td><td class="num cost">$0.0179</td><td class="num higgs">$0.050</td><td class="num price">$0.0250</td><td class="num price">4</td><td class="num cost">$0.0071</td></tr>
       </tbody>
     </table>
 
     <div class="notes">
-      <div class="note-box"><strong>最高成本口径：</strong>从当前已记录报价中取最高成本；毛利按建议定价减去最高成本计算。</div>
-      <div class="note-box"><strong>定价说明：</strong>默认 Higgsfield USD × 50%；Seedream 与 Higgsfield 同价，Qwen Image 固定 $0.0500。</div>
+      <div class="note-box"><strong>Credit 单价口径：</strong>必须按最低单价 $100 = 15,000 Credits 计算，否则大包用户会低于目标实收。</div>
+      <div class="note-box"><strong>定价说明：</strong>Credits 向上取整；例如 $0.0500 要收 8 credits，按最低单价实收约 $0.0533。</div>
     </div>
   </section>
 </body>
