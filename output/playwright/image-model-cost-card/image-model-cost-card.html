@@ -145,16 +145,10 @@
       color: var(--green);
     }
 
-    .note-col {
-      color: #ffe0d6;
-      font-size: 19px;
-    }
-
     .w-model { width: 20%; }
     .w-res { width: 13%; }
-    .w-provider { width: 14%; }
-    .w-cost { width: 13%; }
-    .w-ref { width: 14%; }
+    .w-provider { width: 16%; }
+    .w-cost { width: 15%; }
 
     .notes {
       margin-top: 20px;
@@ -201,23 +195,22 @@
           <th class="w-cost num">主成本 USD / 张</th>
           <th class="w-provider">副供应商</th>
           <th class="w-cost num">副成本 USD / 张</th>
-          <th class="w-ref">参考图是否加价</th>
         </tr>
       </thead>
       <tbody>
-        <tr><td>GPT Image 2</td><td class="num">1K</td><td class="primary">APIMart</td><td class="num cost">$0.0060</td><td>GRS AI</td><td class="num">$0.0044</td><td class="note-col">不加价</td></tr>
-        <tr><td>GPT Image 2</td><td class="num">2K</td><td class="primary">APIMart</td><td class="num cost">$0.0120</td><td>GRS AI VIP</td><td class="num">$0.0096</td><td class="note-col">不加价</td></tr>
-        <tr><td>GPT Image 2</td><td class="num">4K</td><td class="primary">APIMart</td><td class="num cost">$0.0180</td><td>GRS AI VIP</td><td class="num">$0.0096</td><td class="note-col">不加价</td></tr>
-        <tr><td>Seedream 5.0 Lite</td><td class="num">2K</td><td class="primary">APIMart</td><td class="num cost">$0.0280</td><td>CRUN</td><td class="num">$0.0313</td><td class="note-col">不加价</td></tr>
-        <tr><td>Seedream 5.0 Lite</td><td class="num">3K</td><td class="primary">APIMart</td><td class="num cost">$0.0280</td><td>CRUN</td><td class="num">$0.0313</td><td class="note-col">不加价</td></tr>
-        <tr><td>Qwen Image 2.0</td><td class="num">1K</td><td class="primary">APIMart</td><td class="num cost">$0.0200</td><td>CRUN</td><td class="num">$0.0223</td><td class="note-col">不加价</td></tr>
-        <tr><td>Qwen Image 2.0</td><td class="num">2K</td><td class="primary">APIMart</td><td class="num cost">$0.0200</td><td>CRUN</td><td class="num">$0.0223</td><td class="note-col">不加价</td></tr>
-        <tr><td>Nano Banana Pro</td><td class="num">1K / 2K</td><td class="primary">GRS AI</td><td class="num cost">$0.0133</td><td>APIMart</td><td class="num">$0.0400</td><td class="note-col">不加价</td></tr>
-        <tr><td>Nano Banana Pro</td><td class="num">4K</td><td class="primary">GRS AI</td><td class="num cost">$0.0133*</td><td>APIMart</td><td class="num">$0.0500</td><td class="note-col">不加价</td></tr>
-        <tr><td>Nano Banana 2</td><td class="num">512 / 1K</td><td class="primary">GRS AI</td><td class="num cost">$0.0089</td><td>APIMart</td><td class="num">$0.0300</td><td class="note-col">不加价</td></tr>
-        <tr><td>Nano Banana 2</td><td class="num">2K</td><td class="primary">GRS AI</td><td class="num cost">$0.0089*</td><td>APIMart</td><td class="num">$0.0400</td><td class="note-col">不加价</td></tr>
-        <tr><td>Nano Banana 2</td><td class="num">4K</td><td class="primary">GRS AI</td><td class="num cost">$0.0089*</td><td>APIMart</td><td class="num">$0.0600</td><td class="note-col">不加价</td></tr>
-        <tr><td>Grok Imagine</td><td class="num">1K / default</td><td class="primary">APIMart</td><td class="num cost">$0.0150</td><td>CRUN</td><td class="num">$0.0179</td><td class="note-col">图生图按 i2i 价</td></tr>
+        <tr><td>GPT Image 2</td><td class="num">1K</td><td class="primary">APIMart</td><td class="num cost">$0.0060</td><td>GRS AI</td><td class="num">$0.0044</td></tr>
+        <tr><td>GPT Image 2</td><td class="num">2K</td><td class="primary">APIMart</td><td class="num cost">$0.0120</td><td>GRS AI VIP</td><td class="num">$0.0096</td></tr>
+        <tr><td>GPT Image 2</td><td class="num">4K</td><td class="primary">APIMart</td><td class="num cost">$0.0180</td><td>GRS AI VIP</td><td class="num">$0.0096</td></tr>
+        <tr><td>Seedream 5.0 Lite</td><td class="num">2K</td><td class="primary">APIMart</td><td class="num cost">$0.0280</td><td>CRUN</td><td class="num">$0.0313</td></tr>
+        <tr><td>Seedream 5.0 Lite</td><td class="num">3K</td><td class="primary">APIMart</td><td class="num cost">$0.0280</td><td>CRUN</td><td class="num">$0.0313</td></tr>
+        <tr><td>Qwen Image 2.0</td><td class="num">1K</td><td class="primary">APIMart</td><td class="num cost">$0.0200</td><td>CRUN</td><td class="num">$0.0223</td></tr>
+        <tr><td>Qwen Image 2.0</td><td class="num">2K</td><td class="primary">APIMart</td><td class="num cost">$0.0200</td><td>CRUN</td><td class="num">$0.0223</td></tr>
+        <tr><td>Nano Banana Pro</td><td class="num">1K / 2K</td><td class="primary">GRS AI</td><td class="num cost">$0.0133</td><td>APIMart</td><td class="num">$0.0400</td></tr>
+        <tr><td>Nano Banana Pro</td><td class="num">4K</td><td class="primary">GRS AI</td><td class="num cost">$0.0133*</td><td>APIMart</td><td class="num">$0.0500</td></tr>
+        <tr><td>Nano Banana 2</td><td class="num">512 / 1K</td><td class="primary">GRS AI</td><td class="num cost">$0.0089</td><td>APIMart</td><td class="num">$0.0300</td></tr>
+        <tr><td>Nano Banana 2</td><td class="num">2K</td><td class="primary">GRS AI</td><td class="num cost">$0.0089*</td><td>APIMart</td><td class="num">$0.0400</td></tr>
+        <tr><td>Nano Banana 2</td><td class="num">4K</td><td class="primary">GRS AI</td><td class="num cost">$0.0089*</td><td>APIMart</td><td class="num">$0.0600</td></tr>
+        <tr><td>Grok Imagine</td><td class="num">1K / default</td><td class="primary">APIMart</td><td class="num cost">$0.0150</td><td>CRUN</td><td class="num">$0.0179</td></tr>
       </tbody>
     </table>
 
