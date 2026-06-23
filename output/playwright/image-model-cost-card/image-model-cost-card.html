@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>图片模型成本表</title>
+  <style>
+    :root {
+      --bg: #111015;
+      --panel: rgba(10, 8, 12, 0.74);
+      --line: rgba(255, 255, 255, 0.11);
+      --text: #f8f2fb;
+      --muted: #bdb2c4;
+      --orange: #ff6738;
+      --rose: #c12b62;
+      --plum: #32103a;
+      --gold: #ffc66d;
+      --green: #74dc98;
+      --cyan: #8ed8ff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #07060a;
+      font-family: Inter, "SF Pro Display", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      color: var(--text);
+    }
+
+    .card {
+      width: 1920px;
+      height: 1080px;
+      padding: 54px 68px 40px;
+      overflow: hidden;
+      background:
+        linear-gradient(135deg, rgba(139, 26, 120, 0.28), transparent 34%),
+        linear-gradient(315deg, rgba(255, 103, 56, 0.20), transparent 35%),
+        var(--bg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .top {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 40px;
+      margin-bottom: 28px;
+    }
+
+    .kicker {
+      color: var(--orange);
+      font-weight: 850;
+      font-size: 24px;
+      letter-spacing: 0;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 56px;
+      line-height: 1.06;
+      font-weight: 880;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 22px;
+      line-height: 1.42;
+      max-width: 1020px;
+    }
+
+    .summary {
+      min-width: 420px;
+      padding: 20px 24px;
+      background: rgba(255, 255, 255, 0.065);
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      border-radius: 8px;
+      text-align: right;
+    }
+
+    .summary strong {
+      display: block;
+      color: var(--gold);
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .summary span {
+      display: block;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.35;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      background: var(--panel);
+      border: 1px solid var(--line);
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 12px 16px;
+      text-align: left;
+      vertical-align: middle;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: clip;
+    }
+
+    th {
+      background: linear-gradient(90deg, rgba(50, 16, 58, 0.98), rgba(193, 43, 98, 0.54));
+      color: #fff9f6;
+      font-size: 18px;
+      font-weight: 850;
+    }
+
+    td {
+      color: var(--text);
+      font-size: 21px;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+
+    tr:nth-child(even) td {
+      background: rgba(255, 255, 255, 0.028);
+    }
+
+    .num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .primary {
+      color: var(--cyan);
+    }
+
+    .cost {
+      color: var(--green);
+    }
+
+    .note-col {
+      color: #ffe0d6;
+      font-size: 19px;
+    }
+
+    .w-model { width: 20%; }
+    .w-res { width: 13%; }
+    .w-provider { width: 14%; }
+    .w-cost { width: 13%; }
+    .w-ref { width: 14%; }
+
+    .notes {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.42;
+    }
+
+    .note-box {
+      min-height: 64px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .note-box strong {
+      color: var(--gold);
+    }
+  </style>
+</head>
+<body>
+  <section class="card" id="image-cost-card">
+    <div class="top">
+      <div>
+        <div class="kicker">Package II · Image Model Cost</div>
+        <h1>图片模型成本总表</h1>
+        <p class="subtitle">按主 / 副供应商展示每张图成本，全部统一为 USD 计价；参考图本身不额外收费，平台按输出图片张数与 resolution 计费。</p>
+      </div>
+      <div class="summary">
+        <strong>最低成本：$0.0089 / 张</strong>
+        <span>Nano Banana 2 · GRS AI</span>
+        <span>GPT Image 2 最高 4K：$0.0180 / 张</span>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th class="w-model">图片模型</th>
+          <th class="w-res num">Resolution</th>
+          <th class="w-provider">主供应商</th>
+          <th class="w-cost num">主成本 USD / 张</th>
+          <th class="w-provider">副供应商</th>
+          <th class="w-cost num">副成本 USD / 张</th>
+          <th class="w-ref">参考图是否加价</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>GPT Image 2</td><td class="num">1K</td><td class="primary">APIMart</td><td class="num cost">$0.0060</td><td>GRS AI</td><td class="num">$0.0044</td><td class="note-col">不加价</td></tr>
+        <tr><td>GPT Image 2</td><td class="num">2K</td><td class="primary">APIMart</td><td class="num cost">$0.0120</td><td>GRS AI VIP</td><td class="num">$0.0096</td><td class="note-col">不加价</td></tr>
+        <tr><td>GPT Image 2</td><td class="num">4K</td><td class="primary">APIMart</td><td class="num cost">$0.0180</td><td>GRS AI VIP</td><td class="num">$0.0096</td><td class="note-col">不加价</td></tr>
+        <tr><td>Seedream 5.0 Lite</td><td class="num">2K</td><td class="primary">APIMart</td><td class="num cost">$0.0280</td><td>CRUN</td><td class="num">$0.0313</td><td class="note-col">不加价</td></tr>
+        <tr><td>Seedream 5.0 Lite</td><td class="num">3K</td><td class="primary">APIMart</td><td class="num cost">$0.0280</td><td>CRUN</td><td class="num">$0.0313</td><td class="note-col">不加价</td></tr>
+        <tr><td>Qwen Image 2.0</td><td class="num">1K</td><td class="primary">APIMart</td><td class="num cost">$0.0200</td><td>CRUN</td><td class="num">$0.0223</td><td class="note-col">不加价</td></tr>
+        <tr><td>Qwen Image 2.0</td><td class="num">2K</td><td class="primary">APIMart</td><td class="num cost">$0.0200</td><td>CRUN</td><td class="num">$0.0223</td><td class="note-col">不加价</td></tr>
+        <tr><td>Nano Banana Pro</td><td class="num">1K / 2K</td><td class="primary">GRS AI</td><td class="num cost">$0.0133</td><td>APIMart</td><td class="num">$0.0400</td><td class="note-col">不加价</td></tr>
+        <tr><td>Nano Banana Pro</td><td class="num">4K</td><td class="primary">GRS AI</td><td class="num cost">$0.0133*</td><td>APIMart</td><td class="num">$0.0500</td><td class="note-col">不加价</td></tr>
+        <tr><td>Nano Banana 2</td><td class="num">512 / 1K</td><td class="primary">GRS AI</td><td class="num cost">$0.0089</td><td>APIMart</td><td class="num">$0.0300</td><td class="note-col">不加价</td></tr>
+        <tr><td>Nano Banana 2</td><td class="num">2K</td><td class="primary">GRS AI</td><td class="num cost">$0.0089*</td><td>APIMart</td><td class="num">$0.0400</td><td class="note-col">不加价</td></tr>
+        <tr><td>Nano Banana 2</td><td class="num">4K</td><td class="primary">GRS AI</td><td class="num cost">$0.0089*</td><td>APIMart</td><td class="num">$0.0600</td><td class="note-col">不加价</td></tr>
+        <tr><td>Grok Imagine</td><td class="num">1K / default</td><td class="primary">APIMart</td><td class="num cost">$0.0150</td><td>CRUN</td><td class="num">$0.0179</td><td class="note-col">图生图按 i2i 价</td></tr>
+      </tbody>
+    </table>
+
+    <div class="notes">
+      <div class="note-box"><strong>* GRS AI 说明：</strong>公开价按 per request 展示，未按 resolution 拆价；高分辨率同价需要实际 API 测试确认。</div>
+      <div class="note-box"><strong>Reference Image：</strong>所有图片模型均可传参考图；最多 4 张参考图。费用按输出图片张数、模型和 resolution 计算。</div>
+    </div>
+  </section>
+</body>
+</html>
