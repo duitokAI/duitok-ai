@@ -73,7 +73,7 @@
     }
 
     .summary {
-      min-width: 450px;
+      min-width: 510px;
       padding: 18px 22px;
       background: rgba(255, 255, 255, 0.065);
       border: 1px solid rgba(255, 255, 255, 0.13);
@@ -136,10 +136,6 @@
       font-variant-numeric: tabular-nums;
     }
 
-    .provider {
-      color: var(--cyan);
-    }
-
     .cost {
       color: var(--green);
     }
@@ -152,13 +148,12 @@
       color: var(--muted);
     }
 
-    .w-model { width: 17%; }
+    .w-model { width: 21%; }
     .w-res { width: 11%; }
-    .w-provider { width: 15%; }
     .w-cost { width: 13%; }
-    .w-credit { width: 13%; }
-    .w-higgs { width: 15%; }
-    .w-note { width: 16%; }
+    .w-credit { width: 16%; }
+    .w-higgs { width: 17%; }
+    .w-note { width: 22%; }
 
     .notes {
       margin-top: 18px;
@@ -187,11 +182,11 @@
       <div>
         <div class="kicker">Package II · Conservative Image Cost</div>
         <h1>图片模型最高成本版 + Higgsfield 对标价</h1>
-        <p class="subtitle">不区分主 / 副供应商，每个 resolution 直接取当前记录中的最高供应商成本；Higgsfield 使用官网当前 Starter 年付口径折算。</p>
+        <p class="subtitle">每个 resolution 直接取当前记录中的最高成本；Higgsfield 使用官网当前年付套餐区间折算。</p>
       </div>
       <div class="summary">
-        <strong>Higgsfield Starter：$15 / 200 credits</strong>
-        <span>1 credit ≈ $0.075；Nano Banana Pro / 2 = 2 credits/image</span>
+        <strong>Higgsfield：$0.033-$0.075 / credit</strong>
+        <span>Starter $15/200 · Plus $39/1000 · Ultra $99/3000</span>
         <span>Higgsfield 图片价格按 credits/image，不按 resolution 拆价</span>
       </div>
     </div>
@@ -201,7 +196,6 @@
         <tr>
           <th class="w-model">图片模型</th>
           <th class="w-res num">Resolution</th>
-          <th class="w-provider">最高成本供应商</th>
           <th class="w-cost num">最高成本 USD / 张</th>
           <th class="w-credit num">Higgsfield credits / 张</th>
           <th class="w-higgs num">Higgsfield USD / 张</th>
@@ -209,25 +203,25 @@
         </tr>
       </thead>
       <tbody>
-        <tr><td>GPT Image 2</td><td class="num">1K</td><td class="provider">APIMart</td><td class="num cost">$0.0060</td><td class="num higgs">1</td><td class="num higgs">$0.0750</td><td>官网列为 GPT Image</td></tr>
-        <tr><td>GPT Image 2</td><td class="num">2K</td><td class="provider">APIMart</td><td class="num cost">$0.0120</td><td class="num higgs">1</td><td class="num higgs">$0.0750</td><td>不按 resolution 拆</td></tr>
-        <tr><td>GPT Image 2</td><td class="num">4K</td><td class="provider">APIMart</td><td class="num cost">$0.0180</td><td class="num higgs">1</td><td class="num higgs">$0.0750</td><td>不按 resolution 拆</td></tr>
-        <tr><td>Seedream 5.0 Lite</td><td class="num">2K</td><td class="provider">CRUN</td><td class="num cost">$0.0313</td><td class="num higgs">1</td><td class="num higgs">$0.0750</td><td>官网列为 Seedream</td></tr>
-        <tr><td>Seedream 5.0 Lite</td><td class="num">3K</td><td class="provider">CRUN</td><td class="num cost">$0.0313</td><td class="num higgs">1</td><td class="num higgs">$0.0750</td><td>不按 resolution 拆</td></tr>
-        <tr><td>Qwen Image 2.0</td><td class="num">1K</td><td class="provider">CRUN</td><td class="num cost">$0.0223</td><td class="num muted">-</td><td class="num muted">-</td><td>Higgsfield 未列 Qwen</td></tr>
-        <tr><td>Qwen Image 2.0</td><td class="num">2K</td><td class="provider">CRUN</td><td class="num cost">$0.0223</td><td class="num muted">-</td><td class="num muted">-</td><td>Higgsfield 未列 Qwen</td></tr>
-        <tr><td>Nano Banana Pro</td><td class="num">1K / 2K</td><td class="provider">APIMart</td><td class="num cost">$0.0400</td><td class="num higgs">2</td><td class="num higgs">$0.1500</td><td>2K 可无限*</td></tr>
-        <tr><td>Nano Banana Pro</td><td class="num">4K</td><td class="provider">APIMart</td><td class="num cost">$0.0500</td><td class="num higgs">2</td><td class="num higgs">$0.1500</td><td>官网未拆 4K 单价</td></tr>
-        <tr><td>Nano Banana 2</td><td class="num">512 / 1K</td><td class="provider">APIMart</td><td class="num cost">$0.0300</td><td class="num higgs">2</td><td class="num higgs">$0.1500</td><td>2 credits/image</td></tr>
-        <tr><td>Nano Banana 2</td><td class="num">2K</td><td class="provider">APIMart</td><td class="num cost">$0.0400</td><td class="num higgs">2</td><td class="num higgs">$0.1500</td><td>2K 可无限*</td></tr>
-        <tr><td>Nano Banana 2</td><td class="num">4K</td><td class="provider">APIMart</td><td class="num cost">$0.0600</td><td class="num higgs">2</td><td class="num higgs">$0.1500</td><td>官网未拆 4K 单价</td></tr>
-        <tr><td>Grok Imagine</td><td class="num">1K / default</td><td class="provider">CRUN</td><td class="num cost">$0.0179</td><td class="num muted">-</td><td class="num muted">-</td><td>Higgsfield 未列图像价</td></tr>
+        <tr><td>GPT Image 2</td><td class="num">1K</td><td class="num cost">$0.0060</td><td class="num higgs">1</td><td class="num higgs">$0.033-$0.075</td><td>官网列为 GPT Image</td></tr>
+        <tr><td>GPT Image 2</td><td class="num">2K</td><td class="num cost">$0.0120</td><td class="num higgs">1</td><td class="num higgs">$0.033-$0.075</td><td>不按 resolution 拆</td></tr>
+        <tr><td>GPT Image 2</td><td class="num">4K</td><td class="num cost">$0.0180</td><td class="num higgs">1</td><td class="num higgs">$0.033-$0.075</td><td>不按 resolution 拆</td></tr>
+        <tr><td>Seedream 5.0 Lite</td><td class="num">2K</td><td class="num cost">$0.0313</td><td class="num higgs">1</td><td class="num higgs">$0.033-$0.075</td><td>官网列为 Seedream</td></tr>
+        <tr><td>Seedream 5.0 Lite</td><td class="num">3K</td><td class="num cost">$0.0313</td><td class="num higgs">1</td><td class="num higgs">$0.033-$0.075</td><td>不按 resolution 拆</td></tr>
+        <tr><td>Qwen Image 2.0</td><td class="num">1K</td><td class="num cost">$0.0223</td><td class="num muted">-</td><td class="num muted">-</td><td>Higgsfield 未列 Qwen</td></tr>
+        <tr><td>Qwen Image 2.0</td><td class="num">2K</td><td class="num cost">$0.0223</td><td class="num muted">-</td><td class="num muted">-</td><td>Higgsfield 未列 Qwen</td></tr>
+        <tr><td>Nano Banana Pro</td><td class="num">1K / 2K</td><td class="num cost">$0.0400</td><td class="num higgs">2</td><td class="num higgs">$0.066-$0.150</td><td>2K 有网页 unlimited 权益*</td></tr>
+        <tr><td>Nano Banana Pro</td><td class="num">4K</td><td class="num cost">$0.0500</td><td class="num higgs">2</td><td class="num higgs">$0.066-$0.150</td><td>官网未拆 4K 单价</td></tr>
+        <tr><td>Nano Banana 2</td><td class="num">512 / 1K</td><td class="num cost">$0.0300</td><td class="num higgs">2</td><td class="num higgs">$0.066-$0.150</td><td>2 credits/image</td></tr>
+        <tr><td>Nano Banana 2</td><td class="num">2K</td><td class="num cost">$0.0400</td><td class="num higgs">2</td><td class="num higgs">$0.066-$0.150</td><td>2K 有网页 unlimited 权益*</td></tr>
+        <tr><td>Nano Banana 2</td><td class="num">4K</td><td class="num cost">$0.0600</td><td class="num higgs">2</td><td class="num higgs">$0.066-$0.150</td><td>官网未拆 4K 单价</td></tr>
+        <tr><td>Grok Imagine</td><td class="num">1K / default</td><td class="num cost">$0.0179</td><td class="num muted">-</td><td class="num muted">-</td><td>Higgsfield 未列图像价</td></tr>
       </tbody>
     </table>
 
     <div class="notes">
-      <div class="note-box"><strong>最高成本口径：</strong>从当前主 / 副供应商报价中取更高的一方，适合做保守预算和不亏损定价底线。</div>
-      <div class="note-box"><strong>Higgsfield 说明：</strong>官网图片表按 credits/image 展示：Nano Banana Pro、Nano Banana 2 为 2 credits/image；GPT Image、Seedream 为 1 credit/image。未公开逐 resolution 美元价。</div>
+      <div class="note-box"><strong>最高成本口径：</strong>从当前已记录报价中取最高成本，适合做保守预算和不亏损定价底线。</div>
+      <div class="note-box"><strong>Higgsfield 说明：</strong>官网价格页显示图片按 credits/image：Nano Banana Pro、Nano Banana 2 为 2；GPT Image、Seedream 为 1。USD 区间按 Starter / Plus / Ultra 年付折算。</div>
     </div>
   </section>
 </body>
