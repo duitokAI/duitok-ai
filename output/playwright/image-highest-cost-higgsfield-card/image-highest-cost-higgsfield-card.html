@@ -16,6 +16,7 @@
       --gold: #ffc66d;
       --green: #74dc98;
       --cyan: #8ed8ff;
+      --red: #ff7b7b;
     }
 
     * { box-sizing: border-box; }
@@ -144,14 +145,24 @@
       color: var(--gold);
     }
 
+    .price {
+      color: var(--cyan);
+    }
+
+    .loss {
+      color: var(--red);
+    }
+
     .muted {
       color: var(--muted);
     }
 
-    .w-model { width: 30%; }
-    .w-res { width: 18%; }
-    .w-cost { width: 24%; }
-    .w-higgs { width: 28%; }
+    .w-model { width: 22%; }
+    .w-res { width: 11%; }
+    .w-cost { width: 16%; }
+    .w-higgs { width: 16%; }
+    .w-price { width: 18%; }
+    .w-margin { width: 17%; }
 
     .notes {
       margin-top: 18px;
@@ -178,14 +189,14 @@
   <section class="card" id="highest-cost-card">
     <div class="top">
       <div>
-        <div class="kicker">Package II · Conservative Image Cost</div>
-        <h1>图片模型最高成本版 + Higgsfield 对标价</h1>
-        <p class="subtitle">每个 resolution 直接取当前记录中的最高成本；Higgsfield 按 1 美金 = 20 credits 折算，只展示美元价格。</p>
+        <div class="kicker">Package II · Image Pricing Rule</div>
+        <h1>图片模型定价：按 Higgsfield 价格的 50%</h1>
+        <p class="subtitle">每个 resolution 保留当前最高成本；你的用户定价按 Higgsfield 美元价的 50% 计算，并同步显示单张毛利。</p>
       </div>
       <div class="summary">
-        <strong>Higgsfield：1 美金 = 20 credits</strong>
-        <span>1 credit = $0.05</span>
-        <span>Higgsfield 列只显示每张图的美元成本</span>
+        <strong>定价规则：Higgsfield × 50%</strong>
+        <span>Higgsfield 换算：1 美金 = 20 credits</span>
+        <span>毛利 = 你的定价 - 当前最高成本</span>
       </div>
     </div>
 
@@ -196,29 +207,31 @@
           <th class="w-res num">Resolution</th>
           <th class="w-cost num">最高成本 USD / 张</th>
           <th class="w-higgs num">Higgsfield USD / 张</th>
+          <th class="w-price num">建议定价 USD / 张</th>
+          <th class="w-margin num">毛利 USD / 张</th>
         </tr>
       </thead>
       <tbody>
-        <tr><td>GPT Image 2</td><td class="num">1K</td><td class="num cost">$0.0060</td><td class="num higgs">$0.200</td></tr>
-        <tr><td>GPT Image 2</td><td class="num">2K</td><td class="num cost">$0.0120</td><td class="num higgs">$0.350</td></tr>
-        <tr><td>GPT Image 2</td><td class="num">4K</td><td class="num cost">$0.0180</td><td class="num higgs">$0.600</td></tr>
-        <tr><td>Seedream 5.0 Lite</td><td class="num">2K</td><td class="num cost">$0.0313</td><td class="num higgs">$0.050</td></tr>
-        <tr><td>Seedream 5.0 Lite</td><td class="num">3K</td><td class="num cost">$0.0313</td><td class="num higgs">$0.050</td></tr>
-        <tr><td>Qwen Image 2.0</td><td class="num">1K</td><td class="num cost">$0.0223</td><td class="num muted">-</td></tr>
-        <tr><td>Qwen Image 2.0</td><td class="num">2K</td><td class="num cost">$0.0223</td><td class="num muted">-</td></tr>
-        <tr><td>Nano Banana Pro</td><td class="num">1K</td><td class="num cost">$0.0400</td><td class="num higgs">$0.100</td></tr>
-        <tr><td>Nano Banana Pro</td><td class="num">2K</td><td class="num cost">$0.0400</td><td class="num higgs">$0.100</td></tr>
-        <tr><td>Nano Banana Pro</td><td class="num">4K</td><td class="num cost">$0.0500</td><td class="num higgs">$0.200</td></tr>
-        <tr><td>Nano Banana 2</td><td class="num">1K</td><td class="num cost">$0.0300</td><td class="num higgs">$0.075</td></tr>
-        <tr><td>Nano Banana 2</td><td class="num">2K</td><td class="num cost">$0.0400</td><td class="num higgs">$0.100</td></tr>
-        <tr><td>Nano Banana 2</td><td class="num">3K</td><td class="num cost">-</td><td class="num higgs">$0.150</td></tr>
-        <tr><td>Grok Imagine</td><td class="num">1K / default</td><td class="num cost">$0.0179</td><td class="num higgs">$0.050</td></tr>
+        <tr><td>GPT Image 2</td><td class="num">1K</td><td class="num cost">$0.0060</td><td class="num higgs">$0.200</td><td class="num price">$0.1000</td><td class="num cost">$0.0940</td></tr>
+        <tr><td>GPT Image 2</td><td class="num">2K</td><td class="num cost">$0.0120</td><td class="num higgs">$0.350</td><td class="num price">$0.1750</td><td class="num cost">$0.1630</td></tr>
+        <tr><td>GPT Image 2</td><td class="num">4K</td><td class="num cost">$0.0180</td><td class="num higgs">$0.600</td><td class="num price">$0.3000</td><td class="num cost">$0.2820</td></tr>
+        <tr><td>Seedream 5.0 Lite</td><td class="num">2K</td><td class="num cost">$0.0313</td><td class="num higgs">$0.050</td><td class="num price">$0.0250</td><td class="num loss">-$0.0063</td></tr>
+        <tr><td>Seedream 5.0 Lite</td><td class="num">3K</td><td class="num cost">$0.0313</td><td class="num higgs">$0.050</td><td class="num price">$0.0250</td><td class="num loss">-$0.0063</td></tr>
+        <tr><td>Qwen Image 2.0</td><td class="num">1K</td><td class="num cost">$0.0223</td><td class="num muted">-</td><td class="num muted">-</td><td class="num muted">-</td></tr>
+        <tr><td>Qwen Image 2.0</td><td class="num">2K</td><td class="num cost">$0.0223</td><td class="num muted">-</td><td class="num muted">-</td><td class="num muted">-</td></tr>
+        <tr><td>Nano Banana Pro</td><td class="num">1K</td><td class="num cost">$0.0400</td><td class="num higgs">$0.100</td><td class="num price">$0.0500</td><td class="num cost">$0.0100</td></tr>
+        <tr><td>Nano Banana Pro</td><td class="num">2K</td><td class="num cost">$0.0400</td><td class="num higgs">$0.100</td><td class="num price">$0.0500</td><td class="num cost">$0.0100</td></tr>
+        <tr><td>Nano Banana Pro</td><td class="num">4K</td><td class="num cost">$0.0500</td><td class="num higgs">$0.200</td><td class="num price">$0.1000</td><td class="num cost">$0.0500</td></tr>
+        <tr><td>Nano Banana 2</td><td class="num">1K</td><td class="num cost">$0.0300</td><td class="num higgs">$0.075</td><td class="num price">$0.0375</td><td class="num cost">$0.0075</td></tr>
+        <tr><td>Nano Banana 2</td><td class="num">2K</td><td class="num cost">$0.0400</td><td class="num higgs">$0.100</td><td class="num price">$0.0500</td><td class="num cost">$0.0100</td></tr>
+        <tr><td>Nano Banana 2</td><td class="num">3K</td><td class="num cost">-</td><td class="num higgs">$0.150</td><td class="num price">$0.0750</td><td class="num muted">-</td></tr>
+        <tr><td>Grok Imagine</td><td class="num">1K / default</td><td class="num cost">$0.0179</td><td class="num higgs">$0.050</td><td class="num price">$0.0250</td><td class="num cost">$0.0071</td></tr>
       </tbody>
     </table>
 
     <div class="notes">
-      <div class="note-box"><strong>最高成本口径：</strong>从当前已记录报价中取最高成本，适合做保守预算和不亏损定价底线。</div>
-      <div class="note-box"><strong>Higgsfield 说明：</strong>按你给的换算口径：1 美金 = 20 credits，表格中只展示折算后的美元价格。</div>
+      <div class="note-box"><strong>最高成本口径：</strong>从当前已记录报价中取最高成本；红色负数代表按 Higgsfield 50% 定价会低于成本。</div>
+      <div class="note-box"><strong>定价说明：</strong>Higgsfield USD 先按 1 美金 = 20 credits 换算，再乘以 50% 得到建议定价。</div>
     </div>
   </section>
 </body>
