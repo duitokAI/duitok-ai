@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Creators Desk News Card</title>
+  <style>
+    :root {
+      --paper: #f4f3ef;
+      --ink: #111;
+      --muted: #74716c;
+      --faint: #aaa59c;
+      --rule: #d6d2c9;
+      --rule-strong: #151515;
+      --soft: #ebe9e3;
+      --accent: #b5165a;
+      --serif-zh: "Songti SC", "STSong", "Noto Serif SC", "Source Han Serif SC", serif;
+      --serif-en: Georgia, "Times New Roman", serif;
+      --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+      --mono: "SFMono-Regular", "Roboto Mono", "Courier New", monospace;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #d8d6d0;
+      color: var(--ink);
+    }
+
+    .poster {
+      position: relative;
+      width: 1080px;
+      height: 1440px;
+      overflow: hidden;
+      padding: 84px 88px 72px;
+      background:
+        radial-gradient(circle at 26% 8%, rgba(255,255,255,.8), transparent 32%),
+        linear-gradient(90deg, rgba(17,17,17,.026) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(17,17,17,.018) 1px, transparent 1px),
+        var(--paper);
+      background-size: auto, 9px 9px, 11px 11px, auto;
+      font-family: var(--serif-zh);
+    }
+
+    .poster::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        radial-gradient(circle at 12% 18%, rgba(0,0,0,.035) 0 1px, transparent 1.6px),
+        radial-gradient(circle at 75% 55%, rgba(0,0,0,.025) 0 1px, transparent 1.5px);
+      background-size: 18px 22px, 23px 19px;
+      mix-blend-mode: multiply;
+      opacity: .25;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .desk-bar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      padding-bottom: 28px;
+      border-bottom: 1px solid var(--rule);
+      font-family: var(--sans);
+      font-weight: 700;
+      letter-spacing: .05em;
+      font-size: 19px;
+    }
+
+    .desk-brand {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .mark {
+      width: 28px;
+      height: 18px;
+      position: relative;
+      display: inline-block;
+    }
+
+    .mark::before,
+    .mark::after {
+      content: "";
+      position: absolute;
+      top: 4px;
+      width: 14px;
+      height: 10px;
+      border: 4px solid var(--accent);
+      border-radius: 999px;
+      transform: rotate(35deg);
+    }
+
+    .mark::before { left: 1px; border-color: #2f1b52; }
+    .mark::after { right: 1px; }
+
+    .date {
+      font-family: var(--mono);
+      color: var(--muted);
+      font-weight: 500;
+      letter-spacing: .22em;
+      font-size: 17px;
+    }
+
+    .kicker {
+      margin-top: 28px;
+      font-family: var(--mono);
+      color: var(--muted);
+      letter-spacing: .24em;
+      font-size: 19px;
+      text-transform: uppercase;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 314px;
+      gap: 54px;
+      margin-top: 18px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 570px;
+      font-family: var(--serif-zh);
+      font-weight: 540;
+      font-size: 84px;
+      line-height: .98;
+      letter-spacing: 0;
+    }
+
+    h1 .en {
+      font-family: var(--serif-en);
+      font-weight: 500;
+      letter-spacing: -.015em;
+    }
+
+    .subhead {
+      margin: 14px 0 0;
+      max-width: 616px;
+      font-size: 30px;
+      line-height: 1.38;
+      color: #33302c;
+    }
+
+    .signal {
+      border-top: 3px solid var(--rule-strong);
+      padding-top: 24px;
+      align-self: start;
+    }
+
+    .signal-label {
+      font-family: var(--mono);
+      letter-spacing: .24em;
+      color: var(--muted);
+      font-size: 16px;
+      text-transform: uppercase;
+    }
+
+    .signal-value {
+      margin-top: 16px;
+      font-family: var(--serif-en);
+      font-size: 72px;
+      line-height: .86;
+      letter-spacing: -.035em;
+    }
+
+    .signal-question {
+      margin-top: 8px;
+      font-size: 28px;
+      line-height: 1.08;
+    }
+
+    .signal-note {
+      margin-top: 20px;
+      color: #5f5b55;
+      font-size: 20px;
+      line-height: 1.45;
+    }
+
+    .image-stage {
+      margin: 18px 28px 0;
+      height: 450px;
+      background: var(--soft);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    .image-stage img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+    }
+
+    .image-placeholder {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-family: var(--mono);
+      letter-spacing: .18em;
+      font-size: 18px;
+      border: 1px solid var(--rule);
+    }
+
+    .source-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      margin-top: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--rule);
+      font-family: var(--mono);
+      color: var(--muted);
+      letter-spacing: .16em;
+      font-size: 15px;
+      text-transform: uppercase;
+    }
+
+    .insights {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+      margin-top: 22px;
+    }
+
+    .insight {
+      border-top: 1px solid var(--rule);
+      padding-top: 14px;
+      min-width: 0;
+    }
+
+    .insight-num {
+      font-family: var(--mono);
+      font-size: 17px;
+      letter-spacing: .16em;
+      color: #252525;
+    }
+
+    .insight-title {
+      margin-top: 12px;
+      font-size: 30px;
+      line-height: 1.05;
+    }
+
+    .insight-text {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 19px;
+      line-height: 1.35;
+    }
+
+    .takeaway {
+      margin-top: 24px;
+      padding: 10px 0 10px 26px;
+      border-left: 4px solid var(--rule-strong);
+      font-size: 27px;
+      line-height: 1.32;
+      color: #201f1d;
+    }
+  </style>
+</head>
+<body>
+  <section class="poster" data-output="creators-desk-card">
+    <div class="content">
+      <header class="desk-bar">
+        <div class="desk-brand"><span class="mark"></span><span>CREATORS DESK</span></div>
+        <div class="date">AI MARKET · 2026.06.02</div>
+      </header>
+
+      <div class="kicker">AI 市场分析 · SOURCE REPORT</div>
+
+      <section class="hero-grid">
+        <div>
+          <h1><span class="en">Claude</span> 母公司<br>估值近万亿</h1>
+          <p class="subhead">Anthropic 申请上市：AI 正从工具热，进入公开市场定价时刻。</p>
+        </div>
+        <aside class="signal">
+          <div class="signal-label">MARKET SIGNAL</div>
+          <div class="signal-value">$1T</div>
+          <div class="signal-question">准备 IPO?</div>
+          <div class="signal-note">不是融资额，而是市场对 AI 公司的重新定价。</div>
+        </aside>
+      </section>
+
+      <figure class="image-stage">
+        <div class="image-placeholder">SOURCE IMAGE</div>
+        <!-- Replace placeholder with: <img src="./assets/source-image.png" alt=""> -->
+      </figure>
+
+      <div class="source-row">
+        <div>SOURCE IMAGE · USER PROVIDED</div>
+        <div>TOPIC · AI / IPO / STARTUP MARKET</div>
+      </div>
+
+      <section class="insights">
+        <article class="insight">
+          <div class="insight-num">01</div>
+          <div class="insight-title">从工具到资产</div>
+          <div class="insight-text">AI 公司开始被市场定价。</div>
+        </article>
+        <article class="insight">
+          <div class="insight-num">02</div>
+          <div class="insight-title">从热度到能力</div>
+          <div class="insight-text">会用 AI，正在变成基础竞争力。</div>
+        </article>
+        <article class="insight">
+          <div class="insight-num">03</div>
+          <div class="insight-title">从观望到学习</div>
+          <div class="insight-text">越早上手，越早建立工作流。</div>
+        </article>
+      </section>
+
+      <footer class="takeaway">现在学会用 AI 工具，不是追热点，是在给自己加分。</footer>
+    </div>
+  </section>
+</body>
+</html>

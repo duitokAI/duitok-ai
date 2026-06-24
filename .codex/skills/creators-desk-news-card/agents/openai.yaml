@@ -1,0 +1,4 @@
+interface:
+  display_name: "Creators Desk News Card"
+  short_description: "生成 CREATORS DESK 风格新闻分析长图"
+  default_prompt: "Use $creators-desk-news-card to turn this AI/news topic into a CREATORS DESK style market-analysis poster."
